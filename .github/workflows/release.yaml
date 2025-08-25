@@ -29,12 +29,10 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Upload chart
+      - name: Upload charts to OCI
         env:
           CHANGED_CHARTS: ${{ steps.chart-releaser.outputs.changed_charts }}
-          CHART_VERSION: ${{ steps.chart-releaser.outputs.chart_version }}
         run: |
           echo "CHANGED_CHARTS: $CHANGED_CHARTS"
-          echo "CHART_VERSION: $CHART_VERSION"
           echo "DEBUG Running: helm registry login --username ${{ secrets.REGISTRY_USER }} --password ${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.REGISTRY }}"
           # helm registry login --username ${{ secrets.REGISTRY_USER }} --password ${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.REGISTRY }}
