@@ -102,7 +102,8 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts[0].host Hostname for MinIO ingress
@@ -139,7 +140,8 @@ consoleIngress:
   tls: []
 
 ## @section Resources
-resources: {}
+resources:
+  {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
