@@ -1,7 +1,6 @@
 version: 2
 updates:
   - package-ecosystem: "helm"
-    directories: # Location of package manifests
-      - "/"
+    directory: "/"
     schedule:
       interval: "daily"
