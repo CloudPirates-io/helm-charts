@@ -6,6 +6,6 @@
 version: 2
 updates:
   - package-ecosystem: "helm" # See documentation for possible values
-    directory: "/charts/**/*" # Location of package manifests
+    directories: "/charts/**/*" # Location of package manifests
     schedule:
       interval: "daily"
