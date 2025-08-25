@@ -7,6 +7,6 @@ version: 2
 updates:
   - package-ecosystem: "helm" # See documentation for possible values
     directories: # Location of package manifests
-      - "/charts/**/*"
+      - "/charts/mongodb"
     schedule:
       interval: "daily"
