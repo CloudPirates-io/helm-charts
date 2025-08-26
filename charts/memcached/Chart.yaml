@@ -1,26 +1,30 @@
 apiVersion: v2
 name: memcached
-description: High-performance, distributed memory object caching system. Memcached is an in-memory key-value store for small chunks of arbitrary data from results of database calls, API calls, or page rendering.
+description: Memcached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.
 type: application
+
 version: 0.0.1
 appVersion: "1.6.32"
+
 keywords:
   - memcached
   - cache
   - in-memory
   - key-value
   - distributed
+
 home: https://www.cloudpirates.io
+
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
-annotations:
-  category: Database
-  license: Apache-2.0
+
 maintainers:
   - name: CloudPirates GmbH & Co. KG
     url: https://www.cloudpirates.io
+
 dependencies:
   - name: common
     version: "1.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
-icon: https://memcached.org/images/memcached.png
+
+icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
