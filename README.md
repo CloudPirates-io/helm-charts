@@ -1,10 +1,13 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?org=cloudpirates"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates" /></a>
+    <a href="https://artifacthub.io/packages/search?org=cloudpirates">
+      <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates" />
+    </a>
 </p>
 
 # CloudPirates Open Source Helm Charts
 
-A curated collection of production-ready Helm charts for open-source cloud-native applications. This repository provides secure, well-documented, and configurable Helm charts following cloud-native best practices (project name "nonami").
+A curated collection of production-ready Helm charts for open-source cloud-native applications.
+This repository provides secure, well-documented, and configurable Helm charts following cloud-native best practices (project name "nonami").
 
 ## Available Charts
 
@@ -13,13 +16,14 @@ A curated collection of production-ready Helm charts for open-source cloud-nativ
 | [ClusterPirate](charts/clusterpirate/) | Client agent for the CloudPirates Managed Observability Platform to connect your Kubernetes cluster to our infrastructure |
 | [Common](charts/common/)               | A library chart for common templates and helper functions                                                                 |
 | [MariaDB](charts/mariadb/)             | High-performance, open-source relational database server that is a drop-in replacement for MySQL                          |
-| [MinIO](charts/minio/)                 | High Performance Object Storage compatible with Amazon S3 APIs                                                            |
+| [Memcached](charts/memcached/)         | High-performance, distributed memory object caching system                                                                |
+| [MinIO](charts/minio/)                 | High-Performance Object Storage compatible with Amazon S3 APIs                                                            |
 | [MongoDB](charts/mongodb/)             | MongoDB a flexible NoSQL database for scalable, real-time data management                                                 |
 | [PostgreSQL](charts/postgres/)         | The World's Most Advanced Open Source Relational Database                                                                 |
 | [RabbitMQ](charts/rabbitmq/)           | A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)                                           |
 | [Redis](charts/redis/)                 | In-memory data structure store, used as a database, cache, and message broker                                             |
 | [TimescaleDB](charts/timescaledb/)     | TimescaleDB is a PostgreSQL extension for high-performance real-time analytics on time-series and event data              |
-| [Valkey](charts/valkey/)               | High performance in-memory data structure store, fork of Redis                                                            |
+| [Valkey](charts/valkey/)               | High-performance in-memory data structure store, fork of Redis                                                            |
 
 ## Quick Start
 
