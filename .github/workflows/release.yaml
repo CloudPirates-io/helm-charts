@@ -1,0 +1,81 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Run chart-releaser
+        id: chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          skip_existing: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.9.2
+        if: ${{ steps.chart-releaser.outputs.changed_charts }}
+
+      - name: Upload charts to OCI registry
+        id: upload
+        if: ${{ steps.chart-releaser.outputs.changed_charts }}
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+        run: |
+          CHANGED_CHARTS="${{ steps.chart-releaser.outputs.changed_charts }}"
+
+          helm registry login --username $REGISTRY_USER --password ${{ secrets.REGISTRY_PASSWORD }} https://${{ vars.REGISTRY }}
+
+          RELEASED_CHARTS=""
+          for chart_directory in ${CHANGED_CHARTS//,/ }; do
+            CHART_NAME=${chart_directory#charts/}
+
+            cd $chart_directory
+
+            # Extract version and appVersion from Chart.yaml
+            CHART_VERSION=$(yq eval '.version' "Chart.yaml")
+            APP_VERSION=$(yq eval '.appVersion' "Chart.yaml")
+
+            echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}"
+            if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }} 2>&1 | tee ${CHART_NAME}-output.log; then
+
+              # Extract digest and sign chart
+              DIGEST=$(cat ${CHART_NAME}-output.log | awk -F '[, ]+' '/Digest/{print $NF}')
+              cosign sign -y --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST
+
+              RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
+              echo "Successfully released $CHART_NAME-$CHART_VERSION"
+            else
+              echo "Failed to push $CHART_NAME-$CHART_VERSION"
+              cat ${CHART_NAME}-output.log
+              exit 1
+            fi
+            cd ${{ github.workspace }}
+          done
+          echo "released_charts=$RELEASED_CHARTS" >> "$GITHUB_OUTPUT"
