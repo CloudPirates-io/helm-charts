@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Memcached Helm Chart Values Schema",
+  "description": "Schema for Memcached Helm chart values",
+  "properties": {
+    "global": {
+      "type": "object",
+      "title": "Global parameters",
+      "description": "Global Docker image parameters",
+      "properties": {
+        "imageRegistry": {
+          "type": "string",
+          "title": "Global Docker Image Registry",
+          "description": "Global Docker image registry"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "title": "Global Image Pull Secrets",
+          "description": "Global Docker registry secret names as an array of objects",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "Secret Name",
+                "description": "Name of the image pull secret"
+              }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "title": "Memcached image configuration",
+      "description": "Configuration for Memcached container image",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "title": "Memcached Image Registry",
+          "description": "Memcached image registry"
+        },
+        "repository": {
+          "type": "string",
+          "title": "Memcached Image Repository",
+          "description": "Memcached image repository"
+        },
+        "tag": {
+          "type": "string",
+          "title": "Memcached Image Tag",
+          "description": "Memcached image tag"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "title": "Image Pull Policy",
+          "description": "Image pull policy",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "title": "Replica Count",
+      "description": "Number of Memcached replicas",
+      "minimum": 1
+    },
+    "service": {
+      "type": "object",
+      "title": "Service configuration",
+      "description": "Kubernetes service configuration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Service Type",
+          "description": "Kubernetes service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+        },
+        "port": {
+          "type": "integer",
+          "title": "Service Port",
+          "description": "Service port",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "title": "Memcached configuration",
+      "description": "Memcached configuration options",
+      "properties": {
+        "memoryLimit": {
+          "type": "integer",
+          "title": "Memory Limit",
+          "description": "Maximum amount of memory to use for cache (in MB)",
+          "minimum": 1
+        },
+        "maxConnections": {
+          "type": "integer",
+          "title": "Max Connections",
+          "description": "Maximum number of simultaneous connections",
+          "minimum": 1
+        },
+        "verbosity": {
+          "type": "integer",
+          "title": "Verbosity",
+          "description": "Verbosity level",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "extraArgs": {
+          "type": "array",
+          "title": "Extra Arguments",
+          "description": "Additional command-line arguments",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "title": "Resource configuration",
+      "description": "Pod resource configuration"
+    }
+  }
+}
