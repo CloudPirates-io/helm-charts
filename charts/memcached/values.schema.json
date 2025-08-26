@@ -27,7 +27,9 @@
                 "description": "Name of the image pull secret"
               }
             },
-            "required": ["name"]
+            "required": [
+              "name"
+            ]
           }
         }
       }
@@ -56,7 +58,11 @@
           "type": "string",
           "title": "Image Pull Policy",
           "description": "Image pull policy",
-          "enum": ["Always", "IfNotPresent", "Never"]
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ]
         }
       }
     },
@@ -75,7 +81,11 @@
           "type": "string",
           "title": "Service Type",
           "description": "Kubernetes service type",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer"
+          ]
         },
         "port": {
           "type": "integer",

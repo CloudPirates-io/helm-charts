@@ -71,22 +71,22 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Memcached Image Parameters
 
-| Parameter           | Description                                          | Default        |
-| ------------------- | ---------------------------------------------------- | -------------- |
-| `image.registry`    | Memcached image registry                             | `docker.io`    |
-| `image.repository`  | Memcached image repository                           | `memcached`    |
+| Parameter           | Description                                          | Default                                                                            |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `image.registry`    | Memcached image registry                             | `docker.io`                                                                        |
+| `image.repository`  | Memcached image repository                           | `memcached`                                                                        |
 | `image.tag`         | Memcached image tag (immutable tags are recommended) | `"1.6.39@sha256:3e4cfa8274fc07f27f040ec994c7506a4438a835e2e229673b3da06c8c3d99b2"` |
-| `image.pullPolicy`  | Memcached image pull policy                          | `Always`       |
-| `image.pullSecrets` | Memcached image pull secrets                         | `[]`           |
+| `image.pullPolicy`  | Memcached image pull policy                          | `Always`                                                                           |
+| `image.pullSecrets` | Memcached image pull secrets                         | `[]`                                                                               |
 
 ### Memcached Configuration Parameters
 
-| Parameter                 | Description                                   | Default |
-| ------------------------- | --------------------------------------------- | ------- |
-| `config.memoryLimit`      | Maximum amount of memory to use for cache (MB) | `64`    |
-| `config.maxConnections`   | Maximum number of simultaneous connections    | `1024`  |
-| `config.verbosity`        | Verbosity level (0-2)                        | `0`     |
-| `config.extraArgs`        | Additional command-line arguments             | `[]`    |
+| Parameter               | Description                                    | Default |
+| ----------------------- | ---------------------------------------------- | ------- |
+| `config.memoryLimit`    | Maximum amount of memory to use for cache (MB) | `64`    |
+| `config.maxConnections` | Maximum number of simultaneous connections     | `1024`  |
+| `config.verbosity`      | Verbosity level (0-2)                          | `0`     |
+| `config.extraArgs`      | Additional command-line arguments              | `[]`    |
 
 ### Service Parameters
 
@@ -111,9 +111,9 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Resources Parameters
 
-| Parameter            | Description                                          | Default |
-| -------------------- | ---------------------------------------------------- | ------- |
-| `resources.limits`   | The resources limits for the Memcached containers    | `{memory: "128Mi"}` |
+| Parameter            | Description                                          | Default                        |
+| -------------------- | ---------------------------------------------------- | ------------------------------ |
+| `resources.limits`   | The resources limits for the Memcached containers    | `{memory: "128Mi"}`            |
 | `resources.requests` | The requested resources for the Memcached containers | `{cpu: "50m", memory: "64Mi"}` |
 
 ### Health Check Parameters
@@ -135,36 +135,36 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Service Account Parameters
 
-| Parameter                                    | Description                                     | Default |
-| -------------------------------------------- | ----------------------------------------------- | ------- |
-| `serviceAccount.create`                      | Specifies whether a service account should be created | `true`  |
-| `serviceAccount.annotations`                 | Annotations to add to the service account       | `{}`    |
-| `serviceAccount.name`                        | The name of the service account to use          | `""`    |
-| `serviceAccount.automountServiceAccountToken`| Automatically mount service account token       | `false` |
+| Parameter                                     | Description                                           | Default |
+| --------------------------------------------- | ----------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created | `true`  |
+| `serviceAccount.annotations`                  | Annotations to add to the service account             | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use                | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automatically mount service account token             | `false` |
 
 ### ConfigMap Parameters
 
-| Parameter           | Description                              | Default |
-| ------------------- | ---------------------------------------- | ------- |
-| `configMap.create`  | Create a ConfigMap for Memcached configuration | `false` |
-| `configMap.data`    | ConfigMap data                           | `{}`    |
+| Parameter          | Description                                    | Default |
+| ------------------ | ---------------------------------------------- | ------- |
+| `configMap.create` | Create a ConfigMap for Memcached configuration | `false` |
+| `configMap.data`   | ConfigMap data                                 | `{}`    |
 
 ### Ingress Parameters
 
-| Parameter               | Description                                                                     | Default                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ingress.enabled`       | Enable ingress record generation for Memcached                                  | `false`                                                                                                   |
-| `ingress.className`     | IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)   | `""`                                                                                                      |
-| `ingress.annotations`   | Additional annotations for the Ingress resource                                 | `{}`                                                                                                      |
-| `ingress.hosts`         | An array with hosts and paths                                                   | `[{"host": "memcached.local", "paths": [{"path": "/", "pathType": "ImplementationSpecific"}]}]` |
-| `ingress.tls`           | TLS configuration for the Ingress                                               | `[]`                                                                                                      |
+| Parameter             | Description                                                                   | Default                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ingress.enabled`     | Enable ingress record generation for Memcached                                | `false`                                                                                         |
+| `ingress.className`   | IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+) | `""`                                                                                            |
+| `ingress.annotations` | Additional annotations for the Ingress resource                               | `{}`                                                                                            |
+| `ingress.hosts`       | An array with hosts and paths                                                 | `[{"host": "memcached.local", "paths": [{"path": "/", "pathType": "ImplementationSpecific"}]}]` |
+| `ingress.tls`         | TLS configuration for the Ingress                                             | `[]`                                                                                            |
 
 ### Extra Configuration Parameters
 
-| Parameter           | Description                                                                        | Default |
-| ------------------- | ---------------------------------------------------------------------------------- | ------- |
-| `extraEnv`          | A list of additional environment variables                                         | `[]`    |
-| `extraVolumes`      | A list of additional existing volumes that will be mounted into the container      | `[]`    |
+| Parameter           | Description                                                                         | Default |
+| ------------------- | ----------------------------------------------------------------------------------- | ------- |
+| `extraEnv`          | A list of additional environment variables                                          | `[]`    |
+| `extraVolumes`      | A list of additional existing volumes that will be mounted into the container       | `[]`    |
 | `extraVolumeMounts` | A list of additional existing volume mounts that will be mounted into the container | `[]`    |
 
 ### Pod Configuration Parameters
@@ -226,15 +226,15 @@ service:
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - memcached
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - memcached
+          topologyKey: kubernetes.io/hostname
 ```
 
 ### Custom Configuration with ConfigMap
@@ -292,6 +292,7 @@ serviceAccount:
 ### Memory Issues
 
 1. **Monitor memory usage**:
+
    ```bash
    kubectl run memcached-client --rm --tty -i --restart='Never' --image memcached:1.6.39 -- bash
    echo "stats" | nc <service-name> 11211 | grep bytes
