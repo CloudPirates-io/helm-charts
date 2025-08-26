@@ -5,7 +5,6 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
     branches:
       - main
 
@@ -16,10 +15,11 @@ jobs:
       - name: Setup Helm
         uses: Azure/setup-helm@v4.3.1
 
-      - name: Checkout
+      - name: Checkout pull request branch
         uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       # Python is required because `ct lint` runs Yamale (https://github.com/23andMe/Yamale) and
       # yamllint (https://github.com/adrienverge/yamllint) which require Python
@@ -28,16 +28,25 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Set up chart-testing
+      - name: Set up chart-testing-action
         uses: helm/chart-testing-action@v2.7.0
 
-      - name: Run chart-testing (list-changed)
+      - name: Get changed charts
         id: list-changed
         run: |
-          changed=$(ct list-changed --config ct.yaml)
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
           if [[ -n "$changed" ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changed charts:"
+            echo "$changed"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No chart changes detected"
           fi
 
-      - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml
+      - name: Installing plugin helm-unittest
+        if: steps.list-changed.outputs.changed == 'true'
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest >/dev/null
+
+      - name: Run chart testing (lint & unittest)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands "helm unittest {{ .Path }}"
