@@ -208,6 +208,15 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `tolerations`  | Toleration labels for pod assignment | `[]`    |
 | `affinity`     | Affinity settings for pod assignment | `{}`    |
 
+### Service Account
+
+| Parameter                                     | Description                                                                                                               | Default |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created                                                                     | `false` |
+| `serviceAccount.annotations`                  | Annotations to add to the service account                                                                                 | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
+
 ## Examples
 
 ### Basic Deployment

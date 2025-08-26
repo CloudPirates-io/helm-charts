@@ -647,6 +647,33 @@
       "type": "object",
       "title": "Affinity Configuration",
       "description": "Affinity settings for pod assignment"
+    },
+    "serviceAccount": {
+      "type": "object",
+      "title": "Service Account Configuration",
+      "description": "Service account configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create Service Account",
+          "description": "Specifies whether a service account should be created"
+        },
+        "annotations": {
+          "type": "object",
+          "title": "Service Account Annotations",
+          "description": "Annotations to add to the service account"
+        },
+        "name": {
+          "type": "string",
+          "title": "Service Account Name",
+          "description": "The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template."
+        },
+        "automountServiceAccountToken": {
+          "type": "boolean",
+          "title": "Automount Service Account Token",
+          "description": "Whether to automount the service account token inside the pod"
+        }
+      }
     }
   }
 }

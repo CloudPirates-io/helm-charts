@@ -155,3 +155,14 @@ Return the proper Docker Image Registry Secret Names
 {{- define "postgres.imagePullSecrets" -}}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "postgres.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "postgres.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
