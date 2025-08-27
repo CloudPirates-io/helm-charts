@@ -31,10 +31,9 @@ image:
 # -----------------------------------------------------------------------------
 
 deployment:
-
   # Pod resource limits and requests
   resources:
-    limits: 
+    limits:
       memory: 256Mi
     requests:
       memory: 256Mi
@@ -63,8 +62,8 @@ deployment:
       timeoutSeconds: 5
       failureThreshold: 3
       successThreshold: 1
-    
-    # Readiness probe configuration  
+
+    # Readiness probe configuration
     # Determines if the container is ready to receive traffic
     readinessProbe:
       enabled: true
@@ -92,25 +91,25 @@ clusterPirate:
     # Enable/disable metrics collection
     # When enabled: Grants access to metrics.k8s.io API for node and pod resource usage
     enabled: true
-    
+
     # Interval in seconds for metrics updates
     # How often the service collects and reports metrics
     updateIntervalSeconds: 60
-    
+
     # Metrics caching configuration using Valkey
     cache:
       # Valkey server hostname or IP address
       # When using the dependency chart, this will default to the subchart service name
       # Format: <release-name>-valkey
       host: ""
-      
+
       # Valkey server port
       port: 6379
-      
+
       # Valkey authentication password (optional)
       # Leave empty if no authentication is required
       password: ""
-      
+
       # Time-to-live for cached metrics in seconds
       # Default: 86400 seconds (24 hours)
       ttl: 86400
@@ -121,7 +120,7 @@ clusterPirate:
     # When enabled: Grants list/watch permissions for pods, deployments, services, etc.
     # Resources monitored: pods, deployments, statefulsets, daemonsets, jobs, services, namespaces, cronjobs
     resourceEventsEnabled: true
-    
+
     # Enable monitoring of Kubernetes system events
     # When enabled: Grants access to /api/v1/events for cluster event monitoring
     # Monitors internal Kubernetes events (pod failures, scaling events, etc.)
@@ -150,10 +149,10 @@ auth:
   # Example:
   # existingSecret: "clusterpirate-secrets"
   # existingSecretAccessTokenKey: "api-token"
-  
+
   # Name of existing secret containing the access token
   existingSecret: ""
-  
+
   # Key within the existing secret that contains the access token
   # Defaults to "accessToken" if not specified
   existingSecretAccessTokenKey: "accessToken"
@@ -175,7 +174,7 @@ serviceAccount:
   # Whether to create a service account
   # Set to false to use an existing service account
   create: true
-  
+
   # Name of the service account to create or use
   # If empty and create is true, a name is generated using the fullname template
   # If empty and create is false, uses "default" service account
@@ -192,26 +191,26 @@ valkey:
 
   persistence:
     enabled: false
-  
+
   # Valkey configuration overrides
   # These values will be passed to the Valkey subchart
   # For full configuration options, see: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
-  
+
   # Authentication configuration
   auth:
     # Enable/disable password authentication for Valkey
     enabled: true
-    
+
     # Option 1: Auto-generate password (default when using dependency)
     # Leave empty to auto-generate a secure password
     # Option 2: Set password directly (not recommended for production)
     # Example: password: "your-secure-password"
     password: ""
-    
+
     # Option 3: Use existing Kubernetes Secret (recommended for production)
     # Name of existing secret containing the Valkey password
     existingSecret: ""
-    
+
     # Key within the existing secret that contains the password
     # Defaults to "password" if not specified
     existingSecretPasswordKey: "password"

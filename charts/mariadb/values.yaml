@@ -29,7 +29,7 @@ image:
 ## @section MariaDB Authentication parameters
 auth:
   ## @param auth.enabled MariaDB authentication enabled or disabled
-  enabled : true
+  enabled: true
   ## @param auth.rootPassword MariaDB root password
   rootPassword: ""
   ## @param auth.database MariaDB custom database
@@ -103,7 +103,8 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
 
 ## @section Resources parameters
-resources: {}
+resources:
+  {}
   ## @param resources.limits The resources limits for the MariaDB containers
   ## limits:
   ##   memory: 300Mi
@@ -127,7 +128,7 @@ extraConfigs: []
 ##  - name: config
 ##    defaultMode: 0440
 ##    mountPath: /mnt/config
-## @param extraVolumes A list of additional existing volumes that will be mounted into the container 
+## @param extraVolumes A list of additional existing volumes that will be mounted into the container
 extraVolumes: []
 ##  - name: volume
 ##    mountPath: /mnt/tmp
