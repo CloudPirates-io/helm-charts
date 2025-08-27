@@ -2,11 +2,16 @@ apiVersion: v2
 name: valkey
 description: High performance in-memory data structure store, fork of Redis. Valkey is an open-source, high-performance key/value datastore that supports a variety of workloads such as caching, message queues, and can act as a primary database.
 type: application
-version: 0.1.7
+
+version: 0.1.8
 appVersion: "8.1.3"
+
 home: https://www.cloudpirates.io
+icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
+
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+
 keywords:
   - valkey
   - redis
@@ -15,14 +20,16 @@ keywords:
   - key-value
   - in-memory
   - nosql
+
 annotations:
   category: Database
   license: Apache-2.0
+
 maintainers:
   - name: CloudPirates GmbH & Co. KG
     url: https://www.cloudpirates.io
+
 dependencies:
   - name: common
     version: "1.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
-icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
