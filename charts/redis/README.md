@@ -175,7 +175,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 ### Basic Deployment
 
 ```bash
-helm install my-valkey ./charts/valkey
+helm install my-redis ./charts/redis
 ```
 
 ### Using Existing Secret for Authentication
