@@ -121,13 +121,14 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `resources.requests.cpu`    | CPU request    | `50m`   |
 | `resources.requests.memory` | Memory request | `128Mi` |
 
-### Pod Assignment
+### Pod Assignment / Eviction
 
-| Parameter      | Description                       | Default |
-| -------------- | --------------------------------- | ------- |
-| `nodeSelector` | Node selector for pod assignment  | `{}`    |
-| `tolerations`  | Tolerations for pod assignment    | `[]`    |
-| `affinity`     | Affinity rules for pod assignment | `{}`    |
+| Parameter           | Description                       | Default |
+| ------------------- | --------------------------------- | ------- |
+| `nodeSelector`      | Node selector for pod assignment  | `{}`    |
+| `priorityClassName` | Priority class for pod eviction   | `""`    |
+| `tolerations`       | Tolerations for pod assignment    | `[]`    |
+| `affinity`          | Affinity rules for pod assignment | `{}`    |
 
 ### Security Context
 
