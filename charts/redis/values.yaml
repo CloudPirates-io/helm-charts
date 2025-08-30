@@ -84,6 +84,9 @@ resources:
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
 
+## @param priorityClassName for pod eviction
+priorityClassName: ""
+
 ## @param tolerations Tolerations for pod assignment
 tolerations: []
 
