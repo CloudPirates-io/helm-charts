@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.1.7 (2025-08-28)
+## 0.1.8 (2025-08-31)
 
-* [redis] Fix typo in readme ([#23](https://github.com/CloudPirates-io/helm-charts/pull/23))
+* [redis] Add support for statefulset priorityclassname ([#25](https://github.com/CloudPirates-io/helm-charts/pull/25))
