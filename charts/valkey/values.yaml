@@ -92,6 +92,17 @@ service:
   ## @param service.annotations Service annotations
   annotations: {}
 
+## @section Service Account configuration
+## @param serviceAccount.create Enable creation of a Service Account
+serviceAccount:
+  create: true
+  ## @param serviceAccount.name Name of the Service Account
+  name: ""
+  ## @param serviceAccount.annotations Annotations to add to the Service Account
+  annotations: {}
+  ## @param serviceAccount.automountToken Enable automounting of the Service Account token
+  automountToken: false
+
 ## @section Ingress configuration
 ingress:
   ## @param ingress.enabled Enable ingress record generation for Valkey

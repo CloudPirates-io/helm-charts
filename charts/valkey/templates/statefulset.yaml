@@ -33,6 +33,7 @@ spec:
 {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "valkey.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

@@ -141,6 +141,15 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `service.targetPort`  | Valkey container port | `6379`      |
 | `service.annotations` | Service annotations   | `{}`        |
 
+### ServiceAccount configuration
+
+| Parameter                       | Description                                      | Default |
+| ------------------------------- | ------------------------------------------------ | ------- |
+| `serviceAccount.create`         | Enable creation of a Service Account             | `true`  |
+| `serviceAccount.name`           | Name of the Service Account                      | `""`    |
+| `serviceAccount.annotations`    | Annotations to add to the Service Account        | `{}`    |
+| `serviceAccount.automountToken` | Enable automounting of the Service Account token | `false` |
+
 ### Ingress configuration
 
 | Parameter                            | Description                                             | Default        |
