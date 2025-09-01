@@ -86,27 +86,15 @@ Refer to individual chart READMEs for detailed configuration options.
 
 ## Contributing
 
-1. **Follow Patterns**: Use existing charts as templates
-2. **Test Thoroughly**: Ensure charts pass linting and installation tests
-3. **Document Completely**: Include comprehensive README and parameter documentation
+Want to contribute? Awesome! The most basic way to show your support is to star the project, or to raise issues. If you want to open a pull request, please read the [contributing guidelines](CONTRIBUTING.md).
 
-### Development Commands
+**This project is built and maintained by our growing community of contributors!**
 
-```bash
-# Lint chart
-helm lint ./charts/<chart-name>
+<a href="https://github.com/CloudPirates-io/helm-charts/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CloudPirates-io/helm-charts" />
+</a>
 
-# Render templates locally
-helm template test-release ./charts/<chart-name> -n test
-
-# Install for testing
-helm install test-release ./charts/<chart-name> -n test
-
-# Package chart
-helm package ./charts/<chart-name>
-```
-
-## Support
+Made with [contrib.rocks](https://contrib.rocks).
 
 ### Chart Issues
 

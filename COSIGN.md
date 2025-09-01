@@ -94,15 +94,6 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/clusterpirate:1
 helm install my-release oci://registry-1.docker.io/cloudpirates/clusterpirate --version 1.0.0
 ```
 
-## Support
-
-For signature verification issues:
-
-1. **Check the public key**: Ensure you're using the latest public key from this document
-2. **Verify connectivity**: Confirm access to `registry-1.docker.io`
-3. **Update tools**: Ensure Cosign is up to date
-4. **Contact support**: Reach out via our [Developer Portal](https://developer.cloudpirates.io)
-
 ## Additional Resources
 
 - [Sigstore Documentation](https://docs.sigstore.dev/)
