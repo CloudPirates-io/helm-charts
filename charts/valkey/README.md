@@ -145,7 +145,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 | Parameter                       | Description                                      | Default |
 | ------------------------------- | ------------------------------------------------ | ------- |
-| `serviceAccount.create`         | Enable creation of a Service Account             | `true`  |
+| `serviceAccount.create`         | Enable creation of a Service Account             | `false` |
 | `serviceAccount.name`           | Name of the Service Account                      | `""`    |
 | `serviceAccount.annotations`    | Annotations to add to the Service Account        | `{}`    |
 | `serviceAccount.automountToken` | Enable automounting of the Service Account token | `false` |
