@@ -144,3 +144,13 @@ extraVolumes: []
 
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: extra-config
+#     namespace: "{{ .Release.Namespace }}"
+#   data:
+#     key: value

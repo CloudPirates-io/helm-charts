@@ -166,6 +166,43 @@ The following table lists the configurable parameters of the Memcached chart and
 | `extraEnv`          | A list of additional environment variables                                          | `[]`    |
 | `extraVolumes`      | A list of additional existing volumes that will be mounted into the container       | `[]`    |
 | `extraVolumeMounts` | A list of additional existing volume mounts that will be mounted into the container | `[]`    |
+| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release             | `[]`    |
+
+#### Extra Objects
+
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+
+**Example: Deploy a NetworkPolicy with templating**
+
+```yaml
+extraObjects:
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: "{{ .Release.Namespace }}"
+    spec:
+      podSelector: {}
+      policyTypes:
+        - Egress
+      egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+```
+
+All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
 
 ### Pod Configuration Parameters
 

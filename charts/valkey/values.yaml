@@ -202,3 +202,13 @@ tolerations: []
 
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: extra-config
+#     namespace: "{{ .Release.Namespace }}"
+#   data:
+#     key: value

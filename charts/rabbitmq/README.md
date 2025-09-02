@@ -62,165 +62,203 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Global parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `global.imageRegistry` | Global Docker image registry | `""` |
-| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` |
+| Parameter                 | Description                                     | Default |
+| ------------------------- | ----------------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry                    | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
 
 ### Common parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `nameOverride` | String to partially override rabbitmq.fullname | `""` |
-| `fullnameOverride` | String to fully override rabbitmq.fullname | `""` |
-| `commonLabels` | Labels to add to all deployed objects | `{}` |
-| `commonAnnotations` | Annotations to add to all deployed objects | `{}` |
+| Parameter           | Description                                    | Default |
+| ------------------- | ---------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override rabbitmq.fullname | `""`    |
+| `fullnameOverride`  | String to fully override rabbitmq.fullname     | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects          | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects     | `{}`    |
 
 ### RabbitMQ image parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `image.registry` | RabbitMQ image registry | `docker.io` |
-| `image.repository` | RabbitMQ image repository | `rabbitmq` |
-| `image.tag` | RabbitMQ image tag | `"4.1.3-managemen@sha256:4c521003d812dd7b33793e2b7e45fbcc323d764b8c3309dfcb0e4c5db30c56ab"` |
-| `image.imagePullPolicy` | RabbitMQ image pull policy | `Always` |
+| Parameter               | Description                | Default                                                                                     |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------- |
+| `image.registry`        | RabbitMQ image registry    | `docker.io`                                                                                 |
+| `image.repository`      | RabbitMQ image repository  | `rabbitmq`                                                                                  |
+| `image.tag`             | RabbitMQ image tag         | `"4.1.3-managemen@sha256:4c521003d812dd7b33793e2b7e45fbcc323d764b8c3309dfcb0e4c5db30c56ab"` |
+| `image.imagePullPolicy` | RabbitMQ image pull policy | `Always`                                                                                    |
 
 ### Deployment configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1` |
+| Parameter      | Description                                                                                        | Default |
+| -------------- | -------------------------------------------------------------------------------------------------- | ------- |
+| `replicaCount` | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`     |
 
 ### Service configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `service.type` | Kubernetes service type | `ClusterIP` |
-| `service.amqpPort` | RabbitMQ AMQP service port | `5672` |
-| `service.managementPort` | RabbitMQ management UI port | `15672` |
-| `service.epmdPort` | RabbitMQ EPMD port | `4369` |
-| `service.distPort` | RabbitMQ distribution port | `25672` |
+| Parameter                | Description                 | Default     |
+| ------------------------ | --------------------------- | ----------- |
+| `service.type`           | Kubernetes service type     | `ClusterIP` |
+| `service.amqpPort`       | RabbitMQ AMQP service port  | `5672`      |
+| `service.managementPort` | RabbitMQ management UI port | `15672`     |
+| `service.epmdPort`       | RabbitMQ EPMD port          | `4369`      |
+| `service.distPort`       | RabbitMQ distribution port  | `25672`     |
 
 ### RabbitMQ Authentication
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `auth.enabled` | Enable RabbitMQ authentication | `true` |
-| `auth.username` | RabbitMQ default username | `admin` |
-| `auth.password` | RabbitMQ password (if empty, random password will be generated) | `""` |
-| `auth.erlangCookie` | Erlang cookie for clustering (if empty, random cookie will be generated) | `""` |
-| `auth.existingSecret` | Name of existing secret containing RabbitMQ credentials | `""` |
-| `auth.existingPasswordKey` | Key in existing secret containing RabbitMQ password | `"password"` |
-| `auth.existingErlangCookieKey` | Key in existing secret containing Erlang cookie | `"erlang-cookie"` |
+| Parameter                      | Description                                                              | Default           |
+| ------------------------------ | ------------------------------------------------------------------------ | ----------------- |
+| `auth.enabled`                 | Enable RabbitMQ authentication                                           | `true`            |
+| `auth.username`                | RabbitMQ default username                                                | `admin`           |
+| `auth.password`                | RabbitMQ password (if empty, random password will be generated)          | `""`              |
+| `auth.erlangCookie`            | Erlang cookie for clustering (if empty, random cookie will be generated) | `""`              |
+| `auth.existingSecret`          | Name of existing secret containing RabbitMQ credentials                  | `""`              |
+| `auth.existingPasswordKey`     | Key in existing secret containing RabbitMQ password                      | `"password"`      |
+| `auth.existingErlangCookieKey` | Key in existing secret containing Erlang cookie                          | `"erlang-cookie"` |
 
 ### RabbitMQ configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ | `false` |
-| `config.memoryHighWatermark.type` | Memory high watermark type. Either `absolute` or `relative` | `"relative"` |
-| `config.memoryHighWatermark.value` | Memory high watermark value | `0.4` |
-| `config.extraConfiguration` | Additional RabbitMQ configuration | `""` |
-| `config.advancedConfiguration` | Advanced RabbitMQ configuration | `""` |
+| Parameter                            | Description                                                 | Default      |
+| ------------------------------------ | ----------------------------------------------------------- | ------------ |
+| `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ        | `false`      |
+| `config.memoryHighWatermark.type`    | Memory high watermark type. Either `absolute` or `relative` | `"relative"` |
+| `config.memoryHighWatermark.value`   | Memory high watermark value                                 | `0.4`        |
+| `config.extraConfiguration`          | Additional RabbitMQ configuration                           | `""`         |
+| `config.advancedConfiguration`       | Advanced RabbitMQ configuration                             | `""`         |
 
 ### PeerDiscoveryK8sPlugin configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `peerDiscoveryK8sPlugin.enabled` | Enable K8s peer discovery plugin for a RabbitMQ HA-cluster | `false` |
-| `peerDiscoveryK8sPlugin.useLongname` | Uses the FQDN as connection string (RABBITMQ_USE_LONGNAME) | `true` |
-| `peerDiscoveryK8sPlugin.addressType` | Peer discovery plugin address type | `hostname` |
+| Parameter                            | Description                                                | Default    |
+| ------------------------------------ | ---------------------------------------------------------- | ---------- |
+| `peerDiscoveryK8sPlugin.enabled`     | Enable K8s peer discovery plugin for a RabbitMQ HA-cluster | `false`    |
+| `peerDiscoveryK8sPlugin.useLongname` | Uses the FQDN as connection string (RABBITMQ_USE_LONGNAME) | `true`     |
+| `peerDiscoveryK8sPlugin.addressType` | Peer discovery plugin address type                         | `hostname` |
 
 ### ManagementPlugin configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `managementPlugin.enabled` | Enable RabbitMQ management plugin | `true` |
+| Parameter                  | Description                       | Default |
+| -------------------------- | --------------------------------- | ------- |
+| `managementPlugin.enabled` | Enable RabbitMQ management plugin | `true`  |
 
 ### Metrics configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `metrics.enabled` | Enable RabbitMQ metrics (via prometheus plugin) | `false` |
-| `metrics.port` | RabbitMQ metrics port | `15692` |
-| `metrics.serviceMonitor.enabled` | Create ServiceMonitor for Prometheus monitoring | `false` |
-| `metrics.serviceMonitor.namespace` | Namespace for ServiceMonitor | `""` |
-| `metrics.serviceMonitor.labels` | Labels for ServiceMonitor | `{}` |
-| `metrics.serviceMonitor.annotations` | Annotations for ServiceMonitor | `{}` |
-| `metrics.serviceMonitor.interval` | Scrape interval | `30s` |
-| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout | `10s` |
-| `additionalPlugins` | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]` |
+| Parameter                              | Description                                                                                                                 | Default |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false` |
+| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692` |
+| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false` |
+| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`    |
+| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`    |
+| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`    |
+| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`   |
+| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`   |
+| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`    |
 
 ### Persistence
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `persistence.enabled` | Enable persistent storage | `true` |
-| `persistence.storageClass` | Storage class to use for persistent volume | `""` |
-| `persistence.accessModes` | Persistent Volume access modes | `["ReadWriteOnce"]` |
-| `persistence.size` | Size of persistent volume | `8Gi` |
-| `persistence.annotations` | Annotations for persistent volume claims | `{}` |
+| Parameter                  | Description                                | Default             |
+| -------------------------- | ------------------------------------------ | ------------------- |
+| `persistence.enabled`      | Enable persistent storage                  | `true`              |
+| `persistence.storageClass` | Storage class to use for persistent volume | `""`                |
+| `persistence.accessModes`  | Persistent Volume access modes             | `["ReadWriteOnce"]` |
+| `persistence.size`         | Size of persistent volume                  | `8Gi`               |
+| `persistence.annotations`  | Annotations for persistent volume claims   | `{}`                |
 
 ### Ingress configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `ingress.enabled` | Enable ingress for RabbitMQ management | `false` |
-| `ingress.className` | Ingress class name | `""` |
-| `ingress.annotations` | Ingress annotations | `{}` |
-| `ingress.hosts` | Ingress hosts configuration | `[{"host": "rabbitmq.local", "paths": [{"path": "/", "pathType": "Prefix"}]}]` |
-| `ingress.tls` | Ingress TLS configuration | `[]` |
+| Parameter             | Description                            | Default                                                                        |
+| --------------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
+| `ingress.enabled`     | Enable ingress for RabbitMQ management | `false`                                                                        |
+| `ingress.className`   | Ingress class name                     | `""`                                                                           |
+| `ingress.annotations` | Ingress annotations                    | `{}`                                                                           |
+| `ingress.hosts`       | Ingress hosts configuration            | `[{"host": "rabbitmq.local", "paths": [{"path": "/", "pathType": "Prefix"}]}]` |
+| `ingress.tls`         | Ingress TLS configuration              | `[]`                                                                           |
 
 ### Resources
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `resources` | Resource limits and requests for RabbitMQ pods | `{}` |
+| Parameter   | Description                                    | Default |
+| ----------- | ---------------------------------------------- | ------- |
+| `resources` | Resource limits and requests for RabbitMQ pods | `{}`    |
 
 ### Node Selection
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `nodeSelector` | Node labels for pod assignment | `{}` |
-| `tolerations` | Toleration labels for pod assignment | `[]` |
-| `affinity` | Affinity settings for pod assignment | `{}` |
+| Parameter      | Description                          | Default |
+| -------------- | ------------------------------------ | ------- |
+| `nodeSelector` | Node labels for pod assignment       | `{}`    |
+| `tolerations`  | Toleration labels for pod assignment | `[]`    |
+| `affinity`     | Affinity settings for pod assignment | `{}`    |
 
 ### Security Context
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `podSecurityContext.fsGroup` | Group ID for the volumes of the pod | `999` |
-| `securityContext.allowPrivilegeEscalation` | Enable container privilege escalation | `false` |
-| `securityContext.runAsNonRoot` | Configure the container to run as a non-root user | `true` |
-| `securityContext.runAsUser` | User ID for the RabbitMQ container | `999` |
-| `securityContext.runAsGroup` | Group ID for the RabbitMQ container | `999` |
-| `securityContext.readOnlyRootFilesystem` | Mount container root filesystem as read-only | `true` |
-| `securityContext.capabilities.drop` | Linux capabilities to be dropped | `["ALL"]` |
+| Parameter                                  | Description                                       | Default   |
+| ------------------------------------------ | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`               | Group ID for the volumes of the pod               | `999`     |
+| `securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `securityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
+| `securityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`     |
+| `securityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
+| `securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Liveness and readiness probes
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `livenessProbe.enabled` | Enable livenessProbe on RabbitMQ containers | `true` |
-| `livenessProbe.initialDelaySeconds` | Initial delay seconds for livenessProbe | `120` |
-| `livenessProbe.periodSeconds` | Period seconds for livenessProbe | `30` |
-| `livenessProbe.timeoutSeconds` | Timeout seconds for livenessProbe | `20` |
-| `livenessProbe.failureThreshold` | Failure threshold for livenessProbe | `3` |
-| `livenessProbe.successThreshold` | Success threshold for livenessProbe | `1` |
-| `readinessProbe.enabled` | Enable readinessProbe on RabbitMQ containers | `true` |
-| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe | `0` |
-| `readinessProbe.periodSeconds` | Period seconds for readinessProbe | `10` |
-| `readinessProbe.timeoutSeconds` | Timeout seconds for readinessProbe | `5` |
-| `readinessProbe.failureThreshold` | Failure threshold for readinessProbe | `1` |
-| `readinessProbe.successThreshold` | Success threshold for readinessProbe | `1` |
+| Parameter                            | Description                                  | Default |
+| ------------------------------------ | -------------------------------------------- | ------- |
+| `livenessProbe.enabled`              | Enable livenessProbe on RabbitMQ containers  | `true`  |
+| `livenessProbe.initialDelaySeconds`  | Initial delay seconds for livenessProbe      | `120`   |
+| `livenessProbe.periodSeconds`        | Period seconds for livenessProbe             | `30`    |
+| `livenessProbe.timeoutSeconds`       | Timeout seconds for livenessProbe            | `20`    |
+| `livenessProbe.failureThreshold`     | Failure threshold for livenessProbe          | `3`     |
+| `livenessProbe.successThreshold`     | Success threshold for livenessProbe          | `1`     |
+| `readinessProbe.enabled`             | Enable readinessProbe on RabbitMQ containers | `true`  |
+| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe     | `0`     |
+| `readinessProbe.periodSeconds`       | Period seconds for readinessProbe            | `10`    |
+| `readinessProbe.timeoutSeconds`      | Timeout seconds for readinessProbe           | `5`     |
+| `readinessProbe.failureThreshold`    | Failure threshold for readinessProbe         | `1`     |
+| `readinessProbe.successThreshold`    | Success threshold for readinessProbe         | `1`     |
 
 ### Additional Configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `extraEnv` | Additional environment variables to set | `[]` |
-| `extraVolumes` | Additional volumes to add to the pod | `[]` |
-| `extraVolumeMounts` | Additional volume mounts to add to the RabbitMQ container | `[]` |
+| Parameter           | Description                                                             | Default |
+| ------------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnv`          | Additional environment variables to set                                 | `[]`    |
+| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
+| `extraVolumeMounts` | Additional volume mounts to add to the RabbitMQ container               | `[]`    |
+| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+
+#### Extra Objects
+
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+
+**Example: Deploy a NetworkPolicy with templating**
+
+```yaml
+extraObjects:
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: "{{ .Release.Namespace }}"
+    spec:
+      podSelector: {}
+      policyTypes:
+        - Egress
+      egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+```
+
+All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
+
 
 ## Examples
 
