@@ -220,7 +220,7 @@ readinessProbe:
   ## @param readinessProbe.enabled Enable readinessProbe on RabbitMQ containers
   enabled: true
   ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  initialDelaySeconds: 0
+  initialDelaySeconds: 30
   ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
   periodSeconds: 10
   ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe

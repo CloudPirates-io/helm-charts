@@ -27,6 +27,23 @@ spec:
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.auth.enabled }}
+      initContainers:
+        - name: init-erlang-cookie
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              cp /cookie/erlang-cookie /var/lib/rabbitmq/.erlang.cookie && \
+              chmod 400 /var/lib/rabbitmq/.erlang.cookie && \
+              chown 999:999 /var/lib/rabbitmq/.erlang.cookie
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+            - name: erlang-cookie
+              mountPath: /cookie
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
@@ -54,11 +71,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "rabbitmq.secretName" . }}
                   key: {{ include "rabbitmq.secretPasswordKey" . }}
-            - name: RABBITMQ_ERLANG_COOKIE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "rabbitmq.secretName" . }}
-                  key: {{ include "rabbitmq.secretErlangCookieKey" . }}
             {{- end }}
             - name: RABBITMQ_USE_LONGNAME
               value: {{ .Values.peerDiscoveryK8sPlugin.useLongname | quote }}
@@ -127,6 +139,11 @@ spec:
         - name: config
           configMap:
             name: {{ include "rabbitmq.fullname" . }}-config
+        {{- if .Values.auth.enabled }}
+        - name: erlang-cookie
+          secret:
+            secretName: {{ include "rabbitmq.secretName" . }}
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
