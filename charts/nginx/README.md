@@ -1,0 +1,323 @@
+<p align="center">
+    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-nginx"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-nginx" /></a>
+</p>
+
+# Nginx
+
+nginx ("engine x") is an HTTP web server, reverse proxy, content cache, load balancer, TCP/UDP proxy server, and mail proxy server. 
+
+## Installing the Chart
+
+To install the chart with the release name `my-nginx`:
+
+```bash
+helm install my-nginx oci://registry-1.docker.io/cloudpirates/nginx
+```
+
+To install with custom values:
+
+```bash
+helm install my-nginx oci://registry-1.docker.io/cloudpirates/nginx -f my-values.yaml
+```
+
+## Uninstalling the Chart
+
+To uninstall/delete the `my-nginx` deployment:
+
+```bash
+helm uninstall my-nginx
+```
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Security & Signature Verification
+
+This Helm chart is cryptographically signed with Cosign to ensure authenticity and prevent tampering.
+
+**Public Key:**
+
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
+mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+-----END PUBLIC KEY-----
+```
+
+To verify the helm chart before installation, copy the public key to the file `cosign.pub` and run cosign:
+
+```bash
+cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/nginx:<version>
+```
+
+## Configuration
+
+The following table lists the configurable parameters of the Nginx chart and their default values.
+
+### Global Parameters
+
+| Parameter                 | Description                                     | Default |
+| ------------------------- | ----------------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker Image registry                    | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
+
+### Common Parameters
+
+| Parameter           | Description                                     | Default |
+| ------------------- | ----------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override nginx.fullname     | `""`    |
+| `fullnameOverride`  | String to fully override nginx.fullname         | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects           | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects      | `{}`    |
+
+
+### Nginx Image Parameters
+
+| Parameter           | Description                                          | Default                                                                            |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `image.registry`    | Nginx image registry                                 | `docker.io`                                                                        |
+| `image.repository`  | Nginx image repository                               | `nginx`                                                                            |
+| `image.tag`         | Nginx image tag                                      | `"1.28.0@sha256:24ccf9a6192d2c6c5c4a6e9d2fdfa2a8e382b15f8dd7d0e05a1579f6a46f7776"` |
+| `image.pullPolicy`  | Nginx image pull policy                              | `Always`                                                                           |
+
+
+### Nginx Configuration Parameters
+
+| Parameter             | Description                                               | Default |
+| --------------------- | --------------------------------------------------------- | ------- |
+| `config`              | Custom NGINX configuration file (nginx.conf)              | `""`    |
+| `serverConfig`        | Custom server block to be added to NGINX configuration    | `""`    |
+| `streamServerConfig`  | Custom stream server block to be added to NGINX config    | `""`    |
+
+
+### Service Parameters
+
+| Parameter        | Description              | Default     |
+| ---------------- | ------------------------ | ----------- |
+| `service.type`   | Nginx service type       | `ClusterIP` |
+| `service.port`   | Nginx service port       | `8080`      |
+
+
+### Security Context Parameters
+
+| Parameter                                           | Description                                             | Default |
+| --------------------------------------------------- | ------------------------------------------------------- | ------- |
+| `podSecurityContext.fsGroup`                        | Set Nginx pod's Security Context fsGroup                | `101`   |
+| `containerSecurityContext.runAsUser`                | Set Nginx container's Security Context runAsUser        | `101`   |
+| `containerSecurityContext.runAsNonRoot`             | Set Nginx container's Security Context runAsNonRoot     | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Set Nginx container's privilege escalation              | `false` |
+
+
+### Resources Parameters
+
+| Parameter   | Description                              | Default |
+| ----------- | ---------------------------------------- | ------- |
+| `resources` | Resource limits and requests for Nginx pod| `{}`    |
+
+
+### Health Check Parameters
+
+| Parameter                            | Description                                   | Default |
+| ------------------------------------ | --------------------------------------------- | ------- |
+| `livenessProbe.enabled`              | Enable liveness probe                         | `true`  |
+| `livenessProbe.initialDelaySeconds`  | Initial delay before starting probes          | `30`    |
+| `livenessProbe.periodSeconds`        | How often to perform the probe                | `10`    |
+| `livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                | `5`     |
+| `livenessProbe.failureThreshold`     | Number of failures before pod is restarted    | `3`     |
+| `livenessProbe.successThreshold`     | Number of successes to mark probe as successful| `1`    |
+| `readinessProbe.enabled`             | Enable readiness probe                        | `true`  |
+| `readinessProbe.initialDelaySeconds` | Initial delay before starting probes          | `5`     |
+| `readinessProbe.periodSeconds`       | How often to perform the probe                | `5`     |
+| `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                | `5`     |
+| `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready| `3`    |
+| `readinessProbe.successThreshold`    | Number of successes to mark probe as successful| `1`    |
+
+
+### Service Account Parameters
+
+| Parameter                                     | Description                                           | Default |
+| --------------------------------------------- | ----------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created | `true`  |
+| `serviceAccount.annotations`                  | Annotations to add to the service account             | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use                | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automatically mount service account token             | `false` |
+
+
+### Ingress Parameters
+
+| Parameter             | Description                                                                   | Default                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ingress.enabled`     | Enable ingress record generation                                              | `false`                                                                                         |
+| `ingress.className`   | IngressClass that will be be used to implement the Ingress                    | `""`                                                                                            |
+| `ingress.annotations` | Additional annotations for the Ingress resource                               | `{}`                                                                                            |
+| `ingress.hosts`       | An array with hosts and paths                                                 | `[{{host: "nginx.local", paths: [{{path: "/", pathType: "ImplementationSpecific"}}]}}]`      |
+| `ingress.tls`         | TLS configuration for the Ingress                                             | `[]`                                                                                            |
+
+
+### Extra Configuration Parameters
+
+| Parameter           | Description                                                                         | Default |
+| ------------------- | ----------------------------------------------------------------------------------- | ------- |
+| `extraEnv`          | Additional environment variables to set                                             | `[]`    |
+| `extraVolumes`      | Additional volumes to add to the pod                                                | `[]`    |
+| `extraVolumeMounts` | Additional volume mounts to add to the Nginx container                             | `[]`    |
+| `extraObjects`      | Array of extra objects to deploy with the release                                   | `[]`    |
+
+#### Extra Objects
+
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+
+**Example: Deploy a NetworkPolicy with templating**
+
+```yaml
+extraObjects:
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: "{{ .Release.Namespace }}"
+    spec:
+      podSelector: {}
+      policyTypes:
+        - Egress
+      egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+```
+
+All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
+
+
+### Pod Configuration Parameters
+
+| Parameter        | Description                    | Default |
+| ---------------- | ------------------------------ | ------- |
+| `nodeSelector`   | Node selector for pod assignment| `{}`    |
+| `tolerations`    | Tolerations for pod assignment | `[]`    |
+| `affinity`       | Affinity rules for pod assignment| `{}`  |
+
+## Examples
+
+
+### Basic Installation
+
+Create a `values.yaml` file:
+
+```yaml
+replicaCount: 2
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+service:
+  type: ClusterIP
+  port: 8080
+```
+
+Install the chart:
+
+```bash
+helm install my-nginx charts/nginx -f values.yaml
+```
+
+### Custom NGINX Configuration
+
+```yaml
+config: |-
+  user  nginx;
+  worker_processes  1;
+  error_log  /var/log/nginx/error.log warn;
+  pid        /run/nginx.pid;
+  events {
+      worker_connections  1024;
+  }
+  http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+      log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for"';
+      access_log  /var/log/nginx/access.log  main;
+      sendfile        on;
+      keepalive_timeout  65;
+      include /etc/nginx/conf.d/*.conf;
+  }
+```
+
+### With Service Account
+
+```yaml
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/nginx-role
+```
+
+### Enable Ingress
+
+```yaml
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: nginx.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+```
+
+### Enable Autoscaling
+
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+```
+
+## Troubleshooting
+
+
+### Connection Issues
+
+1. **Check deployment and service status**:
+
+  ```bash
+  kubectl get deployment -l app.kubernetes.io/name=nginx
+  kubectl get svc -l app.kubernetes.io/name=nginx
+  kubectl get pods -l app.kubernetes.io/name=nginx
+  ```
+2. **Check pod logs**:
+
+  ```bash
+  kubectl logs <pod-name>
+  ```
+
+### Performance Tuning
+
+For production workloads, consider:
+
+- Using a dedicated ConfigMap for Nginx configuration
+- Implementing rate limiting and connection throttling
+- Enabling gzip compression for responses
+- Monitoring performance metrics with Prometheus
+
+## Links
+
+- [Nginx Official Documentation](https://nginx.org/)
+- [Nginx Docker Hub](https://hub.docker.com/_/nginx)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
