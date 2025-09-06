@@ -93,8 +93,6 @@ podSecurityContext:
 
 ## @section MariaDB Container Security Context
 containerSecurityContext:
-  ## @param containerSecurityContext.enabled Enabled MariaDB container's Security Context
-  enabled: true
   ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
   runAsUser: 999
   ## @param containerSecurityContext.runAsNonRoot Set MariaDB container's Security Context runAsNonRoot
