@@ -24,7 +24,7 @@ spec:
         {{- with (include "nginx.annotations" .) }}
         {{- . | nindent 8 }}
         {{- end }}
-        {{- if or .Values.serverConfig .Values.streamServerConfig }}
+        {{- if or .Values.config .Values.serverConfig .Values.streamServerConfig }}
         checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
     spec:
