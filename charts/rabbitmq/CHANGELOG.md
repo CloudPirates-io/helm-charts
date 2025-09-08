@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.1 (2025-09-05)
+## 0.1.1 (2025-09-08)
 
-* [rabbitmq]: Fix non creationg / mounting of erlang cookie ([#36](https://github.com/CloudPirates-io/helm-charts/pull/36))
+* [rabbitmq]: Fix non creation / mounting of erlang cookie ([#36](https://github.com/CloudPirates-io/helm-charts/pull/36))
 
 ## 0.1.0 (2025-09-02)
 
