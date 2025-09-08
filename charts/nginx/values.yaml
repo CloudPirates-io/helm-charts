@@ -66,10 +66,34 @@ serviceAccount:
 
 autoscaling:
   enabled: false
-  minReplicas: ""
-  maxReplicas: ""
-  targetCPUUtilizationPercentage: ""
-  targetMemoryUtilizationPercentage: ""
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+## @section Pod Disruption Budget parameters
+podDisruptionBudget:
+  ## @param podDisruptionBudget.enabled Enable Pod Disruption Budget creation
+  enabled: false
+  ## @param podDisruptionBudget.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: 1
+  ## @param podDisruptionBudget.maxUnavailable Maximum number/percentage of pods that can be unavailable after the eviction
+  maxUnavailable: ""
+
+## @section Network Policy parameters
+networkPolicy:
+  ## @param networkPolicy.enabled Enable Network Policy creation
+  enabled: false
+  ## @param networkPolicy.allowExternal Don't require client label for connections
+  allowExternal: true
+  ## @param networkPolicy.ingress Enable ingress traffic
+  ingress: true
+  ## @param networkPolicy.egress Enable egress traffic
+  egress: true
+  ## @param networkPolicy.ingressRules Additional ingress rules
+  ingressRules: []
+  ## @param networkPolicy.egressRules Additional egress rules
+  egressRules: []
 
 ## @param resources Resource limits and requests for Nginx pod
 resources:
@@ -109,6 +133,8 @@ podSecurityContext:
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
+  ## @param livenessProbe.path HTTP path for liveness probe
+  path: /health
   ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
   initialDelaySeconds: 30
   ## @param livenessProbe.periodSeconds How often to perform the probe
@@ -123,6 +149,8 @@ livenessProbe:
 readinessProbe:
   ## @param readinessProbe.enabled Enable readiness probe
   enabled: true
+  ## @param readinessProbe.path HTTP path for readiness probe
+  path: /health
   ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
   initialDelaySeconds: 5
   ## @param readinessProbe.periodSeconds How often to perform the probe
@@ -132,6 +160,22 @@ readinessProbe:
   ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
   failureThreshold: 3
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startup probe
+  enabled: true
+  ## @param startupProbe.path HTTP path for startup probe
+  path: /health
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param startupProbe.periodSeconds How often to perform the probe
+  periodSeconds: 5
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 3
+  ## @param startupProbe.failureThreshold Number of failures before pod is considered failed to start
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
 ## @param extraEnv Additional environment variables to set
@@ -173,22 +217,34 @@ extraObjects: []
 config: ""
 
 ## @param serverConfig Custom server block to be added to NGINX configuration
-## PHP-FPM example server block:
+## Default server block with health endpoint:
 ## serverConfig: |-
 ##   server {
 ##     listen 0.0.0.0:8080;
-##     root /myapp;
+##     root /usr/share/nginx/html;
 ##     location / {
-##       index index.html index.php;
+##       index index.html index.htm;
 ##     }
-##     location ~ \.php$ {
-##       fastcgi_pass phpfpm-server:9000;
-##       fastcgi_index index.php;
-##       include fastcgi.conf;
+##     location /health {
+##       access_log off;
+##       return 200 "healthy\n";
+##       add_header Content-Type text/plain;
 ##     }
 ##   }
 ##
-serverConfig: ""
+serverConfig: |-
+  server {
+    listen 0.0.0.0:8080;
+    root /usr/share/nginx/html;
+    location / {
+      index index.html index.htm;
+    }
+    location /health {
+      access_log off;
+      return 200 "healthy\n";
+      add_header Content-Type text/plain;
+    }
+  }
 ## @param streamServerConfig Custom stream server block to be added to NGINX configuration
 ## streamServerConfig: |-
 ##   server {

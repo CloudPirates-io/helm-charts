@@ -52,8 +52,10 @@ spec:
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
               port: nginx
+              scheme: HTTP
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -62,13 +64,27 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
               port: nginx
+              scheme: HTTP
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.path }}
+              port: nginx
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -93,12 +109,8 @@ spec:
             - name: emptydir
               mountPath: /var/cache/nginx/scgi_temp
               subPath: scgi-temp-dir
-          {{- if .Values.config }}
+          {{- if or .Values.config .Values.serverConfig .Values.streamServerConfig }}
             - name: nginx-config
-              mountPath: /etc/nginx/conf.d
-          {{- end }}
-          {{- if or .Values.serverConfig .Values.streamServerConfig }}
-            - name: nginx-server-config
               mountPath: /etc/nginx/conf.d
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
@@ -107,30 +119,23 @@ spec:
       volumes:
         - name: emptydir
           emptyDir: {}
-      {{- if or .Values.serverConfig .Values.streamServerConfig }}
-        - name: nginx-server-config
-          configMap:
-            name: {{ include "nginx.fullname" . }}
-            {{- if .Values.serverConfig }}
-            items:
-              - key: server-config.conf
-                path: server-config.conf
-            {{- end }}
-            {{- if .Values.streamServerConfig }}
-            items:
-              - key: stream-server-config.conf
-                path: stream-server-config.conf
-            {{- end }}
-      {{- end }}
-      {{- if or .Values.serverConfig .Values.streamServerConfig }}
+      {{- if or .Values.config .Values.serverConfig .Values.streamServerConfig }}
         - name: nginx-config
           configMap:
             name: {{ include "nginx.fullname" . }}
-            {{- if .Values.serverConfig }}
             items:
+              {{- if .Values.config }}
               - key: nginx.conf
                 path: nginx.conf
-            {{- end }}
+              {{- end }}
+              {{- if .Values.serverConfig }}
+              - key: server-config.conf
+                path: server-config.conf
+              {{- end }}
+              {{- if .Values.streamServerConfig }}
+              - key: stream-server-config.conf
+                path: stream-server-config.conf
+              {{- end }}
       {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 8 }}
