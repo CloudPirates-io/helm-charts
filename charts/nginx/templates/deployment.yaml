@@ -25,12 +25,13 @@ spec:
         {{- . | nindent 8 }}
         {{- end }}
         {{- if or .Values.config .Values.serverConfig .Values.streamServerConfig }}
-        checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/server-configuration: {{ printf "%s%s%s" .Values.config .Values.serverConfig .Values.streamServerConfig | sha256sum }}
         {{- end }}
     spec:
-{{- with (include "nginx.imagePullSecrets" .) }}
-{{ . | nindent 6 }}
-{{- end }}
+      {{- with (include "nginx.imagePullSecrets" .) }}
+      imagePullSecrets:
+        {{ . | nindent 6 }}
+      {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
