@@ -2,7 +2,7 @@
 
 ## 0.2.1 (2025-09-08)
 
-* [minio]: Upgrade minio to latest stable ([#43](https://github.com/CloudPirates-io/helm-charts/pull/43))
+* [minio] Update minio to RELEASE.2025-09-07 ([#43](https://github.com/CloudPirates-io/helm-charts/pull/43))
 
 ## 0.2.0 (2025-09-02)
 
