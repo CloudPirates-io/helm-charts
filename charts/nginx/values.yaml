@@ -106,32 +106,66 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
 
+## @section Probes
+
+## @param livenessProbe.enabled Enable or disable the liveness probe
 livenessProbe:
-  ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
-  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  ## @param livenessProbe.path HTTP path to check for liveness
+  path: "/"
+  ## @param livenessProbe.scheme HTTP scheme to use for the probe (HTTP or HTTPS)
+  scheme: HTTP
+  ## @param livenessProbe.httpHeaders Optional HTTP headers for the probe
+  httpHeaders: []
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting the first probe (seconds)
   initialDelaySeconds: 30
-  ## @param livenessProbe.periodSeconds How often to perform the probe
+  ## @param livenessProbe.periodSeconds How often to perform the probe (seconds)
   periodSeconds: 10
-  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt (seconds)
   timeoutSeconds: 5
-  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  ## @param livenessProbe.failureThreshold Number of consecutive failures before restarting the container
   failureThreshold: 3
-  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  ## @param livenessProbe.successThreshold Number of consecutive successes to consider the probe successful
   successThreshold: 1
 
+## @param readinessProbe.enabled Enable or disable the readiness probe
 readinessProbe:
-  ## @param readinessProbe.enabled Enable readiness probe
   enabled: true
-  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  ## @param readinessProbe.path HTTP path to check for readiness
+  path: "/"
+  ## @param readinessProbe.scheme HTTP scheme to use for the probe (HTTP or HTTPS)
+  scheme: HTTP
+  ## @param readinessProbe.httpHeaders Optional HTTP headers for the probe
+  httpHeaders: []
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting the first probe (seconds)
   initialDelaySeconds: 5
-  ## @param readinessProbe.periodSeconds How often to perform the probe
+  ## @param readinessProbe.periodSeconds How often to perform the probe (seconds)
   periodSeconds: 5
-  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt (seconds)
   timeoutSeconds: 5
-  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  ## @param readinessProbe.failureThreshold Number of consecutive failures before marking the pod NotReady
   failureThreshold: 3
-  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  ## @param readinessProbe.successThreshold Number of consecutive successes to consider the probe successful
+  successThreshold: 1
+
+## @param startupProbe.enabled Enable or disable the startup probe
+startupProbe:
+  enabled: false
+  ## @param startupProbe.path HTTP path to check for startup
+  path: "/"
+  ## @param startupProbe.scheme HTTP scheme to use for the probe (HTTP or HTTPS)
+  scheme: HTTP
+  ## @param startupProbe.httpHeaders Optional HTTP headers for the probe
+  httpHeaders: []
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting the first probe (seconds)
+  initialDelaySeconds: 10
+  ## @param startupProbe.periodSeconds How often to perform the probe (seconds)
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt (seconds)
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Number of consecutive failures before marking the container as failed
+  failureThreshold: 3
+  ## @param startupProbe.successThreshold Number of consecutive successes to consider the probe successful
   successThreshold: 1
 
 ## @param extraEnv Additional environment variables to set
