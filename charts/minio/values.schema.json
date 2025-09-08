@@ -661,6 +661,15 @@
       "type": "object",
       "title": "Affinity Configuration",
       "description": "Affinity settings for pod assignment"
+    },
+    "extraObjects": {
+      "type": "array",
+      "title": "Extra Objects",
+      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
+      "items": {
+        "type": "object",
+        "description": "A Kubernetes manifest object. All fields are allowed."
+      }
     }
   }
 }

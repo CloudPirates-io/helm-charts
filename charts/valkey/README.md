@@ -141,6 +141,15 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `service.targetPort`  | Valkey container port | `6379`      |
 | `service.annotations` | Service annotations   | `{}`        |
 
+### ServiceAccount configuration
+
+| Parameter                       | Description                                      | Default |
+| ------------------------------- | ------------------------------------------------ | ------- |
+| `serviceAccount.create`         | Enable creation of a Service Account             | `false` |
+| `serviceAccount.name`           | Name of the Service Account                      | `""`    |
+| `serviceAccount.annotations`    | Annotations to add to the Service Account        | `{}`    |
+| `serviceAccount.automountToken` | Enable automounting of the Service Account token | `false` |
+
 ### Ingress configuration
 
 | Parameter                            | Description                                             | Default        |
@@ -200,6 +209,49 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `nodeSelector` | Node labels for pod assignment       | `{}`    |
 | `tolerations`  | Toleration labels for pod assignment | `[]`    |
 | `affinity`     | Affinity settings for pod assignment | `{}`    |
+
+### Additional Configuration
+
+| Parameter      | Description                                                             | Default |
+| -------------- | ----------------------------------------------------------------------- | ------- |
+| `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+
+#### Extra Objects
+
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+
+**Example: Deploy a NetworkPolicy with templating**
+
+```yaml
+extraObjects:
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: "{{ .Release.Namespace }}"
+    spec:
+      podSelector: {}
+      policyTypes:
+        - Egress
+      egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+```
+
+All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
+
 
 ## Examples
 

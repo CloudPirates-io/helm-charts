@@ -19,6 +19,7 @@ This repository provides secure, well-documented, and configurable Helm charts f
 | [Memcached](charts/memcached/)         | High-performance, distributed memory object caching system                                                                |
 | [MinIO](charts/minio/)                 | High-Performance Object Storage compatible with Amazon S3 APIs                                                            |
 | [MongoDB](charts/mongodb/)             | MongoDB a flexible NoSQL database for scalable, real-time data management                                                 |
+| [Nginx](charts/nginx/)                 | High-performance HTTP server and reverse proxy                                                                            |
 | [PostgreSQL](charts/postgres/)         | The World's Most Advanced Open Source Relational Database                                                                 |
 | [RabbitMQ](charts/rabbitmq/)           | A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)                                           |
 | [Redis](charts/redis/)                 | In-memory data structure store, used as a database, cache, and message broker                                             |

@@ -92,6 +92,17 @@ service:
   ## @param service.annotations Service annotations
   annotations: {}
 
+## @section Service Account configuration
+## @param serviceAccount.create Enable creation of a Service Account
+serviceAccount:
+  create: false
+  ## @param serviceAccount.name Name of the Service Account
+  name: ""
+  ## @param serviceAccount.annotations Annotations to add to the Service Account
+  annotations: {}
+  ## @param serviceAccount.automountToken Enable automounting of the Service Account token
+  automountToken: false
+
 ## @section Ingress configuration
 ingress:
   ## @param ingress.enabled Enable ingress record generation for Valkey
@@ -191,3 +202,13 @@ tolerations: []
 
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: extra-config
+#     namespace: "{{ .Release.Namespace }}"
+#   data:
+#     key: value

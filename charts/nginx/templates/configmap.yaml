@@ -1,0 +1,22 @@
+{{- if or .Values.serverConfig .Values.streamServerConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nginx.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "nginx.labels" . | nindent 4 }}
+data:
+  {{- if .Values.config }}
+  nginx.conf: |-
+{{ .Values.config | indent 4 }}
+  {{- end }}
+  {{- if .Values.serverConfig }}
+  server-config.conf: |-
+{{ .Values.serverConfig | indent 4 }}
+  {{- end }}
+  {{- if .Values.streamServerConfig }}
+  stream-server-config.conf: |-
+{{ .Values.streamServerConfig | indent 4 }}
+  {{- end }}
+{{- end }}

@@ -82,7 +82,8 @@ config:
   verbosity: 0
 
 ## @param resources Resource limits and requests for Memcached pod
-resources: {}
+resources:
+  {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -153,3 +154,6 @@ extraVolumes: []
 
 ## @param extraVolumeMounts Additional volume mounts to add to the Memcached container
 extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []

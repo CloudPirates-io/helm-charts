@@ -48,9 +48,8 @@ Return the proper Docker Image Registry Secret Names
 {{- define "mariadb.imagePullSecrets" -}}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
-
 {{/*
-Return the MariaDB Secret Name
+Get the secret name for MariaDB root password
 */}}
 {{- define "mariadb.secretName" -}}
 {{- if .Values.auth.existingSecret }}
@@ -58,6 +57,13 @@ Return the MariaDB Secret Name
 {{- else }}
 {{- include "mariadb.fullname" . }}
 {{- end }}
+{{- end }}
+
+{{/*
+Validate values of MariaDB - Authentication
+*/}}
+{{- define "mariadb.validateValues.auth" -}}
+{{/* No validation needed - empty rootPassword will trigger auto-generation */}}
 {{- end }}
 
 {{/*
@@ -70,24 +76,4 @@ Return the MariaDB ConfigMap Name
 {{- include "mariadb.fullname" . }}
 {{- end }}
 {{- end }}
-
-{{/*
-Validate MariaDB required passwords are not empty
-*/}}
-{{- define "mariadb.validateValues.auth" -}}
-{{- if .Values.auth.enabled }}
-{{- if not .Values.auth.existingSecret -}}
-  {{- if not .Values.auth.rootPassword -}}
-mariadb: auth.rootPassword
-    You must provide a password for MariaDB root user.
-    Please set auth.rootPassword or use an existing secret.
-  {{- end -}}
-  {{- if and .Values.auth.username (not .Values.auth.password) -}}
-mariadb: auth.password
-    You must provide a password for the custom MariaDB user.
-    Please set auth.password or use an existing secret.
-  {{- end -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
 

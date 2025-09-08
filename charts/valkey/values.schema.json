@@ -627,6 +627,36 @@
         }
       }
     },
+    "serviceAccount": {
+      "type": "object",
+      "title": "Service Account Configuration",
+      "description": "ServiceAccount configuration for Valkey",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create ServiceAccount",
+          "description": "Enable creation of a Service Account"
+        },
+        "name": {
+          "type": "string",
+          "title": "ServiceAccount Name",
+          "description": "Name of the Service Account"
+        },
+        "annotations": {
+          "type": "object",
+          "title": "ServiceAccount Annotations",
+          "description": "Annotations to add to the Service Account",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "automountToken": {
+          "type": "boolean",
+          "title": "Automount ServiceAccount Token",
+          "description": "Enable automounting of the Service Account token"
+        }
+      }
+    },
     "affinity": {
       "type": "object",
       "title": "Affinity Configuration",
@@ -647,6 +677,15 @@
           "title": "Pod Anti-Affinity",
           "description": "Pod anti-affinity configuration"
         }
+      }
+    },
+    "extraObjects": {
+      "type": "array",
+      "title": "Extra Objects",
+      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
+      "items": {
+        "type": "object",
+        "description": "A Kubernetes manifest object. All fields are allowed."
       }
     }
   }

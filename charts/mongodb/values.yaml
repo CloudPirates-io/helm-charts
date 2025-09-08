@@ -63,7 +63,6 @@ config:
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
   existingConfigmapKey: ""
 
-
 persistence:
   ## @param persistence.enabled Enable persistent storage
   enabled: true
@@ -146,3 +145,6 @@ extraVolumes: []
 
 ## @param extraVolumeMounts Additional volume mounts to add to the MongoDB container
 extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []

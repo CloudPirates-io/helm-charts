@@ -1,0 +1,199 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override nginx.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override nginx.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @section Nginx image parameters
+image:
+  ## @param image.registry Nginx image registry
+  registry: docker.io
+  ## @param image.repository Nginx image repository
+  repository: nginx
+  ## @param image.tag Nginx image tag
+  tag: "1.28.0@sha256:24ccf9a6192d2c6c5c4a6e9d2fdfa2a8e382b15f8dd7d0e05a1579f6a46f7776"
+  ## @param image.pullPolicy Nginx image pull policy
+  pullPolicy: Always
+
+## @param replicaCount Number of Nginx replicas to deploy
+replicaCount: 1
+
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.port Nginx service port (use 8080 to avoid permission issues with non-root user)
+  port: 80
+
+## @section Ingress parameters
+ingress:
+  ## @param ingress.enabled Enable ingress record generation
+  enabled: false
+  ## @param ingress.className IngressClass that will be be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+  ## @param ingress.hosts An array with hosts and paths
+  hosts:
+    - host: nginx.local
+      paths:
+        - path: /
+          pathType: Prefix
+  ## @param ingress.tls An array with the tls configuration
+  tls: []
+
+## @section Service Account parameters
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: true
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automatically mount service account token
+  automountServiceAccountToken: false
+
+
+autoscaling:
+  enabled: false
+  minReplicas: ""
+  maxReplicas: ""
+  targetCPUUtilizationPercentage: ""
+  targetMemoryUtilizationPercentage: ""
+
+## @param resources Resource limits and requests for Nginx pod
+resources:
+  {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 64Mi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 101
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set Nginx container's privilege escalation
+  allowPrivilegeEscalation: false
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
+  fsGroup: 101
+
+livenessProbe:
+  ## @param livenessProbe.enabled Enable liveness probe
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readiness probe
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 5
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnv Additional environment variables to set
+extraEnv: []
+# - name: EXTRA_VAR
+#   value: "extra_value"
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the Nginx container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+
+## @param config Custom NGINX configuration file (nginx.conf)
+## Example configuration:
+## config: |-
+##   user  nginx;
+##   worker_processes  1;
+##   error_log  /var/log/nginx/error.log warn;
+##   pid        /run/nginx.pid;
+##   events {
+##       worker_connections  1024;
+##   }
+##   http {
+##       include       /etc/nginx/mime.types;
+##       default_type  application/octet-stream;
+##       log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+##                         '$status $body_bytes_sent "$http_referer" '
+##                         '"$http_user_agent" "$http_x_forwarded_for"';
+##       access_log  /var/log/nginx/access.log  main;
+##       sendfile        on;
+##       keepalive_timeout  65;
+##       include /etc/nginx/conf.d/*.conf;
+##   }
+##
+config: ""
+
+## @param serverConfig Custom server block to be added to NGINX configuration
+## PHP-FPM example server block:
+## serverConfig: |-
+##   server {
+##     listen 0.0.0.0:8080;
+##     root /myapp;
+##     location / {
+##       index index.html index.php;
+##     }
+##     location ~ \.php$ {
+##       fastcgi_pass phpfpm-server:9000;
+##       fastcgi_index index.php;
+##       include fastcgi.conf;
+##     }
+##   }
+##
+serverConfig: ""
+## @param streamServerConfig Custom stream server block to be added to NGINX configuration
+## streamServerConfig: |-
+##   server {
+##     listen 0.0.0.0:8080 udp;
+##     proxy_pass localhost:9000;
+##   }
+##
+streamServerConfig: ""
