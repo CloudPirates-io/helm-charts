@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nginx.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "nginx.labels" . | nindent 4 }}
+  {{- with (include "nginx.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "nginx.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nginx.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- with (include "nginx.annotations" .) }}
+        {{- . | nindent 8 }}
+        {{- end }}
+        {{- if or .Values.serverConfig .Values.streamServerConfig }}
+        checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+{{- with (include "nginx.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      serviceAccountName: {{ include "nginx.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: {{ include "nginx.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          ports:
+            - name: nginx
+              containerPort: 8080
+              protocol: TCP
+          {{- if .Values.extraEnv }}
+          env:
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: nginx
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: nginx
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: emptydir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: emptydir
+              mountPath: /run
+              subPath: run-dir
+            - name: emptydir
+              mountPath: /var/cache/nginx/client_temp
+              subPath: client-temp-dir
+            - name: emptydir
+              mountPath: /var/cache/nginx/proxy_temp
+              subPath: proxy-temp-dir
+            - name: emptydir
+              mountPath: /var/cache/nginx/fastcgi_temp
+              subPath: fastcgi-temp-dir
+            - name: emptydir
+              mountPath: /var/cache/nginx/uwsgi_temp
+              subPath: uwsgi-temp-dir
+            - name: emptydir
+              mountPath: /var/cache/nginx/scgi_temp
+              subPath: scgi-temp-dir
+          {{- if .Values.config }}
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+          {{- end }}
+          {{- if or .Values.serverConfig .Values.streamServerConfig }}
+            - name: nginx-server-config
+              mountPath: /etc/nginx/conf.d
+          {{- end }}
+          {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: emptydir
+          emptyDir: {}
+      {{- if or .Values.serverConfig .Values.streamServerConfig }}
+        - name: nginx-server-config
+          configMap:
+            name: {{ include "nginx.fullname" . }}
+            {{- if .Values.serverConfig }}
+            items:
+              - key: server-config.conf
+                path: server-config.conf
+            {{- end }}
+            {{- if .Values.streamServerConfig }}
+            items:
+              - key: stream-server-config.conf
+                path: stream-server-config.conf
+            {{- end }}
+      {{- end }}
+      {{- if or .Values.serverConfig .Values.streamServerConfig }}
+        - name: nginx-config
+          configMap:
+            name: {{ include "nginx.fullname" . }}
+            {{- if .Values.serverConfig }}
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+            {{- end }}
+      {{- end }}
+      {{- if .Values.extraVolumes }}
+      {{- toYaml .Values.extraVolumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

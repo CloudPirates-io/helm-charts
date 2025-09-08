@@ -1,0 +1,174 @@
+suite: test nginx common parameters
+templates:
+  - deployment.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+tests:
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-nginx
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: nginx
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/nginx:1.6.31@sha256:testdigest123
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should respect global.imageRegistry override
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry.com/nginx:1.6.31@sha256:testdigest123
+
+  - it: should respect global.imagePullSecrets
+    set:
+      global:
+        imagePullSecrets:
+          - name: my-secret-1
+          - name: my-secret-2
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: my-secret-1
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: my-secret-2
+
+  - it: should respect nameOverride
+    set:
+      nameOverride: "custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-name
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-name
+
+  - it: should respect fullnameOverride
+    set:
+      fullnameOverride: "completely-custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-name
+
+  - it: should add commonLabels to all resources
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: metadata.labels.team
+          value: platform
+
+  - it: should add commonAnnotations to all resources
+    set:
+      commonAnnotations:
+        deployment.kubernetes.io/revision: "1"
+        prometheus.io/scrape: "true"
+    asserts:
+      - equal:
+          path: metadata.annotations["deployment.kubernetes.io/revision"]
+          value: "1"
+      - equal:
+          path: metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  - it: should respect image.registry override
+    set:
+      image:
+        registry: "custom-registry.io"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/nginx:1.6.31@sha256:testdigest123
+
+  - it: should respect image.repository override
+    set:
+      image:
+        repository: "custom/nginx"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/custom/nginx:1.6.31@sha256:testdigest123
+
+  - it: should respect image.tag override
+    set:
+      image:
+        tag: "1.6.30@sha256:newdigest123"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/nginx:1.6.30@sha256:newdigest123
+
+  - it: should respect image.imagePullPolicy override
+    set:
+      image:
+        imagePullPolicy: "IfNotPresent"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should prioritize global.imageRegistry over image.registry
+    set:
+      global:
+        imageRegistry: "global-registry.com"
+      image:
+        registry: "image-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: global-registry.com/nginx:1.6.31@sha256:testdigest123
+
+  - it: should combine all overrides correctly
+    set:
+      global:
+        imageRegistry: "global-reg.io"
+        imagePullSecrets:
+          - name: global-secret
+      nameOverride: "custom-nginx"
+      commonLabels:
+        env: "prod"
+      commonAnnotations:
+        version: "v1.0.0"
+      image:
+        repository: "custom/nginx"
+        tag: "1.6.29@sha256:custom123"
+        imagePullPolicy: "Never"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-nginx
+      - equal:
+          path: metadata.labels.env
+          value: prod
+      - equal:
+          path: metadata.annotations.version
+          value: v1.0.0
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: global-reg.io/custom/nginx:1.6.29@sha256:custom123
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Never
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: global-secret
