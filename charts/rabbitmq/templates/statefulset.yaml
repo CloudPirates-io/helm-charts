@@ -27,6 +27,31 @@ spec:
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.auth.enabled }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          image: busybox
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rabbitmq.secretName" . }}
+                  key: {{ include "rabbitmq.secretErlangCookieKey" . }}
+          command:
+            - sh
+            - -c
+            - |
+              if [ ! -f /var/lib/rabbitmq/.erlang.cookie ]; then
+                echo "Copy erlang cookie"
+                echo $RABBITMQ_ERLANG_COOKIE > /var/lib/rabbitmq/.erlang.cookie
+              else
+                echo "Erlang cookie already exists."
+              fi
+              chmod 600 /var/lib/rabbitmq/.erlang.cookie
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
