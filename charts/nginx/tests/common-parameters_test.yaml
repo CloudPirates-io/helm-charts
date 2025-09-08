@@ -1,11 +1,11 @@
 suite: test nginx common parameters
 templates:
   - deployment.yaml
-set:
-  image:
-    tag: 1.6.31@sha256:testdigest123
 tests:
   - it: should use default values when nothing is overridden
+    set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
     asserts:
       - equal:
           path: metadata.name
@@ -25,6 +25,8 @@ tests:
 
   - it: should respect global.imageRegistry override
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       global:
         imageRegistry: "my-registry.com"
     asserts:
@@ -34,6 +36,8 @@ tests:
 
   - it: should respect global.imagePullSecrets
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       global:
         imagePullSecrets:
           - name: my-secret-1
@@ -48,6 +52,8 @@ tests:
 
   - it: should respect nameOverride
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       nameOverride: "custom-name"
     asserts:
       - equal:
@@ -59,6 +65,8 @@ tests:
 
   - it: should respect fullnameOverride
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       fullnameOverride: "completely-custom-name"
     asserts:
       - equal:
@@ -67,6 +75,8 @@ tests:
 
   - it: should add commonLabels to all resources
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       commonLabels:
         environment: "test"
         team: "platform"
@@ -80,6 +90,8 @@ tests:
 
   - it: should add commonAnnotations to all resources
     set:
+      image:
+        tag: 1.6.31@sha256:testdigest123
       commonAnnotations:
         deployment.kubernetes.io/revision: "1"
         prometheus.io/scrape: "true"
@@ -95,6 +107,7 @@ tests:
     set:
       image:
         registry: "custom-registry.io"
+        tag: 1.6.31@sha256:testdigest123
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
@@ -104,6 +117,7 @@ tests:
     set:
       image:
         repository: "custom/nginx"
+        tag: 1.6.31@sha256:testdigest123
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
@@ -121,6 +135,7 @@ tests:
   - it: should respect image.imagePullPolicy override
     set:
       image:
+        tag: 1.6.31@sha256:testdigest123
         imagePullPolicy: "IfNotPresent"
     asserts:
       - equal:
@@ -129,10 +144,11 @@ tests:
 
   - it: should prioritize global.imageRegistry over image.registry
     set:
-      global:
-        imageRegistry: "global-registry.com"
       image:
         registry: "image-registry.com"
+        tag: 1.6.31@sha256:testdigest123
+      global:
+        imageRegistry: "global-registry.com"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
