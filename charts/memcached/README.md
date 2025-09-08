@@ -104,7 +104,6 @@ The following table lists the configurable parameters of the Memcached chart and
 | --------------------------------------------------- | ------------------------------------------------------- | ------- |
 | `podSecurityContext.enabled`                        | Enabled Memcached pod Security Context                  | `true`  |
 | `podSecurityContext.fsGroup`                        | Set Memcached pod's Security Context fsGroup            | `11211` |
-| `containerSecurityContext.enabled`                  | Enabled Memcached container's Security Context          | `true`  |
 | `containerSecurityContext.runAsUser`                | Set Memcached container's Security Context runAsUser    | `11211` |
 | `containerSecurityContext.runAsNonRoot`             | Set Memcached container's Security Context runAsNonRoot | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set Memcached container's privilege escalation          | `false` |

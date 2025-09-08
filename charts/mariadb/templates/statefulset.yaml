@@ -39,12 +39,7 @@ spec:
         - name: mariadb
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          {{- if .Values.containerSecurityContext.enabled }}
-          securityContext:
-            runAsUser: {{ .Values.containerSecurityContext.runAsUser }}
-            runAsNonRoot: {{ .Values.containerSecurityContext.runAsNonRoot }}
-            allowPrivilegeEscalation: {{ .Values.containerSecurityContext.allowPrivilegeEscalation }}
-          {{- end }}
+          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env }}
           env:
             {{- if and .Values.auth.enabled }}
