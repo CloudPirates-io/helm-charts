@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.2.1 (2025-09-09)
+## 0.3.0 (2025-09-12)
 
-* Update docker.io/redis:8.2.1 Docker digest to acb90ce ([#59](https://github.com/CloudPirates-io/helm-charts/pull/59))
+* [redis]: Implement redis sentinal functionality ([#81](https://github.com/CloudPirates-io/helm-charts/pull/81))
 
 ## 0.2.0 (2025-09-02)
 

@@ -5,6 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
+  {{- if include "redis.sentinelEnabled" . }}
+  annotations:
+    # This service points to all Redis instances for Sentinel-based discovery
+    # Applications should use Sentinel clients to discover the current master
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -14,3 +20,8 @@ spec:
       name: redis
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
+  {{- if include "redis.sentinelEnabled" . }}
+  # In Sentinel mode, this service points to all Redis instances
+  # Clients should use Sentinel to discover the current master
+  sessionAffinity: None
+  {{- end }}

@@ -26,8 +26,14 @@ image:
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
-## @param replicaCount Number of Redis replicas to deploy
-replicaCount: 1
+## @section Redis Architecture
+## @param architecture Redis architecture. Allowed values: standalone or replication
+architecture: replication
+
+## @param replicaCount Number of Redis instances to deploy (only when architecture=replication)
+## When using Sentinel, this is the total number of Redis instances (including the initial master)
+## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
+replicaCount: 3
 
 service:
   ## @param service.type Kubernetes service type
@@ -144,6 +150,43 @@ extraVolumes: []
 
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
+
+## @section Redis Sentinel configuration
+## This section configures Redis Sentinel for high availability in replication mode
+## When enabled, Redis instances use dynamic master/replica role assignment managed by Sentinel
+sentinel:
+  ## @param sentinel.enabled Enable Redis Sentinel for high availability
+  ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
+  enabled: true
+  ## @param sentinel.image.repository Redis Sentinel image repository
+  image:
+    repository: redis
+    tag: "8.2.1@sha256:acb90ced0bd769b7c04cb4c32c4494ba7b3e0ee068bdbfff0eeb0d31c2a21078"
+    pullPolicy: Always
+  ## @param sentinel.masterName Name of the master server (default: mymaster)
+  masterName: mymaster
+  ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
+  quorum: 2
+  ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
+  downAfterMilliseconds: 30000
+  ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
+  failoverTimeout: 180000
+  ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover
+  parallelSyncs: 1
+  ## @param sentinel.port Sentinel port
+  port: 26379
+  service:
+    ## @param sentinel.service.type Kubernetes service type for Sentinel
+    type: ClusterIP
+    ## @param sentinel.service.port Sentinel service port
+    port: 26379
+  ## @param sentinel.resources Resource limits and requests for Sentinel pods
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []

@@ -1,0 +1,20 @@
+{{- if include "redis.sentinelEnabled" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redis.fullname" . }}-sentinel
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sentinel
+spec:
+  type: {{ .Values.sentinel.service.type }}
+  ports:
+    - port: {{ .Values.sentinel.service.port }}
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+  selector:
+    {{- include "redis.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: sentinel
+{{- end }}

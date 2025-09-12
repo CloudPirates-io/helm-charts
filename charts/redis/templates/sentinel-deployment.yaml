@@ -1,0 +1,169 @@
+{{- if include "redis.sentinelEnabled" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redis.fullname" . }}-sentinel
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sentinel
+  {{- with (include "redis.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      {{- include "redis.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: sentinel
+  template:
+    metadata:
+      labels:
+        {{- include "redis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: sentinel
+    spec:
+{{- with (include "redis.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-master
+          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: {{ include "redis.sentinel.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.sentinel.image) }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for Redis pod-0 to be ready..."
+              until {{ include "redis.cli" (dict "auth" .Values.auth.enabled) }} -h {{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }} -p {{ .Values.service.port }} ping | grep -q "PONG"; do
+                echo "Redis pod-0 not ready, waiting..."
+                sleep 5
+              done
+              echo "Redis master is ready!"
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.secretName" . }}
+                  key: {{ include "redis.secretPasswordKey" . }}
+          {{- end }}
+      containers:
+        - name: sentinel
+          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: {{ include "redis.sentinel.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.sentinel.image) }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Get Redis pod-0 IP dynamically
+              MASTER_IP=$(getent hosts {{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }} | awk '{print $1}')
+              echo "Resolved Redis pod-0 IP: $MASTER_IP"
+              
+              # Create dynamic Sentinel config
+              cat > /tmp/sentinel.conf << 'EOF'
+              # Sentinel configuration
+              port {{ .Values.sentinel.port }}
+              bind 0.0.0.0
+              
+              # Monitor the master (IP will be substituted)
+              sentinel monitor {{ .Values.sentinel.masterName }} MASTER_IP {{ .Values.service.port }} {{ .Values.sentinel.quorum }}
+              
+              # Master down after milliseconds
+              sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
+              
+              # Failover timeout
+              sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
+              
+              # Parallel syncs
+              sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
+              
+              {{- if .Values.auth.enabled }}
+              # Authentication
+              requirepass "${REDIS_PASSWORD}"
+              sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              {{- end }}
+              
+              # Logging
+              logfile ""
+              loglevel notice
+              EOF
+              
+              # Replace placeholder with actual IP and password
+              sed -i "s/MASTER_IP/$MASTER_IP/g" /tmp/sentinel.conf
+              {{- if .Values.auth.enabled }}
+              sed -i "s/\${REDIS_PASSWORD}/$REDIS_PASSWORD/g" /tmp/sentinel.conf
+              {{- end }}
+              
+              echo "Final sentinel config:"
+              cat /tmp/sentinel.conf
+              
+              redis-sentinel /tmp/sentinel.conf
+          ports:
+            - name: sentinel
+              containerPort: {{ .Values.sentinel.port }}
+              protocol: TCP
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.secretName" . }}
+                  key: {{ include "redis.secretPasswordKey" . }}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - redis-cli -p {{ .Values.sentinel.port }} ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - redis-cli -p {{ .Values.sentinel.port }} ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
+          volumeMounts:
+            - name: sentinel-config
+              mountPath: /usr/local/etc/redis
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: sentinel-config
+          configMap:
+            name: {{ include "redis.fullname" . }}-sentinel-config
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

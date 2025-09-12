@@ -1,0 +1,41 @@
+{{- if include "redis.sentinelEnabled" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "redis.fullname" . }}-sentinel-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sentinel
+  {{- with (include "redis.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+data:
+  sentinel.conf: |
+    # Sentinel configuration
+    port {{ .Values.sentinel.port }}
+    bind 0.0.0.0
+    
+    # Monitor the master (initially pod-0)
+    sentinel monitor {{ .Values.sentinel.masterName }} {{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }} {{ .Values.service.port }} {{ .Values.sentinel.quorum }}
+    
+    # Master down after milliseconds
+    sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
+    
+    # Failover timeout
+    sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
+    
+    # Parallel syncs
+    sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
+    
+    {{- if .Values.auth.enabled }}
+    # Authentication
+    requirepass "${REDIS_PASSWORD}"
+    sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+    {{- end }}
+    
+    # Logging
+    logfile ""
+    loglevel notice
+{{- end }}

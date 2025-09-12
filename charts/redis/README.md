@@ -75,7 +75,8 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `fullnameOverride`  | String to fully override redis.fullname     | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
-| `replicaCount`      | Number of Redis replicas to deploy          | `1`     |
+| `architecture`      | Redis architecture. Allowed values: `standalone` or `replication` | `standalone` |
+| `replicaCount`      | Number of Redis replicas to deploy (only when architecture=replication) | `2`     |
 
 ### Service Configuration
 
@@ -163,6 +164,28 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready | `6`     |
 | `readinessProbe.successThreshold`    | Number of successes to mark probe as successful | `1`     |
 
+### Redis Sentinel Configuration (High Availability)
+
+Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable.
+
+| Parameter                            | Description                                              | Default   |
+| ------------------------------------ | -------------------------------------------------------- | --------- |
+| `sentinel.enabled`                   | Enable Redis Sentinel for high availability             | `false`   |
+| `sentinel.image.repository`          | Redis Sentinel image repository                          | `redis`   |
+| `sentinel.image.tag`                 | Redis Sentinel image tag                                 | `8.2.1@sha256:...` |
+| `sentinel.image.pullPolicy`          | Sentinel image pull policy                               | `Always`  |
+| `sentinel.masterName`                | Name of the master server                                | `mymaster` |
+| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure   | `2`       |
+| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                | `30000`   |
+| `sentinel.failoverTimeout`           | Timeout for failover in ms                               | `180000`  |
+| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover       | `1`       |
+| `sentinel.port`                      | Sentinel port                                            | `26379`   |
+| `sentinel.service.type`              | Kubernetes service type for Sentinel                    | `ClusterIP` |
+| `sentinel.service.port`              | Sentinel service port                                    | `26379`   |
+| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                          | `128Mi`   |
+| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                           | `25m`     |
+| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                        | `64Mi`    |
+
 ### Additional Configuration
 
 | Parameter           | Description                                                             | Default |
@@ -224,6 +247,63 @@ auth:
   enabled: true
   existingSecret: "redis-credentials"
   existingSecretPasswordKey: "password"
+```
+
+### High Availability with Redis Sentinel
+
+Deploy Redis with master-replica architecture and Sentinel for automatic failover:
+
+```yaml
+# values-ha.yaml
+architecture: replication
+replicaCount: 2
+
+sentinel:
+  enabled: true
+  quorum: 2
+  downAfterMilliseconds: 30000
+  failoverTimeout: 180000
+
+auth:
+  enabled: true
+```
+
+```bash
+helm install my-redis ./charts/redis -f values-ha.yaml
+```
+
+After deployment, you'll have:
+- 1 Redis master instance
+- 2 Redis replica instances  
+- 3 Redis Sentinel instances (for monitoring and failover)
+
+**Connecting to Redis with Sentinel:**
+
+```bash
+# Get the Redis password
+REDIS_PASSWORD=$(kubectl get secret my-redis -o jsonpath="{.data.redis-password}" | base64 -d)
+
+# Connect to Sentinel to discover the current master
+kubectl run redis-client --rm --tty -i --restart='Never' \
+    --image redis:8.2.1 -- bash
+
+# Inside the pod:
+redis-cli -h my-redis-sentinel -p 26379 sentinel get-master-addr-by-name mymaster
+
+# Connect to the current master (address from previous command)
+redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
+```
+
+### Master-Replica without Sentinel
+
+If you want replication without Sentinel (manual failover):
+
+```yaml
+# values-replication.yaml  
+architecture: replication
+replicaCount: 2
+sentinel:
+  enabled: false
 ```
 
 ## Upgrading
