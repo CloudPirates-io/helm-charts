@@ -32,3 +32,27 @@ body:
     attributes:
       label: Additional informations
       description: Tell us anything else you think we should know.
+  - type: markdown
+    attributes:
+      value: |
+        Select helm charts if your idea applies to them, so we can auto-label your issue.
+  - type: dropdown
+    attributes:
+      label: Affected helm charts
+      description: Select one or more (optional)
+      multiple: true
+      options:
+        - universal
+        - clusterpirate
+        - common
+        - keycloak
+        - mariadb
+        - memcached
+        - minio
+        - mongodb
+        - nginx
+        - postgres
+        - rabbitmq
+        - redis
+        - timescaledb
+        - valkey

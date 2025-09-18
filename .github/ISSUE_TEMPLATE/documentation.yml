@@ -1,0 +1,24 @@
+name: 📖 Documentation
+description: Additions, improvements or typo fixes to the documentation
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement towards our documentation for the Helm charts.
+        Please fill in the following form.
+  - type: textarea
+    attributes:
+      label: Describe the addition / improvement / typo fix
+      description: A clear and concise description of what you want to happen. PRs are welcome.
+      placeholder: |
+        I found a typo in the README of...
+        The examples are outdated in...
+        Important information is missing in...
+        This section can be confusing:...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional informations
+      description: Tell us anything else you think we should know.
