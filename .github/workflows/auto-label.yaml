@@ -1,7 +1,7 @@
 name: Auto-label issues
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 jobs:
   label:
@@ -13,13 +13,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const body = context.payload.issue.body;
-            const section = (body.split(/### Affected helm charts/)[1] || "").trim();
-            const labels = section.split(",").map(s => s.trim()).filter(Boolean);
+            const labels = (context.payload.issue.body.split(/### Affected helm charts/)[1] || "")
+              .trim()
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
             if (labels.length) {
               await github.rest.issues.addLabels({
                 ...context.repo,
                 issue_number: context.issue.number,
-                labels
+                labels,
               });
             }

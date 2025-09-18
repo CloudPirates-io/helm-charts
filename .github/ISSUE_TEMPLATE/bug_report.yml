@@ -52,11 +52,10 @@ body:
       label: Affected helm charts
       description: Select one or more
       multiple: true
-      # - type: checkboxes
-      #   attributes:
-      #     label: Affected helm charts
       options:
         - universal
+        - clusterpirate
+        - common
         - keycloak
         - mariadb
         - memcached
@@ -68,3 +67,6 @@ body:
         - redis
         - timescaledb
         - valkey
+        - documentation
+      validations:
+        required: true
