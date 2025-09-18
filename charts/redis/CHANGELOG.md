@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.3.1 (2025-09-17)
+## 0.3.2 (2025-09-18)
 
-* [redis] fix sentinel conditions. set default to standalone ([#106](https://github.com/CloudPirates-io/helm-charts/pull/106))
+* [redis] Fix pod not restarting after configmap change ([#112](https://github.com/CloudPirates-io/helm-charts/pull/112))
 
 ## 0.2.0 (2025-09-02)
 

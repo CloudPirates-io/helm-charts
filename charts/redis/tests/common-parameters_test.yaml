@@ -4,6 +4,11 @@ templates:
 set:
   image:
     tag: 8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+  config:
+    content: |
+      # Redis configuration
+      bind 0.0.0.0
+      port 6379
 tests:
   - it: should use default values when nothing is overridden
     asserts:
