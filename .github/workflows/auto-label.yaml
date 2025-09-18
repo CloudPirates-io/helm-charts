@@ -14,11 +14,11 @@ jobs:
         with:
           script: |
             const body = context.payload.issue.body;
-            const regex = /- \[x\] (.+)/gi;
+            const section = body.split(/### Affected helm charts/)[1] || "";
+            const regex = /^- (.+)$/gim;
             const labels = [];
             let match;
-
-            while ((match = regex.exec(body)) !== null) {
+            while ((match = regex.exec(section)) !== null) {
               labels.push(match[1].trim());
             }
 

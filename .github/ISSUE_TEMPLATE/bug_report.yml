@@ -47,9 +47,14 @@ body:
     attributes:
       value: |
         Select affected helm charts so we can auto-label your issue.
-  - type: checkboxes
+  - type: dropdown
     attributes:
       label: Affected helm charts
+      description: Select one or more
+      multiple: true
+      # - type: checkboxes
+      #   attributes:
+      #     label: Affected helm charts
       options:
         - label: universal
         - label: keycloak
