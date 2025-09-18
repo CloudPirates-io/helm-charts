@@ -43,3 +43,23 @@ body:
     attributes:
       label: Additional informations
       description: Tell us anything else you think we should know.
+  - type: markdown
+    attributes:
+      value: |
+        Select affected helm charts so we can auto-label your issue.
+  - type: checkboxes
+    attributes:
+      label: Affected helm charts
+      options:
+        - label: universal
+        - label: keycloak
+        - label: mariadb
+        - label: memcached
+        - label: minio
+        - label: mongodb
+        - label: nginx
+        - label: postgres
+        - label: rabbitmq
+        - label: redis
+        - label: timescaledb
+        - label: valkey
