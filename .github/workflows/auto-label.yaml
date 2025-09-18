@@ -14,14 +14,8 @@ jobs:
         with:
           script: |
             const body = context.payload.issue.body;
-            const section = body.split(/### Affected helm charts/)[1] || "";
-            const regex = /^- (.+)$/gim;
-            const labels = [];
-            let match;
-            while ((match = regex.exec(section)) !== null) {
-              labels.push(match[1].trim());
-            }
-
+            const section = (body.split(/### Affected helm charts/)[1] || "").trim();
+            const labels = section.split(",").map(s => s.trim()).filter(Boolean);
             if (labels.length) {
               await github.rest.issues.addLabels({
                 ...context.repo,
