@@ -145,6 +145,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `persistence.size`         | Size of persistent volume                | `8Gi`           |
 | `persistence.mountPath`    | Mount path for Redis data                | `/data`         |
 | `persistence.annotations`  | Annotations for persistent volume claims | `{}`            |
+| `persistence.existingClaim`| Use a existing PVC                       | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -209,24 +210,23 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable.
 
-| Parameter                            | Description                                           | Default            |
-| ------------------------------------ | ----------------------------------------------------- | ------------------ |
-| `sentinel.enabled`                   | Enable Redis Sentinel for high availability           | `false`            |
-| `sentinel.image.repository`          | Redis Sentinel image repository                       | `redis`            |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                              | `8.2.1@sha256:...` |
-| `sentinel.image.pullPolicy`          | Sentinel image pull policy                            | `Always`           |
-| `sentinel.masterName`                | Name of the master server                             | `mymaster`         |
-| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure | `2`                |
-| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down              | `30000`            |
-| `sentinel.failoverTimeout`           | Timeout for failover in ms                            | `180000`           |
-| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover     | `1`                |
-| `sentinel.port`                      | Sentinel port                                         | `26379`            |
-| `sentinel.service.type`              | Kubernetes service type for Sentinel                  | `ClusterIP`        |
-| `sentinel.service.port`              | Sentinel service port                                 | `26379`            |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                        | `128Mi`            |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                         | `25m`              |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                      | `64Mi`             |
-| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container       | `[]`               |
+| Parameter                            | Description                                              | Default   |
+| ------------------------------------ | -------------------------------------------------------- | --------- |
+| `sentinel.enabled`                   | Enable Redis Sentinel for high availability             | `false`   |
+| `sentinel.image.repository`          | Redis Sentinel image repository                          | `redis`   |
+| `sentinel.image.tag`                 | Redis Sentinel image tag                                 | `8.2.1@sha256:...` |
+| `sentinel.image.pullPolicy`          | Sentinel image pull policy                               | `Always`  |
+| `sentinel.masterName`                | Name of the master server                                | `mymaster` |
+| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure   | `2`       |
+| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                | `30000`   |
+| `sentinel.failoverTimeout`           | Timeout for failover in ms                               | `180000`  |
+| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover       | `1`       |
+| `sentinel.port`                      | Sentinel port                                            | `26379`   |
+| `sentinel.service.type`              | Kubernetes service type for Sentinel                    | `ClusterIP` |
+| `sentinel.service.port`              | Sentinel service port                                    | `26379`   |
+| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                          | `128Mi`   |
+| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                           | `25m`     |
+| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                        | `64Mi`    |
 
 ### Additional Configuration
 
@@ -317,7 +317,7 @@ helm install my-redis ./charts/redis -f values-ha.yaml
 After deployment, you'll have:
 
 - 1 Redis master instance
-- 2 Redis replica instances
+- 2 Redis replica instances  
 - 3 Redis Sentinel instances (for monitoring and failover)
 
 **Connecting to Redis with Sentinel:**
@@ -342,7 +342,7 @@ redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
 If you want replication without Sentinel (manual failover):
 
 ```yaml
-# values-replication.yaml
+# values-replication.yaml  
 architecture: replication
 replicaCount: 2
 sentinel:

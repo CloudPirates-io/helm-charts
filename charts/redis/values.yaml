@@ -68,6 +68,9 @@ config:
 persistence:
   ## @param persistence.enabled Enable persistent storage
   enabled: true
+  ## @param master.persistence.existingClaim Use a existing PVC which must be created manually before bound
+  ## NOTE: requires master.persistence.enabled: true
+  existingClaim: ""
   ## @param persistence.storageClass Storage class to use for persistent volume
   storageClass: ""
   ## @param persistence.accessMode Access mode for persistent volume
