@@ -177,3 +177,13 @@ tests:
       - equal:
           path: spec.template.spec.imagePullSecrets[0].name
           value: global-secret
+
+  - it: should use existingClaim for data volume
+    set:
+      persistence:
+        enabled: true
+        existingClaim: my-existing-pvc
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].persistentVolumeClaim.claimName
+          value: my-existing-pvc
