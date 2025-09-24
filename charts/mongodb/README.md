@@ -101,6 +101,16 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `auth.existingSecretPasswordKey` | Key in existing secret containing MongoDB password                  | `""`    |
 | `config`                         | MongoDB configuration options                                       | `{}`    |
 
+### Custom User Configuration
+| Parameter                   | Description                                                                        | Default                                  |
+| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
+| `customUser`                | Optional user to be created at initialisation with a custom password and database  | `{}`                                     |
+| `customUser.name`           | Name of the custom user to be created                                              | `""`                                     |
+| `customUser.database`       | Name of the database to be created                                                 | `""`                                     |
+| `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
+| `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
+| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
+
 ### Persistence Parameters
 
 | Parameter                  | Description                                | Default         |
