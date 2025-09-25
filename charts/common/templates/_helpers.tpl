@@ -254,7 +254,7 @@ Detect if the target platform is OpenShift (via .Values.targetPlatform or API gr
 Usage: {{ include "common.isOpenshift" . }}
 */}}
 {{- define "common.isOpenshift" -}}
-{{- if or (eq (lower (default "" .Values.targetPlatform)) "openshift") (.Capabilities.APIVersions.Has "route.openshift.io") -}}
+{{- if or (eq (lower (default "" .Values.targetPlatform)) "openshift") (.Capabilities.APIVersions.Has "route.openshift.io/v1") -}}
 true
 {{- else -}}
 false
