@@ -48,6 +48,47 @@ spec:
                   name: {{ include "mongodb.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
+            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+            - name: MONGO_CUSTOM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ .Values.customUser.existingSecret }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.name }}
+                  key: {{ .Values.customUser.secretKeys.name }}
+                  {{- else }}
+                  key: CUSTOM_USER
+                  {{- end }}
+            - name: MONGO_CUSTOM_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ .Values.customUser.existingSecret }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.password }}
+                  key: {{ .Values.customUser.secretKeys.password }}
+                  {{- else }}
+                  key: CUSTOM_PASSWORD
+                  {{- end }}
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ .Values.customUser.existingSecret }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.database }}
+                  key: {{ .Values.customUser.secretKeys.database }}
+                  {{- else }}
+                  key: CUSTOM_DB
+                  {{- end }}
+            {{- end }}
             {{- range .Values.extraEnv }}
             - name: {{ .name }}
               value: {{ .value | quote }}
@@ -82,6 +123,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+            - name: custom-user-script
+              mountPath: /docker-entrypoint-initdb.d/
+            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: /etc/mongo
@@ -93,6 +138,11 @@ spec:
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}
+        {{- end }}
+        {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+        - name: custom-user-script
+          configMap:
+            name: mongodb-custom-user-script
         {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config
