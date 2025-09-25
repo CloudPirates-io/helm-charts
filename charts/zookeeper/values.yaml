@@ -30,14 +30,22 @@ image:
 
 ## @param replicaCount Number of Zookeeper replicas to deploy
 replicaCount: 3
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
+podDisruptionBudget:
+  ## @param podDisruptionBudget.enabled Create a Pod Disruption Budget to ensure high availability during voluntary disruptions
+  enabled: true
+
+networkPolicy:
+  ## @param networkPolicy.enabled Enable network policies
+  enabled: true
 
 ## @section Zookeeper configuration parameters
 ## @see https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_configuration
 zookeeperConfig:
   ## @param zookeeperConfig.tickTime Zookeeper tick time
   tickTime: 2000
-  ## @param zookeeperConfig.dataDir Zookeeper data directory (should match persistence.mountPath)
-  dataDir: /var/lib/zookeeper/data
   ## @param zookeeperConfig.initLimit Zookeeper init limit
   initLimit: 10
   ## @param zookeeperConfig.syncLimit Zookeeper sync limit
@@ -53,7 +61,7 @@ zookeeperConfig:
   ## @param zookeeperConfig.4lwCommandsWhitelist Zookeeper 4-letter word commands whitelist
   ## possible values are: "srvr,ruok,conf,cons,dump,envi,ruok,mntr,stat" or "*" to allow all commands
   ## @see https://zookeeper.apache.org/doc/r3.5.9/zookeeperAdmin.html#sc_clusterOptions
-  commandsWhitelist: "srvr"
+  commandsWhitelist: "srvr,mntr,ruok"
   autopurge:
     ## @param zookeeperConfig.autopurge.purgeInterval Zookeeper autopurge purge interval (in hours)
     purgeInterval: 24
@@ -74,10 +82,25 @@ metrics:
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
   runAsUser: 1000
+  ## @param containerSecurityContext.runAsGroup Set MariaDB container's Security Context runAsGroup
+  runAsGroup: 1000
+  ## @param containerSecurityContext.seLinuxOptions Set container's Security Context seLinuxOptions
+  seLinuxOptions: {}
   ## @param containerSecurityContext.runAsNonRoot Set MariaDB container's Security Context runAsNonRoot
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set MariaDB container's privilege escalation
   allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.privileged Set container's privileged mode
+  privileged: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: true
+  ## @param containerSecurityContext.capabilities Linux capabilities to drop or add for the container
+  capabilities:
+    drop:
+    - ALL
+  ## @param containerSecurityContext.seccompProfile Seccomp profile for the container
+  seccompProfile:
+    type: RuntimeDefault
 
 ## @section Security Context
 podSecurityContext:
@@ -138,7 +161,7 @@ persistence:
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
-  mountPath: /var/lib/zookeeper/data
+  mountPath: /data
 
 ## @section Liveness and readiness probes
 livenessProbe:
