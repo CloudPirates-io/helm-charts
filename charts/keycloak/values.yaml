@@ -266,6 +266,9 @@ extraEnv: {}
 # VARNAME1: value1
 # VARNAME2: value2
 
+## @param extraEnvVarsSecret Name of a secret containing additional environment variables
+extraEnvVarsSecret: ""
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 
