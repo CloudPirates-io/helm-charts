@@ -54,7 +54,7 @@ config:
   ## @param config.content Include your custom MongoDB configurations here as string
   content: |
     systemLog:
-      quiet: false
+      quiet: true
       verbosity: 0
     net:
       bindIpAll: true
@@ -62,6 +62,22 @@ config:
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
   existingConfigmapKey: ""
+
+## @section customUser Optional user to be created at initialisation with a custom password and database
+customUser: {}
+  ## @param customUser.name Name of the custom user to be created
+  # name: ""
+  ## @param customUser.database Name of the database to be created
+  # database: ""
+  ## @param customUser.password Password to be used for the custom user
+  # password: ""
+  ## @param customUser.existingSecret Existing secret, in which username, password and database name are saved
+  # existingSecret: ""
+  ## @param customUser.secretKeys Name of keys in existing secret to use the custom user name, password and database
+  # secretKeys:
+  #   name: ""
+  #   password: ""
+  #   database: ""
 
 persistence:
   ## @param persistence.enabled Enable persistent storage
@@ -137,8 +153,6 @@ readinessProbe:
 
 ## @param extraEnv Additional environment variables to set
 extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []

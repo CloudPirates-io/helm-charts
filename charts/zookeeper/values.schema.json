@@ -49,16 +49,76 @@
     },
     "containerSecurityContext": {
       "type": "object",
+      "description": "Container-level security context settings",
       "properties": {
-        "runAsUser": { "type": "integer", "minimum": 0 },
-        "runAsNonRoot": { "type": "boolean" },
-        "allowPrivilegeEscalation": { "type": "boolean" }
+        "runAsUser": {
+          "type": "integer",
+          "description": "User ID to run the container process"
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "Group ID to run the container process"
+        },
+        "seLinuxOptions": {
+          "type": "object",
+          "description": "Set container's Security Context seLinuxOptions"
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Require the container to run as a non-root user"
+        },
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "description": "Whether to allow privilege escalation for the container"
+        },
+        "privileged": {
+          "type": "boolean",
+          "description": "Set container's privileged mode"
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "description": "Mount container root filesystem as read-only"
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Linux capabilities to drop or add for the container",
+          "properties": {
+            "drop": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of Linux capabilities to drop (e.g., ALL)"
+            },
+            "add": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "List of Linux capabilities to add"
+            }
+          }
+        },
+        "seccompProfile": {
+          "type": "object",
+          "description": "Seccomp profile configuration for the container",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Type of seccomp profile to use (e.g., RuntimeDefault, Localhost)"
+            },
+            "localhostProfile": {
+              "type": "string",
+              "description": "Path to a localhost seccomp profile (if type is Localhost)"
+            }
+          }
+        }
       }
     },
     "podSecurityContext": {
       "type": "object",
+      "description": "Pod-level security context settings",
       "properties": {
-        "fsGroup": { "type": "integer", "minimum": 0 }
+        "fsGroup": {
+          "type": "integer",
+          "description": "Group ID for the volumes of the pod"
+        }
       }
     },
     "service": {
@@ -113,14 +173,15 @@
     "affinity": { "type": "object" },
     "persistence": {
       "type": "object",
+      "description": "Persistence configuration",
       "properties": {
-        "enabled": { "type": "boolean" },
-        "storageClass": { "type": "string" },
-        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
-        "size": { "type": "string", "pattern": "^\\d+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$" },
-        "accessModes": { "type": "array", "items": { "type": "string" } },
-        "existingClaim": { "type": "string" },
-        "mountPath": { "type": "string" }
+        "enabled": { "type": "boolean", "description": "Enable persistence using Persistent Volume Claims" },
+        "storageClass": { "type": "string", "description": "Persistent Volume storage class" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Persistent Volume Claim annotations" },
+        "size": { "type": "string", "description": "Persistent Volume size" },
+        "accessModes": { "type": "array", "items": { "type": "string" }, "description": "Persistent Volume access modes" },
+        "existingClaim": { "type": "string", "description": "The name of an existing PVC to use for persistence" },
+        "mountPath": { "type": "string", "description": "The path where to mount the data volume" }
       }
     },
     "livenessProbe": {
@@ -169,6 +230,26 @@
     },
     "extraVolumes": { "type": "array", "items": { "type": "object" } },
     "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
-    "extraObjects": { "type": "array", "items": { "type": "object" } }
+    "extraObjects": { "type": "array", "items": { "type": "object" } },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "Pod Disruption Budget configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Create a Pod Disruption Budget to ensure high availability during voluntary disruptions"
+        }
+      }
+    },
+    "networkPolicy": {
+      "type": "object",
+      "description": "Network Policy configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable network policies"
+        }
+      }
+    }
   }
 }
