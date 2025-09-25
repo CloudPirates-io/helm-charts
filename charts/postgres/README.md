@@ -70,12 +70,12 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL image configuration
 
-| Parameter            | Description                                  | Default                                                                        |
-| -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
-| `image.registry`     | PostgreSQL image registry                    | `docker.io`                                                                    |
-| `image.repository`   | PostgreSQL image repository                  | `postgres`                                                                     |
-| `image.tag`          | PostgreSQL image tag (immutable tags are recommended) | `"17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"` |
-| `image.imagePullPolicy` | PostgreSQL image pull policy              | `Always`                                                                       |
+| Parameter               | Description                                           | Default                                                                          |
+| ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
+| `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
+| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"` |
+| `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
 
 ### Deployment configuration
 
@@ -108,13 +108,13 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL Authentication
 
-| Parameter                                | Description                                                                           | Default                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
-| `auth.username`                          | Name for a custom superuser to create at initialisation. (This will also create a database with the same name)                                                      | `"openfga"`             |
-| `auth.password`                          | Password for the custom user to create                                                | `""`                     |
-| `auth.database`                          | Alternative name for the default database to be created at initialisation                                                  | `""`                     |
-| `auth.existingSecret`                    | Name of existing secret to use for PostgreSQL credentials                             | `""`                     |
-| `auth.secretKeys.passwordKey`       | Name of key in existing secret to use for PostgreSQL credentials                      | `"postgres-password"`    |
+| Parameter                     | Description                                                                                                    | Default               |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `auth.username`               | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
+| `auth.password`               | Password for the custom user to create                                                                         | `""`                  |
+| `auth.database`               | Alternative name for the default database to be created at initialisation                                      | `""`                  |
+| `auth.existingSecret`         | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
+| `auth.secretKeys.passwordKey` | Name of key in existing secret to use for PostgreSQL credentials                                               | `"postgres-password"` |
 
 ### PostgreSQL Configuration
 
@@ -133,24 +133,25 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `config.postgresqlLogMinDurationStatement`    | Sets the minimum execution time above which statements will be logged                   | `""`    |
 | `config.extraConfig`                          | Additional PostgreSQL configuration parameters                                          | `[]`    |
 | `config.existingConfigmap`                    | Name of existing ConfigMap with PostgreSQL configuration                                | `""`    |
+| `config.pgHbaConfig`                          | Content of a custom pg_hba.conf file to be used instead of the default config           | `""`    |
 
 ### Custom User Configuration
-| Parameter                                     | Description                                                                             | Default |
-| --------------------------------------------- | --------------------------------------------------------------------------------------- | ------- |
-| `customUser`     | Optional user to be created at initialisation with a custom password and database                                         | `{}`    |
-| `customUser.name`     | Name of the custom user to be created                                        | `""`    |
-| `customUser.database`     | Name of the database to be created                                        | `""`    |
-| `customUser.password`     | Password to be used for the custom user                                        | `""`    |
-| `customUser.existingSecret`     | Existing secret, in which username, password and database name are saved           | `""`    |
-| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database           | `{name: "", database: "", password: ""}`    |
+| Parameter                   | Description                                                                        | Default                                  |
+| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
+| `customUser`                | Optional user to be created at initialisation with a custom password and database  | `{}`                                     |
+| `customUser.name`           | Name of the custom user to be created                                              | `""`                                     |
+| `customUser.database`       | Name of the database to be created                                                 | `""`                                     |
+| `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
+| `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
+| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
 
 ### PostgreSQL Initdb Configuration
 
-| Parameter                 | Description                                                                   | Default |
-| ------------------------- | ----------------------------------------------------------------------------- | ------- |
+| Parameter                 | Description                                                                      | Default |
+| ------------------------- | -------------------------------------------------------------------------------- | ------- |
 | `initdb.args`             | Send arguments to postgres initdb. This is a space separated string of arguments | `""`    |
-| `initdb.scripts`          | Dictionary of initdb scripts                                                   | `{}`    |
-| `initdb.scriptsConfigMap` | ConfigMap with scripts to be run at first boot                                | `""`    |
+| `initdb.scripts`          | Dictionary of initdb scripts                                                     | `{}`    |
+| `initdb.scriptsConfigMap` | ConfigMap with scripts to be run at first boot                                   | `""`    |
 
 ### Service configuration
 
@@ -193,7 +194,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 ### Persistent Volume Claim Retention Policy
 
 | Parameter                                          | Description                                                                    | Default    |
-| -------------------------------------------------- | ------------------------------------------------------------------------------ | -----------|
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
 | `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the Statefulset                  | `false`    |
 | `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
 | `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
@@ -246,10 +247,10 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### Extra Configuration Parameters
 
-| Parameter            | Description                                                            | Default   |
-|----------------------|------------------------------------------------------------------------|-----------|
-| `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`      |
-| `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``        |
+| Parameter            | Description                                                            | Default |
+| -------------------- | ---------------------------------------------------------------------- | ------- |
+| `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
+| `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 
 #### Extra Objects
 

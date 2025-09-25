@@ -42,6 +42,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ include "postgres.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          args:
+            - -c
+            - 'config_file={{ include "postgres.configDir" . }}/postgresql.conf'
           env:
             - name: PGDATA
               value: {{ include "postgres.dataDir" . }}/pgdata

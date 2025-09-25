@@ -99,6 +99,8 @@ config:
   extraConfig: []
   ## @param config.existingConfigmap Name of existing ConfigMap with PostgreSQL configuration
   existingConfigmap: ""
+  ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
+  pgHbaConfig: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser: {}
