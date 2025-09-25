@@ -248,3 +248,41 @@ imagePullSecrets:
     {{- end }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Detect if the target platform is OpenShift (via .Values.targetPlatform or API group).
+Usage: {{ include "common.isOpenshift" . }}
+*/}}
+{{- define "common.isOpenshift" -}}
+{{- if or (eq (lower (default "" .Values.targetPlatform)) "openshift") (.Capabilities.APIVersions.Has "route.openshift.io") -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end }}
+
+{{/*
+Render podSecurityContext, omitting runAsUser, runAsGroup, fsGroup, and seLinuxOptions if OpenShift is detected.
+Usage: {{ include "common.renderPodSecurityContext" . }}
+*/}}
+{{- define "common.renderPodSecurityContext" -}}
+{{- $isOpenshift := include "common.isOpenshift" . | trim }}
+{{- if eq $isOpenshift "true" }}
+{{- omit .Values.podSecurityContext "runAsUser" "runAsGroup" "fsGroup" "seLinuxOptions" | toYaml | nindent 8 }}
+{{- else }}
+{{- toYaml .Values.podSecurityContext | nindent 8 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Render containerSecurityContext, omitting runAsUser, runAsGroup, and seLinuxOptions if OpenShift is detected.
+Usage: {{ include "common.renderContainerSecurityContext" . }}
+*/}}
+{{- define "common.renderContainerSecurityContext" -}}
+{{- $isOpenshift := include "common.isOpenshift" . | trim }}
+{{- if eq $isOpenshift "true" }}
+{{- omit .Values.containerSecurityContext "runAsUser" "runAsGroup" "seLinuxOptions" | toYaml | nindent 12 }}
+{{- else }}
+{{- toYaml .Values.containerSecurityContext | nindent 12 }}
+{{- end }}
+{{- end }}

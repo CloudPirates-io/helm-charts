@@ -70,6 +70,7 @@ metrics:
     ## @param metrics.service.ports.port Zookeeper metrics service port
     port: 7000
 
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @section MariaDB Container Security Context
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
@@ -79,6 +80,7 @@ containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Set MariaDB container's privilege escalation
   allowPrivilegeEscalation: false
 
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @section Security Context
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod

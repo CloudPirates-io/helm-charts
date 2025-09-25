@@ -32,8 +32,7 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . }}
       {{- if .Values.cloneStaticSiteFromGit.enabled }}
       initContainers:
         - name: git-clone-repository
@@ -73,7 +72,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . }}
           image: {{ include "nginx.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           ports:
