@@ -240,9 +240,10 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra Environment
 
-| Parameter  | Description                                           | Default |
-| ---------- | ----------------------------------------------------- | ------- |
-| `extraEnv` | Additional environment variables from key-value pairs | `{}`    |
+| Parameter  | Description                                                            | Default |
+| ---------- |------------------------------------------------------------------------| ----- |
+| `extraEnv` | Additional environment variables from key-value pairs                  | `{}`  |
+| `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``    |
 
 ### Extra Configuration Parameters
 

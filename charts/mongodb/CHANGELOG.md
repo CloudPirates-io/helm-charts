@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.2.0 (2025-09-24)
+## 0.2.0 (2025-09-25)
 
-* [mongodb] add custom user creation at initialization ([#153](https://github.com/CloudPirates-io/helm-charts/pull/153))
+* [redis] return fqdn for sentinel master lookup ([#156](https://github.com/CloudPirates-io/helm-charts/pull/156))

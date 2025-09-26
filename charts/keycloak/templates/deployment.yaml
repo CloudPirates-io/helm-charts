@@ -141,6 +141,11 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+          {{- if .Values.extraEnvVarsSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.extraEnvVarsSecret }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.keycloak.httpPort }}

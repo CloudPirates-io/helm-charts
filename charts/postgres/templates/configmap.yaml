@@ -11,6 +11,10 @@ metadata:
     {{- include "postgres.annotations" . | nindent 4 }}
   {{- end }}
 data:
+  {{- if .Values.config.pgHbaConfig }}
+  pg_hba.conf: |
+{{ .Values.config.pgHbaConfig | indent 4 }}
+  {{- end }}
   postgresql.conf: |
     # PostgreSQL configuration file
     
@@ -99,6 +103,11 @@ data:
     lc_time = 'en_US.utf8'
     default_text_search_config = 'pg_catalog.english'
     
+    {{ if .Values.config.pgHbaConfig }}
+    # Set custom pg_hba.conf file to use
+    hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
+    {{- end }}
+
     # Additional Configuration
     {{- range .Values.config.extraConfig }}
     {{ . }}
