@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.2.1 (2025-09-08)
+## 0.2.2 (2025-09-26)
 
-* [timescaledb] Update TimescaleDB to 2.22.0 ([#46](https://github.com/CloudPirates-io/helm-charts/pull/46))
+* [timescale/timescaledb] chore(deps): update docker.io/timescale/timescaledb:2.22.0-pg17 Docker digest to bd55a8c ([#167](https://github.com/CloudPirates-io/helm-charts/pull/167))
 
 ## 0.2.0 (2025-09-02)
 
