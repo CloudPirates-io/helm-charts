@@ -72,7 +72,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "nginx.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           ports:
