@@ -276,7 +276,7 @@ extraObjects: []
 initContainers:
   ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting
   waitForPostgres:
-    image: "postgres:17.6@sha256:0f4f20021a065d114083d1b95d9fb89ad847cbc4c3cc9238417815c7df42350f"
+    image: "postgres:17.6@sha256:0b6428e8c09651398137d2b3308a6ad87e73ac15fc38729891c16d942e947d3d"
   ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
   waitForMariadb:
     image: "mariadb:12.0.2@sha256:8a061ef9813cf960f94a262930a32b190c3fbe5c8d3ab58456ef1df4b90fd5dc"
