@@ -1,8 +1,47 @@
 # Changelog
 
-## 0.5.3 (2025-09-25)
+## 0.5.4 (2025-09-26)
 
-* [Postgres] support custom pg_hba.conf ([#157](https://github.com/CloudPirates-io/helm-charts/pull/157))
+* [postgres] chore(deps): update docker.io/postgres:17.6 Docker digest to 0b6428e ([#161](https://github.com/CloudPirates-io/helm-charts/pull/161))
+
+## <small>0.5.3 (2025-09-25)</small>
+
+* add support for custom user at initialisation with password and database ([62d9d0d](https://github.com/CloudPirates-io/helm-charts/commit/62d9d0d))
+* add support for extra env vars from secret ([f6bb0dc](https://github.com/CloudPirates-io/helm-charts/commit/f6bb0dc))
+* bump chart version to 0.5.2 ([8c80572](https://github.com/CloudPirates-io/helm-charts/commit/8c80572))
+* bump chart version to 0.5.3 ([337480c](https://github.com/CloudPirates-io/helm-charts/commit/337480c))
+* bump chartversion to 0.3.0 ([9e0454c](https://github.com/CloudPirates-io/helm-charts/commit/9e0454c))
+* chore: add support for db initialization scripts ([96c8215](https://github.com/CloudPirates-io/helm-charts/commit/96c8215))
+* chore: add support for passing extra environment variables ([0951fdc](https://github.com/CloudPirates-io/helm-charts/commit/0951fdc))
+* chore: add support for persistentVolumeClaimRetentionPolicy ([2f73cfb](https://github.com/CloudPirates-io/helm-charts/commit/2f73cfb))
+* chore: bump version ([33105e9](https://github.com/CloudPirates-io/helm-charts/commit/33105e9))
+* chore(deps): update docker.io/postgres:17.6 Docker digest to 0f4f200 ([6f0746a](https://github.com/CloudPirates-io/helm-charts/commit/6f0746a))
+* chore(deps): update docker.io/postgres:17.6 Docker digest to 8a56bef ([3546801](https://github.com/CloudPirates-io/helm-charts/commit/3546801))
+* chore(deps): update docker.io/postgres:17.6 Docker digest to feff5b2 ([8b89eda](https://github.com/CloudPirates-io/helm-charts/commit/8b89eda))
+* fix admin postgres-password env-variable ([7b89fa4](https://github.com/CloudPirates-io/helm-charts/commit/7b89fa4))
+* fix: Change default name for CUSTOM_PASSWORD ([f7e74dd](https://github.com/CloudPirates-io/helm-charts/commit/f7e74dd))
+* support custom pg_hba.conf (#157) ([9f3ceea](https://github.com/CloudPirates-io/helm-charts/commit/9f3ceea)), closes [#157](https://github.com/CloudPirates-io/helm-charts/issues/157)
+* update env-vars, initialisation values, remove unused auth values ([11a6947](https://github.com/CloudPirates-io/helm-charts/commit/11a6947))
+* add extraObject array to all charts ([34772b7](https://github.com/CloudPirates-io/helm-charts/commit/34772b7))
+* Add initial Changelogs to all Charts ([68f10ca](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca))
+* bump chart version ([fc9c564](https://github.com/CloudPirates-io/helm-charts/commit/fc9c564))
+* Bump chart version ([2907796](https://github.com/CloudPirates-io/helm-charts/commit/2907796))
+* Bump chart version ([9bd67d6](https://github.com/CloudPirates-io/helm-charts/commit/9bd67d6))
+* Bump chart version ([492acc9](https://github.com/CloudPirates-io/helm-charts/commit/492acc9))
+* bump postgres ([4cc47f2](https://github.com/CloudPirates-io/helm-charts/commit/4cc47f2))
+* Update CHANGELOG.md ([7749beb](https://github.com/CloudPirates-io/helm-charts/commit/7749beb))
+* Update CHANGELOG.md ([b1ce7c7](https://github.com/CloudPirates-io/helm-charts/commit/b1ce7c7))
+* Update CHANGELOG.md ([7df85ea](https://github.com/CloudPirates-io/helm-charts/commit/7df85ea))
+* Update CHANGELOG.md ([3ac9592](https://github.com/CloudPirates-io/helm-charts/commit/3ac9592))
+* Update CHANGELOG.md ([574c9dc](https://github.com/CloudPirates-io/helm-charts/commit/574c9dc))
+* Update CHANGELOG.md ([9c7f377](https://github.com/CloudPirates-io/helm-charts/commit/9c7f377))
+* Update CHANGELOG.md ([ee72020](https://github.com/CloudPirates-io/helm-charts/commit/ee72020))
+* Update CHANGELOG.md ([8baa18d](https://github.com/CloudPirates-io/helm-charts/commit/8baa18d))
+* Update CHANGELOG.md ([3e90557](https://github.com/CloudPirates-io/helm-charts/commit/3e90557))
+* Update CHANGELOG.md ([65522d2](https://github.com/CloudPirates-io/helm-charts/commit/65522d2))
+* Update CHANGELOG.md ([0a89918](https://github.com/CloudPirates-io/helm-charts/commit/0a89918))
+* Update CHANGELOG.md ([b82862d](https://github.com/CloudPirates-io/helm-charts/commit/b82862d))
+* Update docker.io/postgres:17.6 Docker digest to 29574e2 ([1226760](https://github.com/CloudPirates-io/helm-charts/commit/1226760))
 
 ## <small>0.2.1 (2025-08-26)</small>
 
