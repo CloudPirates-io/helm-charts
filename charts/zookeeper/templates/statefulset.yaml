@@ -32,10 +32,11 @@ spec:
 {{- with (include "zookeeper.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . }}
+          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           image: {{ include "zookeeper.image" . | quote }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy | default "Always" | quote }}
           ports:
