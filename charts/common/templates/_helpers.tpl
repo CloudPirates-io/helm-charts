@@ -270,7 +270,7 @@ Usage: {{ include "common.renderPodSecurityContext" . }}
 {{- if eq $isOpenshift "true" }}
 {{- omit .Values.podSecurityContext "runAsUser" "runAsGroup" "fsGroup" "seLinuxOptions" | toYaml }}
 {{- else }}
-{{- toYaml .Values.podSecurityContext | nindent 8 }}
+{{- toYaml .Values.podSecurityContext }}
 {{- end }}
 {{- end }}
 
@@ -283,6 +283,6 @@ Usage: {{ include "common.renderContainerSecurityContext" . }}
 {{- if eq $isOpenshift "true" }}
 {{- omit .Values.containerSecurityContext "runAsUser" "runAsGroup" "seLinuxOptions" | toYaml }}
 {{- else }}
-{{- toYaml .Values.containerSecurityContext | nindent 12 }}
+{{- toYaml .Values.containerSecurityContext }}
 {{- end }}
 {{- end }}

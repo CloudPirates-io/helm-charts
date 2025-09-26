@@ -76,6 +76,11 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.commandsWhitelist` | 4-letter word commands whitelist | `srvr` |
 | `zookeeperConfig.autopurge.purgeInterval` | Autopurge purge interval (hours) | `24` |
 | `zookeeperConfig.autopurge.snapRetainCount` | Autopurge snapshot retain count | `3` |
+| `zookeeperConfig.admin.enableServer` | Enable the admin server | `"false"` |
+| `zookeeperConfig.admin.serverPort` | Admin server port | `8080` |
+| `zookeeperConfig.admin.serverAddress` | Admin server address | `0.0.0.0` |
+| `zookeeperConfig.admin.idleTimeout` | Admin server connection idle timeout (milliseconds) | `30000` |
+| `zookeeperConfig.admin.commandUrl` | Admin server command URL | `/commands` |
 
 ### Metrics
 

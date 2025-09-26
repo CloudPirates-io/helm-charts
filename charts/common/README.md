@@ -17,8 +17,8 @@ kind: StatefulSet
 spec:
   template:
     spec:
-      securityContext: {{ include "common.renderPodSecurityContext" . }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
 ```

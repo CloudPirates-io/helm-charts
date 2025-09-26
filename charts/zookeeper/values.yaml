@@ -61,12 +61,24 @@ zookeeperConfig:
   ## @param zookeeperConfig.4lwCommandsWhitelist Zookeeper 4-letter word commands whitelist
   ## possible values are: "srvr,ruok,conf,cons,dump,envi,ruok,mntr,stat" or "*" to allow all commands
   ## @see https://zookeeper.apache.org/doc/r3.5.9/zookeeperAdmin.html#sc_clusterOptions
-  commandsWhitelist: "srvr,mntr,ruok"
+  commandsWhitelist: "srvr"
   autopurge:
     ## @param zookeeperConfig.autopurge.purgeInterval Zookeeper autopurge purge interval (in hours)
     purgeInterval: 24
     ## @param zookeeperConfig.autopurge.snapRetainCount Zookeeper autopurge snapshot retain count
     snapRetainCount: 3
+  admin:
+    ## @param zookeeperConfig.admin.enableServer Enable Zookeeper Admin server
+    enableServer: "false"
+    ## @param zookeeperConfig.admin.serverPort Zookeeper Admin server port
+    serverPort: 8080
+    ## @param zookeeperConfig.admin.serverAddress Zookeeper Admin server address
+    serverAddress: "0.0.0.0"
+    ## @param zookeeperConfig.admin.idleTimeout Zookeeper Admin server connection idle timeout (in milliseconds)
+    idleTimeout: 30000
+    ## @param zookeeperConfig.admin.commandUrl Zookeeper Admin server command URL
+    commandUrl: "/commands"
+
 
 ## @section Zookeeper Metrics configuration
 metrics:
