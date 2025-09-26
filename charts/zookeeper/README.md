@@ -23,18 +23,6 @@ To install with custom values:
 helm install my-zookeeper ./charts/zookeeper -f values.yaml
 ```
 
-#### Example config for OpenShift Clusters
-To run this chart in an OpenShift cluster, the following security values must be empty:
-```yaml
-zookeeper:
-  containerSecurityContext:
-    runAsUser:
-    runAsGroup:
-    seLinuxOptions:
-  podSecurityContext:
-    fsGroup:
-```
-
 
 ### Getting Started
 
