@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.5.4 (2025-09-26)
+## 0.6.0 (2025-09-26)
 
-* [postgres] chore(deps): update docker.io/postgres:17.6 Docker digest to 0b6428e ([#161](https://github.com/CloudPirates-io/helm-charts/pull/161))
+* [postgres]: Fix invalid data dir path on postgres 18 ([#165](https://github.com/CloudPirates-io/helm-charts/pull/165))
+
+## <small>0.5.4 (2025-09-26)</small>
+
+* chore(deps): update docker.io/postgres:17.6 Docker digest to 0b6428e (#161) ([1946296](https://github.com/CloudPirates-io/helm-charts/commit/1946296)), closes [#161](https://github.com/CloudPirates-io/helm-charts/issues/161)
 
 ## <small>0.5.3 (2025-09-25)</small>
 
