@@ -106,12 +106,6 @@ Return PostgreSQL initialization scripts ConfigMap name
 {{- end -}}
 {{- end -}}
 
-{{/*
-Return PostgreSQL data directory
-*/}}
-{{- define "postgres.dataDir" -}}
-{{- printf "/var/lib/postgresql/data" -}}
-{{- end }}
 
 {{/*
 Return PostgreSQL config directory
@@ -169,4 +163,45 @@ Create the name of the service account to use
 
 {{- define "postgres.custom-user-configname" -}}
 {{- printf "%s-custom-user-credentials" (include "postgres.fullname" .) -}}
+{{- end }}
+
+{{/*
+Extract PostgreSQL major version from image tag
+*/}}
+{{- define "postgres.majorVersion" -}}
+{{- $tag := .Values.image.tag -}}
+{{- if contains "@" $tag -}}
+  {{- $tag = (split "@" $tag)._0 -}}
+{{- end -}}
+{{- if contains "." $tag -}}
+  {{- (split "." $tag)._0 -}}
+{{- else -}}
+  {{- $tag -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return PostgreSQL data directory based on major version
+For PostgreSQL 18+, use version-specific path; for older versions use traditional path
+*/}}
+{{- define "postgres.dataDir" -}}
+{{- $majorVersion := include "postgres.majorVersion" . | int -}}
+{{- if ge $majorVersion 18 -}}
+{{- printf "/var/lib/postgresql" -}}
+{{- else -}}
+{{- printf "/var/lib/postgresql/data" -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return PGDATA path based on major version
+For PostgreSQL 18+, use version-specific PGDATA; for older versions use traditional PGDATA
+*/}}
+{{- define "postgres.pgdataPath" -}}
+{{- $majorVersion := include "postgres.majorVersion" . | int -}}
+{{- if ge $majorVersion 18 -}}
+{{- printf "/var/lib/postgresql/%d/docker" $majorVersion -}}
+{{- else -}}
+{{- printf "/var/lib/postgresql/data/pgdata" -}}
+{{- end -}}
 {{- end }}
