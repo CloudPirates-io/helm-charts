@@ -17,7 +17,7 @@ jobs:
               .trim()
               .split(",")
               .map((s) => s.trim())
-              .filter((s) => s && s !== "_No response_")
+              .filter((s) => s && s !== "_No response_");
             if (labels.length) {
               await github.rest.issues.addLabels({
                 ...context.repo,
