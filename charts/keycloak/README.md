@@ -113,21 +113,23 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Keycloak Configuration
 
-| Parameter                              | Description                                                   | Default            |
-| -------------------------------------- | ------------------------------------------------------------- | ------------------ |
-| `keycloak.adminUser`                   | Keycloak admin username                                       | `admin`            |
-| `keycloak.adminPassword`               | Keycloak admin password                                       | `""`               |
-| `keycloak.existingSecret`              | Name of existing secret to use for Keycloak admin credentials | `""`               |
-| `keycloak.secretKeys.adminPasswordKey` | Secret key for admin credentials                              | `"admin-password"` |
-| `keycloak.hostname`                    | Keycloak hostname                                             | `""`               |
-| `keycloak.hostnameAdmin`               | Keycloak admin hostname                                       | `""`               |
-| `keycloak.hostnameStrict`              | Enable strict hostname resolution                             | `false`            |
-| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname                                 | `""`               |
-| `keycloak.httpEnabled`                 | Enable HTTP listener                                          | `true`             |
-| `keycloak.httpPort`                    | HTTP port                                                     | `8080`             |
-| `keycloak.httpsPort`                   | HTTPS port                                                    | `8443`             |
-| `keycloak.proxy`                       | Proxy mode (edge, reencrypt, passthrough, none)               | `none`             |
-| `keycloak.production`                  | Enable production mode                                        | `false`            |
+| Parameter                              | Description                                                                                                  | Default            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `keycloak.adminUser`                   | Keycloak admin username                                                                                      | `admin`            |
+| `keycloak.adminPassword`               | Keycloak admin password                                                                                      | `""`               |
+| `keycloak.existingSecret`              | Name of existing secret to use for Keycloak admin credentials                                                | `""`               |
+| `keycloak.secretKeys.adminPasswordKey` | Secret key for admin credentials                                                                             | `"admin-password"` |
+| `keycloak.hostname`                    | Keycloak hostname                                                                                            | `""`               |
+| `keycloak.hostnameAdmin`               | Keycloak admin hostname                                                                                      | `""`               |
+| `keycloak.hostnameStrict`              | Enable strict hostname resolution                                                                            | `false`            |
+| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname                                                                                | `""`               |
+| `keycloak.httpEnabled`                 | Enable HTTP listener                                                                                         | `true`             |
+| `keycloak.httpPort`                    | HTTP port                                                                                                    | `8080`             |
+| `keycloak.httpsPort`                   | HTTPS port                                                                                                   | `8443`             |
+| `keycloak.proxyHeaders`                | The proxy headers that should be accepted by the server. (forwarded, xforwarded)                             | `""`               |
+| `keycloak.proxyProtocolEnabled`        | Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false) | `false`            |
+| `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
+| `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
 
 ### Database Configuration
 
@@ -240,10 +242,10 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra Environment
 
-| Parameter  | Description                                                            | Default |
-| ---------- |------------------------------------------------------------------------| ----- |
-| `extraEnv` | Additional environment variables from key-value pairs                  | `{}`  |
-| `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``    |
+| Parameter            | Description                                                            | Default |
+| -------------------- | ---------------------------------------------------------------------- | ------- |
+| `extraEnv`           | Additional environment variables from key-value pairs                  | `{}`    |
+| `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``      |
 
 ### Extra Configuration Parameters
 
@@ -271,7 +273,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                   | Description                                       | Default      |
 | --------------------------- | ------------------------------------------------- | ------------ |
-| `mariadb.enabled`           | Enable embedded PostgreSQL database               | `false`       |
+| `mariadb.enabled`           | Enable embedded PostgreSQL database               | `false`      |
 | `mariadb.auth.database`     | MariaDB database name                             | `"keycloak"` |
 | `mariadb.auth.username`     | MariaDB database user (leave empty for root user) | `""`         |
 | `mariadb.auth.password`     | MariaDB database password                         | `""`         |

@@ -77,8 +77,14 @@ spec:
             {{- if .Values.keycloak.hostnameBackchannel }}
             - --hostname-backchannel={{ include "keycloak.hostnameBackchannel" . }}
             {{- end }}
-            {{- if ne .Values.keycloak.proxy "none" }}
-            - --proxy={{ .Values.keycloak.proxy }}
+            {{- if .Values.keycloak.proxyHeaders }}
+            - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
+            {{- end }}
+            {{- if .Values.keycloak.proxyProtocolEnabled }}
+            - --proxy-protocol-enabled={{ .Values.keycloak.proxyProtocolEnabled }}
+            {{- end }}
+            {{- if .Values.keycloak.proxyTrustedAddresses }}
+            - --proxy-trusted-addresses={{ .Values.keycloak.proxyTrustedAddresses }}
             {{- end }}
             {{- if .Values.keycloak.httpPort }}
             - --http-port={{ .Values.keycloak.httpPort }}

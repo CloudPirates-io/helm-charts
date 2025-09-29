@@ -82,8 +82,12 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
-  ## @param keycloak.proxy Proxy mode (edge, reencrypt, passthrough, none)
-  proxy: none
+  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded)
+  proxyHeaders: ""
+  ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
+  proxyProtocolEnabled: false
+  ## @param keycloak.proxyTrustedAddresses A comma separated list of trusted proxy addresses
+  proxyTrustedAddresses: ""
   ## @param keycloak.production Enable production mode
   production: false
 

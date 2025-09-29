@@ -171,10 +171,18 @@
           "maximum": 65535,
           "description": "HTTPS port"
         },
-        "proxy": {
+        "proxyHeaders": {
           "type": "string",
-          "enum": ["edge", "reencrypt", "passthrough", "none"],
-          "description": "Proxy mode (edge, reencrypt, passthrough, none)"
+          "enum": ["", "forwarded", "xforwarded"],
+          "description": "The proxy headers that should be accepted by the server. (forwarded, xforwarded)"
+        },
+        "proxyProtocolEnabled": {
+          "type": "boolean",
+          "description": "Whether the server should use the HA PROXY protocol when serving requests from behind a proxy."
+        },
+        "proxyTrustedAddresses": {
+          "type": "string",
+          "description": "A comma separated list of trusted proxy addresses"
         },
         "production": {
           "type": "boolean",
