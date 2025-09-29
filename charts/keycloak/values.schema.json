@@ -49,6 +49,10 @@
           "type": "string",
           "description": "Keycloak image tag (immutable tags are recommended)"
         },
+        "command": {
+          "type": "string",
+          "description": "Keycloak container startup command"
+        },
         "imagePullPolicy": {
           "type": "string",
           "enum": ["Always", "IfNotPresent", "Never"],

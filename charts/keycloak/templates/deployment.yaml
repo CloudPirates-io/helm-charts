@@ -57,7 +57,7 @@ spec:
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command:
-            - /opt/keycloak/bin/kc.sh
+            - {{ .Values.image.command }}
           args:
             {{- if .Values.keycloak.production }}
             - start
