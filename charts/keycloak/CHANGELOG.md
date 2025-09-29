@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.1.6 (2025-09-26)
+## 0.1.7 (2025-09-29)
 
-* [postgres] chore(deps): update postgres:17.6 Docker digest to 0b6428e ([#162](https://github.com/CloudPirates-io/helm-charts/pull/162))
+* [keycloak] replace deprecated 'proxy' with new proxy parameters ([#183](https://github.com/CloudPirates-io/helm-charts/pull/183))
+
+## <small>0.1.6 (2025-09-26)</small>
+
+* [postgres] chore(deps): update postgres:17.6 Docker digest to 0b6428e (#162) ([6293612](https://github.com/CloudPirates-io/helm-charts/commit/6293612)), closes [#162](https://github.com/CloudPirates-io/helm-charts/issues/162)
 
 ## <small>0.1.5 (2025-09-25)</small>
 
