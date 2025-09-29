@@ -15,8 +15,14 @@ data:
     electionPortBindRetry={{ .Values.zookeeperConfig.electionPortBindRetry | default 10 }}
     maxClientCnxns={{ .Values.zookeeperConfig.maxClientCnxns | default 60 }}
     #standaloneEnabled={{ .Values.zookeeperConfig.standaloneEnabled | default "false" }}
-    adminServerEnabled={{ .Values.zookeeperConfig.adminServerEnabled | default "false" }}
-    commandsWhitelist={{ .Values.zookeeperConfig.commandsWhitelist | default "srvr" }}
+    {{- if eq .Values.zookeeperConfig.admin.enableServer "true" }}
+    admin.enableServer={{ .Values.zookeeperConfig.admin.enableServer | default "false" }}
+    admin.serverPort={{ .Values.zookeeperConfig.admin.serverPort | default 8080 }}
+    admin.serverAddress={{ .Values.zookeeperConfig.admin.serverAddress | default "0.0.0.0" }}
+    admin.idleTimeout={{ .Values.zookeeperConfig.admin.idleTimeout | default 30000 }}
+    admin.commandUrl={{ .Values.zookeeperConfig.admin.commandUrl | default "/commands" }}
+    {{- end }}
+    4lw.commands.whitelist={{ .Values.zookeeperConfig.commandsWhitelist | default "srvr" }}
     autopurge.purgeInterval={{ .Values.zookeeperConfig.autopurge.purgeInterval | default 24 }}
     autopurge.snapRetainCount={{ .Values.zookeeperConfig.autopurge.snapRetainCount | default 3 }}
     quorumListenOnAllIPs=true

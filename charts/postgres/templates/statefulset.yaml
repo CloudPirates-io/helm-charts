@@ -47,7 +47,7 @@ spec:
             - 'config_file={{ include "postgres.configDir" . }}/postgresql.conf'
           env:
             - name: PGDATA
-              value: {{ include "postgres.dataDir" . }}/pgdata
+              value: {{ include "postgres.pgdataPath" . }}
             {{- if .Values.initdb.args }}
             - name: POSTGRES_INITDB_ARGS
               value: {{ .Values.initdb.args | quote }}

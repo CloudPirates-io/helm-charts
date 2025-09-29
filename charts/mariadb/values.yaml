@@ -86,8 +86,6 @@ persistence:
 
 ## @section MariaDB Pod Security Context
 podSecurityContext:
-  ## @param podSecurityContext.enabled Enabled MariaDB pod Security Context
-  enabled: true
   ## @param podSecurityContext.fsGroup Set MariaDB pod's Security Context fsGroup
   fsGroup: 999
 

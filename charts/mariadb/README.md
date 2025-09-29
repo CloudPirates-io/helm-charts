@@ -152,7 +152,6 @@ The following table lists the configurable parameters of the MariaDB chart and t
 
 | Parameter                                           | Description                                           | Default |
 | --------------------------------------------------- | ----------------------------------------------------- | ------- |
-| `podSecurityContext.enabled`                        | Enabled MariaDB pod Security Context                  | `true`  |
 | `podSecurityContext.fsGroup`                        | Set MariaDB pod's Security Context fsGroup            | `999`   |
 | `containerSecurityContext.runAsUser`                | Set MariaDB container's Security Context runAsUser    | `999`   |
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot | `true`  |
