@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.2.3 (2025-09-15)
+## 0.2.4 (2025-09-30)
 
-* [minio] Minio set deployment update strategy ([#87](https://github.com/CloudPirates-io/helm-charts/pull/87))
+* [minio] add more configuration options for the minio server ([#189](https://github.com/CloudPirates-io/helm-charts/pull/189))
 
 ## <small>0.2.1 (2025-09-08)</small>
 
