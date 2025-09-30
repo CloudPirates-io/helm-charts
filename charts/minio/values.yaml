@@ -53,6 +53,23 @@ config:
   domain: ""
   ## @param config.serverUrl MinIO server URL for console
   serverUrl: ""
+  ## @param config.minioOpts String of parameteres to use when starting the MinIO Server (example: '--console-address=":9001"')
+  minioOpts: ""
+  ## @param config.minioVolumes The directories or drives the minio server uses as the storage backend (example: '/mnt/drive1/minio')
+  minioVolumes: ""
+  ## @param config.minioConfigEnvFile Specifies the full path to the file the MinIO server process uses for loading environment variables
+  minioConfigEnvFile: ""
+  ## @param config.minioScannerSpeed Manage the maximum wait period for the scanner when balancing MinIO read/write performance to scanner processes (fastest, fast, default, slow, slowest)
+  minioScannerSpeed: ""
+  ## @param config.minioCompressionEnabled Set to on to enable data compression for new objects. Defaults to off.
+  minioCompressionEnabled: ""
+  ## @param config.minioCompressionAllowEncryption Set to on to encrypt objects after compressing them. Defaults to off.
+  minioCompressionAllowEncryption: ""
+  ## @param config.minioCompressionExtensions Comma-separated list of the file extensions to compress. Setting a new list of file extensions replaces the previously configured list. Defaults to "*"
+  minioCompressionExtensions: ""
+  ## @param config.minioCompressionMimeTypes Comma-separated list of the MIME types to compress. Setting a new list of types replaces the previously configured list. Defaults to "text/*, application/json, application/xml, binary/octet-stream"
+  minioCompressionMimeTypes: ""
+
   ## @param config.extraEnvVars Extra environment variables to be set on MinIO containers
   extraEnvVars: []
 

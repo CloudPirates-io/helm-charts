@@ -117,6 +117,49 @@
           "title": "MinIO Server URL",
           "description": "MinIO server URL for console"
         },
+        "minioOpts": {
+          "type": "string",
+          "title": "MinIO Server Options",
+          "description": "String of parameteres to use when starting the MinIO Server"
+        },
+        "minioVolumes": {
+          "type": "string",
+          "title": "MinIO Volume directories",
+          "description": "The directories or drives the minio server uses as the storage backend"
+        },
+        "minioConfigEnvFile": {
+          "type": "string",
+          "title": "MinIO Config Environment File",
+          "description": "Path to environment file for MinIO to load variables from"
+        },
+        "minioScannerSpeed": {
+          "type": "string",
+          "enum": ["fastest", "fast", "default", "slow", "slowest", ""],
+          "title": "MinIO Scanner Speed",
+          "description": "Manage the maximum wait period for the scanner when balancing MinIO read/write performance to scanner processes"
+        },
+        "minioCompressionEnabled": {
+          "type": "string",
+          "enum": ["on", "off", ""],
+          "title": "MinIO Compression Enabled",
+          "description": "Set to on to enable data compression for new objects"
+        },
+        "minioCompressionAllowEncryption": {
+          "type": "string",
+          "enum": ["on", "off", ""],
+          "title": "MinIO Compression Allow Encryption",
+          "description": "Set to on to encrypt objects after compressing them"
+        },
+        "minioCompressionExtensions": {
+          "type": "string",
+          "title": "MinIO Compression Extentions",
+          "description": "Comma-separated list of the file extensions to compress"
+        },
+        "minioCompressionMimeTypes": {
+          "type": "string",
+          "title": "MinIO Compression MimeTypes",
+          "description": "Comma-separated list of the MIME types to compress"
+        },
         "extraEnvVars": {
           "type": "array",
           "title": "Extra Environment Variables",

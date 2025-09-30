@@ -76,14 +76,14 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### MinIO image configuration
 
-| Parameter          | Description                                                                                           | Default                          |
-| ------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `image.registry`   | MinIO image registry                                                                                  | `docker.io`                      |
-| `image.repository` | MinIO image repository                                                                                | `minio/minio`                    |
-| `image.tag`        | MinIO image tag (immutable tags are recommended)                                                      | `"RELEASE.2024-08-17T01-24-54Z"` |
-| `image.useCpuV1`     | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)                 | `false` |
-| `image.tagCpuV1`     | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)                 | `RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883` |
-| `image.imagePullPolicy` | MinIO image pull policy                                                                               | `IfNotPresent`                   |
+| Parameter               | Description                                                                                                     | Default                                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `image.registry`        | MinIO image registry                                                                                            | `docker.io`                                                                                                  |
+| `image.repository`      | MinIO image repository                                                                                          | `minio/minio`                                                                                                |
+| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2024-08-17T01-24-54Z"`                                                                             |
+| `image.useCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `false`                                                                                                      |
+| `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883` |
+| `image.imagePullPolicy` | MinIO image pull policy                                                                                         | `IfNotPresent`                                                                                               |
 
 ### MinIO Authentication
 
@@ -97,13 +97,21 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### MinIO configuration
 
-| Parameter               | Description                                               | Default |
-| ----------------------- | --------------------------------------------------------- | ------- |
-| `config.region`         | MinIO server default region                               | `""`    |
-| `config.browserEnabled` | Enable MinIO web browser                                  | `true`  |
-| `config.domain`         | MinIO server domain                                       | `""`    |
-| `config.serverUrl`      | MinIO server URL for console                              | `""`    |
-| `config.extraEnvVars`   | Extra environment variables to be set on MinIO containers | `[]`    |
+| Parameter                                | Description                                                                                                                                                                                           | Default |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `config.region`                          | MinIO server default region                                                                                                                                                                           | `""`    |
+| `config.browserEnabled`                  | Enable MinIO web browser                                                                                                                                                                              | `true`  |
+| `config.domain`                          | MinIO server domain                                                                                                                                                                                   | `""`    |
+| `config.serverUrl`                       | MinIO server URL for console                                                                                                                                                                          | `""`    |
+| `config.minioOpts`                       | String of parameteres to use when starting the MinIO Server (example: '--console-address=":9001"')                                                                                                    | `""`    |
+| `config.minioVolumes`                    | The directories or drives the minio server uses as the storage backend (example: '/mnt/drive1/minio')                                                                                                 | `""`    |
+| `config.minioConfigEnvFile`              | Specifies the full path to the file the MinIO server process uses for loading environment variables                                                                                                   | `""`    |
+| `config.minioScannerSpeed`               | Manage the maximum wait period for the scanner when balancing MinIO read/write performance to scanner processes (fastest, fast, default, slow, slowest)                                               | `""`    |
+| `config.minioCompressionEnabled`         | Set to on to enable data compression for new objects. Defaults to off.                                                                                                                                | `""`    |
+| `config.minioCompressionAllowEncryption` | Set to on to encrypt objects after compressing them. Defaults to off.                                                                                                                                 | `""`    |
+| `config.minioCompressionExtensions`      | Comma-separated list of the file extensions to compress. Setting a new list of file extensions replaces the previously configured list. Defaults to "*"                                               | `""`    |
+| `config.minioCompressionMimeTypes`       | Comma-separated list of the MIME types to compress. Setting a new list of types replaces the previously configured list. Defaults to "text/*, application/json, application/xml, binary/octet-stream" | `""`    |
+| `config.extraEnvVars`                    | Extra environment variables to be set on MinIO containers                                                                                                                                             | `[]`    |
 
 ### Deployment configuration
 
@@ -215,9 +223,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### Extra Configuration Parameters
 
-| Parameter           | Description                                                                         | Default |
-| ------------------- | ----------------------------------------------------------------------------------- | ------- |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release             | `[]`    |
+| Parameter      | Description                                                             | Default |
+| -------------- | ----------------------------------------------------------------------- | ------- |
+| `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects
 
