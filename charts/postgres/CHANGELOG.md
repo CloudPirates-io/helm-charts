@@ -1,8 +1,16 @@
 # Changelog
 
+## 0.6.1 (2025-09-29)
+
+* [Postgres] update default postgres config files ([#180](https://github.com/CloudPirates-io/helm-charts/pull/180))
+
+## <small>0.5.5 (2025-09-29)</small>
+
+* [postgres]: Default config (#163) ([fc0da25](https://github.com/CloudPirates-io/helm-charts/commit/fc0da25)), closes [#163](https://github.com/CloudPirates-io/helm-charts/issues/163)
+
 ## 0.6.0 (2025-09-26)
 
-* [postgres]: Fix invalid data dir path on postgres 18 ([#165](https://github.com/CloudPirates-io/helm-charts/pull/165))
+* [postgres]: Fix invalid data dir path on postgres 18 (#165) ([7592892](https://github.com/CloudPirates-io/helm-charts/commit/7592892)), closes [#165](https://github.com/CloudPirates-io/helm-charts/issues/165)
 
 ## <small>0.5.4 (2025-09-26)</small>
 

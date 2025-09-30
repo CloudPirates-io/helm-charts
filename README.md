@@ -40,8 +40,11 @@ This repository provides secure, well-documented, and configurable Helm charts f
 ### Installing Charts
 
 ```bash
-# From repository
+# From Docker Hub registry
 helm install my-release oci://registry-1.docker.io/cloudpirates/<chartname>
+
+# From GitHub Container Registry (GHCR)
+helm install my-release oci://ghcr.io/cloudpirates-io/helm-charts/<chartname>
 
 # From local clone
 helm install my-release ./charts/<chart-name>

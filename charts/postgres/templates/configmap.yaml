@@ -11,14 +11,33 @@ metadata:
     {{- include "postgres.annotations" . | nindent 4 }}
   {{- end }}
 data:
-  {{- if .Values.config.pgHbaConfig }}
   pg_hba.conf: |
+{{- if .Values.config.pgHbaConfig }}
 {{ .Values.config.pgHbaConfig | indent 4 }}
-  {{- end }}
+{{- else }}
+    # Default pg_hba.conf configuration
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+    # "local" is for Unix domain socket connections only
+    local   all             all                                     trust
+    # IPv4 local connections:
+    host    all             all             127.0.0.1/32            trust
+    # IPv6 local connections:
+    host    all             all             ::1/128                 trust
+    # Allow replication connections from localhost, by a user with the
+    # replication privilege.
+    local   replication     all                                     trust
+    host    replication     all             127.0.0.1/32            trust
+    host    replication     all             ::1/128                 trust
+
+    # Allow connections from any host with password authentication
+    host    all             all             all                     md5
+{{- end }}
   postgresql.conf: |
     # PostgreSQL configuration file
-    
+
     # Connection Settings
+    listen_addresses = '*'
     {{- if .Values.config.postgresqlMaxConnections }}
     max_connections = {{ .Values.config.postgresqlMaxConnections }}
     {{- else }}
@@ -103,10 +122,8 @@ data:
     lc_time = 'en_US.utf8'
     default_text_search_config = 'pg_catalog.english'
     
-    {{ if .Values.config.pgHbaConfig }}
-    # Set custom pg_hba.conf file to use
+    # Set pg_hba.conf file to use
     hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
-    {{- end }}
 
     # Additional Configuration
     {{- range .Values.config.extraConfig }}
