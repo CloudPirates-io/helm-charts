@@ -48,6 +48,11 @@ jobs:
         uses: sigstore/cosign-installer@v3.9.2
         if: ${{ steps.chart-releaser.outputs.changed_charts }}
 
+      - id: github-repo-owner-name
+        uses: ASzc/change-string-case-action@v6
+        with:
+          string: ${{ github.repository_owner }}
+
       - name: Upload charts to OCI registries
         id: upload
         if: ${{ steps.chart-releaser.outputs.changed_charts }}
@@ -91,12 +96,12 @@ jobs:
             fi
 
             # Push to GHCR
-            echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://ghcr.io/${{ github.repository_owner }}/helm-charts"
-            if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts 2>&1 | tee ${CHART_NAME}-ghcr-output.log; then
+            echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts"
+            if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts 2>&1 | tee ${CHART_NAME}-ghcr-output.log; then
 
               # Extract digest and sign GHCR chart
               GHCR_DIGEST=$(cat ${CHART_NAME}-ghcr-output.log | awk -F '[, ]+' '/Digest/{print $NF}')
-              cosign sign -y --key env://COSIGN_KEY ghcr.io/${{ github.repository_owner }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST
+              cosign sign -y --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST
 
               echo "Successfully released $CHART_NAME-$CHART_VERSION to GHCR"
             else
