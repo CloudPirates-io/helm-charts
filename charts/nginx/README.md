@@ -210,7 +210,6 @@ containerPorts:
 | Parameter        | Description                                                | Default     |
 | ---------------- | ---------------------------------------------------------- | ----------- |
 | `service.type`   | Nginx service type                                         | `ClusterIP` |
-| `service.port`   | Nginx service port                                         | `80`        |
 | `service.ports`  | Array of service ports (advanced configuration) - see examples | `[]`    |
 
 #### Service Ports Examples
