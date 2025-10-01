@@ -57,11 +57,6 @@ To run Nginx on port 8080 with matching health checks:
 
 ```yaml
 # my-values.yaml
-containerPorts:
-- name: http
-  containerPort: 8080
-  protocol: TCP
-
 serverConfig: |
   server {
     listen 0.0.0.0:8080;
@@ -187,15 +182,9 @@ data:
 
 | Parameter         | Description                                                       | Default |
 | ----------------- | ----------------------------------------------------------------- | ------- |
-| `containerPort`   | Nginx container port                                              | `80`    |
 | `containerPorts`  | Array of container ports (advanced configuration) - see examples | `[]`    |
 
 #### Container Ports Examples
-
-**Single custom port:**
-```yaml
-containerPort: 8080
-```
 
 **Multiple ports (advanced):**
 ```yaml
@@ -275,7 +264,6 @@ service:
 
 **HTTP-based probes for custom port 8080:**
 ```yaml
-containerPort: 8080
 livenessProbe:
   enabled: true
   type: httpGet
@@ -288,7 +276,6 @@ readinessProbe:
 
 **TCP-based probes (default):**
 ```yaml
-containerPort: 8080
 livenessProbe:
   enabled: true
   type: tcpSocket
