@@ -33,7 +33,7 @@
         "pullPolicy": { "type": "string", "enum": ["Always", "Never", "IfNotPresent"] }
       }
     },
-    "replicaCount": { "type": "integer", "minimum": 1 },
+    "replicaCount": { "type": "integer", "minimum": 0 },
     "metrics": {
       "type": "object",
       "properties": {
