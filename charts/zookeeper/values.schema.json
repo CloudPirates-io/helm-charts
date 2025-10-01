@@ -157,6 +157,10 @@
     },
     "nodeSelector": { "type": "object", "additionalProperties": { "type": "string" } },
     "priorityClassName": { "type": "string" },
+    "targetPlatform": {
+      "type": "string",
+      "description": "Target platform for deployment (e.g., openshift, default)"
+    },
     "tolerations": {
       "type": "array",
       "items": {
