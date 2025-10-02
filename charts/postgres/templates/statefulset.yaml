@@ -198,6 +198,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- end }}
         {{- if not .Values.config.existingConfigmap }}
         - name: config
           configMap:
@@ -239,6 +244,7 @@ spec:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
     whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
   {{- end }}
+  {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -261,4 +267,5 @@ spec:
       storageClassName: {{ .Values.persistence.storageClass | quote }}
       {{- end }}
       {{- end }}
+    {{- end }}
   {{- end }}
