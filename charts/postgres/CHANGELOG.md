@@ -1,8 +1,16 @@
 # Changelog
 
-## 0.6.1 (2025-09-29)
+## 0.7.1 (2025-10-02)
 
-* [Postgres] update default postgres config files ([#180](https://github.com/CloudPirates-io/helm-charts/pull/180))
+* [postgres] implement support for existingClaim ([#212](https://github.com/CloudPirates-io/helm-charts/pull/212))
+
+## 0.7.0 (2025-09-30)
+
+* make postgres run on openshift (#184) ([0396895](https://github.com/CloudPirates-io/helm-charts/commit/0396895)), closes [#184](https://github.com/CloudPirates-io/helm-charts/issues/184)
+
+## <small>0.6.1 (2025-09-29)</small>
+
+* update default postgres config files (#180) ([6385512](https://github.com/CloudPirates-io/helm-charts/commit/6385512)), closes [#180](https://github.com/CloudPirates-io/helm-charts/issues/180)
 
 ## <small>0.5.5 (2025-09-29)</small>
 
