@@ -146,6 +146,8 @@ service:
   httpsTargetPort: 8443
   ## @param service.annotations Service annotations
   annotations: {}
+  ## @param service.trafficDistribution Traffic distribution preference for the keycloak service. If the field is not set, the implementation will apply its default routing strategy.
+  trafficDistribution: ""
 
 ## @section Ingress configuration
 ingress:
@@ -252,6 +254,9 @@ nodeSelector: {}
 
 ## @param tolerations Toleration labels for pod assignment
 tolerations: []
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
 
 ## @param affinity Affinity settings for pod assignment
 affinity: {}

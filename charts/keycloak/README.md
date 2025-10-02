@@ -162,14 +162,15 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Service configuration
 
-| Parameter                 | Description                   | Default     |
-| ------------------------- | ----------------------------- | ----------- |
-| `service.type`            | Keycloak service type         | `ClusterIP` |
-| `service.httpPort`        | Keycloak HTTP service port    | `8080`      |
-| `service.httpsPort`       | Keycloak HTTPS service port   | `8443`      |
-| `service.httpTargetPort`  | Keycloak HTTP container port  | `8080`      |
-| `service.httpsTargetPort` | Keycloak HTTPS container port | `8443`      |
-| `service.annotations`     | Service annotations           | `{}`        |
+| Parameter                     | Description                   | Default     |
+| ----------------------------- | ----------------------------- | ----------- |
+| `service.type`                | Keycloak service type         | `ClusterIP` |
+| `service.httpPort`            | Keycloak HTTP service port    | `8080`      |
+| `service.httpsPort`           | Keycloak HTTPS service port   | `8443`      |
+| `service.httpTargetPort`      | Keycloak HTTP container port  | `8080`      |
+| `service.httpsTargetPort`     | Keycloak HTTPS container port | `8443`      |
+| `service.annotations`         | Service annotations           | `{}`        |
+| `service.trafficDistribution` | Service traffic distribution  | `""`        |
 
 ### Ingress configuration
 
@@ -225,11 +226,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Node Selection
 
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
+| Parameter                   | Description                                    | Default |
+| --------------------------- | ---------------------------------------------- | ------- |
+| `nodeSelector`              | Node labels for pod assignment                 | `{}`    |
+| `tolerations`               | Toleration labels for pod assignment           | `[]`    |
+| `affinity`                  | Affinity settings for pod assignment           | `{}`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
 
 ### Service Account
 
@@ -522,21 +524,18 @@ kubectl get secret my-keycloak -o jsonpath="{.data.admin-password}" | base64 --d
 ### Common Issues
 
 1. **Pod fails to start with database connection errors**
-
    - Verify database connection parameters
    - Ensure the database is running and accessible
    - Check database credentials in secrets
    - Review pod logs: `kubectl logs <pod-name>`
 
 2. **Cannot access Keycloak via ingress**
-
    - Verify ingress configuration and annotations
    - Check if ingress controller is installed
    - Ensure DNS resolves to the correct IP
    - Check TLS certificate configuration
 
 3. **Admin login fails**
-
    - Verify admin password in the secret
    - Check if the admin user exists in the database
    - Review Keycloak logs for authentication errors
