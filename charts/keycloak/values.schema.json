@@ -313,6 +313,10 @@
         "annotations": {
           "type": "object",
           "description": "Service annotations"
+        },
+        "trafficDistribution": {
+          "type": "string",
+          "description": "Traffic distribution policy"
         }
       }
     },
@@ -530,6 +534,10 @@
     "affinity": {
       "type": "object",
       "description": "Affinity settings for pod assignment"
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "description": "Topology Spread Constraints for pod assignment"
     },
     "serviceAccount": {
       "type": "object",
