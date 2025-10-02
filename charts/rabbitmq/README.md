@@ -210,18 +210,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | Parameter                                                | Description                                       | Default   |
 | -------------------------------------------------------- | ------------------------------------------------- | --------- |
 | `podSecurityContext.fsGroup`                             | Group ID for the volumes of the pod               | `999`     |
-| `securityContext.allowPrivilegeEscalation`               | Enable container privilege escalation             | `false`   |
-| `securityContext.runAsNonRoot`                           | Configure the container to run as a non-root user | `true`    |
-| `securityContext.runAsUser`                              | User ID for the RabbitMQ container                | `999`     |
-| `securityContext.runAsGroup`                             | Group ID for the RabbitMQ container               | `999`     |
-| `securityContext.readOnlyRootFilesystem`                 | Mount container root filesystem as read-only      | `true`    |
-| `securityContext.capabilities.drop`                      | Linux capabilities to be dropped                  | `["ALL"]` |
-| `initContainer.securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `initContainer.securityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `initContainer.securityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`     |
-| `initContainer.securityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
-| `initContainer.securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
-| `initContainer.securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `containerSecurityContext.allowPrivilegeEscalation`      | Enable container privilege escalation             | `false`   |
+| `containerSecurityContext.runAsNonRoot`                  | Configure the container to run as a non-root user | `true`    |
+| `containerSecurityContext.runAsUser`                     | User ID for the RabbitMQ container                | `999`     |
+| `containerSecurityContext.runAsGroup`                    | Group ID for the RabbitMQ container               | `999`     |
+| `containerSecurityContext.readOnlyRootFilesystem`        | Mount container root filesystem as read-only      | `true`    |
+| `containerSecurityContext.capabilities.drop`             | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Liveness and readiness probes
 

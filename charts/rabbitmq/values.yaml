@@ -118,21 +118,6 @@ initContainer:
     tag: "1.37.0@sha256:d82f458899c9696cb26a7c02d5568f81c8c8223f8661bb2a7988b269c8b9051e"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
-  securityContext:
-    ## @param initContainer.securityContext.allowPrivilegeEscalation Enable container privilege escalation
-    allowPrivilegeEscalation: false
-    ## @param initContainer.securityContext.runAsNonRoot Configure the container to run as a non-root user
-    runAsNonRoot: true
-    ## @param initContainer.securityContext.runAsUser User ID for the RabbitMQ container
-    runAsUser: 999
-    ## @param initContainer.securityContext.runAsGroup Group ID for the RabbitMQ container
-    runAsGroup: 999
-    ## @param initContainer.securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
-    readOnlyRootFilesystem: true
-    ## @param initContainer.securityContext.capabilities.drop Linux capabilities to be dropped
-    capabilities:
-      drop:
-        - ALL
 
 ## @section Metrics configuration
 metrics:
@@ -218,18 +203,18 @@ tolerations: []
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the RabbitMQ container
+  ## @param containerSecurityContext.runAsUser User ID for the RabbitMQ container
   runAsUser: 999
-  ## @param securityContext.runAsGroup Group ID for the RabbitMQ container
+  ## @param containerSecurityContext.runAsGroup Group ID for the RabbitMQ container
   runAsGroup: 999
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: true
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL
