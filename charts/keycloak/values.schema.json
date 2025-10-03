@@ -87,6 +87,13 @@
       },
       "description": "Array of VolumeMount to add to the keycloak container"
     },
+    "extraInitContainers": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of initContainer to add to the keycloak pod"
+    },
     "podSecurityContext": {
       "type": "object",
       "properties": {
