@@ -130,6 +130,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.proxyProtocolEnabled`        | Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false) | `false`            |
 | `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
 | `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
+| `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
 
 ### Database Configuration
 

@@ -108,6 +108,8 @@ spec:
             - --features-disabled={{ join "," .Values.features.disabled }}
             {{- end }}
           env:
+            - name: KC_HTTP_RELATIVE_PATH
+              value: {{ .Values.keycloak.httpRelativePath | quote | default "/" }}
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloak.adminUser | quote }}
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
@@ -166,7 +168,7 @@ spec:
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
@@ -178,7 +180,7 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
@@ -190,7 +192,7 @@ spec:
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}

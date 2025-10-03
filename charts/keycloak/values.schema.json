@@ -191,6 +191,10 @@
         "production": {
           "type": "boolean",
           "description": "Enable production mode"
+        },
+        "httpRelativePath": {
+          "type": "string",
+          "description": "Set relative path for serving resources; must start with a /"
         }
       }
     },

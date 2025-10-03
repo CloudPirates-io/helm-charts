@@ -1,0 +1,17 @@
+suite: test service account
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: readiness probe should be original
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /realms/master
+  - it: readiness probe should include the httpRelativePath
+    set:
+      keycloak:
+        httpRelativePath: /auth
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /auth/realms/master

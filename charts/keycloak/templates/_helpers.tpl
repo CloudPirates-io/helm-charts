@@ -181,3 +181,14 @@ Return the database JDBC URL
 {{- end -}}
 {{- end -}}
 {{- end }}
+
+{{/*
+Return the url to use for probes
+*/}}
+{{- define "keycloak.probeUrl" -}}
+{{- if or (eq .Values.keycloak.httpRelativePath "") (eq .Values.keycloak.httpRelativePath "/") -}}
+{{- printf "/realms/master" -}}
+{{- else -}}
+{{- printf "%s/realms/master" .Values.keycloak.httpRelativePath -}}
+{{- end -}}
+{{- end }}
