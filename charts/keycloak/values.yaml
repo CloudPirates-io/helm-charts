@@ -92,6 +92,8 @@ keycloak:
   proxyTrustedAddresses: ""
   ## @param keycloak.production Enable production mode
   production: false
+  ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
+  httpRelativePath: ""
 
 ## @section Database Configuration
 database:
