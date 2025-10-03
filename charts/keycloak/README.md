@@ -99,6 +99,19 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
+### Extra volumes and volumes mount
+
+| Parameter           | Description                                           | Default |
+| ------------------- | ----------------------------------------------------- | ------- |
+| `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
+| `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
+
+### Extra init containers for Keycloak pod
+
+| Parameter             | Description                                           | Default |
+| --------------------- | ----------------------------------------------------- | ------- |
+| `extraInitContainers` | Array of initContainer to add to the keycloak pod     | `[]`    |
+
 ### Security
 
 | Parameter                                  | Description                                       | Default   |
