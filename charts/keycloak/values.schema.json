@@ -73,6 +73,20 @@
       "type": "object",
       "description": "Map of labels to add to the pods"
     },
+    "extraVolumes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of Volume to add to the keycloak pod"
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of VolumeMount to add to the keycloak container"
+    },
     "podSecurityContext": {
       "type": "object",
       "properties": {
