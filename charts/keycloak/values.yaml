@@ -38,6 +38,12 @@ podAnnotations: {}
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}
 
+## @section extra volumes and volumes mount
+## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
+extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
+extraVolumeMounts: []
+
 ## @section Security Context
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod

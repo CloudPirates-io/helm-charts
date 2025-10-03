@@ -220,6 +220,10 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
+            {{- if .Values.extraVolumeMounts }}
+              {{- toYaml .Values.extraVolumeMounts | nindent 12}}
+            {{- end }}
+
       volumes:
         {{- if .Values.persistence.enabled }}
         - name: data
@@ -237,6 +241,9 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
+          {{- if .Values.extraVolumes }}
+            {{- toYaml .Values.extraVolumes | nindent 8 }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
