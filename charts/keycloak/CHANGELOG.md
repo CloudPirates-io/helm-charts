@@ -61,3 +61,7 @@
 * Update CHANGELOG.md ([2178148](https://github.com/CloudPirates-io/helm-charts/commit/2178148))
 * Update CHANGELOG.md ([8d6710f](https://github.com/CloudPirates-io/helm-charts/commit/8d6710f))
 * chore: fix changelog ([bd9f1a8](https://github.com/CloudPirates-io/helm-charts/commit/bd9f1a8))
+=======
+## 0.2.0 (2025-10-03)
+
+* [keycloak] Add support for extra volumes, volumeMounts and initContainers ([#215](https://github.com/CloudPirates-io/helm-charts/pull/215))
