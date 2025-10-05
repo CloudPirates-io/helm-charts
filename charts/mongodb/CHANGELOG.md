@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.2.0 (2025-09-25)
+## 0.3.0 (2025-10-05)
 
-* [redis] return fqdn for sentinel master lookup ([#156](https://github.com/CloudPirates-io/helm-charts/pull/156))
+* [mariadb] use tpl to return existingConfigMap ([#217](https://github.com/CloudPirates-io/helm-charts/pull/217))
