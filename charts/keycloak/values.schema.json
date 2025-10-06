@@ -284,6 +284,19 @@
         }
       }
     },
+    "realm": {
+      "type": "object",
+      "properties": {
+        "import": {
+          "type": "boolean",
+          "description": "Enable import of realms from /opt/keycloak/data/import (production mode must be false)"
+        },
+        "configFile": {
+          "type": "string",
+          "description": "Json config for initial realm configuration, mounted in /opt/keycloak/data/import"
+        }
+      }
+    },
     "features": {
       "type": "object",
       "properties": {

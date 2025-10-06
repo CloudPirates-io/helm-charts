@@ -68,6 +68,9 @@ spec:
             - start
             {{- else }}
             - start-dev
+            {{- if .Values.realm.import }}
+            - --import-realm
+            {{- end }}
             {{- end }}
             {{- if .Values.keycloak.httpEnabled }}
             - --http-enabled=true
@@ -221,10 +224,14 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
+            {{- if .Values.realm.import }}
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
               {{- toYaml .Values.extraVolumeMounts | nindent 12}}
             {{- end }}
-
       volumes:
         {{- if .Values.persistence.enabled }}
         - name: data
@@ -245,9 +252,14 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
-          {{- if .Values.extraVolumes }}
-            {{- toYaml .Values.extraVolumes | nindent 8 }}
-          {{- end }}
+        {{- if .Values.realm.import }}
+        - name: realm-config
+          configMap:
+            name: {{ include "keycloak.fullname" . }}-realm
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+          {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

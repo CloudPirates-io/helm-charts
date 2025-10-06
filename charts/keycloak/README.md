@@ -167,6 +167,13 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `cache.stack`      | Cache stack (local, ispn, default) | `local` |
 | `cache.configFile` | Custom cache configuration file    | `""`    |
 
+### Realm Configuration
+
+| Parameter          | Description                                                                            | Default |
+| ------------------ | -------------------------------------------------------------------------------------- | ------- |
+| `realm.import`     | Enable import of realms from /opt/keycloak/data/import (production mode must be false) | `false` |
+| `realm.configFile` | Json config for initial realm configuration, mounted in /opt/keycloak/data/import      | `""`    |
+
 ### Features Configuration
 
 | Parameter           | Description               | Default |
@@ -459,6 +466,19 @@ kubectl create secret generic keycloak-db-credentials \
   --from-literal=db-password=your-db-password \
   --from-literal=db-username=keycloak
 ```
+
+### Realm import
+
+```yaml
+realm:
+  import: true
+  configFile: |
+    {
+      "realm": "my-realm",
+      "enabled": true
+    }
+```
+
 
 ### High Availability Setup
 
