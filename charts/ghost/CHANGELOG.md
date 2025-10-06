@@ -1,8 +1,16 @@
 # Changelog
 
-## 0.2.1 (2025-10-01)
+## 0.2.3 (2025-10-06)
 
-* [ghost] switch helm-chart icon to a new svg ([#199](https://github.com/CloudPirates-io/helm-charts/pull/199))
+* [mariadb] chore(deps): update mariadb:12.0.2 Docker digest to 03a03a6 ([#208](https://github.com/CloudPirates-io/helm-charts/pull/208))
+
+## <small>0.2.2 (2025-10-01)</small>
+
+* use png as icon (#200) ([359e88f](https://github.com/CloudPirates-io/helm-charts/commit/359e88f)), closes [#200](https://github.com/CloudPirates-io/helm-charts/issues/200)
+
+## <small>0.2.1 (2025-10-01)</small>
+
+* switch helm-chart icon to a new svg (#199) ([44e4d0d](https://github.com/CloudPirates-io/helm-charts/commit/44e4d0d)), closes [#199](https://github.com/CloudPirates-io/helm-charts/issues/199)
 
 ## 0.2.0 (2025-10-01)
 
