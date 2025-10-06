@@ -207,10 +207,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            {{- if .Values.persistence.enabled }}
             - name: data
               mountPath: /opt/keycloak/data
-            {{- end }}
             {{- if .Values.cache.configFile }}
             - name: cache-config
               mountPath: /opt/keycloak/conf/cache-ispn.xml
@@ -232,6 +230,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: {{ default (include "keycloak.fullname" .) .Values.persistence.existingClaim }}
+        {{- else }}
+        - name: data
+          emptyDir: {}
         {{- end }}
         {{- if .Values.cache.configFile }}
         - name: cache-config
