@@ -484,7 +484,9 @@ spec:
     whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
   {{- end }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1	
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         {{- with .Values.persistence.annotations }}
         annotations:
