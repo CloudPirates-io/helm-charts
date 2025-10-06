@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.5.1 (2025-10-06)
+## 0.5.2 (2025-10-06)
 
-* [redis] chore(deps): update docker.io/redis:8.2.1 Docker digest to 5fa2edb ([#187](https://github.com/CloudPirates-io/helm-charts/pull/187))
+* [redis] chore(deps): update redis:8.2.1 Docker digest to 5fa2edb ([#188](https://github.com/CloudPirates-io/helm-charts/pull/188))
+
+## <small>0.5.1 (2025-10-06)</small>
+
+* chore(deps): update docker.io/redis:8.2.1 Docker digest to 5fa2edb (#187) ([fe21dc2](https://github.com/CloudPirates-io/helm-charts/commit/fe21dc2)), closes [#187](https://github.com/CloudPirates-io/helm-charts/issues/187)
 
 ## 0.5.0 (2025-10-01)
 
