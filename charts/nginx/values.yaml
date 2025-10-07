@@ -231,6 +231,72 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the Nginx container
 extraVolumeMounts: []
 
+## @section Nginx metrics parameters
+## Prometheus metrics configuration
+## @see https://nginx.org/en/docs/http/ngx_http_stub_status_module.html#stub_status
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose Nginx metrics
+  enabled: false
+  ## @param metrics.image.registry Nginx exporter image registry
+  ## @param metrics.image.repository Nginx exporter image repository
+  ## @param metrics.image.tag Nginx exporter image tag
+  ## @param metrics.image.pullPolicy Nginx exporter image pull policy
+  image:
+    registry: docker.io
+    repository: nginx/nginx-prometheus-exporter
+    tag: "1.4@sha256:6edfb73afd11f2d83ea4e8007f5068c3ffaa38078a6b0ad1339e5bd2f637aacd"
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources:
+    limits:
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  ## @param metrics.extraArgs Extra arguments for nginx exporter, for example:
+  ## extraArgs:
+  ##   - --log.level=info 
+  ##   - --log.format=logfmt
+  extraArgs: []
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.type Metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Metrics service port
+    port: 9113
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.loadBalancerIP Load balancer IP if metrics service type is `LoadBalancer`
+    loadBalancerIP: ""
+    ## @param metrics.service.loadBalancerSourceRanges Addresses that are allowed when metrics service is LoadBalancer
+    loadBalancerSourceRanges: []
+    ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
+    clusterIP: ""
+    ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
+    nodePort: ""
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 

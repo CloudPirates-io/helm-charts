@@ -306,6 +306,46 @@ readinessProbe:
 | `ingress.tls`         | TLS configuration for the Ingress                                             | `[]`                                                                                            |
 
 
+### Metrics Parameters
+
+| Parameter                       | Description                                                        | Default   |
+|----------------------------------|--------------------------------------------------------------------|-----------|
+| `metrics.enabled`                | Start a sidecar Prometheus exporter to expose Nginx metrics        | `false`   |
+| `metrics.image.registry`         | Nginx exporter image registry                                      | `docker.io` |
+| `metrics.image.repository`       | Nginx exporter image repository                                    | `nginx/nginx-prometheus-exporter` |
+| `metrics.image.tag`              | Nginx exporter image tag                                           | `"1.4@sha256:..."` |
+| `metrics.image.pullPolicy`       | Nginx exporter image pull policy                                   | `Always`  |
+| `metrics.resources.limits.memory`| Memory limit for metrics container                                 | `64Mi`    |
+| `metrics.resources.requests.cpu` | CPU request for metrics container                                  | `50m`     |
+| `metrics.resources.requests.memory`| Memory request for metrics container                              | `64Mi`    |
+| `metrics.extraArgs`              | Extra arguments for nginx exporter                                 | `[]`      |
+| `metrics.service.type`           | Metrics service type                                               | `ClusterIP` |
+| `metrics.service.port`           | Metrics service port                                               | `9113`    |
+| `metrics.service.annotations`    | Additional custom annotations for Metrics service                  | `{}`      |
+| `metrics.service.loadBalancerIP` | Load balancer IP if metrics service type is `LoadBalancer`         | `""`      |
+| `metrics.service.loadBalancerSourceRanges` | Allowed addresses for LoadBalancer metrics service         | `[]`      |
+| `metrics.service.clusterIP`      | Static clusterIP or None for headless metrics service              | `""`      |
+| `metrics.service.nodePort`       | NodePort value for LoadBalancer/NodePort metrics service types     | `""`      |
+| `metrics.serviceMonitor.enabled` | Create ServiceMonitor resource(s) for PrometheusOperator           | `false`   |
+| `metrics.serviceMonitor.namespace`| Namespace for ServiceMonitor resource(s)                          | `""`      |
+| `metrics.serviceMonitor.interval`| Interval for scraping metrics                                      | `30s`     |
+| `metrics.serviceMonitor.scrapeTimeout`| Timeout for scraping metrics                                 | `""`      |
+| `metrics.serviceMonitor.relabelings`| Additional relabeling of metrics                              | `[]`      |
+| `metrics.serviceMonitor.metricRelabelings`| Additional metric relabeling of metrics                    | `[]`      |
+| `metrics.serviceMonitor.honorLabels`| Honor metrics labels                                         | `false`   |
+| `metrics.serviceMonitor.selector`| Prometheus instance selector labels                               | `{}`      |
+| `metrics.serviceMonitor.annotations`| Additional annotations for ServiceMonitor                     | `{}`      |
+| `metrics.serviceMonitor.namespaceSelector`| Namespace selector for ServiceMonitor                      | `{}`      |
+
+**Note:**  
+To enable metrics, set `metrics.enabled: true` and ensure your Nginx configuration includes a stub status endpoint, e.g.:
+```nginx
+location /stub_status {
+  stub_status on;
+}
+```
+
+
 ### Extra Configuration Parameters
 
 | Parameter           | Description                                                                         | Default |

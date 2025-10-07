@@ -202,6 +202,49 @@ spec:
             {{- toYaml .Values.cloneStaticSiteFromGit.extraVolumeMounts | nindent 12 }}
             {{- end }}
         {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "nginx.metrics.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.metrics.image) }}
+          command:
+            - nginx-prometheus-exporter
+            - --nginx.scrape-uri=http://localhost:8080/stub_status
+            {{- range .Values.metrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          args:
+            {{- if .Values.metrics.extraArgs }}
+            {{- range .Values.metrics.extraArgs }}
+            {{- if not (hasPrefix "--" .) }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 9113
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+        {{- end }}
       volumes:
         - name: emptydir
           emptyDir: {}
