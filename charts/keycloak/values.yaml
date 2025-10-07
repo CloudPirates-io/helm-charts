@@ -59,18 +59,18 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the Keycloak container
+  ## @param containerSecurityContext.runAsUser User ID for the Keycloak container
   runAsUser: 1001
-  ## @param securityContext.runAsGroup Group ID for the Keycloak container
+  ## @param containerSecurityContext.runAsGroup Group ID for the Keycloak container
   runAsGroup: 1001
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: false
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL
