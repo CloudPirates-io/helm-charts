@@ -1,0 +1,16 @@
+architecture: replication
+replicaCount: 3
+
+sentinel:
+  enabled: true
+  masterName: redis-ipv6-test
+  quorum: 2
+
+auth:
+  enabled: false
+
+persistence:
+  enabled: false
+
+# Test IPv6 mode
+ipFamily: ipv6
