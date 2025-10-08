@@ -4,13 +4,14 @@
     "config:recommended"
   ],
   "enabledManagers": [
-    "regex",
+    "custom.regex",
     "helmv3"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": [
-        "^charts/.+/values\\.yaml$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^charts/.+/values\\.yaml$/"
       ],
       "matchStrings": [
         "repository:\\s*(?<depName>[^\\s]+)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
@@ -22,7 +23,7 @@
   "packageRules": [
     {
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "matchUpdateTypes": [
         "minor",
