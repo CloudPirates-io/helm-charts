@@ -56,6 +56,19 @@
         "**/clusterpirate"
       ],
       "enabled": false
+    },
+    {
+      "matchDatasources": [
+        "helm"
+      ],
+      "matchPackageNames": [
+        "common",
+        "valkey"
+      ],
+      "matchSourceUrls": [
+        "oci://registry-1.docker.io/cloudpirates"
+      ],
+      "enabled": false
     }
   ]
 }
