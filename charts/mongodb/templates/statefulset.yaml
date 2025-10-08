@@ -31,7 +31,8 @@ spec:
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           {{- if or .Values.config.content .Values.config.existingConfigmap }}
           args:
-            - -f {{- include "mongodb.configFullName" . }}
+            - "-f"
+            - {{ include "mongodb.configFullName" . | quote }}
           {{- end }}
           ports:
             - name: mongodb
@@ -133,6 +134,60 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
+{{- if .Values.metrics.enabled }}
+        - name: metrics
+          securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
+          image: {{ include "mongodb.metrics.image" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          args:
+            - --mongodb.uri={{ include "mongodb.metrics.connectionString" . }}
+            - --web.listen-address=0.0.0.0:9216
+            - --collect-all
+            {{- range .Values.metrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- range .Values.metrics.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http-metrics
+              containerPort: 9216
+              protocol: TCP
+          {{- if .Values.metrics.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.metrics.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.metrics.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.metrics.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.metrics.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.metrics.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.metrics.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.metrics.readinessProbe.successThreshold }}
+          {{- end }}
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+{{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
         - name: data

@@ -82,3 +82,49 @@ Return the proper Docker Image Registry Secret Names
 {{- printf "%s/mongod.conf" .Values.config.mountPath }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return the proper MongoDB Exporter image name
+*/}}
+{{- define "mongodb.metrics.image" -}}
+{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
+Return the MongoDB connection string for metrics
+*/}}
+{{- define "mongodb.metrics.connectionString" -}}
+{{- if .Values.auth.enabled -}}
+mongodb://$(MONGO_METRICS_USERNAME):$(MONGO_METRICS_PASSWORD)@localhost:27017/admin
+{{- else -}}
+mongodb://localhost:27017
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the secret name for MongoDB metrics user
+*/}}
+{{- define "mongodb.metrics.secretName" -}}
+{{- if .Values.auth.existingSecret }}
+{{- .Values.auth.existingSecret }}
+{{- else }}
+{{- include "mongodb.fullname" . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return metrics service name
+*/}}
+{{- define "mongodb.metrics.fullname" -}}
+{{- printf "%s-metrics" (include "mongodb.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Return ServiceMonitor labels
+*/}}
+{{- define "mongodb.metrics.serviceMonitor.labels" -}}
+{{- include "mongodb.labels" . }}
+{{- with .Values.metrics.serviceMonitor.additionalLabels }}
+{{- toYaml . }}
+{{- end }}
+{{- end -}}

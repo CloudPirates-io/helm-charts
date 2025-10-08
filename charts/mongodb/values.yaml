@@ -162,3 +162,110 @@ extraVolumeMounts: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+## @section Network Policy parameters
+networkPolicy:
+  ## @param networkPolicy.enabled Enable NetworkPolicy for MongoDB and metrics
+  enabled: false
+  ## @param networkPolicy.allowedSources List of allowed sources for network policy
+  allowedSources: []
+  #  - namespaceSelector:
+  #      matchLabels:
+  #        monitoring: enabled
+  #  - podSelector:
+  #      matchLabels:
+  #        app: prometheus
+
+## @section Metrics parameters
+metrics:
+  ## @param metrics.enabled Enable metrics collection
+  enabled: false
+  ## @param metrics.image.registry MongoDB Exporter image registry
+  ## @param metrics.image.repository MongoDB Exporter image repository
+  ## @param metrics.image.tag MongoDB Exporter image tag
+  ## @param metrics.image.pullPolicy MongoDB Exporter image pull policy
+  image:
+    registry: docker.io
+    repository: percona/mongodb_exporter
+    tag: "0.47.1"
+    pullPolicy: IfNotPresent
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  ## @param metrics.containerSecurityContext Security context for metrics container
+  containerSecurityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+  ## @section Metrics service parameters
+  service:
+    ## @param metrics.service.type Metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Metrics service port
+    port: 9216
+    ## @param metrics.service.targetPort Metrics service target port
+    targetPort: http-metrics
+    ## @param metrics.service.annotations Additional annotations for metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional labels for metrics service
+    labels: {}
+  ## @section ServiceMonitor parameters
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which ServiceMonitor is created
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.additionalLabels Additional labels for ServiceMonitor
+    additionalLabels: {}
+    ## @param metrics.serviceMonitor.annotations Additional annotations for ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.relabelings RelabelConfigs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Specify honorLabels parameter to add the scrape endpoint
+    honorLabels: false
+    ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in prometheus
+    jobLabel: ""
+  ## @param metrics.livenessProbe.enabled Enable liveness probe for metrics container
+  ## @param metrics.livenessProbe.initialDelaySeconds Initial delay before starting liveness probes
+  ## @param metrics.livenessProbe.periodSeconds How often to perform the liveness probe
+  ## @param metrics.livenessProbe.timeoutSeconds Timeout for each liveness probe attempt
+  ## @param metrics.livenessProbe.failureThreshold Number of failures before container is restarted
+  ## @param metrics.livenessProbe.successThreshold Number of successes to mark liveness probe as successful
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param metrics.readinessProbe.enabled Enable readiness probe for metrics container
+  ## @param metrics.readinessProbe.initialDelaySeconds Initial delay before starting readiness probes
+  ## @param metrics.readinessProbe.periodSeconds How often to perform the readiness probe
+  ## @param metrics.readinessProbe.timeoutSeconds Timeout for each readiness probe attempt
+  ## @param metrics.readinessProbe.failureThreshold Number of failures before container is marked unready
+  ## @param metrics.readinessProbe.successThreshold Number of successes to mark readiness probe as successful
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param metrics.extraEnv Additional environment variables for metrics container
+  extraEnv: []
+  ## @param metrics.extraArgs Additional command line arguments for MongoDB Exporter
+  extraArgs: []
