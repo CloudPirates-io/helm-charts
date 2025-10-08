@@ -4,7 +4,8 @@
     "config:recommended"
   ],
   "enabledManagers": [
-    "regex"
+    "regex",
+    "helmv3"
   ],
   "regexManagers": [
     {
@@ -12,7 +13,7 @@
         "^charts/.+/values\\.yaml$"
       ],
       "matchStrings": [
-        "(?<depName>.*?)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)@(?<currentDigest>sha256:[a-f0-9]{64})['\"]?"
+        "repository:\\s*(?<depName>[^\\s]+)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
@@ -37,6 +38,16 @@
       ],
       "commitMessageTopic": "{{{depName}}}",
       "commitMessagePrefix": "[{{{replace 'docker.io/' '' depName}}}]",
+      "automerge": false
+    },
+    {
+      "matchManagers": [
+        "helmv3"
+      ],
+      "labels": [
+        "dependencies",
+        "renovate"
+      ],
       "automerge": false
     },
     {
