@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.2.0 (2025-10-06)
+## 0.3.0 (2025-10-08)
 
-* [keycloak] Add support for extra volumes, volumeMounts and initContainers ([#215](https://github.com/CloudPirates-io/helm-charts/pull/215))
+* [mongodb] feat: add metrics exporter ([#243](https://github.com/CloudPirates-io/helm-charts/pull/243))
