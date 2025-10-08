@@ -1,8 +1,17 @@
 # Changelog
 
-## 0.1.11 (2025-10-01)
+## 0.1.13 (2025-10-08)
 
-* [nginx] update containerport documentation ([#198](https://github.com/CloudPirates-io/helm-charts/pull/198))
+* [nginx/nginx-prometheus-exporter] Update nginx/nginx-prometheus-exporter to v1.5 ([#234](https://github.com/CloudPirates-io/helm-charts/pull/234))
+
+## <small>0.1.12 (2025-10-07)</small>
+
+* Add prometheus nginx metrics exporter (#224) ([5bf615a](https://github.com/CloudPirates-io/helm-charts/commit/5bf615a)), closes [#224](https://github.com/CloudPirates-io/helm-charts/issues/224)
+
+## <small>0.1.11 (2025-10-01)</small>
+
+* Changed README.md due to bug (wrong description) (#197) ([84fd116](https://github.com/CloudPirates-io/helm-charts/commit/84fd116)), closes [#197](https://github.com/CloudPirates-io/helm-charts/issues/197)
+* update containerport documentation (#198) ([f20d6d4](https://github.com/CloudPirates-io/helm-charts/commit/f20d6d4)), closes [#198](https://github.com/CloudPirates-io/helm-charts/issues/198)
 
 ## <small>0.1.10 (2025-09-30)</small>
 
