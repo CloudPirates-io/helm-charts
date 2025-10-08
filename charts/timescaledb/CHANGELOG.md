@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.3.0 (2025-10-05)
+## 0.3.0 (2025-10-08)
 
-* [mariadb] use tpl to return existingConfigMap ([#217](https://github.com/CloudPirates-io/helm-charts/pull/217))
+* [mongodb] feat: add metrics exporter ([#243](https://github.com/CloudPirates-io/helm-charts/pull/243))
