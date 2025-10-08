@@ -190,6 +190,20 @@ persistence:
   ## @param mountPath The path where to mount the data volume
   mountPath: /mnt/data
 
+serviceAccount:
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount for MinIO
+  create: true
+  ## @param serviceAccount.name Name of the created ServiceAccount
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Enable/disable auto mounting of the service account token
+  ##
+  automountServiceAccountToken: false
+  ## @param serviceAccount.annotations Custom annotations for MinIO serviceAccount
+  ##
+  annotations: {}
+
 ## @section Liveness and readiness probes
 livenessProbe:
   ## @param livenessProbe.enabled Enable livenessProbe on MinIO containers
