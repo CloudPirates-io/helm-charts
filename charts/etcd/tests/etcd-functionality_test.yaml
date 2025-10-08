@@ -1,0 +1,258 @@
+suite: test etcd functionality
+templates:
+  - statefulset.yaml
+  - service.yaml
+  - poddisruptionbudget.yaml
+  - servicemonitor.yaml
+  - networkpolicy.yaml
+set:
+  image:
+    tag: v3.6.0-alpha.0
+tests:
+  # Replica count validation
+  - it: should fail with even replica count
+    template: statefulset.yaml
+    set:
+      replicaCount: 2
+    asserts:
+      - failedTemplate: {}
+
+  - it: should succeed with odd replica count
+    template: statefulset.yaml
+    set:
+      replicaCount: 5
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  # etcd configuration
+  - it: should configure initial cluster state
+    template: statefulset.yaml
+    set:
+      config:
+        initialClusterState: "existing"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--initial-cluster-state=existing"
+
+  - it: should configure heartbeat and election timeout
+    template: statefulset.yaml
+    set:
+      config:
+        heartbeatInterval: 200
+        electionTimeout: 2000
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--heartbeat-interval=200"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--election-timeout=2000"
+
+  - it: should configure listen IPs
+    template: statefulset.yaml
+    set:
+      config:
+        listenPeerIp: "127.0.0.1"
+        listenClientIp: "127.0.0.1"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-peer-urls=http://127.0.0.1:2380"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-client-urls=http://127.0.0.1:2379"
+
+  - it: should add extraArgs
+    template: statefulset.yaml
+    set:
+      extraArgs:
+        - "--max-txn-ops=128"
+        - "--grpc-keepalive-min-time=5s"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--max-txn-ops=128"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--grpc-keepalive-min-time=5s"
+
+  # TLS configuration
+  - it: should enable client TLS
+    template: statefulset.yaml
+    set:
+      auth:
+        enabled: true
+        existingSecret: "etcd-client-certs"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--client-cert-auth"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-client-urls=https://0.0.0.0:2379"
+
+  - it: should enable peer TLS
+    template: statefulset.yaml
+    set:
+      auth:
+        peer:
+          enabled: true
+          existingSecret: "etcd-peer-certs"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--peer-client-cert-auth"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-peer-urls=https://0.0.0.0:2380"
+
+  # Metrics configuration
+  - it: should expose metrics port when enabled
+    template: statefulset.yaml
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-metrics-urls=http://0.0.0.0:2381"
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: metrics
+            containerPort: 2381
+            protocol: TCP
+
+  - it: should not expose metrics port when disabled
+    template: statefulset.yaml
+    set:
+      metrics:
+        enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: "--listen-metrics-urls=http://0.0.0.0:2381"
+
+  - it: should create ServiceMonitor when enabled
+    template: servicemonitor.yaml
+    set:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ServiceMonitor
+
+  - it: should not create ServiceMonitor when disabled
+    template: servicemonitor.yaml
+    set:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Service configuration
+  - it: should add service annotations
+    template: service.yaml
+    set:
+      service:
+        annotations:
+          key1: "value1"
+          key2: "value2"
+    asserts:
+      - equal:
+          path: metadata.annotations.key1
+          value: value1
+        documentIndex: 0
+      - equal:
+          path: metadata.annotations.key2
+          value: value2
+        documentIndex: 0
+
+  - it: should expose metrics port in service
+    template: service.yaml
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: metrics
+            port: 2381
+            targetPort: metrics
+            protocol: TCP
+        documentIndex: 0
+
+  # PodDisruptionBudget
+  - it: should create PDB when enabled
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+
+  - it: should not create PDB when disabled
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set minAvailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 2
+
+  # NetworkPolicy
+  - it: should create NetworkPolicy when enabled
+    template: networkpolicy.yaml
+    set:
+      networkPolicy:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: NetworkPolicy
+
+  - it: should not create NetworkPolicy when disabled
+    template: networkpolicy.yaml
+    set:
+      networkPolicy:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # UpdateStrategy
+  - it: should configure update strategy
+    template: statefulset.yaml
+    set:
+      updateStrategy:
+        type: "OnDelete"
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: OnDelete
