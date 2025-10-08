@@ -61,11 +61,11 @@
       "matchDatasources": [
         "helm"
       ],
-      "matchPackagePatterns": [
-        "^cloudpirates/common$",
-        "^cloudpirates/valkey$"
-      ],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^cloudpirates/common$/",
+        "/^cloudpirates/valkey$/"
+      ]
     }
   ]
 }
