@@ -31,10 +31,10 @@ spec:
 {{- with (include "keycloak.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
         - name: copy-quarkus-lib
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command: ["sh", "-c", "cp -r /opt/keycloak/lib/quarkus/* /shared-quarkus/"]
@@ -43,21 +43,25 @@ spec:
               mountPath: /shared-quarkus
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForPostgres.image }}
           command: ["sh", "-c", "until pg_isready -h {{ .Release.Name }}-postgres -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
         {{- else if .Values.mariadb.enabled }}
         - name: wait-for-mariadb
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForMariadb.image }}
           command: ["sh", "-c", "until mysqladmin ping -h {{ .Release.Name }}-mariadb -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
         {{- end }}
+        {{- if .Values.extraInitContainers }}
+          {{- toYaml .Values.extraInitContainers | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command:
-            - /opt/keycloak/bin/kc.sh
+            - {{ .Values.image.command }}
           args:
             {{- if .Values.keycloak.production }}
             - start
@@ -77,8 +81,14 @@ spec:
             {{- if .Values.keycloak.hostnameBackchannel }}
             - --hostname-backchannel={{ include "keycloak.hostnameBackchannel" . }}
             {{- end }}
-            {{- if ne .Values.keycloak.proxy "none" }}
-            - --proxy={{ .Values.keycloak.proxy }}
+            {{- if .Values.keycloak.proxyHeaders }}
+            - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
+            {{- end }}
+            {{- if .Values.keycloak.proxyProtocolEnabled }}
+            - --proxy-protocol-enabled={{ .Values.keycloak.proxyProtocolEnabled }}
+            {{- end }}
+            {{- if .Values.keycloak.proxyTrustedAddresses }}
+            - --proxy-trusted-addresses={{ .Values.keycloak.proxyTrustedAddresses }}
             {{- end }}
             {{- if .Values.keycloak.httpPort }}
             - --http-port={{ .Values.keycloak.httpPort }}
@@ -100,9 +110,11 @@ spec:
             - --features-disabled={{ join "," .Values.features.disabled }}
             {{- end }}
           env:
-            - name: KEYCLOAK_ADMIN
+            - name: KC_HTTP_RELATIVE_PATH
+              value: {{ .Values.keycloak.httpRelativePath | quote | default "/" }}
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloak.adminUser | quote }}
-            - name: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "keycloak.secretName" . }}
@@ -141,6 +153,11 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+          {{- if .Values.extraEnvVarsSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.extraEnvVarsSecret }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.keycloak.httpPort }}
@@ -153,7 +170,7 @@ spec:
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
@@ -165,7 +182,7 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
@@ -177,7 +194,7 @@ spec:
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
-              path: /realms/master
+              path: {{ include "keycloak.probeUrl" . }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
@@ -189,10 +206,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            {{- if .Values.persistence.enabled }}
             - name: data
               mountPath: /opt/keycloak/data
-            {{- end }}
             {{- if .Values.cache.configFile }}
             - name: cache-config
               mountPath: /opt/keycloak/conf/cache-ispn.xml
@@ -205,11 +220,18 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
+            {{- if .Values.extraVolumeMounts }}
+              {{- toYaml .Values.extraVolumeMounts | nindent 12}}
+            {{- end }}
+
       volumes:
         {{- if .Values.persistence.enabled }}
         - name: data
           persistentVolumeClaim:
             claimName: {{ default (include "keycloak.fullname" .) .Values.persistence.existingClaim }}
+        {{- else }}
+        - name: data
+          emptyDir: {}
         {{- end }}
         {{- if .Values.cache.configFile }}
         - name: cache-config
@@ -222,6 +244,9 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
+          {{- if .Values.extraVolumes }}
+            {{- toYaml .Values.extraVolumes | nindent 8 }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -232,5 +257,9 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}

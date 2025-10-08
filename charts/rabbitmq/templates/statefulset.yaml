@@ -4,15 +4,15 @@ metadata:
   name: {{ include "rabbitmq.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "rabbitmq.labels" . | nindent 4 }}
-  {{- with (include "rabbitmq.annotations" .) }}
+    {{- toYaml (merge (include "rabbitmq.labels" . | fromYaml) .Values.statefulsetLabels) | nindent 4 }}
+  {{- if or (include "rabbitmq.annotations" .) .Values.statefulsetAnnotations }}
   annotations:
-    {{- . | nindent 4 }}
+    {{- toYaml (merge (include "rabbitmq.annotations" . | fromYaml) .Values.statefulsetAnnotations) | nindent 4 }}
   {{- end }}
 spec:
   serviceName: {{ include "rabbitmq.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
-  podManagementPolicy: OrderedReady
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
   selector:
     matchLabels:
       {{- include "rabbitmq.selectorLabels" . | nindent 6 }}
@@ -20,32 +20,29 @@ spec:
     metadata:
       labels:
         {{- include "rabbitmq.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       {{- with (include "rabbitmq.imagePullSecrets" .) }}
       {{ . | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
-      {{- if .Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- end }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       {{- if or .Values.auth.enabled .Values.installPlugins .Values.customScripts.initContainers }}
       initContainers:
         {{- if .Values.auth.enabled }}
         - name: init-erlang-cookie
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
-          {{- if .Values.initContainer.securityContext }}
-          securityContext:
-            {{- toYaml .Values.initContainer.securityContext | nindent 12 }}
-          {{- end }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
             - |
               echo "$RABBITMQ_ERLANG_COOKIE" > /var/lib/rabbitmq/.erlang.cookie
               chmod 400 /var/lib/rabbitmq/.erlang.cookie
-              chown {{ .Values.securityContext.runAsUser | default 999 }}:{{ .Values.securityContext.runAsGroup | default 999 }} /var/lib/rabbitmq/.erlang.cookie
+              chown $(id -u):$(id -g) /var/lib/rabbitmq/.erlang.cookie
           env:
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
@@ -60,10 +57,7 @@ spec:
         - name: download-plugins
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
-          {{- if .Values.initContainer.securityContext }}
-          securityContext:
-            {{- toYaml .Values.initContainer.securityContext | nindent 12 }}
-          {{- end }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
@@ -88,10 +82,7 @@ spec:
         - name: copy-plugins
           image: {{ include "rabbitmq.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if .Values.initContainer.securityContext }}
-          securityContext:
-            {{- toYaml .Values.initContainer.securityContext | nindent 12 }}
-          {{- end }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
@@ -109,10 +100,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          {{- if .Values.securityContext }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          {{- end }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rabbitmq.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           {{- if .Values.customScripts.postStart.enabled }}
@@ -246,7 +234,9 @@ spec:
       {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1	
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         {{- with .Values.persistence.annotations }}
         annotations:
@@ -263,4 +253,9 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size | quote }}
+  {{- end }}
+  {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
+    whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
   {{- end }}

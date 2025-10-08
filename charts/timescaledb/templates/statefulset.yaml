@@ -29,12 +29,10 @@ spec:
 {{- with (include "timescaledb.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "timescaledb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:

@@ -22,7 +22,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.1@sha256:acb90ced0bd769b7c04cb4c32c4494ba7b3e0ee068bdbfff0eeb0d31c2a21078"
+  tag: "8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -34,6 +34,12 @@ architecture: standalone
 ## When using Sentinel, this is the total number of Redis instances (including the initial master)
 ## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
 replicaCount: 3
+
+## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
+## auto: Uses the first IP returned by hostname -i (default)
+## ipv4: Forces IPv4 address selection
+## ipv6: Forces IPv6 address selection
+ipFamily: auto
 
 service:
   ## @param service.type Kubernetes service type
@@ -79,6 +85,15 @@ persistence:
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
 
+## @section Persistent Volume Claim Retention Policy
+persistentVolumeClaimRetentionPolicy:
+  ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the Statefulset
+  enabled: false
+  ## @param persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  whenScaled: Retain
+  ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  whenDeleted: Retain
+
 ## @param resources Resource limits and requests for Redis pod
 resources:
   limits:
@@ -98,6 +113,9 @@ tolerations: []
 
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
 
 containerSecurityContext:
   ## @param securityContext.runAsUser User ID to run the container
@@ -161,7 +179,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.1@sha256:acb90ced0bd769b7c04cb4c32c4494ba7b3e0ee068bdbfff0eeb0d31c2a21078"
+    tag: "8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
@@ -175,6 +193,8 @@ sentinel:
   parallelSyncs: 1
   ## @param sentinel.port Sentinel port
   port: 26379
+  ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
+  extraVolumeMounts: []
   service:
     ## @param sentinel.service.type Kubernetes service type for Sentinel
     type: ClusterIP
@@ -197,6 +217,71 @@ initContainer:
     requests:
       cpu: 25m
       memory: 64Mi
+
+## @section Redis metrics parameters
+## Prometheus metrics configuration
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose Redis metrics
+  enabled: false
+  ## @param metrics.image.registry Redis exporter image registry
+  ## @param metrics.image.repository Redis exporter image repository
+  ## @param metrics.image.tag Redis exporter image tag
+  ## @param metrics.image.pullPolicy Redis exporter image pull policy
+  image:
+    registry: docker.io
+    repository: oliver006/redis_exporter
+    tag: "v1.78.0@sha256:043d380adf3b23c9f73a986d820e79491975c104fe0ce6ecb8639a19914654fd"
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources:
+    limits:
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  ## @param metrics.extraArgs Extra arguments for redis exporter, for example:
+  ## extraArgs:
+  ##   - --redis.addr=redis://localhost:6379
+  ##   - --web.listen-address=0.0.0.0:9121
+  extraArgs: []
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.type Metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Metrics service port
+    port: 9121
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.loadBalancerIP Load balancer IP if metrics service type is `LoadBalancer`
+    loadBalancerIP: ""
+    ## @param metrics.service.loadBalancerSourceRanges Addresses that are allowed when metrics service is LoadBalancer
+    loadBalancerSourceRanges: []
+    ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
+    clusterIP: ""
+    ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
+    nodePort: ""
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []

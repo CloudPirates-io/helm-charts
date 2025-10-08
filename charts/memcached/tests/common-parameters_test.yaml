@@ -172,3 +172,12 @@ tests:
       - equal:
           path: spec.template.spec.imagePullSecrets[0].name
           value: global-secret
+
+  - it: should render if config.verbosity is set
+    set:
+      config:
+        verbosity: 2
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "-vv"

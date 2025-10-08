@@ -24,3 +24,4 @@ spec:
     {{- end }}
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}
+  trafficDistribution: {{ .Values.service.trafficDistribution }}

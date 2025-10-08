@@ -5,9 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rabbitmq.labels" . | nindent 4 }}
-  {{- with (include "rabbitmq.annotations" .) }}
+  {{- if or (include "rabbitmq.annotations" .) .Values.service.annotationsHeadless }}
   annotations:
-    {{- . | nindent 4 }}
+    {{- toYaml (merge (include "rabbitmq.annotations" . | fromYaml) .Values.service.annotationsHeadless) | nindent 4 }}
   {{- end }}
 spec:
   clusterIP: None

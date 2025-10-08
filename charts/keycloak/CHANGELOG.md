@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.1.1 (2025-09-19)
+## 0.2.0 (2025-10-06)
 
-* [keycloak] add readme documentation and values.schema.json ([#127](https://github.com/CloudPirates-io/helm-charts/pull/127))
+* [keycloak] Add support for extra volumes, volumeMounts and initContainers ([#215](https://github.com/CloudPirates-io/helm-charts/pull/215))

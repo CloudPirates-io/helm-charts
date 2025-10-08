@@ -22,7 +22,7 @@ image:
   ## @param image.repository TimescaleDB image repository
   repository: timescale/timescaledb
   ## @param image.tag TimescaleDB image tag (immutable tags are recommended)
-  tag: "2.22.0-pg17@sha256:ddbce8b06206c2b16e1f5797222a0ed28947b710a07a230e77b174b419f69d74"
+  tag: "2.22.0-pg17@sha256:bd55a8c608eaf813af588e55bfeab25787b9380487adfe8f78d3064760bf4e44"
   ## @param image.imagePullPolicy TimescaleDB image pull policy
   imagePullPolicy: Always
 
@@ -35,18 +35,18 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the TimescaleDB container
+  ## @param containerSecurityContext.runAsUser User ID for the TimescaleDB container
   runAsUser: 999
-  ## @param securityContext.runAsGroup Group ID for the TimescaleDB container
+  ## @param containerSecurityContext.runAsGroup Group ID for the TimescaleDB container
   runAsGroup: 999
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: false
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL

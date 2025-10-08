@@ -32,12 +32,10 @@ spec:
 {{- with (include "minio.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "minio.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command: ["/bin/sh"]
@@ -73,6 +71,39 @@ spec:
             - name: MINIO_SERVER_URL
               value: {{ .Values.config.serverUrl | quote }}
             {{- end }}
+            {{- if .Values.config.minioOpts }}
+            - name: MINIO_OPTS
+              value: {{ .Values.config.minioOpts | quote }}
+            {{- end }}
+            {{- if .Values.config.minioVolumes }}
+            - name: MINIO_VOLUMES
+              value: {{ .Values.config.minioVolumes | quote }}
+            {{- end }}
+            {{- if .Values.config.minioConfigEnvFile }}
+            - name: MINIO_CONFIG_ENV_FILE
+              value: {{ .Values.config.minioConfigEnvFile | quote }}
+            {{- end }}
+            {{- if .Values.config.minioScannerSpeed }}
+            - name: MINIO_SCANNER_SPEED
+              value: {{ .Values.config.minioScannerSpeed | quote }}
+            {{- end }}
+            {{- if .Values.config.minioCompressionEnabled }}
+            - name: MINIO_COMPRESSION_ENABLE
+              value: {{ .Values.config.minioCompressionEnabled | quote }}
+            {{- end }}
+            {{- if and .Values.config.minioCompressionEnabled .Values.config.minioCompressionAllowEncryption }}
+            - name: MINIO_COMPRESSION_ALLOW_ENCRYPTION
+              value: {{ .Values.config.minioCompressionAllowEncryption | quote }}
+            {{- end }}
+            {{- if and .Values.config.minioCompressionEnabled .Values.config.minioCompressionExtensions }}
+            - name: MINIO_COMPRESSION_EXTENSIONS
+              value: {{ .Values.config.minioCompressionExtensions | quote }}
+            {{- end }}
+            {{- if and .Values.config.minioCompressionEnabled .Values.config.minioCompressionMimeTypes }}
+            - name: MINIO_COMPRESSION_MIME_TYPES
+              value: {{ .Values.config.minioCompressionMimeTypes | quote }}
+            {{- end }}
+
             {{- with .Values.config.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

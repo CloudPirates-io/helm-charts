@@ -89,15 +89,15 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Security Context
 
-| Parameter                                  | Description                                       | Default   |
-| ------------------------------------------ | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`               | Group ID for the volumes of the pod               | `999`     |
-| `securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `securityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `securityContext.runAsUser`                | User ID for the TimescaleDB container             | `999`     |
-| `securityContext.runAsGroup`               | Group ID for the TimescaleDB container            | `999`     |
-| `securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
-| `securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| Parameter                                           | Description                                       | Default   |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
+| `containerSecurityContext.runAsUser`                | User ID for the TimescaleDB container             | `999`     |
+| `containerSecurityContext.runAsGroup`               | Group ID for the TimescaleDB container            | `999`     |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### TimescaleDB Authentication
 

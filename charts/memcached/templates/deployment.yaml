@@ -23,11 +23,10 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "memcached.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "memcached.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           args:
@@ -40,7 +39,7 @@ spec:
             - {{ .Values.config.maxConnections | quote }}
             {{- end }}
             {{- if .Values.config.verbosity }}
-            - {{ printf "-%s" (repeat .Values.config.verbosity "v") | quote }}
+            - {{ printf "-%s" (repeat (.Values.config.verbosity | int) "v") | quote }}
             {{- end }}
             {{- range .Values.config.extraArgs }}
             - {{ . | quote }}

@@ -23,6 +23,7 @@ To install with custom values:
 helm install my-zookeeper ./charts/zookeeper -f values.yaml
 ```
 
+
 ### Getting Started
 
 1. Connect to ZooKeeper from inside the cluster:
@@ -51,20 +52,21 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Common Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `nameOverride` | String to partially override fullname | `""` |
-| `fullnameOverride` | String to fully override fullname | `""` |
-| `commonLabels` | Labels to add to all deployed objects | `{}` |
-| `commonAnnotations` | Annotations to add to all deployed objects | `{}` |
-| `replicaCount` | Number of ZooKeeper replicas to deploy | `3` |
+| Parameter                   | Description                                                                 | Default |
+|-----------------------------|-----------------------------------------------------------------------------|---------|
+| `nameOverride`              | String to partially override fullname                                       | `""`    |
+| `fullnameOverride`          | String to fully override fullname                                           | `""`    |
+| `commonLabels`              | Labels to add to all deployed objects                                       | `{}`    |
+| `commonAnnotations`         | Annotations to add to all deployed objects                                  | `{}`    |
+| `replicaCount`              | Number of ZooKeeper replicas to deploy                                      | `3`     |
+| `podDisruptionBudget.enabled` | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions | `true`  |
+| `networkPolicy.enabled`     | Enable network policies                                                     | `true`  |
 
 ### ZooKeeper Configuration
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `zookeeperConfig.tickTime` | ZooKeeper tick time | `2000` |
-| `zookeeperConfig.dataDir` | ZooKeeper data directory | `/var/lib/zookeeper/data` |
 | `zookeeperConfig.initLimit` | ZooKeeper init limit | `10` |
 | `zookeeperConfig.syncLimit` | ZooKeeper sync limit | `5` |
 | `zookeeperConfig.electionPortBindRetry` | ZooKeeper election port bind retry | `10` |
@@ -74,6 +76,11 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.commandsWhitelist` | 4-letter word commands whitelist | `srvr` |
 | `zookeeperConfig.autopurge.purgeInterval` | Autopurge purge interval (hours) | `24` |
 | `zookeeperConfig.autopurge.snapRetainCount` | Autopurge snapshot retain count | `3` |
+| `zookeeperConfig.admin.enableServer` | Enable the admin server | `"false"` |
+| `zookeeperConfig.admin.serverPort` | Admin server port | `8080` |
+| `zookeeperConfig.admin.serverAddress` | Admin server address | `0.0.0.0` |
+| `zookeeperConfig.admin.idleTimeout` | Admin server connection idle timeout (milliseconds) | `30000` |
+| `zookeeperConfig.admin.commandUrl` | Admin server command URL | `/commands` |
 
 ### Metrics
 
@@ -122,12 +129,19 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Security Context
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `containerSecurityContext.runAsUser` | Set container's Security Context runAsUser | `1000` |
-| `containerSecurityContext.runAsNonRoot` | Set container's Security Context runAsNonRoot | `true` |
-| `containerSecurityContext.allowPrivilegeEscalation` | Set container's privilege escalation | `false` |
-| `podSecurityContext.fsGroup` | Group ID for the volumes of the pod | `1000` |
+| Parameter                                 | Description                                               | Default |
+|-------------------------------------------|-----------------------------------------------------------|---------|
+| `containerSecurityContext.runAsUser`      | User ID to run the container process                      | `1000`  |
+| `containerSecurityContext.runAsGroup`     | Group ID to run the container process                     | `1000`  |
+| `containerSecurityContext.seLinuxOptions` | SELinux options for the container                         | `{}`    |
+| `containerSecurityContext.runAsNonRoot`   | Require the container to run as a non-root user           | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Whether to allow privilege escalation for the container | `false` |
+| `containerSecurityContext.privileged`     | Set container's privileged mode                           | `false` |
+| `containerSecurityContext.readOnlyRootFilesystem` | Mount container root filesystem as read-only           | `false` |
+| `containerSecurityContext.capabilities`   | Linux capabilities to drop or add for the container        | `{}`    |
+| `containerSecurityContext.seccompProfile` | Seccomp profile for the container                         | `{}`    |
+| `podSecurityContext.fsGroup`              | Group ID for the volumes of the pod                        | `1000`  |
+
 
 ### Health Checks
 

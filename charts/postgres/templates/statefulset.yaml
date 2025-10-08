@@ -34,17 +34,18 @@ spec:
 {{- with (include "postgres.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "postgres.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          args:
+            - -c
+            - 'config_file={{ include "postgres.configDir" . }}/postgresql.conf'
           env:
             - name: PGDATA
-              value: {{ include "postgres.dataDir" . }}/pgdata
+              value: {{ include "postgres.pgdataPath" . }}
             {{- if .Values.initdb.args }}
             - name: POSTGRES_INITDB_ARGS
               value: {{ .Values.initdb.args | quote }}
@@ -116,7 +117,7 @@ spec:
                   {{- if .Values.customUser.secretKeys }}
                   key: {{ .Values.customUser.secretKeys.password }}
                   {{- else }}
-                  key: CUSTOM_DB
+                  key: CUSTOM_PASSWORD
                   {{- end }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
@@ -197,6 +198,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- end }}
         {{- if not .Values.config.existingConfigmap }}
         - name: config
           configMap:
@@ -238,6 +244,7 @@ spec:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
     whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
   {{- end }}
+  {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -260,4 +267,5 @@ spec:
       storageClassName: {{ .Values.persistence.storageClass | quote }}
       {{- end }}
       {{- end }}
+    {{- end }}
   {{- end }}

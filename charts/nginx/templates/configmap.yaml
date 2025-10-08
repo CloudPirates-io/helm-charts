@@ -1,4 +1,4 @@
-{{- if or .Values.serverConfig .Values.streamServerConfig }}
+{{- if or .Values.config .Values.serverConfig .Values.streamServerConfig }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

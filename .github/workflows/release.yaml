@@ -9,6 +9,7 @@ jobs:
   release:
     permissions:
       contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,6 +29,13 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run chart-releaser
         id: chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
@@ -40,7 +48,12 @@ jobs:
         uses: sigstore/cosign-installer@v3.9.2
         if: ${{ steps.chart-releaser.outputs.changed_charts }}
 
-      - name: Upload charts to OCI registry
+      - id: github-repo-owner-name
+        uses: ASzc/change-string-case-action@v6
+        with:
+          string: ${{ github.repository_owner }}
+
+      - name: Upload charts to OCI registries
         id: upload
         if: ${{ steps.chart-releaser.outputs.changed_charts }}
         env:
@@ -50,7 +63,11 @@ jobs:
         run: |
           CHANGED_CHARTS="${{ steps.chart-releaser.outputs.changed_charts }}"
 
+          # Login to primary registry
           helm registry login --username $REGISTRY_USER --password ${{ secrets.REGISTRY_PASSWORD }} https://${{ vars.REGISTRY }}
+
+          # Login to GHCR
+          helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
 
           RELEASED_CHARTS=""
           for chart_directory in ${CHANGED_CHARTS//,/ }; do
@@ -62,6 +79,7 @@ jobs:
             CHART_VERSION=$(yq eval '.version' "Chart.yaml")
             APP_VERSION=$(yq eval '.appVersion' "Chart.yaml")
 
+            # Push to primary registry (Docker Hub)
             echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}"
             if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }} 2>&1 | tee ${CHART_NAME}-output.log; then
 
@@ -70,12 +88,28 @@ jobs:
               cosign sign -y --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST
 
               RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
-              echo "Successfully released $CHART_NAME-$CHART_VERSION"
+              echo "Successfully released $CHART_NAME-$CHART_VERSION to primary registry"
             else
-              echo "Failed to push $CHART_NAME-$CHART_VERSION"
+              echo "Failed to push $CHART_NAME-$CHART_VERSION to primary registry"
               cat ${CHART_NAME}-output.log
               exit 1
             fi
+
+            # Push to GHCR
+            echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts"
+            if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts 2>&1 | tee ${CHART_NAME}-ghcr-output.log; then
+
+              # Extract digest and sign GHCR chart
+              GHCR_DIGEST=$(cat ${CHART_NAME}-ghcr-output.log | awk -F '[, ]+' '/Digest/{print $NF}')
+              cosign sign -y --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST
+
+              echo "Successfully released $CHART_NAME-$CHART_VERSION to GHCR"
+            else
+              echo "Failed to push $CHART_NAME-$CHART_VERSION to GHCR"
+              cat ${CHART_NAME}-ghcr-output.log
+              exit 1
+            fi
+
             cd ${{ github.workspace }}
           done
           echo "released_charts=$RELEASED_CHARTS" >> "$GITHUB_OUTPUT"

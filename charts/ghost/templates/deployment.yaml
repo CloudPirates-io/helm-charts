@@ -1,0 +1,159 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ghost.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "ghost.labels" . | nindent 4 }}
+  {{- with (include "ghost.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ghost.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ghost.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- with (include "ghost.annotations" .) }}
+        {{- . | nindent 8 }}
+        {{- end }}
+        {{- if or .Values.serverConfig .Values.streamServerConfig }}
+        checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+{{- with (include "ghost.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      serviceAccountName: {{ include "ghost.serviceAccountName" . }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.mariadb.enabled }}
+      initContainers:
+        - name: wait-for-mariadb
+          image: "{{ .Values.initContainers.waitForMariadb.image | default "mariadb:12.0.2" }}"
+          command:
+            - sh
+            - -c
+            - >
+              retries=0;
+              max_retries=15;
+              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.name" . }}-mariadb 
+              -P {{ .Values.mariadb.service.port }} 
+              -u{{ .Values.mariadb.auth.username }} 
+              -p{{ .Values.mariadb.auth.password }} 
+              --silent; do 
+                retries=$((retries+1));
+                echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)"; 
+                if [ $retries -ge $max_retries ]; then
+                  echo "Maximum number of retries reached. Exiting.";
+                  exit 1;
+                fi;
+                sleep 2; 
+              done;
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "ghost.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          #command: ["tail", "-f", "/dev/null"]
+          ports:
+            {{- range .Values.containerPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          {{- if .Values.extraEnv }}
+          env:
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            {{- if eq .Values.livenessProbe.type "httpGet" }}
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ (index .Values.containerPorts 0).name }}
+            {{- else }}
+            tcpSocket:
+              port: {{ (index .Values.containerPorts 0).name }}
+            {{- end }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            {{- if eq .Values.readinessProbe.type "httpGet" }}
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ (index .Values.containerPorts 0).name }}
+            {{- else }}
+            tcpSocket:
+              port: {{ (index .Values.containerPorts 0).name }}
+            {{- end }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: emptydir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: data
+              mountPath: /var/lib/ghost/content
+            - name: ghost-config
+              mountPath: /var/lib/ghost/config.production.json
+              subPath: config.production.json
+          {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: emptydir
+          emptyDir: {}
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            {{- if .Values.persistence.existingClaim }}
+            claimName: {{ .Values.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ghost.fullname" . }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: ghost-config
+          configMap:
+            name: {{ include "ghost.fullname" . }}
+            items:
+              - key: config.production.json
+                path: config.production.json
+      {{- if .Values.extraVolumes }}
+      {{- toYaml .Values.extraVolumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

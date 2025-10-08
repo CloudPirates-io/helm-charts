@@ -31,8 +31,11 @@ spec:
 {{- with (include "redis.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
       initContainers:
         - name: redis-init
@@ -116,9 +119,27 @@ spec:
               fi
 
               # Configure for Sentinel discovery and force deletion tolerance
-              echo "replica-announce-ip $(hostname -i)" >> /tmp/redis.conf
+              # Get IP address based on ipFamily setting
+              {{- if eq .Values.ipFamily "ipv4" }}
+              MY_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              if [ -z "$MY_IP" ]; then
+                echo "Warning: No IPv4 address found, falling back to first available IP"
+                MY_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              MY_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
+              if [ -z "$MY_IP" ]; then
+                echo "Warning: No IPv6 address found, falling back to first available IP"
+                MY_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else }}
+              # auto: Use the first IP address for dual-stack compatibility
+              MY_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "Using IP address: ${MY_IP}"
+              echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
-              echo "slave-announce-ip $(hostname -i)" >> /tmp/redis.conf
+              echo "slave-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
 
               # Make slaves more eligible for promotion during force deletions
@@ -141,7 +162,7 @@ spec:
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
           command:
@@ -248,9 +269,13 @@ spec:
             {{- end }}
         {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
         - name: sentinel
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.sentinel.image" . | quote }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.sentinel.image) }}
+          {{- if .Values.sentinel.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
+          {{- end }}
           command:
             - /bin/sh
             - -c
@@ -288,7 +313,7 @@ spec:
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
                 echo "No Sentinels available, checking Redis instances directly..."
                 for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
-                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
+                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local"
                   ROLE_INFO=$(redis-cli -h "${REDIS_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$REDIS_HOST"
@@ -300,9 +325,28 @@ spec:
 
               # Final fallback: Use pod-0 hostname for initial bootstrap only
               if [ -z "$MASTER_HOST" ]; then
-                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
+                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local"
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
+
+              # Get IP address based on ipFamily setting
+              {{- if eq .Values.ipFamily "ipv4" }}
+              SENTINEL_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              if [ -z "$SENTINEL_IP" ]; then
+                echo "Warning: No IPv4 address found, falling back to first available IP"
+                SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              SENTINEL_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
+              if [ -z "$SENTINEL_IP" ]; then
+                echo "Warning: No IPv6 address found, falling back to first available IP"
+                SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else }}
+              # auto: Use the first IP address for dual-stack compatibility
+              SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "Sentinel using IP address: ${SENTINEL_IP}"
 
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
@@ -317,6 +361,7 @@ spec:
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              requirepass "${REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
               sentinel deny-scripts-reconfig yes
@@ -325,7 +370,7 @@ spec:
               # CRITICAL: Track disconnected slaves for force deletion tolerance
               sentinel_link_buffer_size 32768
               # Allow sentinels to discover each other
-              sentinel announce-ip $(hostname -i)
+              sentinel announce-ip ${SENTINEL_IP}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
               loglevel notice
@@ -376,6 +421,59 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "redis.metrics.image" . | quote }}
+          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.metrics.image) }}
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.secretName" . }}
+                  key: {{ include "redis.secretPasswordKey" . }}
+          {{- end }}
+          command:
+            - /redis_exporter
+            {{- range .Values.metrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          args:
+            {{- if .Values.auth.enabled }}
+            - --redis.password=$(REDIS_PASSWORD)
+            {{- end }}
+            {{- if .Values.metrics.extraArgs }}
+            {{- range .Values.metrics.extraArgs }}
+            {{- if not (hasPrefix "--" .) }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 9121
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+        {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
         - name: data
@@ -417,8 +515,15 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- if .Values.persistence.enabled }}
+  {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
+    whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
+  {{- end }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1	
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         {{- with .Values.persistence.annotations }}
         annotations:

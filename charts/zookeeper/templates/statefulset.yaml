@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- with (include "zookeeper.annotations" .) }}
@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "zookeeper.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 10 }}
   updateStrategy:
     type: RollingUpdate
   podManagementPolicy: Parallel
@@ -31,11 +32,10 @@ spec:
 {{- with (include "zookeeper.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "zookeeper.image" . | quote }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy | default "Always" | quote }}
           ports:
@@ -56,6 +56,10 @@ spec:
             - name: {{ .name }}
               value: {{ .value | quote }}
           {{- end }}
+            - name: ZOO_MY_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
           livenessProbe:
             tcpSocket:
               port: client
@@ -118,7 +122,9 @@ spec:
         {{- end }}
       spec:
         accessModes:
-          - {{ .Values.persistence.accessMode | quote }}
+        {{- with .Values.persistence.accessModes }}
+          {{- toYaml . | nindent 10 }}
+        {{- end}}
         {{- if .Values.persistence.storageClass }}
         storageClassName: {{ .Values.persistence.storageClass | quote }}
         {{- end }}

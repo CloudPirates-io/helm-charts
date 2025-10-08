@@ -25,6 +25,8 @@ image:
   tag: "26.3.4@sha256:2b32a51a31e8d780d9fa9a69a59ead69975263c61b5dd13559090e22aa26f100"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
+  ## @param image.command Keycloak container command
+  command: "/opt/keycloak/bin/kc.sh"
 
 ## @section Deployment configuration
 ## @param replicaCount Number of Keycloak replicas to deploy
@@ -36,23 +38,39 @@ podAnnotations: {}
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}
 
+## @section extra volumes and volumes mount
+## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
+extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
+extraVolumeMounts: []
+
+## @section Extra init containers for Keycloak pod
+## @param Optionnaly specify an extra list of initContainer for the Keycloak pod
+## Example:
+## initContainers:
+##   - name: <container-name>
+##     image: <your-image>
+##     imagePullPolicy: Always
+##
+extraInitContainers: []
+
 ## @section Security Context
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the Keycloak container
+  ## @param containerSecurityContext.runAsUser User ID for the Keycloak container
   runAsUser: 1001
-  ## @param securityContext.runAsGroup Group ID for the Keycloak container
+  ## @param containerSecurityContext.runAsGroup Group ID for the Keycloak container
   runAsGroup: 1001
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: false
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL
@@ -82,10 +100,16 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
-  ## @param keycloak.proxy Proxy mode (edge, reencrypt, passthrough, none)
-  proxy: none
+  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded)
+  proxyHeaders: ""
+  ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
+  proxyProtocolEnabled: false
+  ## @param keycloak.proxyTrustedAddresses A comma separated list of trusted proxy addresses
+  proxyTrustedAddresses: ""
   ## @param keycloak.production Enable production mode
   production: false
+  ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
+  httpRelativePath: /
 
 ## @section Database Configuration
 database:
@@ -140,6 +164,8 @@ service:
   httpsTargetPort: 8443
   ## @param service.annotations Service annotations
   annotations: {}
+  ## @param service.trafficDistribution Traffic distribution preference for the keycloak service. If the field is not set, the implementation will apply its default routing strategy.
+  trafficDistribution: ""
 
 ## @section Ingress configuration
 ingress:
@@ -247,6 +273,9 @@ nodeSelector: {}
 ## @param tolerations Toleration labels for pod assignment
 tolerations: []
 
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
@@ -266,6 +295,9 @@ extraEnv: {}
 # VARNAME1: value1
 # VARNAME2: value2
 
+## @param extraEnvVarsSecret Name of a secret containing additional environment variables
+extraEnvVarsSecret: ""
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 
@@ -273,10 +305,10 @@ extraObjects: []
 initContainers:
   ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting
   waitForPostgres:
-    image: "postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"
+    image: "postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"
   ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
   waitForMariadb:
-    image: "mariadb:12.0.2@sha256:8a061ef9813cf960f94a262930a32b190c3fbe5c8d3ab58456ef1df4b90fd5dc"
+    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
 ## @descriptionStart

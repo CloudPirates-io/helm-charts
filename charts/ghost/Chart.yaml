@@ -1,0 +1,28 @@
+apiVersion: v2
+name: ghost
+description: A simple, powerful publishing platform that allows you to share your stories with the world.
+type: application
+version: 0.2.3
+appVersion: "6.0.9"
+keywords:
+  - ghost
+  - blogging
+  - content management
+home: https://www.cloudpirates.io
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    url: https://www.cloudpirates.io
+  - name: Gianni Carafa
+    email: gianni.carafa@srf.ch
+    url: https://www.srf.ch
+dependencies:
+  - name: common
+    version: "1.x.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+  - name: mariadb
+    version: "0.3.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+    condition: mariadb.enabled
+icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png

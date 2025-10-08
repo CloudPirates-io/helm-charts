@@ -150,13 +150,13 @@ The following table lists the configurable parameters of the MariaDB chart and t
 
 ### Security Context Parameters
 
-| Parameter                                           | Description                                           | Default |
-| --------------------------------------------------- | ----------------------------------------------------- | ------- |
-| `podSecurityContext.enabled`                        | Enabled MariaDB pod Security Context                  | `true`  |
-| `podSecurityContext.fsGroup`                        | Set MariaDB pod's Security Context fsGroup            | `999`   |
-| `containerSecurityContext.runAsUser`                | Set MariaDB container's Security Context runAsUser    | `999`   |
-| `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot | `true`  |
-| `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation          | `false` |
+| Parameter                                           | Description                                                     | Default |
+| --------------------------------------------------- | --------------------------------------------------------------- | ------- |
+| `podSecurityContext.fsGroup`                        | Set MariaDB pod's Security Context fsGroup                      | `999`   |
+| `containerSecurityContext.runAsUser`                | Set MariaDB container's Security Context runAsUser              | `999`   |
+| `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
 
 ### Resources Parameters
 

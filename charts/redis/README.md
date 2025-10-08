@@ -69,14 +69,14 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 ### Common Parameters
 
-| Parameter           | Description                                 | Default |
-| ------------------- | ------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override redis.fullname | `""`    |
-| `fullnameOverride`  | String to fully override redis.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
-| `architecture`      | Redis architecture. Allowed values: `standalone` or `replication` | `standalone` |
-| `replicaCount`      | Number of Redis replicas to deploy (only when architecture=replication) | `2`     |
+| Parameter           | Description                                                             | Default      |
+| ------------------- | ----------------------------------------------------------------------- | ------------ |
+| `nameOverride`      | String to partially override redis.fullname                             | `""`         |
+| `fullnameOverride`  | String to fully override redis.fullname                                 | `""`         |
+| `commonLabels`      | Labels to add to all deployed objects                                   | `{}`         |
+| `commonAnnotations` | Annotations to add to all deployed objects                              | `{}`         |
+| `architecture`      | Redis architecture. Allowed values: `standalone` or `replication`       | `standalone` |
+| `replicaCount`      | Number of Redis replicas to deploy (only when architecture=replication) | `2`          |
 
 ### Service Configuration
 
@@ -103,6 +103,38 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `config.existingConfigmap`    | Name of existing ConfigMap to use    | `""`                   |
 | `config.existingConfigmapKey` | Key in existing ConfigMap            | `""`                   |
 
+### Metrics
+
+| Parameter                                  | Description                                                                             | Default                                                                           |
+| ------------------------------------------ | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Redis metrics                             | `false`                                                                           |
+| `metrics.image.registry`                   | Redis exporter image registry                                                           | `docker.io`                                                                       |
+| `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter`                                                        |
+| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.58.0@sha256:2e42c98f2c53aaf3ce205e746ff8bfa25d39e30d8b4f401ce0ad2740836bb817` |
+| `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                                                                          |
+| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                                                                             |
+| `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                                                                            |
+| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                     | `nil`                                                                             |
+| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                  | `64Mi`                                                                            |
+| `metrics.extraArgs`                        | Extra arguments for Redis exporter (e.g. `--redis.addr`, `--web.listen-address`)        | `[]`                                                                              |
+| `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                                                                       |
+| `metrics.service.port`                     | Metrics service port                                                                    | `9121`                                                                            |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                                                                              |
+| `metrics.service.loadBalancerIP`           | LoadBalancer IP if metrics service type is `LoadBalancer`                               | `""`                                                                              |
+| `metrics.service.loadBalancerSourceRanges` | Addresses allowed when metrics service is `LoadBalancer`                                | `[]`                                                                              |
+| `metrics.service.clusterIP`                | Static clusterIP or None for headless services when metrics service type is `ClusterIP` | `""`                                                                              |
+| `metrics.service.nodePort`                 | NodePort value for LoadBalancer and NodePort service types                              | `""`                                                                              |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using Prometheus Operator        | `false`                                                                           |
+| `metrics.serviceMonitor.namespace`         | Namespace in which to create ServiceMonitor resource(s)                                 | `""`                                                                              |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                             | `30s`                                                                             |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                 | `""`                                                                              |
+| `metrics.serviceMonitor.relabelings`       | Additional relabeling of metrics                                                        | `[]`                                                                              |
+| `metrics.serviceMonitor.metricRelabelings` | Additional metric relabeling of metrics                                                 | `[]`                                                                              |
+| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels                                                                    | `false`                                                                           |
+| `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                                     | `{}`                                                                              |
+| `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                                    | `{}`                                                                              |
+| `metrics.serviceMonitor.namespaceSelector` | Namespace selector for ServiceMonitor                                                   | `{}`                                                                              |
+
 ### Persistence
 
 | Parameter                  | Description                              | Default         |
@@ -114,6 +146,14 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `persistence.mountPath`    | Mount path for Redis data                | `/data`         |
 | `persistence.annotations`  | Annotations for persistent volume claims | `{}`            |
 
+### Persistent Volume Claim Retention Policy
+
+| Parameter                                            | Description                                                                     | Default     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------- | ----------- |
+| `persistentVolumeClaimRetentionPolicy.enabled`      | Enable Persistent volume retention policy for the Statefulset                  | `false`     |
+| `persistentVolumeClaimRetentionPolicy.whenDeleted`  | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"`  |
+| `persistentVolumeClaimRetentionPolicy.whenScaled`   | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"`  |
+
 ### Resource Management
 
 | Parameter                   | Description    | Default |
@@ -124,12 +164,13 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 ### Pod Assignment / Eviction
 
-| Parameter           | Description                       | Default |
-| ------------------- | --------------------------------- | ------- |
-| `nodeSelector`      | Node selector for pod assignment  | `{}`    |
-| `priorityClassName` | Priority class for pod eviction   | `""`    |
-| `tolerations`       | Tolerations for pod assignment    | `[]`    |
-| `affinity`          | Affinity rules for pod assignment | `{}`    |
+| Parameter                   | Description                                    | Default |
+| --------------------------- | ---------------------------------------------- | ------- |
+| `nodeSelector`              | Node selector for pod assignment               | `{}`    |
+| `priorityClassName`         | Priority class for pod eviction                | `""`    |
+| `tolerations`               | Tolerations for pod assignment                 | `[]`    |
+| `affinity`                  | Affinity rules for pod assignment              | `{}`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
 
 ### Security Context
 
@@ -168,23 +209,24 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable.
 
-| Parameter                            | Description                                              | Default   |
-| ------------------------------------ | -------------------------------------------------------- | --------- |
-| `sentinel.enabled`                   | Enable Redis Sentinel for high availability             | `false`   |
-| `sentinel.image.repository`          | Redis Sentinel image repository                          | `redis`   |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                                 | `8.2.1@sha256:...` |
-| `sentinel.image.pullPolicy`          | Sentinel image pull policy                               | `Always`  |
-| `sentinel.masterName`                | Name of the master server                                | `mymaster` |
-| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure   | `2`       |
-| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                | `30000`   |
-| `sentinel.failoverTimeout`           | Timeout for failover in ms                               | `180000`  |
-| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover       | `1`       |
-| `sentinel.port`                      | Sentinel port                                            | `26379`   |
-| `sentinel.service.type`              | Kubernetes service type for Sentinel                    | `ClusterIP` |
-| `sentinel.service.port`              | Sentinel service port                                    | `26379`   |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                          | `128Mi`   |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                           | `25m`     |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                        | `64Mi`    |
+| Parameter                            | Description                                           | Default            |
+| ------------------------------------ | ----------------------------------------------------- | ------------------ |
+| `sentinel.enabled`                   | Enable Redis Sentinel for high availability           | `false`            |
+| `sentinel.image.repository`          | Redis Sentinel image repository                       | `redis`            |
+| `sentinel.image.tag`                 | Redis Sentinel image tag                              | `8.2.1@sha256:...` |
+| `sentinel.image.pullPolicy`          | Sentinel image pull policy                            | `Always`           |
+| `sentinel.masterName`                | Name of the master server                             | `mymaster`         |
+| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure | `2`                |
+| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down              | `30000`            |
+| `sentinel.failoverTimeout`           | Timeout for failover in ms                            | `180000`           |
+| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover     | `1`                |
+| `sentinel.port`                      | Sentinel port                                         | `26379`            |
+| `sentinel.service.type`              | Kubernetes service type for Sentinel                  | `ClusterIP`        |
+| `sentinel.service.port`              | Sentinel service port                                 | `26379`            |
+| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                        | `128Mi`            |
+| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                         | `25m`              |
+| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                      | `64Mi`             |
+| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container       | `[]`               |
 
 ### Additional Configuration
 
@@ -273,8 +315,9 @@ helm install my-redis ./charts/redis -f values-ha.yaml
 ```
 
 After deployment, you'll have:
+
 - 1 Redis master instance
-- 2 Redis replica instances  
+- 2 Redis replica instances
 - 3 Redis Sentinel instances (for monitoring and failover)
 
 **Connecting to Redis with Sentinel:**
@@ -299,7 +342,7 @@ redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
 If you want replication without Sentinel (manual failover):
 
 ```yaml
-# values-replication.yaml  
+# values-replication.yaml
 architecture: replication
 replicaCount: 2
 sentinel:

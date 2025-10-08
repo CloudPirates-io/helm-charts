@@ -1,0 +1,320 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override nginx.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override nginx.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @section Nginx image parameters
+image:
+  ## @param image.registry Nginx image registry
+  registry: docker.io
+  ## @param image.repository Nginx image repository
+  repository: ghost
+  ## @param image.tag Nginx image tag
+  tag: "6.0.9@sha256:0476b5029ce6ca0dc6cc0f4b1515a3c7982e28163f0d66fb3c230b0a257b8043"
+  ## @param image.pullPolicy Nginx image pull policy
+  pullPolicy: Always
+
+## @param replicaCount Number of Nginx replicas to deploy
+replicaCount: 1
+
+## @section Container port configuration
+## @param containerPorts Array of container ports
+## Example:
+## containerPorts:
+##   - name: http
+##     containerPort: 80
+##     protocol: TCP
+##   - name: https
+##     containerPort: 443
+##     protocol: TCP
+containerPorts:
+  - name: http
+    containerPort: 2368
+    protocol: TCP
+
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.ports Array of service ports
+  ## Example:
+  ## ports:
+  ##   - port: 80
+  ##     targetPort: http
+  ##     protocol: TCP
+  ##     name: http
+  ##   - port: 443
+  ##     targetPort: https
+  ##     protocol: TCP
+  ##     name: https
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+
+## @section Ingress parameters
+ingress:
+  ## @param ingress.enabled Enable ingress record generation
+  enabled: true
+  ## @param ingress.className IngressClass that will be be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+  ## @param ingress.hosts An array with hosts and paths
+  hosts:
+    - host: ghost.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: admin.ghost.localhost
+      paths:
+        - path: /ghost
+          pathType: Prefix
+  ## @param ingress.tls An array with the tls configuration
+  tls: []
+
+## @section Service Account parameters
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: true
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automatically mount service account token
+  automountServiceAccountToken: false
+
+
+autoscaling:
+  enabled: false
+  minReplicas: ""
+  maxReplicas: ""
+  targetCPUUtilizationPercentage: ""
+  targetMemoryUtilizationPercentage: ""
+
+## @param resources Resource limits and requests for Nginx pod
+resources:
+  {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 64Mi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 1000
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set Nginx container's privilege escalation
+  allowPrivilegeEscalation: false
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
+  fsGroup: 1000
+
+livenessProbe:
+  ## @param livenessProbe.enabled Enable liveness probe
+  enabled: true
+  ## @param livenessProbe.type Probe type (tcpSocket or httpGet)
+  type: tcpSocket
+  ## @param livenessProbe.path Path for HTTP probe (only used when type is httpGet)
+  path: /
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readiness probe
+  enabled: true
+  ## @param readinessProbe.type Probe type (tcpSocket or httpGet)
+  type: tcpSocket
+  ## @param readinessProbe.path Path for HTTP probe (only used when type is httpGet)
+  path: /
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 5
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnv Additional environment variables to set
+extraEnv: []
+# - name: EXTRA_VAR
+#   value: "extra_value"
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the Nginx container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+
+## @section Init Container Configuration
+## Configuration for init containers
+initContainers:
+  ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
+  waitForMariadb:
+    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
+
+config:
+  database:
+    client: "mysql"
+    externalConnection:
+      host: "my-external-db"
+      port: 3306
+      user: "ghost"
+      password: "changeme"
+      database: "ghost"
+    pool:
+      min: 2
+      max: 10
+  mail:
+    transport: "SMTP"
+    options:
+      service: "Mailgun"
+      host: "smtp.mailgun.org"
+      port: 465
+      secure: true
+      auth:
+        user: "postmaster@example.mailgun.org"
+        pass: "1234567890"
+    from: "support@example.com"
+  server:
+    host: "0.0.0.0"
+    port: 2368
+  privacy:
+    useUpdateCheck: false
+    useGravatar: false
+    useRpcPing: false
+    useStructuredData: false
+  security:
+    staffDeviceVerification: false
+  paths:
+    contentPath: "/var/lib/ghost/content"
+  referrerPolicy: "origin-when-crossorigin"
+  logging:
+    path: "/var/lib/ghost/content/logs/"
+    useLocalTime: true
+    level: "info"
+    rotation:
+      enabled: true
+      count: 10
+      period: "1d"
+    transports:
+      - "stdout"
+      - "file"
+  caching:
+    frontend:
+      maxAge: 0
+    contentAPI:
+      maxAge: 10
+    robotstxt:
+      maxAge: 3600
+    sitemap:
+      maxAge: 3600
+    sitemapXSL:
+      maxAge: 86400
+    wellKnown:
+      maxAge: 86400
+    cors:
+      maxAge: 86400
+    publicAssets:
+      maxAge: 31536000
+    threeHundredOne:
+      maxAge: 31536000
+    customRedirects:
+      maxAge: 31536000
+  compress: true
+  imageOptimization:
+    resize: false
+  storage:
+    active: "local-file-store"
+  adapters:
+    cache:
+      imageSizes:
+        adapter: "Redis"
+        ttl: 3600
+        keyPrefix: "image-sizes:"
+  portal:
+    url: "https://cdn.jsdelivr.net/npm/@tryghost/portal@~{version}/umd/portal.min.js"
+  sodoSearch:
+    url: "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/sodo-search.min.js"
+    styles: "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/main.css"
+  comments:
+    url: "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/comments-ui.min.js"
+    styles: "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/main.css"
+
+persistence:
+  ## @param persistence.enabled Enable persistence using PVC
+  enabled: true
+  ## @param persistence.annotations Annotations to add to the PVC
+  annotations: {}
+  ## @param persistence.existingClaim Use an existing PVC by specifying its name
+  existingClaim: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined as "-", it will use the default storage class
+  storageClass: ""
+  ## @param persistence.accessMode Access mode of the PVC
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of persistent volume claim
+  size: 8Gi
+
+mariadb:
+  ## @param mariadb.enabled Enable MariaDB database deployment (default)
+  enabled: true
+
+  auth:
+    ## @param mariadb.auth.database MariaDB custom database
+    database: ghost
+    ## @param mariadb.auth.username MariaDB custom user name
+    username: ghost
+    ## @param mariadb.auth.password MariaDB custom user password
+    password: changeme
+    ## @param mariadb.auth.existingSecret Name of existing secret to use for MariaDB credentials
+    existingSecret: ""
+    ## @param mariadb.auth.allowEmptyRootPassword Allow the root user of MariaDB to have no password set
+    allowEmptyRootPassword: false
+
+  service:
+    port: 3306

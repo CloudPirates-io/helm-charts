@@ -99,35 +99,51 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
+### Extra volumes and volumes mount
+
+| Parameter           | Description                                           | Default |
+| ------------------- | ----------------------------------------------------- | ------- |
+| `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
+| `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
+
+### Extra init containers for Keycloak pod
+
+| Parameter             | Description                                           | Default |
+| --------------------- | ----------------------------------------------------- | ------- |
+| `extraInitContainers` | Array of initContainer to add to the keycloak pod     | `[]`    |
+
 ### Security
 
-| Parameter                                  | Description                                       | Default   |
-| ------------------------------------------ | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`               | Group ID for the volumes of the pod               | `1001`    |
-| `securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `securityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `securityContext.runAsUser`                | User ID for the Keycloak container                | `1001`    |
-| `securityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`    |
-| `securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
-| `securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| Parameter                                           | Description                                       | Default   |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1001`    |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
+| `containerSecurityContext.runAsUser`                | User ID for the Keycloak container                | `1001`    |
+| `containerSecurityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`    |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Keycloak Configuration
 
-| Parameter                              | Description                                                   | Default            |
-| -------------------------------------- | ------------------------------------------------------------- | ------------------ |
-| `keycloak.adminUser`                   | Keycloak admin username                                       | `admin`            |
-| `keycloak.adminPassword`               | Keycloak admin password                                       | `""`               |
-| `keycloak.existingSecret`              | Name of existing secret to use for Keycloak admin credentials | `""`               |
-| `keycloak.secretKeys.adminPasswordKey` | Secret key for admin credentials                              | `"admin-password"` |
-| `keycloak.hostname`                    | Keycloak hostname                                             | `""`               |
-| `keycloak.hostnameAdmin`               | Keycloak admin hostname                                       | `""`               |
-| `keycloak.hostnameStrict`              | Enable strict hostname resolution                             | `false`            |
-| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname                                 | `""`               |
-| `keycloak.httpEnabled`                 | Enable HTTP listener                                          | `true`             |
-| `keycloak.httpPort`                    | HTTP port                                                     | `8080`             |
-| `keycloak.httpsPort`                   | HTTPS port                                                    | `8443`             |
-| `keycloak.proxy`                       | Proxy mode (edge, reencrypt, passthrough, none)               | `none`             |
-| `keycloak.production`                  | Enable production mode                                        | `false`            |
+| Parameter                              | Description                                                                                                  | Default            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `keycloak.adminUser`                   | Keycloak admin username                                                                                      | `admin`            |
+| `keycloak.adminPassword`               | Keycloak admin password                                                                                      | `""`               |
+| `keycloak.existingSecret`              | Name of existing secret to use for Keycloak admin credentials                                                | `""`               |
+| `keycloak.secretKeys.adminPasswordKey` | Secret key for admin credentials                                                                             | `"admin-password"` |
+| `keycloak.hostname`                    | Keycloak hostname                                                                                            | `""`               |
+| `keycloak.hostnameAdmin`               | Keycloak admin hostname                                                                                      | `""`               |
+| `keycloak.hostnameStrict`              | Enable strict hostname resolution                                                                            | `false`            |
+| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname                                                                                | `""`               |
+| `keycloak.httpEnabled`                 | Enable HTTP listener                                                                                         | `true`             |
+| `keycloak.httpPort`                    | HTTP port                                                                                                    | `8080`             |
+| `keycloak.httpsPort`                   | HTTPS port                                                                                                   | `8443`             |
+| `keycloak.proxyHeaders`                | The proxy headers that should be accepted by the server. (forwarded, xforwarded)                             | `""`               |
+| `keycloak.proxyProtocolEnabled`        | Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false) | `false`            |
+| `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
+| `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
+| `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
 
 ### Database Configuration
 
@@ -160,14 +176,15 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Service configuration
 
-| Parameter                 | Description                   | Default     |
-| ------------------------- | ----------------------------- | ----------- |
-| `service.type`            | Keycloak service type         | `ClusterIP` |
-| `service.httpPort`        | Keycloak HTTP service port    | `8080`      |
-| `service.httpsPort`       | Keycloak HTTPS service port   | `8443`      |
-| `service.httpTargetPort`  | Keycloak HTTP container port  | `8080`      |
-| `service.httpsTargetPort` | Keycloak HTTPS container port | `8443`      |
-| `service.annotations`     | Service annotations           | `{}`        |
+| Parameter                     | Description                   | Default     |
+| ----------------------------- | ----------------------------- | ----------- |
+| `service.type`                | Keycloak service type         | `ClusterIP` |
+| `service.httpPort`            | Keycloak HTTP service port    | `8080`      |
+| `service.httpsPort`           | Keycloak HTTPS service port   | `8443`      |
+| `service.httpTargetPort`      | Keycloak HTTP container port  | `8080`      |
+| `service.httpsTargetPort`     | Keycloak HTTPS container port | `8443`      |
+| `service.annotations`         | Service annotations           | `{}`        |
+| `service.trafficDistribution` | Service traffic distribution  | `""`        |
 
 ### Ingress configuration
 
@@ -223,11 +240,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Node Selection
 
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
+| Parameter                   | Description                                    | Default |
+| --------------------------- | ---------------------------------------------- | ------- |
+| `nodeSelector`              | Node labels for pod assignment                 | `{}`    |
+| `tolerations`               | Toleration labels for pod assignment           | `[]`    |
+| `affinity`                  | Affinity settings for pod assignment           | `{}`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
 
 ### Service Account
 
@@ -240,9 +258,10 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra Environment
 
-| Parameter  | Description                                           | Default |
-| ---------- | ----------------------------------------------------- | ------- |
-| `extraEnv` | Additional environment variables from key-value pairs | `{}`    |
+| Parameter            | Description                                                            | Default |
+| -------------------- | ---------------------------------------------------------------------- | ------- |
+| `extraEnv`           | Additional environment variables from key-value pairs                  | `{}`    |
+| `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``      |
 
 ### Extra Configuration Parameters
 
@@ -270,7 +289,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                   | Description                                       | Default      |
 | --------------------------- | ------------------------------------------------- | ------------ |
-| `mariadb.enabled`           | Enable embedded PostgreSQL database               | `false`       |
+| `mariadb.enabled`           | Enable embedded PostgreSQL database               | `false`      |
 | `mariadb.auth.database`     | MariaDB database name                             | `"keycloak"` |
 | `mariadb.auth.username`     | MariaDB database user (leave empty for root user) | `""`         |
 | `mariadb.auth.password`     | MariaDB database password                         | `""`         |
@@ -519,21 +538,18 @@ kubectl get secret my-keycloak -o jsonpath="{.data.admin-password}" | base64 --d
 ### Common Issues
 
 1. **Pod fails to start with database connection errors**
-
    - Verify database connection parameters
    - Ensure the database is running and accessible
    - Check database credentials in secrets
    - Review pod logs: `kubectl logs <pod-name>`
 
 2. **Cannot access Keycloak via ingress**
-
    - Verify ingress configuration and annotations
    - Check if ingress controller is installed
    - Ensure DNS resolves to the correct IP
    - Check TLS certificate configuration
 
 3. **Admin login fails**
-
    - Verify admin password in the secret
    - Check if the admin user exists in the database
    - Review Keycloak logs for authentication errors

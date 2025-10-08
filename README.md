@@ -15,6 +15,7 @@ This repository provides secure, well-documented, and configurable Helm charts f
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | [ClusterPirate](charts/clusterpirate/) | Client agent for the CloudPirates Managed Observability Platform to connect your Kubernetes cluster to our infrastructure |
 | [Common](charts/common/)               | A library chart for common templates and helper functions                                                                 |
+| [Ghost](charts/ghost/)                 | A simple, powerful publishing platform that allows you to share your stories with the world.                              |
 | [Keycloak](charts/keycloak/)           | Open Source Identity and Access Management solution                                                                       |
 | [MariaDB](charts/mariadb/)             | High-performance, open-source relational database server that is a drop-in replacement for MySQL                          |
 | [Memcached](charts/memcached/)         | High-performance, distributed memory object caching system                                                                |
@@ -39,8 +40,11 @@ This repository provides secure, well-documented, and configurable Helm charts f
 ### Installing Charts
 
 ```bash
-# From repository
+# From Docker Hub registry
 helm install my-release oci://registry-1.docker.io/cloudpirates/<chartname>
+
+# From GitHub Container Registry (GHCR)
+helm install my-release oci://ghcr.io/cloudpirates-io/helm-charts/<chartname>
 
 # From local clone
 helm install my-release ./charts/<chart-name>

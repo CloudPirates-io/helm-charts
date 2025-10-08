@@ -71,7 +71,7 @@ Return the MariaDB ConfigMap Name
 */}}
 {{- define "mariadb.configMapName" -}}
 {{- if .Values.config.existingConfigMap }}
-{{- .Values.config.existingConfigMap }}
+{{- printf "%s" (tpl .Values.config.existingConfigMap $) -}}
 {{- else }}
 {{- include "mariadb.fullname" . }}
 {{- end }}

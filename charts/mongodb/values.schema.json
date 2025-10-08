@@ -56,9 +56,9 @@
         "tag": {
           "type": "string",
           "title": "MongoDB Image Tag",
-          "description": "MongoDB Docker image tag with digest"
+          "description": "MongoDB image tag"
         },
-        "imagePullPolicy": {
+        "pullPolicy": {
           "type": "string",
           "title": "MongoDB Image Pull Policy",
           "description": "MongoDB image pull policy",
@@ -75,6 +75,22 @@
       "type": "string",
       "title": "Full Name Override",
       "description": "String to fully override mongodb.fullname"
+    },
+    "commonLabels": {
+      "type": "object",
+      "title": "Common Labels",
+      "description": "Labels to add to all deployed objects",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "commonAnnotations": {
+      "type": "object",
+      "title": "Common Annotations",
+      "description": "Annotations to add to all deployed objects",
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "service": {
       "type": "object",
@@ -128,37 +144,81 @@
         }
       }
     },
-    "databases": {
-      "type": "array",
-      "title": "Additional Databases",
-      "description": "Array of additional databases to create",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Database Name",
-            "description": "Name of the database"
-          },
-          "user": {
-            "type": "string",
-            "title": "Database User",
-            "description": "Username for the database"
-          },
-          "password": {
-            "type": "string",
-            "title": "Database Password",
-            "description": "Password for the database user"
-          }
-        },
-        "required": ["name"]
-      }
-    },
     "config": {
       "type": "object",
       "title": "MongoDB Configuration",
       "description": "MongoDB configuration options",
-      "additionalProperties": true
+      "properties": {
+        "mountPath": {
+          "type": "string",
+          "title": "Config Mount Path",
+          "description": "MongoDB configuration options"
+        },
+        "content": {
+          "type": "string",
+          "title": "Config Content",
+          "description": "Include your custom MongoDB configurations here as string"
+        },
+        "existingConfigmap": {
+          "type": "string",
+          "title": "Existing ConfigMap",
+          "description": "Name of an existing Configmap to use instead of creating one"
+        },
+        "existingConfigmapKey": {
+          "type": "string",
+          "title": "Existing ConfigMap Key",
+          "description": "Name of the key in the Configmap that should be used"
+        }
+      }
+    },
+    "customUser": {
+      "type": "object",
+      "title": "Custom User",
+      "description": "Optional user to be created at initialisation with a custom password and database",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Custom User Name",
+          "description": "Name of the custom user to be created"
+        },
+        "database": {
+          "type": "string",
+          "title": "Custom User Database",
+          "description": "Name of the database to be created"
+        },
+        "password": {
+          "type": "string",
+          "title": "Custom User Password",
+          "description": "Password to be used for the custom user"
+        },
+        "existingSecret": {
+          "type": "string",
+          "title": "Custom User Existing Secret",
+          "description": "Existing secret, in which username, password and database name are saved"
+        },
+        "secretKeys": {
+          "type": "object",
+          "title": "Custom User Secret Keys",
+          "description": "Name of keys in existing secret to use the custom user name, password and database",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Secret Key for User Name",
+              "description": "Key name in the secret for username"
+            },
+            "password": {
+              "type": "string",
+              "title": "Secret Key for Password",
+              "description": "Key name in the secret for password"
+            },
+            "database": {
+              "type": "string",
+              "title": "Secret Key for Database",
+              "description": "Key name in the secret for database name"
+            }
+          }
+        }
+      }
     },
     "persistence": {
       "type": "object",
@@ -191,6 +251,14 @@
           "type": "string",
           "title": "Mount Path",
           "description": "Mount path for MongoDB data"
+        },
+        "annotations": {
+          "type": "object",
+          "title": "Persistence Annotations",
+          "description": "Annotations for persistent volume claims",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
@@ -262,17 +330,11 @@
       "title": "Affinity Configuration",
       "description": "Affinity rules for pod assignment"
     },
-    "securityContext": {
+    "containerSecurityContext": {
       "type": "object",
-      "title": "Security Context",
+      "title": "Container Security Context",
       "description": "Security context configuration",
       "properties": {
-        "fsGroup": {
-          "type": "integer",
-          "title": "FS Group",
-          "description": "Group ID for filesystem ownership",
-          "minimum": 0
-        },
         "runAsUser": {
           "type": "integer",
           "title": "Run As User",
@@ -283,6 +345,11 @@
           "type": "boolean",
           "title": "Run As Non-Root",
           "description": "Run as non-root user"
+        },
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "title": "Allow Privilege Escalation",
+          "description": "Set MongoDB container's privilege escalation"
         }
       }
     },
@@ -290,7 +357,14 @@
       "type": "object",
       "title": "Pod Security Context",
       "description": "Security context for the pod",
-      "additionalProperties": true
+      "properties": {
+        "fsGroup": {
+          "type": "integer",
+          "title": "FS Group",
+          "description": "Set MongoDB pod's Security Context fsGroup",
+          "minimum": 0
+        }
+      }
     },
     "livenessProbe": {
       "type": "object",

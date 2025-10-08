@@ -2,10 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-
-version: 0.1.6
+version: 0.1.13
 appVersion: "1.29.1"
-
 keywords:
   - nginx
   - web server
@@ -13,19 +11,14 @@ keywords:
   - reverse proxy
   - load balancer
   - proxy
-
 home: https://www.cloudpirates.io
-
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
-
 maintainers:
   - name: CloudPirates GmbH & Co. KG
     url: https://www.cloudpirates.io
-
 dependencies:
   - name: common
     version: "1.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
-
 icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg

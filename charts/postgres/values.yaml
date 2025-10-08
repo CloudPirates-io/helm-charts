@@ -22,7 +22,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"
+  tag: "18.0@sha256:073e7c8b84e2197f94c8083634640ab37105effe1bc853ca4d5fbece3219b0e8"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
 
@@ -41,18 +41,18 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the PostgreSQL container
+  ## @param containerSecurityContext.runAsUser User ID for the PostgreSQL container
   runAsUser: 999
-  ## @param securityContext.runAsGroup Group ID for the PostgreSQL container
+  ## @param containerSecurityContext.runAsGroup Group ID for the PostgreSQL container
   runAsGroup: 999
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: false
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL
@@ -99,6 +99,8 @@ config:
   extraConfig: []
   ## @param config.existingConfigmap Name of existing ConfigMap with PostgreSQL configuration
   existingConfigmap: ""
+  ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
+  pgHbaConfig: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser: {}

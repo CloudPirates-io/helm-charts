@@ -49,6 +49,10 @@
           "type": "string",
           "description": "Keycloak image tag (immutable tags are recommended)"
         },
+        "command": {
+          "type": "string",
+          "description": "Keycloak container startup command"
+        },
         "imagePullPolicy": {
           "type": "string",
           "enum": ["Always", "IfNotPresent", "Never"],
@@ -69,6 +73,27 @@
       "type": "object",
       "description": "Map of labels to add to the pods"
     },
+    "extraVolumes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of Volume to add to the keycloak pod"
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of VolumeMount to add to the keycloak container"
+    },
+    "extraInitContainers": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of initContainer to add to the keycloak pod"
+    },
     "podSecurityContext": {
       "type": "object",
       "properties": {
@@ -78,7 +103,7 @@
         }
       }
     },
-    "securityContext": {
+    "containerSecurityContext": {
       "type": "object",
       "properties": {
         "allowPrivilegeEscalation": {
@@ -171,14 +196,26 @@
           "maximum": 65535,
           "description": "HTTPS port"
         },
-        "proxy": {
+        "proxyHeaders": {
           "type": "string",
-          "enum": ["edge", "reencrypt", "passthrough", "none"],
-          "description": "Proxy mode (edge, reencrypt, passthrough, none)"
+          "enum": ["", "forwarded", "xforwarded"],
+          "description": "The proxy headers that should be accepted by the server. (forwarded, xforwarded)"
+        },
+        "proxyProtocolEnabled": {
+          "type": "boolean",
+          "description": "Whether the server should use the HA PROXY protocol when serving requests from behind a proxy."
+        },
+        "proxyTrustedAddresses": {
+          "type": "string",
+          "description": "A comma separated list of trusted proxy addresses"
         },
         "production": {
           "type": "boolean",
           "description": "Enable production mode"
+        },
+        "httpRelativePath": {
+          "type": "string",
+          "description": "Set relative path for serving resources; must start with a /"
         }
       }
     },
@@ -301,6 +338,10 @@
         "annotations": {
           "type": "object",
           "description": "Service annotations"
+        },
+        "trafficDistribution": {
+          "type": "string",
+          "description": "Traffic distribution policy"
         }
       }
     },
@@ -519,6 +560,10 @@
       "type": "object",
       "description": "Affinity settings for pod assignment"
     },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "description": "Topology Spread Constraints for pod assignment"
+    },
     "serviceAccount": {
       "type": "object",
       "properties": {
@@ -544,9 +589,19 @@
       "type": "object",
       "description": "Additional environment variables from key-value pairs"
     },
+    "extraEnvVarsSecret": {
+      "type": "string",
+      "title": "Extra Environment Secret",
+      "description": "Name of an existing Secret containing additional environment variables"
+    },
     "extraObjects": {
       "type": "array",
-      "description": "Array of extra objects to deploy with the release"
+      "title": "Extra Objects",
+      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
+      "items": {
+        "type": "object",
+        "description": "A Kubernetes manifest object. All fields are allowed."
+      }
     },
     "initContainers": {
       "type": "object",

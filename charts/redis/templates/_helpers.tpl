@@ -91,6 +91,13 @@ Return the proper Redis Sentinel image name
 {{- end }}
 
 {{/*
+Return the proper Redis metrics image name
+*/}}
+{{- define "redis.metrics.image" -}}
+{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Sentinel selector labels
 */}}
 {{- define "redis.sentinel.selectorLabels" -}}

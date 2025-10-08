@@ -30,14 +30,22 @@ image:
 
 ## @param replicaCount Number of Zookeeper replicas to deploy
 replicaCount: 3
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
+podDisruptionBudget:
+  ## @param podDisruptionBudget.enabled Create a Pod Disruption Budget to ensure high availability during voluntary disruptions
+  enabled: true
+
+networkPolicy:
+  ## @param networkPolicy.enabled Enable network policies
+  enabled: true
 
 ## @section Zookeeper configuration parameters
 ## @see https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_configuration
 zookeeperConfig:
   ## @param zookeeperConfig.tickTime Zookeeper tick time
   tickTime: 2000
-  ## @param zookeeperConfig.dataDir Zookeeper data directory (should match persistence.mountPath)
-  dataDir: /var/lib/zookeeper/data
   ## @param zookeeperConfig.initLimit Zookeeper init limit
   initLimit: 10
   ## @param zookeeperConfig.syncLimit Zookeeper sync limit
@@ -59,6 +67,18 @@ zookeeperConfig:
     purgeInterval: 24
     ## @param zookeeperConfig.autopurge.snapRetainCount Zookeeper autopurge snapshot retain count
     snapRetainCount: 3
+  admin:
+    ## @param zookeeperConfig.admin.enableServer Enable Zookeeper Admin server
+    enableServer: "false"
+    ## @param zookeeperConfig.admin.serverPort Zookeeper Admin server port
+    serverPort: 8080
+    ## @param zookeeperConfig.admin.serverAddress Zookeeper Admin server address
+    serverAddress: "0.0.0.0"
+    ## @param zookeeperConfig.admin.idleTimeout Zookeeper Admin server connection idle timeout (in milliseconds)
+    idleTimeout: 30000
+    ## @param zookeeperConfig.admin.commandUrl Zookeeper Admin server command URL
+    commandUrl: "/commands"
+
 
 ## @section Zookeeper Metrics configuration
 metrics:
@@ -70,15 +90,32 @@ metrics:
     ## @param metrics.service.ports.port Zookeeper metrics service port
     port: 7000
 
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @section MariaDB Container Security Context
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
   runAsUser: 1000
+  ## @param containerSecurityContext.runAsGroup Set MariaDB container's Security Context runAsGroup
+  runAsGroup: 1000
+  ## @param containerSecurityContext.seLinuxOptions Set container's Security Context seLinuxOptions
+  seLinuxOptions: {}
   ## @param containerSecurityContext.runAsNonRoot Set MariaDB container's Security Context runAsNonRoot
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set MariaDB container's privilege escalation
   allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.privileged Set container's privileged mode
+  privileged: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: true
+  ## @param containerSecurityContext.capabilities Linux capabilities to drop or add for the container
+  capabilities:
+    drop:
+    - ALL
+  ## @param containerSecurityContext.seccompProfile Seccomp profile for the container
+  seccompProfile:
+    type: RuntimeDefault
 
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @section Security Context
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
@@ -138,7 +175,7 @@ persistence:
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
-  mountPath: /var/lib/zookeeper/data
+  mountPath: /data
 
 ## @section Liveness and readiness probes
 livenessProbe:

@@ -1,8 +1,39 @@
 # Changelog
 
-## 0.2.7 (2025-09-16)
+## 0.3.2 (2025-10-06)
 
-* [mariadb] chore(deps): update docker.io/mariadb:12.0.2 Docker digest to 8a061ef ([#97](https://github.com/CloudPirates-io/helm-charts/pull/97))
+* [mariadb] chore(deps): update docker.io/mariadb:12.0.2 Docker digest to 03a03a6 ([#207](https://github.com/CloudPirates-io/helm-charts/pull/207))
+
+## <small>0.3.1 (2025-10-06)</small>
+
+* use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c)), closes [#217](https://github.com/CloudPirates-io/helm-charts/issues/217)
+
+## 0.3.0 (2025-09-29)
+
+* bump version to 0.2.6 ([51bcd26](https://github.com/CloudPirates-io/helm-charts/commit/51bcd26))
+* change statefulset pvc-template labels to not use common.labels ([780386b](https://github.com/CloudPirates-io/helm-charts/commit/780386b))
+* chore(deps): update docker.io/mariadb:12.0.2 Docker digest to 8a061ef ([ba48f7a](https://github.com/CloudPirates-io/helm-charts/commit/ba48f7a))
+* fix pvc-labels ([aaf1b20](https://github.com/CloudPirates-io/helm-charts/commit/aaf1b20))
+* fix statefulset pvc template ([b600627](https://github.com/CloudPirates-io/helm-charts/commit/b600627))
+* make mariadb run on openshift (#176) ([e2c3afb](https://github.com/CloudPirates-io/helm-charts/commit/e2c3afb)), closes [#176](https://github.com/CloudPirates-io/helm-charts/issues/176)
+* add empty linting rule ([8be9283](https://github.com/CloudPirates-io/helm-charts/commit/8be9283))
+* Bump chart version ([ea85028](https://github.com/CloudPirates-io/helm-charts/commit/ea85028))
+* Bump chart version ([d2863aa](https://github.com/CloudPirates-io/helm-charts/commit/d2863aa))
+* Bump MariaDB chart version to 0.2.3 ([10b1b7d](https://github.com/CloudPirates-io/helm-charts/commit/10b1b7d))
+* Fix helpers.tpl ([201ecc7](https://github.com/CloudPirates-io/helm-charts/commit/201ecc7))
+* Implement default password ([c858a6b](https://github.com/CloudPirates-io/helm-charts/commit/c858a6b))
+* Implement init script ([4b6ee98](https://github.com/CloudPirates-io/helm-charts/commit/4b6ee98))
+* mariadb now respects full custom container security context settings ([770ea69](https://github.com/CloudPirates-io/helm-charts/commit/770ea69))
+* Reverse version bump ([379dbfe](https://github.com/CloudPirates-io/helm-charts/commit/379dbfe))
+* Update CHANGELOG.md ([bb96d54](https://github.com/CloudPirates-io/helm-charts/commit/bb96d54))
+* Update CHANGELOG.md ([858838d](https://github.com/CloudPirates-io/helm-charts/commit/858838d))
+* Update CHANGELOG.md ([e5c8efd](https://github.com/CloudPirates-io/helm-charts/commit/e5c8efd))
+* Update CHANGELOG.md ([79570ff](https://github.com/CloudPirates-io/helm-charts/commit/79570ff))
+* Update CHANGELOG.md ([7517a21](https://github.com/CloudPirates-io/helm-charts/commit/7517a21))
+* Update CHANGELOG.md ([bcd1d8a](https://github.com/CloudPirates-io/helm-charts/commit/bcd1d8a))
+* Update CHANGELOG.md ([9af2905](https://github.com/CloudPirates-io/helm-charts/commit/9af2905))
+* Update docker.io/mariadb:12.0.2 Docker digest to a5af517 ([6322f06](https://github.com/CloudPirates-io/helm-charts/commit/6322f06))
+* updated chart version ([f7b6496](https://github.com/CloudPirates-io/helm-charts/commit/f7b6496))
 
 ## 0.2.0 (2025-09-02)
 

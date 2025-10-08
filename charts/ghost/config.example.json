@@ -1,0 +1,101 @@
+{
+  "url": "https://example.com",
+  "database": {
+    "client": "mysql",
+    "connection": {
+      "host": "127.0.0.1",
+      "port": 3306,
+      "user": "your_database_user",
+      "password": "your_database_password",
+      "database": "your_database_name"
+    },
+    "pool": {
+      "min": 2,
+      "max": 10
+    }
+  },
+  "mail": {
+    "transport": "SMTP",
+    "options": {
+      "service": "Mailgun",
+      "host": "smtp.mailgun.org",
+      "port": 465,
+      "secure": true,
+      "auth": {
+        "user": "postmaster@example.mailgun.org",
+        "pass": "1234567890"
+      }
+    },
+    "from": "support@example.com"
+  },
+  "admin": {
+    "url": "https://example.com"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 2368
+  },
+  "privacy": {
+    "useUpdateCheck": false,
+    "useGravatar": false,
+    "useRpcPing": false,
+    "useStructuredData": false
+  },
+  "security": {
+    "staffDeviceVerification": false
+  },
+  "paths": {
+    "contentPath": "content/"
+  },
+  "referrerPolicy": "origin-when-crossorigin",
+  "logging": {
+    "path": "content/logs/",
+    "useLocalTime": true,
+    "level": "info",
+    "rotation": {
+      "enabled": true,
+      "count": 10,
+      "period": "1d"
+    },
+    "transports": ["stdout", "file"]
+  },
+  "caching": {
+    "frontend": { "maxAge": 0 },
+    "contentAPI": { "maxAge": 10 },
+    "robotstxt": { "maxAge": 3600 },
+    "sitemap": { "maxAge": 3600 },
+    "sitemapXSL": { "maxAge": 86400 },
+    "wellKnown": { "maxAge": 86400 },
+    "cors": { "maxAge": 86400 },
+    "publicAssets": { "maxAge": 31536000 },
+    "301": { "maxAge": 31536000 },
+    "customRedirects": { "maxAge": 31536000 }
+  },
+  "compress": true,
+  "imageOptimization": {
+    "resize": false
+  },
+  "storage": {
+    "active": "local-file-store"
+  },
+  "adapters": {
+    "cache": {
+      "imageSizes": {
+        "adapter": "Redis",
+        "ttl": 3600,
+        "keyPrefix": "image-sizes:"
+      }
+    }
+  },
+  "portal": {
+    "url": "https://cdn.jsdelivr.net/npm/@tryghost/portal@~{version}/umd/portal.min.js"
+  },
+  "sodoSearch": {
+    "url": "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/sodo-search.min.js",
+    "styles": "https://cdn.jsdelivr.net/npm/@tryghost/sodo-search@~{version}/umd/main.css"
+  },
+  "comments": {
+    "url": "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/comments-ui.min.js",
+    "styles": "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/main.css"
+  }
+}
