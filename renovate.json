@@ -61,12 +61,9 @@
       "matchDatasources": [
         "helm"
       ],
-      "matchPackageNames": [
-        "common",
-        "valkey"
-      ],
-      "matchSourceUrls": [
-        "oci://registry-1.docker.io/cloudpirates"
+      "matchPackagePatterns": [
+        "^cloudpirates/common$",
+        "^cloudpirates/valkey$"
       ],
       "enabled": false
     }
