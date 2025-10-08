@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.5.4 (2025-10-08)
+## 0.5.5 (2025-10-08)
 
-* [redis]: fix dual stack networking issues ([#227](https://github.com/CloudPirates-io/helm-charts/pull/227))
+* [redis] Update redis to v8.2.2 ([#233](https://github.com/CloudPirates-io/helm-charts/pull/233))
+
+## <small>0.5.4 (2025-10-08)</small>
+
+* [redis]: fix dual stack networking issues (#227) ([381bd76](https://github.com/CloudPirates-io/helm-charts/commit/381bd76)), closes [#227](https://github.com/CloudPirates-io/helm-charts/issues/227)
 
 ## <small>0.5.3 (2025-10-06)</small>
 
