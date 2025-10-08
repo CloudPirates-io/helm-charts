@@ -127,11 +127,19 @@ spec:
             - name: custom-init-scripts
               mountPath: /docker-entrypoint-initdb.d
             {{- end }}
+            {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
+            - name: run
+              mountPath: /var/run/mysqld/
+            {{- end }}
       volumes:
         - name: tmp-volume
           emptyDir: {}
         {{- if not .Values.persistence.enabled }}
         - name: data
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
+        - name: run
           emptyDir: {}
         {{- end }}
         {{- if or .Values.config.customConfiguration .Values.config.existingConfigMap }}

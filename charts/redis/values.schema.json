@@ -92,6 +92,20 @@
       "description": "Number of Redis replicas to deploy",
       "minimum": 1
     },
+    "ipFamily": {
+      "type": "string",
+      "title": "IP Family",
+      "description": "IP family to use for replica and sentinel announce IPs. 'auto' uses the first IP from hostname -i, 'ipv4' forces IPv4, 'ipv6' forces IPv6. Falls back to available IP family with warning if requested family is not available.",
+      "enum": ["auto", "ipv4", "ipv6"],
+      "default": "auto"
+    },
+    "architecture": {
+      "type": "string",
+      "title": "Redis Architecture",
+      "description": "Redis architecture. Allowed values: standalone or replication",
+      "enum": ["standalone", "replication"],
+      "default": "standalone"
+    },
     "service": {
       "type": "object",
       "title": "Service Configuration",
@@ -205,6 +219,32 @@
           "additionalProperties": {
             "type": "string"
           }
+        }
+      }
+    },
+    "persistentVolumeClaimRetentionPolicy": {
+      "type": "object",
+      "title": "PVC Retention Policy",
+      "description": "Persistent Volume Claim retention policy for StatefulSet",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Retention Policy",
+          "description": "Enable Persistent volume retention policy for the StatefulSet"
+        },
+        "whenScaled": {
+          "type": "string",
+          "title": "When Scaled",
+          "description": "Volume retention behavior when the replica count of the StatefulSet is reduced",
+          "enum": ["Retain", "Delete"],
+          "default": "Retain"
+        },
+        "whenDeleted": {
+          "type": "string",
+          "title": "When Deleted",
+          "description": "Volume retention behavior that applies when the StatefulSet is deleted",
+          "enum": ["Retain", "Delete"],
+          "default": "Retain"
         }
       }
     },
@@ -473,6 +513,434 @@
       "description": "Additional volume mounts to add to the Redis container",
       "items": {
         "type": "object"
+      }
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "title": "Topology Spread Constraints",
+      "description": "Topology Spread Constraints for pod assignment",
+      "items": {
+        "type": "object"
+      }
+    },
+    "initContainer": {
+      "type": "object",
+      "title": "Init Container Configuration",
+      "description": "Resource configuration for Redis init container pod",
+      "properties": {
+        "resources": {
+          "type": "object",
+          "title": "Resource Configuration",
+          "description": "Resource limits and requests for init container",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "title": "Resource Limits",
+              "description": "Resource limits for the init container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Limit",
+                  "description": "CPU resource limit"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Limit",
+                  "description": "Memory resource limit"
+                }
+              }
+            },
+            "requests": {
+              "type": "object",
+              "title": "Resource Requests",
+              "description": "Resource requests for the init container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Request",
+                  "description": "CPU resource request"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Request",
+                  "description": "Memory resource request"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sentinel": {
+      "type": "object",
+      "title": "Redis Sentinel Configuration",
+      "description": "Configuration for Redis Sentinel high availability in replication mode",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Sentinel",
+          "description": "Enable Redis Sentinel for high availability"
+        },
+        "image": {
+          "type": "object",
+          "title": "Sentinel Image Configuration",
+          "description": "Configuration for Sentinel container image",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "title": "Sentinel Image Repository",
+              "description": "Redis Sentinel image repository"
+            },
+            "tag": {
+              "type": "string",
+              "title": "Sentinel Image Tag",
+              "description": "Redis Sentinel image tag with digest"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "title": "Sentinel Image Pull Policy",
+              "description": "Redis Sentinel image pull policy",
+              "enum": ["Always", "Never", "IfNotPresent"]
+            }
+          }
+        },
+        "masterName": {
+          "type": "string",
+          "title": "Master Name",
+          "description": "Name of the master server",
+          "default": "mymaster"
+        },
+        "quorum": {
+          "type": "integer",
+          "title": "Quorum",
+          "description": "Number of Sentinels that need to agree about the fact the master is not reachable",
+          "minimum": 1
+        },
+        "downAfterMilliseconds": {
+          "type": "integer",
+          "title": "Down After Milliseconds",
+          "description": "Time in milliseconds after the master is declared down",
+          "minimum": 1
+        },
+        "failoverTimeout": {
+          "type": "integer",
+          "title": "Failover Timeout",
+          "description": "Timeout for failover in milliseconds",
+          "minimum": 1
+        },
+        "parallelSyncs": {
+          "type": "integer",
+          "title": "Parallel Syncs",
+          "description": "Number of replicas that can be reconfigured to use the new master during a failover",
+          "minimum": 1
+        },
+        "port": {
+          "type": "integer",
+          "title": "Sentinel Port",
+          "description": "Sentinel port",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "title": "Extra Volume Mounts",
+          "description": "Additional volume mounts to add to the Sentinel container",
+          "items": {
+            "type": "object"
+          }
+        },
+        "service": {
+          "type": "object",
+          "title": "Sentinel Service Configuration",
+          "description": "Kubernetes service configuration for Sentinel",
+          "properties": {
+            "type": {
+              "type": "string",
+              "title": "Service Type",
+              "description": "Kubernetes service type for Sentinel",
+              "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+            },
+            "port": {
+              "type": "integer",
+              "title": "Service Port",
+              "description": "Sentinel service port",
+              "minimum": 1,
+              "maximum": 65535
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "title": "Resource Configuration",
+          "description": "Resource limits and requests for Sentinel pod",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "title": "Resource Limits",
+              "description": "Resource limits for the Sentinel container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Limit",
+                  "description": "CPU resource limit"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Limit",
+                  "description": "Memory resource limit"
+                }
+              }
+            },
+            "requests": {
+              "type": "object",
+              "title": "Resource Requests",
+              "description": "Resource requests for the Sentinel container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Request",
+                  "description": "CPU resource request"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Request",
+                  "description": "Memory resource request"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "title": "Metrics Configuration",
+      "description": "Prometheus metrics configuration for Redis",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Metrics",
+          "description": "Start a sidecar prometheus exporter to expose Redis metrics"
+        },
+        "image": {
+          "type": "object",
+          "title": "Metrics Image Configuration",
+          "description": "Configuration for metrics exporter container image",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "title": "Metrics Image Registry",
+              "description": "Redis exporter image registry"
+            },
+            "repository": {
+              "type": "string",
+              "title": "Metrics Image Repository",
+              "description": "Redis exporter image repository"
+            },
+            "tag": {
+              "type": "string",
+              "title": "Metrics Image Tag",
+              "description": "Redis exporter image tag with digest"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "title": "Metrics Image Pull Policy",
+              "description": "Redis exporter image pull policy",
+              "enum": ["Always", "Never", "IfNotPresent"]
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "title": "Resource Configuration",
+          "description": "Resource limits and requests for metrics container",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "title": "Resource Limits",
+              "description": "Resource limits for the metrics container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Limit",
+                  "description": "CPU resource limit"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Limit",
+                  "description": "Memory resource limit"
+                }
+              }
+            },
+            "requests": {
+              "type": "object",
+              "title": "Resource Requests",
+              "description": "Resource requests for the metrics container",
+              "properties": {
+                "cpu": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "number"}
+                  ],
+                  "title": "CPU Request",
+                  "description": "CPU resource request"
+                },
+                "memory": {
+                  "type": "string",
+                  "title": "Memory Request",
+                  "description": "Memory resource request"
+                }
+              }
+            }
+          }
+        },
+        "extraArgs": {
+          "type": "array",
+          "title": "Extra Arguments",
+          "description": "Extra arguments for redis exporter",
+          "items": {
+            "type": "string"
+          }
+        },
+        "service": {
+          "type": "object",
+          "title": "Metrics Service Configuration",
+          "description": "Kubernetes service configuration for metrics",
+          "properties": {
+            "type": {
+              "type": "string",
+              "title": "Service Type",
+              "description": "Metrics service type",
+              "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+            },
+            "port": {
+              "type": "integer",
+              "title": "Service Port",
+              "description": "Metrics service port",
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "annotations": {
+              "type": "object",
+              "title": "Service Annotations",
+              "description": "Additional custom annotations for Metrics service",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "loadBalancerIP": {
+              "type": "string",
+              "title": "Load Balancer IP",
+              "description": "Load balancer IP if metrics service type is LoadBalancer"
+            },
+            "loadBalancerSourceRanges": {
+              "type": "array",
+              "title": "Load Balancer Source Ranges",
+              "description": "Addresses that are allowed when metrics service is LoadBalancer",
+              "items": {
+                "type": "string"
+              }
+            },
+            "clusterIP": {
+              "type": "string",
+              "title": "Cluster IP",
+              "description": "Static clusterIP or None for headless services when metrics service type is ClusterIP"
+            },
+            "nodePort": {
+              "oneOf": [
+                {"type": "string"},
+                {"type": "integer"}
+              ],
+              "title": "Node Port",
+              "description": "Specify the nodePort value for the LoadBalancer and NodePort service types"
+            }
+          }
+        },
+        "serviceMonitor": {
+          "type": "object",
+          "title": "Service Monitor Configuration",
+          "description": "Prometheus ServiceMonitor configuration",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "Enable Service Monitor",
+              "description": "Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator"
+            },
+            "namespace": {
+              "type": "string",
+              "title": "Namespace",
+              "description": "Namespace in which to create ServiceMonitor resource(s)"
+            },
+            "interval": {
+              "type": "string",
+              "title": "Interval",
+              "description": "Interval at which metrics should be scraped"
+            },
+            "scrapeTimeout": {
+              "type": "string",
+              "title": "Scrape Timeout",
+              "description": "Timeout after which the scrape is ended"
+            },
+            "relabelings": {
+              "type": "array",
+              "title": "Relabelings",
+              "description": "Specify additional relabeling of metrics",
+              "items": {
+                "type": "object"
+              }
+            },
+            "metricRelabelings": {
+              "type": "array",
+              "title": "Metric Relabelings",
+              "description": "Specify additional metric relabeling of metrics",
+              "items": {
+                "type": "object"
+              }
+            },
+            "honorLabels": {
+              "type": "boolean",
+              "title": "Honor Labels",
+              "description": "Honor metrics labels"
+            },
+            "selector": {
+              "type": "object",
+              "title": "Selector",
+              "description": "Prometheus instance selector labels",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "annotations": {
+              "type": "object",
+              "title": "Annotations",
+              "description": "Additional custom annotations for the ServiceMonitor",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "namespaceSelector": {
+              "type": "object",
+              "title": "Namespace Selector",
+              "description": "Namespace selector for ServiceMonitor",
+              "additionalProperties": true
+            }
+          }
+        }
       }
     },
     "extraObjects": {

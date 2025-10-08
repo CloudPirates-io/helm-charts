@@ -35,6 +35,12 @@ architecture: standalone
 ## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
 replicaCount: 3
 
+## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
+## auto: Uses the first IP returned by hostname -i (default)
+## ipv4: Forces IPv4 address selection
+## ipv6: Forces IPv6 address selection
+ipFamily: auto
+
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
@@ -173,7 +179,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621"
+    tag: "8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
@@ -224,7 +230,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.58.0@sha256:2e42c98f2c53aaf3ce205e746ff8bfa25d39e30d8b4f401ce0ad2740836bb817"
+    tag: "v1.78.0@sha256:043d380adf3b23c9f73a986d820e79491975c104fe0ce6ecb8639a19914654fd"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:

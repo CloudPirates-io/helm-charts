@@ -1,64 +1,70 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
   ],
   "enabledManagers": [
-    "helm-values"
+    "custom.regex",
+    "helmv3"
   ],
-  "helm-values": {
-    "managerFilePatterns": [
-      "/^charts/.*values\\.yaml$/"
-    ],
-    "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>-[^@]*)?@(?<compatibility>.+)$",
-    "extractVersion": "(?<version>[^@]+)@(?<sha>sha256:[a-f0-9]{64})",
-    "rangeStrategy": "replace"
-  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^charts/.+/values\\.yaml$/"
+      ],
+      "matchStrings": [
+        "repository:\\s*(?<depName>[^\\s]+)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
   "packageRules": [
     {
       "matchManagers": [
-        "helm-values"
+        "custom.regex"
       ],
       "matchUpdateTypes": [
         "minor",
         "patch",
         "digest"
       ],
-      "matchPackageNames": [
-        "/^docker\\.io\\/.+/"
+      "matchDatasources": [
+        "docker"
       ],
       "labels": [
         "dependencies",
         "renovate"
       ],
-      "commitMessagePrefix": "[{{{ replace \"docker.io/\" \"\" packageName }}}]",
-      "commitMessageAction": "chore(deps): update"
+      "commitMessageTopic": "{{{depName}}}",
+      "commitMessagePrefix": "[{{{replace 'docker.io/' '' depName}}}]",
+      "automerge": false
     },
     {
       "matchManagers": [
-        "helm-values"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
+        "helmv3"
       ],
       "labels": [
         "dependencies",
         "renovate"
       ],
-      "commitMessagePrefix": "[{{{ packageName }}}]",
-      "commitMessageAction": "chore(deps): update",
-      "matchPackageNames": [
-        "!/^docker\\.io\\/.+/"
-      ]
+      "automerge": false
     },
     {
-      "matchManagers": [
-        "helm-values"
+      "matchPackageNames": [
+        "**/clusterpirate"
+      ],
+      "enabled": false
+    },
+    {
+      "matchDatasources": [
+        "helm"
       ],
       "enabled": false,
       "matchPackageNames": [
-        "/harbor.cloudpirates.io/koperator-internal/services/clusterpirate/"
+        "/^cloudpirates/common$/",
+        "/^cloudpirates/valkey$/"
       ]
     }
   ]
