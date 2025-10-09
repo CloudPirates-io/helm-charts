@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.3.1 (2025-10-09)
+## 0.3.2 (2025-10-09)
 
-* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.3.5 (patch) ([#261](https://github.com/CloudPirates-io/helm-charts/pull/261))
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.0 (minor) ([#270](https://github.com/CloudPirates-io/helm-charts/pull/270))
+
+## <small>0.3.1 (2025-10-09)</small>
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.3.5 (patch) (#261) ([360de40](https://github.com/CloudPirates-io/helm-charts/commit/360de40)), closes [#261](https://github.com/CloudPirates-io/helm-charts/issues/261)
 
 ## 0.3.0 (2025-10-08)
 
