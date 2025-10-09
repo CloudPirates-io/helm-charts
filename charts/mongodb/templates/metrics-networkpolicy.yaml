@@ -1,0 +1,25 @@
+{{- if and .Values.metrics.enabled .Values.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "mongodb.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "mongodb.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 9216
+          protocol: TCP
+      {{- if .Values.networkPolicy.allowedSources }}
+      from:
+        {{- toYaml .Values.networkPolicy.allowedSources | nindent 8 }}
+      {{- end }}
+{{- end }}

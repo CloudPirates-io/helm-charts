@@ -285,3 +285,49 @@ initContainers: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+## @section Metrics configuration
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose PostgreSQL metrics
+  enabled: false
+  image:
+    ## @param metrics.image.registry PostgreSQL exporter image registry
+    registry: quay.io
+    ## @param metrics.image.repository PostgreSQL exporter image repository
+    repository: prometheuscommunity/postgres-exporter
+    ## @param metrics.image.tag PostgreSQL exporter image tag
+    tag: "v0.18.1@sha256:fb96c4413985d4b23ab02b19022b3d70a86c8e0a62f41ab15ebb6f4673781a5d"
+    ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources: {}
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional custom labels for Metrics service
+    labels: {}
+    ## @param metrics.service.port Metrics service port
+    port: 9187
+  ## Prometheus Operator ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace The namespace in which the ServiceMonitor will be created
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval The interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout The timeout after which the scrape is ended
+    scrapeTimeout: 10s
+    ## @param metrics.serviceMonitor.selector Additional labels for ServiceMonitor resource
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations ServiceMonitor annotations
+    annotations: {}
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.relabelings ServiceMonitor relabel configs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings ServiceMonitor metricRelabelings configs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
+    namespaceSelector: {}

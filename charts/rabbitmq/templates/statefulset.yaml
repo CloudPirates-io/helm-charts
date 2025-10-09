@@ -23,6 +23,10 @@ spec:
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- with (include "rabbitmq.imagePullSecrets" .) }}
       {{ . | nindent 6 }}
@@ -203,6 +207,11 @@ spec:
             - name: plugins
               mountPath: /opt/rabbitmq/plugins
             {{- end }}
+            {{- if .Values.definitions.enabled }}
+            - name: definitions
+              mountPath: "/etc/rabbitmq-definitions/defs.json"
+              subPath: {{ .Values.definitions.existingConfigMapKey | default "defs.json" }}
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -220,6 +229,11 @@ spec:
         - name: config
           configMap:
             name: {{ include "rabbitmq.fullname" . }}-config
+        {{- if .Values.definitions.enabled }}
+        - name: definitions
+          configMap:
+            name: {{ .Values.definitions.existingConfigMap | default (printf "%s-definitions" (include "rabbitmq.fullname" .)) }}
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
@@ -235,9 +249,13 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
-    - apiVersion: v1	
+    - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
         name: data

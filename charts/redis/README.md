@@ -70,13 +70,21 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 ### Common Parameters
 
 | Parameter           | Description                                                             | Default      |
-| ------------------- | ----------------------------------------------------------------------- | ------------ |
+|---------------------| ----------------------------------------------------------------------- | ------------ |
 | `nameOverride`      | String to partially override redis.fullname                             | `""`         |
 | `fullnameOverride`  | String to fully override redis.fullname                                 | `""`         |
 | `commonLabels`      | Labels to add to all deployed objects                                   | `{}`         |
 | `commonAnnotations` | Annotations to add to all deployed objects                              | `{}`         |
 | `architecture`      | Redis architecture. Allowed values: `standalone` or `replication`       | `standalone` |
 | `replicaCount`      | Number of Redis replicas to deploy (only when architecture=replication) | `2`          |
+
+### Pod labels and annotations
+
+| Parameter        | Description                           | Default |
+| ---------------- | ------------------------------------- | ------- |
+| `podLabels`      | Map of labels to add to the pods      | `{}`    |
+| `podAnnotations` | Map of annotations to add to the pods | `{}`    |
+
 
 ### Service Configuration
 

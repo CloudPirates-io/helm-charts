@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mongodb.fullname" . }}-init-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+data:
+{{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+  custom-user.sh: |
+    #!/bin/sh
+    set -e
+    mongosh --eval "db.getSiblingDB(\"$MONGO_INITDB_DATABASE\").createUser({user: \"$MONGO_CUSTOM_USERNAME\", pwd: \"$MONGO_CUSTOM_USER_PASSWORD\", roles: [ \"readWrite\", \"dbAdmin\" ]})"
+{{- end }}
+{{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+  metrics-user.sh: |
+    #!/bin/sh
+    set -e
+
+    # Wait for MongoDB to be ready
+    until mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+      echo "Waiting for MongoDB to be ready..."
+      sleep 2
+    done
+
+    # Create metrics user with minimal required permissions
+    mongosh admin --eval "
+      try {
+        db.createUser({
+          user: '${MONGO_METRICS_USERNAME}',
+          pwd: '${MONGO_METRICS_PASSWORD}',
+          roles: [
+            { role: 'clusterMonitor', db: 'admin' },
+            { role: 'readAnyDatabase', db: 'admin' },
+            { role: 'read', db: 'local' }
+          ]
+        });
+        print('Metrics user created successfully');
+      } catch (e) {
+        if (e.code === 51003) {
+          print('Metrics user already exists');
+        } else {
+          throw e;
+        }
+      }
+    "
+{{- end }}

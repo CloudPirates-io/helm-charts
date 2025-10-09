@@ -27,9 +27,16 @@ data:
     export REDISCLI_AUTH="${REDIS_PASSWORD}"
     {{- end }}
 
+    # Set loopback address based on ipFamily configuration
+    {{- if eq .Values.ipFamily "ipv6" }}
+    REDIS_LOOPBACK="::1"
+    {{- else }}
+    REDIS_LOOPBACK="127.0.0.1"
+    {{- end }}
+
     # Function to run Redis commands
     run_redis_command() {
-        local args=("-h" "127.0.0.1" "-p" "$REDIS_PORT")
+        local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
         redis-cli "${args[@]}" "$@"
     }
 
