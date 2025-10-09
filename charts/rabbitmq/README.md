@@ -106,10 +106,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 ### RabbitMQ Definitions
 
 | Parameter                          | Description                                                                                                                                  | Default     |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ---- |
 | `definitions.enabled`              | Enable loading of RabbitMQ definitions on startup. When `true`, definitions will be loaded at container boot.                                | `false`     |
 | `definitions.existingConfigMap`    | Name of an existing ConfigMap containing RabbitMQ definitions (e.g., created via `kubectl create configmap rmq-defs --from-file=defs.json`). | `""`        |
 | `definitions.existingConfigMapKey` | Key in the existing ConfigMap containing the RabbitMQ definitions JSON file.                                                                 | `defs.json` |
+| `defintions.existingSecret`        | Name of an existing Secret containing RabbitMQ definitions.                                                                                  |             | `""` |
+| `definitions.existingSecretKey`    | Key in the existing Secret containing the RabbitMQ definitions JSON file.                                                                    | `defs.json` |
 | `definitions.users`                | Array of RabbitMQ users to create.                                                                                                           | `[]`        |
 | `definitions.vhosts`               | Array of RabbitMQ virtual hosts to create.                                                                                                   | `[]`        |
 | `definitions.permissions`          | Array of RabbitMQ permissions to set per vhost.                                                                                              | `[]`        |

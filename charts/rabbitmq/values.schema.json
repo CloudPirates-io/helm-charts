@@ -951,6 +951,17 @@
           "description": "Key in existing ConfigMap containing RabbitMQ definitions",
           "default": "defs.json"
         },
+        "existingSecret": {
+          "type": "string",
+          "title": "Existing Secret",
+          "description": "Name of existing Secret containing RabbitMQ definitions"
+        },
+        "existingSecretKey": {
+          "type": "string",
+          "title": "Existing Secret Key",
+          "description": "Key in existing Secret containing RabbitMQ definitions",
+          "default": "defs.json"
+        },
         "bindings": {
           "type": "array",
           "title": "Bindings",

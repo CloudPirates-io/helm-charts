@@ -374,6 +374,10 @@ definitions:
   existingConfigMap: ""
   ## @param definitions.existingConfigMapKey Key in existing ConfigMap containing RabbitMQ definitions
   existingConfigMapKey: defs.json
+  ## @param definitions.existingSecret Name of existing Secret containing RabbitMQ definitions
+  existingSecret: ""
+  ## @param definitions.existingSecretKey Key in existing Secret containing RabbitMQ definitions
+  existingSecretKey: defs.json
   ## @param definitions.bindings Array of RabbitMQ bindings to create
   bindings: []
   ## @param definitions.global_parameters Array of RabbitMQ global parameters to create
