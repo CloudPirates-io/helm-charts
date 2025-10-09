@@ -1,20 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "docker:pinDigests"
   ],
   "enabledManagers": [
     "custom.regex",
     "helmv3"
   ],
+  "separateMinorPatch": true,
+  "prConcurrentLimit": 5,
+  "recreateWhen": "always",
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^charts/.+/values\\.yaml$/"
+        "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
       "matchStrings": [
-        "repository:\\s*(?<depName>[^\\s]+)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<packageName>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?",
+        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
@@ -25,11 +30,6 @@
       "matchManagers": [
         "custom.regex"
       ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
       "matchDatasources": [
         "docker"
       ],
@@ -38,8 +38,10 @@
         "renovate"
       ],
       "commitMessageTopic": "{{{depName}}}",
-      "commitMessagePrefix": "[{{{replace 'docker.io/' '' depName}}}]",
-      "automerge": false
+      "commitMessagePrefix": "[{{{replace 'docker.io/' '' packageName}}}]",
+      "automerge": false,
+      "separateMinorPatch": true,
+      "groupName": "{{packageFile}} {{packageName}}"
     },
     {
       "matchManagers": [
@@ -49,23 +51,28 @@
         "dependencies",
         "renovate"
       ],
-      "automerge": false
+      "automerge": false,
+      "commitMessagePrefix": "[helm]"
     },
     {
-      "matchPackageNames": [
-        "**/clusterpirate"
+      "matchDatasources": [
+        "docker"
       ],
-      "enabled": false
+      "matchPackageNames": [
+        "koperator-internal/services/clusterpirate"
+      ],
+      "enabled": false,
+      "pinDigests": false
     },
     {
       "matchDatasources": [
         "helm"
       ],
-      "enabled": false,
       "matchPackageNames": [
-        "/^cloudpirates/common$/",
-        "/^cloudpirates/valkey$/"
-      ]
+        "cloudpirates/common",
+        "cloudpirates/valkey"
+      ],
+      "enabled": false
     }
   ]
 }
