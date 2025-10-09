@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.1.1 (2025-09-25)
+## 0.1.6 (2025-10-09)
 
-* [zookeeper] add networkpolicy and poddisruptionbudget ([#2](https://github.com/mmz-srf/cloudpirates-helm-charts/pull/2))
+* [mongodb] feat: add metrics exporter ([#243](https://github.com/CloudPirates-io/helm-charts/pull/243))

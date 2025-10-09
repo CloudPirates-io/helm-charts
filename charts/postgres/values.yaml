@@ -274,5 +274,14 @@ extraEnv: {}
 ## @param extraEnvVarsSecret Name of a secret containing additional environment variables
 extraEnvVarsSecret: ""
 
+## @param initContainers Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades
+initContainers: []
+# Example with pgautoupgrade for major version upgrades:
+# - name: pgautoupgrade
+#   image: tianon/pgautoupgrade:17-to-18
+#   volumeMounts:
+#     - name: data
+#       mountPath: /var/lib/postgresql/data
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []

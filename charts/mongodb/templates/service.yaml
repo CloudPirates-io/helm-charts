@@ -12,5 +12,11 @@ spec:
       targetPort: mongodb
       protocol: TCP
       name: mongodb
+    {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.metrics.service.port }}
+      targetPort: http-metrics
+      protocol: TCP
+      name: http-metrics
+    {{- end }}
   selector:
     {{- include "mongodb.selectorLabels" . | nindent 4 }}

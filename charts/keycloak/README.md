@@ -349,7 +349,7 @@ keycloak:
   adminPassword: "secure-admin-password"
   hostname: "auth.yourdomain.com"
   production: true
-  proxy: "edge"
+  proxyHeaders: "xforwarded"
 
 database:
   type: "postgres"
@@ -470,7 +470,7 @@ keycloak:
   adminPassword: "secure-admin-password"
   hostname: "auth.yourdomain.com"
   production: true
-  proxy: "edge"
+  proxyHeaders: "xforwarded"
 
 cache:
   stack: "ispn" # Use Infinispan for clustering
