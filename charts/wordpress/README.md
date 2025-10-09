@@ -114,6 +114,16 @@ The command removes all the Kubernetes components associated with the chart and 
 | `mariadb.auth.username`     | MariaDB custom user name                     | `wordpress` |
 | `mariadb.auth.password`     | MariaDB custom user password                 | `""`        |
 
+### Apache Configuration Override Parameters
+
+| Name                        | Description                                   | Value                           |
+| --------------------------- | --------------------------------------------- | ------------------------------- |
+| `apache.configOverride.htaccess` | Custom .htaccess content                 | (see values file)               |
+| `apache.configOverride.apache2Conf` | Custom apache2.conf content           | (see values file)               |
+| `apache.configOverride.portsConf` | Custom ports.conf content               | (see values file)               |
+| `apache.configOverride.vhostConf` | Custom virtual host configuration (000-default.conf) | (see values file)  |
+| `apache.configOverride.customConfigs` | Additional custom Apache configuration files | (see values file)      |
+
 ## Configuration and installation details
 
 ### Persistence
@@ -129,22 +139,40 @@ This chart provides support for ingress resources. If you have an ingress contro
 
 To enable ingress integration, please set `ingress.enabled` to `true`.
 
+### Apache Configuration Override
+
+This chart allows you to override default Apache configuration files using a ConfigMap. This feature is useful for customizing Apache behavior, adding custom virtual hosts, or modifying server settings.
+
+```yaml
+apache:
+  configOverride:
+    htaccess: |
+      # Custom .htaccess content
+      RewriteEngine On
+      RewriteRule ^(.*)$ /index.php [QSA,L]
+    portsConf: |
+      Listen 8080
+      <IfModule mod_ssl.c>
+          Listen 8443
+      </IfModule>
+    vhostConf: |
+      <VirtualHost *:80>
+          DocumentRoot /var/www/html
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+    customConfigs:
+      security.conf: |
+        # Security configurations
+        ServerTokens Prod
+        ServerSignature Off
+```
+
+The configuration files will be mounted to the appropriate locations in the Apache container:
+- `.htaccess` → `/var/www/html/.htaccess`
+- `apache2.conf` → `/etc/apache2/apache2.conf`
+- `vhostConf` → `/etc/apache2/sites-available/000-default.conf`
+
 ### TLS secrets
 
 The chart also facilitates the creation of TLS secrets for use with the ingress controller, with different options for certificate management.
-
-## License
-
-Copyright &copy; 2023 CloudPirates GmbH & Co. KG
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.

@@ -177,3 +177,108 @@ extraVolumeMounts: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+## @section Apache Configuration Override
+apache:
+  ## @param apache.configOverride.enabled Enable Apache configuration override using ConfigMap
+  configOverride:
+    
+    ## @param apache.configOverride.htaccess Custom .htaccess content
+    htaccess: |
+      # Enable compression
+      <IfModule mod_deflate.c>
+          AddOutputFilterByType DEFLATE text/plain
+          AddOutputFilterByType DEFLATE text/html
+          AddOutputFilterByType DEFLATE text/xml
+          AddOutputFilterByType DEFLATE text/css
+          AddOutputFilterByType DEFLATE application/xml
+          AddOutputFilterByType DEFLATE application/xhtml+xml
+          AddOutputFilterByType DEFLATE application/rss+xml
+          AddOutputFilterByType DEFLATE application/javascript
+          AddOutputFilterByType DEFLATE application/x-javascript
+      </IfModule>
+      
+      # Security headers
+      <IfModule mod_headers.c>
+          Header always set X-Content-Type-Options nosniff
+          Header always set X-Frame-Options DENY
+          Header always set X-XSS-Protection "1; mode=block"
+      </IfModule>
+      
+      # WordPress rewrite rules
+      RewriteEngine On
+      RewriteBase /
+      RewriteRule ^index\.php$ - [L]
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteCond %{REQUEST_FILENAME} !-d
+      RewriteRule . /index.php [L]
+
+    ## @param apache.configOverride.portsConf Custom ports.conf content
+    portsConf: |
+      Listen 8080
+      <IfModule mod_ssl.c>
+          Listen 8443
+      </IfModule>
+
+    ## @param apache.configOverride.apache2Conf Custom apache2.conf content
+    vhostConf: |
+      <VirtualHost *:8080>
+          ServerAdmin admin@example.com
+          DocumentRoot /var/www/html
+          
+          # Enhanced logging
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+          
+          # Enable modules
+          <Directory /var/www/html>
+              Options -Indexes +FollowSymLinks
+              AllowOverride All
+              Require all granted
+          </Directory>
+          
+          # Security: Hide sensitive files
+          <Files ~ "^\.">
+              Order allow,deny
+              Deny from all
+          </Files>
+          
+          <Files wp-config.php>
+              Order allow,deny
+              Deny from all
+          </Files>
+      </VirtualHost>
+    
+    ## @param apache.configOverride.customConfigs Additional custom Apache configuration files
+    customConfigs:
+      security.conf: |
+        # Security configurations
+        ServerTokens Prod
+        ServerSignature Off
+        
+        # Prevent access to PHP files in uploads directory
+        <DirectoryMatch "/wp-content/uploads/">
+            <FilesMatch "\.php$">
+                Order Deny,Allow
+                Deny from All
+            </FilesMatch>
+        </DirectoryMatch>
+      
+      performance.conf: |
+        # Performance optimizations
+        KeepAlive On
+        KeepAliveTimeout 5
+        MaxKeepAliveRequests 100
+        
+        # Enable mod_expires
+        <IfModule mod_expires.c>
+            ExpiresActive On
+            ExpiresByType image/jpg "access plus 1 month"
+            ExpiresByType image/jpeg "access plus 1 month"
+            ExpiresByType image/gif "access plus 1 month"
+            ExpiresByType image/png "access plus 1 month"
+            ExpiresByType text/css "access plus 1 month"
+            ExpiresByType application/pdf "access plus 1 month"
+            ExpiresByType text/javascript "access plus 1 month"
+            ExpiresByType application/javascript "access plus 1 month"
+        </IfModule>

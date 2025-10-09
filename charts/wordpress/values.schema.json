@@ -204,6 +204,34 @@
           "type": "integer"
         }
       }
+    },
+    "apache": {
+      "type": "object",
+      "properties": {
+        "configOverride": {
+          "type": "object",
+          "properties": {
+            "htaccess": {
+              "type": "string"
+            },
+            "portsConf": {
+              "type": "string"
+            },
+            "apache2Conf": {
+              "type": "string"
+            },
+            "vhostConf": {
+              "type": "string"
+            },
+            "customConfigs": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

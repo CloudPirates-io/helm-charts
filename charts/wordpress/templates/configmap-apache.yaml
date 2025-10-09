@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wordpress.fullname" . }}-apache-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+  {{- with (include "wordpress.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+data:
+  {{- if .Values.apache.configOverride.htaccess }}
+  .htaccess: |
+    {{- .Values.apache.configOverride.htaccess | nindent 4 }}
+  {{- end }}
+  {{- if .Values.apache.configOverride.apache2Conf }}
+  apache2.conf: |
+    {{- .Values.apache.configOverride.apache2Conf | nindent 4 }}
+  {{- end }}
+  {{- if .Values.apache.configOverride.portsConf }}
+  ports.conf: |
+    {{- .Values.apache.configOverride.portsConf | nindent 4 }}
+  {{- end }}
+  {{- if .Values.apache.configOverride.vhostConf }}
+  000-default.conf: |
+    {{- .Values.apache.configOverride.vhostConf | nindent 4 }}
+  {{- end }}
+  {{- if .Values.apache.configOverride.customConfigs }}
+  {{- range $key, $value := .Values.apache.configOverride.customConfigs }}
+  {{ $key }}: |
+    {{- $value | nindent 4 }}
+  {{- end }}
+  {{- end }}

@@ -33,7 +33,7 @@ spec:
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "wordpress.image" . }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
-          command: ["tail", "-f", "/dev/null"]
+          #command: ["tail", "-f", "/dev/null"]
           env:
             - name: WORDPRESS_DB_HOST
               value: {{ include "wordpress.databaseHost" . | quote }}
@@ -70,7 +70,7 @@ spec:
             {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -99,6 +99,33 @@ spec:
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
+            {{- if .Values.apache.configOverride.htaccess }}
+            - name: apache-config
+              mountPath: /var/www/html/.htaccess
+              subPath: .htaccess
+            {{- end }}
+            {{- if .Values.apache.configOverride.apache2Conf }}
+            - name: apache-config
+              mountPath: /etc/apache2/apache2.conf
+              subPath: apache2.conf
+            {{- end }}
+            {{- if .Values.apache.configOverride.portsConf }}
+            - name: apache-config
+              mountPath: /etc/apache2/ports.conf
+              subPath: ports.conf
+            {{- end }}
+            {{- if .Values.apache.configOverride.vhostConf }}
+            - name: apache-config
+              mountPath: /etc/apache2/sites-available/000-default.conf
+              subPath: 000-default.conf
+            {{- end }}
+            {{- if .Values.apache.configOverride.customConfigs }}
+            {{- range $key, $value := .Values.apache.configOverride.customConfigs }}
+            - name: apache-config
+              mountPath: /etc/apache2/conf-available/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -122,6 +149,9 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: apache-config
+          configMap:
+            name: {{ include "wordpress.fullname" . }}-apache-config
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
