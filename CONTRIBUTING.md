@@ -6,11 +6,23 @@ Hi there! We are thrilled that you'd like to contribute to this project. It's pe
 
 - [Code of Conduct](#code-of-conduct)
 - [How Can I Contribute?](#how-can-i-contribute)
+  - [Reporting Bugs](#reporting-bugs)
+  - [Suggesting Enhancements](#suggesting-enhancements)
+  - [Types of Contributions We're Looking For](#types-of-contributions-were-looking-for)
 - [Development Setup](#development-setup)
+  - [Prerequisites](#prerequisites)
+  - [Setting Up Your Development Environment](#setting-up-your-development-environment)
 - [Contributing Guidelines](#contributing-guidelines)
-- [Chart Development Standards](#chart-development-standards)
+  - [Chart Development Standards](#chart-development-standards)
+  - [Chart Structure](#chart-structure)
+  - [Documentation Requirements](#documentation-requirements)
+  - [Versioning](#versioning)
 - [Testing](#testing)
+  - [Running Tests](#running-tests)
+  - [Test Requirements](#test-requirements)
+  - [Manual Testing](#manual-testing)
 - [Pull Request Process](#pull-request-process)
+  - [Pull Request Checklist](#pull-request-checklist)
 
 ## Code of Conduct
 
@@ -22,21 +34,21 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 Before creating bug reports, please check the existing issues as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
 
-- **Use a clear and descriptive title**
-- **Describe the exact steps to reproduce the problem**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the behavior you observed and what behavior you expected**
-- **Include details about your configuration and environment**
+- Use a **clear and descriptive title**
+- Describe the **exact steps to reproduce** the problem
+- Provide **specific examples** to demonstrate the steps
+- Describe the **behavior you observed** and what **behavior you expected**
+- Include details about **your configuration and environment**
 
 ### Suggesting Enhancements
 
 Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, please include:
 
-- **Use a clear and descriptive title**
-- **Provide a step-by-step description of the suggested enhancement**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the current behavior and explain which behavior you expected to see**
-- **Explain why this enhancement would be useful**
+- Use a **clear and descriptive title**
+- Provide a **step-by-step description** of the suggested enhancement
+- Provide **specific examples** to demonstrate the steps
+- Describe the **current behavior** and explain which **behavior you expected** to see
+- Explain **why this enhancement would be useful**
 
 ### Types of Contributions We're Looking For
 
@@ -52,20 +64,38 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 - Kubernetes 1.24+
 - Helm 3.2.0+
 - [helm-unittest](https://github.com/helm-unittest/helm-unittest) plugin
+- Commits verified by signature
 
 ### Setting Up Your Development Environment
 
 1. Fork the repository on GitHub
 2. Clone your fork locally:
+
    ```bash
    git clone https://github.com/your-username/helm-charts.git
    cd helm-charts
    ```
 
 3. Install the helm-unittest plugin:
+
    ```bash
    helm plugin install https://github.com/helm-unittest/helm-unittest
    ```
+
+4. Make sure to sign your commits
+
+   ```bash
+   git config gpg.format ssh
+   git config user.signingkey <filePath>
+   git config commit.gpgsign true
+   git config tag.gpgsign true
+   ```
+
+   Replace `<filePath>` with the path to your public ssh key file, e.g. `~/.ssh/id_ed25519.pub`, wich you use to push to GitHub.
+   Alternatively, a signing ssh key can be used instead.
+   If you want to sign commits in every repository, not just this one, add the `--global` parameter.
+
+   > More information: [GitHub docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 
 ## Contributing Guidelines
 
@@ -74,18 +104,21 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 All charts in this repository must follow these standards:
 
 #### Security First
+
 - Implement read-only root filesystems where possible
 - Drop unnecessary Linux capabilities
 - Configure security contexts properly
 - Never hardcode credentials
 
 #### Production Ready
+
 - Include comprehensive health checks (liveness, readiness, startup probes)
 - Support resource requests and limits
 - Provide persistent storage configurations
 - Include health check endpoints
 
 #### Highly Configurable
+
 - Provide extensive `values.yaml` with detailed documentation
 - Support existing secrets and ConfigMaps
 - Offer flexible ingress configurations
@@ -154,6 +187,7 @@ helm unittest charts/your-chart
 ### Test Requirements
 
 Your tests should cover:
+
 - Template rendering with default values
 - Template rendering with custom values
 - Required value validation
@@ -181,6 +215,7 @@ kubectl get all -n test
 ## Pull Request Process
 
 1. **Branch**: Create a feature branch from `main`
+
    ```bash
    git checkout -b feature/your-chart-improvement
    ```
@@ -188,6 +223,7 @@ kubectl get all -n test
 2. **Development**: Make your changes following the guidelines above
 
 3. **Testing**: Run all tests and ensure they pass
+
    ```bash
    ./test-all-charts.sh
    helm lint ./charts/your-chart
@@ -196,6 +232,7 @@ kubectl get all -n test
 4. **Documentation**: Update documentation as needed
 
 5. **Commit**: Use clear, descriptive commit messages
+
    ```bash
    git commit -m "[chart-name] Add support for custom annotations"
    ```
