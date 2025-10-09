@@ -180,6 +180,8 @@ networkPolicy:
 metrics:
   ## @param metrics.enabled Enable metrics collection
   enabled: false
+  ## @param metrics.username Username for metrics collection (defaults to root username if not specified)
+  username: ""
   ## @param metrics.image.registry MongoDB Exporter image registry
   ## @param metrics.image.repository MongoDB Exporter image repository
   ## @param metrics.image.tag MongoDB Exporter image tag

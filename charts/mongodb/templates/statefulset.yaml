@@ -89,6 +89,15 @@ spec:
                   key: CUSTOM_DB
                   {{- end }}
             {{- end }}
+            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
             {{- range .Values.extraEnv }}
             - name: {{ .name }}
               value: {{ .value | quote }}
@@ -127,6 +136,10 @@ spec:
             - name: custom-user-script
               mountPath: /docker-entrypoint-initdb.d/
             {{- end }}
+            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+            - name: metrics-user-script
+              mountPath: /docker-entrypoint-initdb.d/metrics/
+            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: /etc/mongo
@@ -143,18 +156,25 @@ spec:
             - --mongodb.uri={{ include "mongodb.metrics.connectionString" . }}
             - --web.listen-address=0.0.0.0:9216
             - --collect-all
+            - --mongodb.direct-connect
             {{- range .Values.metrics.extraArgs }}
             - {{ . }}
             {{- end }}
           {{- if .Values.auth.enabled }}
           env:
             - name: MONGO_METRICS_USERNAME
-              value: {{ .Values.auth.rootUsername | quote }}
+              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
             - name: MONGO_METRICS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- range .Values.metrics.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          {{- else }}
+          env:
             {{- range .Values.metrics.extraEnv }}
             - name: {{ .name }}
               value: {{ .value | quote }}
@@ -196,7 +216,13 @@ spec:
         {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
         - name: custom-user-script
           configMap:
-            name: mongodb-custom-user-script
+            name: {{ include "mongodb.fullname" . }}-custom-user-script
+        {{- end }}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+        - name: metrics-user-script
+          configMap:
+            name: {{ include "mongodb.fullname" . }}-metrics-user-script
+            defaultMode: 0755
         {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config

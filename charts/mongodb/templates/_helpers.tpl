@@ -95,9 +95,9 @@ Return the MongoDB connection string for metrics
 */}}
 {{- define "mongodb.metrics.connectionString" -}}
 {{- if .Values.auth.enabled -}}
-mongodb://$(MONGO_METRICS_USERNAME):$(MONGO_METRICS_PASSWORD)@localhost:27017/admin
+mongodb://$(MONGO_METRICS_USERNAME):$(MONGO_METRICS_PASSWORD)@127.0.0.1:27017/admin?authSource=admin
 {{- else -}}
-mongodb://localhost:27017
+mongodb://127.0.0.1:27017
 {{- end -}}
 {{- end -}}
 
@@ -107,6 +107,8 @@ Get the secret name for MongoDB metrics user
 {{- define "mongodb.metrics.secretName" -}}
 {{- if .Values.auth.existingSecret }}
 {{- .Values.auth.existingSecret }}
+{{- else if and .Values.metrics.username .Values.metrics.enabled }}
+{{- printf "%s-metrics" (include "mongodb.fullname" .) }}
 {{- else }}
 {{- include "mongodb.fullname" . }}
 {{- end }}
