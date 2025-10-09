@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.3.0 (2025-10-09)
+## 0.4.0 (2025-10-09)
 
-* [mongodb] feat: add metrics exporter ([#243](https://github.com/CloudPirates-io/helm-charts/pull/243))
+* [mongodb] fix: newline between mongo labels and additional labels ([#301](https://github.com/CloudPirates-io/helm-charts/pull/301))
