@@ -223,7 +223,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `nodeSelector`              | Node labels for pod assignment                 | `{}`    |
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
-| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
 
 ### Security Context
 
