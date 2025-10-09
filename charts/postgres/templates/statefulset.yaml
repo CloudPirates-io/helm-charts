@@ -188,9 +188,14 @@ spec:
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
               mountPath: /tmp
-            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts }}
             - name: custom-init-scripts
-              mountPath: {{ .Values.initdb.directory }}
+              mountPath: /docker-entrypoint-initdb.d/
+            {{- end }}
+            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+            - name: init-custom-user
+              mountPath: /docker-entrypoint-initdb.d/init-custom-user.sh
+              subPath: init-custom-user.sh
             {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
@@ -212,11 +217,18 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts }}
         - name: custom-init-scripts
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
-            defaultMode: 0755
+        {{- end }}
+        {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+        - name: init-custom-user
+          configMap:
+            name: {{ printf "%s-init-custom-user" (include "postgres.fullname" .) }}
+            items:
+              - key: init-custom-user.sh
+                path: init-custom-user.sh
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

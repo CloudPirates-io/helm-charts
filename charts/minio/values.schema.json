@@ -183,11 +183,6 @@
         }
       }
     },
-    "defaultBuckets": {
-      "type": "string",
-      "title": "Default Buckets",
-      "description": "Comma, semi-colon or space separated list of buckets to create at initialization"
-    },
     "replicaCount": {
       "type": "integer",
       "title": "Replica Count",
@@ -560,40 +555,6 @@
           "type": "string",
           "title": "Existing Claim",
           "description": "The name of an existing PVC to use for persistence"
-        }
-      }
-    },
-    "serviceAccount": {
-      "type": "object",
-      "title": "Service Account Configuration",
-      "description": "Service Account configuration parameters",
-      "properties": {
-        "create": {
-          "type": "boolean",
-          "title": "Create Service Account",
-          "description": "Enable the creation of a ServiceAccount for MinIO",
-          "default": true
-        },
-        "name": {
-          "type": "string",
-          "title": "Service Account Name",
-          "description": "Name of the created ServiceAccount. If not set and create is true, a name is generated using the common.names.fullname template",
-          "default": ""
-        },
-        "automountServiceAccountToken": {
-          "type": "boolean",
-          "title": "Automount Service Account Token",
-          "description": "Enable/disable auto mounting of the service account token",
-          "default": false
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Service Account Annotations",
-          "description": "Custom annotations for MinIO serviceAccount",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "default": {}
         }
       }
     },

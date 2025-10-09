@@ -32,7 +32,6 @@ spec:
 {{- with (include "minio.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      serviceAccountName: {{ template "minio.serviceAccountName" . }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}

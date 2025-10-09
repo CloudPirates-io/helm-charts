@@ -73,11 +73,6 @@ config:
   ## @param config.extraEnvVars Extra environment variables to be set on MinIO containers
   extraEnvVars: []
 
-## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization
-## Format: "bucket-name" or "bucket-name:policy" where policy can be: none, download, upload, or public
-## e.g: "my-bucket, my-second-bucket:download, my-public-bucket:public"
-defaultBuckets: ""
-
 ## @section Deployment configuration
 replicaCount: 1
 
@@ -194,20 +189,6 @@ persistence:
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
   mountPath: /mnt/data
-
-serviceAccount:
-  ## @param serviceAccount.create Enable the creation of a ServiceAccount for MinIO
-  create: true
-  ## @param serviceAccount.name Name of the created ServiceAccount
-  ## If not set and create is true, a name is generated using the common.names.fullname template
-  ##
-  name: ""
-  ## @param serviceAccount.automountServiceAccountToken Enable/disable auto mounting of the service account token
-  ##
-  automountServiceAccountToken: false
-  ## @param serviceAccount.annotations Custom annotations for MinIO serviceAccount
-  ##
-  annotations: {}
 
 ## @section Liveness and readiness probes
 livenessProbe:

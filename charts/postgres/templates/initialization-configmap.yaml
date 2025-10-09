@@ -1,4 +1,4 @@
-{{- if or (and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap)) (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+{{- if and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,29 +10,5 @@ metadata:
   annotations:
     {{- include "postgres.annotations" . | nindent 4 }}
   {{- end }}
-data: 
-  {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-  00-init-custom-user.sh: |
-    #!/bin/sh
-    
-    if [ -z "$CUSTOM_DB" ] && [ -z "$CUSTOM_USER" ] && [ -z "$CUSTOM_PASSWORD" ]; then
-      echo "No custom user configuration found, skipping..."
-      exit 0
-    fi
-
-    set -e
-    echo "Creating custom user: $CUSTOM_USER and database: $CUSTOM_DB"
-
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v DATABASENAME="$CUSTOM_DB" -v USERNAME="$CUSTOM_USER" -v PASSWORD="'$CUSTOM_PASSWORD'" <<-EOSQL
-      CREATE USER :USERNAME WITH PASSWORD :PASSWORD;
-      CREATE DATABASE :DATABASENAME;
-      GRANT ALL PRIVILEGES ON DATABASE :DATABASENAME TO :USERNAME;
-      ALTER DATABASE :DATABASENAME OWNER TO :USERNAME;
-    EOSQL
-    
-    echo "✅ Custom user and database created successfully!"
-  {{- end }}
-  {{- if .Values.initdb.scripts }}
-  {{- include "common.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
-  {{- end }}
+data: {{- include "common.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
 {{- end }}

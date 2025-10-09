@@ -117,14 +117,3 @@ Return MinIO server URL args
 {{- printf "--console-address :%d --address :%d" (int .Values.service.consolePort) (int .Values.service.port) -}}
 {{- end -}}
 {{- end }}
-
-{{/*
-Returns MinIO serviceAccount name
-*/}}
-{{- define "minio.serviceAccountName" -}}
-    {{- if .Values.serviceAccount.create -}}
-        {{ default (include "minio.fullname" .) .Values.serviceAccount.name }}
-    {{- else -}}
-        {{ default "default" .Values.serviceAccount.name }}
-    {{- end -}}
-{{- end -}}
