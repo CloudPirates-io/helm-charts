@@ -103,6 +103,8 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `podAnnotations`         | Annotations to attach to pods   | `{}`    |
 | `statefulsetAnnotations` | Annotations for StatefulSet     | `{}`    |
 
+### RabbitMQ Definitions
+
 | Parameter                          | Description                                                                                                                                  | Default     |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `definitions.enabled`              | Enable loading of RabbitMQ definitions on startup. When `true`, definitions will be loaded at container boot.                                | `false`     |
