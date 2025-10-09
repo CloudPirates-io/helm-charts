@@ -14,8 +14,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "(^|/)charts/.+/values\\.ya?ml$"
+      "managerFilePatterns": [
+        "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
       "matchStrings": [
         "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?",
