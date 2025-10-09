@@ -73,6 +73,12 @@ config:
   ## @param config.extraEnvVars Extra environment variables to be set on MinIO containers
   extraEnvVars: []
 
+## @section Bucket provisioning
+## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization
+## Format: "bucket-name" or "bucket-name:policy" where policy can be: none, download, upload, or public
+## e.g: "my-bucket, my-second-bucket:download, my-public-bucket:public"
+defaultBuckets: ""
+
 ## @section Deployment configuration
 replicaCount: 1
 
