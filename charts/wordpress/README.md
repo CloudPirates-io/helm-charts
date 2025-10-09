@@ -114,6 +114,13 @@ The command removes all the Kubernetes components associated with the chart and 
 | `mariadb.auth.username`     | MariaDB custom user name                     | `wordpress` |
 | `mariadb.auth.password`     | MariaDB custom user password                 | `""`        |
 
+### Init Container Configuration
+
+| Name                        | Description                                  | Value       |
+| --------------------------- | -------------------------------------------- | ----------- |
+| `initContainers.waitForMariadb.image` | MariaDB init container image for waiting | "mariadb:12.0.2" |
+
+
 ### Apache Configuration Override Parameters
 
 | Name                        | Description                                   | Value                           |

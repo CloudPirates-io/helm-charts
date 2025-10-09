@@ -205,6 +205,22 @@
         }
       }
     },
+    "extraObjects": {
+      "type": "array"
+    },
+    "initContainers": {
+      "type": "object",
+      "properties": {
+        "waitForMariadb": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "apache": {
       "type": "object",
       "properties": {
