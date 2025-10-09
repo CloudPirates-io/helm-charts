@@ -52,8 +52,11 @@
       "automerge": false
     },
     {
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
-        "**/clusterpirate"
+        "koperator-internal/services/clusterpirate"
       ],
       "enabled": false
     },
