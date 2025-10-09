@@ -103,6 +103,15 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @section Pod Disruption Budget parameters
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: ""
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable.
+  maxUnavailable: ""
+
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 11211
