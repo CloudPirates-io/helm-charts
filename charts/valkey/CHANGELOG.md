@@ -1,8 +1,18 @@
 # Changelog
 
-## 0.3.2 (2025-09-16)
+## 0.4.1 (2025-10-09)
 
-* [valkey] Fix scheduling directives with disabled persistance ([#96](https://github.com/CloudPirates-io/helm-charts/pull/96))
+* [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v8.1.4 (patch) ([#266](https://github.com/CloudPirates-io/helm-charts/pull/266))
+
+## 0.4.0 (2025-10-06)
+
+* [rabbitmq] make rabbitmq run on openshift (#201) ([df4deeb](https://github.com/CloudPirates-io/helm-charts/commit/df4deeb)), closes [#201](https://github.com/CloudPirates-io/helm-charts/issues/201)
+* fix templating of `affinity`, `nodeSelector` and `tolerations` values ([e98c8ea](https://github.com/CloudPirates-io/helm-charts/commit/e98c8ea))
+* make valkey run on openshift (#206) ([b1f530c](https://github.com/CloudPirates-io/helm-charts/commit/b1f530c)), closes [#206](https://github.com/CloudPirates-io/helm-charts/issues/206)
+* Fix scheduling directives with disabled persistance ([7485b37](https://github.com/CloudPirates-io/helm-charts/commit/7485b37))
+* Oops, wrong bump ([1d2fefa](https://github.com/CloudPirates-io/helm-charts/commit/1d2fefa))
+* Update CHANGELOG.md ([3005f2f](https://github.com/CloudPirates-io/helm-charts/commit/3005f2f))
+* Update CHANGELOG.md ([36da816](https://github.com/CloudPirates-io/helm-charts/commit/36da816))
 
 ## 0.3.0 (2025-09-02)
 
