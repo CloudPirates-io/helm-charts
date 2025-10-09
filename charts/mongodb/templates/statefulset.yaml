@@ -141,7 +141,7 @@ spec:
         {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
         - name: custom-user-script
           configMap:
-            name: mongodb-custom-user-script
+            name: {{ include "mongodb.fullname" . }}-custom-user-script
         {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config
