@@ -14,7 +14,7 @@
         "/^charts/.+/values\\.yaml$/"
       ],
       "matchStrings": [
-        "repository:\\s*(?<depName>[^\\s]+)\\n.*?tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "repository:\\s*(?<depName>[^\\s]+)\\s*\\n\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
