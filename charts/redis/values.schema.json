@@ -523,6 +523,22 @@
         "type": "object"
       }
     },
+    "podLabels": {
+      "type": "object",
+      "title": "Pod Labels",
+      "description": "Map of labels to add to the pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "title": "Pod Annotations",
+      "description": "Map of annotations to add to the pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "initContainer": {
       "type": "object",
       "title": "Init Container Configuration",
