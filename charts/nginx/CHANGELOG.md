@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.1.13 (2025-10-08)
+## 0.1.14 (2025-10-09)
 
-* [nginx/nginx-prometheus-exporter] Update nginx/nginx-prometheus-exporter to v1.5 ([#234](https://github.com/CloudPirates-io/helm-charts/pull/234))
+* [nginx] Update charts/nginx/values.yaml nginx to v1.29.2 (patch) ([#263](https://github.com/CloudPirates-io/helm-charts/pull/263))
+
+## <small>0.1.13 (2025-10-08)</small>
+
+* [nginx/nginx-prometheus-exporter] Update nginx/nginx-prometheus-exporter to v1.5 (#234) ([9f7f1e8](https://github.com/CloudPirates-io/helm-charts/commit/9f7f1e8)), closes [#234](https://github.com/CloudPirates-io/helm-charts/issues/234)
 
 ## <small>0.1.12 (2025-10-07)</small>
 
