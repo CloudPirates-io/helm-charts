@@ -59,7 +59,7 @@ spec:
               else
                 # Create minimal config if no config exists
                 cat > /tmp/redis.conf << EOF
-              bind 0.0.0.0
+              bind * -::*
               port 6379
               EOF
               fi
@@ -208,9 +208,17 @@ spec:
                 - /bin/sh
                 - -c
                 {{- if .Values.auth.enabled }}
-                - redis-cli -a ${REDIS_PASSWORD} ping
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" -a ${REDIS_PASSWORD} ping
                 {{- else }}
-                - redis-cli ping
+                - redis-cli -h "127.0.0.1" -a ${REDIS_PASSWORD} ping
+                {{- end }}
+                {{- else }}
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" ping
+                {{- else }}
+                - redis-cli -h "127.0.0.1" ping
+                {{- end }}
                 {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -224,20 +232,35 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - |
-                  {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
-                  {{- if .Values.auth.enabled }}
-                  redis-cli -a ${REDIS_PASSWORD} ping | grep -q PONG
-                  {{- else }}
-                  redis-cli ping | grep -q PONG
-                  {{- end }}
-                  {{- else }}
-                  {{- if .Values.auth.enabled }}
-                  redis-cli -a ${REDIS_PASSWORD} ping
-                  {{- else }}
-                  redis-cli ping
-                  {{- end }}
-                  {{- end }}
+                {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+                {{- if .Values.auth.enabled }}
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" -a ${REDIS_PASSWORD} ping | grep -q PONG
+                {{- else }}
+                - redis-cli -h "127.0.0.1" -a ${REDIS_PASSWORD} ping | grep -q PONG
+                {{- end }}
+                {{- else }}
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" ping | grep -q PONG
+                {{- else }}
+                - redis-cli -h "127.0.0.1" ping | grep -q PONG
+                {{- end }}
+                {{- end }}
+                {{- else }}
+                {{- if .Values.auth.enabled }}
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" -a ${REDIS_PASSWORD} ping
+                {{- else }}
+                - redis-cli -h "127.0.0.1" -a ${REDIS_PASSWORD} ping
+                {{- end }}
+                {{- else }}
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" ping
+                {{- else }}
+                - redis-cli -h "127.0.0.1" ping
+                {{- end }}
+                {{- end }}
+                {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -287,7 +310,12 @@ spec:
 
               # Wait for Redis to be ready
               echo "Waiting for Redis to start..."
-              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h 127.0.0.1 -p {{ .Values.service.port }} ping >/dev/null 2>&1; do
+              {{- if eq .Values.ipFamily "ipv6" }}
+              REDIS_HOST="::1"
+              {{- else }}
+              REDIS_HOST="127.0.0.1"
+              {{- end }}
+              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h "${REDIS_HOST}" -p {{ .Values.service.port }} ping >/dev/null 2>&1; do
                 sleep 1
               done
               echo "Redis is ready"
@@ -354,7 +382,7 @@ spec:
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
               port {{ .Values.sentinel.port }}
-              bind 0.0.0.0
+              bind * -::*
               # Enable hostname resolution for Redis Sentinel
               sentinel resolve-hostnames yes
               sentinel announce-hostnames yes
@@ -406,9 +434,11 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - |
-                  # Check if sentinel is responding
-                  redis-cli -h 127.0.0.1 -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- else }}
+                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5

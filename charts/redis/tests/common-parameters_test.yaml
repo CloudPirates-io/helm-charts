@@ -7,7 +7,7 @@ set:
   config:
     content: |
       # Redis configuration
-      bind 0.0.0.0
+      bind * -::*
       port 6379
 tests:
   - it: should use default values when nothing is overridden
