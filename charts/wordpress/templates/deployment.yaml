@@ -27,13 +27,13 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "wordpress.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "wordpress.image" . }}
           imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          command: ["tail", "-f", "/dev/null"]
           env:
             - name: WORDPRESS_DB_HOST
               value: {{ include "wordpress.databaseHost" . | quote }}
