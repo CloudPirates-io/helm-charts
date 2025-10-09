@@ -178,11 +178,17 @@ extraVolumeMounts: []
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 
+## @section Init Container Configuration
+## Configuration for init containers
+initContainers:
+  ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
+  waitForMariadb:
+    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
+
 ## @section Apache Configuration Override
 apache:
   ## @param apache.configOverride.enabled Enable Apache configuration override using ConfigMap
   configOverride:
-    
     ## @param apache.configOverride.htaccess Custom .htaccess content
     htaccess: |
       # Enable compression
@@ -197,14 +203,14 @@ apache:
           AddOutputFilterByType DEFLATE application/javascript
           AddOutputFilterByType DEFLATE application/x-javascript
       </IfModule>
-      
+
       # Security headers
       <IfModule mod_headers.c>
           Header always set X-Content-Type-Options nosniff
           Header always set X-Frame-Options DENY
           Header always set X-XSS-Protection "1; mode=block"
       </IfModule>
-      
+
       # WordPress rewrite rules
       RewriteEngine On
       RewriteBase /
@@ -225,37 +231,37 @@ apache:
       <VirtualHost *:8080>
           ServerAdmin admin@example.com
           DocumentRoot /var/www/html
-          
+
           # Enhanced logging
           ErrorLog ${APACHE_LOG_DIR}/error.log
           CustomLog ${APACHE_LOG_DIR}/access.log combined
-          
+
           # Enable modules
           <Directory /var/www/html>
               Options -Indexes +FollowSymLinks
               AllowOverride All
               Require all granted
           </Directory>
-          
+
           # Security: Hide sensitive files
           <Files ~ "^\.">
               Order allow,deny
               Deny from all
           </Files>
-          
+
           <Files wp-config.php>
               Order allow,deny
               Deny from all
           </Files>
       </VirtualHost>
-    
+
     ## @param apache.configOverride.customConfigs Additional custom Apache configuration files
     customConfigs:
       security.conf: |
         # Security configurations
         ServerTokens Prod
         ServerSignature Off
-        
+
         # Prevent access to PHP files in uploads directory
         <DirectoryMatch "/wp-content/uploads/">
             <FilesMatch "\.php$">
@@ -263,13 +269,13 @@ apache:
                 Deny from All
             </FilesMatch>
         </DirectoryMatch>
-      
+
       performance.conf: |
         # Performance optimizations
         KeepAlive On
         KeepAliveTimeout 5
         MaxKeepAliveRequests 100
-        
+
         # Enable mod_expires
         <IfModule mod_expires.c>
             ExpiresActive On
