@@ -123,15 +123,16 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Service configuration
 
-| Parameter                     | Description                            | Default     |
-| ----------------------------- | -------------------------------------- | ----------- |
-| `service.type`                | Kubernetes service type                | `ClusterIP` |
-| `service.amqpPort`            | RabbitMQ AMQP service port             | `5672`      |
-| `service.managementPort`      | RabbitMQ management UI port            | `15672`     |
-| `service.epmdPort`            | RabbitMQ EPMD port                     | `4369`      |
-| `service.distPort`            | RabbitMQ distribution port             | `25672`     |
-| `service.annotations`         | Kubernetes service annotations         | `{}`        |
-| `service.annotationsHeadless` | Kubernetes service annotationsHeadless | `25672`     |
+| Parameter                     | Description                                 | Default     |
+| ----------------------------- | ------------------------------------------- | ----------- |
+| `service.type`                | Kubernetes service type                     | `ClusterIP` |
+| `service.amqpPort`            | RabbitMQ AMQP service port                  | `5672`      |
+| `service.managementPort`      | RabbitMQ management UI port                 | `15672`     |
+| `service.epmdPort`            | RabbitMQ EPMD port                          | `4369`      |
+| `service.distPort`            | RabbitMQ distribution port                  | `25672`     |
+| `service.annotations`         | Kubernetes service annotations              | `{}`        |
+| `service.annotationsHeadless` | Kubernetes service annotationsHeadless      | `25672`     |
+| `service.trafficDistribution` | Traffic distribution policy for the service | `""`        |
 
 ### RabbitMQ Authentication
 
@@ -222,7 +223,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `nodeSelector`              | Node labels for pod assignment                 | `{}`    |
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
-| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
 
 ### Security Context
 
