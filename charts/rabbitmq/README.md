@@ -102,6 +102,21 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `podLabels`              | Labels to attach to pods        | `{}`    |
 | `statefulsetAnnotations` | Annotations for StatefulSet     | `{}`    |
 
+| Parameter                          | Description                                                                                                                                  | Default     |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `definitions.enabled`              | Enable loading of RabbitMQ definitions on startup. When `true`, definitions will be loaded at container boot.                                | `false`     |
+| `definitions.existingConfigMap`    | Name of an existing ConfigMap containing RabbitMQ definitions (e.g., created via `kubectl create configmap rmq-defs --from-file=defs.json`). | `""`        |
+| `definitions.existingConfigMapKey` | Key in the existing ConfigMap containing the RabbitMQ definitions JSON file.                                                                 | `defs.json` |
+| `definitions.users`                | Array of RabbitMQ users to create.                                                                                                           | `[]`        |
+| `definitions.vhosts`               | Array of RabbitMQ virtual hosts to create.                                                                                                   | `[]`        |
+| `definitions.permissions`          | Array of RabbitMQ permissions to set per vhost.                                                                                              | `[]`        |
+| `definitions.queues`               | Array of RabbitMQ queues to create.                                                                                                          | `[]`        |
+| `definitions.exchanges`            | Array of RabbitMQ exchanges to create.                                                                                                       | `[]`        |
+| `definitions.bindings`             | Array of RabbitMQ bindings to create.                                                                                                        | `[]`        |
+| `definitions.parameters`           | Array of RabbitMQ parameters to create.                                                                                                      | `[]`        |
+| `definitions.global_parameters`    | Array of RabbitMQ global parameters to create.                                                                                               | `[]`        |
+| `definitions.topic_permissions`    | Array of RabbitMQ topic permissions to create.                                                                                               | `[]`        |
+| `definitions.policies`             | Array of RabbitMQ policies to create.                                                                                                        | `[]`        |
 
 ### Service configuration
 
@@ -153,8 +168,8 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ## Plugin configuration
 
-| Parameter        | Description                                                                                                                                       | Default |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Parameter        | Description                                                  | Default |
+| ---------------- | ------------------------------------------------------------ | ------- |
 | `installPlugins` | Additional 3rd party RabbitMQ plugins to download and enable | `[]`    |
 
 ### Metrics configuration
@@ -207,15 +222,15 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Security Context
 
-| Parameter                                                | Description                                       | Default   |
-| -------------------------------------------------------- | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`                             | Group ID for the volumes of the pod               | `999`     |
-| `containerSecurityContext.allowPrivilegeEscalation`      | Enable container privilege escalation             | `false`   |
-| `containerSecurityContext.runAsNonRoot`                  | Configure the container to run as a non-root user | `true`    |
-| `containerSecurityContext.runAsUser`                     | User ID for the RabbitMQ container                | `999`     |
-| `containerSecurityContext.runAsGroup`                    | Group ID for the RabbitMQ container               | `999`     |
-| `containerSecurityContext.readOnlyRootFilesystem`        | Mount container root filesystem as read-only      | `true`    |
-| `containerSecurityContext.capabilities.drop`             | Linux capabilities to be dropped                  | `["ALL"]` |
+| Parameter                                           | Description                                       | Default   |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
+| `containerSecurityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`     |
+| `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Liveness and readiness probes
 
@@ -236,18 +251,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables to set                                 | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the RabbitMQ container               | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
-| `podManagementPolicy`      | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady`    |
+| Parameter             | Description                                                             | Default        |
+| --------------------- | ----------------------------------------------------------------------- | -------------- |
+| `extraEnv`            | Additional environment variables to set                                 | `[]`           |
+| `extraVolumes`        | Additional volumes to add to the pod                                    | `[]`           |
+| `extraVolumeMounts`   | Additional volume mounts to add to the RabbitMQ container               | `[]`           |
+| `extraObjects`        | A list of additional Kubernetes objects to deploy alongside the release | `[]`           |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
+| `podManagementPolicy` | A list of additional Kubernetes objects to deploy alongside the release | `OrderedReady` |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -273,12 +288,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `rbac.rules`  | Custom RBAC rules                    | `[]`    |
 
 ### Pod Disruption Budget configuration
+
 | Parameter            | Description                                                    | Default |
 | -------------------- | -------------------------------------------------------------- | ------- |
 | `pdb.create`         | Enable/disable a Pod Disruption Budget creation                | `false` |
 | `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `""`    |
 | `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
-
 
 #### Extra Objects
 
@@ -488,20 +503,17 @@ kubectl get secret my-rabbitmq -o jsonpath="{.data.password}" | base64 --decode
 ### Common Issues
 
 1. **Pod fails to start with permission errors**
-
    - Ensure your storage class supports the required access modes
    - Check if security contexts are compatible with your cluster policies
    - Verify the RabbitMQ data directory permissions
 
 2. **Cannot connect to RabbitMQ**
-
    - Verify the service is running: `kubectl get svc`
    - Check if authentication is properly configured
    - Ensure firewall rules allow access to ports 5672 (AMQP) and 15672 (Management UI)
    - Check RabbitMQ logs: `kubectl logs <pod-name>`
 
 3. **Clustering issues**
-
    - Verify all nodes can reach each other
    - Check Erlang cookie consistency across cluster nodes
    - Ensure proper DNS resolution for pod hostnames

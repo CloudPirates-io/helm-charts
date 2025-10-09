@@ -202,10 +202,7 @@
               "enum": ["absolute", "relative"]
             },
             "value": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "Memory High Watermark Value",
               "description": "Memory high watermark value"
             }
@@ -357,7 +354,12 @@
           "description": "Persistent Volume access modes",
           "items": {
             "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
+            "enum": [
+              "ReadWriteOnce",
+              "ReadOnlyMany",
+              "ReadWriteMany",
+              "ReadWriteOncePod"
+            ]
           }
         },
         "size": {
@@ -456,10 +458,7 @@
           "description": "Resource limits for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Limit",
               "description": "CPU resource limit"
             },
@@ -476,10 +475,7 @@
           "description": "Resource requests for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Request",
               "description": "CPU resource request"
             },
@@ -789,6 +785,89 @@
       "items": {
         "type": "object",
         "description": "A Kubernetes manifest object. All fields are allowed."
+      }
+    },
+    "definitions": {
+      "type": "object",
+      "title": "RabbitMQ Definitions",
+      "description": "RabbitMQ definitions loaded on startup (https://www.rabbitmq.com/docs/definitions)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Definitions",
+          "description": "Enable loading of RabbitMQ definitions on startup"
+        },
+        "existingConfigMap": {
+          "type": "string",
+          "title": "Existing ConfigMap",
+          "description": "Name of existing ConfigMap containing RabbitMQ definitions"
+        },
+        "existingConfigMapKey": {
+          "type": "string",
+          "title": "Existing ConfigMap Key",
+          "description": "Key in existing ConfigMap containing RabbitMQ definitions",
+          "default": "defs.json"
+        },
+        "bindings": {
+          "type": "array",
+          "title": "Bindings",
+          "description": "Array of RabbitMQ bindings to create",
+          "items": { "type": "object" }
+        },
+        "global_parameters": {
+          "type": "array",
+          "title": "Global Parameters",
+          "description": "Array of RabbitMQ global parameters to create",
+          "items": { "type": "object" }
+        },
+        "parameters": {
+          "type": "array",
+          "title": "Parameters",
+          "description": "Array of RabbitMQ parameters to create",
+          "items": { "type": "object" }
+        },
+        "policies": {
+          "type": "array",
+          "title": "Policies",
+          "description": "Array of RabbitMQ policies to create",
+          "items": { "type": "object" }
+        },
+        "queues": {
+          "type": "array",
+          "title": "Queues",
+          "description": "Array of RabbitMQ queues to create",
+          "items": { "type": "object" }
+        },
+        "exchanges": {
+          "type": "array",
+          "title": "Exchanges",
+          "description": "Array of RabbitMQ exchanges to create",
+          "items": { "type": "object" }
+        },
+        "topic_permissions": {
+          "type": "array",
+          "title": "Topic Permissions",
+          "description": "Array of RabbitMQ topic permissions to create",
+          "items": { "type": "object" }
+        },
+        "users": {
+          "type": "array",
+          "title": "Users",
+          "description": "Array of RabbitMQ users to create",
+          "items": { "type": "object" }
+        },
+        "vhosts": {
+          "type": "array",
+          "title": "Virtual Hosts",
+          "description": "Array of RabbitMQ vhosts to create",
+          "items": { "type": "object" }
+        },
+        "permissions": {
+          "type": "array",
+          "title": "Permissions",
+          "description": "Array of RabbitMQ permissions to set",
+          "items": { "type": "object" }
+        }
       }
     }
   }

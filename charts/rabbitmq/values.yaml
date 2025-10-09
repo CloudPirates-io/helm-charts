@@ -360,3 +360,103 @@ pdb:
   minAvailable: ""
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable.
   maxUnavailable: ""
+
+## @section RabbitMQ Definitions (https://www.rabbitmq.com/docs/definitions)
+definitions:
+  ## @param definitions.enabled Enable loading of RabbitMQ definitions on startup
+  enabled: false
+  ## @param definitions.existingConfigMap Name of existing ConfigMap containing RabbitMQ definitions
+  existingConfigMap: ""
+  ## @param definitions.existingConfigMapKey Key in existing ConfigMap containing RabbitMQ definitions
+  existingConfigMapKey: defs.json
+  ## @param definitions.bindings Array of RabbitMQ bindings to create
+  bindings: []
+  ## @param definitions.global_parameters Array of RabbitMQ global parameters to create
+  global_parameters: []
+  ## @param definitions.parameters Array of RabbitMQ parameters to create
+  parameters: []
+  ## @param definitions.policies Array of RabbitMQ policies to create
+  policies: []
+  # - name: ha-all
+  #   vhost: app
+  #   pattern: ".*"
+  #   definition:
+  #     ha-mode: all
+  #   priority: 0
+  #   apply-to: all
+  ## @param definitions.queues Array of RabbitMQ queues to create
+  queues: []
+  # - name: app-queue
+  #   vhost: app
+  #   durable: true
+  #   auto_delete: false
+  #   arguments:
+  #     x-message-ttl: 60000
+  #     x-dead-letter-exchange: "app-dlx"
+  # - name: app-dlx
+  #   vhost: app
+  #   durable: true
+  #   auto_delete: false
+  #   arguments: {}
+  ## @param definitions.exchanges Array of RabbitMQ exchanges to create
+  exchanges: []
+  #   - name: app-exchange
+  #   vhost: app
+  #   type: direct
+  #   durable: true
+  #   auto_delete: false
+  #   internal: false
+  #   arguments: {}
+  # - name: app-dlx
+  #   vhost: app
+  #   type: fanout
+  #   durable: true
+  #   auto_delete: false
+  #   internal: false
+  #   arguments: {}
+  ## @param definitions.topic_permissions Array of RabbitMQ topic permissions to create
+  topic_permissions: []
+  # - user: app-user
+  #   vhost: app
+  #   exchange: "amq.topic"
+  #   write: "app.*"
+  #   read: "app.*"
+  ## @param definitions.users Array of RabbitMQ users to create
+  users: []
+  # - name: user1
+  #   password_hash: "9/1i+jKFRpbTRV1PtRnzFFYibT3cEpP92JeZ8YKGtflf4e/"
+  #   hashing_algorithm: "rabbit_password_hashing_sha512"
+  #   tags: []
+  # - name: admin
+  #   password_hash: "9/1i+jKFRpbTRV1PtRnzFFYibT3cEpP92JeZ8YKGtflf4e/"
+  #   hashing_algorithm: "rabbit_password_hashing_sha512"
+  #   tags: ["administrator"]
+  ## @param definitions.vhosts Array of RabbitMQ vhosts to create
+  vhosts: []
+  # - name: vhost1
+  #   limits: []
+  #   metadata:
+  #     description: "vhost v1",
+  #     tags: []
+  # - name: vhost2
+  #   limits: []
+  #   metadata:
+  #     description: "vhost v2,
+  #     tags": []
+  ## @param definitions.permissions Array of RabbitMQ permissions to set
+  permissions: []
+  # - user: user1
+  #   vhost: vhost1
+  #   configure: ".*"
+  #   write: ".*"
+  #   read: ".*"
+  # - user: admin
+  #   vhost: "/"
+  #   configure: ".*"
+  #   write: ".*"
+  #   read: ".*"
+  # - user: admin
+  #   vhost: "vhost2"
+  #   configure: ".*"
+  #   write: ".*"
+  #   read: ".*"
