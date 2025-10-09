@@ -1,8 +1,14 @@
 # Changelog
 
-## 0.3.1 (2025-10-08)
+## 0.3.2 (2025-10-09)
 
-* [mongodb] update values.schema.json ([#242](https://github.com/CloudPirates-io/helm-charts/pull/242))
+* [mongo] Update charts/mongodb/values.yaml mongo to v8.0.15 (patch) ([#262](https://github.com/CloudPirates-io/helm-charts/pull/262))
+
+## <small>0.3.1 (2025-10-08)</small>
+
+*  [minio, mongodb, postgres, timescaledb] Update securityContext to containerSecurityContext in the v ([8a4003f](https://github.com/CloudPirates-io/helm-charts/commit/8a4003f)), closes [#213](https://github.com/CloudPirates-io/helm-charts/issues/213)
+* [mariadb] use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c)), closes [#217](https://github.com/CloudPirates-io/helm-charts/issues/217)
+* update values.schema.json (#242) ([f973e47](https://github.com/CloudPirates-io/helm-charts/commit/f973e47)), closes [#242](https://github.com/CloudPirates-io/helm-charts/issues/242)
 
 ## 0.3.0 (2025-10-02)
 
