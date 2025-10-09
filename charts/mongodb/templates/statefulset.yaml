@@ -132,14 +132,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
-            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-            - name: custom-user-script
+            - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d/
-            {{- end }}
-            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
-            - name: metrics-user-script
-              mountPath: /docker-entrypoint-initdb.d/metrics/
-            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: /etc/mongo
@@ -213,17 +207,9 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-        - name: custom-user-script
+        - name: init-scripts
           configMap:
-            name: {{ include "mongodb.fullname" . }}-custom-user-script
-        {{- end }}
-        {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
-        - name: metrics-user-script
-          configMap:
-            name: {{ include "mongodb.fullname" . }}-metrics-user-script
-            defaultMode: 0755
-        {{- end }}
+            name: {{ include "mongodb.fullname" . }}-init-scripts
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config
           configMap:
