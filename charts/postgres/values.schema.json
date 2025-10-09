@@ -735,6 +735,15 @@
       "title": "Extra Environment Secret",
       "description": "Name of an existing Secret containing additional environment variables"
     },
+    "initContainers": {
+      "type": "array",
+      "title": "Init Containers",
+      "description": "Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades",
+      "items": {
+        "type": "object",
+        "description": "A Kubernetes init container specification. All fields are allowed."
+      }
+    },
     "extraObjects": {
       "type": "array",
       "title": "Extra Objects",
