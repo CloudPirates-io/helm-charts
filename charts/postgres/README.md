@@ -288,6 +288,30 @@ extraObjects:
 
 All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
 
+### Metrics Configuration
+
+| Parameter                                  | Description                                                                     | Default                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------- |
+| `metrics.enabled`                          | Start a sidecar prometheus exporter to expose PostgreSQL metrics                | `false`                                 |
+| `metrics.image.registry`                   | PostgreSQL exporter image registry                                              | `quay.io`                               |
+| `metrics.image.repository`                 | PostgreSQL exporter image repository                                            | `prometheuscommunity/postgres-exporter` |
+| `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.18.1`                               |
+| `metrics.image.pullPolicy`                 | PostgreSQL exporter image pull policy                                           | `Always`                                |
+| `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                                    |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                                    |
+| `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                                    |
+| `metrics.service.port`                     | Metrics service port                                                            | `9187`                                  |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator | `false`                                 |
+| `metrics.serviceMonitor.namespace`         | The namespace in which the ServiceMonitor will be created                       | `""`                                    |
+| `metrics.serviceMonitor.interval`          | The interval at which metrics should be scraped                                 | `30s`                                   |
+| `metrics.serviceMonitor.scrapeTimeout`     | The timeout after which the scrape is ended                                     | `10s`                                   |
+| `metrics.serviceMonitor.selector`          | Additional labels for ServiceMonitor resource                                   | `{}`                                    |
+| `metrics.serviceMonitor.annotations`       | ServiceMonitor annotations                                                      | `{}`                                    |
+| `metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels        | `false`                                 |
+| `metrics.serviceMonitor.relabelings`       | ServiceMonitor relabel configs to apply to samples before scraping              | `[]`                                    |
+| `metrics.serviceMonitor.metricRelabelings` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion   | `[]`                                    |
+| `metrics.serviceMonitor.namespaceSelector` | ServiceMonitor namespace selector                                               | `{}`                                    |
+
 ## Examples
 
 ### Basic Deployment
@@ -437,6 +461,33 @@ data:
     work_mem = 16MB
     maintenance_work_mem = 256MB
     # Add your custom configuration here
+```
+
+### Monitoring with Prometheus
+
+Enable metrics collection with Prometheus:
+
+```yaml
+# values-monitoring.yaml
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+```
+
+Deploy with monitoring enabled:
+
+```bash
+helm install my-postgres ./charts/postgres -f values-monitoring.yaml
+```
+
+The PostgreSQL exporter will expose metrics on port 9187, and if you have Prometheus Operator installed, the ServiceMonitor will automatically configure Prometheus to scrape the metrics.
+
+You can access metrics directly via port-forward:
+
+```bash
+kubectl port-forward service/my-postgres-metrics 9187:9187
+curl http://localhost:9187/metrics
 ```
 
 ## Access PostgreSQL
