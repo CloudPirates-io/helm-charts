@@ -1,0 +1,227 @@
+name: Build Containers from Source
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/*/Dockerfile'
+      - 'charts/*/Chart.yaml'
+      - '.github/workflows/build-containers.yaml'
+  pull_request:
+    paths:
+      - 'charts/*/Dockerfile'
+      - 'charts/*/Chart.yaml'
+      - '.github/workflows/build-containers.yaml'
+  workflow_dispatch:
+    inputs:
+      chart_name:
+        description: 'Chart name to build (leave empty to build all)'
+        required: false
+        type: string
+
+jobs:
+  detect-charts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Detect charts with Dockerfiles
+        id: set-matrix
+        run: |
+          set -e
+
+          # Find all charts with Dockerfiles
+          charts_with_dockerfiles=()
+
+          if [ -n "${{ github.event.inputs.chart_name }}" ]; then
+            # Manual workflow dispatch with specific chart
+            if [ -f "charts/${{ github.event.inputs.chart_name }}/Dockerfile" ]; then
+              charts_with_dockerfiles+=("${{ github.event.inputs.chart_name }}")
+            fi
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            # For PRs, only build changed charts
+            changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+            for chart_dir in charts/*/; do
+              chart_name=$(basename "$chart_dir")
+              if echo "$changed_files" | grep -q "charts/${chart_name}/"; then
+                if [ -f "charts/${chart_name}/Dockerfile" ]; then
+                  charts_with_dockerfiles+=("$chart_name")
+                fi
+              fi
+            done
+          else
+            # For pushes to main or manual dispatch without chart name, build all
+            for chart_dir in charts/*/; do
+              chart_name=$(basename "$chart_dir")
+              if [ -f "charts/${chart_name}/Dockerfile" ]; then
+                charts_with_dockerfiles+=("$chart_name")
+              fi
+            done
+          fi
+
+          if [ ${#charts_with_dockerfiles[@]} -eq 0 ]; then
+            echo "No charts with Dockerfiles found"
+            echo 'matrix={"include":[]}' >> $GITHUB_OUTPUT
+          else
+            echo "Found charts with Dockerfiles: ${charts_with_dockerfiles[*]}"
+
+            # Build JSON array for matrix
+            json_array="["
+            first=true
+            for chart in "${charts_with_dockerfiles[@]}"; do
+              if [ "$first" = true ]; then
+                first=false
+              else
+                json_array+=","
+              fi
+
+              # Extract metadata from Chart.yaml
+              app_version=$(yq eval '.appVersion' "charts/${chart}/Chart.yaml" | tr -d '"')
+              chart_version=$(yq eval '.version' "charts/${chart}/Chart.yaml" | tr -d '"')
+              description=$(yq eval '.description' "charts/${chart}/Chart.yaml" | tr -d '"')
+
+              json_array+="{\"name\":\"${chart}\",\"app_version\":\"${app_version}\",\"chart_version\":\"${chart_version}\",\"description\":\"${description}\"}"
+            done
+            json_array+="]"
+
+            echo "matrix={\"include\":${json_array}}" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: detect-charts
+    if: needs.detect-charts.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-charts.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          tags: |
+            type=raw,value=${{ matrix.app_version }}
+            type=raw,value=${{ matrix.chart_version }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.vendor=CloudPirates
+            org.opencontainers.image.version=${{ matrix.app_version }}
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: charts/${{ matrix.name }}
+          file: charts/${{ matrix.name }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          provenance: true
+          sbom: true
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.9.2
+
+      - name: Sign the images with cosign
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          DIGEST="${{ steps.build.outputs.digest }}"
+
+          # Sign Docker Hub image
+          cosign sign -y --key env://COSIGN_KEY \
+            ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}@${DIGEST}
+
+          # Sign GHCR image
+          cosign sign -y --key env://COSIGN_KEY \
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}@${DIGEST}
+
+      - name: Verify signatures
+        if: github.event_name != 'pull_request'
+        run: |
+          DIGEST="${{ steps.build.outputs.digest }}"
+
+          # Verify Docker Hub image
+          cosign verify --key cosign.pub \
+            ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}@${DIGEST}
+
+          # Verify GHCR image
+          cosign verify --key cosign.pub \
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}@${DIGEST}
+
+      - name: Generate SBOM
+        if: github.event_name != 'pull_request'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: ${{ matrix.name }}-sbom.spdx.json
+
+      - name: Upload SBOM
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-sbom
+          path: ${{ matrix.name }}-sbom.spdx.json
+          retention-days: 90
+
+      - name: Summary
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "## 🐳 Container Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Chart:** ${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**App Version:** ${{ matrix.app_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Chart Version:** ${{ matrix.chart_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Images" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}:${{ matrix.app_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ matrix.app_version }}\`" >> $GITHUB_STEP_SUMMARY

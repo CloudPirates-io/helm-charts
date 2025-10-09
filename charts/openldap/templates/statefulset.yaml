@@ -1,0 +1,209 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "openldap.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openldap.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "openldap.fullname" . }}-headless
+  replicas: {{ .Values.replicaCount }}
+  {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
+    whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "openldap.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "openldap.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.global.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: openldap
+          image: {{ include "openldap.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: LDAP_DOMAIN
+              value: {{ .Values.config.domain | quote }}
+            - name: LDAP_ORGANIZATION
+              value: {{ .Values.config.organization | quote }}
+            - name: LDAP_BASE_DN
+              value: {{ include "openldap.baseDN" . | quote }}
+            - name: LDAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "openldap.secretName" . }}
+                  key: {{ .Values.auth.existingSecretPasswordKey }}
+            {{- if .Values.config.tls.enabled }}
+            - name: LDAP_TLS_ENABLED
+              value: "true"
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: ldap
+              containerPort: 389
+              protocol: TCP
+            - name: ldaps
+              containerPort: 636
+              protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - ldapsearch
+                - -x
+                - -b
+                - ""
+                - -s
+                - base
+                - "(objectclass=*)"
+                - namingContexts
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - ldapsearch
+                - -x
+                - -b
+                - ""
+                - -s
+                - base
+                - "(objectclass=*)"
+                - namingContexts
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.dataPath }}
+            - name: config
+              mountPath: {{ .Values.persistence.configPath }}
+            {{- if .Values.config.tls.enabled }}
+            - name: tls
+              mountPath: /etc/ldap/certs
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        {{- if not .Values.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        - name: config
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.config.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.config.tls.existingSecret }}
+            items:
+              - key: {{ .Values.config.tls.certKey }}
+                path: tls.crt
+              - key: {{ .Values.config.tls.keyKey }}
+                path: tls.key
+              - key: {{ .Values.config.tls.caKey }}
+                path: ca.crt
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- with .Values.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+    - metadata:
+        name: config
+        {{- with .Values.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: 1Gi
+  {{- end }}

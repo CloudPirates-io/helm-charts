@@ -1,0 +1,192 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override openldap.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override openldap.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @section OpenLDAP image parameters
+image:
+  ## @param image.registry OpenLDAP image registry
+  registry: docker.io
+  ## @param image.repository OpenLDAP image repository
+  repository: cloudpirates/openldap
+  ## @param image.tag OpenLDAP image tag (uses Chart appVersion if not specified)
+  tag: ""
+  ## @param image.pullPolicy OpenLDAP image pull policy
+  pullPolicy: IfNotPresent
+
+## @section OpenLDAP configuration
+## @param replicaCount Number of OpenLDAP replicas
+replicaCount: 1
+
+## @section Pod labels and annotations
+## @param podLabels Map of labels to add to the pods
+podLabels: {}
+## @param podAnnotations Map of annotations to add to the pods
+podAnnotations: {}
+
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.ldapPort LDAP service port
+  ldapPort: 389
+  ## @param service.ldapsPort LDAPS service port
+  ldapsPort: 636
+  ## @param service.annotations Service annotations
+  annotations: {}
+
+## @section OpenLDAP Authentication
+auth:
+  ## @param auth.adminPassword OpenLDAP admin password (if empty, random password will be generated)
+  adminPassword: ""
+  ## @param auth.existingSecret Name of existing secret containing admin password
+  existingSecret: ""
+  ## @param auth.existingSecretPasswordKey Key in existing secret containing admin password
+  existingSecretPasswordKey: "adminPassword"
+
+## @section OpenLDAP Configuration
+config:
+  ## @param config.domain LDAP domain
+  domain: "example.org"
+  ## @param config.organization Organization name
+  organization: "Example Inc"
+  ## @param config.baseDN Base DN (auto-generated from domain if empty)
+  baseDN: ""
+  ## @param config.tls.enabled Enable TLS/LDAPS
+  tls:
+    enabled: false
+    ## @param config.tls.existingSecret Name of existing secret containing TLS certificates
+    existingSecret: ""
+    ## @param config.tls.certKey Key in secret containing certificate
+    certKey: "tls.crt"
+    ## @param config.tls.keyKey Key in secret containing private key
+    keyKey: "tls.key"
+    ## @param config.tls.caKey Key in secret containing CA certificate
+    caKey: "ca.crt"
+
+## @section Persistence
+persistence:
+  ## @param persistence.enabled Enable persistent storage
+  enabled: true
+  ## @param persistence.storageClass Storage class to use for persistent volume
+  storageClass: ""
+  ## @param persistence.accessMode Access mode for persistent volume
+  accessMode: ReadWriteOnce
+  ## @param persistence.size Size of persistent volume
+  size: 8Gi
+  ## @param persistence.dataPath Mount path for LDAP data
+  dataPath: /var/lib/ldap
+  ## @param persistence.configPath Mount path for LDAP config
+  configPath: /etc/ldap/slapd.d
+  ## @param persistence.annotations Annotations for persistent volume claims
+  annotations: {}
+
+## @section Persistent Volume Claim Retention Policy
+persistentVolumeClaimRetentionPolicy:
+  ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the Statefulset
+  enabled: false
+  ## @param persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  whenScaled: Retain
+  ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  whenDeleted: Retain
+
+## @param resources Resource limits and requests for OpenLDAP pod
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param priorityClassName for pod eviction
+priorityClassName: ""
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 389
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set OpenLDAP container's privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount root filesystem as read-only
+  readOnlyRootFilesystem: false
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set OpenLDAP pod's Security Context fsGroup
+  fsGroup: 389
+
+livenessProbe:
+  ## @param livenessProbe.enabled Enable liveness probe
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  failureThreshold: 6
+  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readiness probe
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param readinessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 6
+  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnv Additional environment variables to set
+extraEnv: []
+# - name: EXTRA_VAR
+#   value: "extra_value"
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the OpenLDAP container
+extraVolumeMounts: []
+
+## @param initContainers Add additional init containers
+initContainers: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: extra-config
+#     namespace: "{{ .Release.Namespace }}"
+#   data:
+#     key: value

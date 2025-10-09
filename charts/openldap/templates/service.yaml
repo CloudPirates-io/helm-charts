@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "openldap.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openldap.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: ldap
+      port: {{ .Values.service.ldapPort }}
+      targetPort: ldap
+      protocol: TCP
+    - name: ldaps
+      port: {{ .Values.service.ldapsPort }}
+      targetPort: ldaps
+      protocol: TCP
+  selector:
+    {{- include "openldap.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "openldap.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openldap.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: ldap
+      port: {{ .Values.service.ldapPort }}
+      targetPort: ldap
+      protocol: TCP
+    - name: ldaps
+      port: {{ .Values.service.ldapsPort }}
+      targetPort: ldaps
+      protocol: TCP
+  selector:
+    {{- include "openldap.selectorLabels" . | nindent 4 }}
