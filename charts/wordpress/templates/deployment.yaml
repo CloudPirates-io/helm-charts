@@ -28,6 +28,32 @@ spec:
 {{- end }}
       serviceAccountName: {{ include "wordpress.serviceAccountName" . }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.mariadb.enabled }}
+      initContainers:
+        - name: wait-for-mariadb
+          image: "{{ .Values.initContainers.waitForMariadb.image | default "mariadb:12.0.2" }}"
+          command:
+            - sh
+            - -c
+            - >
+              retries=0;
+              max_retries=25;
+              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "wordpress.databaseHost" . }} 
+              -P {{ .Values.mariadb.service.port }} 
+              -u{{ .Values.mariadb.auth.username }} 
+              -p{{ .Values.mariadb.auth.password }} 
+              ; do 
+                retries=$((retries+1));
+                echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)"; 
+                if [ $retries -ge $max_retries ]; then
+                  echo "Maximum number of retries reached. Exiting.";
+                  exit 1;
+                fi;
+                sleep 2; 
+              done;
+              exit 0;
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
