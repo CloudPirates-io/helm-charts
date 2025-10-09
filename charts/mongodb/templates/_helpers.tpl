@@ -127,6 +127,6 @@ Return ServiceMonitor labels
 {{- define "mongodb.metrics.serviceMonitor.labels" -}}
 {{- include "mongodb.labels" . }}
 {{- with .Values.metrics.serviceMonitor.additionalLabels }}
-{{- toYaml . }}
+{{ toYaml . }}
 {{- end }}
 {{- end -}}
