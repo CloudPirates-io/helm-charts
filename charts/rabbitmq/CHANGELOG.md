@@ -1,8 +1,13 @@
 # Changelog
 
-## 0.3.1 (2025-10-06)
+## 0.3.2 (2025-10-09)
 
-* [rabbitmq] chore(deps): update docker.io/rabbitmq:4.1.4-management Docker digest to 8c31e22 ([#204](https://github.com/CloudPirates-io/helm-charts/pull/204))
+* [rabbitmq]: Fix auth disable erlang cookie ([#248](https://github.com/CloudPirates-io/helm-charts/pull/248))
+
+## <small>0.3.1 (2025-10-06)</small>
+
+* [mariadb] use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c)), closes [#217](https://github.com/CloudPirates-io/helm-charts/issues/217)
+* chore(deps): update docker.io/rabbitmq:4.1.4-management Docker digest to 8c31e22 (#204) ([dd82ffe](https://github.com/CloudPirates-io/helm-charts/commit/dd82ffe)), closes [#204](https://github.com/CloudPirates-io/helm-charts/issues/204)
 
 ## 0.3.0 (2025-10-06)
 
