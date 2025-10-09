@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.5.6 (2025-10-08)
+## 0.5.7 (2025-10-09)
 
-* [oliver006/redis_exporter] Update oliver006/redis_exporter to v1.78.0 ([#235](https://github.com/CloudPirates-io/helm-charts/pull/235))
+* [redis] Update charts/redis/values.yaml redis to v8.2.2 (patch) ([#264](https://github.com/CloudPirates-io/helm-charts/pull/264))
+
+## <small>0.5.6 (2025-10-08)</small>
+
+* [oliver006/redis_exporter] Update oliver006/redis_exporter to v1.78.0 (#235) ([508fd61](https://github.com/CloudPirates-io/helm-charts/commit/508fd61)), closes [#235](https://github.com/CloudPirates-io/helm-charts/issues/235)
 
 ## <small>0.5.5 (2025-10-08)</small>
 
