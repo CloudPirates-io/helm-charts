@@ -100,6 +100,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | ------------------------ | ------------------------------- | ------- |
 | `statefulsetLabels`      | Labels to attach to StatefulSet | `{}`    |
 | `podLabels`              | Labels to attach to pods        | `{}`    |
+| `podAnnotations`         | Annotations to attach to pods   | `{}`    |
 | `statefulsetAnnotations` | Annotations for StatefulSet     | `{}`    |
 
 | Parameter                          | Description                                                                                                                                  | Default     |
@@ -214,11 +215,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Node Selection
 
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
+| Parameter                   | Description                                    | Default |
+| --------------------------- | ---------------------------------------------- | ------- |
+| `nodeSelector`              | Node labels for pod assignment                 | `{}`    |
+| `tolerations`               | Toleration labels for pod assignment           | `[]`    |
+| `affinity`                  | Affinity settings for pod assignment           | `{}`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
 
 ### Security Context
 

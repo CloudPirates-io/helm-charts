@@ -203,6 +203,9 @@ tolerations: []
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
@@ -324,6 +327,8 @@ persistentVolumeClaimRetentionPolicy:
 statefulsetLabels: {}
 ## @param podLabels pod labels
 podLabels: {}
+## @param podAnnotations pod annotations
+podAnnotations: {}
 ## @param statefulsetAnnotations statefulset annotations.
 statefulsetAnnotations: {}
 

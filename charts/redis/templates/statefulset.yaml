@@ -22,14 +22,15 @@ spec:
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- if or .Values.config.content .Values.config.existingConfigmap }}
       annotations:
         {{- if and .Values.config.content (not .Values.config.existingConfigmap) }}
         checksum/config: {{ .Values.config.content | sha256sum }}
         {{- else if .Values.config.existingConfigmap }}
         checksum/config: {{ .Values.config.existingConfigmap | sha256sum }}
         {{- end }}
-      {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
 {{- with (include "redis.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
