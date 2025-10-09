@@ -14,12 +14,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)charts/.+/values\\.ya?ml$/"
+      "fileMatch": [
+        "(^|/)charts/.+/values\\.ya?ml$"
       ],
       "matchStrings": [
-        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?",
-        "(?<depName>sentinel\\.image):\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<packageName>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?",
+        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
@@ -51,11 +51,12 @@
         "dependencies",
         "renovate"
       ],
-      "automerge": false
+      "automerge": false,
+      "commitMessagePrefix": "[helm]"
     },
     {
       "matchPackageNames": [
-        "**/clusterpirate"
+        "cloudpirates/clusterpirate"
       ],
       "enabled": false
     },
@@ -63,11 +64,11 @@
       "matchDatasources": [
         "helm"
       ],
-      "enabled": false,
       "matchPackageNames": [
-        "/^cloudpirates/common$/",
-        "/^cloudpirates/valkey$/"
-      ]
+        "cloudpirates/common",
+        "cloudpirates/valkey"
+      ],
+      "enabled": false
     }
   ]
 }
