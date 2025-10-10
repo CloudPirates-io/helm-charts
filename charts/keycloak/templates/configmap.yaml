@@ -14,3 +14,20 @@ data:
   cache-ispn.xml: |
     {{- .Values.cache.configFile | nindent 4 }}
 {{- end }}
+{{- if .Values.realm.import }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "keycloak.fullname" . }}-realm
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+  {{- with (include "keycloak.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+data:
+  realm.json: |
+    {{ .Values.realm.configFile | nindent 4 }}
+{{- end }}

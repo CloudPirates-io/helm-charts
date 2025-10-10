@@ -210,7 +210,13 @@ spec:
             {{- if .Values.definitions.enabled }}
             - name: definitions
               mountPath: "/etc/rabbitmq-definitions/defs.json"
-              subPath: {{ .Values.definitions.existingConfigMapKey | default "defs.json" }}
+              subPath: {{- if .Values.definitions.existingConfigMap }}
+                {{ .Values.definitions.existingConfigMapKey | default "defs.json" }}
+              {{- else if .Values.definitions.existingSecret }}
+                {{ .Values.definitions.existingSecretKey | default "defs.json" }}
+              {{- else }}
+                defs.json
+              {{- end }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -231,8 +237,16 @@ spec:
             name: {{ include "rabbitmq.fullname" . }}-config
         {{- if .Values.definitions.enabled }}
         - name: definitions
+          {{- if .Values.definitions.existingConfigMap }}
           configMap:
-            name: {{ .Values.definitions.existingConfigMap | default (printf "%s-definitions" (include "rabbitmq.fullname" .)) }}
+            name: {{ .Values.definitions.existingConfigMap }}
+          {{- else if .Values.definitions.existingSecret }}
+          secret:
+            secretName: {{ .Values.definitions.existingSecret }}
+          {{- else }}
+          configMap:
+            name: {{ printf "%s-definitions" (include "rabbitmq.fullname" .) }}
+          {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}

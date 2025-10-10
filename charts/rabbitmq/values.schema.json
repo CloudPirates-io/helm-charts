@@ -108,6 +108,12 @@
           "description": "Kubernetes service type",
           "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
         },
+        "trafficDistribution": {
+          "type": "string",
+          "description": "Traffic distribution policy",
+          "enum": ["", "PreferClose", "PreferSameZone", "PreferSameNode"],
+          "default": ""
+        },
         "amqpPort": {
           "type": "integer",
           "title": "AMQP Port",
@@ -913,18 +919,12 @@
           "description": "Enable/disable a Pod Disruption Budget creation"
         },
         "minAvailable": {
-          "oneOf": [
-            {"type": "string"},
-            {"type": "integer"}
-          ],
+          "oneOf": [{ "type": "string" }, { "type": "integer" }],
           "title": "Min Available",
           "description": "Minimum number/percentage of pods that should remain scheduled"
         },
         "maxUnavailable": {
-          "oneOf": [
-            {"type": "string"},
-            {"type": "integer"}
-          ],
+          "oneOf": [{ "type": "string" }, { "type": "integer" }],
           "title": "Max Unavailable",
           "description": "Maximum number/percentage of pods that may be made unavailable"
         }
@@ -949,6 +949,17 @@
           "type": "string",
           "title": "Existing ConfigMap Key",
           "description": "Key in existing ConfigMap containing RabbitMQ definitions",
+          "default": "defs.json"
+        },
+        "existingSecret": {
+          "type": "string",
+          "title": "Existing Secret",
+          "description": "Name of existing Secret containing RabbitMQ definitions"
+        },
+        "existingSecretKey": {
+          "type": "string",
+          "title": "Existing Secret Key",
+          "description": "Key in existing Secret containing RabbitMQ definitions",
           "default": "defs.json"
         },
         "bindings": {

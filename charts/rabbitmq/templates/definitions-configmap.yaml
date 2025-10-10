@@ -2,7 +2,7 @@
 This file is rendered only if definitions are enabled AND an existing ConfigMap is NOT specified.
 It constructs a dictionary from the values and then converts it to a valid JSON object.
 */}}
-{{- if and .Values.definitions.enabled (not .Values.definitions.existingConfigMap) }}
+{{- if and .Values.definitions.enabled (not .Values.definitions.existingConfigMap) (not .Values.definitions.existingSecret) }}
 {{- $def := dict }}
 {{- if .Values.definitions.users -}}{{- $_ := set $def "users" .Values.definitions.users }}{{- end }}
 {{- if .Values.definitions.vhosts -}}{{- $_ := set $def "vhosts" .Values.definitions.vhosts }}{{- end }}

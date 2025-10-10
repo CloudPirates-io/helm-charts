@@ -143,6 +143,13 @@ cache:
   ## @param cache.configFile Custom cache configuration file
   configFile: ""
 
+## @section Realm Configuration
+realm:
+  ## @param realm.import Enable import of realms from /opt/keycloak/data/import (production mode must be false)
+  import: false
+  ## @param realm.configFile Json config for initial realm configuration, mounted in /opt/keycloak/data/import
+  configFile: ""
+
 ## @section Features Configuration
 features:
   ## @param features.enabled List of enabled features

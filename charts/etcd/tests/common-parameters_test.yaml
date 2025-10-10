@@ -18,7 +18,7 @@ tests:
           value: RELEASE-NAME
       - equal:
           path: spec.template.spec.containers[0].image
-          value: gcr.io/etcd-development/etcd:v3.6.0-alpha.0
+          value: quay.io/coreos/etcd:v3.6.0-alpha.0
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
@@ -30,7 +30,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: my-registry.com/etcd-development/etcd:v3.6.0-alpha.0
+          value: my-registry.com/coreos/etcd:v3.6.0-alpha.0
 
   - it: should respect global.imagePullSecrets
     set:
@@ -98,7 +98,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: custom-registry.io/etcd-development/etcd:v3.6.0-alpha.0
+          value: custom-registry.io/coreos/etcd:v3.6.0-alpha.0
 
   - it: should respect image.repository override
     set:
@@ -107,7 +107,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: gcr.io/custom/etcd:v3.6.0-alpha.0
+          value: quay.io/custom/etcd:v3.6.0-alpha.0
 
   - it: should respect image.tag override
     set:
@@ -116,7 +116,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: gcr.io/etcd-development/etcd:v3.5.0
+          value: quay.io/coreos/etcd:v3.5.0
 
   - it: should respect image.pullPolicy override
     set:
@@ -136,7 +136,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: global-registry.com/etcd-development/etcd:v3.6.0-alpha.0
+          value: global-registry.com/coreos/etcd:v3.6.0-alpha.0
 
   - it: should add podLabels to pod template
     set:
