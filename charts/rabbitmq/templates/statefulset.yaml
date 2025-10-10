@@ -217,6 +217,7 @@ spec:
               {{- else }}
                 defs.json
               {{- end }}
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}

@@ -38,6 +38,8 @@ replicaCount: 1
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
+  ## @param service.trafficDistribution Traffic distribution policy for the service
+  trafficDistribution: ""
   ## @param service.amqpPort RabbitMQ AMQP service port
   amqpPort: 5672
   ## @param service.managementPort RabbitMQ management UI port
