@@ -146,7 +146,7 @@ jobs:
             type=raw,value=${{ matrix.app_version }}
             type=raw,value=${{ matrix.chart_version }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/main' }}
           labels: |
             org.opencontainers.image.title=${{ matrix.name }}
             org.opencontainers.image.description=${{ matrix.description }}
