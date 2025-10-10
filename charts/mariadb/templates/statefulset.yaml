@@ -11,7 +11,11 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.galera.enabled }}
+  replicas: {{ .Values.galera.replicaCount }}
+  {{- else }}
   replicas: 1
+  {{- end }}
   serviceName: {{ include "mariadb.fullname" . }}
   selector:
     matchLabels:
@@ -37,7 +41,15 @@ spec:
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
-          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env }}
+          {{- if .Values.galera.enabled }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Source the galera entrypoint script
+              source /usr/local/bin/galera-entrypoint.sh
+          {{- end }}
+          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env .Values.galera.enabled }}
           env:
             {{- if and .Values.auth.enabled }}
             - name: MARIADB_ROOT_PASSWORD
@@ -63,6 +75,33 @@ spec:
             - name: MARIADB_ALLOW_EMPTY_ROOT_PASSWORD
               value: "1"
             {{- end }}
+            {{- if .Values.galera.enabled }}
+            - name: MARIADB_GALERA_CLUSTER
+              value: "true"
+            - name: MARIADB_GALERA_CLUSTER_NAME
+              value: {{ .Values.galera.name | quote }}
+            - name: MARIADB_GALERA_CLUSTER_ADDRESS
+              value: "gcomm://{{ include "mariadb.galeraClusterAddress" . }}"
+            - name: MARIADB_GALERA_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MARIADB_GALERA_NODE_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: MARIADB_GALERA_SST_USER
+              value: {{ .Values.galera.sst.user | quote }}
+            {{- if .Values.galera.sst.password }}
+            - name: MARIADB_GALERA_SST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mariadb.galeraSecretName" . }}
+                  key: {{ .Values.galera.sst.secretKeys.passwordKey }}
+            {{- end }}
+            - name: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP
+              value: {{ .Values.galera.forceSafeToBootstrap | quote }}
+            {{- end }}
             {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -71,13 +110,35 @@ spec:
             - name: mysql
               containerPort: 3306
               protocol: TCP
+            {{- if .Values.galera.enabled }}
+            - name: galera-repl
+              containerPort: 4567
+              protocol: TCP
+            - name: galera-ist
+              containerPort: 4568
+              protocol: TCP
+            - name: galera-sst
+              containerPort: 4444
+              protocol: TCP
+            {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             exec:
               command:
                 - bash
                 - -c
+                {{- if .Values.galera.enabled }}
+                - |
+                  healthcheck.sh --connect --innodb_initialized
+                  # Also check Galera cluster status
+                  if mysql -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_ready'" | grep -q ON; then
+                    exit 0
+                  else
+                    exit 1
+                  fi
+                {{- else }}
                 - healthcheck.sh --connect --innodb_initialized
+                {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -90,7 +151,18 @@ spec:
               command:
                 - bash
                 - -c
+                {{- if .Values.galera.enabled }}
+                - |
+                  healthcheck.sh --connect --innodb_initialized
+                  # Check if node is synced in Galera cluster
+                  if mysql -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_local_state_comment'" | grep -q Synced; then
+                    exit 0
+                  else
+                    exit 1
+                  fi
+                {{- else }}
                 - healthcheck.sh --connect --innodb_initialized
+                {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -119,9 +191,17 @@ spec:
               mountPath: /var/lib/mysql
             - mountPath: /tmp
               name: tmp-volume
-            {{- if or .Values.config.customConfiguration .Values.config.existingConfigMap }}
+            {{- if or .Values.config.customConfiguration .Values.config.existingConfigMap .Values.galera.enabled }}
             - name: config
               mountPath: /etc/mysql/conf.d
+            {{- end }}
+            {{- if .Values.galera.enabled }}
+            - name: galera-config
+              mountPath: /etc/mysql/galera.cnf
+              subPath: galera.cnf
+            - name: galera-scripts
+              mountPath: /usr/local/bin/galera-entrypoint.sh
+              subPath: galera-entrypoint.sh
             {{- end }}
             {{- if .Values.initdbScriptsConfigMap }}
             - name: custom-init-scripts
@@ -142,10 +222,19 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
-        {{- if or .Values.config.customConfiguration .Values.config.existingConfigMap }}
+        {{- if or .Values.config.customConfiguration .Values.config.existingConfigMap .Values.galera.enabled }}
         - name: config
           configMap:
             name: {{ include "mariadb.configMapName" . }}
+        {{- end }}
+        {{- if .Values.galera.enabled }}
+        - name: galera-config
+          configMap:
+            name: {{ include "mariadb.fullname" . }}-galera
+        - name: galera-scripts
+          configMap:
+            name: {{ include "mariadb.fullname" . }}-galera-scripts
+            defaultMode: 0755
         {{- end }}
         {{- if .Values.initdbScriptsConfigMap }}
         - name: custom-init-scripts

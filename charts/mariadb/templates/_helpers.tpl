@@ -77,3 +77,35 @@ Return the MariaDB ConfigMap Name
 {{- end }}
 {{- end }}
 
+{{/*
+Get the secret name for Galera SST authentication
+*/}}
+{{- define "mariadb.galeraSecretName" -}}
+{{- if .Values.galera.sst.existingSecret }}
+{{- .Values.galera.sst.existingSecret }}
+{{- else }}
+{{- printf "%s-galera" (include "mariadb.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generate Galera cluster address list
+*/}}
+{{- define "mariadb.galeraClusterAddress" -}}
+{{- $fullname := include "mariadb.fullname" . -}}
+{{- $replicaCount := int .Values.galera.replicaCount -}}
+{{- $namespace := .Release.Namespace -}}
+{{- $addresses := list -}}
+{{- range $i := until $replicaCount -}}
+{{- $addresses = append $addresses (printf "%s-%d.%s.%s.svc.cluster.local:4567" $fullname $i $fullname $namespace) -}}
+{{- end -}}
+{{- join "," $addresses -}}
+{{- end }}
+
+{{/*
+Generate Galera cluster name with release context
+*/}}
+{{- define "mariadb.galeraClusterName" -}}
+{{- printf "%s-%s" .Release.Name .Values.galera.name -}}
+{{- end }}
+
