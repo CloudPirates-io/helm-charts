@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 (2025-10-09)
+## 0.2.2 (2025-10-10)
 
 * [memcached]: Implement PDB ([#295](https://github.com/CloudPirates-io/helm-charts/pull/295))
 
