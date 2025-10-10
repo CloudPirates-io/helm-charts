@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.3.4 (2025-10-09)
+## 0.3.5 (2025-10-10)
 
-* [redis , rabbitmq]: Add podAnnotations ([#294](https://github.com/CloudPirates-io/helm-charts/pull/294))
+* [rabbitmq] Update charts/rabbitmq/values.yaml rabbitmq ([#321](https://github.com/CloudPirates-io/helm-charts/pull/321))
+
+## <small>0.3.4 (2025-10-09)</small>
+
+* [redis , rabbitmq]: Add podAnnotations (#294) ([6d78869](https://github.com/CloudPirates-io/helm-charts/commit/6d78869)), closes [#294](https://github.com/CloudPirates-io/helm-charts/issues/294)
 
 ## <small>0.3.3 (2025-10-09)</small>
 

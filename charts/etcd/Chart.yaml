@@ -1,0 +1,26 @@
+apiVersion: v2
+name: etcd
+description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
+type: application
+version: 0.1.1
+appVersion: "3.6.0"
+keywords:
+  - etcd
+  - distributed
+  - key-value
+  - consensus
+  - raft
+home: https://etcd.io/
+sources:
+  - https://github.com/etcd-io/etcd
+annotations:
+  category: Database
+  license: Apache-2.0
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    url: https://www.cloudpirates.io
+dependencies:
+  - name: common
+    version: "1.x.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/etcd/icon/color/etcd-icon-color.svg

@@ -97,7 +97,7 @@ readinessProbe:
 config:
   content: |
     # Redis production configuration
-    bind 0.0.0.0
+    bind * -::*
     port 6379
     
     # Memory management

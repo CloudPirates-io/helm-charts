@@ -1,0 +1,22 @@
+{{- if .Values.pdb.create }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "memcached.fullname" . }}-pdb
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "memcached.labels" . | nindent 4 }}
+  {{- with (include "memcached.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  {{- if or .Values.pdb.maxUnavailable (not .Values.pdb.minAvailable) }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "memcached.selectorLabels" . | nindent 6 }}
+{{- end }}
