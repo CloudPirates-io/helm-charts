@@ -106,7 +106,7 @@ jobs:
           cat << 'EOF' | gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F -
           ## ⚠️ Unsigned Commits Detected
 
-          This pull request contains **${{ steps.check-commits.outputs.unsigned_commits }}** out of **${{ steps.check-commits.outputs.total_commits }}** unsigned commits.
+          This pull request contains unsigned commits.
 
           ### What does this mean?
 
