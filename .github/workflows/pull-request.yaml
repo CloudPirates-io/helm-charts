@@ -21,9 +21,10 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@v5.0.0
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.repository }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Python is required because `ct lint` runs Yamale (https://github.com/23andMe/Yamale) and
       # yamllint (https://github.com/adrienverge/yamllint) which require Python
@@ -69,9 +70,10 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@v5.0.0
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.repository }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -107,15 +109,42 @@ jobs:
 
             # Generate new CHANGELOG.md
             npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
-            
+
             # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
             # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
             # So we only need to find a released section to start printing in the awk script below
             awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
 
-            # Remove chart name prefixes from commit messages
+            # Remove entries that belong to other charts - keep only entries for this chart or without chart prefix
+            # This filters out commits like "[mongodb]" from rabbitmq changelog
+            UPPER_CHART=$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')
+            # Use awk to filter: keep non-commit lines (headers) and commit lines that either have no chart prefix or match this chart
+            awk -v chart="${CHART_NAME}" -v upper="${UPPER_CHART}" '
+              /^\* / {
+                # This is a commit line
+                if (/^\* \[/) {
+                  # Has a chart prefix - only keep if it matches this chart
+                  if (match($0, /^\* \[(.*)\]/, arr)) {
+                    prefix = arr[1]
+                    if (tolower(prefix) == tolower(chart)) {
+                      print
+                    }
+                  }
+                } else {
+                  # No chart prefix - keep it
+                  print
+                }
+              }
+              !/^\* / {
+                # Not a commit line (header, blank line, etc.) - keep it
+                print
+              }
+            ' "$CHANGELOG_TMP_FILE" > "$CHANGELOG_TMP_FILE.filtered"
+            mv "$CHANGELOG_TMP_FILE.filtered" "$CHANGELOG_TMP_FILE"
+
+            # Remove chart name prefixes from commit messages for this chart
             sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
+            sed -i -E "s/\* \[${UPPER_CHART}\] /\* /g" "$CHANGELOG_TMP_FILE"
 
             # Remove extra newlines so the changelog file passes the markdown linter
             sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
@@ -137,10 +166,9 @@ jobs:
 
       - name: Push all changes
         run: |
-          cd $GITHUB_WORKSPACE/charts
-          # Push all the new commits, if any
+          # Push all the new commits to the PR branch in the base repository, if any
           if [[ $(git cherry -v) ]]; then
-            git push
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
           else
             echo "No changed CHANGELOGS, skip push"
           fi
