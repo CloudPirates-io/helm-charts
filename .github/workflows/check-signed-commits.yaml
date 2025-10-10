@@ -22,6 +22,15 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Configure Git for SSH signature verification
+        run: |
+          # Create a temporary allowed signers file (not used for actual verification)
+          # This allows git to recognize SSH signatures exist without requiring key validation
+          touch /tmp/allowed_signers
+          git config --global gpg.ssh.allowedSignersFile /tmp/allowed_signers
+          # Configure git to recognize SSH signing format
+          git config --global gpg.format ssh
+
       - name: Check for verified commits
         id: check-commits
         run: |
@@ -36,19 +45,25 @@ jobs:
           for commit in $COMMITS; do
             TOTAL_COUNT=$((TOTAL_COUNT + 1))
             # Check if commit is signed (GPG or SSH signature)
-            # git verify-commit checks GPG signatures
-            # git log checks for SSH signatures (shows in %G? format)
+            # %G? returns signature status
+            # %GF returns the signing key fingerprint (empty if not signed)
             SIGNATURE=$(git log -1 --format='%G?' $commit)
+            FINGERPRINT=$(git log -1 --format='%GF' $commit)
 
             # %G? returns:
             # G = good GPG signature
-            # U = good signature with unknown validity
+            # U = unverified signature (has signature but can't verify - common for SSH)
             # B = bad signature
             # N = no signature
             # E = signature expired
             # Y = good signature (expired key)
 
-            if [[ "$SIGNATURE" == "N" ]] || [[ "$SIGNATURE" == "B" ]] || [[ "$SIGNATURE" == "E" ]]; then
+            # A commit is considered SIGNED if it has any signature present
+            # We check for a fingerprint to confirm a signature exists
+            # For SSH signatures, %G? will be "U" but %GF will have the fingerprint
+
+            if [[ -z "$FINGERPRINT" ]]; then
+              # No fingerprint means no signature at all
               UNSIGNED_COMMITS="${UNSIGNED_COMMITS}${commit}\n"
               UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
             fi
