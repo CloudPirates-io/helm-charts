@@ -19,10 +19,6 @@ data:
     
     echo "Starting Galera cluster initialization..."
     
-    # Wait for DNS resolution of cluster members
-    echo "Waiting for DNS resolution..."
-    sleep 5
-    
     # Check if this is the bootstrap node (first replica)
     HOSTNAME=$(hostname)
     echo "Current hostname: $HOSTNAME"
@@ -70,10 +66,13 @@ data:
         echo "Node is safe to bootstrap based on grastate.dat"
         BOOTSTRAP_CLUSTER=true
     fi
-    
+
     # Start MariaDB with appropriate options
     if [ "$BOOTSTRAP_CLUSTER" = true ]; then
         echo "Bootstrapping new Galera cluster..."
+        #exec mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+        mariadb-install-db
+        sleep 3
         exec mariadbd --wsrep-new-cluster "$@"
     else
         echo "Joining existing Galera cluster..."

@@ -18,8 +18,8 @@ data:
     wsrep_provider={{ .Values.galera.wsrepProvider }}
     wsrep_cluster_name={{ include "mariadb.galeraClusterName" . }}
     wsrep_cluster_address=gcomm://{{ include "mariadb.galeraClusterAddress" . }}
-    wsrep_node_name=$(MARIADB_GALERA_NODE_NAME)
-    wsrep_node_address=$(MARIADB_GALERA_NODE_ADDRESS)
+    wsrep_node_name={{ include "mariadb.galeraNodeName" . }}
+    wsrep_node_address={{ include "mariadb.galeraNodeAddress" . }}
     
     # Replication settings
     binlog_format=ROW
@@ -43,7 +43,7 @@ data:
     # State Snapshot Transfer (SST) settings
     wsrep_sst_method={{ .Values.galera.wsrepMethod }}
     {{- if .Values.galera.sst.user }}
-    wsrep_sst_auth={{ .Values.galera.sst.user }}:$(MARIADB_GALERA_SST_PASSWORD)
+    wsrep_sst_auth={{ .Values.galera.sst.user }}:{{ .Values.galera.sst.password }}
     {{- end }}
     
     {{- if .Values.galera.wsrepDebug }}

@@ -109,3 +109,16 @@ Generate Galera cluster name with release context
 {{- printf "%s-%s" .Release.Name .Values.galera.name -}}
 {{- end }}
 
+{{/*
+Generate Galera node name with pod name
+*/}}
+{{- define "mariadb.galeraNodeName" -}}
+{{- printf "%s-%s" (include "mariadb.fullname" .) "$(MY_POD_NAME)" -}}
+{{- end }}
+
+{{/*
+Generate Galera node address
+*/}}
+{{- define "mariadb.galeraNodeAddress" -}}
+{{- printf "%s-%s.%s.%s.svc.cluster.local" (include "mariadb.fullname" .) "$(MY_POD_NAME)" (include "mariadb.fullname" .) .Release.Namespace -}}
+{{- end }}
