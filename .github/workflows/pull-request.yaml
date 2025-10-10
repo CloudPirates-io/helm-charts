@@ -64,30 +64,19 @@ jobs:
     name: Automatically update CHANGELOG
     permissions:
       contents: write
-      pull-requests: write
     if: needs.lint-test.outputs.changed == 'true'
     steps:
-      - name: Checkout PR head
+      - name: Checkout pull request branch
         uses: actions/checkout@v5.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.head_ref }}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
       - name: Configure Git
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Check if fork
-        id: check-fork
-        run: |
-          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-            echo "is_fork=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_fork=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Fetch tags
         run: |
@@ -116,42 +105,27 @@ jobs:
 
             touch "$CHANGELOG_FILE"
 
-            # Generate new CHANGELOG.md with conventional-changelog
+            # Generate new CHANGELOG.md
             npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
+            
+            # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
+            # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
+            # So we only need to find a released section to start printing in the awk script below
+            awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
 
-            # Remove unreleased section that conventional-changelog adds for uncommitted changes
-            # The unreleased section has format "## <date>" while released sections have "## version <date>" or "## <small>version</small> <date>"
-            # We preserve the h1 heading and all properly versioned sections
-            awk '
-              BEGIN { in_unreleased=0; found_versioned=0 }
-              /^# / { print; next }
-              /^## [0-9]/ || /^## <small>[0-9]/ { found_versioned=1; in_unreleased=0; print; next }
-              /^## \(/ || /^## [0-9]{4}-[0-9]{2}-[0-9]{2}/ {
-                if (!found_versioned) { in_unreleased=1; next }
-                print; next
-              }
-              !in_unreleased { print }
-            ' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
-
-            # Remove chart name prefixes from commit messages (case insensitive)
+            # Remove chart name prefixes from commit messages
             sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /gi" "$CHANGELOG_TMP_FILE"
+            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
 
-            # Clean up spacing: remove extra blank lines but keep structure
-            sed -i -E '/^$/N;/^\n$/D' "$CHANGELOG_TMP_FILE"
+            # Remove extra newlines so the changelog file passes the markdown linter
+            sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
+            
+            # Include h1 heading and add entry for the current version. There is no tag for the current version (this will be created once merged), so we need to manually add it.
+            # We know the final squashed commit title, which will be the PR title. We cannot add a link to the commit in the main branch because it has not been
+            # merged yet (this will be corrected once a new version regenerates the changelog). Instead, we add the PR url which contains the exact same information.
+            echo -e -n "# Changelog\n\n## $CHART_VERSION ($(date +'%Y-%m-%d'))\n\n* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))\n" > "$CHANGELOG_FILE"
 
-            # Build final changelog: h1 header + new version entry + existing entries
-            {
-              echo "# Changelog"
-              echo ""
-              echo "## $CHART_VERSION ($(date +'%Y-%m-%d'))"
-              echo ""
-              echo "* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))"
-              echo ""
-              # Append all existing versioned entries (skip h1 header if present)
-              awk '/^# / {next} {print}' "$CHANGELOG_TMP_FILE"
-            } > "$CHANGELOG_FILE"
-
+            cat "$CHANGELOG_TMP_FILE" >> "$CHANGELOG_FILE"
             rm "$CHANGELOG_TMP_FILE"
             
             # Commit all changes, if any
@@ -161,25 +135,12 @@ jobs:
             fi
           done
 
-      - name: Push changes (same repo)
-        if: steps.check-fork.outputs.is_fork == 'false'
+      - name: Push all changes
         run: |
+          cd $GITHUB_WORKSPACE/charts
           # Push all the new commits, if any
           if [[ $(git cherry -v) ]]; then
             git push
-          else
-            echo "No changed CHANGELOGS, skip push"
-          fi
-
-      - name: Push changes (fork)
-        if: steps.check-fork.outputs.is_fork == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # For forks, we need to push to the fork's branch with proper authentication
-          # The GITHUB_TOKEN has permissions to push to forks via pull_request_target
-          if [[ $(git cherry -v) ]]; then
-            git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.event.pull_request.head.repo.full_name }}.git HEAD:${{ github.event.pull_request.head.ref }}
           else
             echo "No changed CHANGELOGS, skip push"
           fi
