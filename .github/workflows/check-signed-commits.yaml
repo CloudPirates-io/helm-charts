@@ -1,0 +1,132 @@
+name: "Check Signed Commits"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+jobs:
+  check-signed-commits:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Check for verified commits
+        id: check-commits
+        run: |
+          # Get all commits in the PR
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          COMMITS=$(git rev-list origin/${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.sha }})
+
+          UNSIGNED_COMMITS=""
+          UNSIGNED_COUNT=0
+          TOTAL_COUNT=0
+
+          for commit in $COMMITS; do
+            TOTAL_COUNT=$((TOTAL_COUNT + 1))
+            # Check if commit is signed (has gpg signature)
+            if ! git verify-commit $commit 2>/dev/null; then
+              UNSIGNED_COMMITS="${UNSIGNED_COMMITS}${commit}\n"
+              UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
+            fi
+          done
+
+          echo "total_commits=${TOTAL_COUNT}" >> $GITHUB_OUTPUT
+          echo "unsigned_commits=${UNSIGNED_COUNT}" >> $GITHUB_OUTPUT
+
+          if [ $UNSIGNED_COUNT -gt 0 ]; then
+            echo "has_unsigned=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_unsigned=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if comment already exists
+        if: steps.check-commits.outputs.has_unsigned == 'true'
+        id: check-comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Check if our bot has already commented on this PR
+          COMMENT_EXISTS=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            | jq -r '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("⚠️ Unsigned Commits Detected"))) | .id' | head -1)
+
+          if [ -n "$COMMENT_EXISTS" ]; then
+            echo "comment_exists=true" >> $GITHUB_OUTPUT
+            echo "comment_id=${COMMENT_EXISTS}" >> $GITHUB_OUTPUT
+          else
+            echo "comment_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post warning comment
+        if: steps.check-commits.outputs.has_unsigned == 'true' && steps.check-comment.outputs.comment_exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat << 'EOF' | gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F -
+          ## ⚠️ Unsigned Commits Detected
+
+          This pull request contains **${{ steps.check-commits.outputs.unsigned_commits }}** out of **${{ steps.check-commits.outputs.total_commits }}** unsigned commits.
+
+          ### What does this mean?
+
+          Signed commits help ensure the authenticity and traceability of contributions. They allow us to verify that commits actually came from the stated author, even if GitHub accounts are deleted or modified in the future.
+
+          ### Current Policy (Grace Period)
+
+          **This is currently a warning only.** We are in a transition period to give all contributors time to set up commit signing.
+
+          After this grace period, **all commits will be required to be signed** before PRs can be merged.
+
+          ### How to sign your commits
+
+          1. **Set up GPG signing:**
+             - Generate a GPG key: `gpg --full-generate-key`
+             - List your keys: `gpg --list-secret-keys --keyid-format=long`
+             - Export your public key: `gpg --armor --export YOUR_KEY_ID`
+             - Add the public key to your [GitHub account settings](https://github.com/settings/keys)
+
+          2. **Configure Git to sign commits:**
+             ```bash
+             git config --global user.signingkey YOUR_KEY_ID
+             git config --global commit.gpgsign true
+             ```
+
+          3. **Alternative: SSH signing (GitHub supported):**
+             - Use your existing SSH key: `git config --global gpg.format ssh`
+             - Set your signing key: `git config --global user.signingkey ~/.ssh/id_ed25519.pub`
+
+          4. **Sign existing commits in this PR:**
+             ```bash
+             # For the last N commits
+             git rebase --exec 'git commit --amend --no-edit -n -S' -i HEAD~N
+             git push --force-with-lease
+             ```
+
+          ### Resources
+
+          - [GitHub Docs: Signing Commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+          - [GitHub Docs: Telling Git about your signing key](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key)
+
+          ---
+
+          _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._
+          EOF
+
+      - name: Success message
+        if: steps.check-commits.outputs.has_unsigned == 'false'
+        run: |
+          echo "✅ All ${{ steps.check-commits.outputs.total_commits }} commits in this PR are signed!"
