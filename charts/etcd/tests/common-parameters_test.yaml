@@ -1,32 +1,27 @@
-suite: test redis common parameters
+suite: test etcd common parameters
 templates:
   - statefulset.yaml
 set:
   image:
-    tag: 8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
-  config:
-    content: |
-      # Redis configuration
-      bind * -::*
-      port 6379
+    tag: v3.6.0-alpha.0
 tests:
   - it: should use default values when nothing is overridden
     asserts:
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-redis
+          value: RELEASE-NAME-etcd
       - equal:
           path: metadata.labels["app.kubernetes.io/name"]
-          value: redis
+          value: etcd
       - equal:
           path: metadata.labels["app.kubernetes.io/instance"]
           value: RELEASE-NAME
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/redis:8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+          value: gcr.io/etcd-development/etcd:v3.6.0-alpha.0
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
-          value: Always
+          value: IfNotPresent
 
   - it: should respect global.imageRegistry override
     set:
@@ -35,7 +30,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: my-registry.com/redis:8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+          value: my-registry.com/etcd-development/etcd:v3.6.0-alpha.0
 
   - it: should respect global.imagePullSecrets
     set:
@@ -103,34 +98,34 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: custom-registry.io/redis:8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+          value: custom-registry.io/etcd-development/etcd:v3.6.0-alpha.0
 
   - it: should respect image.repository override
     set:
       image:
-        repository: "custom/redis"
+        repository: "custom/etcd"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/custom/redis:8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+          value: gcr.io/custom/etcd:v3.6.0-alpha.0
 
   - it: should respect image.tag override
     set:
       image:
-        tag: "7.0.0@sha256:newdigest123"
+        tag: "v3.5.0"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/redis:7.0.0@sha256:newdigest123
+          value: gcr.io/etcd-development/etcd:v3.5.0
 
-  - it: should respect image.imagePullPolicy override
+  - it: should respect image.pullPolicy override
     set:
       image:
-        imagePullPolicy: "IfNotPresent"
+        pullPolicy: "Always"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
-          value: IfNotPresent
+          value: Always
 
   - it: should prioritize global.imageRegistry over image.registry
     set:
@@ -141,7 +136,33 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: global-registry.com/redis:8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6
+          value: global-registry.com/etcd-development/etcd:v3.6.0-alpha.0
+
+  - it: should add podLabels to pod template
+    set:
+      podLabels:
+        custom: "label"
+        foo: "bar"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.custom
+          value: label
+      - equal:
+          path: spec.template.metadata.labels.foo
+          value: bar
+
+  - it: should add podAnnotations to pod template
+    set:
+      podAnnotations:
+        custom: "annotation"
+        foo: "bar"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.custom
+          value: annotation
+      - equal:
+          path: spec.template.metadata.annotations.foo
+          value: bar
 
   - it: should combine all overrides correctly
     set:
@@ -149,19 +170,23 @@ tests:
         imageRegistry: "global-reg.io"
         imagePullSecrets:
           - name: global-secret
-      nameOverride: "custom-redis"
+      nameOverride: "custom-etcd"
       commonLabels:
         env: "prod"
       commonAnnotations:
         version: "v1.0.0"
+      podLabels:
+        pod-label: "value"
+      podAnnotations:
+        pod-annotation: "value"
       image:
-        repository: "custom/redis"
-        tag: "6.2.0@sha256:custom123"
-        imagePullPolicy: "Never"
+        repository: "custom/etcd"
+        tag: "v3.5.0"
+        pullPolicy: "Never"
     asserts:
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-custom-redis
+          value: RELEASE-NAME-custom-etcd
       - equal:
           path: metadata.labels.env
           value: prod
@@ -169,8 +194,14 @@ tests:
           path: metadata.annotations.version
           value: v1.0.0
       - equal:
+          path: spec.template.metadata.labels.pod-label
+          value: value
+      - equal:
+          path: spec.template.metadata.annotations.pod-annotation
+          value: value
+      - equal:
           path: spec.template.spec.containers[0].image
-          value: global-reg.io/custom/redis:6.2.0@sha256:custom123
+          value: global-reg.io/custom/etcd:v3.5.0
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Never

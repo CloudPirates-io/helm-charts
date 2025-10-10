@@ -1,0 +1,271 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override etcd.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override etcd.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @section etcd image parameters
+image:
+  ## @param image.registry etcd image registry
+  registry: gcr.io
+  ## @param image.repository etcd image repository
+  repository: etcd-development/etcd
+  ## @param image.tag etcd image tag
+  tag: "v3.6.0-alpha.0"
+  ## @param image.pullPolicy etcd image pull policy
+  pullPolicy: IfNotPresent
+
+## @param replicaCount Number of etcd replicas to deploy (must be odd number for quorum)
+replicaCount: 3
+
+## @param podLabels Additional labels for etcd pods
+podLabels: {}
+
+## @param podAnnotations Additional annotations for etcd pods
+podAnnotations: {}
+
+## @section Service configuration
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.annotations Service annotations
+  annotations: {}
+  ## @param service.clientPort etcd client service port
+  clientPort: 2379
+  ## @param service.peerPort etcd peer service port
+  peerPort: 2380
+  ## @param service.metricsPort etcd metrics service port
+  metricsPort: 2381
+
+auth:
+  ## @param auth.enabled Enable client-to-server authentication
+  enabled: false
+  ## @param auth.existingSecret Name of existing secret containing client certificates
+  existingSecret: ""
+  peer:
+    ## @param auth.peer.enabled Enable peer-to-peer authentication
+    enabled: false
+    ## @param auth.peer.existingSecret Name of existing secret containing peer certificates
+    existingSecret: ""
+
+## @section etcd configuration
+config:
+  ## @param config.initialClusterState Initial cluster state (new or existing)
+  initialClusterState: new
+  ## @param config.autoCompactionMode Auto compaction mode (periodic or revision)
+  autoCompactionMode: periodic
+  ## @param config.autoCompactionRetention Auto compaction retention (1 hour for periodic mode)
+  autoCompactionRetention: "1"
+  ## @param config.snapshotCount Number of committed transactions to trigger a snapshot
+  snapshotCount: 10000
+  ## @param config.quotaBackendBytes Backend storage quota in bytes (default 2GB)
+  quotaBackendBytes: 2147483648
+  ## @param config.maxRequestBytes Maximum client request size in bytes
+  maxRequestBytes: 1572864
+  ## @param config.logLevel Log level (debug, info, warn, error, panic, fatal)
+  logLevel: info
+  ## @param config.initialClusterToken Initial cluster token for the etcd cluster
+  initialClusterToken: etcd-cluster
+  ## @param config.heartbeatInterval Time (in milliseconds) of a heartbeat interval
+  heartbeatInterval: 100
+  ## @param config.electionTimeout Time (in milliseconds) for an election to timeout
+  electionTimeout: 1000
+  ## @param config.maxSnapshots Maximum number of snapshot files to retain
+  maxSnapshots: 5
+  ## @param config.maxWals Maximum number of wal files to retain
+  maxWals: 5
+  ## @param config.listenPeerIp IP address to listen on for peer traffic (default 0.0.0.0)
+  listenPeerIp: 0.0.0.0
+  ## @param config.listenClientIp IP address to listen on for client traffic (default 0.0.0.0)
+  listenClientIp: 0.0.0.0
+
+## @section Persistence
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  enabled: true
+  ## @param persistence.storageClass Persistent Volume storage class
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  annotations: {}
+  ## @param persistence.size Persistent Volume size
+  size: 8Gi
+  ## @param persistence.accessModes Persistent Volume access modes
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.mountPath The path where to mount the data volume
+  mountPath: /var/run/etcd
+
+## @param resources Resource limits and requests for etcd pod
+resources: {}
+  # limits:
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi
+
+## @section StatefulSet configuration
+## @param updateStrategy.type StatefulSet update strategy type
+updateStrategy:
+  type: RollingUpdate
+
+## @section Metrics configuration
+metrics:
+  ## @param metrics.enabled Enable Prometheus metrics
+  enabled: true
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace which Prometheus is running in
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Specify the timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings RelabelConfigs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.labels Additional labels that can be used so ServiceMonitor will be discovered by Prometheus
+    labels: {}
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    honorLabels: false
+
+## @section High Availability
+podDisruptionBudget:
+  ## @param podDisruptionBudget.enabled Enable Pod Disruption Budget
+  enabled: false
+  ## @param podDisruptionBudget.minAvailable Minimum number of available pods
+  minAvailable: ""
+  ## @param podDisruptionBudget.maxUnavailable Maximum number of unavailable pods
+  maxUnavailable: 1
+
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Enable creation of ServiceAccount for etcd pod
+  create: true
+  ## @param serviceAccount.name Name of the created serviceAccount
+  name: ""
+  ## @param serviceAccount.annotations Annotations for service account
+  annotations: {}
+  ## @param serviceAccount.automountServiceAccountToken Auto-mount the service account token in the pod
+  automountServiceAccountToken: false
+
+## @section Network Policy
+networkPolicy:
+  ## @param networkPolicy.enabled Enable NetworkPolicy
+  enabled: false
+  ## @param networkPolicy.allowExternal Allow external traffic
+  allowExternal: true
+  ## @param networkPolicy.extraIngress Additional ingress rules
+  extraIngress: []
+  ## @param networkPolicy.extraEgress Additional egress rules
+  extraEgress: []
+
+## @param extraArgs Additional etcd command line arguments as array
+extraArgs: []
+# - --max-txn-ops=128
+# - --grpc-keepalive-min-time=5s
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param priorityClassName for pod eviction
+priorityClassName: ""
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 1000
+  ## @param containerSecurityContext.runAsGroup Group ID to run the container
+  runAsGroup: 1000
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set etcd container's privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: true
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to drop
+  capabilities:
+    drop:
+    - ALL
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set etcd pod's Security Context fsGroup
+  fsGroup: 1000
+
+## @section Liveness and readiness probes
+livenessProbe:
+  ## @param livenessProbe.enabled Enable livenessProbe on etcd containers
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  initialDelaySeconds: 10
+  ## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Success threshold for livenessProbe
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readinessProbe on etcd containers
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+  periodSeconds: 10
+  ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Success threshold for readinessProbe
+  successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startupProbe on etcd containers
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  initialDelaySeconds: 0
+  ## @param startupProbe.periodSeconds Period seconds for startupProbe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Failure threshold for startupProbe
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Success threshold for startupProbe
+  successThreshold: 1
+
+## @param extraEnv Additional environment variables to set
+extraEnv: []
+# - name: EXTRA_VAR
+#   value: "extra_value"
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the etcd container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []

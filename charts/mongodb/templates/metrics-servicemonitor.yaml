@@ -10,7 +10,6 @@ metadata:
   {{- end }}
   labels:
     {{- include "mongodb.metrics.serviceMonitor.labels" . | nindent 4 }}
-    release: {{ .Release.Name }}
   {{- with .Values.metrics.serviceMonitor.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
