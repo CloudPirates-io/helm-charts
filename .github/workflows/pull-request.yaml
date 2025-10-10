@@ -21,8 +21,7 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@v5.0.0
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,7 +70,7 @@ jobs:
         uses: actions/checkout@v5.0.0
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.repository }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -115,32 +114,37 @@ jobs:
             # So we only need to find a released section to start printing in the awk script below
             awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
 
-            # Remove entries that belong to other charts - keep only entries for this chart or without chart prefix
-            # This filters out commits like "[mongodb]" from rabbitmq changelog
-            UPPER_CHART=$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')
-            # Use awk to filter: keep non-commit lines (headers) and commit lines that either have no chart prefix or match this chart
-            awk -v chart="${CHART_NAME}" -v upper="${UPPER_CHART}" '
-              /^\* / {
-                # This is a commit line
-                if (/^\* \[/) {
-                  # Has a chart prefix - only keep if it matches this chart
-                  if (match($0, /^\* \[(.*)\]/, arr)) {
-                    prefix = arr[1]
-                    if (tolower(prefix) == tolower(chart)) {
-                      print
-                    }
-                  }
-                } else {
-                  # No chart prefix - keep it
-                  print
-                }
-              }
-              !/^\* / {
-                # Not a commit line (header, blank line, etc.) - keep it
-                print
-              }
-            ' "$CHANGELOG_TMP_FILE" > "$CHANGELOG_TMP_FILE.filtered"
-            mv "$CHANGELOG_TMP_FILE.filtered" "$CHANGELOG_TMP_FILE"
+            # Remove entries that belong to other charts
+            # Since --commit-path already filtered to commits touching this chart,
+            # we only need to remove entries that explicitly mention OTHER charts in their prefix
+            # Strategy: Keep entries that either have no prefix, match our chart, or don't match any other known chart
+
+            # Get list of all other chart names (excluding current one)
+            OTHER_CHARTS=$(find charts -mindepth 1 -maxdepth 1 -type d ! -name "${CHART_NAME}" -exec basename {} \; | grep -v '^charts$' | tr '\n' '|' | sed 's/|$//')
+
+            # Filter: remove lines that start with "* [otherChartName]" where otherChartName is a different chart
+            # This keeps: our chart entries, multi-chart entries including ours, misspellings, and entries without prefixes
+            if [[ -n "$OTHER_CHARTS" ]]; then
+              # Remove entries that start with exactly "* [otherChart]" (not substring matches)
+              grep -vE "^\* \[(${OTHER_CHARTS})\]" "$CHANGELOG_TMP_FILE" > "$CHANGELOG_TMP_FILE.filtered" || cp "$CHANGELOG_TMP_FILE" "$CHANGELOG_TMP_FILE.filtered"
+
+              # Also remove multi-chart entries that list OTHER charts but NOT this chart
+              # e.g., "* [redis , mariadb]" should be removed from rabbitmq changelog
+              UPPER_CHART=$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')
+              grep "^\* \[.*,.*\]" "$CHANGELOG_TMP_FILE.filtered" | while IFS= read -r line; do
+                # Check if this multi-chart line includes our chart name
+                if ! echo "$line" | grep -qiE "\[(.*[, ])?${CHART_NAME}([, ].*)?(\]|:)" && \
+                   ! echo "$line" | grep -qiE "\[(.*[, ])?${UPPER_CHART}([, ].*)?(\]|:)"; then
+                  # This multi-chart entry doesn't include our chart - remove it
+                  grep -vF "$line" "$CHANGELOG_TMP_FILE.filtered" > "$CHANGELOG_TMP_FILE.filtered.tmp"
+                  mv "$CHANGELOG_TMP_FILE.filtered.tmp" "$CHANGELOG_TMP_FILE.filtered"
+                fi
+              done
+              mv "$CHANGELOG_TMP_FILE.filtered" "$CHANGELOG_TMP_FILE"
+            else
+              cp "$CHANGELOG_TMP_FILE" "$CHANGELOG_TMP_FILE.filtered"
+              mv "$CHANGELOG_TMP_FILE.filtered" "$CHANGELOG_TMP_FILE"
+            fi
 
             # Remove chart name prefixes from commit messages for this chart
             sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
@@ -166,9 +170,10 @@ jobs:
 
       - name: Push all changes
         run: |
-          # Push all the new commits to the PR branch in the base repository, if any
+          # Push all the new commits to the PR branch, if any
+          # gh pr checkout sets up tracking correctly for both fork and branch PRs
           if [[ $(git cherry -v) ]]; then
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            git push
           else
             echo "No changed CHANGELOGS, skip push"
           fi
