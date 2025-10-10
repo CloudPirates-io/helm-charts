@@ -73,6 +73,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 |---------------------| ----------------------------------------------------------------------- | ------------ |
 | `nameOverride`      | String to partially override redis.fullname                             | `""`         |
 | `fullnameOverride`  | String to fully override redis.fullname                                 | `""`         |
+| `namespaceOverride` | String to override the namespace for all resources                      | `""`         |
 | `commonLabels`      | Labels to add to all deployed objects                                   | `{}`         |
 | `commonAnnotations` | Annotations to add to all deployed objects                              | `{}`         |
 | `architecture`      | Redis architecture. Allowed values: `standalone` or `replication`       | `standalone` |

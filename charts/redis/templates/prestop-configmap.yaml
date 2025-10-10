@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "redis.fullname" . }}-prestop-script
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "common.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
 data:
@@ -19,8 +19,8 @@ data:
     REDIS_PORT="{{ .Values.service.port }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
-    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local"
-    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "common.namespace" . }}.svc.cluster.local"
+    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ include "common.namespace" . }}.svc.cluster.local"
 
     # Set authentication if enabled
     {{- if .Values.auth.enabled }}

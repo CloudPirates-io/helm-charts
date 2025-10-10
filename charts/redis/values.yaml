@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override redis.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -295,6 +297,6 @@ extraObjects: []
 #   kind: ConfigMap
 #   metadata:
 #     name: extra-config
-#     namespace: "{{ .Release.Namespace }}"
+#     namespace: "{{ include "common.namespace" . }}"
 #   data:
 #     key: value
