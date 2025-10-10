@@ -1,0 +1,89 @@
+suite: test openshift related settings
+templates:
+  - templates/statefulset.yaml
+set:
+  podSecurityContext:
+    fsGroup: 999
+    runAsGroup: 999
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 999
+    runAsGroup: 999
+    readOnlyRootFilesystem: true
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    capabilities:
+      drop:
+        - ALL
+      add: []
+  targetPlatform: undefined
+tests:
+  - it: should configure default pod security context for OpenShift
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 999
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 999
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+
+  - it: should configure default container security context for OpenShift
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 999
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 999
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.seLinuxOptions.level
+          value: "s0:c123,c456"
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop[0]
+          value: ALL
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.add
+          value: []
+
+  - it: should configure OpenShift restricted pod security context
+    set:
+      targetPlatform: openshift
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - isNull:
+          path: spec.template.spec.securityContext.runAsUser
+      - isNull:
+          path: spec.template.spec.securityContext.runAsGroup
+      - isNull:
+          path: spec.template.spec.securityContext.seLinuxOptions
+
+  - it: should configure OpenShift restricted container security context
+    set:
+      targetPlatform: openshift
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.seLinuxOptions
+          

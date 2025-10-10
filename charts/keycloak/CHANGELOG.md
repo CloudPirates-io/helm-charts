@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.2.0 (2025-10-06)
+## 0.3.2 (2025-10-09)
 
-* [keycloak] Add support for extra volumes, volumeMounts and initContainers ([#215](https://github.com/CloudPirates-io/helm-charts/pull/215))
+* [mongodb] fix: newline between mongo labels and additional labels ([#301](https://github.com/CloudPirates-io/helm-charts/pull/301))

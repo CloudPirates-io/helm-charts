@@ -1,8 +1,31 @@
 # Changelog
 
-## 0.3.1 (2025-10-08)
+## 0.4.2 (2025-10-10)
 
-* [mongodb] update values.schema.json ([#242](https://github.com/CloudPirates-io/helm-charts/pull/242))
+* [mongo] Update charts/mongodb/values.yaml mongo ([#319](https://github.com/CloudPirates-io/helm-charts/pull/319))
+
+## <small>0.4.1 (2025-10-09)</small>
+
+* [all] add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a)), closes [#226](https://github.com/CloudPirates-io/helm-charts/issues/226)
+* fix: newline between mongo labels and additional labels (#301) ([ea7937f](https://github.com/CloudPirates-io/helm-charts/commit/ea7937f)), closes [#301](https://github.com/CloudPirates-io/helm-charts/issues/301)
+
+## 0.4.0 (2025-10-09)
+
+* feat: add metrics exporter (#243) ([c931978](https://github.com/CloudPirates-io/helm-charts/commit/c931978)), closes [#243](https://github.com/CloudPirates-io/helm-charts/issues/243)
+
+## <small>0.3.3 (2025-10-09)</small>
+
+* makes configmap name dynamic (#279) ([6dd10a9](https://github.com/CloudPirates-io/helm-charts/commit/6dd10a9)), closes [#279](https://github.com/CloudPirates-io/helm-charts/issues/279)
+
+## <small>0.3.2 (2025-10-09)</small>
+
+* [mongo] Update charts/mongodb/values.yaml mongo to v8.0.15 (patch) (#262) ([2fc1f1a](https://github.com/CloudPirates-io/helm-charts/commit/2fc1f1a)), closes [#262](https://github.com/CloudPirates-io/helm-charts/issues/262)
+
+## <small>0.3.1 (2025-10-08)</small>
+
+*  [minio, mongodb, postgres, timescaledb] Update securityContext to containerSecurityContext in the v ([8a4003f](https://github.com/CloudPirates-io/helm-charts/commit/8a4003f)), closes [#213](https://github.com/CloudPirates-io/helm-charts/issues/213)
+* [mariadb] use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c)), closes [#217](https://github.com/CloudPirates-io/helm-charts/issues/217)
+* update values.schema.json (#242) ([f973e47](https://github.com/CloudPirates-io/helm-charts/commit/f973e47)), closes [#242](https://github.com/CloudPirates-io/helm-charts/issues/242)
 
 ## 0.3.0 (2025-10-02)
 

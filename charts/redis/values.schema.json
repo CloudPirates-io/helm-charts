@@ -42,6 +42,11 @@
       "title": "Full Name Override",
       "description": "String to fully override redis.fullname"
     },
+    "namespaceOverride": {
+      "type": "string",
+      "title": "Namespace Override",
+      "description": "String to override the namespace for all resources"
+    },
     "commonLabels": {
       "type": "object",
       "title": "Common Labels",
@@ -521,6 +526,22 @@
       "description": "Topology Spread Constraints for pod assignment",
       "items": {
         "type": "object"
+      }
+    },
+    "podLabels": {
+      "type": "object",
+      "title": "Pod Labels",
+      "description": "Map of labels to add to the pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "title": "Pod Annotations",
+      "description": "Map of annotations to add to the pods",
+      "additionalProperties": {
+        "type": "string"
       }
     },
     "initContainer": {

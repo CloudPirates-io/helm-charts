@@ -143,6 +143,46 @@
         "type": "object",
         "description": "A Kubernetes manifest object. All fields are allowed."
       }
+    },
+    "pdb": {
+      "type": "object",
+      "title": "Pod Disruption Budget configuration",
+      "description": "Pod Disruption Budget (PDB) configuration to ensure high availability",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create PDB",
+          "description": "Enable/disable a Pod Disruption Budget creation"
+        },
+        "minAvailable": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^([0-9]+%|)$"
+            }
+          ],
+          "title": "Minimum Available",
+          "description": "Minimum number/percentage of pods that should remain scheduled"
+        },
+        "maxUnavailable": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^([0-9]+%|)$"
+            }
+          ],
+          "title": "Maximum Unavailable",
+          "description": "Maximum number/percentage of pods that may be made unavailable"
+        }
+      }
     }
   }
 }

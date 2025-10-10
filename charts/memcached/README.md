@@ -158,6 +158,14 @@ The following table lists the configurable parameters of the Memcached chart and
 | `ingress.hosts`       | An array with hosts and paths                                                 | `[{"host": "memcached.local", "paths": [{"path": "/", "pathType": "ImplementationSpecific"}]}]` |
 | `ingress.tls`         | TLS configuration for the Ingress                                             | `[]`                                                                                            |
 
+### Pod Disruption Budget Parameters
+
+| Parameter            | Description                                                    | Default |
+| -------------------- | -------------------------------------------------------------- | ------- |
+| `pdb.create`         | Enable/disable a Pod Disruption Budget creation                | `false` |
+| `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `""`    |
+| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
+
 ### Extra Configuration Parameters
 
 | Parameter           | Description                                                                         | Default |
@@ -257,6 +265,11 @@ resources:
 
 service:
   type: ClusterIP
+
+# Enable Pod Disruption Budget for high availability
+pdb:
+  create: true
+  minAvailable: 1
 
 # Use anti-affinity to spread pods across nodes
 affinity:

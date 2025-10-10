@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override redis.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -22,7 +24,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621"
+  tag: "8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -34,6 +36,12 @@ architecture: standalone
 ## When using Sentinel, this is the total number of Redis instances (including the initial master)
 ## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
 replicaCount: 3
+
+## @section Pod labels and annotations
+## @param podLabels Map of labels to add to the pods
+podLabels: {}
+## @param podAnnotations Map of annotations to add to the pods
+podAnnotations: {}
 
 ## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
 ## auto: Uses the first IP returned by hostname -i (default)
@@ -64,7 +72,7 @@ config:
   ## @param config.content Include your custom Redis configurations here as string
   content: |
     # Redis configuration
-    bind 0.0.0.0
+    bind * -::*
     port 6379
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
@@ -289,6 +297,6 @@ extraObjects: []
 #   kind: ConfigMap
 #   metadata:
 #     name: extra-config
-#     namespace: "{{ .Release.Namespace }}"
+#     namespace: "{{ include "common.namespace" . }}"
 #   data:
 #     key: value

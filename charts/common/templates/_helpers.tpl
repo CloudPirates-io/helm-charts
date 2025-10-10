@@ -24,6 +24,15 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Return the namespace to use for resources.
+Defaults to .Release.Namespace but can be overridden via .Values.namespaceOverride.
+Useful for multi-namespace deployments in combined charts.
+*/}}
+{{- define "common.namespace" -}}
+{{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "common.chart" -}}

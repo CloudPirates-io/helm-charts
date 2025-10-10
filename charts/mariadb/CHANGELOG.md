@@ -1,8 +1,16 @@
 # Changelog
 
-## 0.3.2 (2025-10-06)
+## 0.3.4 (2025-10-10)
 
-* [mariadb] chore(deps): update docker.io/mariadb:12.0.2 Docker digest to 03a03a6 ([#207](https://github.com/CloudPirates-io/helm-charts/pull/207))
+* [mariadb] Update charts/mariadb/values.yaml mariadb ([#315](https://github.com/CloudPirates-io/helm-charts/pull/315))
+
+## <small>0.3.3 (2025-10-08)</small>
+
+* Add support for readOnlyRootFilesystem (#228) ([cdb58b2](https://github.com/CloudPirates-io/helm-charts/commit/cdb58b2)), closes [#228](https://github.com/CloudPirates-io/helm-charts/issues/228)
+
+## <small>0.3.2 (2025-10-06)</small>
+
+* chore(deps): update docker.io/mariadb:12.0.2 Docker digest to 03a03a6 (#207) ([e51e995](https://github.com/CloudPirates-io/helm-charts/commit/e51e995)), closes [#207](https://github.com/CloudPirates-io/helm-charts/issues/207)
 
 ## <small>0.3.1 (2025-10-06)</small>
 
