@@ -23,15 +23,17 @@ spec:
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
     spec:
       {{- with (include "rabbitmq.imagePullSecrets" .) }}
       {{ . | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
-      {{- if or .Values.auth.enabled .Values.installPlugins .Values.customScripts.initContainers }}
       initContainers:
-        {{- if .Values.auth.enabled }}
         - name: init-erlang-cookie
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
@@ -40,19 +42,25 @@ spec:
             - sh
             - -c
             - |
+              {{- if .Values.auth.enabled }}
               echo "$RABBITMQ_ERLANG_COOKIE" > /var/lib/rabbitmq/.erlang.cookie
+              {{- else }}
+              # Generate a default Erlang cookie when auth is disabled
+              echo "defaultcookie" > /var/lib/rabbitmq/.erlang.cookie
+              {{- end }}
               chmod 400 /var/lib/rabbitmq/.erlang.cookie
               chown $(id -u):$(id -g) /var/lib/rabbitmq/.erlang.cookie
+          {{- if .Values.auth.enabled }}
           env:
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
                 secretKeyRef:
                   name: {{ include "rabbitmq.secretName" . }}
                   key: {{ include "rabbitmq.secretErlangCookieKey" . }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/rabbitmq
-        {{- end }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
@@ -97,7 +105,6 @@ spec:
         {{- if .Values.customScripts.initContainers }}
         {{- toYaml .Values.customScripts.initContainers | nindent 8 }}
         {{- end }}
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
@@ -200,6 +207,17 @@ spec:
             - name: plugins
               mountPath: /opt/rabbitmq/plugins
             {{- end }}
+            {{- if .Values.definitions.enabled }}
+            - name: definitions
+              mountPath: "/etc/rabbitmq-definitions/defs.json"
+              subPath: {{- if .Values.definitions.existingConfigMap }}
+                {{ .Values.definitions.existingConfigMapKey | default "defs.json" }}
+              {{- else if .Values.definitions.existingSecret }}
+                {{ .Values.definitions.existingSecretKey | default "defs.json" }}
+              {{- else }}
+                defs.json
+              {{- end }}
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -217,6 +235,19 @@ spec:
         - name: config
           configMap:
             name: {{ include "rabbitmq.fullname" . }}-config
+        {{- if .Values.definitions.enabled }}
+        - name: definitions
+          {{- if .Values.definitions.existingConfigMap }}
+          configMap:
+            name: {{ .Values.definitions.existingConfigMap }}
+          {{- else if .Values.definitions.existingSecret }}
+          secret:
+            secretName: {{ .Values.definitions.existingSecret }}
+          {{- else }}
+          configMap:
+            name: {{ printf "%s-definitions" (include "rabbitmq.fullname" .) }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
@@ -232,9 +263,13 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
-    - apiVersion: v1	
+    - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
         name: data

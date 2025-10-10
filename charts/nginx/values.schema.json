@@ -26,6 +26,7 @@
     "commonAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
     "image": {
       "type": "object",
+      "description": "NGINX image configuration",
       "properties": {
         "registry": { "type": "string" },
         "repository": { "type": "string" },
@@ -37,6 +38,7 @@
     "containerPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
     "containerPorts": {
       "type": "array",
+      "description": "List of container ports",
       "items": {
         "type": "object",
         "properties": {
@@ -117,6 +119,7 @@
     },
     "autoscaling": {
       "type": "object",
+      "description": "Autoscaling configuration",
       "properties": {
         "enabled": { "type": "boolean" },
         "minReplicas": { "type": ["integer", "string"] },
@@ -125,12 +128,27 @@
         "targetMemoryUtilizationPercentage": { "type": ["integer", "string"] }
       }
     },
-    "resources": { "type": "object" },
-    "nodeSelector": { "type": "object", "additionalProperties": { "type": "string" } },
-    "tolerations": { "type": "array", "items": { "type": "object" } },
-    "affinity": { "type": "object" },
+    "resources": {
+      "type": "object",
+      "description": "Resource requests and limits"
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector for pod scheduling",
+      "additionalProperties": { "type": "string" }
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations for pod scheduling",
+      "items": { "type": "object" }
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Affinity rules for pod scheduling"
+    },
     "containerSecurityContext": {
       "type": "object",
+      "description": "Container-level security context settings",
       "properties": {
         "runAsUser": { "type": "integer" },
         "runAsNonRoot": { "type": "boolean" },
@@ -139,6 +157,7 @@
     },
     "podSecurityContext": {
       "type": "object",
+      "description": "Pod-level security context settings",
       "properties": {
         "fsGroup": { "type": "integer" }
       }
@@ -171,6 +190,7 @@
     },
     "extraEnv": {
       "type": "array",
+      "description": "Extra environment variables",
       "items": {
         "type": "object",
         "properties": {
@@ -180,14 +200,117 @@
         "required": ["name", "value"]
       }
     },
-    "extraVolumes": { "type": "array", "items": { "type": "object" } },
-    "extraVolumeMounts": { "type": "array", "items": { "type": "object" } },
+    "extraVolumes": {
+      "type": "array",
+      "description": "Additional volumes",
+      "items": { "type": "object" }
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "description": "Additional volume mounts",
+      "items": { "type": "object" }
+    },
     "extraObjects": { "type": "array", "items": { "type": "object" } },
-    "config": { "type": "string" },
-    "existingConfigConfigmap": { "type": "string" },
-    "serverConfig": { "type": "string" },
-    "existingServerConfigConfigmap": { "type": "string" },
-    "streamServerConfig": { "type": "string" },
-    "existingStreamServerConfigmap": { "type": "string" }
+    "config": {
+      "type": "string",
+      "description": "Custom NGINX configuration"
+    },
+    "existingConfigConfigmap": {
+      "type": "string",
+      "description": "Name of existing ConfigMap for NGINX config"
+    },
+    "serverConfig": {
+      "type": "string",
+      "description": "Custom server configuration"
+    },
+    "existingServerConfigConfigmap": {
+      "type": "string",
+      "description": "Name of existing ConfigMap for server config"
+    },
+    "streamServerConfig": {
+      "type": "string",
+      "description": "Custom stream server configuration"
+    },
+    "existingStreamServerConfigmap": {
+      "type": "string",
+      "description": "Name of existing ConfigMap for stream server config"
+    },
+    "serviceAccountName": {
+      "type": "string",
+      "description": "Service account name for the pod"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Prometheus metrics configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Start a sidecar prometheus exporter to expose Nginx metrics"
+        },
+        "image": {
+          "type": "object",
+          "description": "Nginx exporter image configuration",
+          "properties": {
+            "registry": { "type": "string" },
+            "repository": { "type": "string" },
+            "tag": { "type": "string" },
+            "pullPolicy": { "type": "string" }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "Resource limits and requests for metrics container",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "properties": {
+                "memory": { "type": "string" }
+              }
+            },
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": { "type": "string" },
+                "memory": { "type": "string" }
+              }
+            }
+          }
+        },
+        "extraArgs": {
+          "type": "array",
+          "description": "Extra arguments for nginx exporter",
+          "items": { "type": "string" }
+        },
+        "service": {
+          "type": "object",
+          "description": "Metrics service configuration",
+          "properties": {
+            "type": { "type": "string" },
+            "port": { "type": "integer" },
+            "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
+            "loadBalancerIP": { "type": "string" },
+            "loadBalancerSourceRanges": { "type": "array", "items": { "type": "string" } },
+            "clusterIP": { "type": "string" },
+            "nodePort": { "type": "string" }
+          }
+        },
+        "serviceMonitor": {
+          "type": "object",
+          "description": "Prometheus ServiceMonitor configuration",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "namespace": { "type": "string" },
+            "interval": { "type": "string" },
+            "scrapeTimeout": { "type": "string" },
+            "relabelings": { "type": "array", "items": { "type": "object" } },
+            "metricRelabelings": { "type": "array", "items": { "type": "object" } },
+            "honorLabels": { "type": "boolean" },
+            "selector": { "type": "object", "additionalProperties": { "type": "string" } },
+            "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
+            "namespaceSelector": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        }
+      }
+    }
   }
 }

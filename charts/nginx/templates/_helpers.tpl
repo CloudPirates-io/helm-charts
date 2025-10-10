@@ -98,3 +98,10 @@ Return the custom NGINX stream server config configmap.
     {{- include "common.fullname" . -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return the proper Nginx metrics image name
+*/}}
+{{- define "nginx.metrics.image" -}}
+{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}

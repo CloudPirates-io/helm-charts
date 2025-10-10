@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.7.2 (2025-10-05)
+## 0.8.0 (2025-10-09)
 
-* [mariadb] use tpl to return existingConfigMap ([#217](https://github.com/CloudPirates-io/helm-charts/pull/217))
+* [mongodb] fix: newline between mongo labels and additional labels ([#301](https://github.com/CloudPirates-io/helm-charts/pull/301))

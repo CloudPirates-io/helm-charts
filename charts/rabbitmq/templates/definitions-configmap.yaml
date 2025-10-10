@@ -1,0 +1,28 @@
+{{- /*
+This file is rendered only if definitions are enabled AND an existing ConfigMap is NOT specified.
+It constructs a dictionary from the values and then converts it to a valid JSON object.
+*/}}
+{{- if and .Values.definitions.enabled (not .Values.definitions.existingConfigMap) (not .Values.definitions.existingSecret) }}
+{{- $def := dict }}
+{{- if .Values.definitions.users -}}{{- $_ := set $def "users" .Values.definitions.users }}{{- end }}
+{{- if .Values.definitions.vhosts -}}{{- $_ := set $def "vhosts" .Values.definitions.vhosts }}{{- end }}
+{{- if .Values.definitions.permissions -}}{{- $_ := set $def "permissions" .Values.definitions.permissions }}{{- end }}
+{{- if .Values.definitions.topic_permissions -}}{{- $_ := set $def "topic_permissions" .Values.definitions.topic_permissions }}{{- end }}
+{{- if .Values.definitions.parameters -}}{{- $_ := set $def "parameters" .Values.definitions.parameters }}{{- end }}
+{{- if .Values.definitions.global_parameters -}}{{- $_ := set $def "global_parameters" .Values.definitions.global_parameters }}{{- end }}
+{{- if .Values.definitions.policies -}}{{- $_ := set $def "policies" .Values.definitions.policies }}{{- end }}
+{{- if .Values.definitions.queues -}}{{- $_ := set $def "queues" .Values.definitions.queues }}{{- end }}
+{{- if .Values.definitions.exchanges -}}{{- $_ := set $def "exchanges" .Values.definitions.exchanges }}{{- end }}
+{{- if .Values.definitions.bindings -}}{{- $_ := set $def "bindings" .Values.definitions.bindings }}{{- end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rabbitmq.fullname" . }}-definitions
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rabbitmq.labels" . | nindent 4 }}
+data:
+  defs.json: |-
+{{- $def | toPrettyJson | nindent 4 }}
+{{- end }}

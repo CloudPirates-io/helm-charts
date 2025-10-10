@@ -1,0 +1,240 @@
+{{- include "etcd.validateValues" . }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "etcd.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "etcd.labels" . | nindent 4 }}
+  {{- with (include "etcd.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "etcd.fullname" . }}-headless
+  replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: Parallel
+  {{- if .Values.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "etcd.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "etcd.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with (include "etcd.annotations" .) }}
+        {{- . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+{{- with (include "etcd.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      serviceAccountName: {{ include "etcd.serviceAccountName" . }}
+      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "etcd.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
+          command:
+            - /usr/local/bin/etcd
+          args:
+            - --name=$(POD_NAME)
+            - --listen-peer-urls={{ if .Values.auth.peer.enabled }}https{{ else }}http{{ end }}://{{ .Values.config.listenPeerIp }}:{{ .Values.service.peerPort }}
+            - --listen-client-urls={{ if .Values.auth.enabled }}https{{ else }}http{{ end }}://{{ .Values.config.listenClientIp }}:{{ .Values.service.clientPort }}
+            - --advertise-client-urls={{ if .Values.auth.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.clientPort }}
+            - --initial-advertise-peer-urls={{ if .Values.auth.peer.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.peerPort }}
+            - --initial-cluster={{ include "etcd.initialCluster" . }}
+            - --initial-cluster-token={{ .Values.config.initialClusterToken }}
+            - --initial-cluster-state={{ .Values.config.initialClusterState }}
+            - --data-dir={{ .Values.persistence.mountPath }}/default.etcd
+            - --auto-compaction-mode={{ .Values.config.autoCompactionMode }}
+            - --auto-compaction-retention={{ .Values.config.autoCompactionRetention }}
+            - --snapshot-count={{ .Values.config.snapshotCount | int64 }}
+            - --quota-backend-bytes={{ .Values.config.quotaBackendBytes | int64 }}
+            - --max-request-bytes={{ .Values.config.maxRequestBytes | int64 }}
+            - --heartbeat-interval={{ .Values.config.heartbeatInterval }}
+            - --election-timeout={{ .Values.config.electionTimeout }}
+            - --max-snapshots={{ .Values.config.maxSnapshots }}
+            - --max-wals={{ .Values.config.maxWals }}
+            - --log-level={{ .Values.config.logLevel }}
+            {{- if .Values.auth.enabled }}
+            - --client-cert-auth
+            - --trusted-ca-file=/etc/etcd/certs/client/ca.crt
+            - --cert-file=/etc/etcd/certs/client/tls.crt
+            - --key-file=/etc/etcd/certs/client/tls.key
+            {{- end }}
+            {{- if .Values.auth.peer.enabled }}
+            - --peer-client-cert-auth
+            - --peer-trusted-ca-file=/etc/etcd/certs/peer/ca.crt
+            - --peer-cert-file=/etc/etcd/certs/peer/tls.crt
+            - --peer-key-file=/etc/etcd/certs/peer/tls.key
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - --listen-metrics-urls=http://{{ .Values.config.listenClientIp }}:{{ .Values.service.metricsPort }}
+            {{- end }}
+            {{- range .Values.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.service.clientPort | default 2379 }}
+              protocol: TCP
+            - name: peer
+              containerPort: {{ .Values.service.peerPort | default 2380 }}
+              protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.service.metricsPort | default 2381 }}
+              protocol: TCP
+            {{- end }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /health
+              port: client
+              {{- if .Values.auth.enabled }}
+              scheme: HTTPS
+              {{- else }}
+              scheme: HTTP
+              {{- end }}
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: client
+              {{- if .Values.auth.enabled }}
+              scheme: HTTPS
+              {{- else }}
+              scheme: HTTP
+              {{- end }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /health?serializable=true
+              port: client
+              {{- if .Values.auth.enabled }}
+              scheme: HTTPS
+              {{- else }}
+              scheme: HTTP
+              {{- end }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
+            {{- if .Values.auth.enabled }}
+            - name: client-certs
+              mountPath: /etc/etcd/certs/client
+              readOnly: true
+            {{- end }}
+            {{- if .Values.auth.peer.enabled }}
+            - name: peer-certs
+              mountPath: /etc/etcd/certs/peer
+              readOnly: true
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        {{- if not .Values.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.auth.enabled }}
+        - name: client-certs
+          secret:
+            secretName: {{ .Values.auth.existingSecret }}
+            defaultMode: 0400
+        {{- end }}
+        {{- if .Values.auth.peer.enabled }}
+        - name: peer-certs
+          secret:
+            secretName: {{ .Values.auth.peer.existingSecret }}
+            defaultMode: 0400
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- with .Values.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- with .Values.persistence.accessModes }}
+          {{- toYaml . | nindent 10 }}
+        {{- end}}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+  {{- end }}

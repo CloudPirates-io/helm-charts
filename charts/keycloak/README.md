@@ -114,15 +114,15 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Security
 
-| Parameter                                  | Description                                       | Default   |
-| ------------------------------------------ | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`               | Group ID for the volumes of the pod               | `1001`    |
-| `securityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `securityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `securityContext.runAsUser`                | User ID for the Keycloak container                | `1001`    |
-| `securityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`    |
-| `securityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
-| `securityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| Parameter                                           | Description                                       | Default   |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1001`    |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
+| `containerSecurityContext.runAsUser`                | User ID for the Keycloak container                | `1001`    |
+| `containerSecurityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`    |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
 
 ### Keycloak Configuration
 
@@ -356,7 +356,7 @@ keycloak:
   adminPassword: "secure-admin-password"
   hostname: "auth.yourdomain.com"
   production: true
-  proxy: "edge"
+  proxyHeaders: "xforwarded"
 
 database:
   type: "postgres"
@@ -490,7 +490,7 @@ keycloak:
   adminPassword: "secure-admin-password"
   hostname: "auth.yourdomain.com"
   production: true
-  proxy: "edge"
+  proxyHeaders: "xforwarded"
 
 cache:
   stack: "ispn" # Use Infinispan for clustering

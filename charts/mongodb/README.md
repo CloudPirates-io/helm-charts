@@ -157,6 +157,81 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready | `6`     |
 | `readinessProbe.successThreshold`    | Number of successes to mark probe as successful | `1`     |
 
+### Network Policy Parameters
+
+| Parameter                      | Description                                  | Default |
+| ------------------------------ | -------------------------------------------- | ------- |
+| `networkPolicy.enabled`        | Enable NetworkPolicy for MongoDB and metrics | `false` |
+| `networkPolicy.allowedSources` | List of allowed sources for network policy   | `[]`    |
+
+### Metrics Parameters
+
+| Parameter                          | Description                                                         | Default                                                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `metrics.enabled`                  | Enable metrics collection                                           | `false`                                                                                                                              |
+| `metrics.username`                 | Username for metrics collection (defaults to root if not specified) | `""`                                                                                                                                 |
+| `metrics.image.registry`           | MongoDB Exporter image registry                                     | `docker.io`                                                                                                                          |
+| `metrics.image.repository`         | MongoDB Exporter image repository                                   | `percona/mongodb_exporter`                                                                                                           |
+| `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.1`                                                                                                                             |
+| `metrics.image.pullPolicy`         | MongoDB Exporter image pull policy                                  | `IfNotPresent`                                                                                                                       |
+| `metrics.resources`                | Resource limits and requests for metrics container                  | `limits: { memory: 256Mi }, requests: { cpu: 10m, memory: 64Mi }`                                                                    |
+| `metrics.containerSecurityContext` | Security context for metrics container                              | `runAsUser: 65534, runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] }` |
+
+### Metrics Service Parameters
+
+| Parameter                     | Description                                | Default        |
+| ----------------------------- | ------------------------------------------ | -------------- |
+| `metrics.service.type`        | Metrics service type                       | `ClusterIP`    |
+| `metrics.service.port`        | Metrics service port                       | `9216`         |
+| `metrics.service.targetPort`  | Metrics service target port                | `http-metrics` |
+| `metrics.service.annotations` | Additional annotations for metrics service | `{}`           |
+| `metrics.service.labels`      | Additional labels for metrics service      | `{}`           |
+
+### ServiceMonitor Parameters
+
+| Parameter                                  | Description                                                                  | Default |
+| ------------------------------------------ | ---------------------------------------------------------------------------- | ------- |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics                          | `false` |
+| `metrics.serviceMonitor.namespace`         | Namespace in which ServiceMonitor is created                                 | `""`    |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                  | `30s`   |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                      | `""`    |
+| `metrics.serviceMonitor.additionalLabels`  | Additional labels for ServiceMonitor                                         | `{}`    |
+| `metrics.serviceMonitor.annotations`       | Additional annotations for ServiceMonitor                                    | `{}`    |
+| `metrics.serviceMonitor.relabelings`       | RelabelConfigs to apply to samples before scraping                           | `[]`    |
+| `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                    | `[]`    |
+| `metrics.serviceMonitor.honorLabels`       | Specify honorLabels parameter to add the scrape endpoint                     | `false` |
+| `metrics.serviceMonitor.jobLabel`          | The name of the label on the target service to use as job name in Prometheus | `""`    |
+
+### Metrics Liveness Probe Parameters
+
+| Parameter                                   | Description                                      | Default |
+| ------------------------------------------- | ------------------------------------------------ | ------- |
+| `metrics.livenessProbe.enabled`             | Enable liveness probe for metrics container      | `true`  |
+| `metrics.livenessProbe.initialDelaySeconds` | Initial delay before starting liveness probes    | `15`    |
+| `metrics.livenessProbe.periodSeconds`       | How often to perform the liveness probe          | `10`    |
+| `metrics.livenessProbe.timeoutSeconds`      | Timeout for each liveness probe attempt          | `5`     |
+| `metrics.livenessProbe.failureThreshold`    | Number of failures before container is restarted | `3`     |
+| `metrics.livenessProbe.successThreshold`    | Number of successes to mark probe as successful  | `1`     |
+
+### Metrics Readiness Probe Parameters
+
+| Parameter                                    | Description                                           | Default |
+| -------------------------------------------- | ----------------------------------------------------- | ------- |
+| `metrics.readinessProbe.enabled`             | Enable readiness probe for metrics container          | `true`  |
+| `metrics.readinessProbe.initialDelaySeconds` | Initial delay before starting readiness probes        | `5`     |
+| `metrics.readinessProbe.periodSeconds`       | How often to perform the readiness probe              | `10`    |
+| `metrics.readinessProbe.timeoutSeconds`      | Timeout for each readiness probe attempt              | `5`     |
+| `metrics.readinessProbe.failureThreshold`    | Number of failures before container is marked unready | `3`     |
+| `metrics.readinessProbe.successThreshold`    | Number of successes to mark readiness as successful   | `1`     |
+
+### Metrics Additional Parameters
+
+| Parameter           | Description                                            | Default |
+| ------------------- | ------------------------------------------------------ | ------- |
+| `metrics.extraEnv`  | Additional environment variables for metrics container | `[]`    |
+| `metrics.extraArgs` | Additional command line arguments for MongoDB Exporter | `[]`    |
+
+
 ### Additional Parameters
 
 | Parameter           | Description                                              | Default |

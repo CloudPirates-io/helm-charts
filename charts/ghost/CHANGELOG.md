@@ -1,8 +1,20 @@
 # Changelog
 
-## 0.2.3 (2025-10-06)
+## 0.2.6 (2025-10-10)
 
-* [mariadb] chore(deps): update mariadb:12.0.2 Docker digest to 03a03a6 ([#208](https://github.com/CloudPirates-io/helm-charts/pull/208))
+* [ghost] Update charts/ghost/values.yaml ghost to v6.3.0 (minor) ([#327](https://github.com/CloudPirates-io/helm-charts/pull/327))
+
+## <small>0.2.5 (2025-10-09)</small>
+
+* Update charts/ghost/values.yaml ghost to v6.2.0 (minor) (#268) ([c8d3f80](https://github.com/CloudPirates-io/helm-charts/commit/c8d3f80)), closes [#268](https://github.com/CloudPirates-io/helm-charts/issues/268)
+
+## <small>0.2.4 (2025-10-09)</small>
+
+* Update charts/ghost/values.yaml ghost to v6.0.10 (patch) (#259) ([c9b9b8b](https://github.com/CloudPirates-io/helm-charts/commit/c9b9b8b)), closes [#259](https://github.com/CloudPirates-io/helm-charts/issues/259)
+
+## <small>0.2.3 (2025-10-06)</small>
+
+* [mariadb] chore(deps): update mariadb:12.0.2 Docker digest to 03a03a6 (#208) ([01a6ad1](https://github.com/CloudPirates-io/helm-charts/commit/01a6ad1)), closes [#208](https://github.com/CloudPirates-io/helm-charts/issues/208)
 
 ## <small>0.2.2 (2025-10-01)</small>
 

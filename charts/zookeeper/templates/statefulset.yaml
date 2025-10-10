@@ -27,7 +27,7 @@ spec:
         {{- with (include "zookeeper.annotations" .) }}
         {{- . | nindent 8 }}
         {{- end }}
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ toYaml .Values.zookeeperConfig | sha256sum }}
     spec:
 {{- with (include "zookeeper.imagePullSecrets" .) }}
 {{ . | nindent 6 }}

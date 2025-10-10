@@ -1,0 +1,210 @@
+suite: test etcd common parameters
+templates:
+  - statefulset.yaml
+set:
+  image:
+    tag: v3.6.0-alpha.0
+tests:
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-etcd
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: etcd
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/coreos/etcd:v3.6.0-alpha.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should respect global.imageRegistry override
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry.com/coreos/etcd:v3.6.0-alpha.0
+
+  - it: should respect global.imagePullSecrets
+    set:
+      global:
+        imagePullSecrets:
+          - name: my-secret-1
+          - name: my-secret-2
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: my-secret-1
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: my-secret-2
+
+  - it: should respect nameOverride
+    set:
+      nameOverride: "custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-name
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-name
+
+  - it: should respect fullnameOverride
+    set:
+      fullnameOverride: "completely-custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-name
+
+  - it: should add commonLabels to all resources
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: metadata.labels.team
+          value: platform
+
+  - it: should add commonAnnotations to all resources
+    set:
+      commonAnnotations:
+        deployment.kubernetes.io/revision: "1"
+        prometheus.io/scrape: "true"
+    asserts:
+      - equal:
+          path: metadata.annotations["deployment.kubernetes.io/revision"]
+          value: "1"
+      - equal:
+          path: metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  - it: should respect image.registry override
+    set:
+      image:
+        registry: "custom-registry.io"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/coreos/etcd:v3.6.0-alpha.0
+
+  - it: should respect image.repository override
+    set:
+      image:
+        repository: "custom/etcd"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/custom/etcd:v3.6.0-alpha.0
+
+  - it: should respect image.tag override
+    set:
+      image:
+        tag: "v3.5.0"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/coreos/etcd:v3.5.0
+
+  - it: should respect image.pullPolicy override
+    set:
+      image:
+        pullPolicy: "Always"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should prioritize global.imageRegistry over image.registry
+    set:
+      global:
+        imageRegistry: "global-registry.com"
+      image:
+        registry: "image-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: global-registry.com/coreos/etcd:v3.6.0-alpha.0
+
+  - it: should add podLabels to pod template
+    set:
+      podLabels:
+        custom: "label"
+        foo: "bar"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.custom
+          value: label
+      - equal:
+          path: spec.template.metadata.labels.foo
+          value: bar
+
+  - it: should add podAnnotations to pod template
+    set:
+      podAnnotations:
+        custom: "annotation"
+        foo: "bar"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.custom
+          value: annotation
+      - equal:
+          path: spec.template.metadata.annotations.foo
+          value: bar
+
+  - it: should combine all overrides correctly
+    set:
+      global:
+        imageRegistry: "global-reg.io"
+        imagePullSecrets:
+          - name: global-secret
+      nameOverride: "custom-etcd"
+      commonLabels:
+        env: "prod"
+      commonAnnotations:
+        version: "v1.0.0"
+      podLabels:
+        pod-label: "value"
+      podAnnotations:
+        pod-annotation: "value"
+      image:
+        repository: "custom/etcd"
+        tag: "v3.5.0"
+        pullPolicy: "Never"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-etcd
+      - equal:
+          path: metadata.labels.env
+          value: prod
+      - equal:
+          path: metadata.annotations.version
+          value: v1.0.0
+      - equal:
+          path: spec.template.metadata.labels.pod-label
+          value: value
+      - equal:
+          path: spec.template.metadata.annotations.pod-annotation
+          value: value
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: global-reg.io/custom/etcd:v3.5.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Never
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: global-secret

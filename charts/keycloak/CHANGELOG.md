@@ -4,6 +4,10 @@
 
 * [keycloak] Allow to import a realm at startup from a json config ([#219](https://github.com/CloudPirates-io/helm-charts/pull/219))
 
+## 0.3.2 (2025-10-09)
+
+* [mongodb] fix: newline between mongo labels and additional labels ([#301](https://github.com/CloudPirates-io/helm-charts/pull/301))
+
 ## 0.3.1 (2025-10-09)
 
 * [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.3.5 (patch) ([#261](https://github.com/CloudPirates-io/helm-charts/pull/261))

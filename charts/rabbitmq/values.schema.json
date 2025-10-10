@@ -108,6 +108,12 @@
           "description": "Kubernetes service type",
           "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
         },
+        "trafficDistribution": {
+          "type": "string",
+          "description": "Traffic distribution policy",
+          "enum": ["", "PreferClose", "PreferSameZone", "PreferSameNode"],
+          "default": ""
+        },
         "amqpPort": {
           "type": "integer",
           "title": "AMQP Port",
@@ -202,10 +208,7 @@
               "enum": ["absolute", "relative"]
             },
             "value": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "Memory High Watermark Value",
               "description": "Memory high watermark value"
             }
@@ -357,7 +360,12 @@
           "description": "Persistent Volume access modes",
           "items": {
             "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
+            "enum": [
+              "ReadWriteOnce",
+              "ReadOnlyMany",
+              "ReadWriteMany",
+              "ReadWriteOncePod"
+            ]
           }
         },
         "size": {
@@ -456,10 +464,7 @@
           "description": "Resource limits for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Limit",
               "description": "CPU resource limit"
             },
@@ -476,10 +481,7 @@
           "description": "Resource requests for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Request",
               "description": "CPU resource request"
             },
@@ -548,6 +550,14 @@
           "title": "Pod Anti-Affinity",
           "description": "Pod anti-affinity configuration"
         }
+      }
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "title": "Topology Spread Constraints",
+      "description": "Topology spread constraints for pod assignment",
+      "items": {
+        "type": "object"
       }
     },
     "securityContext": {
@@ -789,6 +799,229 @@
       "items": {
         "type": "object",
         "description": "A Kubernetes manifest object. All fields are allowed."
+      }
+    },
+    "podLabels": {
+      "type": "object",
+      "title": "Pod Labels",
+      "description": "Labels to attach to pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "title": "Pod Annotations",
+      "description": "Annotations to attach to pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "statefulsetLabels": {
+      "type": "object",
+      "title": "StatefulSet Labels",
+      "description": "Labels to attach to StatefulSet",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "statefulsetAnnotations": {
+      "type": "object",
+      "title": "StatefulSet Annotations",
+      "description": "Annotations for StatefulSet",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podManagementPolicy": {
+      "type": "string",
+      "title": "Pod Management Policy",
+      "description": "StatefulSet pod management policy",
+      "enum": ["OrderedReady", "Parallel"]
+    },
+    "persistentVolumeClaimRetentionPolicy": {
+      "type": "object",
+      "title": "PVC Retention Policy",
+      "description": "Persistent Volume Claim retention policy for StatefulSet",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Retention Policy",
+          "description": "Enable Persistent volume retention policy"
+        },
+        "whenDeleted": {
+          "type": "string",
+          "title": "When Deleted",
+          "description": "Volume retention behavior when replica is deleted",
+          "enum": ["Retain", "Delete"]
+        },
+        "whenScaled": {
+          "type": "string",
+          "title": "When Scaled",
+          "description": "Volume retention behavior when replica count is reduced",
+          "enum": ["Retain", "Delete"]
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "title": "Service Account",
+      "description": "Service account configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create Service Account",
+          "description": "Enable creation of ServiceAccount"
+        },
+        "name": {
+          "type": "string",
+          "title": "Service Account Name",
+          "description": "Name of serviceAccount"
+        },
+        "annotations": {
+          "type": "object",
+          "title": "Service Account Annotations",
+          "description": "Annotations for service account",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rbac": {
+      "type": "object",
+      "title": "RBAC Configuration",
+      "description": "RBAC parameters",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create RBAC",
+          "description": "Whether RBAC rules should be created"
+        },
+        "rules": {
+          "type": "array",
+          "title": "Custom RBAC Rules",
+          "description": "Custom RBAC rules",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "pdb": {
+      "type": "object",
+      "title": "Pod Disruption Budget",
+      "description": "Pod Disruption Budget configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "title": "Create PDB",
+          "description": "Enable/disable a Pod Disruption Budget creation"
+        },
+        "minAvailable": {
+          "oneOf": [{ "type": "string" }, { "type": "integer" }],
+          "title": "Min Available",
+          "description": "Minimum number/percentage of pods that should remain scheduled"
+        },
+        "maxUnavailable": {
+          "oneOf": [{ "type": "string" }, { "type": "integer" }],
+          "title": "Max Unavailable",
+          "description": "Maximum number/percentage of pods that may be made unavailable"
+        }
+      }
+    },
+    "definitions": {
+      "type": "object",
+      "title": "RabbitMQ Definitions",
+      "description": "RabbitMQ definitions loaded on startup (https://www.rabbitmq.com/docs/definitions)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Definitions",
+          "description": "Enable loading of RabbitMQ definitions on startup"
+        },
+        "existingConfigMap": {
+          "type": "string",
+          "title": "Existing ConfigMap",
+          "description": "Name of existing ConfigMap containing RabbitMQ definitions"
+        },
+        "existingConfigMapKey": {
+          "type": "string",
+          "title": "Existing ConfigMap Key",
+          "description": "Key in existing ConfigMap containing RabbitMQ definitions",
+          "default": "defs.json"
+        },
+        "existingSecret": {
+          "type": "string",
+          "title": "Existing Secret",
+          "description": "Name of existing Secret containing RabbitMQ definitions"
+        },
+        "existingSecretKey": {
+          "type": "string",
+          "title": "Existing Secret Key",
+          "description": "Key in existing Secret containing RabbitMQ definitions",
+          "default": "defs.json"
+        },
+        "bindings": {
+          "type": "array",
+          "title": "Bindings",
+          "description": "Array of RabbitMQ bindings to create",
+          "items": { "type": "object" }
+        },
+        "global_parameters": {
+          "type": "array",
+          "title": "Global Parameters",
+          "description": "Array of RabbitMQ global parameters to create",
+          "items": { "type": "object" }
+        },
+        "parameters": {
+          "type": "array",
+          "title": "Parameters",
+          "description": "Array of RabbitMQ parameters to create",
+          "items": { "type": "object" }
+        },
+        "policies": {
+          "type": "array",
+          "title": "Policies",
+          "description": "Array of RabbitMQ policies to create",
+          "items": { "type": "object" }
+        },
+        "queues": {
+          "type": "array",
+          "title": "Queues",
+          "description": "Array of RabbitMQ queues to create",
+          "items": { "type": "object" }
+        },
+        "exchanges": {
+          "type": "array",
+          "title": "Exchanges",
+          "description": "Array of RabbitMQ exchanges to create",
+          "items": { "type": "object" }
+        },
+        "topic_permissions": {
+          "type": "array",
+          "title": "Topic Permissions",
+          "description": "Array of RabbitMQ topic permissions to create",
+          "items": { "type": "object" }
+        },
+        "users": {
+          "type": "array",
+          "title": "Users",
+          "description": "Array of RabbitMQ users to create",
+          "items": { "type": "object" }
+        },
+        "vhosts": {
+          "type": "array",
+          "title": "Virtual Hosts",
+          "description": "Array of RabbitMQ vhosts to create",
+          "items": { "type": "object" }
+        },
+        "permissions": {
+          "type": "array",
+          "title": "Permissions",
+          "description": "Array of RabbitMQ permissions to set",
+          "items": { "type": "object" }
+        }
       }
     }
   }

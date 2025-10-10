@@ -35,6 +35,10 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- toYaml .Values.initContainers | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
@@ -193,6 +197,49 @@ spec:
               mountPath: /docker-entrypoint-initdb.d/init-custom-user.sh
               subPath: init-custom-user.sh
             {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "postgresql://{{ include "postgres.username" . }}:$(POSTGRES_PASSWORD)@localhost:{{ .Values.service.targetPort }}/{{ include "postgres.database" . }}?sslmode=disable"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.secretName" . }}
+                  key: {{ .Values.auth.secretKeys.passwordKey }}
+          ports:
+            - name: metrics
+              containerPort: 9187
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /
+              port: metrics
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+          {{- with .Values.metrics.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
         - name: data

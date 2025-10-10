@@ -1,8 +1,28 @@
 # Changelog
 
-## 0.3.1 (2025-10-06)
+## 0.3.5 (2025-10-10)
 
-* [rabbitmq] chore(deps): update docker.io/rabbitmq:4.1.4-management Docker digest to 8c31e22 ([#204](https://github.com/CloudPirates-io/helm-charts/pull/204))
+* [rabbitmq] Update charts/rabbitmq/values.yaml rabbitmq ([#321](https://github.com/CloudPirates-io/helm-charts/pull/321))
+
+## <small>0.3.4 (2025-10-09)</small>
+
+* [redis , rabbitmq]: Add podAnnotations (#294) ([6d78869](https://github.com/CloudPirates-io/helm-charts/commit/6d78869)), closes [#294](https://github.com/CloudPirates-io/helm-charts/issues/294)
+
+## <small>0.3.3 (2025-10-09)</small>
+
+* [all] add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a)), closes [#226](https://github.com/CloudPirates-io/helm-charts/issues/226)
+* [mongodb] feat: add metrics exporter (#243) ([c931978](https://github.com/CloudPirates-io/helm-charts/commit/c931978)), closes [#243](https://github.com/CloudPirates-io/helm-charts/issues/243)
+* [rabbitmq]: add option to handle definitions via chart (#286) ([5425131](https://github.com/CloudPirates-io/helm-charts/commit/5425131)), closes [#286](https://github.com/CloudPirates-io/helm-charts/issues/286)
+* [rabbitmq]: Fix auth disable erlang cookie (#248) ([9abf547](https://github.com/CloudPirates-io/helm-charts/commit/9abf547)), closes [#248](https://github.com/CloudPirates-io/helm-charts/issues/248)
+
+## <small>0.3.2 (2025-10-09)</small>
+
+* Feature/renovate fix (#256) ([0d364d0](https://github.com/CloudPirates-io/helm-charts/commit/0d364d0)), closes [#256](https://github.com/CloudPirates-io/helm-charts/issues/256)
+
+## <small>0.3.1 (2025-10-06)</small>
+
+* [mariadb] use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c)), closes [#217](https://github.com/CloudPirates-io/helm-charts/issues/217)
+* chore(deps): update docker.io/rabbitmq:4.1.4-management Docker digest to 8c31e22 (#204) ([dd82ffe](https://github.com/CloudPirates-io/helm-charts/commit/dd82ffe)), closes [#204](https://github.com/CloudPirates-io/helm-charts/issues/204)
 
 ## 0.3.0 (2025-10-06)
 

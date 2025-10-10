@@ -59,6 +59,10 @@ data:
     prometheus.tcp.port = {{ .Values.metrics.port }}
     {{- end }}
 
+    {{- if .Values.definitions.enabled }}
+    management.load_definitions = /etc/rabbitmq-definitions/defs.json
+    {{- end }}
+
     {{- if and .Values.config.extraConfiguration (ne .Values.config.extraConfiguration "") }}
     # Extra configuration
 {{ .Values.config.extraConfiguration | indent 4 }}

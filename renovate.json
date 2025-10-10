@@ -1,65 +1,80 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "docker:pinDigests"
   ],
   "enabledManagers": [
-    "helm-values"
+    "custom.regex",
+    "helmv3"
   ],
-  "helm-values": {
-    "managerFilePatterns": [
-      "/^charts/.*values\\.yaml$/"
-    ],
-    "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>-[^@]*)?@(?<compatibility>.+)$",
-    "extractVersion": "(?<version>[^@]+)@(?<sha>sha256:[a-f0-9]{64})",
-    "rangeStrategy": "replace"
-  },
+  "separateMinorPatch": true,
+  "prConcurrentLimit": 5,
+  "recreateWhen": "never",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)charts/.+/values\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<packageName>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?",
+        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*(?<packageName>[^\\s]+)\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
   "packageRules": [
     {
       "matchManagers": [
-        "helm-values"
+        "custom.regex"
       ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "matchPackageNames": [
-        "/^docker\\.io\\/.+/"
+      "matchDatasources": [
+        "docker"
       ],
       "labels": [
         "dependencies",
         "renovate"
       ],
-      "commitMessagePrefix": "[{{{ replace \"docker.io/\" \"\" packageName }}}]",
-      "commitMessageAction": "chore(deps): update"
+      "commitMessageTopic": "{{{depName}}}",
+      "commitMessagePrefix": "[{{{replace 'docker.io/' '' packageName}}}]",
+      "automerge": false,
+      "separateMinorPatch": true,
+      "groupName": "{{packageFile}} {{packageName}}"
     },
     {
       "matchManagers": [
-        "helm-values"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
+        "helmv3"
       ],
       "labels": [
         "dependencies",
         "renovate"
       ],
-      "commitMessagePrefix": "[{{{ packageName }}}]",
-      "commitMessageAction": "chore(deps): update",
-      "matchPackageNames": [
-        "!/^docker\\.io\\/.+/"
-      ]
+      "automerge": false,
+      "commitMessagePrefix": "[helm]"
     },
     {
-      "matchManagers": [
-        "helm-values"
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "koperator-internal/services/clusterpirate"
       ],
       "enabled": false,
+      "pinDigests": false,
+      "recreateWhen": "never"
+    },
+    {
+      "matchDatasources": [
+        "helm"
+      ],
       "matchPackageNames": [
-        "/harbor.cloudpirates.io/koperator-internal/services/clusterpirate/"
-      ]
+        "cloudpirates/common",
+        "cloudpirates/valkey"
+      ],
+      "enabled": false,
+      "recreateWhen": "never"
     }
   ]
 }

@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.3.4@sha256:2b32a51a31e8d780d9fa9a69a59ead69975263c61b5dd13559090e22aa26f100"
+  tag: "26.4.0@sha256:5f3fb534cde6bf006d79f5912473e5d2c828c707cdfc52e16972803aca9d43dd"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -59,18 +59,18 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
 
-securityContext:
-  ## @param securityContext.allowPrivilegeEscalation Enable container privilege escalation
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
-  ## @param securityContext.runAsNonRoot Configure the container to run as a non-root user
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
   runAsNonRoot: true
-  ## @param securityContext.runAsUser User ID for the Keycloak container
+  ## @param containerSecurityContext.runAsUser User ID for the Keycloak container
   runAsUser: 1001
-  ## @param securityContext.runAsGroup Group ID for the Keycloak container
+  ## @param containerSecurityContext.runAsGroup Group ID for the Keycloak container
   runAsGroup: 1001
-  ## @param securityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
   readOnlyRootFilesystem: false
-  ## @param securityContext.capabilities.drop Linux capabilities to be dropped
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
   capabilities:
     drop:
       - ALL
@@ -109,7 +109,7 @@ keycloak:
   ## @param keycloak.production Enable production mode
   production: false
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
-  httpRelativePath: "/"
+  httpRelativePath: /
 
 ## @section Database Configuration
 database:

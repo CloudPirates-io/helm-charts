@@ -297,6 +297,11 @@
           "type": "boolean",
           "title": "Allow Privilege Escalation",
           "description": "Set MariaDB container's privilege escalation"
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "title": "Read-Only root filesystem",
+          "description": "Set MariaDB container's Security Context readOnlyRootFilesystem"
         }
       }
     },
