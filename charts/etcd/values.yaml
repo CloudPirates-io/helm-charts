@@ -18,11 +18,11 @@ commonAnnotations: {}
 ## @section etcd image parameters
 image:
   ## @param image.registry etcd image registry
-  registry: gcr.io
+  registry: quay.io
   ## @param image.repository etcd image repository
-  repository: etcd-development/etcd
+  repository: coreos/etcd
   ## @param image.tag etcd image tag
-  tag: "v3.6.0-alpha.0"
+  tag: "v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3"
   ## @param image.pullPolicy etcd image pull policy
   pullPolicy: IfNotPresent
 
