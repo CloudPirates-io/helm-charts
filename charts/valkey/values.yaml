@@ -212,3 +212,49 @@ extraObjects: []
 #     namespace: "{{ .Release.Namespace }}"
 #   data:
 #     key: value
+
+## @section Metrics configuration
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose Valkey metrics
+  enabled: false
+  image:
+    ## @param metrics.image.registry Valkey exporter image registry
+    registry: docker.io
+    ## @param metrics.image.repository Valkey exporter image repository
+    repository: oliver006/redis_exporter
+    ## @param metrics.image.tag Valkey exporter image tag
+    tag: "v1.78.0-alpine@sha256:bcedc3641b40d26b09d4962a9b7ba84d7582d83a90d224a9ee5aa63829f3aba7"
+    ## @param metrics.image.pullPolicy Valkey exporter image pull policy
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources: {}
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional custom labels for Metrics service
+    labels: {}
+    ## @param metrics.service.port Metrics service port
+    port: 9121
+  ## Prometheus Operator ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace The namespace in which the ServiceMonitor will be created
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval The interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout The timeout after which the scrape is ended
+    scrapeTimeout: 10s
+    ## @param metrics.serviceMonitor.selector Additional labels for ServiceMonitor resource
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations ServiceMonitor annotations
+    annotations: {}
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.relabelings ServiceMonitor relabel configs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings ServiceMonitor metricRelabelings configs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
+    namespaceSelector: {}
