@@ -62,7 +62,8 @@
         "koperator-internal/services/clusterpirate"
       ],
       "enabled": false,
-      "pinDigests": false
+      "pinDigests": false,
+      "recreateWhen": "never"
     },
     {
       "matchDatasources": [
@@ -72,7 +73,8 @@
         "cloudpirates/common",
         "cloudpirates/valkey"
       ],
-      "enabled": false
+      "enabled": false,
+      "recreateWhen": "never"
     }
   ]
 }
