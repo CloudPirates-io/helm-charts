@@ -1,0 +1,40 @@
+OpenLDAP has been deployed successfully!
+
+** Please be patient while the chart is being deployed **
+
+1. Get the OpenLDAP admin password by running:
+
+  kubectl get secret --namespace {{ .Release.Namespace }} {{ include "openldap.secretName" . }} -o jsonpath="{.data.{{ .Values.auth.existingSecretPasswordKey }}}" | base64 -d
+
+2. Connect to OpenLDAP:
+
+  From within the cluster:
+
+    ldapsearch -x -H ldap://{{ include "openldap.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.ldapPort }} -D "cn=admin,{{ include "openldap.baseDN" . }}" -w <password> -b "{{ include "openldap.baseDN" . }}"
+
+  From outside the cluster:
+
+  {{- if contains "LoadBalancer" .Values.service.type }}
+
+    kubectl get svc --namespace {{ .Release.Namespace }} {{ include "openldap.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+  {{- else if contains "NodePort" .Values.service.type }}
+
+    export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "openldap.fullname" . }})
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    echo "LDAP available at $NODE_IP:$NODE_PORT"
+
+  {{- else }}
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "openldap.fullname" . }} {{ .Values.service.ldapPort }}:{{ .Values.service.ldapPort }}
+
+    Then connect to ldap://localhost:{{ .Values.service.ldapPort }}
+
+  {{- end }}
+
+3. Configuration:
+
+  Domain: {{ .Values.config.domain }}
+  Organization: {{ .Values.config.organization }}
+  Base DN: {{ include "openldap.baseDN" . }}
+  Admin DN: cn=admin,{{ include "openldap.baseDN" . }}

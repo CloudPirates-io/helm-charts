@@ -2,39 +2,23 @@ name: Auto-label issues
 on:
   issues:
     types: [opened]
-  pull_request:
-    types: [opened]
 
 jobs:
   label:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      pull-requests: write
     steps:
       - name: Apply labels
         uses: actions/github-script@v7
         with:
           script: |
-            let content = "";
-            if (context.payload.pull_request) {
-              const parsedTitle = context.payload.pull_request.title.match(/^\[([a-z_-]+(?:, [a-z_-]+)*)\].+$/);
-              content = parsedTitle ? parsedTitle[1] : "";
-            } else {
-              content = context.payload.issue.body.split(/### Affected Helm charts/)[1] || "";
-            }
-            const { data } = await github.rest.issues.listLabelsForRepo({
-              ...context.repo,
-              per_page: 100,
-            });
-            const existingLabels = new Set(data.map((label) => label.name));
-            const labels = content
+            const labels = (context.payload.issue.body.split(/### Affected Helm charts/)[1] || "")
               .trim()
               .split(",")
               .map((s) => s.trim())
-              .filter((s) => s && existingLabels.has(s));
+              .filter((s) => s && s !== "_No response_");
             if (labels.length) {
-              console.log(`Adding ${labels.length} labels: ${labels.join(', ')}`)
               await github.rest.issues.addLabels({
                 ...context.repo,
                 issue_number: context.issue.number,

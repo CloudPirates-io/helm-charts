@@ -1,0 +1,591 @@
+name: Build Containers and Release Charts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'charts/**'
+      - '.github/workflows/build-and-release.yaml'
+  workflow_dispatch:
+    inputs:
+      chart_name:
+        description: 'Chart name to build (leave empty to build all)'
+        required: false
+        type: string
+      skip_push:
+        description: 'Skip login and push (test build only)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  detect-charts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_dockerfiles: ${{ steps.set-matrix.outputs.has_dockerfiles }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Detect charts with Dockerfiles
+        id: set-matrix
+        run: |
+          set -e
+
+          # Find all charts with Dockerfiles
+          charts_with_dockerfiles=()
+
+          if [ -n "${{ github.event.inputs.chart_name }}" ]; then
+            # Manual workflow dispatch with specific chart
+            if [ -f "charts/${{ github.event.inputs.chart_name }}/Dockerfile" ]; then
+              charts_with_dockerfiles+=("${{ github.event.inputs.chart_name }}")
+            fi
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            # For PRs, only build changed charts
+            changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+            for chart_dir in charts/*/; do
+              chart_name=$(basename "$chart_dir")
+              if echo "$changed_files" | grep -q "charts/${chart_name}/"; then
+                if [ -f "charts/${chart_name}/Dockerfile" ]; then
+                  charts_with_dockerfiles+=("$chart_name")
+                fi
+              fi
+            done
+          else
+            # For pushes to main or manual dispatch without chart name, build all
+            for chart_dir in charts/*/; do
+              chart_name=$(basename "$chart_dir")
+              if [ -f "charts/${chart_name}/Dockerfile" ]; then
+                charts_with_dockerfiles+=("$chart_name")
+              fi
+            done
+          fi
+
+          if [ ${#charts_with_dockerfiles[@]} -eq 0 ]; then
+            echo "No charts with Dockerfiles found"
+            echo 'matrix={"include":[]}' >> $GITHUB_OUTPUT
+            echo 'has_dockerfiles=false' >> $GITHUB_OUTPUT
+          else
+            echo "Found charts with Dockerfiles: ${charts_with_dockerfiles[*]}"
+
+            # Build JSON array for matrix
+            json_array="["
+            first=true
+            for chart in "${charts_with_dockerfiles[@]}"; do
+              if [ "$first" = true ]; then
+                first=false
+              else
+                json_array+=","
+              fi
+
+              # Extract metadata from Chart.yaml
+              app_version=$(yq eval '.appVersion' "charts/${chart}/Chart.yaml" | tr -d '"')
+              chart_version=$(yq eval '.version' "charts/${chart}/Chart.yaml" | tr -d '"')
+              description=$(yq eval '.description' "charts/${chart}/Chart.yaml" | tr -d '"')
+
+              json_array+="{\"name\":\"${chart}\",\"app_version\":\"${app_version}\",\"chart_version\":\"${chart_version}\",\"description\":\"${description}\"}"
+            done
+            json_array+="]"
+
+            echo "matrix={\"include\":${json_array}}" >> $GITHUB_OUTPUT
+            echo 'has_dockerfiles=true' >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: detect-charts
+    if: needs.detect-charts.outputs.has_dockerfiles == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      digests: ${{ steps.collect-digests.outputs.digests }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-charts.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Determine target registries
+        id: registries
+        run: |
+          # Check if DockerHub credentials are available
+          if [ -n "${{ vars.REGISTRY }}" ] && [ -n "${{ vars.REPOSITORY }}" ] && [ -n "${{ secrets.REGISTRY_USER }}" ] && [ -n "${{ secrets.REGISTRY_PASSWORD }}" ]; then
+            echo "dockerhub_enabled=true" >> $GITHUB_OUTPUT
+            echo "DockerHub registry will be used: ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}"
+          else
+            echo "dockerhub_enabled=false" >> $GITHUB_OUTPUT
+            echo "DockerHub credentials not configured, skipping DockerHub"
+          fi
+
+          # GHCR is always available in GitHub Actions
+          echo "ghcr_enabled=true" >> $GITHUB_OUTPUT
+          echo "GHCR registry will be used: ghcr.io/${{ github.repository_owner }}"
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ steps.registries.outputs.dockerhub_enabled == 'true' && format('{0}/{1}/{2}', vars.REGISTRY, vars.REPOSITORY, matrix.name) || '' }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+          tags: |
+            type=raw,value=${{ matrix.app_version }}
+            type=raw,value=${{ matrix.chart_version }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.vendor=CloudPirates
+            org.opencontainers.image.version=${{ matrix.app_version }}
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request' && !inputs.skip_push && steps.registries.outputs.dockerhub_enabled == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request' && !inputs.skip_push
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: charts/${{ matrix.name }}
+          file: charts/${{ matrix.name }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && !inputs.skip_push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          provenance: true
+          sbom: true
+
+      - name: Check cosign key availability
+        id: check-cosign
+        if: github.event_name != 'pull_request' && !inputs.skip_push
+        run: |
+          if [ -n "${{ secrets.COSIGN_KEY }}" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request' && !inputs.skip_push && steps.check-cosign.outputs.available == 'true'
+        uses: sigstore/cosign-installer@v3.9.2
+
+      - name: Sign the images with cosign
+        if: github.event_name != 'pull_request' && !inputs.skip_push && steps.check-cosign.outputs.available == 'true'
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          DIGEST="${{ steps.build.outputs.digest }}"
+
+          # Sign Docker Hub image if enabled
+          if [ "${{ steps.registries.outputs.dockerhub_enabled }}" == "true" ]; then
+            echo "Signing DockerHub image..."
+            cosign sign -y --key env://COSIGN_KEY \
+              ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}@${DIGEST}
+          fi
+
+          # Sign GHCR image
+          echo "Signing GHCR image..."
+          cosign sign -y --key env://COSIGN_KEY \
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}@${DIGEST}
+
+      - name: Verify signatures
+        if: github.event_name != 'pull_request' && !inputs.skip_push && steps.check-cosign.outputs.available == 'true'
+        run: |
+          DIGEST="${{ steps.build.outputs.digest }}"
+
+          # Verify Docker Hub image if enabled
+          if [ "${{ steps.registries.outputs.dockerhub_enabled }}" == "true" ]; then
+            echo "Verifying DockerHub image signature..."
+            cosign verify --key cosign.pub \
+              ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}@${DIGEST}
+          fi
+
+          # Verify GHCR image
+          echo "Verifying GHCR image signature..."
+          cosign verify --key cosign.pub \
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}@${DIGEST}
+
+      - name: Generate SBOM
+        if: github.event_name != 'pull_request' && !inputs.skip_push
+        continue-on-error: true
+        uses: anchore/sbom-action@v0
+        with:
+          path: charts/${{ matrix.name }}
+          format: spdx-json
+          output-file: ${{ matrix.name }}-sbom.spdx.json
+
+      - name: Upload SBOM
+        if: github.event_name != 'pull_request' && !inputs.skip_push
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-sbom
+          path: ${{ matrix.name }}-sbom.spdx.json
+          retention-days: 90
+
+      - name: Export digest for chart update
+        id: export-digest
+        run: |
+          echo "chart_name=${{ matrix.name }}" >> $GITHUB_OUTPUT
+          echo "digest=${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
+          echo "registry=${{ vars.REGISTRY }}" >> $GITHUB_OUTPUT
+          echo "repository=${{ vars.REPOSITORY }}" >> $GITHUB_OUTPUT
+
+          # Create digest file for artifact upload
+          mkdir -p /tmp/digests
+          cat > /tmp/digests/${{ matrix.name }}.json <<EOF
+          {
+            "chart_name": "${{ matrix.name }}",
+            "digest": "${{ steps.build.outputs.digest }}",
+            "registry": "${{ vars.REGISTRY }}",
+            "repository": "${{ vars.REPOSITORY }}",
+            "app_version": "${{ matrix.app_version }}"
+          }
+          EOF
+
+      - name: Upload digest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ matrix.name }}
+          path: /tmp/digests/${{ matrix.name }}.json
+          retention-days: 1
+
+      - name: Summary
+        run: |
+          echo "## 🐳 Container Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Chart:** ${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**App Version:** ${{ matrix.app_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Chart Version:** ${{ matrix.chart_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ inputs.skip_push }}" == "true" ]]; then
+            echo "**Build Type:** Test build only (not pushed to registry)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Images" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.registries.outputs.dockerhub_enabled }}" == "true" ]; then
+              echo "- \`${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${{ matrix.name }}:${{ matrix.app_version }}\`" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "- \`ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ matrix.app_version }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  update-chart-values:
+    needs: [detect-charts, build-and-push]
+    if: |
+      needs.detect-charts.outputs.has_dockerfiles == 'true' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !inputs.skip_push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      charts_updated: ${{ steps.update.outputs.charts_updated }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Download all digest artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digest-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Update values.yaml with container digests
+        id: update
+        run: |
+          set -e
+
+          CHARTS_UPDATED=""
+          ANY_CHANGES=false
+
+          for digest_file in /tmp/digests/*.json; do
+            [ -f "$digest_file" ] || continue
+
+            CHART_NAME=$(jq -r '.chart_name' "$digest_file")
+            DIGEST=$(jq -r '.digest' "$digest_file")
+            REGISTRY=$(jq -r '.registry' "$digest_file")
+            REPOSITORY=$(jq -r '.repository' "$digest_file")
+            APP_VERSION=$(jq -r '.app_version' "$digest_file")
+
+            VALUES_FILE="charts/${CHART_NAME}/values.yaml"
+
+            if [ ! -f "$VALUES_FILE" ]; then
+              echo "Warning: values.yaml not found for $CHART_NAME"
+              continue
+            fi
+
+            echo "Updating $VALUES_FILE with digest $DIGEST"
+
+            # Update the image tag to include the digest
+            # Format: appVersion@sha256:digest
+            NEW_TAG="${APP_VERSION}@${DIGEST}"
+
+            # Use yq to update the image.tag field
+            yq eval -i ".image.tag = \"${NEW_TAG}\"" "$VALUES_FILE"
+
+            # Optionally update registry and repository if they exist in values.yaml
+            if [ -n "$REGISTRY" ] && [ "$REGISTRY" != "null" ]; then
+              yq eval -i ".image.registry = \"${REGISTRY}\"" "$VALUES_FILE"
+            fi
+
+            if [ -n "$REPOSITORY" ] && [ "$REPOSITORY" != "null" ]; then
+              yq eval -i ".image.repository = \"${REPOSITORY}/${CHART_NAME}\"" "$VALUES_FILE"
+            fi
+
+            # Check if there were actual changes
+            if ! git diff --quiet "$VALUES_FILE"; then
+              CHARTS_UPDATED="${CHARTS_UPDATED}${CHART_NAME} "
+              ANY_CHANGES=true
+              echo "Updated $CHART_NAME values.yaml with digest"
+            else
+              echo "No changes needed for $CHART_NAME"
+            fi
+          done
+
+          if [ "$ANY_CHANGES" = true ]; then
+            echo "charts_updated=${CHARTS_UPDATED}" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.update.outputs.has_changes == 'true'
+        run: |
+          git add charts/*/values.yaml
+          git commit -m "chore: update chart values with container digests [skip ci]
+
+          Updated charts: ${{ steps.update.outputs.charts_updated }}
+
+          Container builds completed successfully and SHA digests have been
+          pinned in values.yaml for reproducible deployments."
+
+          git push origin main
+
+      - name: Summary
+        if: steps.update.outputs.has_changes == 'true'
+        run: |
+          echo "## 📝 Chart Values Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following charts have been updated with container SHA digests:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for chart in ${{ steps.update.outputs.charts_updated }}; do
+            echo "- \`$chart\`" >> $GITHUB_STEP_SUMMARY
+          done
+
+  release:
+    needs: [detect-charts, build-and-push, update-chart-values]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !inputs.skip_push &&
+      (needs.update-chart-values.result == 'success' || needs.update-chart-values.result == 'skipped')
+    permissions:
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Determine target registries
+        id: registries
+        run: |
+          # Check if DockerHub credentials are available
+          if [ -n "${{ vars.REGISTRY }}" ] && [ -n "${{ vars.REPOSITORY }}" ] && [ -n "${{ secrets.REGISTRY_USER }}" ] && [ -n "${{ secrets.REGISTRY_PASSWORD }}" ]; then
+            echo "dockerhub_enabled=true" >> $GITHUB_OUTPUT
+            echo "DockerHub registry will be used for Helm charts"
+          else
+            echo "dockerhub_enabled=false" >> $GITHUB_OUTPUT
+            echo "DockerHub credentials not configured, skipping DockerHub"
+          fi
+
+          # GHCR is always available
+          echo "ghcr_enabled=true" >> $GITHUB_OUTPUT
+          echo "GHCR registry will be used for Helm charts"
+
+      - name: Login to Registry
+        if: steps.registries.outputs.dockerhub_enabled == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run chart-releaser
+        id: chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          skip_existing: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Check cosign key availability
+        id: check-cosign-release
+        if: ${{ steps.chart-releaser.outputs.changed_charts }}
+        run: |
+          if [ -n "${{ secrets.COSIGN_KEY }}" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.9.2
+        if: ${{ steps.chart-releaser.outputs.changed_charts && steps.check-cosign-release.outputs.available == 'true' }}
+
+      - id: github-repo-owner-name
+        uses: ASzc/change-string-case-action@v6
+        with:
+          string: ${{ github.repository_owner }}
+
+      - name: Upload charts to OCI registries
+        id: upload
+        if: ${{ steps.chart-releaser.outputs.changed_charts }}
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+        run: |
+          CHANGED_CHARTS="${{ steps.chart-releaser.outputs.changed_charts }}"
+
+          # Check if cosign is available
+          COSIGN_ENABLED="false"
+          if [ -n "$COSIGN_KEY" ]; then
+            COSIGN_ENABLED="true"
+            echo "Cosign signing enabled"
+          else
+            echo "Cosign signing disabled (no COSIGN_KEY secret configured)"
+          fi
+
+          # Login to registries based on availability
+          if [ "${{ steps.registries.outputs.dockerhub_enabled }}" == "true" ]; then
+            echo "Logging in to DockerHub..."
+            helm registry login --username $REGISTRY_USER --password ${{ secrets.REGISTRY_PASSWORD }} https://${{ vars.REGISTRY }}
+          fi
+
+          echo "Logging in to GHCR..."
+          helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
+
+          RELEASED_CHARTS=""
+          for chart_directory in ${CHANGED_CHARTS//,/ }; do
+            CHART_NAME=${chart_directory#charts/}
+
+            cd $chart_directory
+
+            # Extract version and appVersion from Chart.yaml
+            CHART_VERSION=$(yq eval '.version' "Chart.yaml")
+            APP_VERSION=$(yq eval '.appVersion' "Chart.yaml")
+
+            # Push to DockerHub if enabled
+            if [ "${{ steps.registries.outputs.dockerhub_enabled }}" == "true" ]; then
+              echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}"
+              if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }} 2>&1 | tee ${CHART_NAME}-output.log; then
+
+                # Extract digest and sign chart if cosign is enabled
+                DIGEST=$(cat ${CHART_NAME}-output.log | awk -F '[, ]+' '/Digest/{print $NF}')
+                if [ "$COSIGN_ENABLED" == "true" ]; then
+                  echo "Signing DockerHub chart..."
+                  cosign sign -y --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST
+                fi
+
+                RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
+                echo "Successfully released $CHART_NAME-$CHART_VERSION to DockerHub"
+              else
+                echo "Failed to push $CHART_NAME-$CHART_VERSION to DockerHub"
+                cat ${CHART_NAME}-output.log
+                exit 1
+              fi
+            fi
+
+            # Push to GHCR
+            echo "Pushing Helm chart $CHART_NAME-$CHART_VERSION.tgz to oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts"
+            if helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts 2>&1 | tee ${CHART_NAME}-ghcr-output.log; then
+
+              # Extract digest and sign GHCR chart if cosign is enabled
+              GHCR_DIGEST=$(cat ${CHART_NAME}-ghcr-output.log | awk -F '[, ]+' '/Digest/{print $NF}')
+              if [ "$COSIGN_ENABLED" == "true" ]; then
+                echo "Signing GHCR chart..."
+                cosign sign -y --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST
+              fi
+
+              # Only add to RELEASED_CHARTS if not already added by DockerHub push
+              if [ "${{ steps.registries.outputs.dockerhub_enabled }}" != "true" ]; then
+                RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
+              fi
+              echo "Successfully released $CHART_NAME-$CHART_VERSION to GHCR"
+            else
+              echo "Failed to push $CHART_NAME-$CHART_VERSION to GHCR"
+              cat ${CHART_NAME}-ghcr-output.log
+              exit 1
+            fi
+
+            cd ${{ github.workspace }}
+          done
+          echo "released_charts=$RELEASED_CHARTS" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        if: steps.chart-releaser.outputs.changed_charts
+        run: |
+          echo "## 📦 Helm Charts Released" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following charts have been released with SHA-pinned container images:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for chart in ${{ steps.upload.outputs.released_charts }}; do
+            echo "- \`$chart\`" >> $GITHUB_STEP_SUMMARY
+          done

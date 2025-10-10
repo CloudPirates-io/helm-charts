@@ -1,0 +1,27 @@
+apiVersion: v2
+name: openldap
+description: OpenLDAP Software is an open source implementation of the Lightweight Directory Access Protocol
+type: application
+version: 0.1.0
+appVersion: "2.6.10"
+keywords:
+  - openldap
+  - ldap
+  - directory
+  - authentication
+  - identity
+home: https://www.cloudpirates.io
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/openldap
+  - https://git.openldap.org/openldap/openldap
+annotations:
+  category: Infrastructure
+  license: Apache-2.0
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    url: https://www.cloudpirates.io
+dependencies:
+  - name: common
+    version: "1.x.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+icon: https://www.openldap.org/images/headers/LDAPworm.gif

@@ -9,8 +9,52 @@ on:
       - main
 
 jobs:
+  check-signed-commits:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Check if warning already posted
+        id: check-comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const warningExists = comments.data.some(comment =>
+              comment.body.includes('⚠️ **Warning: Unsigned Commits Detected**')
+            );
+            return warningExists;
+
+      - name: Check signed commits in PR
+        if: steps.check-comment.outputs.result == 'false'
+        uses: 1Password/check-signed-commits-action@v1
+        with:
+          # Grace period - only warn, don't fail the build
+          failIfUnsigned: false
+          comment: |
+            ⚠️ **Warning: Unsigned Commits Detected**
+
+            This PR contains unsigned commits. While this is currently allowed during our grace period, it is **strongly recommended** to sign all your commits.
+
+            **Why sign commits?**
+            - Verifies the authenticity of your contributions
+            - Improves security and trust in the codebase
+            - Will become **mandatory** after the grace period ends
+
+            **How to sign commits:**
+            - See [GitHub's guide on signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+
+            **Grace Period:** This check will become mandatory in a future update.
+
   lint-test:
     runs-on: ubuntu-latest
+    needs: [check-signed-commits]
+    if: always()
     outputs:
       changed: ${{ steps.list-changed.outputs.changed }}
       changedCharts: ${{ steps.list-changed.outputs.changedCharts }}
@@ -64,13 +108,16 @@ jobs:
     name: Automatically update CHANGELOG
     permissions:
       contents: write
-    if: needs.lint-test.outputs.changed == 'true'
+      pull-requests: write
+    if: always() && needs.lint-test.outputs.changed == 'true'
     steps:
-      - name: Checkout pull request branch
+      - name: Checkout base repository
         uses: actions/checkout@v5.0.0
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          # Always checkout the base repository, not the fork
+          repository: ${{ github.repository }}
+          # Use a token with write permissions
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Configure Git
@@ -78,12 +125,15 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
+      - name: Fetch and checkout PR branch
+        run: |
+          # Fetch the PR branch from either fork or base repo
+          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+          git checkout pr-${{ github.event.pull_request.number }}
+
       - name: Fetch tags
         run: |
           git fetch --tags
-
-      - name: Install conventional-changelog-cli
-        run: npm install -g conventional-changelog-cli
 
       - name: Generate changelog
         id: generate-changelog
@@ -101,33 +151,67 @@ jobs:
             # Extract version from Chart.yaml
             CHART_VERSION=$(yq eval '.version' "${GITHUB_WORKSPACE}/charts/${CHART_NAME}/Chart.yaml")
             CHANGELOG_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md"
-            CHANGELOG_TMP_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md.tmp"
+            CHANGELOG_NEW="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.new.md"
 
-            touch "$CHANGELOG_FILE"
+            # Start new changelog with header and new version entry
+            echo "# Changelog" > "$CHANGELOG_NEW"
+            echo "" >> "$CHANGELOG_NEW"
+            echo "## $CHART_VERSION ($(date +'%Y-%m-%d'))" >> "$CHANGELOG_NEW"
+            echo "" >> "$CHANGELOG_NEW"
+            echo "* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))" >> "$CHANGELOG_NEW"
 
-            # Generate new CHANGELOG.md
-            npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
-            
-            # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
-            # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
-            # So we only need to find a released section to start printing in the awk script below
-            awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
+            # Get all tags for this chart, sorted by version
+            CHART_TAGS=$(git tag -l "${CHART_NAME}-*" | sort -V -r)
 
-            # Remove chart name prefixes from commit messages
-            sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
+            # For each tag, generate a section with the commits since the previous tag
+            PREV_TAG=""
+            for TAG in $CHART_TAGS; do
+              # Get the tag version (strip chart name prefix)
+              TAG_VERSION=${TAG#${CHART_NAME}-}
+              TAG_DATE=$(git log -1 --format=%ai "$TAG" | cut -d' ' -f1)
 
-            # Remove extra newlines so the changelog file passes the markdown linter
-            sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
-            
-            # Include h1 heading and add entry for the current version. There is no tag for the current version (this will be created once merged), so we need to manually add it.
-            # We know the final squashed commit title, which will be the PR title. We cannot add a link to the commit in the main branch because it has not been
-            # merged yet (this will be corrected once a new version regenerates the changelog). Instead, we add the PR url which contains the exact same information.
-            echo -e -n "# Changelog\n\n## $CHART_VERSION ($(date +'%Y-%m-%d'))\n\n* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))\n" > "$CHANGELOG_FILE"
+              echo "" >> "$CHANGELOG_NEW"
+              echo "## $TAG_VERSION ($TAG_DATE)" >> "$CHANGELOG_NEW"
+              echo "" >> "$CHANGELOG_NEW"
 
-            cat "$CHANGELOG_TMP_FILE" >> "$CHANGELOG_FILE"
-            rm "$CHANGELOG_TMP_FILE"
-            
+              # Get commits for this chart between this tag and the previous one
+              if [ -z "$PREV_TAG" ]; then
+                # First tag - get all commits up to this tag
+                COMMIT_RANGE="${TAG}"
+              else
+                # Get commits between previous tag and this tag
+                COMMIT_RANGE="${TAG}..${PREV_TAG}"
+              fi
+
+              # Get commits that touched this chart's directory
+              git log "$COMMIT_RANGE" --oneline --no-merges -- "charts/${CHART_NAME}" | while read -r commit_line; do
+                COMMIT_HASH=$(echo "$commit_line" | cut -d' ' -f1)
+                COMMIT_MSG=$(echo "$commit_line" | cut -d' ' -f2-)
+
+                # Skip commits that are clearly for other charts (have [other-chart] prefix)
+                # But allow commits with [chart-name] prefix, [all] prefix, or no prefix
+                if echo "$COMMIT_MSG" | grep -qE '^\[[a-z]+\]'; then
+                  # Has a chart prefix - check if it's for this chart or [all]
+                  if ! echo "$COMMIT_MSG" | grep -qiE '^\[('"${CHART_NAME}"'|all)\]'; then
+                    # Skip this commit - it's for a different chart
+                    continue
+                  fi
+                fi
+
+                # Remove chart name prefix from commit message (case insensitive)
+                COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -E "s/^\[${CHART_NAME}\] //i")
+                COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -E "s/^\[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] //")
+                COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -E "s/^\[all\] //i")
+
+                echo "* ${COMMIT_MSG} ([${COMMIT_HASH}](https://github.com/${GITHUB_REPOSITORY}/commit/${COMMIT_HASH}))" >> "$CHANGELOG_NEW"
+              done
+
+              PREV_TAG="$TAG"
+            done
+
+            # Replace old changelog with new one
+            mv "$CHANGELOG_NEW" "$CHANGELOG_FILE"
+
             # Commit all changes, if any
             if git status -s | grep "charts/${CHART_NAME}/CHANGELOG.md"; then
               git add "charts/${CHART_NAME}/CHANGELOG.md"
@@ -135,12 +219,62 @@ jobs:
             fi
           done
 
-      - name: Push all changes
+      - name: Check if commits were made
+        id: check-changes
         run: |
-          cd $GITHUB_WORKSPACE/charts
-          # Push all the new commits, if any
-          if [[ $(git cherry -v) ]]; then
-            git push
+          # Compare against origin/main to detect unpushed commits
+          # This works even when the branch doesn't have an upstream tracking branch
+          if [[ $(git log origin/${{ github.event.repository.default_branch }}..HEAD --oneline) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "CHANGELOG changes detected and committed"
           else
-            echo "No changed CHANGELOGS, skip push"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No CHANGELOG changes to push"
           fi
+
+      - name: Commit and push changes (for branch PRs)
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          # For PRs from branches in the same repository, push directly
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+      - name: Create commit for fork PRs
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+
+            // Get the list of changed CHANGELOG files
+            const changedFiles = execSync('git diff --name-only HEAD').toString().trim().split('\n');
+
+            console.log('Changed files:', changedFiles);
+
+            // Create a comment on the PR with the updated CHANGELOGs
+            let comment = '### 📝 CHANGELOG Updates\n\n';
+            comment += 'The following CHANGELOG files have been automatically updated. ';
+            comment += 'Please pull these changes into your fork:\n\n';
+            comment += '```bash\n';
+            comment += `gh pr checkout ${{ github.event.pull_request.number }}\n`;
+            comment += 'git pull\n';
+            comment += '```\n\n';
+            comment += '**Changed files:**\n';
+
+            for (const file of changedFiles) {
+              if (file.includes('CHANGELOG.md')) {
+                comment += `- \`${file}\`\n`;
+              }
+            }
+
+            comment += '\n**Note:** Since this PR is from a fork, the bot cannot push changes directly. ';
+            comment += 'The changes have been prepared but need to be manually pulled into your fork.';
+
+            // Post the comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+            core.setFailed('CHANGELOG updates ready but cannot push to fork. Please pull the changes manually (see comment above).');
