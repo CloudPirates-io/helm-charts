@@ -26,7 +26,12 @@ data:
     # Extract replica number from hostname
     REPLICA_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
     echo "Replica number: $REPLICA_NUM"
-    
+
+    # Replace REPLICA_NUM in galera.cnf
+    #sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /etc/mysql/galera.cnf
+    #sed "s/REPLICA_NUM/$REPLICA_NUM/g" /etc/mysql/galera.cnf > /tmp/galera.cnf
+    #mv /tmp/galera.cnf /etc/mysql/galera.cnf
+
     # Check if data directory exists and is empty
     DATA_DIR="/var/lib/mysql"
     if [ ! -d "$DATA_DIR/mysql" ]; then

@@ -36,6 +36,29 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.galera.enabled }}
+      initContainers:
+        - name: galera-config-init
+          image: {{ include "mariadb.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              cp /tmp/galera-config-ro/galera.cnf /tmp/galera-config-rw/galera.cnf
+              REPLICA_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
+              sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /tmp/galera-config-rw/galera.cnf
+              chmod 644 /tmp/galera-config-rw/galera.cnf
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+            - name: galera-config
+              mountPath: /tmp/galera-config-ro
+              readOnly: true
+            - name: galera-config-rw
+              mountPath: /tmp/galera-config-rw
+      {{- end }}
       containers:
         - name: mariadb
           image: {{ include "mariadb.image" . }}
@@ -194,7 +217,7 @@ spec:
               mountPath: /etc/mysql/conf.d
             {{- end }}
             {{- if .Values.galera.enabled }}
-            - name: galera-config
+            - name: galera-config-rw
               mountPath: /etc/mysql/galera.cnf
               subPath: galera.cnf
             - name: galera-scripts
@@ -229,6 +252,8 @@ spec:
         - name: galera-config
           configMap:
             name: {{ include "mariadb.fullname" . }}-galera
+        - name: galera-config-rw
+          emptyDir: {}
         - name: galera-scripts
           configMap:
             name: {{ include "mariadb.fullname" . }}-galera-scripts
