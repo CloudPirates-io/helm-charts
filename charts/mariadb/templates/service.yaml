@@ -23,5 +23,57 @@ spec:
       {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
+    {{- if .Values.galera.enabled }}
+    - port: 4567
+      targetPort: galera-repl
+      protocol: TCP
+      name: galera-repl
+    - port: 4568
+      targetPort: galera-ist
+      protocol: TCP
+      name: galera-ist
+    - port: 4444
+      targetPort: galera-sst
+      protocol: TCP
+      name: galera-sst
+    {{- end }}
   selector:
     {{- include "mariadb.selectorLabels" . | nindent 4 }}
+{{- if .Values.galera.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mariadb.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mariadb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: headless
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: mysql
+      protocol: TCP
+      name: mysql
+    - port: 4567
+      targetPort: galera-repl
+      protocol: TCP
+      name: galera-repl
+    - port: 4568
+      targetPort: galera-ist
+      protocol: TCP
+      name: galera-ist
+    - port: 4444
+      targetPort: galera-sst
+      protocol: TCP
+      name: galera-sst
+  selector:
+    {{- include "mariadb.selectorLabels" . | nindent 4 }}
+{{- end }}

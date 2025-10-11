@@ -1,0 +1,58 @@
+{{- if .Values.galera.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mariadb.fullname" . }}-galera
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mariadb.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  galera.cnf: |
+    [galera]
+    # Galera Provider Configuration
+    wsrep_on=ON
+    wsrep_provider={{ .Values.galera.wsrepProvider }}
+    wsrep_cluster_name={{ include "mariadb.galeraClusterName" . }}
+    wsrep_cluster_address=gcomm://{{ include "mariadb.galeraClusterAddress" . }}
+    wsrep_node_name={{ include "mariadb.galeraNodeName" . }}
+    wsrep_node_address={{ include "mariadb.galeraNodeAddress" . }}
+    
+    # Replication settings
+    binlog_format=ROW
+    default_storage_engine=InnoDB
+    innodb_autoinc_lock_mode=2
+    
+    # InnoDB settings for Galera
+    innodb_flush_log_at_trx_commit={{ .Values.galera.innodb.flushLogAtTrxCommit }}
+    innodb_buffer_pool_size={{ .Values.galera.innodb.bufferPoolSize }}
+    
+    # Galera performance tuning
+    wsrep_slave_threads={{ .Values.galera.wsrepSlaveThreads }}
+    wsrep_certify_nonPK={{ .Values.galera.wsrepCertifyNonPK }}
+    wsrep_max_ws_rows={{ .Values.galera.wsrepMaxWsRows }}
+    wsrep_max_ws_size={{ .Values.galera.wsrepMaxWsSize }}
+    wsrep_retry_autocommit={{ .Values.galera.wsrepRetryAutocommit }}
+    wsrep_auto_increment_control={{ .Values.galera.wsrepAutoIncrementControl }}
+    wsrep_drupal_282555_workaround={{ .Values.galera.wsrepDrupalHack }}
+    wsrep_log_conflicts={{ .Values.galera.wsrepLogConflicts }}
+    
+    # State Snapshot Transfer (SST) settings
+    wsrep_sst_method={{ .Values.galera.wsrepMethod }}
+    {{- if .Values.galera.sst.user }}
+    wsrep_sst_auth={{ .Values.galera.sst.user }}:{{ .Values.galera.sst.password }}
+    {{- end }}
+    
+    {{- if .Values.galera.wsrepDebug }}
+    # Debug settings
+    wsrep_debug=ON
+    {{- end }}
+    
+    # Additional settings for cluster consistency
+    innodb_doublewrite=1
+    query_cache_type=0
+    query_cache_size=0
+{{- end }}
