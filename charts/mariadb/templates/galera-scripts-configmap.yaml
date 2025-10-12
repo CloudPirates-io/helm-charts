@@ -28,9 +28,10 @@ data:
     echo "Replica number: $REPLICA_NUM"
 
     # Replace REPLICA_NUM in galera.cnf
-    #sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /etc/mysql/galera.cnf
-    #sed "s/REPLICA_NUM/$REPLICA_NUM/g" /etc/mysql/galera.cnf > /tmp/galera.cnf
-    #mv /tmp/galera.cnf /etc/mysql/galera.cnf
+    # Galera config is mounted to init Container as read-only, copy to writable location
+    cp /tmp/galera-config-ro/galera.cnf /tmp/galera-config-rw/galera.cnf
+    sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /tmp/galera-config-rw/galera.cnf
+    chmod 644 /tmp/galera-config-rw/galera.cnf
 
     # Check if data directory exists and is empty
     DATA_DIR="/var/lib/mysql"
@@ -76,12 +77,12 @@ data:
     if [ "$BOOTSTRAP_CLUSTER" = true ]; then
         echo "Bootstrapping new Galera cluster..."
         #exec mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-        mariadb-install-db
-        sleep 3
-        exec mariadbd --wsrep-new-cluster "$@"
+        #mariadb-install-db
+        #sleep 3
+        #exec mariadbd --wsrep-new-cluster "$@"
     else
         echo "Joining existing Galera cluster..."
-        exec mariadbd "$@"
+        #exec mariadbd "$@"
     fi
     
   galera-recovery.sh: |
