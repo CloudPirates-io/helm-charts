@@ -27,12 +27,6 @@ data:
     REPLICA_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
     echo "Replica number: $REPLICA_NUM"
 
-    # Replace REPLICA_NUM in galera.cnf
-    # Galera config is mounted to init Container as read-only, copy to writable location
-    cp /tmp/galera-config-ro/galera.cnf /tmp/galera-config-rw/galera.cnf
-    sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /tmp/galera-config-rw/galera.cnf
-    chmod 644 /tmp/galera-config-rw/galera.cnf
-
     # Check if data directory exists and is empty
     DATA_DIR="/var/lib/mysql"
     if [ ! -d "$DATA_DIR/mysql" ]; then
@@ -80,9 +74,12 @@ data:
         #mariadb-install-db
         #sleep 3
         #exec mariadbd --wsrep-new-cluster "$@"
+        exec /usr/local/bin/docker-entrypoint.sh --wsrep-new-cluster "$@"
+
     else
         echo "Joining existing Galera cluster..."
-        #exec mariadbd "$@"
+        exec mariadbd "$@"
+        #exec /usr/local/bin/docker-entrypoint.sh "$@"
     fi
     
   galera-recovery.sh: |

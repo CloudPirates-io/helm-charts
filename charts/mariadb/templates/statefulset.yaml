@@ -47,7 +47,9 @@ spec:
             - -c
             - |
               REPLICA_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
-              /usr/local/bin/galera-entrypoint.sh
+              cp /tmp/galera-config-ro/galera.cnf /tmp/galera-config-rw/galera.cnf
+              sed -i "s/REPLICA_NUM/$REPLICA_NUM/g" /tmp/galera-config-rw/galera.cnf
+              chmod 644 /tmp/galera-config-rw/galera.cnf
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
@@ -56,9 +58,6 @@ spec:
               readOnly: true
             - name: galera-config-rw 
               mountPath: /tmp/galera-config-rw
-            - name: galera-scripts
-              mountPath: /usr/local/bin/galera-entrypoint.sh
-              subPath: galera-entrypoint.sh
       {{- end }}
       containers:
         - name: mariadb
@@ -66,7 +65,10 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
           {{- if .Values.galera.enabled }}
-          #command: ['tail', '-f', '/dev/null']
+          command: 
+            - /bin/bash
+            - -c
+            - source /usr/local/bin/galera-entrypoint.sh
           {{- end }}
           {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env .Values.galera.enabled }}
           env:
@@ -109,9 +111,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            {{- if .Values.galera.sst.password }}
             - name: MARIADB_GALERA_SST_USER
               value: {{ .Values.galera.sst.user | quote }}
-            {{- if .Values.galera.sst.password }}
             - name: MARIADB_GALERA_SST_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -216,11 +218,7 @@ spec:
             {{- end }}
             {{- if .Values.galera.enabled }}
             - name: galera-config-rw
-<<<<<<< HEAD
               mountPath: /etc/mysql/mariadb.conf.d/60-galera.cnf
-=======
-              mountPath: /etc/mysql/galera.cnf
->>>>>>> 563af4909e104e06f51a22c967ad8ea187bb4f84
               subPath: galera.cnf
             - name: galera-scripts
               mountPath: /usr/local/bin/galera-entrypoint.sh
