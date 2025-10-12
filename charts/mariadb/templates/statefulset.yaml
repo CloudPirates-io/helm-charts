@@ -216,7 +216,11 @@ spec:
             {{- end }}
             {{- if .Values.galera.enabled }}
             - name: galera-config-rw
+<<<<<<< HEAD
               mountPath: /etc/mysql/mariadb.conf.d/60-galera.cnf
+=======
+              mountPath: /etc/mysql/galera.cnf
+>>>>>>> 563af4909e104e06f51a22c967ad8ea187bb4f84
               subPath: galera.cnf
             - name: galera-scripts
               mountPath: /usr/local/bin/galera-entrypoint.sh
