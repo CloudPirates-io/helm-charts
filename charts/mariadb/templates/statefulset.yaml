@@ -101,8 +101,6 @@ spec:
               value: "true"
             - name: MARIADB_GALERA_CLUSTER_NAME
               value: {{ .Values.galera.name | quote }}
-            - name: MARIADB_GALERA_CLUSTER_ADDRESS
-              value: "gcomm://{{ include "mariadb.galeraClusterAddress" . }}"
             - name: MARIADB_GALERA_NODE_NAME
               valueFrom:
                 fieldRef:
