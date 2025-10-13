@@ -182,8 +182,10 @@ test_chart() {
         return 1
     fi
 
-    # Helm unittest (if tests exist)
-    if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+    # Helm unittest (if tests exist and not disabled)
+    if [ -f ".disable-unittest" ]; then
+        echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
+    elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
         echo "🧪 Running Helm unittest..."
         if ! helm unittest .; then
             echo -e "${RED}❌ Helm unittest failed for $chart${NC}"
