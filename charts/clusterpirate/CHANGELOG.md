@@ -1,8 +1,17 @@
 # Changelog
 
+## 1.1.1 (2025-10-13)
+
+* Fix formatting ([#371](https://github.com/CloudPirates-io/helm-charts/pull/371))
+
+## 1.1.1 (2025-10-13)
+
+* Bugfix/lint workflow (#363) ([ce5c550](https://github.com/CloudPirates-io/helm-charts/commit/ce5c550))
+* Bugfix/lint workflow (#362) ([bbf7bd5](https://github.com/CloudPirates-io/helm-charts/commit/bbf7bd5))
+
 ## 1.1.0 (2025-10-13)
 
-* [clusterpirate] Bump dependencies ([#357](https://github.com/CloudPirates-io/helm-charts/pull/357))
+* Bump dependencies (#357) ([c2909cd](https://github.com/CloudPirates-io/helm-charts/commit/c2909cd))
 
 ## 1.0.7 (2025-08-27)
 
