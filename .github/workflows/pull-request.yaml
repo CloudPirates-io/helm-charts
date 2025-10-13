@@ -77,7 +77,8 @@ jobs:
 
       - name: Run chart testing (lint & unittest)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands "sh -c 'if [ ! -f {{ .Path }}/.disable-unittest ]; then helm unittest {{ .Path }}; else echo \"Skipping unittest for {{ .Path }} (.disable-unittest found)\"; fi'"
+        run: |
+          ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
     runs-on: ubuntu-latest
@@ -133,6 +134,12 @@ jobs:
           for chart_directory in ${CHANGED_CHARTS}; do
             CHART_NAME=${chart_directory#charts/}
             echo "Testing chart: $CHART_NAME"
+
+            # Check if integration test is disabled for this chart
+            if [ -f "${chart_directory}/.disable-unittest" ]; then
+              echo "⏩ Skipping integration test for $CHART_NAME (.disable-unittest found)"
+              continue
+            fi
 
             # Run test script without cluster creation (kind-action already created it)
             # and without cleanup (let GitHub Actions handle it)
