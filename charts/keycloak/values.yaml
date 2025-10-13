@@ -232,7 +232,7 @@ persistence:
 
 ## @section Metrics Configuration
 metrics:
-  enabled: true
+  enabled: false
   ## @section Metrics service parameters
   service:
     ## @param metrics.service.type Metrics service type
@@ -248,7 +248,7 @@ metrics:
   ## @section ServiceMonitor parameters
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource for scraping metrics using PrometheusOperator
-    enabled: true
+    enabled: false
     ## @param metrics.serviceMonitor.namespace Namespace in which ServiceMonitor is created
     namespace: ""
     ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
