@@ -250,10 +250,10 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `livenessProbe.failureThreshold`     | Failure threshold for livenessProbe          | `3`     |
 | `livenessProbe.successThreshold`     | Success threshold for livenessProbe          | `1`     |
 | `readinessProbe.enabled`             | Enable readinessProbe on RabbitMQ containers | `true`  |
-| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe     | `0`     |
-| `readinessProbe.periodSeconds`       | Period seconds for readinessProbe            | `10`    |
-| `readinessProbe.timeoutSeconds`      | Timeout seconds for readinessProbe           | `5`     |
-| `readinessProbe.failureThreshold`    | Failure threshold for readinessProbe         | `1`     |
+| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe     | `10`    |
+| `readinessProbe.periodSeconds`       | Period seconds for readinessProbe            | `30`    |
+| `readinessProbe.timeoutSeconds`      | Timeout seconds for readinessProbe           | `20`    |
+| `readinessProbe.failureThreshold`    | Failure threshold for readinessProbe         | `3`     |
 | `readinessProbe.successThreshold`    | Success threshold for readinessProbe         | `1`     |
 
 ### Additional Configuration
