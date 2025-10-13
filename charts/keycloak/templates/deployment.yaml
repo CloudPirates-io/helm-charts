@@ -118,6 +118,16 @@ spec:
             {{- with .Values.keycloak.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- if .Values.tls.enabled }}
+            - --https-certificate-file={{ .Values.tls.certificateFile }}
+            - --https-certificate-key-file={{ .Values.tls.certificateKeyFile }}
+            {{- end }}
+            {{- if .Values.tls.truststoreEnabled }}
+            - --https-trust-store-file={{ .Values.tls.truststoreFile }}
+            {{- if .Values.tls.truststorePassword }}
+            - --https-trust-store-password={{ .Values.tls.truststorePassword }}
+            {{- end }}
+            {{- end }}
           env:
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloak.httpRelativePath | quote | default "/" }}
@@ -239,6 +249,16 @@ spec:
               mountPath: /opt/keycloak/data/import
               readOnly: true
             {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /opt/keycloak/certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.tls.truststoreEnabled }}
+            - name: tls-truststore
+              mountPath: /opt/keycloak/truststore
+              readOnly: true
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
               {{- toYaml .Values.extraVolumeMounts | nindent 12}}
             {{- end }}
@@ -266,6 +286,24 @@ spec:
         - name: realm-config
           configMap:
             name: {{ include "keycloak.fullname" . }}-realm
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.tls.existingSecret }}
+            items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key
+        {{- end }}
+        {{- if .Values.tls.truststoreEnabled }}
+        - name: tls-truststore
+          secret:
+            secretName: {{ .Values.tls.truststoreExistingSecret }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
         {{- end }}
         {{- if .Values.extraVolumes }}
           {{- toYaml .Values.extraVolumes | nindent 8 }}

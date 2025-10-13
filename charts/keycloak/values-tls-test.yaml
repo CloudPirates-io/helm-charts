@@ -1,0 +1,31 @@
+# Test values for TLS configuration
+keycloak:
+  adminPassword: "admin"
+  hostname: "keycloak.local"
+  production: false  # Use dev mode for faster startup in testing
+  httpEnabled: true  # Keep HTTP enabled for easier testing
+
+# Enable TLS with custom certificates
+tls:
+  enabled: true
+  existingSecret: "keycloak-tls-certs"
+
+# Use embedded PostgreSQL for testing
+postgres:
+  enabled: true
+  auth:
+    database: "keycloak"
+    password: "keycloak-test"
+
+# Disable MariaDB
+mariadb:
+  enabled: false
+
+# Minimal resources for kind cluster
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"

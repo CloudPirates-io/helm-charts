@@ -234,6 +234,43 @@
         }
       }
     },
+    "tls": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable TLS/HTTPS support using custom certificates"
+        },
+        "existingSecret": {
+          "type": "string",
+          "description": "Name of existing secret containing TLS certificate and key (PEM format)"
+        },
+        "certificateFile": {
+          "type": "string",
+          "description": "Path where the TLS certificate file will be mounted (internal)"
+        },
+        "certificateKeyFile": {
+          "type": "string",
+          "description": "Path where the TLS certificate key file will be mounted (internal)"
+        },
+        "truststoreEnabled": {
+          "type": "boolean",
+          "description": "Enable truststore for client certificate validation or outgoing HTTPS requests"
+        },
+        "truststoreExistingSecret": {
+          "type": "string",
+          "description": "Name of existing secret containing truststore file (Java Keystore format)"
+        },
+        "truststorePassword": {
+          "type": "string",
+          "description": "Password for the truststore"
+        },
+        "truststoreFile": {
+          "type": "string",
+          "description": "Path where the truststore file will be mounted (internal)"
+        }
+      }
+    },
     "database": {
       "type": "object",
       "properties": {

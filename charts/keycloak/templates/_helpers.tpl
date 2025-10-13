@@ -194,6 +194,28 @@ Return the url to use for probes
 {{- end }}
 
 {{/*
+Return TLS certificate secret name
+*/}}
+{{- define "keycloak.tlsSecretName" -}}
+{{- if .Values.tls.existingSecret -}}
+    {{- .Values.tls.existingSecret -}}
+{{- else -}}
+    {{- printf "%s-tls" (include "keycloak.fullname" .) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return TLS truststore secret name
+*/}}
+{{- define "keycloak.truststoreSecretName" -}}
+{{- if .Values.tls.truststoreExistingSecret -}}
+    {{- .Values.tls.truststoreExistingSecret -}}
+{{- else -}}
+    {{- printf "%s-truststore" (include "keycloak.fullname" .) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Return metrics service name
 */}}
 {{- define "keycloak.metrics.fullname" -}}

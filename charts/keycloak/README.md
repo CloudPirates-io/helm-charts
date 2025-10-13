@@ -146,6 +146,19 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
 | `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
+### TLS Configuration
+
+| Parameter                          | Description                                                                                | Default                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `tls.enabled`                      | Enable TLS/HTTPS support using custom certificates                                        | `false`                            |
+| `tls.existingSecret`               | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                               |
+| `tls.certificateFile`              | Path where the TLS certificate file will be mounted (internal)                            | `"/opt/keycloak/certs/tls.crt"`    |
+| `tls.certificateKeyFile`           | Path where the TLS certificate key file will be mounted (internal)                        | `"/opt/keycloak/certs/tls.key"`    |
+| `tls.truststoreEnabled`            | Enable truststore for client certificate validation or outgoing HTTPS requests            | `false`                            |
+| `tls.truststoreExistingSecret`     | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks) | `""`                               |
+| `tls.truststorePassword`           | Password for the truststore (use with caution - consider using existing secret)           | `""`                               |
+| `tls.truststoreFile`               | Path where the truststore file will be mounted (internal)                                 | `"/opt/keycloak/truststore/truststore.jks"` |
+
 ### Database Configuration
 
 | Parameter                         | Description                                                                                                            | Default         |
@@ -501,6 +514,46 @@ realm:
     }
 ```
 
+### Using Custom TLS Certificates
+
+```yaml
+# values-tls.yaml
+tls:
+  enabled: true
+  existingSecret: "keycloak-tls-certs"
+
+keycloak:
+  httpEnabled: false  # Disable HTTP when using TLS
+  production: true
+  hostname: "auth.yourdomain.com"
+```
+
+Create the TLS secret first with your certificate and key in PEM format:
+
+```bash
+kubectl create secret generic keycloak-tls-certs \
+  --from-file=tls.crt=/path/to/certificate.pem \
+  --from-file=tls.key=/path/to/private-key.pem
+```
+
+#### Using Truststore for Client Certificates or Outgoing HTTPS
+
+```yaml
+# values-tls-truststore.yaml
+tls:
+  enabled: true
+  existingSecret: "keycloak-tls-certs"
+  truststoreEnabled: true
+  truststoreExistingSecret: "keycloak-truststore"
+  truststorePassword: "changeit"
+```
+
+Create the truststore secret:
+
+```bash
+kubectl create secret generic keycloak-truststore \
+  --from-file=truststore.jks=/path/to/truststore.jks
+```
 
 ### High Availability Setup
 
