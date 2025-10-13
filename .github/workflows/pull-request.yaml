@@ -9,8 +9,52 @@ on:
       - main
 
 jobs:
+  check-signed-commits:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Check if warning already posted
+        id: check-comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const warningExists = comments.data.some(comment =>
+              comment.body.includes('⚠️ **Warning: Unsigned Commits Detected**')
+            );
+            return warningExists;
+
+      - name: Check signed commits in PR
+        if: steps.check-comment.outputs.result == 'false'
+        uses: 1Password/check-signed-commits-action@v1
+        with:
+          # Grace period - only warn, don't fail the build
+          failIfUnsigned: false
+          comment: |
+            ⚠️ **Warning: Unsigned Commits Detected**
+
+            This PR contains unsigned commits. While this is currently allowed during our grace period, it is **strongly recommended** to sign all your commits.
+
+            **Why sign commits?**
+            - Verifies the authenticity of your contributions
+            - Improves security and trust in the codebase
+            - Will become **mandatory** after the grace period ends
+
+            **How to sign commits:**
+            - See [GitHub's guide on signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+
+            **Grace Period:** This check will become mandatory in a future update.
+
   lint-test:
     runs-on: ubuntu-latest
+    needs: [check-signed-commits]
+    if: always()
     outputs:
       changed: ${{ steps.list-changed.outputs.changed }}
       changedCharts: ${{ steps.list-changed.outputs.changedCharts }}
@@ -64,13 +108,15 @@ jobs:
     name: Automatically update CHANGELOG
     permissions:
       contents: write
-    if: needs.lint-test.outputs.changed == 'true'
+      pull-requests: write
+    if: always() && needs.lint-test.outputs.changed == 'true'
     steps:
-      - name: Checkout pull request branch
+      - name: Checkout PR branch
         uses: actions/checkout@v5.0.0
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Configure Git
@@ -78,69 +124,143 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Fetch tags
+      - name: Add upstream remote and fetch tags
         run: |
-          git fetch --tags
+          git remote add upstream https://github.com/${{ github.repository }}.git || true
+          git fetch upstream --tags
 
-      - name: Install conventional-changelog-cli
-        run: npm install -g conventional-changelog-cli
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-      - name: Generate changelog
-        id: generate-changelog
+      - name: Generate changelog and commit
+        id: check-changes
+        shell: bash
         env:
           PULL_REQUEST_NUMBER: "${{ github.event.pull_request.number }}"
           PULL_REQUEST_URL: "${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.number }}"
           GITHUB_TOKEN: "${{ github.token }}"
+          GITHUB_REPOSITORY: "${{ github.repository }}"
+          GITHUB_REPOSITORY_URL: "${{ github.server_url }}/${{ github.repository }}"
           CHANGED_CHARTS: ${{ needs.lint-test.outputs.changedCharts }}
         run: |
+          set -e
           PR_TITLE="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${PULL_REQUEST_NUMBER}" | jq -r '.title')"
+
+          # Extract chart names from changed chart directories
+          CHART_NAMES=()
           for chart_directory in ${CHANGED_CHARTS}; do
             CHART_NAME=${chart_directory#charts/}
-            echo "Updating CHANGELOG for chart $CHART_NAME"
+            CHART_NAMES+=("--chart" "$CHART_NAME")
+          done
 
-            # Extract version from Chart.yaml
-            CHART_VERSION=$(yq eval '.version' "${GITHUB_WORKSPACE}/charts/${CHART_NAME}/Chart.yaml")
-            CHANGELOG_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md"
-            CHANGELOG_TMP_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md.tmp"
+          # Run the changelog generation script
+          ./generate-changelog.sh \
+            "${CHART_NAMES[@]}" \
+            --pr-title "${PR_TITLE}" \
+            --pr-number "${PULL_REQUEST_NUMBER}" \
+            --pr-url "${PULL_REQUEST_URL}"
 
-            touch "$CHANGELOG_FILE"
-
-            # Generate new CHANGELOG.md
-            npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
-            
-            # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
-            # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
-            # So we only need to find a released section to start printing in the awk script below
-            awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
-
-            # Remove chart name prefixes from commit messages
-            sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
-
-            # Remove extra newlines so the changelog file passes the markdown linter
-            sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
-            
-            # Include h1 heading and add entry for the current version. There is no tag for the current version (this will be created once merged), so we need to manually add it.
-            # We know the final squashed commit title, which will be the PR title. We cannot add a link to the commit in the main branch because it has not been
-            # merged yet (this will be corrected once a new version regenerates the changelog). Instead, we add the PR url which contains the exact same information.
-            echo -e -n "# Changelog\n\n## $CHART_VERSION ($(date +'%Y-%m-%d'))\n\n* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))\n" > "$CHANGELOG_FILE"
-
-            cat "$CHANGELOG_TMP_FILE" >> "$CHANGELOG_FILE"
-            rm "$CHANGELOG_TMP_FILE"
-            
-            # Commit all changes, if any
-            if git status -s | grep "charts/${CHART_NAME}/CHANGELOG.md"; then
+          # Stage all changed CHANGELOG files
+          for chart_directory in ${CHANGED_CHARTS}; do
+            CHART_NAME=${chart_directory#charts/}
+            if [ -f "charts/${CHART_NAME}/CHANGELOG.md" ]; then
               git add "charts/${CHART_NAME}/CHANGELOG.md"
-              git commit -m "Update CHANGELOG.md" --signoff
             fi
           done
 
-      - name: Push all changes
-        run: |
-          cd $GITHUB_WORKSPACE/charts
-          # Push all the new commits, if any
-          if [[ $(git cherry -v) ]]; then
-            git push
+          # Commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No CHANGELOG changes to commit"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           else
-            echo "No changed CHANGELOGS, skip push"
+            git commit -m "chore: update CHANGELOG.md for changed charts" --signoff
+            echo "CHANGELOG updated and committed"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Push changes to PR branch
+        if: steps.check-changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to push directly
+          if git push origin HEAD:${{ github.event.pull_request.head.ref }} 2>&1 | tee push_output.txt; then
+            echo "Successfully pushed changes"
+            echo "push_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "Direct push failed, will try alternative method"
+            echo "push_success=false" >> $GITHUB_OUTPUT
+            cat push_output.txt
+          fi
+        id: push-direct
+        continue-on-error: true
+
+      - name: Push via GitHub API (fallback for forks)
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.push-direct.outputs.push_success != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
+
+            try {
+              // Get the current commit SHA
+              const currentSha = execSync('git rev-parse HEAD').toString().trim();
+              console.log('Current commit SHA:', currentSha);
+
+              // Get the PR head ref details
+              const headRef = '${{ github.event.pull_request.head.ref }}';
+              const headRepo = '${{ github.event.pull_request.head.repo.full_name }}';
+              const [owner, repo] = headRepo.split('/');
+
+              console.log(`Updating ref: refs/heads/${headRef} in ${owner}/${repo} to ${currentSha}`);
+
+              // Update the reference using GitHub API
+              await github.rest.git.updateRef({
+                owner: owner,
+                repo: repo,
+                ref: `heads/${headRef}`,
+                sha: currentSha,
+                force: false
+              });
+
+              console.log('Successfully pushed changes via GitHub API');
+              core.notice('✅ Changelog updated and pushed successfully');
+
+            } catch (error) {
+              console.error('Failed to push via GitHub API:', error);
+
+              // Post a helpful comment
+              const changedFiles = execSync('git diff --cached --name-only').toString().trim().split('\n');
+
+              let comment = '### 📝 CHANGELOG Updates\n\n';
+              comment += '⚠️ **Unable to automatically push changelog changes.**\n\n';
+              comment += 'Please update the changelog manually by running:\n\n';
+              comment += '```bash\n';
+              comment += `gh pr checkout ${{ github.event.pull_request.number }}\n`;
+              comment += `./generate-changelog.sh \\\n`;
+              comment += `  --chart <your-chart-name> \\\n`;
+              comment += `  --pr-title "${{ github.event.pull_request.title }}" \\\n`;
+              comment += `  --pr-number ${{ github.event.pull_request.number }} \\\n`;
+              comment += `  --pr-url "${{ github.event.pull_request.html_url }}"\n`;
+              comment += `git add charts/*/CHANGELOG.md\n`;
+              comment += `git commit -m "chore: update CHANGELOG.md for changed charts" --signoff\n`;
+              comment += `git push\n`;
+              comment += '```\n\n';
+              comment += '**Files that need updating:**\n';
+
+              for (const file of changedFiles.filter(f => f.includes('CHANGELOG.md'))) {
+                comment += `- \`${file}\`\n`;
+              }
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+
+              core.setFailed('Unable to push changelog updates. Please update manually (see comment above).');
+            }
