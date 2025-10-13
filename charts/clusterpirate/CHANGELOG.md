@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.0 (2025-10-13)
+
+* [clusterpirate] Bump dependencies ([#357](https://github.com/CloudPirates-io/helm-charts/pull/357))
 
 ## 1.0.7 (2025-08-27)
 
