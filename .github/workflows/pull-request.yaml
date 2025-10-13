@@ -8,18 +8,25 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   lint-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
     outputs:
       changed: ${{ steps.list-changed.outputs.changed }}
       changedCharts: ${{ steps.list-changed.outputs.changedCharts }}
     steps:
       - name: Setup Helm
-        uses: Azure/setup-helm@v4.3.1
+        uses: Azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
 
       - name: Checkout pull request branch
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
@@ -33,7 +40,7 @@ jobs:
           python-version: 3.x
 
       - name: Set up chart-testing-action
-        uses: helm/chart-testing-action@v2.7.0
+        uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
 
       - name: Get changed charts
         id: list-changed
@@ -50,40 +57,71 @@ jobs:
             echo "No chart changes detected"
           fi
 
+      - name: Cache Helm plugins
+        if: steps.list-changed.outputs.changed == 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.local/share/helm/plugins
+          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-helm-plugins-
+
       - name: Installing plugin helm-unittest
         if: steps.list-changed.outputs.changed == 'true'
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest >/dev/null
+        run: |
+          if ! helm plugin list | grep -q unittest; then
+            helm plugin install https://github.com/helm-unittest/helm-unittest
+          else
+            echo "helm-unittest plugin already installed"
+          fi
 
       - name: Run chart testing (lint & unittest)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands "helm unittest {{ .Path }}"
+        run: |
+          ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
     needs: [lint-test]
     if: needs.lint-test.outputs.changed == 'true'
     steps:
       - name: Checkout pull request branch
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
       - name: Setup Helm
-        uses: Azure/setup-helm@v4.3.1
+        uses: Azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
 
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.12.0
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
         with:
           cluster_name: helm-chart-test
           wait: 300s
 
+      - name: Cache Helm plugins
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.local/share/helm/plugins
+          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-helm-plugins-
+
       - name: Installing plugin helm-unittest
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest
+        run: |
+          if ! helm plugin list | grep -q unittest; then
+            helm plugin install https://github.com/helm-unittest/helm-unittest
+          else
+            echo "helm-unittest plugin already installed"
+          fi
 
       - name: Run integration tests
         env:
@@ -96,6 +134,12 @@ jobs:
           for chart_directory in ${CHANGED_CHARTS}; do
             CHART_NAME=${chart_directory#charts/}
             echo "Testing chart: $CHART_NAME"
+
+            # Check if integration test is disabled for this chart
+            if [ -f "${chart_directory}/.disable-unittest" ]; then
+              echo "⏩ Skipping integration test for $CHART_NAME (.disable-unittest found)"
+              continue
+            fi
 
             # Run test script without cluster creation (kind-action already created it)
             # and without cleanup (let GitHub Actions handle it)

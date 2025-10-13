@@ -1,16 +1,21 @@
 name: Check signed commits in PR
 on: pull_request_target
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   check-signed-commits:
     name: Check signed commits in PR
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -39,7 +44,7 @@ jobs:
       - name: Check signed commits in PR
         if: steps.check-bots.outputs.has_human_commits == 'true'
         continue-on-error: true
-        uses: 1Password/check-signed-commits-action@v1
+        uses: 1Password/check-signed-commits-action@ed2885f3ed2577a4f5d3c3fe895432a557d23d52 # v1.2.0
         with:
           comment: |
             ## ⚠️ Unsigned Commits Detected
