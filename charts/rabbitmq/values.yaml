@@ -90,6 +90,18 @@ config:
     ## You can also use an absolute value, e.g.: 256Mi
     ##
     value: 0.4
+  ## Logging configuration
+  ## ref: https://www.rabbitmq.com/docs/logging
+  ##
+  logging:
+    ## @param config.logging.console.enabled Enable console logging (outputs to stdout/stderr instead of files)
+    console:
+      enabled: true
+    ## @param config.logging.file.enabled Enable file logging (outputs to /var/log/rabbitmq/)
+    file:
+      enabled: false
+    ## @param config.logging.level Log level for RabbitMQ (debug, info, warning, error, critical, none)
+    level: "info"
   ## @param config.extraConfiguration Additional RabbitMQ configuration
   extraConfiguration: ""
   ## @param config.advancedConfiguration Advanced RabbitMQ configuration
