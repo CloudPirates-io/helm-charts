@@ -58,12 +58,9 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands "helm unittest {{ .Path }}"
 
-  update-changelog:
+  integration-test:
     runs-on: ubuntu-latest
     needs: [lint-test]
-    name: Automatically update CHANGELOG
-    permissions:
-      contents: write
     if: needs.lint-test.outputs.changed == 'true'
     steps:
       - name: Checkout pull request branch
@@ -73,74 +70,203 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - name: Setup Helm
+        uses: Azure/setup-helm@v4.3.1
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          cluster_name: helm-chart-test
+          wait: 300s
+
+      - name: Installing plugin helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest
+
+      - name: Run integration tests
+        env:
+          CHANGED_CHARTS: ${{ needs.lint-test.outputs.changedCharts }}
+        run: |
+          # Make script executable
+          chmod +x ./test-charts.sh
+
+          # Test each changed chart
+          for chart_directory in ${CHANGED_CHARTS}; do
+            CHART_NAME=${chart_directory#charts/}
+            echo "Testing chart: $CHART_NAME"
+
+            # Run test script without cluster creation (kind-action already created it)
+            # and without cleanup (let GitHub Actions handle it)
+            ./test-charts.sh "$CHART_NAME" --no-cleanup
+          done
+
+  update-changelog:
+    runs-on: ubuntu-latest
+    needs: [lint-test]
+    name: Automatically update CHANGELOG
+    permissions:
+      contents: write
+      pull-requests: write
+    if: always() && needs.lint-test.outputs.changed == 'true'
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5.0.0
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
       - name: Configure Git
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Fetch tags
+      - name: Add upstream remote and fetch tags
         run: |
-          git fetch --tags
+          # Always fetch tags from the canonical upstream repository
+          UPSTREAM_REPO="CloudPirates-io/helm-charts"
+          echo "Fetching tags from upstream: ${UPSTREAM_REPO}"
+          git remote add upstream https://github.com/${UPSTREAM_REPO}.git || true
+          git fetch upstream --tags
 
-      - name: Install conventional-changelog-cli
-        run: npm install -g conventional-changelog-cli
+          # Also fetch tags from origin (the fork/current repo)
+          git fetch origin --tags || true
 
-      - name: Generate changelog
-        id: generate-changelog
+          # List all tags for debugging
+          echo "Available tags:"
+          git tag -l | head -20
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Generate changelog and commit
+        id: check-changes
+        shell: bash
         env:
           PULL_REQUEST_NUMBER: "${{ github.event.pull_request.number }}"
           PULL_REQUEST_URL: "${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.number }}"
           GITHUB_TOKEN: "${{ github.token }}"
+          GITHUB_REPOSITORY: "${{ github.repository }}"
+          GITHUB_REPOSITORY_URL: "${{ github.server_url }}/${{ github.repository }}"
           CHANGED_CHARTS: ${{ needs.lint-test.outputs.changedCharts }}
         run: |
+          set -e
           PR_TITLE="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${PULL_REQUEST_NUMBER}" | jq -r '.title')"
+
+          # Extract chart names from changed chart directories
+          CHART_NAMES=()
           for chart_directory in ${CHANGED_CHARTS}; do
             CHART_NAME=${chart_directory#charts/}
-            echo "Updating CHANGELOG for chart $CHART_NAME"
-
-            # Extract version from Chart.yaml
-            CHART_VERSION=$(yq eval '.version' "${GITHUB_WORKSPACE}/charts/${CHART_NAME}/Chart.yaml")
-            CHANGELOG_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md"
-            CHANGELOG_TMP_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md.tmp"
-
-            touch "$CHANGELOG_FILE"
-
-            # Generate new CHANGELOG.md
-            npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
-            
-            # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
-            # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
-            # So we only need to find a released section to start printing in the awk script below
-            awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
-
-            # Remove chart name prefixes from commit messages
-            sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
-
-            # Remove extra newlines so the changelog file passes the markdown linter
-            sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
-            
-            # Include h1 heading and add entry for the current version. There is no tag for the current version (this will be created once merged), so we need to manually add it.
-            # We know the final squashed commit title, which will be the PR title. We cannot add a link to the commit in the main branch because it has not been
-            # merged yet (this will be corrected once a new version regenerates the changelog). Instead, we add the PR url which contains the exact same information.
-            echo -e -n "# Changelog\n\n## $CHART_VERSION ($(date +'%Y-%m-%d'))\n\n* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))\n" > "$CHANGELOG_FILE"
-
-            cat "$CHANGELOG_TMP_FILE" >> "$CHANGELOG_FILE"
-            rm "$CHANGELOG_TMP_FILE"
-            
-            # Commit all changes, if any
-            if git status -s | grep "charts/${CHART_NAME}/CHANGELOG.md"; then
-              git add "charts/${CHART_NAME}/CHANGELOG.md"
-              git commit -m "Update CHANGELOG.md" --signoff
-            fi
+            CHART_NAMES+=("--chart" "$CHART_NAME")
           done
 
-      - name: Push all changes
-        run: |
-          cd $GITHUB_WORKSPACE/charts
-          # Push all the new commits, if any
-          if [[ $(git cherry -v) ]]; then
-            git push
+          # Run the changelog generation script
+          ./generate-changelog.sh \
+            "${CHART_NAMES[@]}" \
+            --pr-title "${PR_TITLE}" \
+            --pr-number "${PULL_REQUEST_NUMBER}" \
+            --pr-url "${PULL_REQUEST_URL}"
+
+          # Check if there are changes
+          if git status --porcelain | grep -q 'CHANGELOG.md'; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           else
-            echo "No changed CHANGELOGS, skip push"
+            echo "No CHANGELOG changes"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Commit and push via GitHub API
+        id: push-changes
+        if: steps.check-changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+
+            try {
+              const headRef = '${{ github.event.pull_request.head.ref }}';
+              const headRepo = '${{ github.event.pull_request.head.repo.full_name }}';
+              const [owner, repo] = headRepo.split('/');
+
+              // Get current branch SHA
+              const { data: refData } = await github.rest.git.getRef({
+                owner,
+                repo,
+                ref: `heads/${headRef}`
+              });
+              const currentSha = refData.object.sha;
+              console.log('Current branch SHA:', currentSha);
+
+              // Get the tree for current commit
+              const { data: commitData } = await github.rest.git.getCommit({
+                owner,
+                repo,
+                commit_sha: currentSha
+              });
+              const baseTreeSha = commitData.tree.sha;
+
+              // Get all changed CHANGELOG files
+              const changedFiles = execSync('git status --porcelain').toString()
+                .split('\n')
+                .filter(line => line.includes('CHANGELOG.md'))
+                .map(line => line.trim().split(/\s+/)[1])
+                .filter(Boolean);
+
+              console.log('Changed files:', changedFiles);
+
+              // Create blobs for each changed file
+              const blobs = await Promise.all(
+                changedFiles.map(async (file) => {
+                  const content = fs.readFileSync(file, 'utf8');
+                  const { data: blob } = await github.rest.git.createBlob({
+                    owner,
+                    repo,
+                    content,
+                    encoding: 'utf-8'
+                  });
+                  return { path: file, sha: blob.sha, mode: '100644', type: 'blob' };
+                })
+              );
+
+              // Create new tree
+              const { data: newTree } = await github.rest.git.createTree({
+                owner,
+                repo,
+                base_tree: baseTreeSha,
+                tree: blobs
+              });
+
+              // Create commit (this will be automatically signed by GitHub)
+              const { data: newCommit } = await github.rest.git.createCommit({
+                owner,
+                repo,
+                message: 'chore: update CHANGELOG.md for changed charts\n\nSigned-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>',
+                tree: newTree.sha,
+                parents: [currentSha]
+              });
+
+              console.log('Created commit:', newCommit.sha);
+
+              // Update reference
+              await github.rest.git.updateRef({
+                owner,
+                repo,
+                ref: `heads/${headRef}`,
+                sha: newCommit.sha,
+                force: false
+              });
+
+              console.log('✅ Successfully committed and pushed changelog updates');
+              core.notice('✅ Changelog updated and pushed successfully');
+
+            } catch (error) {
+              console.error('Failed to commit via GitHub API:', error);
+              core.setFailed(`Unable to push changelog updates: ${error.message}`);
+            }
