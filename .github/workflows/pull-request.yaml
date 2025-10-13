@@ -34,8 +34,12 @@ jobs:
 
       - name: Fetch upstream main branch
         run: |
-          git remote add upstream https://github.com/CloudPirates-io/helm-charts.git
-          git fetch upstream ${{ github.event.repository.default_branch }}
+          # Fetch the base repository's target branch and update origin/main to point to it
+          git remote set-url origin https://github.com/CloudPirates-io/helm-charts.git
+          git fetch origin ${{ github.event.repository.default_branch }}
+          # Re-add the fork as a remote and checkout the PR branch
+          git remote add fork https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git || true
+          git fetch fork ${{ github.head_ref }}
 
       # Python is required because `ct lint` runs Yamale (https://github.com/23andMe/Yamale) and
       # yamllint (https://github.com/adrienverge/yamllint) which require Python
@@ -50,7 +54,7 @@ jobs:
       - name: Get changed charts
         id: list-changed
         run: |
-          changed=$(ct list-changed --target-branch upstream/${{ github.event.repository.default_branch }})
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
           if [[ -n "$changed" ]]; then
             echo "Changed charts:"
             echo "$changed"
@@ -83,7 +87,7 @@ jobs:
       - name: Run chart testing (lint & unittest)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-          ct lint --target-branch upstream/${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
+          ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
     runs-on: ubuntu-latest
