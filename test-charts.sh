@@ -161,7 +161,17 @@ test_chart() {
     
     # Test template rendering
     echo "📝 Testing template rendering..."
-    if ! helm template test-release . --debug > /tmp/rendered-$chart.yaml; then
+
+    # Check for CI values files
+    CI_VALUES_ARGS=""
+    if [ -d "ci" ] && [ "$(ls -A ci/*.yaml 2>/dev/null)" ]; then
+        echo "📋 Found CI values files, using them for testing"
+        for values_file in ci/*.yaml; do
+            CI_VALUES_ARGS="$CI_VALUES_ARGS -f $values_file"
+        done
+    fi
+
+    if ! helm template test-release . $CI_VALUES_ARGS --debug > /tmp/rendered-$chart.yaml; then
         echo -e "${RED}❌ Template rendering failed for $chart${NC}"
         return 1
     fi
@@ -193,9 +203,10 @@ test_chart() {
     # Install chart
     local namespace="test-$chart"
     local release_name="test-$chart"
-    
+
     echo "🚀 Installing chart..."
     if ! helm install "$release_name" . \
+        $CI_VALUES_ARGS \
         --create-namespace \
         --namespace "$namespace" \
         --wait \
@@ -225,7 +236,7 @@ test_chart() {
     
     # Test upgrade
     echo "🔄 Testing chart upgrade..."
-    if ! helm upgrade "$release_name" . -n "$namespace" --wait --timeout=300s; then
+    if ! helm upgrade "$release_name" . $CI_VALUES_ARGS -n "$namespace" --wait --timeout=300s; then
         echo -e "${YELLOW}⚠️  Chart upgrade failed for $chart${NC}"
     fi
     
