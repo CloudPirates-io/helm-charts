@@ -168,10 +168,10 @@ jobs:
           UPSTREAM_REPO="CloudPirates-io/helm-charts"
           echo "Fetching tags from upstream: ${UPSTREAM_REPO}"
           git remote add upstream https://github.com/${UPSTREAM_REPO}.git || true
-          git fetch upstream --tags
+          git fetch upstream --tags --force
 
           # Also fetch tags from origin (the fork/current repo)
-          git fetch origin --tags || true
+          git fetch origin --tags --force || true
 
           # List all tags for debugging
           echo "Available tags:"

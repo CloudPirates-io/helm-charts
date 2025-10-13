@@ -98,6 +98,7 @@ spec:
               configMapKeyRef:
                 name: {{ include "clusterpirate.fullname" . }}
                 key: valkeyTtl
+          {{- if or .Values.valkey.enabled .Values.clusterPirate.metrics.cache.password }}
           - name: VALKEY_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -114,6 +115,10 @@ spec:
                 name: {{ include "clusterpirate.fullname" . }}
                 key: valkeyPassword
                 {{- end }}
+          {{- else }}
+          - name: VALKEY_PASSWORD
+            value: ""
+          {{- end }}
           - name: MONITORING_RESOURCE_EVENTS_ENABLED
             valueFrom:
               configMapKeyRef:
