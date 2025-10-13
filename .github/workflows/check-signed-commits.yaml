@@ -1,139 +1,75 @@
-name: "Check Signed Commits"
+name: Check signed commits in PR
+on: pull_request_target
 
-on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-    branches:
-      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   check-signed-commits:
+    name: Check signed commits in PR
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5.0.0
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
-      - name: Configure Git for SSH signature verification
-        run: |
-          # Create a temporary allowed signers file (not used for actual verification)
-          # This allows git to recognize SSH signatures exist without requiring key validation
-          touch /tmp/allowed_signers
-          git config --global gpg.ssh.allowedSignersFile /tmp/allowed_signers
-          # Configure git to recognize SSH signing format
-          git config --global gpg.format ssh
-
-      - name: Check for verified commits
-        id: check-commits
+      - name: Check for bot commits
+        id: check-bots
         run: |
           # Get all commits in the PR
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          COMMITS=$(git rev-list origin/${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.sha }})
+          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --format="%an")
 
-          UNSIGNED_COMMITS=""
-          UNSIGNED_COUNT=0
-          TOTAL_COUNT=0
+          echo "Commits in PR:"
+          echo "$COMMITS"
 
-          for commit in $COMMITS; do
-            TOTAL_COUNT=$((TOTAL_COUNT + 1))
-            # Check if commit is signed (GPG or SSH signature)
-            # %G? returns signature status
-            # %GF returns the signing key fingerprint (empty if not signed)
-            SIGNATURE=$(git log -1 --format='%G?' $commit)
-            FINGERPRINT=$(git log -1 --format='%GF' $commit)
-
-            # %G? returns:
-            # G = good GPG signature
-            # U = unverified signature (has signature but can't verify - common for SSH)
-            # B = bad signature
-            # N = no signature
-            # E = signature expired
-            # Y = good signature (expired key)
-
-            # A commit is considered SIGNED if it has any signature present
-            # We check for a fingerprint to confirm a signature exists
-            # For SSH signatures, %G? will be "U" but %GF will have the fingerprint
-
-            if [[ -z "$FINGERPRINT" ]]; then
-              # No fingerprint means no signature at all
-              UNSIGNED_COMMITS="${UNSIGNED_COMMITS}${commit}\n"
-              UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
-            fi
-          done
-
-          echo "total_commits=${TOTAL_COUNT}" >> $GITHUB_OUTPUT
-          echo "unsigned_commits=${UNSIGNED_COUNT}" >> $GITHUB_OUTPUT
-
-          if [ $UNSIGNED_COUNT -gt 0 ]; then
-            echo "has_unsigned=true" >> $GITHUB_OUTPUT
+          # Check if any commits are NOT from bots
+          # grep -v returns 0 (true) if it finds lines NOT matching the pattern
+          # grep -v returns 1 (false) if all lines match the pattern (all are bots)
+          if echo "$COMMITS" | grep -qv '\[bot\]'; then
+            echo "Found human commits"
+            echo "has_human_commits=true" >> $GITHUB_OUTPUT
           else
-            echo "has_unsigned=false" >> $GITHUB_OUTPUT
+            echo "All commits are from bots"
+            echo "has_human_commits=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check if comment already exists
-        if: steps.check-commits.outputs.has_unsigned == 'true'
-        id: check-comment
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Check if our bot has already commented on this PR
-          COMMENT_EXISTS=$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            | jq -r '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("⚠️ Unsigned Commits Detected"))) | .id' | head -1)
+      - name: Check signed commits in PR
+        if: steps.check-bots.outputs.has_human_commits == 'true'
+        continue-on-error: true
+        uses: 1Password/check-signed-commits-action@ed2885f3ed2577a4f5d3c3fe895432a557d23d52 # v1.2.0
+        with:
+          comment: |
+            ## ⚠️ Unsigned Commits Detected
 
-          if [ -n "$COMMENT_EXISTS" ]; then
-            echo "comment_exists=true" >> $GITHUB_OUTPUT
-            echo "comment_id=${COMMENT_EXISTS}" >> $GITHUB_OUTPUT
-          else
-            echo "comment_exists=false" >> $GITHUB_OUTPUT
-          fi
+            This pull request contains unsigned commits.
 
-      - name: Post warning comment
-        if: steps.check-commits.outputs.has_unsigned == 'true' && steps.check-comment.outputs.comment_exists == 'false'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cat << 'EOF' | gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -F -
-          ## ⚠️ Unsigned Commits Detected
+            ### What does this mean?
 
-          This pull request contains unsigned commits.
+            Signed commits help ensure the authenticity and traceability of contributions. They allow us to verify that commits actually came from the stated author, even if GitHub accounts are deleted or modified in the future.
 
-          ### What does this mean?
+            ### Current Policy (Grace Period)
 
-          Signed commits help ensure the authenticity and traceability of contributions. They allow us to verify that commits actually came from the stated author, even if GitHub accounts are deleted or modified in the future.
+            **This is currently a warning only.** We are in a transition period to give all contributors time to set up commit signing.
 
-          ### Current Policy (Grace Period)
+            After this grace period, **all commits will be required to be signed** before PRs can be merged.
 
-          **This is currently a warning only.** We are in a transition period to give all contributors time to set up commit signing.
+            ### How to sign your commits
 
-          After this grace period, **all commits will be required to be signed** before PRs can be merged.
+            Please see our [Contributing Guide](../blob/main/CONTRIBUTING.md#setting-up-your-development-environment) for detailed instructions on setting up commit signing.
 
-          ### How to sign your commits
+            ### Resources
 
-          Please see our [Contributing Guide](../blob/main/CONTRIBUTING.md#setting-up-your-development-environment) for detailed instructions on setting up commit signing.
+            - [Contributing Guide: Development Setup](../blob/main/CONTRIBUTING.md#setting-up-your-development-environment)
+            - [GitHub Docs: About Commit Signature Verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 
-          ### Resources
+            ---
 
-          - [Contributing Guide: Development Setup](../blob/main/CONTRIBUTING.md#setting-up-your-development-environment)
-          - [GitHub Docs: About Commit Signature Verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
-
-          ---
-
-          _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._
-          EOF
-
-      - name: Success message
-        if: steps.check-commits.outputs.has_unsigned == 'false'
-        run: |
-          echo "✅ All ${{ steps.check-commits.outputs.total_commits }} commits in this PR are signed!"
-          
+            _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._

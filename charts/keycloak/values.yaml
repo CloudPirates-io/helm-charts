@@ -110,6 +110,8 @@ keycloak:
   production: false
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
+  ## @param keycloak.extraArgs Additional arguments to pass to the Keycloak startup command
+  extraArgs: []
 
 ## @section Database Configuration
 database:
@@ -181,8 +183,7 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
     # nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
@@ -201,8 +202,7 @@ ingress:
   #      - keycloak.local
 
 ## @section Resources
-resources:
-  {}
+resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -229,6 +229,45 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
+
+## @section Metrics Configuration
+metrics:
+  ## @param metrics.enabled Enable metrics endpoint on Keycloak
+  enabled: false
+  ## @section Metrics service parameters
+  service:
+    ## @param metrics.service.type Metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Metrics service port
+    port: 9000
+    ## @param metrics.service.targetPort Metrics service target port
+    targetPort: http-metrics
+    ## @param metrics.service.annotations Additional annotations for metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional labels for metrics service
+    labels: {}
+  ## @section ServiceMonitor parameters
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which ServiceMonitor is created
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.additionalLabels Additional labels for ServiceMonitor
+    additionalLabels: {}
+    ## @param metrics.serviceMonitor.annotations Additional annotations for ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.relabelings RelabelConfigs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings MetricRelabelConfigs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Specify honorLabels parameter to add the scrape endpoint
+    honorLabels: false
+    ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in prometheus
+    jobLabel: ""
 
 ## @section Liveness and readiness probes
 livenessProbe:

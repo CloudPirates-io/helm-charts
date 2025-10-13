@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "keycloak.imagePullSecrets" .) }}
-{{ . | nindent 6 }}
+{{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
@@ -112,6 +112,12 @@ spec:
             {{- if .Values.features.disabled }}
             - --features-disabled={{ join "," .Values.features.disabled }}
             {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - --metrics-enabled=true
+            {{- end }}
+            {{- with .Values.keycloak.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
             - name: KC_HTTP_RELATIVE_PATH
               value: {{ .Values.keycloak.httpRelativePath | quote | default "/" }}
@@ -165,9 +171,14 @@ spec:
             - name: http
               containerPort: {{ .Values.keycloak.httpPort }}
               protocol: TCP
-            {{- if .Values.keycloak.httpsPort }}
+            {{- if and .Values.keycloak.httpsPort (not .Values.keycloak.httpEnabled) }}
             - name: https
               containerPort: {{ .Values.keycloak.httpsPort }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: http-metrics
+              containerPort: {{ .Values.metrics.service.port }}
               protocol: TCP
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}

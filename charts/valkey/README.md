@@ -210,6 +210,30 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `tolerations`  | Toleration labels for pod assignment | `[]`    |
 | `affinity`     | Affinity settings for pod assignment | `{}`    |
 
+### Metrics configuration
+
+| Parameter                                  | Description                                                                     | Default                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------- | -------------------------- |
+| `metrics.enabled`                          | Start a sidecar prometheus exporter to expose Valkey metrics                    | `false`                    |
+| `metrics.image.registry`                   | Valkey exporter image registry                                                  | `docker.io`                |
+| `metrics.image.repository`                 | Valkey exporter image repository                                                | `oliver006/redis_exporter` |
+| `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.78.0-alpine`           |
+| `metrics.image.pullPolicy`                 | Valkey exporter image pull policy                                               | `Always`                   |
+| `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                       |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                       |
+| `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                       |
+| `metrics.service.port`                     | Metrics service port                                                            | `9121`                     |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator | `false`                    |
+| `metrics.serviceMonitor.namespace`         | The namespace in which the ServiceMonitor will be created                       | `""`                       |
+| `metrics.serviceMonitor.interval`          | The interval at which metrics should be scraped                                 | `30s`                      |
+| `metrics.serviceMonitor.scrapeTimeout`     | The timeout after which the scrape is ended                                     | `10s`                      |
+| `metrics.serviceMonitor.selector`          | Additional labels for ServiceMonitor resource                                   | `{}`                       |
+| `metrics.serviceMonitor.annotations`       | ServiceMonitor annotations                                                      | `{}`                       |
+| `metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels        | `false`                    |
+| `metrics.serviceMonitor.relabelings`       | ServiceMonitor relabel configs to apply to samples before scraping              | `[]`                       |
+| `metrics.serviceMonitor.metricRelabelings` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion   | `[]`                       |
+| `metrics.serviceMonitor.namespaceSelector` | ServiceMonitor namespace selector                                               | `{}`                       |
+
 ### Additional Configuration
 
 | Parameter      | Description                                                             | Default |
@@ -366,6 +390,31 @@ config:
     - "timeout 300"
     - "tcp-keepalive 60"
     - "databases 16"
+```
+
+### Monitoring with Prometheus
+
+Enable metrics collection with Prometheus:
+
+```yaml
+# values-monitoring.yaml
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+```
+
+Deploy with monitoring enabled:
+
+```bash
+helm install my-valkey ./charts/valkey -f values-monitoring.yaml
+```
+
+You can access metrics directly via port-forward:
+
+```bash
+kubectl port-forward service/my-valkey-metrics 9121:9121
+curl http://localhost:9121/metrics
 ```
 
 ## Access Valkey

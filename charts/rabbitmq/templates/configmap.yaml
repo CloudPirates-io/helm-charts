@@ -63,6 +63,18 @@ data:
     management.load_definitions = /etc/rabbitmq-definitions/defs.json
     {{- end }}
 
+    # Logging configuration
+    log.console = {{ .Values.config.logging.console.enabled }}
+    {{- if .Values.config.logging.console.enabled }}
+    log.console.level = {{ .Values.config.logging.level }}
+    {{- end }}
+    {{- if .Values.config.logging.file.enabled }}
+    log.file = true
+    log.file.level = {{ .Values.config.logging.level }}
+    {{- else }}
+    log.file = false
+    {{- end }}
+
     {{- if and .Values.config.extraConfiguration (ne .Values.config.extraConfiguration "") }}
     # Extra configuration
 {{ .Values.config.extraConfiguration | indent 4 }}

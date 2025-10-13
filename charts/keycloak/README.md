@@ -144,6 +144,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
 | `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
 | `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
+| `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
 ### Database Configuration
 
@@ -221,6 +222,27 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `persistence.size`          | Persistent Volume size                             | `1Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
+
+### Metrics
+
+| Parameter                                  | Description                                                                      | Default        |
+| ------------------------------------------ | -------------------------------------------------------------------------------- | -------------- |
+| `metrics.enabled`                          | Enable metrics endpoint on Keycloak                                              | `false`        |
+| `metrics.service.type`                     | Metrics service type                                                             | `ClusterIP`    |
+| `metrics.service.port`                     | Metrics service port                                                             | `9000`         |
+| `metrics.service.targetPort`               | Metrics service target port                                                      | `http-metrics` |
+| `metrics.service.annotations`              | Additional annotations for metrics service                                       | `{}`           |
+| `metrics.service.labels`                   | Additional labels for metrics service                                            | `{}`           |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics using PrometheusOperator     | `false`        |
+| `metrics.serviceMonitor.namespace`         | Namespace in which ServiceMonitor is created                                     | `""`           |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                      | `30s`          |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                          | `""`           |
+| `metrics.serviceMonitor.additionalLabels`  | Additional labels for ServiceMonitor                                             | `{}`           |
+| `metrics.serviceMonitor.annotations`       | Additional annotations for ServiceMonitor                                        | `{}`           |
+| `metrics.serviceMonitor.relabelings`       | RelabelConfigs to apply to samples before scraping                               | `[]`           |
+| `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                        | `[]`           |
+| `metrics.serviceMonitor.honorLabels`       | Specify honorLabels parameter to add the scrape endpoint                         | `false`        |
+| `metrics.serviceMonitor.jobLabel`          | The name of the label on the target service to use as the job name in Prometheus | `""`           |
 
 ### Liveness and readiness probes
 

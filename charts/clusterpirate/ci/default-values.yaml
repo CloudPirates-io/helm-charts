@@ -1,0 +1,17 @@
+# CI test values for clusterpirate chart
+# This file provides minimal required configuration for chart testing
+
+auth:
+  # Provide a test access token for CI testing
+  accessToken: "test-token-for-ci-only"
+
+# Disable Valkey dependency for faster CI testing
+valkey:
+  enabled: false
+
+# Configure cache to not require Valkey
+clusterPirate:
+  metrics:
+    cache:
+      host: "localhost"
+      password: ""

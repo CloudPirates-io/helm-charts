@@ -16,16 +16,10 @@
         },
         "imagePullSecrets": {
           "type": "array",
-          "title": "Global Image Pull Secrets",
-          "description": "Global Docker registry secret names as an array of objects",
           "items": {
-            "type": "object",
+            "type": ["string", "object"],
             "properties": {
-              "name": {
-                "type": "string",
-                "title": "Secret Name",
-                "description": "Name of the image pull secret"
-              }
+              "name": { "type": "string" }
             },
             "required": ["name"]
           }
@@ -211,6 +205,44 @@
               "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "Memory High Watermark Value",
               "description": "Memory high watermark value"
+            }
+          }
+        },
+        "logging": {
+          "type": "object",
+          "title": "Logging Configuration",
+          "description": "RabbitMQ logging configuration",
+          "properties": {
+            "console": {
+              "type": "object",
+              "title": "Console Logging",
+              "description": "Console logging configuration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "Enable Console Logging",
+                  "description": "Enable console logging (outputs to stdout/stderr instead of files)"
+                }
+              }
+            },
+            "file": {
+              "type": "object",
+              "title": "File Logging",
+              "description": "File logging configuration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "Enable File Logging",
+                  "description": "Enable file logging (outputs to /var/log/rabbitmq/)"
+                }
+              }
+            },
+            "level": {
+              "type": "string",
+              "title": "Log Level",
+              "description": "Log level for RabbitMQ",
+              "enum": ["debug", "info", "warning", "error", "critical", "none"],
+              "default": "info"
             }
           }
         },
