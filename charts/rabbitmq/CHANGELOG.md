@@ -4,6 +4,10 @@
 
 * [rabbitmq]: Rabbitmq Loging + levels ([#355](https://github.com/CloudPirates-io/helm-charts/pull/355))
 
+## <small>0.3.7 (2025-10-13)</small>
+
+* use the same default readiness probes as bitnami chart (#356) ([5eac28e](https://github.com/CloudPirates-io/helm-charts/commit/5eac28e)), closes [#356](https://github.com/CloudPirates-io/helm-charts/issues/356)
+
 ## <small>0.3.6 (2025-10-10)</small>
 
 * add traffic distribution and option to source definitions from existingSecret (#334) ([af00fe0](https://github.com/CloudPirates-io/helm-charts/commit/af00fe0)), closes [#334](https://github.com/CloudPirates-io/helm-charts/issues/334)
