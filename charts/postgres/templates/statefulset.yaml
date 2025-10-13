@@ -32,7 +32,7 @@ spec:
       serviceAccountName: {{ include "postgres.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "postgres.imagePullSecrets" .) }}
-{{ . | nindent 6 }}
+{{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.initContainers }}

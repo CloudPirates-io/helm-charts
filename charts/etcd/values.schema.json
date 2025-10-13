@@ -16,14 +16,10 @@
         },
         "imagePullSecrets": {
           "type": "array",
-          "title": "Global Image Pull Secrets",
-          "description": "Global Docker registry secret names as an array",
           "items": {
-            "type": "object",
+            "type": ["string", "object"],
             "properties": {
-              "name": {
-                "type": "string"
-              }
+              "name": { "type": "string" }
             },
             "required": ["name"]
           }

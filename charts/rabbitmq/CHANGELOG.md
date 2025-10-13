@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.4.1 (2025-10-13)
+
+
+## 0.4.0 (2025-10-13)
+
+* [rabbitmq]: Rabbitmq Loging + levels (#355) ([9c661bf](https://github.com/CloudPirates-io/helm-charts/commit/9c661bf))
+
+## 0.3.7 (2025-10-13)
+
+* use the same default readiness probes as bitnami chart (#356) ([5eac28e](https://github.com/CloudPirates-io/helm-charts/commit/5eac28e))
+
 ## 0.3.6 (2025-10-10)
 
 * Update charts/rabbitmq/values.yaml rabbitmq (#339) ([1c06f2e](https://github.com/CloudPirates-io/helm-charts/commit/1c06f2e))

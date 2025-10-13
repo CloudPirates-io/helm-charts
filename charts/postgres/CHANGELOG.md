@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 0.8.3 (2025-10-13)
+
+
 ## 0.8.2 (2025-10-12)
 
 * fix: add connection details to secret (#350) ([066d248](https://github.com/CloudPirates-io/helm-charts/commit/066d248))

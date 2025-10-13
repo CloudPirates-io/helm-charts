@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 0.3.5 (2025-10-13)
+
+
 ## 0.3.4 (2025-10-10)
 
 * Update charts/mariadb/values.yaml mariadb (#315) ([07101fe](https://github.com/CloudPirates-io/helm-charts/commit/07101fe))

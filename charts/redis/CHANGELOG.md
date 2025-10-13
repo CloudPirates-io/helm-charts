@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 0.6.4 (2025-10-13)
+
+
 ## 0.6.3 (2025-10-10)
 
 * feat: use "common.namespace" (#332) ([6dd8563](https://github.com/CloudPirates-io/helm-charts/commit/6dd8563))

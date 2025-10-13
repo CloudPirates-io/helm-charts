@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 0.3.2 (2025-10-13)
+
+* add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
+
 ## 0.3.1 (2025-10-09)
 
 * [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.22.1 (patch) (#265) ([df11e54](https://github.com/CloudPirates-io/helm-charts/commit/df11e54))

@@ -16,16 +16,10 @@
         },
         "imagePullSecrets": {
           "type": "array",
-          "title": "Global Image Pull Secrets",
-          "description": "Global Docker registry secret names as an array of objects",
           "items": {
-            "type": "object",
+            "type": ["string", "object"],
             "properties": {
-              "name": {
-                "type": "string",
-                "title": "Secret Name",
-                "description": "Name of the image pull secret"
-              }
+              "name": { "type": "string" }
             },
             "required": ["name"]
           }
@@ -445,10 +439,7 @@
           "description": "Resource limits for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Limit",
               "description": "CPU resource limit"
             },
@@ -465,10 +456,7 @@
           "description": "Resource requests for the container",
           "properties": {
             "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
+              "oneOf": [{ "type": "string" }, { "type": "number" }],
               "title": "CPU Request",
               "description": "CPU resource request"
             },
@@ -516,7 +504,12 @@
           "description": "Persistent Volume access modes",
           "items": {
             "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
+            "enum": [
+              "ReadWriteOnce",
+              "ReadOnlyMany",
+              "ReadWriteMany",
+              "ReadWriteOncePod"
+            ]
           }
         },
         "existingClaim": {

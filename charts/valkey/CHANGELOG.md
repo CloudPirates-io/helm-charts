@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 0.5.1 (2025-10-13)
+
+
 ## 0.5.0 (2025-10-10)
 
 * feat: add metrics exporter (#342) ([e6b474b](https://github.com/CloudPirates-io/helm-charts/commit/e6b474b))
