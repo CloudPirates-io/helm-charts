@@ -8,7 +8,16 @@
       "type": "object",
       "properties": {
         "imageRegistry": { "type": "string" },
-        "imagePullSecrets": { "type": "array", "items": { "type": "string" } }
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": ["string", "object"],
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
       }
     },
     "nameOverride": { "type": "string" },
