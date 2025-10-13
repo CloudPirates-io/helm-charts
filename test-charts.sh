@@ -205,13 +205,27 @@ test_chart() {
     local release_name="test-$chart"
 
     echo "🚀 Installing chart..."
+    echo "   Release: $release_name"
+    echo "   Namespace: $namespace"
+    echo "   Timeout: 600s"
+    if [ -n "$CI_VALUES_ARGS" ]; then
+        echo "   Values files: $CI_VALUES_ARGS"
+    fi
+    echo ""
+
     if ! helm install "$release_name" . \
         $CI_VALUES_ARGS \
         --create-namespace \
         --namespace "$namespace" \
         --wait \
-        --timeout=600s; then
+        --timeout=600s \
+        --debug; then
         echo -e "${RED}❌ Chart installation failed for $chart${NC}"
+        echo -e "\n${YELLOW}📋 Checking resources in namespace...${NC}"
+        kubectl get all -n "$namespace" || true
+        kubectl describe pods -n "$namespace" || true
+        echo -e "\n${YELLOW}📋 Recent events:${NC}"
+        kubectl get events -n "$namespace" --sort-by='.lastTimestamp' || true
         return 1
     fi
     
@@ -219,10 +233,38 @@ test_chart() {
     echo "🔍 Verifying installation..."
     helm list -n "$namespace"
     kubectl get all -n "$namespace"
-    
+
     # Wait for pods to be ready (with timeout)
     echo "⏳ Waiting for pods to be ready..."
-    kubectl wait --for=condition=Ready pods --all -n "$namespace" --timeout=300s || true
+
+    # Show pod status while waiting
+    local max_wait=300
+    local elapsed=0
+    local interval=10
+
+    while [ $elapsed -lt $max_wait ]; do
+        echo "   [$elapsed/${max_wait}s] Checking pod status..."
+        kubectl get pods -n "$namespace" -o wide
+
+        # Check if all pods are ready
+        if kubectl wait --for=condition=Ready pods --all -n "$namespace" --timeout=1s 2>/dev/null; then
+            echo -e "${GREEN}✅ All pods are ready${NC}"
+            break
+        fi
+
+        # Show recent events for debugging
+        echo "   Recent events:"
+        kubectl get events -n "$namespace" --sort-by='.lastTimestamp' | tail -5
+
+        sleep $interval
+        elapsed=$((elapsed + interval))
+    done
+
+    if [ $elapsed -ge $max_wait ]; then
+        echo -e "${YELLOW}⚠️  Timeout waiting for pods. Current status:${NC}"
+        kubectl get pods -n "$namespace" -o wide
+        kubectl describe pods -n "$namespace"
+    fi
     
     # Run tests if they exist
     if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then

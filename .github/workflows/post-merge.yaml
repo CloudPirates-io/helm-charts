@@ -1,0 +1,161 @@
+name: "Post-Merge Changelog Update"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/**'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Fetch all tags
+        run: |
+          git fetch --tags --force
+          echo "Available tags:"
+          git tag -l | head -20
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Setup Helm
+        uses: Azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+
+      # Python is required because `ct` uses Python-based tools
+      - name: Set up Python
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
+        with:
+          python-version: 3.x
+
+      - name: Set up chart-testing-action
+        uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
+
+      - name: Get changed charts from last commit
+        id: list-changed
+        run: |
+          # Get the commit SHA before the merge
+          BEFORE_SHA="${{ github.event.before }}"
+
+          # Use chart-testing to find changed charts
+          changed=$(ct list-changed --target-branch main --since "${BEFORE_SHA}")
+
+          if [[ -n "$changed" ]]; then
+            echo "Changed charts:"
+            echo "$changed"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo 'changedCharts<<EOF' >> $GITHUB_OUTPUT
+            echo $changed >> $GITHUB_OUTPUT
+            echo 'EOF' >> $GITHUB_OUTPUT
+          else
+            echo "No chart changes detected"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get PR information
+        id: pr-info
+        if: steps.list-changed.outputs.changed == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commit = context.payload.head_commit;
+            const commitSha = commit.id;
+
+            // Find the PR that was merged
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: commitSha
+            });
+
+            const mergedPR = prs.find(pr => pr.merged_at);
+
+            if (mergedPR) {
+              core.setOutput('pr_number', mergedPR.number);
+              core.setOutput('pr_title', mergedPR.title);
+              core.setOutput('pr_url', mergedPR.html_url);
+              console.log(`Found merged PR #${mergedPR.number}: ${mergedPR.title}`);
+            } else {
+              console.log('No merged PR found for this commit');
+              core.setOutput('pr_number', '');
+              core.setOutput('pr_title', commit.message.split('\n')[0]);
+              core.setOutput('pr_url', '');
+            }
+
+      - name: Generate changelog
+        id: generate-changelog
+        if: steps.list-changed.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_REPOSITORY: "${{ github.repository }}"
+          GITHUB_REPOSITORY_URL: "${{ github.server_url }}/${{ github.repository }}"
+          CHANGED_CHARTS: ${{ steps.list-changed.outputs.changedCharts }}
+          PR_NUMBER: ${{ steps.pr-info.outputs.pr_number }}
+          PR_TITLE: ${{ steps.pr-info.outputs.pr_title }}
+          PR_URL: ${{ steps.pr-info.outputs.pr_url }}
+        run: |
+          set -e
+
+          # Extract chart names from changed chart directories
+          CHART_NAMES=()
+          for chart_directory in ${CHANGED_CHARTS}; do
+            CHART_NAME=${chart_directory#charts/}
+            CHART_NAMES+=("--chart" "$CHART_NAME")
+          done
+
+          # Build arguments for the changelog script
+          CHANGELOG_ARGS=("${CHART_NAMES[@]}")
+
+          if [[ -n "$PR_TITLE" ]]; then
+            CHANGELOG_ARGS+=("--pr-title" "${PR_TITLE}")
+          fi
+
+          if [[ -n "$PR_NUMBER" ]]; then
+            CHANGELOG_ARGS+=("--pr-number" "${PR_NUMBER}")
+          fi
+
+          if [[ -n "$PR_URL" ]]; then
+            CHANGELOG_ARGS+=("--pr-url" "${PR_URL}")
+          fi
+
+          # Run the changelog generation script
+          ./generate-changelog.sh "${CHANGELOG_ARGS[@]}"
+
+          # Check if there are changes
+          if git status --porcelain | grep -q 'CHANGELOG.md'; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changelog changes detected"
+          else
+            echo "No CHANGELOG changes"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changelog updates
+        if: steps.generate-changelog.outputs.has_changes == 'true'
+        run: |
+          git add charts/*/CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md for merged changes" \
+            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          git push origin main
