@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    open-pull-requests-limit: 10
+    assignees:
+      - "CloudPirates-io/maintainers"
+    # Group all GitHub Actions updates into a single PR
+    groups:
+      github-actions:
+        patterns:
+          - "*"

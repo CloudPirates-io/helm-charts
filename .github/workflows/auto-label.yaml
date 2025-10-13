@@ -5,15 +5,20 @@ on:
   pull_request:
     types: [opened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   label:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
       pull-requests: write
     steps:
       - name: Apply labels
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             let content = "";
