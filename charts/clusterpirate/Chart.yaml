@@ -4,20 +4,16 @@ description: Client agent for the CloudPirates Managed Observability Platform to
 type: application
 version: 1.1.1
 appVersion: "1.0.1"
-
 keywords:
   - kubernetes
   - clusterpirate
   - cloudpirates
   - observability
   - agent
-
 home: https://www.cloudpirates.io
-
 maintainers:
   - name: CloudPirates GmbH & Co. KG
     url: https://www.cloudpirates.io
-
 dependencies:
   - name: common
     version: "1.x.x"
@@ -26,5 +22,4 @@ dependencies:
     version: "0.5.0"
     repository: oci://registry-1.docker.io/cloudpirates
     condition: valkey.enabled
-
 icon: https://a.storyblok.com/f/143071/512x512/88dc07809a/cluster-pirate-logo.svg
