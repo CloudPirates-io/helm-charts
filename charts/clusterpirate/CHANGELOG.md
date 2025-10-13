@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.1 (2025-10-13)
+## 1.1.2 (2025-10-13)
 
 * Fix formatting ([#371](https://github.com/CloudPirates-io/helm-charts/pull/371))
 
