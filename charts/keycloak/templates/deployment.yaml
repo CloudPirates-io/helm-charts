@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "keycloak.imagePullSecrets" .) }}
-{{ . | nindent 6 }}
+{{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
