@@ -107,6 +107,11 @@
       "title": "MariaDB Authentication",
       "description": "Authentication parameters",
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Authentication",
+          "description": "MariaDB authentication enabled or disabled"
+        },
         "rootPassword": {
           "type": "string",
           "title": "MariaDB Root Password",
@@ -131,6 +136,11 @@
           "type": "string",
           "title": "Existing Secret",
           "description": "Name of existing secret to use for MariaDB credentials"
+        },
+        "allowEmptyRootPassword": {
+          "type": "boolean",
+          "title": "Allow Empty Root Password",
+          "description": "Allow the root user of MariaDB to have no password set"
         },
         "secretKeys": {
           "type": "object",
@@ -165,6 +175,180 @@
           "type": "string",
           "title": "Existing ConfigMap",
           "description": "Name of existing ConfigMap with MariaDB configuration"
+        }
+      }
+    },
+    "galera": {
+      "type": "object",
+      "title": "Galera Cluster Configuration",
+      "description": "Galera Cluster parameters for MariaDB",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Galera Cluster",
+          "description": "Enable Galera Cluster mode"
+        },
+        "name": {
+          "type": "string",
+          "title": "Galera Cluster Name",
+          "description": "Galera cluster name"
+        },
+        "bootstrap": {
+          "type": "object",
+          "title": "Galera Bootstrap Configuration",
+          "description": "Bootstrap mode configuration",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "Enable Bootstrap Mode",
+              "description": "Enable bootstrap mode for the first node in the cluster"
+            }
+          }
+        },
+        "replicaCount": {
+          "type": "integer",
+          "title": "Replica Count",
+          "description": "Number of nodes in the Galera cluster",
+          "minimum": 1
+        },
+        "wsrepProvider": {
+          "type": "string",
+          "title": "Wsrep Provider",
+          "description": "Path to wsrep provider library"
+        },
+        "wsrepMethod": {
+          "type": "string",
+          "title": "Wsrep Method",
+          "description": "Method for state snapshot transfers",
+          "enum": ["mariabackup", "mysqldump", "rsync"]
+        },
+        "forceSafeToBootstrap": {
+          "type": "boolean",
+          "title": "Force Safe to Bootstrap",
+          "description": "Force safe_to_bootstrap=1 in grastate.dat"
+        },
+        "wsrepSlaveThreads": {
+          "type": "integer",
+          "title": "Wsrep Slave Threads",
+          "description": "Number of slave threads for applying writesets",
+          "minimum": 1
+        },
+        "wsrepCertifyNonPK": {
+          "type": "boolean",
+          "title": "Wsrep Certify Non-PK",
+          "description": "Require primary key for replication"
+        },
+        "wsrepMaxWsRows": {
+          "type": "integer",
+          "title": "Wsrep Max WS Rows",
+          "description": "Maximum number of rows in writeset",
+          "minimum": 0
+        },
+        "wsrepMaxWsSize": {
+          "type": "string",
+          "title": "Wsrep Max WS Size",
+          "description": "Maximum size of writeset in bytes"
+        },
+        "wsrepDebug": {
+          "type": "boolean",
+          "title": "Wsrep Debug",
+          "description": "Enable wsrep debugging"
+        },
+        "wsrepRetryAutocommit": {
+          "type": "integer",
+          "title": "Wsrep Retry Autocommit",
+          "description": "Number of times to retry autocommit",
+          "minimum": 1
+        },
+        "wsrepAutoIncrementControl": {
+          "type": "boolean",
+          "title": "Wsrep Auto Increment Control",
+          "description": "Enable auto increment control"
+        },
+        "wsrepDrupalHack": {
+          "type": "boolean",
+          "title": "Wsrep Drupal Hack",
+          "description": "Enable Drupal compatibility hack"
+        },
+        "wsrepLogConflicts": {
+          "type": "boolean",
+          "title": "Wsrep Log Conflicts",
+          "description": "Log conflicts to error log"
+        },
+        "innodb": {
+          "type": "object",
+          "title": "InnoDB Configuration",
+          "description": "InnoDB specific settings for Galera",
+          "properties": {
+            "flushLogAtTrxCommit": {
+              "type": "integer",
+              "title": "Flush Log at Transaction Commit",
+              "description": "InnoDB flush log at transaction commit",
+              "enum": [0, 1, 2]
+            },
+            "bufferPoolSize": {
+              "type": "string",
+              "title": "Buffer Pool Size",
+              "description": "InnoDB buffer pool size",
+              "pattern": "^\\d+(K|M|G|T)?$"
+            }
+          }
+        },
+        "sst": {
+          "type": "object",
+          "title": "SST Configuration",
+          "description": "State Snapshot Transfer specific configuration",
+          "properties": {
+            "user": {
+              "type": "string",
+              "title": "SST User",
+              "description": "SST user for authentication"
+            },
+            "password": {
+              "type": "string",
+              "title": "SST Password",
+              "description": "SST password for authentication"
+            },
+            "existingSecret": {
+              "type": "string",
+              "title": "SST Existing Secret",
+              "description": "Existing secret containing SST credentials"
+            },
+            "secretKeys": {
+              "type": "object",
+              "title": "SST Secret Keys",
+              "description": "Keys in existing secret for SST credentials",
+              "properties": {
+                "userKey": {
+                  "type": "string",
+                  "title": "SST User Key",
+                  "description": "Secret key for SST user"
+                },
+                "passwordKey": {
+                  "type": "string",
+                  "title": "SST Password Key",
+                  "description": "Secret key for SST password"
+                }
+              }
+            }
+          }
+        },
+        "recovery": {
+          "type": "object",
+          "title": "Galera Recovery Configuration",
+          "description": "Enable Galera recovery options",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "Enable Recovery",
+              "description": "Enable automatic recovery"
+            },
+            "clusterBootstrap": {
+              "type": "boolean",
+              "title": "Cluster Bootstrap",
+              "description": "Enable cluster bootstrap in recovery"
+            }
+          }
         }
       }
     },
@@ -722,6 +906,11 @@
       "type": "object",
       "title": "Affinity Configuration",
       "description": "Affinity settings for pod assignment"
+    },
+    "initdbScriptsConfigMap": {
+      "type": "string",
+      "title": "Initialization Scripts ConfigMap",
+      "description": "Name of a ConfigMap with initialization scripts"
     },
     "extraObjects": {
       "type": "array",
