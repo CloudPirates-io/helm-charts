@@ -146,13 +146,14 @@ spec:
               command:
                 - bash
                 - -c
-                {{- if .Values.galera.enabled }}
+                {{- if and .Values.galera.enabled .Values.auth.enabled }}
                 - |
-                  healthcheck.sh --connect --innodb_initialized
-                  # Also check Galera cluster status
-                  if mysql -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_ready'" | grep -q ON; then
+                  if mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_ready'" | grep -q ON; then
                     exit 0
                   else
+                    mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_local_state_comment'"
+                    mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_ready'"
+                    echo "healthcheck failed: Galera not alive"
                     exit 1
                   fi
                 {{- else }}
@@ -164,31 +165,20 @@ spec:
             successThreshold: {{ .Values.livenessProbe.successThreshold }}
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
+          {{- if and .Values.readinessProbe.enabled (not .Values.galera.enabled)}}
           readinessProbe:
             exec:
               command:
                 - bash
                 - -c
-                {{- if .Values.galera.enabled }}
-                - |
-                  healthcheck.sh --connect --innodb_initialized
-                  # Check if node is synced in Galera cluster
-                  if mysql -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SHOW STATUS LIKE 'wsrep_local_state_comment'" | grep -q Synced; then
-                    exit 0
-                  else
-                    exit 1
-                  fi
-                {{- else }}
                 - healthcheck.sh --connect --innodb_initialized
-                {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.startupProbe.enabled }}
+          {{- if and .Values.startupProbe.enabled (not .Values.galera.enabled)}}
           startupProbe:
             exec:
               command:
