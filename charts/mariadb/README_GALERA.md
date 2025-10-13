@@ -1,3 +1,27 @@
+# Galera Cluster with MariaDB
+
+This document provides detailed instructions and best practices for deploying and managing a MariaDB Galera Cluster using the Helm chart available in this repository. Galera Cluster is a synchronous multi-master replication solution for MariaDB, providing high availability and scalability.
+
+
+```mermaid
+graph TD
+    Client[Application / Client] -->|Reads/Writes| LB[Load Balancer / Service Layer]
+
+    subgraph Galera_Cluster
+        direction LR
+        A[Node 1<br/>MariaDB + Galera] <-->|Sync| B[Node 2<br/>MariaDB + Galera]
+        B <-->|Sync| C[Node 3<br/>MariaDB + Galera]
+        C <-->|Sync| A
+    end
+
+    LB -->|Reads/Writes| A
+    LB -->|Reads/Writes| B
+    LB -->|Reads/Writes| C
+
+```
+
+More information about Galera Cluster can be found in the official [Galera Cluster Documentation](https://galeracluster.com/library/documentation/index.html)
+
 ### Galera Cluster Setup
 
 #### Basic Galera Cluster
