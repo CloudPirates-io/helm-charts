@@ -214,6 +214,44 @@
             }
           }
         },
+        "logging": {
+          "type": "object",
+          "title": "Logging Configuration",
+          "description": "RabbitMQ logging configuration",
+          "properties": {
+            "console": {
+              "type": "object",
+              "title": "Console Logging",
+              "description": "Console logging configuration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "Enable Console Logging",
+                  "description": "Enable console logging (outputs to stdout/stderr instead of files)"
+                }
+              }
+            },
+            "file": {
+              "type": "object",
+              "title": "File Logging",
+              "description": "File logging configuration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "Enable File Logging",
+                  "description": "Enable file logging (outputs to /var/log/rabbitmq/)"
+                }
+              }
+            },
+            "level": {
+              "type": "string",
+              "title": "Log Level",
+              "description": "Log level for RabbitMQ",
+              "enum": ["debug", "info", "warning", "error", "critical", "none"],
+              "default": "info"
+            }
+          }
+        },
         "extraConfiguration": {
           "type": "string",
           "title": "Extra Configuration",
