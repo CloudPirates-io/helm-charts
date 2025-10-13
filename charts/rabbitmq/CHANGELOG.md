@@ -1,8 +1,18 @@
 # Changelog
 
-## 0.3.5 (2025-10-10)
+## 0.4.0 (2025-10-13)
 
-* [rabbitmq] Update charts/rabbitmq/values.yaml rabbitmq ([#321](https://github.com/CloudPirates-io/helm-charts/pull/321))
+* [rabbitmq]: Rabbitmq Loging + levels ([#355](https://github.com/CloudPirates-io/helm-charts/pull/355))
+
+## <small>0.3.6 (2025-10-10)</small>
+
+* add traffic distribution and option to source definitions from existingSecret (#334) ([af00fe0](https://github.com/CloudPirates-io/helm-charts/commit/af00fe0)), closes [#334](https://github.com/CloudPirates-io/helm-charts/issues/334)
+* Update charts/rabbitmq/values.yaml rabbitmq (#339) ([1c06f2e](https://github.com/CloudPirates-io/helm-charts/commit/1c06f2e)), closes [#339](https://github.com/CloudPirates-io/helm-charts/issues/339)
+
+## <small>0.3.5 (2025-10-10)</small>
+
+* [mongodb] fix: newline between mongo labels and additional labels (#301) ([ea7937f](https://github.com/CloudPirates-io/helm-charts/commit/ea7937f)), closes [#301](https://github.com/CloudPirates-io/helm-charts/issues/301)
+* Update charts/rabbitmq/values.yaml rabbitmq (#321) ([986eff5](https://github.com/CloudPirates-io/helm-charts/commit/986eff5)), closes [#321](https://github.com/CloudPirates-io/helm-charts/issues/321)
 
 ## <small>0.3.4 (2025-10-09)</small>
 
