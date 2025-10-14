@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.2.0 (2025-10-14)
+
+* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+* Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
+* chore: update CHANGELOG.md for merged changes ([84cf67b](https://github.com/CloudPirates-io/helm-charts/commit/84cf67b))
+* chore: update CHANGELOG.md for all charts via manual trigger ([6974964](https://github.com/CloudPirates-io/helm-charts/commit/6974964))
+* Update charts/nginx/values.yaml nginx (#351) ([d73ca94](https://github.com/CloudPirates-io/helm-charts/commit/d73ca94))
+* add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
+
 ## 0.1.14 (2025-10-09)
 
 * Update charts/nginx/values.yaml nginx to v1.29.2 (patch) (#263) ([b607e10](https://github.com/CloudPirates-io/helm-charts/commit/b607e10))
