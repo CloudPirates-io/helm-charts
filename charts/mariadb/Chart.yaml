@@ -1,8 +1,8 @@
 apiVersion: v2
 name: mariadb
-description: MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL
+description: MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. Supports both single-node and Galera Cluster deployments.
 type: application
-version: 0.4.0
+version: 0.5.0
 appVersion: "12.0.2"
 keywords:
   - mariadb
@@ -10,6 +10,9 @@ keywords:
   - database
   - sql
   - relational
+  - galera
+  - cluster
+  - replication
 home: https://www.cloudpirates.io
 
 sources:
