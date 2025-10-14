@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.10.0 (2025-10-14)
+
+* Add support for `extraVolumes` and `extraVolumeMounts` (#387) ([ed17601](https://github.com/CloudPirates-io/helm-charts/commit/ed17601))
+* chore: update CHANGELOG.md for merged changes ([1ec9aab](https://github.com/CloudPirates-io/helm-charts/commit/1ec9aab))
+* chore: update CHANGELOG.md for merged changes ([c9ff4ec](https://github.com/CloudPirates-io/helm-charts/commit/c9ff4ec))
+* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+
 ## 0.9.0 (2025-10-14)
 
 * Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
