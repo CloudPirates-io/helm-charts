@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "common.name" -}}
+{{- define "cloudpirates.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "common.fullname" -}}
+{{- define "cloudpirates.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -28,23 +28,23 @@ Return the namespace to use for resources.
 Defaults to .Release.Namespace but can be overridden via .Values.namespaceOverride.
 Useful for multi-namespace deployments in combined charts.
 */}}
-{{- define "common.namespace" -}}
+{{- define "cloudpirates.namespace" -}}
 {{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "common.chart" -}}
+{{- define "cloudpirates.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "common.labels" -}}
-helm.sh/chart: {{ include "common.chart" . }}
-{{ include "common.selectorLabels" . }}
+{{- define "cloudpirates.labels" -}}
+helm.sh/chart: {{ include "cloudpirates.chart" . }}
+{{ include "cloudpirates.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -57,15 +57,15 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "common.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "common.name" . }}
+{{- define "cloudpirates.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "cloudpirates.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
-{{- define "common.annotations" -}}
+{{- define "cloudpirates.annotations" -}}
 {{- with .Values.commonAnnotations }}
 {{ toYaml . }}
 {{- end }}
@@ -74,7 +74,7 @@ Common annotations
 {{/*
 Return the proper image name with registry and tag (tag includes digest if present)
 */}}
-{{- define "common.image" -}}
+{{- define "cloudpirates.image" -}}
 {{- $registryName := .image.registry -}}
 {{- $repositoryName := .image.repository -}}
 {{- $tag := .image.tag | toString -}}
@@ -93,14 +93,14 @@ Return the proper image name with registry and tag (tag includes digest if prese
 {{/*
 Return the proper image pull policy
 */}}
-{{- define "common.imagePullPolicy" -}}
+{{- define "cloudpirates.imagePullPolicy" -}}
 {{- .image.imagePullPolicy | default .image.pullPolicy | default "Always" -}}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "common.imagePullSecrets" -}}
+{{- define "cloudpirates.imagePullSecrets" -}}
 {{- $pullSecrets := list }}
 
 {{- if .global }}
@@ -136,7 +136,7 @@ imagePullSecrets:
 {{/*
 Validate required fields
 */}}
-{{- define "common.validateRequired" -}}
+{{- define "cloudpirates.validateRequired" -}}
 {{- $context := index . 0 -}}
 {{- $field := index . 1 -}}
 {{- $message := index . 2 -}}
@@ -148,7 +148,7 @@ Validate required fields
 {{/*
 Return a soft nodeAffinity definition
 */}}
-{{- define "common.affinities.nodes.soft" -}}
+{{- define "cloudpirates.affinities.nodes.soft" -}}
 {{- $key := index . 0 -}}
 {{- $values := index . 1 -}}
 preferredDuringSchedulingIgnoredDuringExecution:
@@ -166,7 +166,7 @@ preferredDuringSchedulingIgnoredDuringExecution:
 {{/*
 Return a hard nodeAffinity definition
 */}}
-{{- define "common.affinities.nodes.hard" -}}
+{{- define "cloudpirates.affinities.nodes.hard" -}}
 {{- $key := index . 0 -}}
 {{- $values := index . 1 -}}
 requiredDuringSchedulingIgnoredDuringExecution:
@@ -183,13 +183,13 @@ requiredDuringSchedulingIgnoredDuringExecution:
 {{/*
 Return a soft podAffinity/podAntiAffinity definition
 */}}
-{{- define "common.affinities.pods.soft" -}}
+{{- define "cloudpirates.affinities.pods.soft" -}}
 {{- $component := index . 0 -}}
 {{- $context := index . 1 -}}
 preferredDuringSchedulingIgnoredDuringExecution:
   - podAffinityTerm:
       labelSelector:
-        matchLabels: {{- (include "common.selectorLabels" $context) | nindent 10 }}
+        matchLabels: {{- (include "cloudpirates.selectorLabels" $context) | nindent 10 }}
           {{- if $component }}
           app.kubernetes.io/component: {{ $component }}
           {{- end }}
@@ -200,12 +200,12 @@ preferredDuringSchedulingIgnoredDuringExecution:
 {{/*
 Return a hard podAffinity/podAntiAffinity definition
 */}}
-{{- define "common.affinities.pods.hard" -}}
+{{- define "cloudpirates.affinities.pods.hard" -}}
 {{- $component := index . 0 -}}
 {{- $context := index . 1 -}}
 requiredDuringSchedulingIgnoredDuringExecution:
   - labelSelector:
-      matchLabels: {{- (include "common.selectorLabels" $context) | nindent 8 }}
+      matchLabels: {{- (include "cloudpirates.selectorLabels" $context) | nindent 8 }}
         {{- if $component }}
         app.kubernetes.io/component: {{ $component }}
         {{- end }}
@@ -215,7 +215,7 @@ requiredDuringSchedulingIgnoredDuringExecution:
 {{/*
 Render a value that contains template perhaps
 */}}
-{{- define "common.tplvalues.render" -}}
+{{- define "cloudpirates.tplvalues.render" -}}
   {{- $value := typeIs "string" .value | ternary .value (.value | toYaml) }}
   {{- if contains "{{" (toString $value) }}
     {{- tpl $value .context }}
@@ -226,26 +226,26 @@ Render a value that contains template perhaps
 
 {{/*
 Return the proper Docker Image Registry Secret Names evaluating values as templates
-{{ include "common.images.renderPullSecrets" ( dict "images" (list .Values.path.to.the.image1, .Values.path.to.the.image2) "context" $) }}
+{{ include "cloudpirates.images.renderPullSecrets" ( dict "images" (list .Values.path.to.the.image1, .Values.path.to.the.image2) "context" $) }}
 */}}
-{{- define "common.images.renderPullSecrets" -}}
+{{- define "cloudpirates.images.renderPullSecrets" -}}
   {{- $pullSecrets := list }}
   {{- $context := .context }}
 
   {{- range (($context.Values.global).imagePullSecrets) -}}
     {{- if kindIs "map" . -}}
-      {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" .name "context" $context)) -}}
+      {{- $pullSecrets = append $pullSecrets (include "cloudpirates.tplvalues.render" (dict "value" .name "context" $context)) -}}
     {{- else -}}
-      {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" . "context" $context)) -}}
+      {{- $pullSecrets = append $pullSecrets (include "cloudpirates.tplvalues.render" (dict "value" . "context" $context)) -}}
     {{- end -}}
   {{- end -}}
 
   {{- range .images -}}
     {{- range .pullSecrets -}}
       {{- if kindIs "map" . -}}
-        {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" .name "context" $context)) -}}
+        {{- $pullSecrets = append $pullSecrets (include "cloudpirates.tplvalues.render" (dict "value" .name "context" $context)) -}}
       {{- else -}}
-        {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" . "context" $context)) -}}
+        {{- $pullSecrets = append $pullSecrets (include "cloudpirates.tplvalues.render" (dict "value" . "context" $context)) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -260,9 +260,9 @@ imagePullSecrets:
 
 {{/*
 Detect if the target platform is OpenShift (via .Values.targetPlatform or API group).
-Usage: {{ include "common.isOpenshift" . }}
+Usage: {{ include "cloudpirates.isOpenshift" . }}
 */}}
-{{- define "common.isOpenshift" -}}
+{{- define "cloudpirates.isOpenshift" -}}
 {{- if or (eq (lower (default "" .Values.targetPlatform)) "openshift") (.Capabilities.APIVersions.Has "route.openshift.io/v1") -}}
 true
 {{- else -}}
@@ -272,10 +272,10 @@ false
 
 {{/*
 Render podSecurityContext, omitting runAsUser, runAsGroup, fsGroup, and seLinuxOptions if OpenShift is detected.
-Usage: {{ include "common.renderPodSecurityContext" . }}
+Usage: {{ include "cloudpirates.renderPodSecurityContext" . }}
 */}}
-{{- define "common.renderPodSecurityContext" -}}
-{{- $isOpenshift := include "common.isOpenshift" . | trim }}
+{{- define "cloudpirates.renderPodSecurityContext" -}}
+{{- $isOpenshift := include "cloudpirates.isOpenshift" . | trim }}
 {{- if eq $isOpenshift "true" }}
 {{- omit .Values.podSecurityContext "runAsUser" "runAsGroup" "fsGroup" "seLinuxOptions" | toYaml }}
 {{- else }}
@@ -285,10 +285,10 @@ Usage: {{ include "common.renderPodSecurityContext" . }}
 
 {{/*
 Render containerSecurityContext, omitting runAsUser, runAsGroup, and seLinuxOptions if OpenShift is detected.
-Usage: {{ include "common.renderContainerSecurityContext" . }}
+Usage: {{ include "cloudpirates.renderContainerSecurityContext" . }}
 */}}
-{{- define "common.renderContainerSecurityContext" -}}
-{{- $isOpenshift := include "common.isOpenshift" . | trim }}
+{{- define "cloudpirates.renderContainerSecurityContext" -}}
+{{- $isOpenshift := include "cloudpirates.isOpenshift" . | trim }}
 {{- if eq $isOpenshift "true" }}
 {{- omit .Values.containerSecurityContext "runAsUser" "runAsGroup" "seLinuxOptions" | toYaml }}
 {{- else }}

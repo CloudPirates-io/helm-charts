@@ -23,12 +23,12 @@ spec:
 {{- with (include "mongodb.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "mongodb.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           {{- if or .Values.config.content .Values.config.existingConfigmap }}
           args:
             - "-f"

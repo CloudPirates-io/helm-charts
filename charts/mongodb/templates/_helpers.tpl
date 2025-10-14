@@ -2,42 +2,42 @@
 Expand the name of the chart.
 */}}
 {{- define "mongodb.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
 {{- define "mongodb.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "mongodb.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "mongodb.labels" -}}
-{{- include "common.labels" . }}
+{{- include "cloudpirates.labels" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "mongodb.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
 {{- define "mongodb.annotations" -}}
-{{- include "common.annotations" . -}}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
@@ -65,14 +65,14 @@ Get the secret key for MongoDB root password
 Return the proper MongoDB image name
 */}}
 {{- define "mongodb.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "mongodb.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{- define "mongodb.configFullName" -}}
@@ -87,7 +87,7 @@ Return the proper Docker Image Registry Secret Names
 Return the proper MongoDB Exporter image name
 */}}
 {{- define "mongodb.metrics.image" -}}
-{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*

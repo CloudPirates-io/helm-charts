@@ -1,0 +1,62 @@
+# CI test values for nginx chart
+# Optimized for faster testing in kind clusters and GitHub Actions
+
+image:
+  # Use IfNotPresent to avoid repeated pulls
+  pullPolicy: IfNotPresent
+  # Use simple tag without digest for better caching
+  tag: "1.29.2-alpine"
+
+# Use non-privileged port for CI environment
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+
+service:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+
+# Run as nginx user (101) - non-root
+containerSecurityContext:
+  runAsUser: 101
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+
+podSecurityContext:
+  fsGroup: 101
+
+# Reduce probe delays for faster readiness in tests
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+livenessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Configure nginx to listen on non-privileged port
+serverConfig: |-
+  server {
+    listen 8080;
+    server_name _;
+    location / {
+      root /usr/share/nginx/html;
+      index index.html index.htm;
+    }
+  }
