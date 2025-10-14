@@ -32,7 +32,7 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "ghost.serviceAccountName" . }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.mariadb.enabled }}
       initContainers:
         - name: wait-for-mariadb
@@ -43,10 +43,10 @@ spec:
             - >
               retries=0;
               max_retries=15;
-              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.name" . }}-mariadb 
-              -P {{ .Values.mariadb.service.port }} 
-              -u{{ .Values.mariadb.auth.username }} 
-              -p{{ .Values.mariadb.auth.password }} 
+              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.fullname" . }}-mariadb
+              -P {{ .Values.mariadb.service.port }}
+              -u{{ .Values.mariadb.auth.username }}
+              -p{{ .Values.mariadb.auth.password }}
               --silent; do 
                 retries=$((retries+1));
                 echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)"; 
@@ -56,13 +56,13 @@ spec:
                 fi;
                 sleep 2; 
               done;
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "ghost.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           #command: ["tail", "-f", "/dev/null"]
           ports:
             {{- range .Values.containerPorts }}

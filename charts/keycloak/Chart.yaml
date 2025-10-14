@@ -21,14 +21,14 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "1.x.x"
+    version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
   - name: postgres
-    version: "0.x.x"
+    version: "0.9.x"
     repository: oci://registry-1.docker.io/cloudpirates
     condition: postgres.enabled
   - name: mariadb
-    version: "0.x.x"
+    version: "0.4.x"
     repository: oci://registry-1.docker.io/cloudpirates
     condition: mariadb.enabled
 icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg

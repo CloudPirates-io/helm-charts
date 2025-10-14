@@ -1,0 +1,72 @@
+# CI test values for ghost chart
+# Optimized for faster testing in kind clusters and GitHub Actions
+
+image:
+  # Use IfNotPresent to avoid repeated pulls
+  pullPolicy: IfNotPresent
+  # Use simple tag without digest for better caching
+  tag: "6.3.1"
+
+# Disable ingress for CI tests
+ingress:
+  enabled: false
+
+# Lenient probes for slow CI environments
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Disable persistence for faster CI tests
+persistence:
+  enabled: false
+
+# MariaDB configuration for CI
+mariadb:
+  enabled: true
+
+  auth:
+    database: ghost
+    username: ghost
+    password: ghost-test-password
+    rootPassword: root-test-password
+
+  image:
+    pullPolicy: IfNotPresent
+
+  primary:
+    persistence:
+      enabled: false
+
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+# Override database connection to use the correct service name
+config:
+  database:
+    client: "mysql"
+    connection:
+      host: "test-ghost-mariadb"
+      port: 3306
+      user: "ghost"
+      password: "ghost-test-password"
+      database: "ghost"

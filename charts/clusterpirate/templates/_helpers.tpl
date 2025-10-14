@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "clusterpirate.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
@@ -11,35 +11,35 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "clusterpirate.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "clusterpirate.labels" -}}
-{{- include "common.labels" . }}
+{{- include "cloudpirates.labels" . }}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
 {{- define "clusterpirate.annotations" -}}
-{{- include "common.annotations" . }}
+{{- include "cloudpirates.annotations" . }}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "clusterpirate.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{/*
 Selector labels
 */}}
 {{- define "clusterpirate.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
@@ -62,5 +62,5 @@ release: {{ .Release.Name }}
 Return the proper ClusterPirate image name
 */}}
 {{- define "clusterpirate.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
