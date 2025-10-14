@@ -32,12 +32,12 @@ spec:
       {{ . | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
         - name: init-erlang-cookie
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
@@ -65,7 +65,7 @@ spec:
         - name: download-plugins
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
@@ -89,8 +89,8 @@ spec:
               mountPath: /tmp/plugins
         - name: copy-plugins
           image: {{ include "rabbitmq.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - sh
             - -c
@@ -107,9 +107,9 @@ spec:
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rabbitmq.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           {{- if .Values.customScripts.postStart.enabled }}
           lifecycle:
             postStart:

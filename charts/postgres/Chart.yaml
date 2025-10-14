@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.8.3
+version: 0.9.0
 appVersion: "18.0"
 keywords:
   - postgres
@@ -18,6 +18,6 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "1.x.x"
+    version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/95e7f13e62/postgres-logo.svg

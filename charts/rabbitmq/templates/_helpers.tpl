@@ -2,42 +2,42 @@
 Expand the name of the chart.
 */}}
 {{- define "rabbitmq.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
 {{- define "rabbitmq.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "rabbitmq.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "rabbitmq.labels" -}}
-{{- include "common.labels" . }}
+{{- include "cloudpirates.labels" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "rabbitmq.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
 {{- define "rabbitmq.annotations" -}}
-{{- include "common.annotations" . -}}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
@@ -75,14 +75,14 @@ Get the secret key for Erlang cookie
 Return the proper RabbitMQ image name
 */}}
 {{- define "rabbitmq.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "rabbitmq.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{- define "rabbitmq.serviceAccountName" -}}

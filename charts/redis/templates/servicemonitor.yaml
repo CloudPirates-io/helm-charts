@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "redis.fullname" . }}-metrics
-  namespace: {{ include "common.namespace" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics

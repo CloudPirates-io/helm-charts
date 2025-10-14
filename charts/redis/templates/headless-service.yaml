@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "redis.fullname" . }}-headless
-  namespace: {{ include "common.namespace" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
 spec:

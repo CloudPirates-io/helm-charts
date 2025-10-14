@@ -2,7 +2,7 @@ apiVersion: v2
 name: zookeeper
 description: Apache ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 type: application
-version: 0.1.7
+version: 0.2.0
 appVersion: "3.9.3"
 keywords:
   - zookeeper
@@ -23,6 +23,6 @@ maintainers:
     url: https://www.srf.ch
 dependencies:
   - name: common
-    version: "1.x.x"
+    version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg

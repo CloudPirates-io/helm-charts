@@ -2,56 +2,56 @@
 Expand the name of the chart.
 */}}
 {{- define "nginx.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
 {{- define "nginx.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "nginx.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "nginx.labels" -}}
-{{- include "common.labels" . }}
+{{- include "cloudpirates.labels" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "nginx.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
 {{- define "nginx.annotations" -}}
-{{- include "common.annotations" . -}}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
 Return the proper Nginx image name
 */}}
 {{- define "nginx.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "nginx.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{/*
@@ -73,7 +73,7 @@ Return the custom NGINX config configmap.
 {{- if .Values.existingConfigConfigmap -}}
     {{- printf "%s" (tpl .Values.existingConfigConfigmap $) -}}
 {{- else -}}
-    {{- include "common.fullname" . -}}
+    {{- include "cloudpirates.fullname" . -}}
 {{- end -}}
 {{- end -}}
 
@@ -84,7 +84,7 @@ Return the custom NGINX server config configmap.
 {{- if .Values.existingServerConfigConfigmap -}}
     {{- printf "%s" (tpl .Values.existingServerConfigConfigmap $) -}}
 {{- else -}}
-    {{- include "common.fullname" . -}}
+    {{- include "cloudpirates.fullname" . -}}
 {{- end -}}
 {{- end -}}
 
@@ -95,7 +95,7 @@ Return the custom NGINX stream server config configmap.
 {{- if .Values.existingStreamServerConfigConfigmap -}}
     {{- printf "%s" (tpl .Values.existingStreamServerConfigConfigmap $) -}}
 {{- else -}}
-    {{- include "common.fullname" . -}}
+    {{- include "cloudpirates.fullname" . -}}
 {{- end -}}
 {{- end -}}
 
@@ -103,5 +103,5 @@ Return the custom NGINX stream server config configmap.
 Return the proper Nginx metrics image name
 */}}
 {{- define "nginx.metrics.image" -}}
-{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
