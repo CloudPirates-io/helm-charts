@@ -43,10 +43,10 @@ spec:
             - >
               retries=0;
               max_retries=15;
-              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.name" . }}-mariadb 
-              -P {{ .Values.mariadb.service.port }} 
-              -u{{ .Values.mariadb.auth.username }} 
-              -p{{ .Values.mariadb.auth.password }} 
+              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.fullname" . }}-mariadb
+              -P {{ .Values.mariadb.service.port }}
+              -u{{ .Values.mariadb.auth.username }}
+              -p{{ .Values.mariadb.auth.password }}
               --silent; do 
                 retries=$((retries+1));
                 echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)"; 
