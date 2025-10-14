@@ -276,6 +276,12 @@ extraEnv: {}
 ## @param extraEnvVarsSecret Name of a secret containing additional environment variables
 extraEnvVarsSecret: ""
 
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the MongoDB container
+extraVolumeMounts: []
+
 ## @param initContainers Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades
 initContainers: []
 # Example with pgautoupgrade for major version upgrades:
