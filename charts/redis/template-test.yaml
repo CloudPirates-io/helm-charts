@@ -1,0 +1,595 @@
+---
+# Source: redis/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis
+---
+# Source: redis/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  redis.conf: |
+    # Redis configuration
+    bind * -::*
+    port 6379
+---
+# Source: redis/templates/prestop-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-prestop-script
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+data:
+  prestop.sh: |
+    #!/bin/bash
+
+    # Redis master failover script for graceful shutdown
+    # Based on Bitnami Redis charts failover handling
+
+    set -e
+
+    # Configuration
+    REDIS_PORT="6379"
+    SENTINEL_PORT="26379"
+    MASTER_NAME="mymaster"
+    HEADLESS_SERVICE="redis-headless.test-redis-helm.svc.cluster.local"
+    REDIS_SERVICE="redis.test-redis-helm.svc.cluster.local"
+
+    # Set authentication if enabled
+
+    # Set loopback address based on ipFamily configuration
+    REDIS_LOOPBACK="127.0.0.1"
+
+    # Function to run Redis commands
+    run_redis_command() {
+        local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        redis-cli "${args[@]}" "$@"
+    }
+
+    # Function to check if current instance is master
+    is_master() {
+        REDIS_ROLE=$(run_redis_command role | head -1)
+        [[ "$REDIS_ROLE" == "master" ]]
+    }
+
+    # Function to get full hostname for a pod
+    get_full_hostname() {
+        hostname="$1"
+        full_hostname="${hostname}.${HEADLESS_SERVICE}"
+        echo "${full_hostname}"
+    }
+
+    # Function to run Sentinel commands
+    run_sentinel_command() {
+        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" sentinel "$@"
+    }
+
+    # Function to check if sentinel failover has finished
+    sentinel_failover_finished() {
+        REDIS_SENTINEL_INFO=($(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>/dev/null || echo ""))
+        if [ ${#REDIS_SENTINEL_INFO[@]} -ge 1 ]; then
+            REDIS_MASTER_HOST="${REDIS_SENTINEL_INFO[0]}"
+            [[ "$REDIS_MASTER_HOST" != "$(get_full_hostname $HOSTNAME)" ]]
+        else
+            # If we can't get master info, assume failover is complete
+            return 0
+        fi
+    }
+
+    # Function to wait with retries
+    retry_while() {
+        local condition="$1"
+        local max_attempts="$2"
+        local sleep_time="$3"
+        local attempt=0
+
+        while [ $attempt -lt $max_attempts ]; do
+            if $condition; then
+                return 0
+            fi
+            sleep "$sleep_time"
+            ((attempt++))
+        done
+        return 1
+    }
+
+    echo "Redis preStop hook starting for pod: $HOSTNAME"
+
+    # Only proceed with failover if this instance is the master
+    if is_master; then
+        echo "I am the master pod and I'm being stopped. Initiating graceful failover."
+
+        # Pause client write connections to prevent data loss during failover
+        echo "Pausing client write connections for 22 seconds to prevent data loss..."
+        if run_redis_command CLIENT PAUSE "22000" WRITE; then
+            echo "Client write connections paused successfully"
+        else
+            echo "Warning: Failed to pause client connections, continuing anyway"
+        fi
+
+        # Issue failover command to Sentinel
+        echo "Issuing failover command to Sentinel..."
+        if run_sentinel_command failover "$MASTER_NAME"; then
+            echo "Failover command sent successfully"
+        else
+            echo "Warning: Failed to send failover command, Sentinel may handle this automatically"
+        fi
+
+        # Wait for Sentinel to complete the failover
+        echo "Waiting for Sentinel to complete failover (up to 20 seconds)..."
+        if retry_while "sentinel_failover_finished" "20" "1"; then
+            echo "Sentinel failover completed successfully"
+        else
+            echo "Warning: Failover may still be in progress or Sentinel unavailable"
+        fi
+
+        # Additional delay to ensure new master is fully established
+        echo "Allowing additional time for new master to stabilize..."
+        sleep 3
+
+    else
+        echo "I am not the master, no failover needed"
+    fi
+
+    echo "Redis preStop hook completed"
+    exit 0
+---
+# Source: redis/templates/headless-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-headless
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+    - port: 26379
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+---
+# Source: redis/templates/sentinel-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sentinel
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: sentinel
+spec:
+  type: ClusterIP
+  ports:
+    - port: 26379
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+---
+# Source: redis/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # This service points to all Redis instances for Sentinel-based discovery
+    # Applications should use Sentinel clients to discover the current master
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+  # In Sentinel mode, this service points to all Redis instances
+  # Clients should use Sentinel to discover the current master
+  sessionAffinity: None
+---
+# Source: redis/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: test-redis-helm
+  labels:
+    helm.sh/chart: redis-0.8.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis
+    app.kubernetes.io/version: "8.2.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  serviceName: redis-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/instance: redis
+      annotations:
+        checksum/config: 1faf092b9660421e9f469ac4c2bf5c5bf869b7eb60d8b5722f0302fe83b8407b
+    spec:
+      securityContext: 
+        fsGroup: 999
+      initContainers:
+        - name: redis-init
+          image: "docker.io/redis:8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              # Get pod ordinal from hostname
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              MY_HOSTNAME=$(hostname)
+
+              # Copy base config
+              if [ -f "/usr/local/etc/redis/redis.conf" ]; then
+                cp /usr/local/etc/redis/redis.conf /tmp/redis.conf
+              else
+                # Create minimal config if no config exists
+                cat > /tmp/redis.conf << EOF
+              bind * -::*
+              port 6379
+              EOF
+              fi
+
+              # Add Redis configurations for better Sentinel failover tolerance
+              echo "" >> /tmp/redis.conf
+              echo "# Configurations for Kubernetes force deletion tolerance" >> /tmp/redis.conf
+              echo "min-slaves-to-write 0" >> /tmp/redis.conf
+              echo "min-slaves-max-lag 0" >> /tmp/redis.conf
+
+              echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
+
+              # Try to determine current master from Sentinel (if any sentinel is available)
+              CURRENT_MASTER=""
+              SENTINEL_FOUND=false
+
+              # Check if any sentinel is already running and knows the master
+              for i in $(seq 0 $((3 - 1))); do
+                SENTINEL_HOST="redis-${i}.redis-headless"
+                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p 26379 sentinel get-master-addr-by-name mymaster 2>/dev/null | head -1 || echo "")
+                if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
+                  CURRENT_MASTER="$MASTER_INFO"
+                  SENTINEL_FOUND=true
+                  echo "Found current master from sentinel: $CURRENT_MASTER"
+                  break
+                fi
+              done
+
+              # Configuration logic
+              if [ "$SENTINEL_FOUND" = true ] && [ -n "$CURRENT_MASTER" ]; then
+                # Sentinel knows the master - configure accordingly
+                MY_HOSTNAME=$(hostname)
+                MY_HOSTNAME_FQDN="${MY_HOSTNAME}.redis-headless"
+                MY_IP=$(hostname -i)
+
+                # Check if I am the master by hostname or IP
+                if [ "$MY_IP" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME_FQDN" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME" = "$CURRENT_MASTER" ]; then
+                  echo "I am the current master according to Sentinel"
+                else
+                  echo "Configuring as replica of current master: $CURRENT_MASTER"
+                  echo "replicaof $CURRENT_MASTER 6379" >> /tmp/redis.conf
+                fi
+              else
+                # No sentinel available - use bootstrap logic
+                if [ "$POD_ORDINAL" != "0" ]; then
+                  echo "Bootstrap mode: configuring as replica of pod-0"
+                  # Use hostname-based replication for better resilience
+                  MASTER_HOSTNAME="redis-0.redis-headless"
+                  echo "replicaof $MASTER_HOSTNAME 6379" >> /tmp/redis.conf
+                  echo "Bootstrap replica using pod-0 hostname: $MASTER_HOSTNAME"
+                else
+                  echo "Bootstrap mode: pod-0 starting as initial master"
+                fi
+              fi
+
+              # Configure for Sentinel discovery and force deletion tolerance
+              # Get IP address based on ipFamily setting
+              # auto: Use the first IP address for dual-stack compatibility
+              MY_IP=$(hostname -i | awk '{print $1}')
+              echo "Using IP address: ${MY_IP}"
+              echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "replica-announce-port 6379" >> /tmp/redis.conf
+              echo "slave-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "slave-announce-port 6379" >> /tmp/redis.conf
+
+              # Make slaves more eligible for promotion during force deletions
+              echo "slave-priority 100" >> /tmp/redis.conf
+              echo "replica-read-only yes" >> /tmp/redis.conf
+          resources:
+            limits:
+              cpu: 50m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc/redis
+            - name: redis-config
+              mountPath: /tmp
+      containers:
+        - name: redis
+          securityContext: 
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 999
+          image: "docker.io/redis:8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              CONFIG_FILE="/tmp/redis.conf"
+              redis-server "$CONFIG_FILE"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - redis-cli -h "127.0.0.1" ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - redis-cli -h "127.0.0.1" ping | grep -q PONG
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - /scripts/prestop.sh
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: redis-config
+              mountPath: /tmp
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
+            - name: config
+              mountPath: /usr/local/etc/redis
+        - name: sentinel
+          securityContext: 
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 999
+          image: "redis:8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: sentinel-config
+              mountPath: /tmp
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              # Wait for Redis to be ready
+              echo "Waiting for Redis to start..."
+              REDIS_HOST="127.0.0.1"
+              while ! redis-cli -h "${REDIS_HOST}" -p 6379 ping >/dev/null 2>&1; do
+                sleep 1
+              done
+              echo "Redis is ready"
+
+              # Determine initial master: query existing Sentinels first, fallback to pod-0 only for bootstrap
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              MASTER_HOST=""
+              SENTINEL_FOUND_MASTER=false
+
+              # First priority: Try to query other sentinels to find the current master
+              echo "Checking existing Sentinels for current master..."
+              for i in $(seq 0 $((3 - 1))); do
+                if [ "$i" != "$POD_ORDINAL" ]; then
+                  SENTINEL_HOST="redis-${i}.redis-headless"
+                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p 26379 sentinel get-master-addr-by-name mymaster 2>/dev/null | head -1 || echo "")
+                  if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
+                    MASTER_HOST="$EXISTING_MASTER"
+                    SENTINEL_FOUND_MASTER=true
+                    echo "Found current master via sentinel: $MASTER_HOST"
+                    break
+                  fi
+                fi
+              done
+
+              # Second priority: If no Sentinels found master, check if any Redis instance claims to be master
+              if [ "$SENTINEL_FOUND_MASTER" = false ]; then
+                echo "No Sentinels available, checking Redis instances directly..."
+                for i in $(seq 0 $((3 - 1))); do
+                  REDIS_HOST="redis-${i}.redis-headless.test-redis-helm.svc.cluster.local"
+                  ROLE_INFO=$(redis-cli -h "${REDIS_HOST}" -p 6379 info replication 2>/dev/null | grep "role:master" || echo "")
+                  if [ -n "$ROLE_INFO" ]; then
+                    MASTER_HOST="$REDIS_HOST"
+                    echo "Found current master by role check: $MASTER_HOST"
+                    break
+                  fi
+                done
+              fi
+
+              # Final fallback: Use pod-0 hostname for initial bootstrap only
+              if [ -z "$MASTER_HOST" ]; then
+                MASTER_HOST="redis-0.redis-headless.test-redis-helm.svc.cluster.local"
+                echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
+              fi
+
+              # Get IP address based on ipFamily setting
+              # auto: Use the first IP address for dual-stack compatibility
+              SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              echo "Sentinel using IP address: ${SENTINEL_IP}"
+
+              # Create Sentinel config
+              cat > /tmp/sentinel.conf << EOF
+              port 26379
+              bind * -::*
+              # Enable hostname resolution for Redis Sentinel
+              sentinel resolve-hostnames yes
+              sentinel announce-hostnames yes
+              sentinel monitor mymaster ${MASTER_HOST} 6379 2
+              sentinel down-after-milliseconds mymaster 1500
+              sentinel failover-timeout mymaster 15000
+              sentinel parallel-syncs mymaster 1
+              # Make automatic failover more aggressive for Kubernetes force deletions
+              sentinel deny-scripts-reconfig yes
+              # Fix leader election issues during force deletions
+              protected-mode no
+              # CRITICAL: Track disconnected slaves for force deletion tolerance
+              sentinel_link_buffer_size 32768
+              # Allow sentinels to discover each other
+              sentinel announce-ip ${SENTINEL_IP}
+              sentinel announce-port 26379
+              logfile ""
+              loglevel notice
+              EOF
+
+              # Add known sentinels to help with discovery (using hostnames for resilience)
+              for i in $(seq 0 $((3 - 1))); do
+                if [ "$i" != "$POD_ORDINAL" ]; then
+                  SENTINEL_HOST="redis-${i}.redis-headless"
+                  # Test if the host is resolvable before adding
+                  if getent hosts "$SENTINEL_HOST" >/dev/null 2>&1; then
+                    SENTINEL_IP=$(getent hosts "$SENTINEL_HOST" | awk '{print $1}' | head -1)
+                    if [ -n "$SENTINEL_IP" ]; then
+                      echo "sentinel known-sentinel mymaster ${SENTINEL_IP} 26379" >> /tmp/sentinel.conf
+                    fi
+                  fi
+                fi
+              done
+
+              echo "Starting Sentinel with config:"
+              cat /tmp/sentinel.conf
+
+              redis-sentinel /tmp/sentinel.conf
+          ports:
+            - name: sentinel
+              containerPort: 26379
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - redis-cli -h "127.0.0.1" -p 26379 ping | grep -q PONG
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 64Mi
+      volumes:
+        - name: redis-config
+          emptyDir: {}
+        - name: sentinel-config
+          emptyDir: {}
+        - name: prestop-script
+          configMap:
+            name: redis-prestop-script
+            defaultMode: 0755
+        - name: config
+          configMap:
+            name: redis-config
+  volumeClaimTemplates:
+    - apiVersion: v1	
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
