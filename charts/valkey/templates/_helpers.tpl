@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "valkey.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
@@ -11,21 +11,21 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "valkey.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "valkey.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "valkey.labels" -}}
-{{- include "common.labels" . -}}
+{{- include "cloudpirates.labels" . -}}
 {{- end }}
 
 {{/*
@@ -41,14 +41,14 @@ Common annotations
 Selector labels
 */}}
 {{- define "valkey.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
 Return the proper Valkey image name
 */}}
 {{- define "valkey.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
@@ -113,5 +113,5 @@ Return Valkey config directory
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "valkey.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}

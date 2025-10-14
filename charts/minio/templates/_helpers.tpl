@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "minio.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
@@ -11,21 +11,21 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "minio.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "minio.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "minio.labels" -}}
-{{- include "common.labels" . -}}
+{{- include "cloudpirates.labels" . -}}
 {{- end }}
 
 {{/*
@@ -41,7 +41,7 @@ Common annotations
 Selector labels
 */}}
 {{- define "minio.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
@@ -63,7 +63,7 @@ Return the proper MinIO image name
 {{- printf "%s:%s" $repositoryName $tag -}}
 {{- end -}}
 {{- else }}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 {{- end }}
 
@@ -71,7 +71,7 @@ Return the proper MinIO image name
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "minio.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{/*

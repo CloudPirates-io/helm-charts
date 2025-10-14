@@ -31,11 +31,11 @@ spec:
 {{- with (include "valkey.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       serviceAccountName: {{ include "valkey.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "valkey.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command:

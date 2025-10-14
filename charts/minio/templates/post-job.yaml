@@ -26,7 +26,7 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       restartPolicy: OnFailure
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: post-job
           image: {{ include "minio.image" . }}
@@ -49,7 +49,7 @@ spec:
             - name: tmp
               mountPath: /tmp
           securityContext:
-            {{- $securityContext := include "common.renderContainerSecurityContext" . | fromYaml }}
+            {{- $securityContext := include "cloudpirates.renderContainerSecurityContext" . | fromYaml }}
             {{- $_ := set $securityContext "readOnlyRootFilesystem" false }}
             {{- toYaml $securityContext | nindent 12 }}
       volumes:

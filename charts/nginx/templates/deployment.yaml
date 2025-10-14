@@ -32,7 +32,7 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.cloneStaticSiteFromGit.enabled }}
       initContainers:
         - name: git-clone-repository
@@ -72,9 +72,9 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "nginx.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           ports:
             {{- range .Values.containerPorts }}
             - name: {{ .name }}
@@ -204,9 +204,9 @@ spec:
         {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "nginx.metrics.image" . | quote }}
-          imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.metrics.image) }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
           command:
             - nginx-prometheus-exporter
             - --nginx.scrape-uri=http://localhost:8080/stub_status
