@@ -6,9 +6,25 @@ on:
       - main
     paths:
       - 'charts/**'
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      update_all_charts:
+        description: 'Update all charts (not just changed ones)'
+        required: false
+        type: boolean
+        default: false
+      clean_start:
+        description: 'Delete existing CHANGELOG.md files and start fresh'
+        required: false
+        type: boolean
+        default: false
+      custom_message:
+        description: 'Custom changelog message (optional)'
+        required: false
+        type: string
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -40,36 +56,100 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Get changed charts from last commit
-        id: list-changed
+      - name: Determine charts to update
+        id: charts-to-update
         run: |
-          # Get the commit SHA before the merge
-          BEFORE_SHA="${{ github.event.before }}"
+          # For manual trigger with update_all_charts enabled
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.update_all_charts }}" = "true" ]; then
+            echo "Manual trigger: updating all charts"
+            all_charts=$(find charts -mindepth 1 -maxdepth 1 -type d | sed 's|^charts/||' | tr '\n' ' ')
+            echo "All charts: $all_charts"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changedCharts=$all_charts" >> $GITHUB_OUTPUT
+            echo "update_mode=all" >> $GITHUB_OUTPUT
+          # For manual trigger without update_all_charts (default behavior - changed charts only)
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger: finding changed charts from last commit"
+            # Use the same logic as push event to find changed charts
+            BEFORE_SHA=$(git rev-parse HEAD~1)
+            changed_files=$(git diff --name-only "${BEFORE_SHA}" HEAD -- 'charts/**')
+            
+            if [[ -n "$changed_files" ]]; then
+              changed_charts=$(echo "$changed_files" | grep '^charts/' | cut -d/ -f1-2 | sort -u | tr '\n' ' ')
+              if [[ -n "$changed_charts" ]]; then
+                echo "Changed charts: $changed_charts"
+                echo "changed=true" >> $GITHUB_OUTPUT
+                echo "changedCharts=${changed_charts}" >> $GITHUB_OUTPUT
+                echo "update_mode=changed" >> $GITHUB_OUTPUT
+              else
+                echo "No chart changes detected in last commit"
+                echo "changed=false" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "No chart changes detected in last commit"
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          # For push event (original behavior)
+          else
+            echo "Push event: finding changed charts from merge commit"
+            BEFORE_SHA="${{ github.event.before }}"
+            changed_files=$(git diff --name-only "${BEFORE_SHA}" HEAD -- 'charts/**')
 
-          # Find changed charts directories using git diff
-          changed_files=$(git diff --name-only "${BEFORE_SHA}" HEAD -- 'charts/**')
-
-          if [[ -n "$changed_files" ]]; then
-            # Extract unique chart directories
-            changed_charts=$(echo "$changed_files" | grep '^charts/' | cut -d/ -f1-2 | sort -u | tr '\n' ' ')
-
-            if [[ -n "$changed_charts" ]]; then
-              echo "Changed charts:"
-              echo "$changed_charts"
-              echo "changed=true" >> $GITHUB_OUTPUT
-              echo "changedCharts=${changed_charts}" >> $GITHUB_OUTPUT
+            if [[ -n "$changed_files" ]]; then
+              changed_charts=$(echo "$changed_files" | grep '^charts/' | cut -d/ -f1-2 | sort -u | tr '\n' ' ')
+              if [[ -n "$changed_charts" ]]; then
+                echo "Changed charts: $changed_charts"
+                echo "changed=true" >> $GITHUB_OUTPUT
+                echo "changedCharts=${changed_charts}" >> $GITHUB_OUTPUT
+                echo "update_mode=changed" >> $GITHUB_OUTPUT
+              else
+                echo "No chart changes detected"
+                echo "changed=false" >> $GITHUB_OUTPUT
+              fi
             else
               echo "No chart changes detected"
               echo "changed=false" >> $GITHUB_OUTPUT
             fi
-          else
-            echo "No chart changes detected"
-            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get PR information
-        id: pr-info
-        if: steps.list-changed.outputs.changed == 'true'
+      - name: Clean start - Delete existing CHANGELOG.md files
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.clean_start == 'true' && steps.charts-to-update.outputs.changed == 'true'
+        run: |
+          echo "Clean start enabled - deleting existing CHANGELOG.md files"
+          CHANGED_CHARTS="${{ steps.charts-to-update.outputs.changedCharts }}"
+          
+          for chart_directory in $CHANGED_CHARTS; do
+            CHART_NAME=${chart_directory#charts/}
+            CHANGELOG_FILE="charts/${CHART_NAME}/CHANGELOG.md"
+            
+            if [ -f "$CHANGELOG_FILE" ]; then
+              echo "Deleting $CHANGELOG_FILE"
+              rm "$CHANGELOG_FILE"
+              
+              # Check if directory is empty except for ignored files
+              if [ -z "$(ls -A "charts/${CHART_NAME}" | grep -vE '^(Chart\.yaml|values\.yaml|\.helmignore|templates|crds|\.gitkeep)$')" ]; then
+                echo "Directory charts/${CHART_NAME} would be empty after deletion, but keeping it"
+              fi
+            else
+              echo "No CHANGELOG.md found at $CHANGELOG_FILE"
+            fi
+          done
+          
+          # Commit the deletions if any files were removed
+          if git status --porcelain | grep -q 'CHANGELOG.md'; then
+            echo "CHANGELOG.md files deleted successfully"
+            git add charts/*/CHANGELOG.md
+            git commit -m "chore: remove existing CHANGELOG.md files for clean start" \
+              -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            echo "clean_start_completed=true" >> $GITHUB_ENV
+          else
+            echo "No CHANGELOG.md files to delete"
+            echo "clean_start_completed=false" >> $GITHUB_ENV
+          fi
+
+      - name: Get PR information for push events
+        id: pr-info-push
+        if: github.event_name == 'push' && steps.charts-to-update.outputs.changed == 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -98,59 +178,86 @@ jobs:
               core.setOutput('pr_url', '');
             }
 
+      - name: Set manual trigger info
+        id: manual-info
+        if: github.event_name == 'workflow_dispatch' && steps.charts-to-update.outputs.changed == 'true'
+        run: |
+          if [ -n "${{ github.event.inputs.custom_message }}" ]; then
+            PR_TITLE="${{ github.event.inputs.custom_message }}"
+          else
+            if [ "${{ github.event.inputs.clean_start }}" = "true" ]; then
+              PR_TITLE="Manual changelog update with clean start"
+            else
+              PR_TITLE="Manual changelog update triggered via workflow_dispatch"
+            fi
+          fi
+          
+          echo "pr_number=manual" >> $GITHUB_OUTPUT
+          echo "pr_title=${PR_TITLE}" >> $GITHUB_OUTPUT
+          echo "pr_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+
       - name: Generate changelog
         id: generate-changelog
-        if: steps.list-changed.outputs.changed == 'true'
+        if: steps.charts-to-update.outputs.changed == 'true'
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           GITHUB_REPOSITORY: "${{ github.repository }}"
           GITHUB_REPOSITORY_URL: "${{ github.server_url }}/${{ github.repository }}"
-          CHANGED_CHARTS: ${{ steps.list-changed.outputs.changedCharts }}
-          PR_NUMBER: ${{ steps.pr-info.outputs.pr_number }}
-          PR_TITLE: ${{ steps.pr-info.outputs.pr_title }}
-          PR_URL: ${{ steps.pr-info.outputs.pr_url }}
+          PR_NUMBER: ${{ github.event_name == 'push' && steps.pr-info-push.outputs.pr_number || steps.manual-info.outputs.pr_number }}
+          PR_TITLE: ${{ github.event_name == 'push' && steps.pr-info-push.outputs.pr_title || steps.manual-info.outputs.pr_title }}
+          PR_URL: ${{ github.event_name == 'push' && steps.pr-info-push.outputs.pr_url || steps.manual-info.outputs.pr_url }}
+          UPDATE_MODE: ${{ steps.charts-to-update.outputs.update_mode }}
+          CLEAN_START: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.clean_start || 'false' }}
         run: |
           set -e
 
-          # Extract chart names from changed chart directories
-          CHART_NAMES=()
-          for chart_directory in ${CHANGED_CHARTS}; do
+          CHANGED_CHARTS="${{ steps.charts-to-update.outputs.changedCharts }}"
+          
+          echo "Update mode: $UPDATE_MODE"
+          echo "Clean start: $CLEAN_START"
+          echo "Processing charts: $CHANGED_CHARTS"
+
+          # Process each chart individually
+          for chart_directory in $CHANGED_CHARTS; do
             CHART_NAME=${chart_directory#charts/}
-            CHART_NAMES+=("--chart" "$CHART_NAME")
+            echo "Processing chart: $CHART_NAME"
+            
+            # Run the changelog script for this specific chart
+            ./generate-changelog.sh \
+              --chart "$CHART_NAME" \
+              --pr-title "${PR_TITLE}" \
+              --pr-number "${PR_NUMBER}" \
+              --pr-url "${PR_URL}"
           done
-
-          # Build arguments for the changelog script
-          CHANGELOG_ARGS=("${CHART_NAMES[@]}")
-
-          if [[ -n "$PR_TITLE" ]]; then
-            CHANGELOG_ARGS+=("--pr-title" "${PR_TITLE}")
-          fi
-
-          if [[ -n "$PR_NUMBER" ]]; then
-            CHANGELOG_ARGS+=("--pr-number" "${PR_NUMBER}")
-          fi
-
-          if [[ -n "$PR_URL" ]]; then
-            CHANGELOG_ARGS+=("--pr-url" "${PR_URL}")
-          fi
-
-          # Run the changelog generation script
-          ./generate-changelog.sh "${CHANGELOG_ARGS[@]}"
 
           # Check if there are changes
           if git status --porcelain | grep -q 'CHANGELOG.md'; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "Changelog changes detected"
+            git status --porcelain
           else
             echo "No CHANGELOG changes"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Commit and push changelog updates
-        if: steps.generate-changelog.outputs.has_changes == 'true'
+        if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
         run: |
           git add charts/*/CHANGELOG.md
-          git commit -m "chore: update CHANGELOG.md for merged changes" \
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            COMMIT_MSG="chore: update CHANGELOG.md via manual trigger"
+            if [ "${{ github.event.inputs.update_all_charts }}" = "true" ]; then
+              COMMIT_MSG="chore: update CHANGELOG.md for all charts via manual trigger"
+            fi
+            if [ "${{ github.event.inputs.clean_start }}" = "true" ]; then
+              COMMIT_MSG="chore: regenerate CHANGELOG.md with clean start"
+            fi
+          else
+            COMMIT_MSG="chore: update CHANGELOG.md for merged changes"
+          fi
+          
+          git commit -m "$COMMIT_MSG" \
             -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
           # Pull latest changes and rebase our commit on top
