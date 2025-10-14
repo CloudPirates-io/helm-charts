@@ -180,9 +180,9 @@ spec:
               {{- end }}
 
               {{- if .Values.auth.enabled }}
-              redis-server "$CONFIG_FILE" --requirepass "${REDIS_PASSWORD}"
+              redis-server "$CONFIG_FILE" --requirepass "${REDIS_PASSWORD}" {{- range .Values.extraFlags }} {{ . }}{{- end }}
               {{- else }}
-              redis-server "$CONFIG_FILE"
+              redis-server "$CONFIG_FILE" {{- range .Values.extraFlags }} {{ . }}{{- end }}
               {{- end }}
           ports:
             - name: redis

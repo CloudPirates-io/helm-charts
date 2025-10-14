@@ -1,0 +1,104 @@
+{{- if .Values.galera.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mariadb.fullname" . }}-galera-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mariadb.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  galera-entrypoint.sh: |
+    #!/bin/bash
+    set -eo pipefail
+    
+    # Galera entrypoint script for MariaDB
+    
+    echo "Starting Galera cluster initialization..."
+    
+    # Check if this is the bootstrap node (first replica)
+    HOSTNAME=$(hostname)
+    echo "Current hostname: $HOSTNAME"
+    
+    # Extract replica number from hostname
+    REPLICA_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
+    echo "Replica number: $REPLICA_NUM"
+
+    # Check if data directory exists and is empty
+    DATA_DIR="/var/lib/mysql"
+    if [ ! -d "$DATA_DIR/mysql" ]; then
+        echo "Data directory is empty, this is a new installation"
+        NEW_CLUSTER=true
+    else
+        echo "Data directory exists, checking cluster state"
+        NEW_CLUSTER=false
+    fi
+    
+    # Check grastate.dat for cluster state
+    GRASTATE_FILE="$DATA_DIR/grastate.dat"
+    SAFE_TO_BOOTSTRAP=false
+    
+    if [ -f "$GRASTATE_FILE" ]; then
+        echo "Found grastate.dat file"
+        if grep -q "safe_to_bootstrap: 1" "$GRASTATE_FILE"; then
+            SAFE_TO_BOOTSTRAP=true
+            echo "Node is safe to bootstrap"
+        fi
+    fi
+    
+    # Determine if we should bootstrap or join
+    BOOTSTRAP_CLUSTER=false
+    
+    if [ "$NEW_CLUSTER" = true ] && [ "$REPLICA_NUM" = "0" ]; then
+        echo "First node in new cluster - will bootstrap"
+        BOOTSTRAP_CLUSTER=true
+    elif [ "$MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP" = "true" ]; then
+        echo "Force bootstrap enabled"
+        BOOTSTRAP_CLUSTER=true
+        # Set safe_to_bootstrap=1 in grastate.dat
+        if [ -f "$GRASTATE_FILE" ]; then
+            sed -i 's/safe_to_bootstrap: 0/safe_to_bootstrap: 1/' "$GRASTATE_FILE"
+        fi
+    elif [ "$SAFE_TO_BOOTSTRAP" = true ]; then
+        echo "Node is safe to bootstrap based on grastate.dat"
+        BOOTSTRAP_CLUSTER=true
+    fi
+
+    # Start MariaDB with appropriate options
+    if [ "$BOOTSTRAP_CLUSTER" = true ]; then
+        echo "Bootstrapping new Galera cluster..."
+        #exec mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+        #mariadb-install-db
+        #sleep 3
+        #exec mariadbd --wsrep-new-cluster "$@"
+        exec /usr/local/bin/docker-entrypoint.sh --wsrep-new-cluster "$@"
+
+    else
+        echo "Joining existing Galera cluster..."
+        exec mariadbd "$@"
+        #exec /usr/local/bin/docker-entrypoint.sh "$@"
+    fi
+    
+  galera-recovery.sh: |
+    #!/bin/bash
+    set -eo pipefail
+    
+    # Galera recovery script
+    echo "Starting Galera recovery process..."
+    
+    DATA_DIR="/var/lib/mysql"
+    GRASTATE_FILE="$DATA_DIR/grastate.dat"
+    
+    if [ ! -f "$GRASTATE_FILE" ]; then
+        echo "No grastate.dat found, nothing to recover"
+        exit 0
+    fi
+    
+    echo "Checking cluster state..."
+    mariadbd --wsrep-recover
+    
+    echo "Recovery completed"
+{{- end }}

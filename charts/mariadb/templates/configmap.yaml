@@ -1,4 +1,4 @@
-{{- if and .Values.config.customConfiguration (not .Values.config.existingConfigMap) }}
+{{- if and (or .Values.config.customConfiguration .Values.galera.enabled) (not .Values.config.existingConfigMap) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,6 +11,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 data:
+  {{- if .Values.config.customConfiguration }}
   my.cnf: |
     {{ .Values.config.customConfiguration | nindent 4 }}
+  {{- end }}
+  {{- if .Values.galera.enabled }}
+  00-galera.cnf: |
+    !include /etc/mysql/galera.cnf
+  {{- end }}
 {{- end }}

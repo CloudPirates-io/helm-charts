@@ -4,7 +4,9 @@
 
 # MariaDB
 
-MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. This Helm chart deploys MariaDB as a StatefulSet on Kubernetes with comprehensive configuration options for development and production environments, providing stable network identities and persistent storage.
+MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. This Helm chart deploys MariaDB as a StatefulSet on Kubernetes with comprehensive configuration options for development and production environments, providing stable network identities and persistent storage. 
+
+The chart supports both single-node deployments and multi-node Galera cluster configurations for high availability and automatic failover.
 
 ## Installing the Chart
 
@@ -126,6 +128,41 @@ The following table lists the configurable parameters of the MariaDB chart and t
 | ---------------------------- | ----------------------------------------------------- | ------- |
 | `config.customConfiguration` | Custom configuration for MariaDB                      | `""`    |
 | `config.existingConfigMap`   | Name of existing ConfigMap with MariaDB configuration | `""`    |
+
+### Galera Cluster Parameters
+
+For a detailed explanation of Galera parameters and usage, see [README_GALERA.md](README_GALERA.md).
+
+> [!WARNING]  
+> You must migrate from a standalone MariaDB to Galera carefully. Do not enable Galera on an existing standalone database without following proper migration steps.
+
+| Parameter                                | Description                                                  | Default         |
+| ---------------------------------------- | ------------------------------------------------------------ | --------------- |
+| `galera.enabled`                         | Enable Galera Cluster mode                                   | `false`         |
+| `galera.name`                            | Galera cluster name                                          | `"galera"`      |
+| `galera.bootstrap.enabled`               | Enable bootstrap mode for the first node in the cluster     | `true`          |
+| `galera.replicaCount`                    | Number of nodes in the Galera cluster                       | `3`             |
+| `galera.wsrepProvider`                   | Path to wsrep provider library                              | `/usr/lib/galera/libgalera_smm.so` |
+| `galera.wsrepMethod`                     | Method for state snapshot transfers (mariabackup, mysqldump, rsync) | `mariabackup`   |
+| `galera.forceSafeToBootstrap`            | Force safe_to_bootstrap=1 in grastate.dat                   | `false`         |
+| `galera.wsrepSlaveThreads`               | Number of slave threads for applying writesets              | `1`             |
+| `galera.wsrepCertifyNonPK`               | Require primary key for replication                         | `true`          |
+| `galera.wsrepMaxWsRows`                  | Maximum number of rows in writeset                          | `0`             |
+| `galera.wsrepMaxWsSize`                  | Maximum size of writeset in bytes                           | `1073741824`    |
+| `galera.wsrepDebug`                      | Enable wsrep debugging                                       | `false`         |
+| `galera.wsrepRetryAutocommit`            | Number of times to retry autocommit                         | `1`             |
+| `galera.wsrepAutoIncrementControl`       | Enable auto increment control                                | `true`          |
+| `galera.wsrepDrupalHack`                 | Enable Drupal compatibility hack                             | `false`         |
+| `galera.wsrepLogConflicts`               | Log conflicts to error log                                   | `false`         |
+| `galera.innodb.flushLogAtTrxCommit`      | InnoDB flush log at transaction commit                       | `0`             |
+| `galera.innodb.bufferPoolSize`           | InnoDB buffer pool size                                      | `"128M"`        |
+| `galera.sst.user`                        | SST user for authentication                                  | `"sstuser"`     |
+| `galera.sst.password`                    | SST password for authentication                              | `""`            |
+| `galera.sst.existingSecret`              | Existing secret containing SST credentials                   | `""`            |
+| `galera.sst.secretKeys.userKey`          | Secret key for SST user                                      | `sst-user`      |
+| `galera.sst.secretKeys.passwordKey`      | Secret key for SST password                                 | `sst-password`  |
+| `galera.recovery.enabled`                | Enable automatic recovery                                    | `true`          |
+| `galera.recovery.clusterBootstrap`       | Enable cluster bootstrap in recovery                         | `true`          |
 
 ### Service Parameters
 
@@ -374,27 +411,6 @@ extraVolumes:
   - name: backup-storage
     mountPath: /backup
     pvcName: mariadb-backup-pvc
-```
-
-### With Ingress (for development only)
-
-**Note**: MariaDB ingress should only be used for development purposes. In production, use direct service connections.
-
-```yaml
-ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/tcp-services-configmap: "default/tcp-services"
-  hosts:
-    - host: mariadb.local
-      paths:
-        - path: /
-          pathType: Prefix
-
-service:
-  type: NodePort
-  nodePort: 30306
 ```
 
 ## Troubleshooting

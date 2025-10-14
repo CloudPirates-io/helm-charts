@@ -17,7 +17,7 @@ This repository provides secure, well-documented, and configurable Helm charts f
 | [Common](charts/common/)               | A library chart for common templates and helper functions                                                                 |
 | [Ghost](charts/ghost/)                 | A simple, powerful publishing platform that allows you to share your stories with the world.                              |
 | [Keycloak](charts/keycloak/)           | Open Source Identity and Access Management solution                                                                       |
-| [MariaDB](charts/mariadb/)             | High-performance, open-source relational database server that is a drop-in replacement for MySQL                          |
+| [MariaDB](charts/mariadb/)             | High-performance, high availability, scalable relational database server that is a drop-in replacement for MySQL          |
 | [Memcached](charts/memcached/)         | High-performance, distributed memory object caching system                                                                |
 | [MinIO](charts/minio/)                 | High-Performance Object Storage compatible with Amazon S3 APIs                                                            |
 | [MongoDB](charts/mongodb/)             | MongoDB a flexible NoSQL database for scalable, real-time data management                                                 |
