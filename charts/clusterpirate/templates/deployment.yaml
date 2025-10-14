@@ -29,7 +29,7 @@ spec:
       containers:
       - name: {{ include "clusterpirate.fullname" . }}
         image: {{ include "clusterpirate.image" . }}
-        imagePullPolicy: {{ include "common.imagePullPolicy" (dict "image" .Values.image) }}
+        imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
         resources:
 {{ toYaml .Values.deployment.resources | indent 10 }}
         {{- if .Values.deployment.probes.livenessProbe.enabled }}

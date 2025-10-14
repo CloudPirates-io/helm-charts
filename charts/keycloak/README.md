@@ -146,6 +146,31 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
 | `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
+### TLS Configuration
+
+| Parameter                                  | Description                                                                                | Default                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `tls.enabled`                              | Enable TLS/HTTPS support using custom certificates                                        | `false`                            |
+| `tls.existingSecret`                       | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                               |
+| `tls.certificateFile`                      | Path where the TLS certificate file will be mounted (internal)                            | `"/opt/keycloak/certs/tls.crt"`    |
+| `tls.certificateKeyFile`                   | Path where the TLS certificate key file will be mounted (internal)                        | `"/opt/keycloak/certs/tls.key"`    |
+| `tls.certManager.enabled`                  | Enable cert-manager integration for automatic certificate provisioning                    | `false`                            |
+| `tls.certManager.issuerRef.name`           | Name of the cert-manager Issuer or ClusterIssuer                                          | `""`                               |
+| `tls.certManager.issuerRef.kind`           | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                 | `ClusterIssuer`                    |
+| `tls.certManager.issuerRef.group`          | Group of the cert-manager issuer                                                          | `cert-manager.io`                  |
+| `tls.certManager.duration`                 | Certificate duration (e.g., 2160h for 90 days)                                            | `""`                               |
+| `tls.certManager.renewBefore`              | Time before expiry to renew certificate (e.g., 360h for 15 days)                          | `""`                               |
+| `tls.certManager.commonName`               | Certificate common name (defaults to first dnsName if not specified)                      | `""`                               |
+| `tls.certManager.dnsNames`                 | List of DNS names for the certificate (uses ingress.hosts if not specified)               | `[]`                               |
+| `tls.certManager.ipAddresses`              | List of IP addresses for the certificate                                                  | `[]`                               |
+| `tls.certManager.secretName`               | Name for the generated secret (defaults to `<fullname>-tls`)                              | `""`                               |
+| `tls.certManager.usages`                   | Certificate key usages                                                                    | `["digital signature", "key encipherment"]` |
+| `tls.certManager.annotations`              | Additional annotations for the Certificate resource                                       | `{}`                               |
+| `tls.truststoreEnabled`                    | Enable truststore for client certificate validation or outgoing HTTPS requests            | `false`                            |
+| `tls.truststoreExistingSecret`             | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks) | `""`                               |
+| `tls.truststorePassword`                   | Password for the truststore (use with caution - consider using existing secret)           | `""`                               |
+| `tls.truststoreFile`                       | Path where the truststore file will be mounted (internal)                                 | `"/opt/keycloak/truststore/truststore.jks"` |
+
 ### Database Configuration
 
 | Parameter                         | Description                                                                                                            | Default         |
@@ -501,6 +526,111 @@ realm:
     }
 ```
 
+### Using Custom TLS Certificates
+
+#### Option 1: Using cert-manager (Recommended)
+
+Automatically provision and renew certificates using cert-manager:
+
+```yaml
+# values-tls-certmanager.yaml
+tls:
+  enabled: true
+  certManager:
+    enabled: true
+    issuerRef:
+      name: "letsencrypt-prod"
+      kind: ClusterIssuer
+    # dnsNames will be automatically populated from ingress.hosts if not specified
+    dnsNames:
+      - auth.yourdomain.com
+
+keycloak:
+  httpEnabled: false  # Disable HTTP when using TLS
+  production: true
+  hostname: "auth.yourdomain.com"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: auth.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+```
+
+**Prerequisites:**
+- cert-manager must be installed in your cluster
+- A ClusterIssuer or Issuer must be configured (e.g., Let's Encrypt)
+
+Install cert-manager if not already installed:
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+```
+
+Create a ClusterIssuer for Let's Encrypt:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your-email@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+```
+
+#### Option 2: Using Existing TLS Certificates
+
+Use pre-existing certificates:
+
+```yaml
+# values-tls.yaml
+tls:
+  enabled: true
+  existingSecret: "keycloak-tls-certs"
+
+keycloak:
+  httpEnabled: false  # Disable HTTP when using TLS
+  production: true
+  hostname: "auth.yourdomain.com"
+```
+
+Create the TLS secret first with your certificate and key in PEM format:
+
+```bash
+kubectl create secret tls keycloak-tls-certs \
+  --cert=/path/to/certificate.pem \
+  --key=/path/to/private-key.pem
+```
+
+#### Using Truststore for Client Certificates or Outgoing HTTPS
+
+```yaml
+# values-tls-truststore.yaml
+tls:
+  enabled: true
+  existingSecret: "keycloak-tls-certs"
+  truststoreEnabled: true
+  truststoreExistingSecret: "keycloak-truststore"
+  truststorePassword: "changeit"
+```
+
+Create the truststore secret:
+
+```bash
+kubectl create secret generic keycloak-truststore \
+  --from-file=truststore.jks=/path/to/truststore.jks
+```
 
 ### High Availability Setup
 

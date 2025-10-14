@@ -31,10 +31,10 @@ spec:
 {{- with (include "keycloak.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
         - name: copy-quarkus-lib
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command: ["sh", "-c", "cp -r /opt/keycloak/lib/quarkus/* /shared-quarkus/"]
@@ -43,12 +43,12 @@ spec:
               mountPath: /shared-quarkus
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForPostgres.image }}
           command: ["sh", "-c", "until pg_isready -h {{ .Release.Name }}-postgres -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
         {{- else if .Values.mariadb.enabled }}
         - name: wait-for-mariadb
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForMariadb.image }}
           command: ["sh", "-c", "until mysqladmin ping -h {{ .Release.Name }}-mariadb -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
         {{- end }}
@@ -57,7 +57,7 @@ spec:
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command:
@@ -117,6 +117,16 @@ spec:
             {{- end }}
             {{- with .Values.keycloak.extraArgs }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - --https-certificate-file={{ .Values.tls.certificateFile }}
+            - --https-certificate-key-file={{ .Values.tls.certificateKeyFile }}
+            {{- end }}
+            {{- if .Values.tls.truststoreEnabled }}
+            - --https-trust-store-file={{ .Values.tls.truststoreFile }}
+            {{- if .Values.tls.truststorePassword }}
+            - --https-trust-store-password={{ .Values.tls.truststorePassword }}
+            {{- end }}
             {{- end }}
           env:
             - name: KC_HTTP_RELATIVE_PATH
@@ -239,6 +249,16 @@ spec:
               mountPath: /opt/keycloak/data/import
               readOnly: true
             {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /opt/keycloak/certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.tls.truststoreEnabled }}
+            - name: tls-truststore
+              mountPath: /opt/keycloak/truststore
+              readOnly: true
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
               {{- toYaml .Values.extraVolumeMounts | nindent 12}}
             {{- end }}
@@ -266,6 +286,24 @@ spec:
         - name: realm-config
           configMap:
             name: {{ include "keycloak.fullname" . }}-realm
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ include "keycloak.tlsSecretName" . }}
+            items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key
+        {{- end }}
+        {{- if .Values.tls.truststoreEnabled }}
+        - name: tls-truststore
+          secret:
+            secretName: {{ .Values.tls.truststoreExistingSecret }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
         {{- end }}
         {{- if .Values.extraVolumes }}
           {{- toYaml .Values.extraVolumes | nindent 8 }}

@@ -79,6 +79,15 @@ config:
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
   existingConfigmapKey: ""
 
+## @Section Pod Disruption Budget
+pdb:
+  ## @param pdb.enabled Enable Pod Disruption Budget
+  enabled: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  maxUnavailable: ""
+
 persistence:
   ## @param persistence.enabled Enable persistent storage
   enabled: true
@@ -132,6 +141,8 @@ containerSecurityContext:
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Redis container's privilege escalation
   allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Read-only root filesystem
+  readOnlyRootFilesystem: true
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

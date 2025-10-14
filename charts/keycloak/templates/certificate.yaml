@@ -1,0 +1,55 @@
+{{- if and .Values.tls.enabled .Values.tls.certManager.enabled }}
+{{- $fullName := include "keycloak.fullname" . -}}
+{{- $secretName := .Values.tls.certManager.secretName | default (printf "%s-tls" $fullName) -}}
+{{- $dnsNames := .Values.tls.certManager.dnsNames -}}
+{{- if and (not $dnsNames) .Values.ingress.enabled }}
+  {{- $dnsNames = list }}
+  {{- range .Values.ingress.hosts }}
+    {{- $dnsNames = append $dnsNames .host }}
+  {{- end }}
+{{- end }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+  {{- with .Values.tls.certManager.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ $secretName }}
+  {{- if .Values.tls.certManager.duration }}
+  duration: {{ .Values.tls.certManager.duration }}
+  {{- end }}
+  {{- if .Values.tls.certManager.renewBefore }}
+  renewBefore: {{ .Values.tls.certManager.renewBefore }}
+  {{- end }}
+  issuerRef:
+    name: {{ .Values.tls.certManager.issuerRef.name | required "tls.certManager.issuerRef.name is required when cert-manager is enabled" }}
+    kind: {{ .Values.tls.certManager.issuerRef.kind }}
+    {{- if .Values.tls.certManager.issuerRef.group }}
+    group: {{ .Values.tls.certManager.issuerRef.group }}
+    {{- end }}
+  {{- if .Values.tls.certManager.commonName }}
+  commonName: {{ .Values.tls.certManager.commonName }}
+  {{- else if $dnsNames }}
+  commonName: {{ index $dnsNames 0 }}
+  {{- end }}
+  {{- if $dnsNames }}
+  dnsNames:
+    {{- range $dnsNames }}
+    - {{ . }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.tls.certManager.ipAddresses }}
+  ipAddresses:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.tls.certManager.usages }}
+  usages:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

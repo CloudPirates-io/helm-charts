@@ -1,0 +1,265 @@
+suite: test cert-manager integration
+templates:
+  - certificate.yaml
+  - deployment.yaml
+tests:
+  - it: should create Certificate when cert-manager is enabled
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          dnsNames:
+            - keycloak.example.com
+    template: certificate.yaml
+    asserts:
+      - isKind:
+          of: Certificate
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-keycloak
+      - equal:
+          path: spec.secretName
+          value: RELEASE-NAME-keycloak-tls
+      - equal:
+          path: spec.issuerRef.name
+          value: letsencrypt-prod
+      - equal:
+          path: spec.issuerRef.kind
+          value: ClusterIssuer
+      - equal:
+          path: spec.dnsNames[0]
+          value: keycloak.example.com
+      - equal:
+          path: spec.commonName
+          value: keycloak.example.com
+
+  - it: should not create Certificate when cert-manager is disabled
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: false
+        existingSecret: my-tls-secret
+    template: certificate.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not create Certificate when tls is disabled
+    set:
+      tls:
+        enabled: false
+        certManager:
+          enabled: true
+    template: certificate.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use custom secretName when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: my-issuer
+            kind: Issuer
+          secretName: custom-secret-name
+          dnsNames:
+            - auth.example.com
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.secretName
+          value: custom-secret-name
+
+  - it: should populate dnsNames from ingress.hosts when not specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+      ingress:
+        enabled: true
+        hosts:
+          - host: auth.example.com
+            paths:
+              - path: /
+                pathType: Prefix
+          - host: auth2.example.com
+            paths:
+              - path: /
+                pathType: Prefix
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.dnsNames[0]
+          value: auth.example.com
+      - equal:
+          path: spec.dnsNames[1]
+          value: auth2.example.com
+      - equal:
+          path: spec.commonName
+          value: auth.example.com
+
+  - it: should set duration and renewBefore when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          duration: 2160h
+          renewBefore: 360h
+          dnsNames:
+            - auth.example.com
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.duration
+          value: 2160h
+      - equal:
+          path: spec.renewBefore
+          value: 360h
+
+  - it: should set custom commonName when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          commonName: custom.example.com
+          dnsNames:
+            - auth.example.com
+            - auth2.example.com
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.commonName
+          value: custom.example.com
+
+  - it: should set ipAddresses when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          dnsNames:
+            - auth.example.com
+          ipAddresses:
+            - 192.168.1.100
+            - 10.0.0.1
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.ipAddresses[0]
+          value: 192.168.1.100
+      - equal:
+          path: spec.ipAddresses[1]
+          value: 10.0.0.1
+
+  - it: should set custom usages when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          dnsNames:
+            - auth.example.com
+          usages:
+            - server auth
+            - client auth
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: spec.usages[0]
+          value: server auth
+      - equal:
+          path: spec.usages[1]
+          value: client auth
+
+  - it: should add annotations when specified
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          dnsNames:
+            - auth.example.com
+          annotations:
+            custom.annotation/key: value
+    template: certificate.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["custom.annotation/key"]
+          value: value
+
+  - it: deployment should use cert-manager generated secret
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          dnsNames:
+            - auth.example.com
+    template: deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="tls-certs")].secret.secretName
+          value: RELEASE-NAME-keycloak-tls
+
+  - it: deployment should use custom cert-manager secret name
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: letsencrypt-prod
+            kind: ClusterIssuer
+          secretName: my-custom-secret
+          dnsNames:
+            - auth.example.com
+    template: deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="tls-certs")].secret.secretName
+          value: my-custom-secret
+
+  - it: should fail when issuerRef.name is not provided
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          dnsNames:
+            - auth.example.com
+    template: certificate.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: "tls.certManager.issuerRef.name is required when cert-manager is enabled"

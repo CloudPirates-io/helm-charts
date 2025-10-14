@@ -144,6 +144,14 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                                    | `{}`                                                                              |
 | `metrics.serviceMonitor.namespaceSelector` | Namespace selector for ServiceMonitor                                                   | `{}`                                                                              |
 
+### Pod Disruption Budget
+
+| Parameter           | Description                                                    | Default |
+|---------------------|----------------------------------------------------------------|---------|
+| `pdb.enabled`       | Enable Pod Disruption Budget                                   | `false` |
+| `pdb.minAvailable`  | Minimum number/percentage of pods that should remain scheduled | `1`     |
+| `pdb.maxUnavailable`| Maximum number/percentage of pods that may be made unavailable | `""`    |
+
 ### Persistence
 
 | Parameter                  | Description                              | Default         |
@@ -188,6 +196,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `containerSecurityContext.runAsUser`                | User ID to run the container   | `999`   |
 | `containerSecurityContext.runAsNonRoot`             | Run as non-root user           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation     | `false` |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Read-only root filesystem      | `true`  |
 | `podSecurityContext.fsGroup`                        | Pod's Security Context fsGroup | `999`   |
 
 ### Health Checks

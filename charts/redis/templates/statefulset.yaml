@@ -299,8 +299,10 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.sentinel.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.sentinel.image) }}
-          {{- if .Values.sentinel.extraVolumeMounts }}
           volumeMounts:
+            - name: sentinel-config
+              mountPath: /tmp
+          {{- if .Values.sentinel.extraVolumeMounts }}
             {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
           {{- end }}
           command:
@@ -515,6 +517,8 @@ spec:
         {{- end }}
         {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
         - name: redis-config
+          emptyDir: {}
+        - name: sentinel-config
           emptyDir: {}
         - name: prestop-script
           configMap:
