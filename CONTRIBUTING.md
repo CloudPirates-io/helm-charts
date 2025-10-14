@@ -177,7 +177,7 @@ All charts must include comprehensive tests. Run tests using:
 
 ```bash
 # Test all charts
-./test-all-charts.sh
+./test-charts.sh
 
 # Test individual chart
 helm dependency update charts/your-chart
@@ -225,7 +225,7 @@ kubectl get all -n test
 3. **Testing**: Run all tests and ensure they pass
 
    ```bash
-   ./test-all-charts.sh
+   ./test-charts.sh
    helm lint ./charts/your-chart
    ```
 

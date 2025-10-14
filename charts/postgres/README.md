@@ -249,6 +249,8 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
+| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
+| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container                | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 

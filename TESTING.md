@@ -17,7 +17,7 @@ helm plugin install https://github.com/helm-unittest/helm-unittest
 Use the provided test runner script to run tests for all charts:
 
 ```bash
-./test-all-charts.sh
+./test-charts.sh
 ```
 
 This script will:
