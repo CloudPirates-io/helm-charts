@@ -1,0 +1,25 @@
+# CI test values for nginx chart
+# Optimized for faster testing in kind clusters
+
+image:
+  # Use IfNotPresent for faster testing
+  pullPolicy: IfNotPresent
+
+# Reduce probe delays for faster readiness in tests
+readinessProbe:
+  initialDelaySeconds: 2
+  periodSeconds: 3
+  timeoutSeconds: 2
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 2
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
