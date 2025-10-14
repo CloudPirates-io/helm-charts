@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.2 (2025-10-14)
+
+* [redis] Add additional args ([#384](https://github.com/CloudPirates-io/helm-charts/pull/384))
 
 ## 0.8.1 (2025-10-14)
 
