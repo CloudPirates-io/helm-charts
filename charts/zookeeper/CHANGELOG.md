@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 0.1.7 (2025-10-13)
+
+* add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
+
 ## 0.1.6 (2025-10-09)
 
 * Update charts/zookeeper/values.yaml zookeeper to v3.9.4 (patch) (#267) ([df3b9e3](https://github.com/CloudPirates-io/helm-charts/commit/df3b9e3))
