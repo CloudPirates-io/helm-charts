@@ -22,16 +22,10 @@
     },
     "imagePullSecrets": {
       "type": "array",
-      "title": "Image Pull Secrets",
-      "description": "Registry secret names as an array of objects",
       "items": {
-        "type": "object",
+        "type": ["string", "object"],
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Secret Name",
-            "description": "Name of the image pull secret"
-          }
+          "name": { "type": "string" }
         },
         "required": ["name"]
       }
@@ -60,11 +54,7 @@
           "type": "string",
           "title": "Image Pull Policy",
           "description": "ClusterPirate image pull policy",
-          "enum": [
-            "Always",
-            "Never",
-            "IfNotPresent"
-          ]
+          "enum": ["Always", "Never", "IfNotPresent"]
         }
       }
     },
@@ -151,9 +141,7 @@
                 "description": "Source for the environment variable value"
               }
             },
-            "required": [
-              "name"
-            ]
+            "required": ["name"]
           }
         },
         "probes": {
@@ -258,13 +246,7 @@
           "type": "string",
           "title": "Log Level",
           "description": "Application logging level",
-          "enum": [
-            "debug",
-            "info",
-            "warn",
-            "error",
-            "fatal"
-          ]
+          "enum": ["debug", "info", "warn", "error", "fatal"]
         },
         "healthPort": {
           "type": "integer",
@@ -419,7 +401,7 @@
           "type": "object",
           "title": "Valkey persistence settings",
           "properties": {
-              "enabled": {
+            "enabled": {
               "type": "boolean",
               "title": "Enable persistence"
             }

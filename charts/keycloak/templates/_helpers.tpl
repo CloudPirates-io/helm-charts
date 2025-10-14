@@ -192,3 +192,20 @@ Return the url to use for probes
 {{- printf "%s/realms/master" .Values.keycloak.httpRelativePath -}}
 {{- end -}}
 {{- end }}
+
+{{/*
+Return metrics service name
+*/}}
+{{- define "keycloak.metrics.fullname" -}}
+{{- printf "%s-metrics" (include "keycloak.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Return ServiceMonitor labels
+*/}}
+{{- define "keycloak.metrics.serviceMonitor.labels" -}}
+{{- include "keycloak.labels" . }}
+{{- with .Values.metrics.serviceMonitor.additionalLabels }}
+{{ toYaml . }}
+{{- end }}
+{{- end -}}

@@ -8,32 +8,48 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   lint-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
     outputs:
       changed: ${{ steps.list-changed.outputs.changed }}
       changedCharts: ${{ steps.list-changed.outputs.changedCharts }}
     steps:
       - name: Setup Helm
-        uses: Azure/setup-helm@v4.3.1
+        uses: Azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
 
       - name: Checkout pull request branch
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - name: Fetch upstream main branch
+        run: |
+          # Fetch the base repository's target branch and update origin/main to point to it
+          git remote set-url origin https://github.com/CloudPirates-io/helm-charts.git
+          git fetch origin ${{ github.event.repository.default_branch }}
+          # Re-add the fork as a remote and checkout the PR branch
+          git remote add fork https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git || true
+          git fetch fork ${{ github.head_ref }}
+
       # Python is required because `ct lint` runs Yamale (https://github.com/23andMe/Yamale) and
       # yamllint (https://github.com/adrienverge/yamllint) which require Python
       - name: Set up Python
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: 3.x
 
       - name: Set up chart-testing-action
-        uses: helm/chart-testing-action@v2.7.0
+        uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
 
       - name: Get changed charts
         id: list-changed
@@ -50,97 +66,91 @@ jobs:
             echo "No chart changes detected"
           fi
 
+      - name: Cache Helm plugins
+        if: steps.list-changed.outputs.changed == 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.local/share/helm/plugins
+          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-helm-plugins-
+
       - name: Installing plugin helm-unittest
         if: steps.list-changed.outputs.changed == 'true'
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest >/dev/null
+        run: |
+          if ! helm plugin list | grep -q unittest; then
+            helm plugin install https://github.com/helm-unittest/helm-unittest
+          else
+            echo "helm-unittest plugin already installed"
+          fi
 
       - name: Run chart testing (lint & unittest)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands "helm unittest {{ .Path }}"
+        run: |
+          ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
-  update-changelog:
+  integration-test:
     runs-on: ubuntu-latest
-    needs: [lint-test]
-    name: Automatically update CHANGELOG
+    timeout-minutes: 30
     permissions:
-      contents: write
+      contents: read
+    needs: [lint-test]
     if: needs.lint-test.outputs.changed == 'true'
     steps:
       - name: Checkout pull request branch
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
-      - name: Configure Git
+      - name: Setup Helm
+        uses: Azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
+
+      - name: Create kind cluster
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+        with:
+          cluster_name: helm-chart-test
+          wait: 300s
+
+      - name: Cache Helm plugins
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.local/share/helm/plugins
+          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-helm-plugins-
+
+      - name: Installing plugin helm-unittest
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          if ! helm plugin list | grep -q unittest; then
+            helm plugin install https://github.com/helm-unittest/helm-unittest
+          else
+            echo "helm-unittest plugin already installed"
+          fi
 
-      - name: Fetch tags
-        run: |
-          git fetch --tags
-
-      - name: Install conventional-changelog-cli
-        run: npm install -g conventional-changelog-cli
-
-      - name: Generate changelog
-        id: generate-changelog
+      - name: Run integration tests
         env:
-          PULL_REQUEST_NUMBER: "${{ github.event.pull_request.number }}"
-          PULL_REQUEST_URL: "${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.number }}"
-          GITHUB_TOKEN: "${{ github.token }}"
           CHANGED_CHARTS: ${{ needs.lint-test.outputs.changedCharts }}
         run: |
-          PR_TITLE="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${PULL_REQUEST_NUMBER}" | jq -r '.title')"
+          # Make script executable
+          chmod +x ./test-charts.sh
+
+          # Test each changed chart
           for chart_directory in ${CHANGED_CHARTS}; do
             CHART_NAME=${chart_directory#charts/}
-            echo "Updating CHANGELOG for chart $CHART_NAME"
+            echo "Testing chart: $CHART_NAME"
 
-            # Extract version from Chart.yaml
-            CHART_VERSION=$(yq eval '.version' "${GITHUB_WORKSPACE}/charts/${CHART_NAME}/Chart.yaml")
-            CHANGELOG_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md"
-            CHANGELOG_TMP_FILE="${GITHUB_WORKSPACE}/charts/${CHART_NAME}/CHANGELOG.md.tmp"
-
-            touch "$CHANGELOG_FILE"
-
-            # Generate new CHANGELOG.md
-            npx conventional-changelog-cli -i "$CHANGELOG_FILE" -s -t "${CHART_NAME}-" -r 0 --commit-path "charts/${CHART_NAME}"
-            
-            # Remove unreleased section (includes all intermediate commits in the branch) and create future entry based on PR title
-            # The unreleased section looks like this "## (YYYY-MM-DD)" whereas a released section looks like this "## 0.0.1 (YYYY-MM-DD)"
-            # So we only need to find a released section to start printing in the awk script below
-            awk '/^##[^(]*[0-9]/ {flag=1} flag {print}' "$CHANGELOG_FILE" > "$CHANGELOG_TMP_FILE"
-
-            # Remove chart name prefixes from commit messages
-            sed -i -E "s/\* \[${CHART_NAME}\] /\* /gi" "$CHANGELOG_TMP_FILE"
-            sed -i -E "s/\* \[$(echo ${CHART_NAME} | tr '[:lower:]' '[:upper:]')\] /\* /g" "$CHANGELOG_TMP_FILE"
-
-            # Remove extra newlines so the changelog file passes the markdown linter
-            sed -i -E -e '/^$/d' "$CHANGELOG_TMP_FILE" && sed -i -E -e 's/(##.*)/\n\1\n/g' "$CHANGELOG_TMP_FILE"
-            
-            # Include h1 heading and add entry for the current version. There is no tag for the current version (this will be created once merged), so we need to manually add it.
-            # We know the final squashed commit title, which will be the PR title. We cannot add a link to the commit in the main branch because it has not been
-            # merged yet (this will be corrected once a new version regenerates the changelog). Instead, we add the PR url which contains the exact same information.
-            echo -e -n "# Changelog\n\n## $CHART_VERSION ($(date +'%Y-%m-%d'))\n\n* ${PR_TITLE} ([#${PULL_REQUEST_NUMBER}](${PULL_REQUEST_URL}))\n" > "$CHANGELOG_FILE"
-
-            cat "$CHANGELOG_TMP_FILE" >> "$CHANGELOG_FILE"
-            rm "$CHANGELOG_TMP_FILE"
-            
-            # Commit all changes, if any
-            if git status -s | grep "charts/${CHART_NAME}/CHANGELOG.md"; then
-              git add "charts/${CHART_NAME}/CHANGELOG.md"
-              git commit -m "Update CHANGELOG.md" --signoff
+            # Check if integration test is disabled for this chart
+            if [ -f "${chart_directory}/.disable-unittest" ]; then
+              echo "⏩ Skipping integration test for $CHART_NAME (.disable-unittest found)"
+              continue
             fi
-          done
 
-      - name: Push all changes
-        run: |
-          cd $GITHUB_WORKSPACE/charts
-          # Push all the new commits, if any
-          if [[ $(git cherry -v) ]]; then
-            git push
-          else
-            echo "No changed CHANGELOGS, skip push"
-          fi
+            # Run test script without cluster creation (kind-action already created it)
+            # and without cleanup (let GitHub Actions handle it)
+            ./test-charts.sh "$CHART_NAME" --no-cleanup
+          done

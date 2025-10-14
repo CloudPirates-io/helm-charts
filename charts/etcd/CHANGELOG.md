@@ -1,9 +1,18 @@
 # Changelog
 
+
+## 0.1.3 (2025-10-13)
+
+
+## 0.1.2 (2025-10-13)
+
+* update helm-chart icon (#360) ([6544ddf](https://github.com/CloudPirates-io/helm-charts/commit/6544ddf))
+
 ## 0.1.1 (2025-10-10)
 
-* [Etcd] artifact hub repository id ([#333](https://github.com/CloudPirates-io/helm-charts/pull/333))
+* artifact hub repository id (#333) ([36ca7c7](https://github.com/CloudPirates-io/helm-charts/commit/36ca7c7))
+* [etcd]: Invalid repo used (#331) ([92617cf](https://github.com/CloudPirates-io/helm-charts/commit/92617cf))
 
 ## 0.1.0 (2025-10-10)
 
-* [etcd]: Initial etcd implementation (#230) ([c6476c3](https://github.com/CloudPirates-io/helm-charts/commit/c6476c3)), closes [#230](https://github.com/CloudPirates-io/helm-charts/issues/230)
+* Initial tagged release

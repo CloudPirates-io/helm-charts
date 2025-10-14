@@ -32,7 +32,7 @@ spec:
       serviceAccountName: {{ include "postgres.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "postgres.imagePullSecrets" .) }}
-{{ . | nindent 6 }}
+{{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.initContainers }}
@@ -188,14 +188,9 @@ spec:
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
               mountPath: /tmp
-            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts }}
+            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
             - name: custom-init-scripts
-              mountPath: /docker-entrypoint-initdb.d/
-            {{- end }}
-            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-            - name: init-custom-user
-              mountPath: /docker-entrypoint-initdb.d/init-custom-user.sh
-              subPath: init-custom-user.sh
+              mountPath: {{ .Values.initdb.directory }}
             {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
@@ -260,18 +255,11 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts }}
+        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
         - name: custom-init-scripts
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
-        {{- end }}
-        {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-        - name: init-custom-user
-          configMap:
-            name: {{ printf "%s-init-custom-user" (include "postgres.fullname" .) }}
-            items:
-              - key: init-custom-user.sh
-                path: init-custom-user.sh
+            defaultMode: 0755
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

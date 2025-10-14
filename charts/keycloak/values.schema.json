@@ -12,9 +12,12 @@
         "imagePullSecrets": {
           "type": "array",
           "items": {
-            "type": "string"
-          },
-          "description": "Global Docker registry secret names as an array"
+            "type": ["string", "object"],
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
         }
       }
     },
@@ -55,7 +58,11 @@
         },
         "imagePullPolicy": {
           "type": "string",
-          "enum": ["Always", "IfNotPresent", "Never"],
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ],
           "description": "Keycloak image pull policy"
         }
       }
@@ -198,7 +205,11 @@
         },
         "proxyHeaders": {
           "type": "string",
-          "enum": ["", "forwarded", "xforwarded"],
+          "enum": [
+            "",
+            "forwarded",
+            "xforwarded"
+          ],
           "description": "The proxy headers that should be accepted by the server. (forwarded, xforwarded)"
         },
         "proxyProtocolEnabled": {
@@ -216,6 +227,13 @@
         "httpRelativePath": {
           "type": "string",
           "description": "Set relative path for serving resources; must start with a /"
+        },
+        "extraArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional arguments to pass to the Keycloak startup command"
         }
       }
     },
@@ -224,7 +242,11 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["postgres", "mysql", "mariadb"],
+          "enum": [
+            "postgres",
+            "mysql",
+            "mariadb"
+          ],
           "description": "Database type (postgres, mysql, mariadb)"
         },
         "host": {
@@ -275,7 +297,11 @@
       "properties": {
         "stack": {
           "type": "string",
-          "enum": ["local", "ispn", "default"],
+          "enum": [
+            "local",
+            "ispn",
+            "default"
+          ],
           "description": "Cache stack (local, ispn, default)"
         },
         "configFile": {
@@ -321,7 +347,12 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"],
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer",
+            "ExternalName"
+          ],
           "description": "Keycloak service type"
         },
         "httpPort": {
@@ -393,7 +424,11 @@
                     },
                     "pathType": {
                       "type": "string",
-                      "enum": ["Exact", "Prefix", "ImplementationSpecific"],
+                      "enum": [
+                        "Exact",
+                        "Prefix",
+                        "ImplementationSpecific"
+                      ],
                       "description": "Path type for Keycloak ingress"
                     }
                   }
@@ -449,13 +484,115 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"]
+            "enum": [
+              "ReadWriteOnce",
+              "ReadOnlyMany",
+              "ReadWriteMany"
+            ]
           },
           "description": "Persistent Volume access modes"
         },
         "existingClaim": {
           "type": "string",
           "description": "The name of an existing PVC to use for persistence"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable metrics endpoint on Keycloak"
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "ClusterIP",
+                "NodePort",
+                "LoadBalancer",
+                "ExternalName"
+              ],
+              "description": "Metrics service type"
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "description": "Metrics service port"
+            },
+            "targetPort": {
+              "type": "string"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Metrics service annotations"
+            },
+            "labels": {
+              "type": "object",
+              "description": "Labels to add to the metrics service"
+            }
+          }
+        },
+        "serviceMonitor": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Create ServiceMonitor resource for scraping metrics using PrometheusOperator"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Namespace in which ServiceMonitor is created"
+            },
+            "interval": {
+              "type": "string",
+              "description": "Interval at which metrics should be scraped"
+            },
+            "labels": {
+              "type": "object",
+              "description": "Labels to add to the ServiceMonitor"
+            },
+            "scrapeTimeout": {
+              "type": "string",
+              "description": "Timeout after which the scrape is ended"
+            },
+            "additionalLabels": {
+              "type": "object",
+              "description": "Additional labels for the ServiceMonitor"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Annotations for the ServiceMonitor"
+            },
+            "relabelings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "description": "Relabeling configuration"
+              },
+              "description": "Relabeling configurations for the ServiceMonitor"
+            },
+            "metricRelabelings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "description": "Metric relabeling configuration"
+              },
+              "description": "Metric relabeling configurations for the ServiceMonitor"
+            },
+            "honorLabels": {
+              "type": "boolean",
+              "description": "Honor labels on the target service"
+            },
+            "jobLabel": {
+              "type": "string",
+              "description": "The label to use to retrieve the job name"
+            }
+          }
         }
       }
     },

@@ -90,6 +90,18 @@ config:
     ## You can also use an absolute value, e.g.: 256Mi
     ##
     value: 0.4
+  ## Logging configuration
+  ## ref: https://www.rabbitmq.com/docs/logging
+  ##
+  logging:
+    ## @param config.logging.console.enabled Enable console logging (outputs to stdout/stderr instead of files)
+    console:
+      enabled: true
+    ## @param config.logging.file.enabled Enable file logging (outputs to /var/log/rabbitmq/)
+    file:
+      enabled: false
+    ## @param config.logging.level Log level for RabbitMQ (debug, info, warning, error, critical, none)
+    level: "info"
   ## @param config.extraConfiguration Additional RabbitMQ configuration
   extraConfiguration: ""
   ## @param config.advancedConfiguration Advanced RabbitMQ configuration
@@ -248,13 +260,13 @@ readinessProbe:
   ## @param readinessProbe.enabled Enable readinessProbe on RabbitMQ containers
   enabled: true
   ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  initialDelaySeconds: 0
+  initialDelaySeconds: 10
   ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
-  periodSeconds: 10
+  periodSeconds: 30
   ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  timeoutSeconds: 5
+  timeoutSeconds: 20
   ## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
-  failureThreshold: 1
+  failureThreshold: 3
   ## @param readinessProbe.successThreshold Success threshold for readinessProbe
   successThreshold: 1
 
