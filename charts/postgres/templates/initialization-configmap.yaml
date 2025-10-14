@@ -33,6 +33,6 @@ data:
     echo "✅ Custom user and database created successfully!"
   {{- end }}
   {{- if .Values.initdb.scripts }}
-  {{- include "common.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
+  {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
   {{- end }}
 {{- end }}

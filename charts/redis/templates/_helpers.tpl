@@ -2,42 +2,42 @@
 Expand the name of the chart.
 */}}
 {{- define "redis.name" -}}
-{{- include "common.name" . -}}
+{{- include "cloudpirates.name" . -}}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
 {{- define "redis.fullname" -}}
-{{- include "common.fullname" . -}}
+{{- include "cloudpirates.fullname" . -}}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "redis.chart" -}}
-{{- include "common.chart" . -}}
+{{- include "cloudpirates.chart" . -}}
 {{- end }}
 
 {{/*
 Common labels
 */}}
 {{- define "redis.labels" -}}
-{{- include "common.labels" . }}
+{{- include "cloudpirates.labels" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "redis.selectorLabels" -}}
-{{- include "common.selectorLabels" . -}}
+{{- include "cloudpirates.selectorLabels" . -}}
 {{- end }}
 
 {{/*
 Common annotations
 */}}
 {{- define "redis.annotations" -}}
-{{- include "common.annotations" . -}}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
@@ -65,14 +65,14 @@ Get the secret key for Redis password
 Return the proper Redis image name
 */}}
 {{- define "redis.image" -}}
-{{- include "common.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "redis.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
 {{- end -}}
 
 {{- define "redis.configFullName" -}}
@@ -87,14 +87,14 @@ Return the proper Docker Image Registry Secret Names
 Return the proper Redis Sentinel image name
 */}}
 {{- define "redis.sentinel.image" -}}
-{{- include "common.image" (dict "image" .Values.sentinel.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.sentinel.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
 Return the proper Redis metrics image name
 */}}
 {{- define "redis.metrics.image" -}}
-{{- include "common.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
