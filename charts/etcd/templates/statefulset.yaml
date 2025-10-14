@@ -39,10 +39,10 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "etcd.serviceAccountName" . }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "etcd.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
           command:
