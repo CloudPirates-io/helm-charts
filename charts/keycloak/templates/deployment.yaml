@@ -290,7 +290,7 @@ spec:
         {{- if .Values.tls.enabled }}
         - name: tls-certs
           secret:
-            secretName: {{ .Values.tls.existingSecret }}
+            secretName: {{ include "keycloak.tlsSecretName" . }}
             items:
               - key: tls.crt
                 path: tls.crt

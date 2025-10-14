@@ -256,6 +256,76 @@
           "type": "string",
           "description": "Path where the TLS certificate key file will be mounted (internal)"
         },
+        "certManager": {
+          "type": "object",
+          "description": "cert-manager integration configuration",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable cert-manager integration for automatic certificate provisioning"
+            },
+            "issuerRef": {
+              "type": "object",
+              "description": "Reference to the cert-manager issuer",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the cert-manager Issuer or ClusterIssuer"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["Issuer", "ClusterIssuer"],
+                  "description": "Kind of the cert-manager issuer"
+                },
+                "group": {
+                  "type": "string",
+                  "description": "Group of the cert-manager issuer"
+                }
+              }
+            },
+            "duration": {
+              "type": "string",
+              "description": "Certificate duration (e.g., 2160h for 90 days)"
+            },
+            "renewBefore": {
+              "type": "string",
+              "description": "Time before expiry to renew certificate (e.g., 360h for 15 days)"
+            },
+            "commonName": {
+              "type": "string",
+              "description": "Certificate common name"
+            },
+            "dnsNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of DNS names for the certificate"
+            },
+            "ipAddresses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of IP addresses for the certificate"
+            },
+            "secretName": {
+              "type": "string",
+              "description": "Name for the generated secret"
+            },
+            "usages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Certificate key usages"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Additional annotations for the Certificate resource"
+            }
+          }
+        },
         "truststoreEnabled": {
           "type": "boolean",
           "description": "Enable truststore for client certificate validation or outgoing HTTPS requests"

@@ -197,7 +197,9 @@ Return the url to use for probes
 Return TLS certificate secret name
 */}}
 {{- define "keycloak.tlsSecretName" -}}
-{{- if .Values.tls.existingSecret -}}
+{{- if .Values.tls.certManager.enabled -}}
+    {{- .Values.tls.certManager.secretName | default (printf "%s-tls" (include "keycloak.fullname" .)) -}}
+{{- else if .Values.tls.existingSecret -}}
     {{- .Values.tls.existingSecret -}}
 {{- else -}}
     {{- printf "%s-tls" (include "keycloak.fullname" .) -}}
