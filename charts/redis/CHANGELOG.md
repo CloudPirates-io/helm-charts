@@ -1,8 +1,11 @@
 # Changelog
 
+
 ## 0.8.2 (2025-10-14)
 
-* [redis] Add additional args ([#384](https://github.com/CloudPirates-io/helm-charts/pull/384))
+* Add additional args (#384) ([6dc59eb](https://github.com/CloudPirates-io/helm-charts/commit/6dc59eb))
+* chore: update CHANGELOG.md for merged changes ([d81bc22](https://github.com/CloudPirates-io/helm-charts/commit/d81bc22))
+* chore: update CHANGELOG.md for merged changes ([514e3a7](https://github.com/CloudPirates-io/helm-charts/commit/514e3a7))
 
 ## 0.8.1 (2025-10-14)
 

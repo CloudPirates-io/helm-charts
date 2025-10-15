@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.1 (2025-10-15)
+
+* rabbitmq - Add labeling to persistent volume claim template ([#389](https://github.com/CloudPirates-io/helm-charts/pull/389))
 
 ## 0.5.0 (2025-10-14)
 
