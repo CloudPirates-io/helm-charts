@@ -15,3 +15,37 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
           value: /auth/realms/master
+  - it: hostname explicitly set should be unchanged
+    set:
+      keycloak:
+        hostname: keycloak.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --hostname=keycloak.example.com
+  - it: hostname with template should be rendered
+    set:
+      keycloak:
+        hostname: keycloak.{{ .Values.myDomain }}
+      myDomain: mydomain.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --hostname=keycloak.mydomain.com
+  - it: hostnameAdmin explicitly set should be unchanged
+    set:
+      keycloak:
+        hostnameAdmin: keycloak.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --hostname-admin=keycloak.example.com
+  - it: hostname with template should be rendered
+    set:
+      keycloak:
+        hostnameAdmin: keycloak.{{ .Values.myDomain }}
+      myDomain: mydomain.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --hostname-admin=keycloak.mydomain.com

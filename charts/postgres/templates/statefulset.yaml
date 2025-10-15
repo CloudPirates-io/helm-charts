@@ -192,6 +192,9 @@ spec:
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
             {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
           image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
@@ -260,6 +263,9 @@ spec:
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
             defaultMode: 0755
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

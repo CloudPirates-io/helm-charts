@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.8.2 (2025-10-14)
+
+* Add additional args (#384) ([6dc59eb](https://github.com/CloudPirates-io/helm-charts/commit/6dc59eb))
+* chore: update CHANGELOG.md for merged changes ([d81bc22](https://github.com/CloudPirates-io/helm-charts/commit/d81bc22))
+* chore: update CHANGELOG.md for merged changes ([514e3a7](https://github.com/CloudPirates-io/helm-charts/commit/514e3a7))
+
+## 0.8.1 (2025-10-14)
+
+* Fix namespace key prefix on redis pdb (#385) ([6451b4c](https://github.com/CloudPirates-io/helm-charts/commit/6451b4c))
+* chore: update CHANGELOG.md for merged changes ([420f342](https://github.com/CloudPirates-io/helm-charts/commit/420f342))
+* chore: update CHANGELOG.md for merged changes ([f594b6b](https://github.com/CloudPirates-io/helm-charts/commit/f594b6b))
+
 ## 0.8.0 (2025-10-14)
 
 * Add pdb and rootOnlyFilesystem options (#383) ([86b889f](https://github.com/CloudPirates-io/helm-charts/commit/86b889f))

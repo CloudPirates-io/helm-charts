@@ -182,6 +182,13 @@ extraEnv: []
 # - name: EXTRA_VAR
 #   value: "extra_value"
 
+## @param extraFlags Additional command-line flags to pass to redis-server
+## Example:
+## extraFlags:
+##   - --maxmemory 230mb
+##   - --maxmemory-policy volatile-lru
+extraFlags: []
+
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
 

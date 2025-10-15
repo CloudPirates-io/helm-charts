@@ -406,6 +406,14 @@
           "description": "Size of persistent volume",
           "pattern": "^\\d+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
         },
+        "labels": {
+          "type": "object",
+          "title": "PVC Labels",
+          "description": "Labels for persistent volume claims",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "annotations": {
           "type": "object",
           "title": "PVC Annotations",

@@ -733,6 +733,22 @@
       "title": "Extra Environment Secret",
       "description": "Name of an existing Secret containing additional environment variables"
     },
+    "extraVolumes": {
+      "type": "array",
+      "title": "Extra Volumes",
+      "description": "Additional volumes to add to the pod",
+      "items": {
+        "type": "object"
+      }
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "title": "Extra Volume Mounts",
+      "description": "Additional volume mounts to add to the MongoDB container",
+      "items": {
+        "type": "object"
+      }
+    },
     "initContainers": {
       "type": "array",
       "title": "Init Containers",
