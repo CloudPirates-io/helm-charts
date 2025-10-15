@@ -36,7 +36,7 @@ jobs:
           days-before-issue-stale: 14
           days-before-issue-close: 7
           stale-issue-label: "stale"
-          exempt-issue-labels: "pinned,security,bug,enhancement"
+          exempt-issue-labels: "pinned,security,bug,enhancement,no-stale"
 
           # PR settings
           stale-pr-message: |
@@ -62,7 +62,7 @@ jobs:
           days-before-pr-stale: 14
           days-before-pr-close: 7
           stale-pr-label: "stale"
-          exempt-pr-labels: "pinned,security,work-in-progress,wip"
+          exempt-pr-labels: "pinned,security,work-in-progress,wip,no-stale"
 
           # General settings
           operations-per-run: 100
