@@ -200,6 +200,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `persistence.storageClass` | Storage class to use for persistent volume | `""`                |
 | `persistence.accessModes`  | Persistent Volume access modes             | `["ReadWriteOnce"]` |
 | `persistence.size`         | Size of persistent volume                  | `8Gi`               |
+| `persistence.labels`       | Labels for persistent volume claims        | `{}`                |
 | `persistence.annotations`  | Annotations for persistent volume claims   | `{}`                |
 
 ### Ingress configuration

@@ -170,6 +170,8 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size Size of persistent volume
   size: 8Gi
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
 
