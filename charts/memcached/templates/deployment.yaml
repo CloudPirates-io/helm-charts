@@ -22,6 +22,7 @@ spec:
 {{- with (include "memcached.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "memcached.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
