@@ -35,13 +35,13 @@ spec:
 {{- with (include "mariadb.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.galera.enabled }}
       initContainers:
         - name: galera-config-init
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - /bin/bash
             - -c
@@ -63,7 +63,7 @@ spec:
         - name: mariadb
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           {{- if .Values.galera.enabled }}
           command: 
             - /bin/bash
