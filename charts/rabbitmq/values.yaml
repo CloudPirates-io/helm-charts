@@ -129,7 +129,7 @@ initContainer:
     ## @param initContainer.image.registry Init container image repository
     repository: busybox
     ## @param initContainer.image.tag Init container image tag
-    tag: "1.37.0@sha256:d82f458899c9696cb26a7c02d5568f81c8c8223f8661bb2a7988b269c8b9051e"
+    tag: "1.37.0@sha256:2f590fc602ce325cbff2ccfc39499014d039546dc400ef8bbf5c6ffb860632e7"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
 
@@ -170,6 +170,8 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size Size of persistent volume
   size: 8Gi
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
 
