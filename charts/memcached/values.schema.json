@@ -1,180 +1,253 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "Memcached Helm Chart Values Schema",
-  "description": "Schema for Memcached Helm chart values",
-  "properties": {
-    "global": {
-      "type": "object",
-      "title": "Global parameters",
-      "description": "Global Docker image parameters",
-      "properties": {
-        "imageRegistry": {
-          "type": "string",
-          "title": "Global Docker Image Registry",
-          "description": "Global Docker image registry"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "affinity": {
+            "type": "object"
         },
-        "imagePullSecrets": {
-          "type": "array",
-          "items": {
-            "type": ["string", "object"],
+        "commonAnnotations": {
+            "type": "object"
+        },
+        "commonLabels": {
+            "type": "object"
+        },
+        "config": {
+            "type": "object",
             "properties": {
-              "name": { "type": "string" }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "image": {
-      "type": "object",
-      "title": "Memcached image configuration",
-      "description": "Configuration for Memcached container image",
-      "properties": {
-        "registry": {
-          "type": "string",
-          "title": "Memcached Image Registry",
-          "description": "Memcached image registry"
+                "extraArgs": {
+                    "type": "array"
+                },
+                "maxConnections": {
+                    "type": "integer"
+                },
+                "memoryLimit": {
+                    "type": "integer"
+                },
+                "verbosity": {
+                    "type": "integer"
+                }
+            }
         },
-        "repository": {
-          "type": "string",
-          "title": "Memcached Image Repository",
-          "description": "Memcached image repository"
+        "configMap": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "object"
+                }
+            }
         },
-        "tag": {
-          "type": "string",
-          "title": "Memcached Image Tag",
-          "description": "Memcached image tag"
+        "containerSecurityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                }
+            }
         },
-        "pullPolicy": {
-          "type": "string",
-          "title": "Image Pull Policy",
-          "description": "Image pull policy",
-          "enum": [
-            "Always",
-            "IfNotPresent",
-            "Never"
-          ]
-        }
-      }
-    },
-    "replicaCount": {
-      "type": "integer",
-      "title": "Replica Count",
-      "description": "Number of Memcached replicas",
-      "minimum": 1
-    },
-    "service": {
-      "type": "object",
-      "title": "Service configuration",
-      "description": "Kubernetes service configuration",
-      "properties": {
-        "type": {
-          "type": "string",
-          "title": "Service Type",
-          "description": "Kubernetes service type",
-          "enum": [
-            "ClusterIP",
-            "NodePort",
-            "LoadBalancer"
-          ]
+        "extraEnv": {
+            "type": "array"
         },
-        "port": {
-          "type": "integer",
-          "title": "Service Port",
-          "description": "Service port",
-          "minimum": 1,
-          "maximum": 65535
-        }
-      }
-    },
-    "config": {
-      "type": "object",
-      "title": "Memcached configuration",
-      "description": "Memcached configuration options",
-      "properties": {
-        "memoryLimit": {
-          "type": "integer",
-          "title": "Memory Limit",
-          "description": "Maximum amount of memory to use for cache (in MB)",
-          "minimum": 1
+        "extraObjects": {
+            "type": "array"
         },
-        "maxConnections": {
-          "type": "integer",
-          "title": "Max Connections",
-          "description": "Maximum number of simultaneous connections",
-          "minimum": 1
+        "extraVolumeMounts": {
+            "type": "array"
         },
-        "verbosity": {
-          "type": "integer",
-          "title": "Verbosity",
-          "description": "Verbosity level",
-          "minimum": 0,
-          "maximum": 2
+        "extraVolumes": {
+            "type": "array"
         },
-        "extraArgs": {
-          "type": "array",
-          "title": "Extra Arguments",
-          "description": "Additional command-line arguments",
-          "items": {
+        "fullnameOverride": {
             "type": "string"
-          }
-        }
-      }
-    },
-    "resources": {
-      "type": "object",
-      "title": "Resource configuration",
-      "description": "Pod resource configuration"
-    },
-    "extraObjects": {
-      "type": "array",
-      "title": "Extra Objects",
-      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
-      "items": {
-        "type": "object",
-        "description": "A Kubernetes manifest object. All fields are allowed."
-      }
-    },
-    "pdb": {
-      "type": "object",
-      "title": "Pod Disruption Budget configuration",
-      "description": "Pod Disruption Budget (PDB) configuration to ensure high availability",
-      "properties": {
-        "create": {
-          "type": "boolean",
-          "title": "Create PDB",
-          "description": "Enable/disable a Pod Disruption Budget creation"
         },
-        "minAvailable": {
-          "oneOf": [
-            {
-              "type": "integer",
-              "minimum": 0
-            },
-            {
-              "type": "string",
-              "pattern": "^([0-9]+%|)$"
+        "global": {
+            "type": "object",
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "type": "string"
+                }
             }
-          ],
-          "title": "Minimum Available",
-          "description": "Minimum number/percentage of pods that should remain scheduled"
         },
-        "maxUnavailable": {
-          "oneOf": [
-            {
-              "type": "integer",
-              "minimum": 0
-            },
-            {
-              "type": "string",
-              "pattern": "^([0-9]+%|)$"
+        "image": {
+            "type": "object",
+            "properties": {
+                "pullPolicy": {
+                    "type": "string"
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
             }
-          ],
-          "title": "Maximum Unavailable",
-          "description": "Maximum number/percentage of pods that may be made unavailable"
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "className": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "array"
+                }
+            }
+        },
+        "livenessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "pdb": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean"
+                },
+                "maxUnavailable": {
+                    "type": "string"
+                },
+                "minAvailable": {
+                    "type": "string"
+                }
+            }
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                }
+            }
+        },
+        "readinessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "replicaCount": {
+            "type": "integer"
+        },
+        "resources": {
+            "type": "object"
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array"
         }
-      }
     }
-  }
 }

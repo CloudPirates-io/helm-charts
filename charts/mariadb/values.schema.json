@@ -1,919 +1,453 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "MariaDB Helm Chart Values Schema",
-  "description": "Schema for MariaDB Helm chart values",
-  "properties": {
-    "global": {
-      "type": "object",
-      "title": "Global Parameters",
-      "description": "Global Docker image parameters",
-      "properties": {
-        "imageRegistry": {
-          "type": "string",
-          "title": "Global Docker Image Registry",
-          "description": "Global Docker Image registry"
-        },
-        "imagePullSecrets": {
-          "type": "array",
-          "items": {
-            "type": ["string", "object"],
-            "properties": {
-              "name": { "type": "string" }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "nameOverride": {
-      "type": "string",
-      "title": "Name Override",
-      "description": "String to partially override mariadb.fullname"
-    },
-    "fullnameOverride": {
-      "type": "string",
-      "title": "Full Name Override",
-      "description": "String to fully override mariadb.fullname"
-    },
-    "commonLabels": {
-      "type": "object",
-      "title": "Common Labels",
-      "description": "Labels to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "commonAnnotations": {
-      "type": "object",
-      "title": "Common Annotations",
-      "description": "Annotations to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "image": {
-      "type": "object",
-      "title": "MariaDB Image Configuration",
-      "description": "MariaDB container image parameters",
-      "properties": {
-        "registry": {
-          "type": "string",
-          "title": "MariaDB Image Registry",
-          "description": "MariaDB image registry"
-        },
-        "repository": {
-          "type": "string",
-          "title": "MariaDB Image Repository",
-          "description": "MariaDB image repository"
-        },
-        "tag": {
-          "type": "string",
-          "title": "MariaDB Image Tag",
-          "description": "MariaDB image tag with digest"
-        },
-        "imagePullPolicy": {
-          "type": "string",
-          "title": "MariaDB Image Pull Policy",
-          "description": "MariaDB image pull policy",
-          "enum": ["Always", "Never", "IfNotPresent"]
-        },
-        "pullSecrets": {
-          "type": "array",
-          "title": "MariaDB Image Pull Secrets",
-          "description": "MariaDB image pull secrets",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "title": "Secret Name",
-                "description": "Name of the image pull secret"
-              }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "auth": {
-      "type": "object",
-      "title": "MariaDB Authentication",
-      "description": "Authentication parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Authentication",
-          "description": "MariaDB authentication enabled or disabled"
-        },
-        "rootPassword": {
-          "type": "string",
-          "title": "MariaDB Root Password",
-          "description": "MariaDB root password"
-        },
-        "database": {
-          "type": "string",
-          "title": "MariaDB Custom Database",
-          "description": "MariaDB custom database"
-        },
-        "username": {
-          "type": "string",
-          "title": "MariaDB Custom Username",
-          "description": "MariaDB custom user name"
-        },
-        "password": {
-          "type": "string",
-          "title": "MariaDB Custom Password",
-          "description": "MariaDB custom user password"
-        },
-        "existingSecret": {
-          "type": "string",
-          "title": "Existing Secret",
-          "description": "Name of existing secret to use for MariaDB credentials"
-        },
-        "allowEmptyRootPassword": {
-          "type": "string",
-          "title": "Allow Empty Root Password",
-          "description": "Allow the root user of MariaDB to have no password set"
-        },
-        "secretKeys": {
-          "type": "object",
-          "title": "Secret Keys",
-          "description": "Keys in existing secret",
-          "properties": {
-            "rootPasswordKey": {
-              "type": "string",
-              "title": "Root Password Key",
-              "description": "Name of key in existing secret to use for root password"
-            },
-            "userPasswordKey": {
-              "type": "string",
-              "title": "User Password Key",
-              "description": "Name of key in existing secret to use for user password"
-            }
-          }
-        }
-      }
-    },
-    "config": {
-      "type": "object",
-      "title": "MariaDB Configuration",
-      "description": "MariaDB configuration parameters",
-      "properties": {
-        "customConfiguration": {
-          "type": "string",
-          "title": "Custom Configuration",
-          "description": "Custom configuration for MariaDB"
-        },
-        "existingConfigMap": {
-          "type": "string",
-          "title": "Existing ConfigMap",
-          "description": "Name of existing ConfigMap with MariaDB configuration"
-        }
-      }
-    },
-    "galera": {
-      "type": "object",
-      "title": "Galera Cluster Configuration",
-      "description": "Galera Cluster parameters for MariaDB",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Galera Cluster",
-          "description": "Enable Galera Cluster mode"
-        },
-        "name": {
-          "type": "string",
-          "title": "Galera Cluster Name",
-          "description": "Galera cluster name"
-        },
-        "bootstrap": {
-          "type": "object",
-          "title": "Galera Bootstrap Configuration",
-          "description": "Bootstrap mode configuration",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "title": "Enable Bootstrap Mode",
-              "description": "Enable bootstrap mode for the first node in the cluster"
-            }
-          }
-        },
-        "replicaCount": {
-          "type": "integer",
-          "title": "Replica Count",
-          "description": "Number of nodes in the Galera cluster",
-          "minimum": 1
-        },
-        "wsrepProvider": {
-          "type": "string",
-          "title": "Wsrep Provider",
-          "description": "Path to wsrep provider library"
-        },
-        "wsrepMethod": {
-          "type": "string",
-          "title": "Wsrep Method",
-          "description": "Method for state snapshot transfers",
-          "enum": ["mariabackup", "mysqldump", "rsync"]
-        },
-        "forceSafeToBootstrap": {
-          "type": "boolean",
-          "title": "Force Safe to Bootstrap",
-          "description": "Force safe_to_bootstrap=1 in grastate.dat"
-        },
-        "wsrepSlaveThreads": {
-          "type": "integer",
-          "title": "Wsrep Slave Threads",
-          "description": "Number of slave threads for applying writesets",
-          "minimum": 1
-        },
-        "wsrepCertifyNonPK": {
-          "type": "boolean",
-          "title": "Wsrep Certify Non-PK",
-          "description": "Require primary key for replication"
-        },
-        "wsrepMaxWsRows": {
-          "type": "integer",
-          "title": "Wsrep Max WS Rows",
-          "description": "Maximum number of rows in writeset",
-          "minimum": 0
-        },
-        "wsrepMaxWsSize": {
-          "type": "string",
-          "title": "Wsrep Max WS Size",
-          "description": "Maximum size of writeset in bytes"
-        },
-        "wsrepDebug": {
-          "type": "boolean",
-          "title": "Wsrep Debug",
-          "description": "Enable wsrep debugging"
-        },
-        "wsrepRetryAutocommit": {
-          "type": "integer",
-          "title": "Wsrep Retry Autocommit",
-          "description": "Number of times to retry autocommit",
-          "minimum": 1
-        },
-        "wsrepAutoIncrementControl": {
-          "type": "boolean",
-          "title": "Wsrep Auto Increment Control",
-          "description": "Enable auto increment control"
-        },
-        "wsrepDrupalHack": {
-          "type": "boolean",
-          "title": "Wsrep Drupal Hack",
-          "description": "Enable Drupal compatibility hack"
-        },
-        "wsrepLogConflicts": {
-          "type": "boolean",
-          "title": "Wsrep Log Conflicts",
-          "description": "Log conflicts to error log"
-        },
-        "innodb": {
-          "type": "object",
-          "title": "InnoDB Configuration",
-          "description": "InnoDB specific settings for Galera",
-          "properties": {
-            "flushLogAtTrxCommit": {
-              "type": "integer",
-              "title": "Flush Log at Transaction Commit",
-              "description": "InnoDB flush log at transaction commit",
-              "enum": [0, 1, 2]
-            },
-            "bufferPoolSize": {
-              "type": "string",
-              "title": "Buffer Pool Size",
-              "description": "InnoDB buffer pool size",
-              "pattern": "^\\d+(K|M|G|T)?$"
-            }
-          }
-        },
-        "sst": {
-          "type": "object",
-          "title": "SST Configuration",
-          "description": "State Snapshot Transfer specific configuration",
-          "properties": {
-            "user": {
-              "type": "string",
-              "title": "SST User",
-              "description": "SST user for authentication"
-            },
-            "password": {
-              "type": "string",
-              "title": "SST Password",
-              "description": "SST password for authentication"
-            },
-            "existingSecret": {
-              "type": "string",
-              "title": "SST Existing Secret",
-              "description": "Existing secret containing SST credentials"
-            },
-            "secretKeys": {
-              "type": "object",
-              "title": "SST Secret Keys",
-              "description": "Keys in existing secret for SST credentials",
-              "properties": {
-                "userKey": {
-                  "type": "string",
-                  "title": "SST User Key",
-                  "description": "Secret key for SST user"
-                },
-                "passwordKey": {
-                  "type": "string",
-                  "title": "SST Password Key",
-                  "description": "Secret key for SST password"
-                }
-              }
-            }
-          }
-        },
-        "recovery": {
-          "type": "object",
-          "title": "Galera Recovery Configuration",
-          "description": "Enable Galera recovery options",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "title": "Enable Recovery",
-              "description": "Enable automatic recovery"
-            },
-            "clusterBootstrap": {
-              "type": "boolean",
-              "title": "Cluster Bootstrap",
-              "description": "Enable cluster bootstrap in recovery"
-            }
-          }
-        }
-      }
-    },
-    "service": {
-      "type": "object",
-      "title": "Service Configuration",
-      "description": "MariaDB service parameters",
-      "properties": {
-        "type": {
-          "type": "string",
-          "title": "Service Type",
-          "description": "MariaDB service type",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
-        },
-        "port": {
-          "type": "integer",
-          "title": "Service Port",
-          "description": "MariaDB service port",
-          "minimum": 1,
-          "maximum": 65535
-        },
-        "nodePort": {
-          "type": "string",
-          "title": "Node Port",
-          "description": "Node port for MariaDB service"
-        },
-        "clusterIP": {
-          "type": "string",
-          "title": "Cluster IP",
-          "description": "Static cluster IP or None for headless service"
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Service Annotations",
-          "description": "Additional custom annotations for MariaDB service",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "persistence": {
-      "type": "object",
-      "title": "Persistence Configuration",
-      "description": "Persistence parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Persistence",
-          "description": "Enable MariaDB data persistence using PVC"
-        },
-        "storageClass": {
-          "type": "string",
-          "title": "Storage Class",
-          "description": "PVC Storage Class for MariaDB data volume"
-        },
-        "accessModes": {
-          "type": "array",
-          "title": "Access Modes",
-          "description": "PVC Access modes",
-          "items": {
-            "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
-          }
-        },
-        "size": {
-          "type": "string",
-          "title": "Storage Size",
-          "description": "PVC Storage Request for MariaDB data volume",
-          "pattern": "^\\d+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
-        },
-        "annotations": {
-          "type": "object",
-          "title": "PVC Annotations",
-          "description": "Additional custom annotations for the PVC",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "selector": {
-          "type": "object",
-          "title": "PVC Selector",
-          "description": "Additional labels for the PVC",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "podSecurityContext": {
-      "type": "object",
-      "title": "Pod Security Context",
-      "description": "MariaDB Pod Security Context",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Pod Security Context",
-          "description": "Enabled MariaDB pod Security Context"
-        },
-        "fsGroup": {
-          "type": "integer",
-          "title": "FS Group",
-          "description": "Set MariaDB pod's Security Context fsGroup",
-          "minimum": 0
-        }
-      }
-    },
-    "containerSecurityContext": {
-      "type": "object",
-      "title": "Container Security Context",
-      "description": "MariaDB Container Security Context",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Container Security Context",
-          "description": "Enabled MariaDB container's Security Context"
-        },
-        "runAsUser": {
-          "type": "integer",
-          "title": "Run As User",
-          "description": "Set MariaDB container's Security Context runAsUser",
-          "minimum": 0
-        },
-        "runAsNonRoot": {
-          "type": "boolean",
-          "title": "Run As Non-Root",
-          "description": "Set MariaDB container's Security Context runAsNonRoot"
-        },
-        "allowPrivilegeEscalation": {
-          "type": "boolean",
-          "title": "Allow Privilege Escalation",
-          "description": "Set MariaDB container's privilege escalation"
-        },
-        "readOnlyRootFilesystem": {
-          "type": "boolean",
-          "title": "Read-Only root filesystem",
-          "description": "Set MariaDB container's Security Context readOnlyRootFilesystem"
-        }
-      }
-    },
-    "resources": {
-      "type": "object",
-      "title": "Resource Configuration",
-      "description": "Resources parameters",
-      "properties": {
-        "limits": {
-          "type": "object",
-          "title": "Resource Limits",
-          "description": "The resources limits for the MariaDB containers",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Limit",
-              "description": "CPU resource limit"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Limit",
-              "description": "Memory resource limit"
-            }
-          }
-        },
-        "requests": {
-          "type": "object",
-          "title": "Resource Requests",
-          "description": "The requested resources for the MariaDB containers",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Request",
-              "description": "CPU resource request"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Request",
-              "description": "Memory resource request"
-            }
-          }
-        }
-      }
-    },
-    "env": {
-      "type": "array",
-      "title": "Environment Variables",
-      "description": "A list of additional environment Variables",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Variable Name",
-            "description": "Environment variable name"
-          },
-          "value": {
-            "type": "string",
-            "title": "Variable Value",
-            "description": "Environment variable value"
-          }
-        },
-        "required": ["name"]
-      }
-    },
-    "extraSecrets": {
-      "type": "array",
-      "title": "Extra Secrets",
-      "description": "A list of additional existing secrets that will be mounted into the container",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "defaultMode": {
-            "type": "integer"
-          },
-          "mountPath": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "extraConfigs": {
-      "type": "array",
-      "title": "Extra Configs",
-      "description": "A list of additional existing configMaps that will be mounted into the container",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "defaultMode": {
-            "type": "integer"
-          },
-          "mountPath": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "extraVolumes": {
-      "type": "array",
-      "title": "Extra Volumes",
-      "description": "A list of additional existing volumes that will be mounted into the container",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "mountPath": {
-            "type": "string"
-          },
-          "pvcName": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "livenessProbe": {
-      "type": "object",
-      "title": "Liveness Probe Configuration",
-      "description": "MariaDB container's liveness probe parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Liveness Probe",
-          "description": "Enable livenessProbe on MariaDB containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for livenessProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for livenessProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for livenessProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for livenessProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for livenessProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "readinessProbe": {
-      "type": "object",
-      "title": "Readiness Probe Configuration",
-      "description": "MariaDB container's readiness probe parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Readiness Probe",
-          "description": "Enable readinessProbe on MariaDB containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for readinessProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for readinessProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for readinessProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for readinessProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for readinessProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "startupProbe": {
-      "type": "object",
-      "title": "Startup Probe Configuration",
-      "description": "MariaDB container's startup probe parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Startup Probe",
-          "description": "Enable startupProbe on MariaDB containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for startupProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for startupProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for startupProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for startupProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for startupProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "podDisruptionBudget": {
-      "type": "object",
-      "title": "Pod Disruption Budget Configuration",
-      "description": "Pod Disruption Budget configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Pod Disruption Budget",
-          "description": "Enable a Pod Disruption Budget creation"
-        },
-        "minAvailable": {
-          "oneOf": [
-            {"type": "integer", "minimum": 0},
-            {"type": "string"}
-          ],
-          "title": "Min Available",
-          "description": "Min number of pods that must still be available after the eviction"
-        },
-        "maxUnavailable": {
-          "oneOf": [
-            {"type": "integer", "minimum": 0},
-            {"type": "string"}
-          ],
-          "title": "Max Unavailable",
-          "description": "Max number of pods that can be unavailable after the eviction"
-        }
-      }
-    },
-    "ingress": {
-      "type": "object",
-      "title": "Ingress Configuration",
-      "description": "Ingress parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Ingress",
-          "description": "Enable ingress record generation for MariaDB"
-        },
-        "className": {
-          "type": "string",
-          "title": "Ingress Class Name",
-          "description": "IngressClass that will be used to implement the Ingress"
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Ingress Annotations",
-          "description": "Additional annotations for the Ingress resource",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "hosts": {
-          "type": "array",
-          "title": "Ingress Hosts",
-          "description": "An array with hosts and paths",
-          "items": {
-            "type": "object",
-            "properties": {
-              "host": {
-                "type": "string",
-                "title": "Host",
-                "description": "Hostname for the ingress"
-              },
-              "paths": {
-                "type": "array",
-                "title": "Paths",
-                "description": "Paths configuration for the host",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "path": {
-                      "type": "string",
-                      "title": "Path",
-                      "description": "Path for the ingress"
-                    },
-                    "pathType": {
-                      "type": "string",
-                      "title": "Path Type",
-                      "description": "Path type for the ingress",
-                      "enum": ["Exact", "Prefix", "ImplementationSpecific"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tls": {
-          "type": "array",
-          "title": "TLS Configuration",
-          "description": "TLS configuration for the Ingress",
-          "items": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "affinity": {
             "type": "object"
-          }
-        }
-      }
-    },
-    "networkPolicy": {
-      "type": "object",
-      "title": "Network Policy Configuration",
-      "description": "Network Policy configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Network Policy",
-          "description": "Specifies whether a NetworkPolicy should be created"
         },
-        "allowExternal": {
-          "type": "boolean",
-          "title": "Allow External",
-          "description": "Don't require client label for connections"
+        "auth": {
+            "type": "object",
+            "properties": {
+                "allowEmptyRootPassword": {
+                    "type": "string"
+                },
+                "database": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "rootPassword": {
+                    "type": "string"
+                },
+                "secretKeys": {
+                    "type": "object",
+                    "properties": {
+                        "rootPasswordKey": {
+                            "type": "string"
+                        },
+                        "userPasswordKey": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
         },
-        "ingressNSMatchLabels": {
-          "type": "object",
-          "title": "Ingress Namespace Match Labels",
-          "description": "Labels to match to allow traffic from other namespaces",
-          "additionalProperties": {
+        "commonAnnotations": {
+            "type": "object"
+        },
+        "commonLabels": {
+            "type": "object"
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "customConfiguration": {
+                    "type": "string"
+                },
+                "existingConfigMap": {
+                    "type": "string"
+                }
+            }
+        },
+        "containerSecurityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "readOnlyRootFilesystem": {
+                    "type": "boolean"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                }
+            }
+        },
+        "env": {
+            "type": "array"
+        },
+        "extraConfigs": {
+            "type": "array"
+        },
+        "extraObjects": {
+            "type": "array"
+        },
+        "extraSecrets": {
+            "type": "array"
+        },
+        "extraVolumes": {
+            "type": "array"
+        },
+        "fullnameOverride": {
             "type": "string"
-          }
         },
-        "ingressNSPodMatchLabels": {
-          "type": "object",
-          "title": "Ingress Namespace Pod Match Labels",
-          "description": "Pod labels to match to allow traffic from other namespaces",
-          "additionalProperties": {
+        "galera": {
+            "type": "object",
+            "properties": {
+                "bootstrap": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "forceSafeToBootstrap": {
+                    "type": "boolean"
+                },
+                "innodb": {
+                    "type": "object",
+                    "properties": {
+                        "bufferPoolSize": {
+                            "type": "string"
+                        },
+                        "flushLogAtTrxCommit": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "recovery": {
+                    "type": "object",
+                    "properties": {
+                        "clusterBootstrap": {
+                            "type": "boolean"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "type": "integer"
+                },
+                "sst": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        },
+                        "secretKeys": {
+                            "type": "object",
+                            "properties": {
+                                "passwordKey": {
+                                    "type": "string"
+                                },
+                                "userKey": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "user": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "wsrepAutoIncrementControl": {
+                    "type": "boolean"
+                },
+                "wsrepCertifyNonPK": {
+                    "type": "boolean"
+                },
+                "wsrepDebug": {
+                    "type": "boolean"
+                },
+                "wsrepDrupalHack": {
+                    "type": "boolean"
+                },
+                "wsrepLogConflicts": {
+                    "type": "boolean"
+                },
+                "wsrepMaxWsRows": {
+                    "type": "integer"
+                },
+                "wsrepMaxWsSize": {
+                    "type": "string"
+                },
+                "wsrepMethod": {
+                    "type": "string"
+                },
+                "wsrepProvider": {
+                    "type": "string"
+                },
+                "wsrepRetryAutocommit": {
+                    "type": "integer"
+                },
+                "wsrepSlaveThreads": {
+                    "type": "integer"
+                }
+            }
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "type": "string"
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "imagePullPolicy": {
+                    "type": "string"
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "properties": {
+                        "kubernetes.io/hostname": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "className": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "array"
+                }
+            }
+        },
+        "initdbScriptsConfigMap": {
             "type": "string"
-          }
+        },
+        "livenessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "allowExternal": {
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ingressNSMatchLabels": {
+                    "type": "object"
+                },
+                "ingressNSPodMatchLabels": {
+                    "type": "object"
+                }
+            }
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "persistence": {
+            "type": "object",
+            "properties": {
+                "accessModes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "selector": {
+                    "type": "object"
+                },
+                "size": {
+                    "type": "string"
+                },
+                "storageClass": {
+                    "type": "string"
+                }
+            }
+        },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podDisruptionBudget": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "maxUnavailable": {
+                    "type": "string"
+                },
+                "minAvailable": {
+                    "type": "integer"
+                }
+            }
+        },
+        "podLabels": {
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                }
+            }
+        },
+        "readinessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resources": {
+            "type": "object"
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "clusterIP": {
+                    "type": "string"
+                },
+                "nodePort": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "startupProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array"
         }
-      }
-    },
-    "podAnnotations": {
-      "type": "object",
-      "title": "Pod Annotations",
-      "description": "Pod configuration annotations",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "podLabels": {
-      "type": "object",
-      "title": "Pod Labels",
-      "description": "Pod configuration labels",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "nodeSelector": {
-      "type": "object",
-      "title": "Node Selector",
-      "description": "Node selector for pod assignment",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "tolerations": {
-      "type": "array",
-      "title": "Tolerations",
-      "description": "Tolerations for pod assignment",
-      "items": {
-        "type": "object"
-      }
-    },
-    "affinity": {
-      "type": "object",
-      "title": "Affinity Configuration",
-      "description": "Affinity settings for pod assignment"
-    },
-    "initdbScriptsConfigMap": {
-      "type": "string",
-      "title": "Initialization Scripts ConfigMap",
-      "description": "Name of a ConfigMap with initialization scripts"
-    },
-    "extraObjects": {
-      "type": "array",
-      "title": "Extra Objects",
-      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
-      "items": {
-        "type": "object",
-        "description": "A Kubernetes manifest object. All fields are allowed."
-      }
     }
-  }
 }
