@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.5.1 (2025-10-15)
+
+* Bugfix/redis non cloudpirates prefix (#394) ([02e03ed](https://github.com/CloudPirates-io/helm-charts/commit/02e03ed))
+* chore: update CHANGELOG.md for merged changes ([2ed8b75](https://github.com/CloudPirates-io/helm-charts/commit/2ed8b75))
+* chore: update CHANGELOG.md for merged changes ([3361964](https://github.com/CloudPirates-io/helm-charts/commit/3361964))
+* chore: update CHANGELOG.md for merged changes ([7f61172](https://github.com/CloudPirates-io/helm-charts/commit/7f61172))
+
 ## 0.5.0 (2025-10-14)
 
 * add galera cluster support for mariadb (#348) ([b7a63ee](https://github.com/CloudPirates-io/helm-charts/commit/b7a63ee))
