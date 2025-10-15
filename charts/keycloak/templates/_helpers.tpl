@@ -129,7 +129,7 @@ Return the Keycloak hostname
 */}}
 {{- define "keycloak.hostname" -}}
 {{- if .Values.keycloak.hostname -}}
-{{- .Values.keycloak.hostname -}}
+{{- tpl (.Values.keycloak.hostname | toString) $ -}}
 {{- else if .Values.ingress.enabled -}}
 {{- (index .Values.ingress.hosts 0).host -}}
 {{- else -}}
@@ -142,7 +142,7 @@ Return the Keycloak admin hostname
 */}}
 {{- define "keycloak.hostnameAdmin" -}}
 {{- if .Values.keycloak.hostnameAdmin -}}
-{{- .Values.keycloak.hostnameAdmin -}}
+{{- tpl (.Values.keycloak.hostnameAdmin | toString) $ -}}
 {{- else -}}
 {{- include "keycloak.hostname" . -}}
 {{- end -}}
