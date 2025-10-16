@@ -10,14 +10,32 @@ keywords:
   - s3
   - storage
   - cloud-native
-home: https://www.cloudpirates.io
+home: https://min.io
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/minio
+  - https://github.com/minio/minio
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/5d3310f00d/minio-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: storage
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: MinIO
+      url: https://min.io
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/minio
+    - name: Application
+      url: https://github.com/minio/minio
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io

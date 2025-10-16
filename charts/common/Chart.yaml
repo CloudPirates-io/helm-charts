@@ -4,12 +4,15 @@ description: A library chart for common templates and helper functions
 type: library
 version: 2.0.0
 appVersion: "2.0.0"
-
 home: https://www.cloudpirates.io
-
 sources:
-  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
-
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/common
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
+annotations:
+  license: Apache-2.0
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub

@@ -8,11 +8,13 @@ keywords:
   - ghost
   - blogging
   - content management
-home: https://www.cloudpirates.io
+home: https://ghost.org
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+  - https://github.com/TryGhost/Ghost
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
   - name: Gianni Carafa
     email: gianni.carafa@srf.ch
@@ -26,3 +28,18 @@ dependencies:
     repository: oci://registry-1.docker.io/cloudpirates
     condition: mariadb.enabled
 icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+annotations:
+  license: Apache-2.0
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: Ghost
+      url: https://ghost.org
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - name: Application
+      url: https://github.com/TryGhost/Ghost
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io

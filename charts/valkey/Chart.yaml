@@ -4,9 +4,10 @@ description: High performance in-memory data structure store, fork of Redis. Val
 type: application
 version: 0.6.0
 appVersion: "8.1.3"
-home: https://www.cloudpirates.io
+home: https://www.valkey.io
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+  - https://github.com/valkey-io/valkey
 keywords:
   - valkey
   - redis
@@ -15,14 +16,28 @@ keywords:
   - key-value
   - in-memory
   - nosql
-annotations:
-  category: Database
-  license: Apache-2.0
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: Valkey
+      url: https://valkey.io
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+    - name: Application
+      url: https://github.com/valkey-io/valkey
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
