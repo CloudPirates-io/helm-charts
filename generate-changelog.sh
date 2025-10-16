@@ -43,6 +43,134 @@ check_dependencies() {
     fi
 }
 
+# Function to format changes for artifacthub.io/changes annotation
+format_changes_for_chart_yaml() {
+    local chart_name="$1"
+    local pr_title="${2:-}"
+    local pr_number="${3:-}"
+    local pr_url="${4:-}"
+    local chart_dir="charts/${chart_name}"
+    local commit_limit=8
+
+    # Create changes array - only include recent changes (latest version)
+    local changes_yaml=""
+    
+    # Add new PR if provided
+    if [ -n "$pr_title" ] && [ -n "$pr_number" ] && [ -n "$pr_url" ]; then
+        changes_yaml="    - kind: added\n      description: \"${pr_title}\"\n      links:\n        - name: \"PR #${pr_number}\"\n          url: \"${pr_url}\""
+    else
+        # Get the latest tag for this chart
+        local latest_tag
+        latest_tag=$(git tag -l "${chart_name}-*" 2>/dev/null | sort -V -r | head -n 1 || true)
+        
+        if [ -n "$latest_tag" ]; then
+            # Get the second latest tag to determine the range
+            local prev_tag
+            prev_tag=$(git tag -l "${chart_name}-*" 2>/dev/null | sort -V -r | sed -n '2p' || true)
+            
+            local commit_range
+            if [ -n "$prev_tag" ]; then
+                commit_range="${prev_tag}..${latest_tag}"
+            else
+                # If no previous tag, just get commits for the latest tag
+                commit_range=$(git log --format=%H "$latest_tag" | tail -1)..${latest_tag}
+            fi
+            
+            # Get recent commits for this chart
+            local changes_found=false
+            while IFS= read -r commit_line; do
+                [ -z "$commit_line" ] && continue
+                
+                local commit_hash
+                commit_hash=$(echo "$commit_line" | cut -d' ' -f1)
+                local commit_msg
+                commit_msg=$(echo "$commit_line" | cut -d' ' -f2-)
+                
+                # Skip commits that are clearly for other charts
+                if echo "$commit_msg" | grep -qE '^\[[a-z]+\]'; then
+                    if ! echo "$commit_msg" | grep -qiE '^\[('"${chart_name}"'|all)\]'; then
+                        continue
+                    fi
+                fi
+
+                # Skip commits that contain "chore", "docs", "typo", "bump" (case insensitive)
+                if echo "$commit_msg" | grep -qiE '(chore|docs|typo|bump)'; then
+                    continue
+                fi
+                
+                # Clean up commit message
+                commit_msg=$(echo "$commit_msg" | sed -E "s/^\[${chart_name}\] //i")
+                commit_msg=$(echo "$commit_msg" | sed -E "s/^\[$(echo "${chart_name}" | tr '[:lower:]' '[:upper:]')\] //")
+                commit_msg=$(echo "$commit_msg" | sed -E "s/^\[all\] //i")
+                
+                # Escape quotes in commit message for YAML
+                commit_msg=$(echo "$commit_msg" | sed 's/"/\\"/g')
+                
+                # Add to changes (limit to first few)
+                if [ "$changes_found" = false ]; then
+                    changes_yaml="    - kind: changed\n      description: \"${commit_msg}\"\n      links:\n        - name: \"Commit ${commit_hash:0:8}\"\n          url: \"${GITHUB_REPOSITORY_URL:-https://github.com/${GITHUB_REPOSITORY:-CloudPirates-io/helm-charts}}/commit/${commit_hash}\""
+                    changes_found=true
+                else
+                    changes_yaml="${changes_yaml}\n    - kind: changed\n      description: \"${commit_msg}\"\n      links:\n        - name: \"Commit ${commit_hash:0:8}\"\n          url: \"${GITHUB_REPOSITORY_URL:-https://github.com/${GITHUB_REPOSITORY:-CloudPirates-io/helm-charts}}/commit/${commit_hash}\""
+                fi
+                
+                # Limit to 3 most recent changes to keep annotation reasonable
+                local change_count
+                change_count=$(echo -e "$changes_yaml" | grep -c "kind:" || echo "0")
+                if [ "$change_count" -ge "$commit_limit" ]; then
+                    break
+                fi
+            done < <(git log "$commit_range" --oneline --no-merges -- "$chart_dir" 2>/dev/null | head -3 || true)
+            
+            if [ "$changes_found" = false ]; then
+                changes_yaml="    - kind: changed\n      description: \"Chart updated\""
+            fi
+        else
+            # No tags found, create a basic entry
+            changes_yaml="    - kind: added\n      description: \"Initial chart release\""
+        fi
+    fi
+    
+    echo -e "$changes_yaml"
+}
+
+# Function to update Chart.yaml with artifacthub.io/changes annotation
+update_chart_yaml_changes() {
+    local chart_yaml="$1"
+    local changes_content="$2"
+    
+    # Create a temporary file for the updated Chart.yaml
+    local temp_chart_yaml
+    temp_chart_yaml=$(mktemp)
+    
+    # Check if the file already has artifacthub.io/changes annotation
+    if grep -q "artifacthub.io/changes:" "$chart_yaml"; then
+        # Remove existing artifacthub.io/changes annotation and its content
+        # This is complex because the annotation is multi-line YAML
+        yq eval 'del(.annotations."artifacthub.io/changes")' "$chart_yaml" > "$temp_chart_yaml"
+    else
+        cp "$chart_yaml" "$temp_chart_yaml"
+    fi
+    
+    # Add the new artifacthub.io/changes annotation
+    # Create a temporary file with the changes content
+    local temp_changes
+    temp_changes=$(mktemp)
+    echo -e "$changes_content" > "$temp_changes"
+    
+    # Use yq to add the changes annotation
+    yq eval '.annotations."artifacthub.io/changes" = load_str("'"$temp_changes"'")' "$temp_chart_yaml" > "${temp_chart_yaml}.new"
+    mv "${temp_chart_yaml}.new" "$temp_chart_yaml"
+    
+    # Replace the original file
+    mv "$temp_chart_yaml" "$chart_yaml"
+    
+    # Clean up temporary files
+    rm -f "$temp_changes"
+    
+    log_info "Updated artifacthub.io/changes annotation in Chart.yaml"
+}
+
 # Function to generate changelog for a single chart
 generate_chart_changelog() {
     local chart_name="$1"
@@ -190,6 +318,16 @@ generate_chart_changelog() {
     mv "$temp_changelog" "$changelog_file"
 
     log_info "Changelog updated: $changelog_file"
+    
+    # Update Chart.yaml with artifacthub.io/changes annotation
+    local changes_for_chart_yaml
+    changes_for_chart_yaml=$(format_changes_for_chart_yaml "$chart_name" "$pr_title" "$pr_number" "$pr_url")
+    
+    if [ -n "$changes_for_chart_yaml" ]; then
+        update_chart_yaml_changes "$chart_yaml" "$changes_for_chart_yaml"
+        log_info "Chart.yaml updated with artifacthub.io/changes annotation"
+    fi
+    
     return 0
 }
 
