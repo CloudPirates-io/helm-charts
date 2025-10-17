@@ -316,6 +316,23 @@
         "namespaceOverride": {
             "type": "string"
         },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "allowExternal": {
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraEgress": {
+                    "type": "array"
+                },
+                "extraIngress": {
+                    "type": "array"
+                }
+            }
+        },
         "nodeSelector": {
             "type": "object"
         },

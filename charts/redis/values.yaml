@@ -322,6 +322,17 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
 
+## @section Network Policy
+networkPolicy:
+  ## @param networkPolicy.enabled Enable NetworkPolicy
+  enabled: false
+  ## @param networkPolicy.allowExternal Allow external traffic
+  allowExternal: true
+  ## @param networkPolicy.extraIngress Additional ingress rules
+  extraIngress: []
+  ## @param networkPolicy.extraEgress Additional egress rules
+  extraEgress: []
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 # - apiVersion: v1
