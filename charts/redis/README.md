@@ -99,6 +99,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | Parameter                        | Description                                                  | Default |
 | -------------------------------- | ------------------------------------------------------------ | ------- |
 | `auth.enabled`                   | Enable Redis authentication                                  | `true`  |
+| `auth.sentinel`                  | Enable authentication for Redis sentinels                    | `true`  |
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing Redis password             | `""`    |

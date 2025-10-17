@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.8.4 (2025-10-17)
+
+* Allow Sentinel authentication to be configured independently from Redis authentication (#403) ([ac12616](https://github.com/CloudPirates-io/helm-charts/commit/ac12616))
+* chore: update CHANGELOG.md for merged changes ([6ebfa2b](https://github.com/CloudPirates-io/helm-charts/commit/6ebfa2b))
+* chore: update CHANGELOG.md for merged changes ([a207257](https://github.com/CloudPirates-io/helm-charts/commit/a207257))
+
 ## 0.8.3 (2025-10-15)
 
 * Add initContainer securityContext and improve security defaults (#397) ([2b5c4bd](https://github.com/CloudPirates-io/helm-charts/commit/2b5c4bd))

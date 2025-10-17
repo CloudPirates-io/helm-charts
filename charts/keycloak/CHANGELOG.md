@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.6.3 (2025-10-17)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.1 (patch) (#400) ([c6f2ca2](https://github.com/CloudPirates-io/helm-charts/commit/c6f2ca2))
+* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
+* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
+* chore: update CHANGELOG.md for merged changes ([48c9191](https://github.com/CloudPirates-io/helm-charts/commit/48c9191))
+* chore: update CHANGELOG.md for merged changes ([46b32bf](https://github.com/CloudPirates-io/helm-charts/commit/46b32bf))
+
 ## 0.6.2 (2025-10-14)
 
 * Add support for templating hostname and hostnameAdmin (#390) ([133f4d5](https://github.com/CloudPirates-io/helm-charts/commit/133f4d5))
