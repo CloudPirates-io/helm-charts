@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.5.3 (2025-10-17)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#401) ([d364501](https://github.com/CloudPirates-io/helm-charts/commit/d364501))
+* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
+* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
+* chore: update CHANGELOG.md for merged changes ([02747d9](https://github.com/CloudPirates-io/helm-charts/commit/02747d9))
+* chore: update CHANGELOG.md for merged changes ([7730143](https://github.com/CloudPirates-io/helm-charts/commit/7730143))
+
 ## 0.5.2 (2025-10-15)
 
 * chore: update CHANGELOG.md for merged changes ([aa0d9fd](https://github.com/CloudPirates-io/helm-charts/commit/aa0d9fd))
