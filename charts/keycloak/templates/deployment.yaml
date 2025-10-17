@@ -244,7 +244,7 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
-            {{- if .Values.realm.import }}
+            {{- if .Values.realm.configFile }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
               readOnly: true
@@ -282,7 +282,7 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
-        {{- if .Values.realm.import }}
+        {{- if .Values.realm.configFile }}
         - name: realm-config
           configMap:
             name: {{ include "keycloak.fullname" . }}-realm

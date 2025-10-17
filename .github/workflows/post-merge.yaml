@@ -244,6 +244,7 @@ jobs:
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
         run: |
           git add charts/*/CHANGELOG.md
+          git add charts/*/Chart.yaml
           
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             COMMIT_MSG="chore: update CHANGELOG.md via manual trigger"

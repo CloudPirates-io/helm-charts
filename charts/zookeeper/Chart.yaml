@@ -11,12 +11,11 @@ keywords:
   - apache
 home: https://zookeeper.apache.org/
 sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
   - https://github.com/apache/zookeeper
-annotations:
-  category: Database
-  license: Apache-2.0
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
   - name: Gianni Carafa
     email: gianni.carafa@srf.ch
@@ -26,3 +25,19 @@ dependencies:
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: streaming-messaging
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: ZooKeeper
+      url: https://zookeeper.apache.org/
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+    - name: Application
+      url: https://github.com/apache/zookeeper
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io

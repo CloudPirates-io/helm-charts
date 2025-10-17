@@ -11,17 +11,29 @@ keywords:
   - in-memory
   - key-value
   - nosql
-home: https://www.cloudpirates.io
+home: https://www.redis.io
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
-annotations:
-  category: Database
-  license: Apache-2.0
+  - https://github.com/redis/redis
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/links: |
+    - name: Redis
+      url: https://redis.io
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - name: Application
+      url: https://github.com/redis/redis
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io

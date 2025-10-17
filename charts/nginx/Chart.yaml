@@ -11,14 +11,29 @@ keywords:
   - reverse proxy
   - load balancer
   - proxy
-home: https://www.cloudpirates.io
+home: https://www.nginx.com
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+  - https://github.com/nginx/nginx
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: networking
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/links: |
+    - name: Nginx
+      url: https://www.nginx.com
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+    - name: Application
+      url: https://github.com/nginx/nginx
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io

@@ -10,17 +10,29 @@ keywords:
   - amqp
   - messaging
   - queue
-home: https://www.cloudpirates.io
+home: https://www.rabbitmq.com
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
-annotations:
-  category: Message Broker
-  license: Apache-2.0
+  - https://github.com/rabbitmq/rabbitmq-server
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: streaming-messaging
+  artifacthub.io/containsSecurityUpdates: false
+  artifacthub.io/links: |
+    - name: RabbitMQ
+      url: https://www.rabbitmq.com
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
+    - name: Application
+      url: https://github.com/rabbitmq/rabbitmq-server
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
