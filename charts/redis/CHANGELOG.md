@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.8.5 (2025-10-17)
+
+* [oliver006/redis_exporter] Update image to v1.79.0 (#408) ([11c625a](https://github.com/CloudPirates-io/helm-charts/commit/11c625a))
+* chore: update CHANGELOG.md for merged changes ([3442284](https://github.com/CloudPirates-io/helm-charts/commit/3442284))
+* chore: update CHANGELOG.md for merged changes ([0295d80](https://github.com/CloudPirates-io/helm-charts/commit/0295d80))
+
+## 0.8.4 (2025-10-17)
+
+* Allow Sentinel authentication to be configured independently from Redis authentication (#403) ([ac12616](https://github.com/CloudPirates-io/helm-charts/commit/ac12616))
+* chore: update CHANGELOG.md for merged changes ([6ebfa2b](https://github.com/CloudPirates-io/helm-charts/commit/6ebfa2b))
+* chore: update CHANGELOG.md for merged changes ([a207257](https://github.com/CloudPirates-io/helm-charts/commit/a207257))
+
 ## 0.8.3 (2025-10-15)
 
 * Add initContainer securityContext and improve security defaults (#397) ([2b5c4bd](https://github.com/CloudPirates-io/helm-charts/commit/2b5c4bd))

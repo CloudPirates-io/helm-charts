@@ -81,7 +81,7 @@ spec:
               # Check if any sentinel is already running and knows the master
               for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
                 SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
-                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
@@ -334,7 +334,7 @@ spec:
               for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
                   SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
-                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
                     MASTER_HOST="$EXISTING_MASTER"
                     SENTINEL_FOUND_MASTER=true
@@ -396,6 +396,8 @@ spec:
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              {{- end }}
+              {{- if .Values.auth.sentinel }}
               requirepass "${REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
@@ -439,16 +441,16 @@ spec:
                 - /bin/sh
                 - -c
                 {{- if eq .Values.ipFamily "ipv6" }}
-                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
                 {{- else }}
-                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
                 {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
-          {{- if .Values.auth.enabled }}
+          {{- if or .Values.auth.enabled .Values.auth.sentinel }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:

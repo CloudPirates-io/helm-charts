@@ -55,7 +55,7 @@ data:
 
     # Function to run Sentinel commands
     run_sentinel_command() {
-        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
     }
 
     # Function to check if sentinel failover has finished
