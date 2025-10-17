@@ -1,8 +1,5 @@
 # Changelog
 
-## 0.5.3 (2025-10-17)
-
-* [universal] use a string instead of a boolean ([#413](https://github.com/CloudPirates-io/helm-charts/pull/413))
 
 ## 0.5.3 (2025-10-17)
 
