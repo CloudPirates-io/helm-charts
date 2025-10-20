@@ -220,6 +220,18 @@ spec:
             - name: run
               mountPath: /var/run/mysqld/
             {{- end }}
+            {{- range $secret := .Values.extraSecrets }}
+            - name: {{ $secret.name }}
+              mountPath: {{ $secret.mountPath }}
+            {{- end }}
+            {{- range $config := .Values.extraConfigs }}
+            - name: {{ $config.name }}
+              mountPath: {{ $config.mountPath }}
+            {{- end }}
+            {{- range $storage := .Values.extraVolumes }}
+            - name: {{ $storage.name }}
+              mountPath: {{ $storage.mountPath }}
+            {{- end }}
       volumes:
         - name: tmp-volume
           emptyDir: {}
