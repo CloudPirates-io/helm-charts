@@ -348,7 +348,7 @@ spec:
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
                 echo "No Sentinels available, checking Redis instances directly..."
                 for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
-                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   ROLE_INFO=$(redis-cli -h "${REDIS_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$REDIS_HOST"
@@ -360,7 +360,7 @@ spec:
 
               # Final fallback: Use pod-0 hostname for initial bootstrap only
               if [ -z "$MASTER_HOST" ]; then
-                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
