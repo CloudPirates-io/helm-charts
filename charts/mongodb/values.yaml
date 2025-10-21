@@ -39,6 +39,8 @@ service:
   type: ClusterIP
   ## @param service.port MongoDB service port
   port: 27017
+  ## @param serivce.annotations Annotations to add to the mongodb service
+  annotations: {}
 
 auth:
   ## @param auth.enabled Enable MongoDB authentication
