@@ -12,6 +12,8 @@ nameOverride: ""
 fullnameOverride: ""
 ## @param namespaceOverride String to override the namespace for all resources
 namespaceOverride: ""
+## @param clusterDomain Kubernetes cluster domain
+clusterDomain: cluster.local
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
