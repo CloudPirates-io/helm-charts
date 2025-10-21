@@ -40,7 +40,7 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+      {{- if eq .Values.architecture "replication" }}
       initContainers:
         - name: redis-init
           image: {{ include "redis.image" . | quote }}
@@ -66,20 +66,23 @@ spec:
               EOF
               fi
 
+              {{- if .Values.sentinel.enabled }}
               # Add Redis configurations for better Sentinel failover tolerance
               echo "" >> /tmp/redis.conf
               echo "# Configurations for Kubernetes force deletion tolerance" >> /tmp/redis.conf
               echo "min-slaves-to-write 0" >> /tmp/redis.conf
               echo "min-slaves-max-lag 0" >> /tmp/redis.conf
+              {{- end }}
 
               echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
 
+              {{- if .Values.sentinel.enabled }}
               # Try to determine current master from Sentinel (if any sentinel is available)
               CURRENT_MASTER=""
               SENTINEL_FOUND=false
 
               # Check if any sentinel is already running and knows the master
-              for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
+              for i in $(seq 0 $(({{ .Values.replicaCount }} - 1))); do
                 SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
                 MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
@@ -150,6 +153,20 @@ spec:
               # Make slaves more eligible for promotion during force deletions
               echo "slave-priority 100" >> /tmp/redis.conf
               echo "replica-read-only yes" >> /tmp/redis.conf
+              {{- else }}
+              # Replication without Sentinel: pod-0 is always master, others are replicas
+              if [ "$POD_ORDINAL" != "0" ]; then
+                echo "Configuring as replica of pod-0 (master)"
+                MASTER_HOSTNAME="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
+                echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- end }}
+                echo "replica-read-only yes" >> /tmp/redis.conf
+              else
+                echo "Pod-0: Configuring as master"
+              fi
+              {{- end }}
           {{- if .Values.auth.enabled }}
           env:
             - name: REDIS_PASSWORD
@@ -174,7 +191,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+              {{- if eq .Values.architecture "replication" }}
               CONFIG_FILE="/tmp/redis.conf"
               {{- else }}
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
@@ -281,12 +298,14 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
-            {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+            {{- if eq .Values.architecture "replication" }}
             - name: redis-config
               mountPath: /tmp
+            {{- if .Values.sentinel.enabled }}
             - name: prestop-script
               mountPath: /scripts
               readOnly: true
+            {{- end }}
             {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
@@ -518,15 +537,17 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+        {{- if eq .Values.architecture "replication" }}
         - name: redis-config
           emptyDir: {}
+        {{- if .Values.sentinel.enabled }}
         - name: sentinel-config
           emptyDir: {}
         - name: prestop-script
           configMap:
             name: {{ include "redis.fullname" . }}-prestop-script
             defaultMode: 0755
+        {{- end }}
         {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config

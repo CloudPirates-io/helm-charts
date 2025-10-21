@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.9.1 (2025-10-21)
+
+* add support for replication mode without sentinel (#428) ([8cbfff2](https://github.com/CloudPirates-io/helm-charts/commit/8cbfff2))
+* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
+* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
+* chore: update CHANGELOG.md for merged changes ([ef1ad8c](https://github.com/CloudPirates-io/helm-charts/commit/ef1ad8c))
+* chore: update CHANGELOG.md for merged changes ([aa678df](https://github.com/CloudPirates-io/helm-charts/commit/aa678df))
+* chore: update CHANGELOG.md for merged changes ([2998496](https://github.com/CloudPirates-io/helm-charts/commit/2998496))
+
 ## 0.9.0 (2025-10-17)
 
 * Network policies (#412) ([43c7285](https://github.com/CloudPirates-io/helm-charts/commit/43c7285))
