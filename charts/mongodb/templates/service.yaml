@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
+  {{- with (include "mongodb.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:

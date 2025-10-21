@@ -10,8 +10,11 @@ metadata:
     {{- with .Values.metrics.service.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- with (include "mongodb.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
   {{- with .Values.metrics.service.annotations }}
-  annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
