@@ -18,6 +18,10 @@ spec:
     metadata:
       labels:
         {{- include "memcached.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
 {{- with (include "memcached.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
