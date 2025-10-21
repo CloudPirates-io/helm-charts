@@ -29,12 +29,15 @@ image:
   pullPolicy: Always
 
 ## @section Redis Architecture
-## @param architecture Redis architecture. Allowed values: standalone or replication
+## @param architecture Redis architecture. Allowed values: standalone, replication
+## - standalone: Single Redis instance
+## - replication: Master-replica setup (use sentinel.enabled to enable/disable Sentinel)
 architecture: standalone
 
 ## @param replicaCount Number of Redis instances to deploy (only when architecture=replication)
 ## When using Sentinel, this is the total number of Redis instances (including the initial master)
-## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
+## Without Sentinel, pod-0 is always the master and other pods are replicas
+## For example: replicaCount: 3 creates 1 master + 2 replicas
 replicaCount: 3
 
 ## @section Pod labels and annotations
@@ -211,9 +214,11 @@ extraVolumeMounts: []
 ## @section Redis Sentinel configuration
 ## This section configures Redis Sentinel for high availability in replication mode
 ## When enabled, Redis instances use dynamic master/replica role assignment managed by Sentinel
+## When disabled with replication architecture, pod-0 is always the master and other pods are replicas
 sentinel:
   ## @param sentinel.enabled Enable Redis Sentinel for high availability
   ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
+  ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:

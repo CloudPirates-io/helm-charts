@@ -1,0 +1,24 @@
+{{- if and (eq .Values.architecture "replication") (not .Values.sentinel.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redis.fullname" . }}-master
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master
+  annotations:
+    # This service always points to pod-0 (the master in replication without sentinel)
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "false"
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    {{- include "redis.selectorLabels" . | nindent 4 }}
+    # Target only pod-0 (the master)
+    statefulset.kubernetes.io/pod-name: {{ include "redis.fullname" . }}-0
+{{- end }}
