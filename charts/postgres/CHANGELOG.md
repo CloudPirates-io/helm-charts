@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.10.2 (2025-10-22)
+
+* Update charts/postgres/values.yaml postgres (#426) ([ae72190](https://github.com/CloudPirates-io/helm-charts/commit/ae72190))
+* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
+* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
+* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+
 ## 0.10.1 (2025-10-22)
 
 * chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
