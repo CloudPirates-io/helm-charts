@@ -56,7 +56,7 @@ Return TimescaleDB credentials secret name
 */}}
 {{- define "timescaledb.secretName" -}}
 {{- if .Values.auth.existingSecret -}}
-    {{- .Values.auth.existingSecret -}}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) -}}
 {{- else -}}
     {{- include "timescaledb.fullname" . -}}
 {{- end -}}

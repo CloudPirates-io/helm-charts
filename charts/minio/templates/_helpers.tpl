@@ -79,7 +79,7 @@ Return MinIO credentials secret name
 */}}
 {{- define "minio.secretName" -}}
 {{- if .Values.auth.existingSecret -}}
-    {{- .Values.auth.existingSecret -}}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) -}}
 {{- else -}}
     {{- include "minio.fullname" . -}}
 {{- end -}}
