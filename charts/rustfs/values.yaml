@@ -22,7 +22,7 @@ image:
   ## @param image.repository RustFS image repository
   repository: rustfs/rustfs
   ## @param image.tag RustFS image tag (immutable tags are recommended)
-  tag: "latest"
+  tag: "1.0.0-alpha.64@sha256:11ba8ff3870e8ee88494ad5b34e6942d1d91321483895c05aa264643f6d99a94"
   ## @param image.imagePullPolicy RustFS image pull policy
   imagePullPolicy: Always
 
@@ -49,8 +49,8 @@ config:
   consoleAddress: "0.0.0.0:9001"
   ## @param config.consoleEnabled Enable RustFS console
   consoleEnabled: true
-  ## @param config.externalAddress RustFS external address
-  externalAddress: ":9000"
+  ## @param config.externalAddress RustFS external address (port your cluster ingress is listening to)
+  externalAddress: ":80"
   ## @param config.corsAllowedOrigins CORS allowed origins for API
   corsAllowedOrigins: "*"
   ## @param config.consoleCorsAllowedOrigins CORS allowed origins for console
@@ -59,6 +59,8 @@ config:
   logLevel: "info"
   ## @param config.tlsPath Path to TLS certificates
   tlsPath: "/opt/tls"
+  ## @param config.serverDomains Comma-separated list of server domains for TLS certificates
+  serverDomains: "rustfs.localhost"
 
   ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
   extraEnvVars: []
@@ -105,7 +107,7 @@ service:
 ## @section Ingress configuration
 ingress:
   ## @param ingress.enabled Enable ingress record generation for RustFS API
-  enabled: false
+  enabled: true
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
@@ -117,7 +119,7 @@ ingress:
   ## @param ingress.hosts[0].paths[0].path Path for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].pathType Path type for RustFS API ingress
   hosts:
-    - host: rustfs.local
+    - host: rustfs.localhost
       paths:
         - path: /
           pathType: Prefix
@@ -126,27 +128,6 @@ ingress:
   #  - secretName: rustfs-tls
   #    hosts:
   #      - rustfs.local
-
-## @section Console Ingress configuration
-consoleIngress:
-  ## @param consoleIngress.enabled Enable ingress record generation for RustFS Console
-  enabled: false
-  ## @param consoleIngress.className IngressClass that will be used to implement the Ingress
-  className: ""
-  ## @param consoleIngress.annotations Additional annotations for the Console Ingress resource
-  annotations:
-    {}
-    # nginx.ingress.kubernetes.io/proxy-body-size: 1000m
-  ## @param consoleIngress.hosts[0].host Hostname for RustFS Console ingress
-  ## @param consoleIngress.hosts[0].paths[0].path Path for RustFS Console ingress
-  ## @param consoleIngress.hosts[0].paths[0].pathType Path type for RustFS Console ingress
-  hosts:
-    - host: rustfs-console.local
-      paths:
-        - path: /
-          pathType: Prefix
-  ## @param consoleIngress.tls TLS configuration for RustFS Console ingress
-  tls: []
 
 ## @section Resources
 resources:

@@ -159,18 +159,6 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `ingress.hosts[0].paths[0].pathType` | Path type for RustFS API ingress              | `Prefix`          |
 | `ingress.tls`                  | TLS configuration for RustFS API ingress     | `[]`              |
 
-### Console Ingress configuration
-
-| Parameter                             | Description                                      | Default                 |
-| ------------------------------------- | ------------------------------------------------ | ----------------------- |
-| `consoleIngress.enabled`              | Enable ingress record generation for RustFS Console | `false`                 |
-| `consoleIngress.className`            | IngressClass that will be used to implement the Ingress | `""`                    |
-| `consoleIngress.annotations`          | Additional annotations for the Console Ingress resource | `{}`                    |
-| `consoleIngress.hosts[0].host`        | Hostname for RustFS Console ingress             | `rustfs-console.local`  |
-| `consoleIngress.hosts[0].paths[0].path` | Path for RustFS Console ingress                  | `/`                     |
-| `consoleIngress.hosts[0].paths[0].pathType` | Path type for RustFS Console ingress             | `Prefix`                |
-| `consoleIngress.tls`                  | TLS configuration for RustFS Console ingress    | `[]`                    |
-
 ### Resources
 
 | Parameter   | Description                        | Default |

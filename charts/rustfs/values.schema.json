@@ -66,48 +66,6 @@
                 }
             }
         },
-        "consoleIngress": {
-            "type": "object",
-            "properties": {
-                "annotations": {
-                    "type": "object"
-                },
-                "className": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "hosts": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "host": {
-                                "type": "string"
-                            },
-                            "paths": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string"
-                                        },
-                                        "pathType": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "tls": {
-                    "type": "array"
-                }
-            }
-        },
         "containerSecurityContext": {
             "type": "object",
             "properties": {
