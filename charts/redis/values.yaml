@@ -55,6 +55,8 @@ podAnnotations: {}
 ipFamily: auto
 
 service:
+  ## @param service.annotations Additional custom annotations for Redis service
+  annotations: {}
   ## @param service.type Kubernetes service type
   type: ClusterIP
   ## @param service.port Redis service port
