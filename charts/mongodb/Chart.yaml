@@ -2,7 +2,7 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.5.1
+version: 0.5.2
 appVersion: "8.0.15"
 keywords:
   - mongodb
@@ -39,4 +39,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "Fix no auth error in init script (#440)"
+          links:
+            - name: "Commit 54b7221"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/54b7221"
