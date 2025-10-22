@@ -92,6 +92,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 | Parameter      | Description             | Default     |
 | -------------- | ----------------------- | ----------- |
+| `service.annotations` | Kubernetes service annotations | `{}` |
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Redis service port      | `6379`      |
 
