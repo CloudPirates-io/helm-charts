@@ -45,7 +45,7 @@ Get the secret name for RabbitMQ credentials
 */}}
 {{- define "rabbitmq.secretName" -}}
 {{- if .Values.auth.existingSecret }}
-{{- .Values.auth.existingSecret }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
 {{- else }}
 {{- include "rabbitmq.fullname" . }}
 {{- end }}
