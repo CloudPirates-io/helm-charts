@@ -1,8 +1,11 @@
 # Changelog
 
+
 ## 0.9.5 (2025-10-22)
 
-* [redis] add service support annotations ([#446](https://github.com/CloudPirates-io/helm-charts/pull/446))
+* add service support annotations (#446) ([72e7eb7](https://github.com/CloudPirates-io/helm-charts/commit/72e7eb7))
+* chore: update CHANGELOG.md for merged changes ([baf1dea](https://github.com/CloudPirates-io/helm-charts/commit/baf1dea))
+* chore: update CHANGELOG.md for merged changes ([42db63e](https://github.com/CloudPirates-io/helm-charts/commit/42db63e))
 
 ## 0.9.4 (2025-10-22)
 
