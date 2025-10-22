@@ -11,9 +11,10 @@ metadata:
     # Applications should use Sentinel clients to discover the current master
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   {{- else }}
+  {{- with .Values.service.annotations }}
   annotations:
-    {{- with .Values.service.annotations }}
     {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- end }}
 spec:
   type: {{ .Values.service.type }}
