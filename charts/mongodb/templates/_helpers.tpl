@@ -45,7 +45,7 @@ Get the secret name for MongoDB root password
 */}}
 {{- define "mongodb.secretName" -}}
 {{- if .Values.auth.existingSecret }}
-{{- .Values.auth.existingSecret }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
 {{- else }}
 {{- include "mongodb.fullname" . }}
 {{- end }}
@@ -106,7 +106,7 @@ Get the secret name for MongoDB metrics user
 */}}
 {{- define "mongodb.metrics.secretName" -}}
 {{- if .Values.auth.existingSecret }}
-{{- .Values.auth.existingSecret }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
 {{- else if and .Values.metrics.username .Values.metrics.enabled }}
 {{- printf "%s-metrics" (include "mongodb.fullname" .) }}
 {{- else }}

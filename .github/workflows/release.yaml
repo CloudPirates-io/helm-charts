@@ -53,7 +53,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v4.0.0
+        uses: sigstore/cosign-installer@v3.10.0
         if: ${{ steps.chart-releaser.outputs.changed_charts }}
 
       - id: github-repo-owner-name
@@ -130,7 +130,7 @@ jobs:
               echo "Extracted digest: $DIGEST"
               echo "Signing chart at ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST"
 
-              if ! cosign sign -y --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST; then
+              if ! cosign sign -y --upload=true --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST; then
                 echo "ERROR: Failed to sign chart"
                 exit 1
               fi
@@ -161,7 +161,7 @@ jobs:
               echo "Extracted digest: $GHCR_DIGEST"
               echo "Signing chart at ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST"
 
-              if ! cosign sign -y --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST; then
+              if ! cosign sign -y --upload=true --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST; then
                 echo "ERROR: Failed to sign chart"
                 exit 1
               fi

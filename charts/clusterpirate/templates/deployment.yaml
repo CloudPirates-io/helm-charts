@@ -108,7 +108,7 @@ spec:
                 key: password
                 {{- else if .Values.valkey.auth.existingSecret }}
                 # Use existing secret specified for Valkey
-                name: {{ .Values.valkey.auth.existingSecret }}
+                name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.valkey.auth.existingSecret "context" .) }}
                 key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "password" }}
                 {{- else if .Values.clusterPirate.metrics.cache.password }}
                 # Use password from ClusterPirate cache config (external Valkey)
@@ -138,7 +138,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 {{- if .Values.auth.existingSecret }}
-                name: {{ .Values.auth.existingSecret }}
+                name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
                 key: {{ .Values.auth.existingSecretAccessTokenKey | default "accessToken" }}
                 {{- else }}
                 name: {{ include "clusterpirate.fullname" . }}
