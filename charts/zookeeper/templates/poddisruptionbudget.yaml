@@ -6,6 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
+  {{- with (include "zookeeper.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 spec:
   maxUnavailable: 1
   selector:
