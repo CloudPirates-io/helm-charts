@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.9.3 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([71d5536](https://github.com/CloudPirates-io/helm-charts/commit/71d5536))
+* chore: update CHANGELOG.md for merged changes ([74b289b](https://github.com/CloudPirates-io/helm-charts/commit/74b289b))
+
 ## 0.9.2 (2025-10-21)
 
 * Modifiable cluster domain (#427) ([88652de](https://github.com/CloudPirates-io/helm-charts/commit/88652de))

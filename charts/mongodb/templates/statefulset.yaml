@@ -31,7 +31,7 @@ spec:
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           {{- if or .Values.config.content .Values.config.existingConfigmap }}
           args:
-            - "-f"
+            - "--config"
             - {{ include "mongodb.configFullName" . | quote }}
           {{- end }}
           ports:
@@ -53,7 +53,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}
@@ -66,7 +66,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}
@@ -79,7 +79,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}

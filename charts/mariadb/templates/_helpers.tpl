@@ -53,7 +53,7 @@ Get the secret name for MariaDB root password
 */}}
 {{- define "mariadb.secretName" -}}
 {{- if .Values.auth.existingSecret }}
-{{- .Values.auth.existingSecret }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
 {{- else }}
 {{- include "mariadb.fullname" . }}
 {{- end }}

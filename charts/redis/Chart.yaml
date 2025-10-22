@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.9.2
+version: 0.9.3
 appVersion: "8.2.2"
 keywords:
   - redis
@@ -42,7 +42,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Modifiable cluster domain (#427)"
-          links:
-            - name: "Commit 88652de"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/88652de"
+          description: "Chart updated"

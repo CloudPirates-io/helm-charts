@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.5.3
+version: 0.5.4
 appVersion: "4.1.4"
 keywords:
   - rabbitmq
@@ -41,7 +41,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update charts/rabbitmq/values.yaml rabbitmq (#401)"
-          links:
-            - name: "Commit d364501"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/d364501"
+          description: "Chart updated"

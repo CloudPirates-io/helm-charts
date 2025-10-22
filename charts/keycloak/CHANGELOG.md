@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.6.5 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
+* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
+* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
+* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
+* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
+* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
+* chore: update CHANGELOG.md for merged changes ([b06a24e](https://github.com/CloudPirates-io/helm-charts/commit/b06a24e))
+* chore: update CHANGELOG.md for merged changes ([b70f02c](https://github.com/CloudPirates-io/helm-charts/commit/b70f02c))
+* chore: update CHANGELOG.md for merged changes ([94c7881](https://github.com/CloudPirates-io/helm-charts/commit/94c7881))
+
 ## 0.6.4 (2025-10-17)
 
 * realm import (#402) ([4257b8b](https://github.com/CloudPirates-io/helm-charts/commit/4257b8b))
