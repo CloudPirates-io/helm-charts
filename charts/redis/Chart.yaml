@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.9.1
+version: 0.9.4
 appVersion: "8.2.2"
 keywords:
   - redis
@@ -41,8 +41,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "[universal] add --upload=true to cosign sign"
+        - kind: changed
+          description: "Update charts/redis/values.yaml redis (#434)"
           links:
-            - name: "PR #437"
-              url: "https://github.com/CloudPirates-io/helm-charts/pull/437"
+            - name: "Commit b833a77"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/b833a77"

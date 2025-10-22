@@ -219,11 +219,11 @@ tests:
     set:
       podDisruptionBudget:
         enabled: true
-        minAvailable: 2
+        minAvailable: "2"
     asserts:
       - equal:
           path: spec.minAvailable
-          value: 2
+          value: "2"
 
   # NetworkPolicy
   - it: should create NetworkPolicy when enabled
