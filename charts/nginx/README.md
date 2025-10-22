@@ -204,6 +204,7 @@ containerPorts:
 | ---------------- | ---------------------------------------------------------- | ----------- |
 | `service.type`   | Nginx service type                                         | `ClusterIP` |
 | `service.ports`  | Array of service ports (advanced configuration) - see examples | `[]`    |
+| `service.annotations`  | Additional annotations to add to the service | `{}`    |
 
 #### Service Ports Examples
 
