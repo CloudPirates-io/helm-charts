@@ -142,8 +142,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+            {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
             - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d/
+            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: /etc/mongo
@@ -217,9 +219,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
         - name: init-scripts
           configMap:
             name: {{ include "mongodb.fullname" . }}-init-scripts
+        {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config
           configMap:
