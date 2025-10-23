@@ -43,7 +43,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.79.0 (minor) (#407)"
+          description: "Update CHANGELOG.md"
           links:
-            - name: "Commit 7c0e2b3"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/7c0e2b3"
+            - name: "Commit 3005f2f"
+              url: "https://github.com/dloewen2/helm-charts/commit/3005f2f"
+        - kind: changed
+          description: "Fix scheduling directives with disabled persistance"
+          links:
+            - name: "Commit 7485b37"
+              url: "https://github.com/dloewen2/helm-charts/commit/7485b37"

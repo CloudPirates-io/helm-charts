@@ -12,6 +12,11 @@ metadata:
     # This service points to all Redis instances for Sentinel-based discovery
     # Applications should use Sentinel clients to discover the current master
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- else }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- end }}
   {{- end }}
 spec:

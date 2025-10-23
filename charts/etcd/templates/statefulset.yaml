@@ -189,13 +189,13 @@ spec:
         {{- if .Values.auth.enabled }}
         - name: client-certs
           secret:
-            secretName: {{ .Values.auth.existingSecret }}
+            secretName: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.existingSecret "context" .) }}
             defaultMode: 0400
         {{- end }}
         {{- if .Values.auth.peer.enabled }}
         - name: peer-certs
           secret:
-            secretName: {{ .Values.auth.peer.existingSecret }}
+            secretName: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.peer.existingSecret "context" .) }}
             defaultMode: 0400
         {{- end }}
         {{- if .Values.extraVolumes }}

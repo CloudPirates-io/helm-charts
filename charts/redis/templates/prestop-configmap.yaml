@@ -23,8 +23,8 @@ data:
     REDIS_PORT="{{ .Values.service.port }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
-    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
-    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
 
     # Set authentication if enabled
     {{- if .Values.auth.enabled }}

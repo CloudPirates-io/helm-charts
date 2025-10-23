@@ -41,7 +41,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: " [minio] Fix bucketname trimming whitespaces in MinIO post-job configuration script. (#406)"
+          description: "Update CHANGELOG.md"
           links:
-            - name: "Commit bf250e2"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/bf250e2"
+            - name: "Commit 55a987f"
+              url: "https://github.com/dloewen2/helm-charts/commit/55a987f"
+        - kind: changed
+          description: "set strategy to recreate in deployment"
+          links:
+            - name: "Commit 6e01f97"
+              url: "https://github.com/dloewen2/helm-charts/commit/6e01f97"

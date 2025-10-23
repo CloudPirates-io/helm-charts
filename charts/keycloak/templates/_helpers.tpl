@@ -56,7 +56,7 @@ Return Keycloak admin credentials secret name
 */}}
 {{- define "keycloak.secretName" -}}
 {{- if .Values.keycloak.existingSecret -}}
-    {{- .Values.keycloak.existingSecret -}}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.keycloak.existingSecret "context" .) -}}
 {{- else -}}
     {{- include "keycloak.fullname" . -}}
 {{- end -}}

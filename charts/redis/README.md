@@ -74,6 +74,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 | `nameOverride`      | String to partially override redis.fullname                                                                      | `""`         |
 | `fullnameOverride`  | String to fully override redis.fullname                                                                          | `""`         |
 | `namespaceOverride` | String to override the namespace for all resources                                                               | `""`         |
+| `clusterDomain`     | Kubernetes cluster domain                                                                                        | `cluster.local` |
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`         |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`         |
 | `architecture`      | Redis architecture. `standalone`: Single instance, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover) | `standalone` |
@@ -91,6 +92,7 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 | Parameter      | Description             | Default     |
 | -------------- | ----------------------- | ----------- |
+| `service.annotations` | Kubernetes service annotations | `{}` |
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Redis service port      | `6379`      |
 

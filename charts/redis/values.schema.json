@@ -28,6 +28,9 @@
                 }
             }
         },
+        "clusterDomain": {
+            "type": "string"
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -535,6 +538,9 @@
         "service": {
             "type": "object",
             "properties": {
+                "annotations": {
+                    "type": "object"
+                },
                 "port": {
                     "type": "integer"
                 },

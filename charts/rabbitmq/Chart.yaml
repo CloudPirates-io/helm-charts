@@ -41,7 +41,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update charts/rabbitmq/values.yaml rabbitmq (#401)"
+          description: "feat(rabbitmq): fix podLabels"
           links:
-            - name: "Commit d364501"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/d364501"
+            - name: "Commit e5af639"
+              url: "https://github.com/dloewen2/helm-charts/commit/e5af639"
+        - kind: changed
+          description: "feat(rabbitmq): fix podLabels duplication"
+          links:
+            - name: "Commit ad3a30b"
+              url: "https://github.com/dloewen2/helm-charts/commit/ad3a30b"

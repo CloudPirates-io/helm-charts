@@ -39,7 +39,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[memcached]: add missing automountServiceAccountToken key to deployment spec (#395)"
+          description: "Update CHANGELOG.md"
           links:
-            - name: "Commit 93fee01"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/93fee01"
+            - name: "Commit 0e5b657"
+              url: "https://github.com/dloewen2/helm-charts/commit/0e5b657"
+        - kind: changed
+          description: "cast verbosity to int before passing to repeat"
+          links:
+            - name: "Commit 518b602"
+              url: "https://github.com/dloewen2/helm-charts/commit/518b602"
