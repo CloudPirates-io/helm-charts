@@ -20,9 +20,10 @@ image:
   ## @param image.registry MinIO image registry
   registry: docker.io
   ## @param image.repository MinIO image repository
-  repository: minio/minio
+  repository: 11notes/minio
   ## @param image.tag MinIO image tag (immutable tags are recommended)
-  tag: "RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+  #tag: "RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"
+  tag: "2025.10.15@sha256:9a7c57b125fefcf3134f26f89e4b450e5cb67ea2d877f5c3781b0721e36ef4dc"
   ## @param image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)
   useCpuV1: false
   ## @param iamge.tagCpuV1 The cpuv1 Minio image tag (immutable tags are recommended)
@@ -194,7 +195,7 @@ persistence:
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
-  mountPath: /mnt/data
+  mountPath: /mnt
 
 serviceAccount:
   ## @param serviceAccount.create Enable the creation of a ServiceAccount for MinIO

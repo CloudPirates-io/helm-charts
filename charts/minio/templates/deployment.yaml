@@ -39,12 +39,8 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "minio.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          command: ["/bin/sh"]
-          args:
-            - -c
-            - |
-              mkdir -p {{ .Values.persistence.mountPath }}
-              exec minio server {{ .Values.persistence.mountPath }} {{ include "minio.serverUrl" . }}
+          #command: [ {{ .Values.persistence.mountPath | quote }} ]
+          command: [ "/mnt/example" ]
           env:
             - name: MINIO_ROOT_USER
               valueFrom:
