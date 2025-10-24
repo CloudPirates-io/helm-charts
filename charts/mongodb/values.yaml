@@ -30,6 +30,10 @@ image:
   tag: "8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
+  ## @param image.command Override default container command (useful when using custom images)
+  command: []
+  ## @param image.args Override default container args (useful when using custom images)
+  args: []
 
 ## @param replicaCount Number of MongoDB replicas to deploy
 replicaCount: 1
