@@ -94,6 +94,12 @@
         "image": {
             "type": "object",
             "properties": {
+                "args": {
+                    "type": "array"
+                },
+                "command": {
+                    "type": "array"
+                },
                 "pullPolicy": {
                     "type": "string"
                 },
@@ -105,18 +111,6 @@
                 },
                 "tag": {
                     "type": "string"
-                },
-                "args": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "command": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
