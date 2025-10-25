@@ -129,6 +129,9 @@
                 }
             }
         },
+        "deploymentType": {
+            "type": "string"
+        },
         "extraObjects": {
             "type": "array"
         },
@@ -269,6 +272,9 @@
         "podLabels": {
             "type": "object"
         },
+        "podManagementPolicy": {
+            "type": "string"
+        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -394,6 +400,22 @@
         },
         "tolerations": {
             "type": "array"
+        },
+        "updateStrategy": {
+            "type": "object",
+            "properties": {
+                "rollingUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "partition": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         }
     }
 }
