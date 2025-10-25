@@ -1,0 +1,65 @@
+# CI test values for rustfs chart
+# Optimized for faster testing in kind clusters and GitHub Actions
+
+image:
+  # Use IfNotPresent to avoid repeated pulls in CI
+  imagePullPolicy: IfNotPresent
+  # Keep latest tag for testing
+  tag: "latest"
+
+# Disable ingress for CI tests
+ingress:
+  enabled: false
+
+consoleIngress:
+  enabled: false
+
+# Lenient probes for slow CI environments
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 10
+
+startupProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 30
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Use smaller persistent volumes for CI
+dataPersistence:
+  enabled: true
+  size: 1Gi
+
+logsPersistence:
+  enabled: true
+  size: 500Mi
+
+# Disable TLS persistence for CI
+tlsPersistence:
+  enabled: false
+
+# Test authentication with simple values
+auth:
+  accessKey: "testkey"
+  secretKey: "testsecret"
+
+# Simple configuration for testing
+config:
+  logLevel: "debug"
+  consoleEnabled: true

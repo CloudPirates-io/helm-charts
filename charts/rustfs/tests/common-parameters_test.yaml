@@ -1,0 +1,122 @@
+suite: test rustfs common parameters
+templates:
+  - deployment.yaml
+set:
+  image:
+    tag: latest
+tests:
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/rustfs/rustfs:latest
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should respect global.imageRegistry override
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry.com/rustfs/rustfs:latest
+
+  - it: should respect nameOverride
+    set:
+      nameOverride: "custom-rustfs"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-rustfs
+
+  - it: should respect fullnameOverride
+    set:
+      fullnameOverride: "completely-custom-rustfs"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-rustfs
+
+  - it: should add commonLabels to all resources
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: metadata.labels.team
+          value: platform
+
+  - it: should respect image configuration overrides
+    set:
+      image:
+        registry: "custom-registry.io"
+        repository: "custom/rustfs"
+        tag: "v1.0.0"
+        imagePullPolicy: "IfNotPresent"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/custom/rustfs:v1.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should configure environment variables correctly
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: RUSTFS_ACCESS_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: RUSTFS_SECRET_KEY
+
+  - it: should configure ports correctly
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: api
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9000
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].name
+          value: console
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 9001
+
+  - it: should configure volume mounts correctly
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].name
+          value: data
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /data
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].name
+          value: logs
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].mountPath
+          value: /app/logs

@@ -1,0 +1,46 @@
+apiVersion: v2
+name: rustfs
+description: High-performance distributed object storage with S3-compatible API
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - rustfs
+  - file-system
+  - s3
+  - storage
+  - cloud-native
+  - rust
+home: https://github.com/rustfs/rustfs
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rustfs
+  - https://github.com/rustfs/rustfs
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
+    url: https://www.cloudpirates.io
+  - name: Gianni Carafa
+    email: gianni.carafa@srf.ch
+    url: https://www.srf.ch
+dependencies:
+  - name: common
+    version: "2.x.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+icon: https://a.storyblok.com/TODO/rustfs-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: storage
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: RustFS
+      url: https://github.com/rustfs/rustfs
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rustfs
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |2
+        - kind: added
+          description: "Initial release of RustFS Helm chart"

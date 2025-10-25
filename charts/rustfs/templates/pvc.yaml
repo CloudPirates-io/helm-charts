@@ -1,0 +1,92 @@
+{{- if and .Values.dataPersistence.enabled (not .Values.dataPersistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rustfs.dataPvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: data
+  {{- $annotations := merge .Values.dataPersistence.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.dataPersistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.dataPersistence.size | quote }}
+  {{- if .Values.dataPersistence.storageClass }}
+  {{- if (eq "-" .Values.dataPersistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.dataPersistence.storageClass }}"
+  {{- end }}
+  {{- end }}
+---
+{{- end }}
+{{- if and .Values.logsPersistence.enabled (not .Values.logsPersistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rustfs.logsPvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: logs
+  {{- $annotations := merge .Values.logsPersistence.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.logsPersistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.logsPersistence.size | quote }}
+  {{- if .Values.logsPersistence.storageClass }}
+  {{- if (eq "-" .Values.logsPersistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.logsPersistence.storageClass }}"
+  {{- end }}
+  {{- end }}
+---
+{{- end }}
+{{- if and .Values.tlsPersistence.enabled (not .Values.tlsPersistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "rustfs.tlsPvcName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tls
+  {{- $annotations := merge .Values.tlsPersistence.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.tlsPersistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.tlsPersistence.size | quote }}
+  {{- if .Values.tlsPersistence.storageClass }}
+  {{- if (eq "-" .Values.tlsPersistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.tlsPersistence.storageClass }}"
+  {{- end }}
+  {{- end }}
+{{- end }}
