@@ -1,6 +1,19 @@
 # Changelog
 
 
+## 0.3.3 (2025-10-22)
+
+* Update charts/memcached/values.yaml memcached (#425) ([de0a4a1](https://github.com/CloudPirates-io/helm-charts/commit/de0a4a1))
+
+## 0.3.2 (2025-10-21)
+
+* Update charts/memcached/values.yaml memcached (#424) ([304f6bd](https://github.com/CloudPirates-io/helm-charts/commit/304f6bd))
+* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
+* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
+* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
+* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
+* chore: update CHANGELOG.md for merged changes ([6d3bd93](https://github.com/CloudPirates-io/helm-charts/commit/6d3bd93))
+
 ## 0.3.1 (2025-10-15)
 
 * chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))

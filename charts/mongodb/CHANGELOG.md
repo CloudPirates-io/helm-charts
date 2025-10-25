@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.5.3 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([bd36e6d](https://github.com/CloudPirates-io/helm-charts/commit/bd36e6d))
+* chore: update CHANGELOG.md for merged changes ([fc6b177](https://github.com/CloudPirates-io/helm-charts/commit/fc6b177))
+
 ## 0.5.2 (2025-10-22)
 
 * Fix no auth error in init script (#440) ([54b7221](https://github.com/CloudPirates-io/helm-charts/commit/54b7221))

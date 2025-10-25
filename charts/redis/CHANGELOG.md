@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.9.4 (2025-10-22)
+
+* Update charts/redis/values.yaml redis (#434) ([b833a77](https://github.com/CloudPirates-io/helm-charts/commit/b833a77))
+* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
+* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
+* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+
+## 0.9.3 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([71d5536](https://github.com/CloudPirates-io/helm-charts/commit/71d5536))
+* chore: update CHANGELOG.md for merged changes ([74b289b](https://github.com/CloudPirates-io/helm-charts/commit/74b289b))
+
 ## 0.9.2 (2025-10-21)
 
 * Modifiable cluster domain (#427) ([88652de](https://github.com/CloudPirates-io/helm-charts/commit/88652de))

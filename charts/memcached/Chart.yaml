@@ -2,7 +2,7 @@ apiVersion: v2
 name: memcached
 description: Memcached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.
 type: application
-version: 0.3.2
+version: 0.3.3
 appVersion: "1.6.39"
 keywords:
   - memcached
@@ -39,7 +39,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[memcached]: add missing automountServiceAccountToken key to deployment spec (#395)"
+          description: "Update charts/memcached/values.yaml memcached (#425)"
           links:
-            - name: "Commit 93fee01"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/93fee01"
+            - name: "Commit de0a4a1"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/de0a4a1"

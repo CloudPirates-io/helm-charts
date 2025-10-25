@@ -242,7 +242,7 @@ spec:
             name: {{ .Values.definitions.existingConfigMap }}
           {{- else if .Values.definitions.existingSecret }}
           secret:
-            secretName: {{ .Values.definitions.existingSecret }}
+            secretName: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.definitions.existingSecret "context" $) }}
           {{- else }}
           configMap:
             name: {{ printf "%s-definitions" (include "rabbitmq.fullname" .) }}

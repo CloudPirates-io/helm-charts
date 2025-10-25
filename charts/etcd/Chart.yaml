@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.2.0
+version: 0.2.2
 appVersion: "3.6.5"
 keywords:
   - etcd
@@ -41,7 +41,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update chart.yaml dependencies for indepentent charts (#382)"
-          links:
-            - name: "Commit 87acfb1"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/87acfb1"
+          description: "Chart updated"
