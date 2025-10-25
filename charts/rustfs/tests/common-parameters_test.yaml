@@ -1,6 +1,7 @@
 suite: test rustfs common parameters
 templates:
   - deployment.yaml
+  - statefulset.yaml
 set:
   image:
     tag: latest
@@ -120,3 +121,77 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].volumeMounts[1].mountPath
           value: /app/logs
+
+  - it: should deploy as StatefulSet when deploymentType is statefulset
+    set:
+      deploymentType: statefulset
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: should configure StatefulSet update strategy correctly
+    set:
+      deploymentType: statefulset
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          partition: 2
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+      - equal:
+          path: spec.updateStrategy.rollingUpdate.partition
+          value: 2
+
+  - it: should create volumeClaimTemplates for StatefulSet
+    set:
+      deploymentType: statefulset
+      dataPersistence:
+        enabled: true
+        size: 20Gi
+      logsPersistence:
+        enabled: true
+        size: 2Gi
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 20Gi
+      - equal:
+          path: spec.volumeClaimTemplates[1].metadata.name
+          value: logs
+      - equal:
+          path: spec.volumeClaimTemplates[1].spec.resources.requests.storage
+          value: 2Gi
+
+  - it: should not deploy Deployment when deploymentType is statefulset
+    set:
+      deploymentType: statefulset
+    template: deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not deploy StatefulSet when deploymentType is deployment
+    set:
+      deploymentType: deployment
+    template: statefulset.yaml
+    asserts:
+      - hasDocuments:
+          count: 0

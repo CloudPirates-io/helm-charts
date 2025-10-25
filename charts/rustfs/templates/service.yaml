@@ -23,3 +23,32 @@ spec:
       targetPort: console
   selector:
     {{- include "rustfs.selectorLabels" . | nindent 4 }}
+{{- if eq .Values.deploymentType "statefulset" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rustfs.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+      name: api
+      targetPort: api
+    - port: {{ .Values.service.consolePort }}
+      protocol: TCP
+      name: console
+      targetPort: console
+  selector:
+    {{- include "rustfs.selectorLabels" . | nindent 4 }}
+{{- end }}

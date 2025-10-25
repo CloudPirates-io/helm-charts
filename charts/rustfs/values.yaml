@@ -42,7 +42,9 @@ auth:
 ## @section RustFS configuration
 config:
   ## @param config.volumes RustFS storage volumes configuration TODO (Not implemented yet in this chart)
-  volumes: "/data/rustfs{0...3}"
+  #volumes: "/data/rustfs{0...3}"
+  volumes: "/data"
+  #volumes: "http://rfs-rustfs-{0...1}.rfs-rustfs-headless.rustfs.svc.cluster.local:9000/data"
   ## @param config.address RustFS server address
   address: "0.0.0.0:9000"
   ## @param config.consoleAddress RustFS console address
@@ -56,7 +58,7 @@ config:
   ## @param config.consoleCorsAllowedOrigins CORS allowed origins for console
   consoleCorsAllowedOrigins: "*"
   ## @param config.logLevel RustFS log level (trace, debug, info, warn, error)
-  logLevel: "info"
+  logLevel: "debug"
   ## @param config.tlsPath Path to TLS certificates
   tlsPath: "/opt/tls"
   ## @param config.serverDomains Comma-separated list of server domains for TLS certificates
@@ -66,7 +68,20 @@ config:
   extraEnvVars: []
 
 ## @section Deployment configuration
-replicaCount: 1
+replicaCount: 2
+## @section Deployment type configuration
+## @param deploymentType Type of deployment (deployment or statefulset)
+deploymentType: "statefulset"
+
+## @param updateStrategy Update strategy for StatefulSet (only applies when deploymentType is statefulset)
+updateStrategy:
+  type: RollingUpdate
+  ## @param updateStrategy.rollingUpdate.partition Partition for RollingUpdate (only for StatefulSet)
+  rollingUpdate:
+    partition: 0
+
+## @param podManagementPolicy Pod management policy for StatefulSet (Parallel or OrderedReady)
+podManagementPolicy: "Parallel"
 
 ## @section Pod annotations and labels
 podAnnotations: {}

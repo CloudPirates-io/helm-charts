@@ -1,6 +1,6 @@
-{{- if eq .Values.deploymentType "deployment" }}
+{{- if eq .Values.deploymentType "statefulset" }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "rustfs.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -12,8 +12,14 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
-  strategy:
-    type: Recreate
+  serviceName: {{ include "rustfs.fullname" . }}-headless
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  updateStrategy:
+    type: {{ .Values.updateStrategy.type }}
+    {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
+    rollingUpdate:
+      partition: {{ .Values.updateStrategy.rollingUpdate.partition }}
+    {{- end }}
   selector:
     matchLabels:
       {{- include "rustfs.selectorLabels" . | nindent 6 }}
@@ -58,8 +64,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: RUSTFS_ADDRESS
+            - name: RUSTFS_ADDRESS_XX
               value: "$(RUSTFS_POD_IP):9000"
+            - name: RUSTFS_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           {{- with .Values.config.extraEnvVars }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -122,20 +132,14 @@ spec:
             - name: tmp
               mountPath: /tmp
       volumes:
+        {{- if not .Values.dataPersistence.enabled }}
         - name: data
-          {{- if .Values.dataPersistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "rustfs.dataPvcName" . }}
-          {{- else }}
           emptyDir: {}
-          {{- end }}
+        {{- end }}
+        {{- if not .Values.logsPersistence.enabled }}
         - name: logs
-          {{- if .Values.logsPersistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "rustfs.logsPvcName" . }}
-          {{- else }}
           emptyDir: {}
-          {{- end }}
+        {{- end }}
         {{- if .Values.tlsPersistence.enabled }}
         - name: tls
           persistentVolumeClaim:
@@ -155,4 +159,61 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- if or .Values.dataPersistence.enabled .Values.logsPersistence.enabled }}
+  volumeClaimTemplates:
+    {{- if .Values.dataPersistence.enabled }}
+    - metadata:
+        name: data
+        labels:
+          {{- include "rustfs.labels" . | nindent 10 }}
+          app.kubernetes.io/component: data
+        {{- $annotations := merge .Values.dataPersistence.annotations .Values.commonAnnotations }}
+        {{- with $annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          {{- range .Values.dataPersistence.accessModes }}
+          - {{ . | quote }}
+          {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.dataPersistence.size | quote }}
+        {{- if .Values.dataPersistence.storageClass }}
+        {{- if (eq "-" .Values.dataPersistence.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.dataPersistence.storageClass }}"
+        {{- end }}
+        {{- end }}
+    {{- end }}
+    {{- if .Values.logsPersistence.enabled }}
+    - metadata:
+        name: logs
+        labels:
+          {{- include "rustfs.labels" . | nindent 10 }}
+          app.kubernetes.io/component: logs
+        {{- $annotations := merge .Values.logsPersistence.annotations .Values.commonAnnotations }}
+        {{- with $annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          {{- range .Values.logsPersistence.accessModes }}
+          - {{ . | quote }}
+          {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.logsPersistence.size | quote }}
+        {{- if .Values.logsPersistence.storageClass }}
+        {{- if (eq "-" .Values.logsPersistence.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.logsPersistence.storageClass }}"
+        {{- end }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
 {{- end }}

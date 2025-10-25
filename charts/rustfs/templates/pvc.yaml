@@ -1,4 +1,4 @@
-{{- if and .Values.dataPersistence.enabled (not .Values.dataPersistence.existingClaim) }}
+{{- if and (eq .Values.deploymentType "deployment") .Values.dataPersistence.enabled (not .Values.dataPersistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -29,7 +29,7 @@ spec:
   {{- end }}
 ---
 {{- end }}
-{{- if and .Values.logsPersistence.enabled (not .Values.logsPersistence.existingClaim) }}
+{{- if and (eq .Values.deploymentType "deployment") .Values.logsPersistence.enabled (not .Values.logsPersistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -60,7 +60,7 @@ spec:
   {{- end }}
 ---
 {{- end }}
-{{- if and .Values.tlsPersistence.enabled (not .Values.tlsPersistence.existingClaim) }}
+{{- if and (eq .Values.deploymentType "deployment") .Values.tlsPersistence.enabled (not .Values.tlsPersistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

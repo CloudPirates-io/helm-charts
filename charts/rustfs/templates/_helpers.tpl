@@ -134,3 +134,25 @@ Return RustFS TLS PVC name
     {{- printf "%s-tls" (include "rustfs.fullname" .) -}}
 {{- end -}}
 {{- end }}
+
+
+{{/*
+Return RustFS Stateful Nodes
+*/}}
+{{- define "rustfs.statefulNodes" -}}
+{{- $namespace := .Release.Namespace }}
+{{- $name := include "rustfs.fullname" . -}}
+{{- $maxNode := sub (.Values.replicaCount | int) 1 }}
+{{- printf "http://%s-{0...%d}.%s-headless.%s.svc.cluster.local" $name $maxNode $name $namespace -}}
+{{- end }}
+
+{{/*
+Return RustFS volumes
+*/}}
+{{- define "rustfs.volumes" -}}
+{{- if eq .Values.deploymentType "statefulset" }}
+    {{ include "rustfs.statefulNodes" . }}:9000{{ .Values.config.volumes }}
+{{- else -}}
+    {{- .Values.config.volumes -}}
+{{- end }}
+{{- end }}

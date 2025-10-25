@@ -117,7 +117,16 @@ The following table lists the configurable parameters of the RustFS chart and th
 
 | Parameter      | Description           | Default |
 | -------------- | --------------------- | ------- |
-| `replicaCount` | Number of replicas    | `1`     |
+| `replicaCount` | Number of replicas    | `4`     |
+
+### Deployment type configuration
+
+| Parameter                           | Description                                      | Default          |
+| ----------------------------------- | ------------------------------------------------ | ---------------- |
+| `deploymentType`                    | Type of deployment (deployment or statefulset)  | `"deployment"`   |
+| `updateStrategy.type`               | Update strategy for StatefulSet                  | `RollingUpdate`  |
+| `updateStrategy.rollingUpdate.partition` | Partition for RollingUpdate (StatefulSet only)  | `0`              |
+| `podManagementPolicy`               | Pod management policy for StatefulSet (Parallel or OrderedReady) | `"Parallel"`     |
 
 ### Pod annotations and labels
 
@@ -281,6 +290,16 @@ helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
   --set logsPersistence.size=5Gi \
   --set dataPersistence.storageClass=fast-ssd
 ```
+
+### Installation as StatefulSet
+
+```bash
+helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
+  --set deploymentType=statefulset \
+  --set replicaCount=3 \
+  --set podManagementPolicy=OrderedReady
+```
+
 
 ## Accessing RustFS
 
