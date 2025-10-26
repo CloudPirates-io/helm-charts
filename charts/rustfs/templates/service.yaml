@@ -51,4 +51,38 @@ spec:
       targetPort: console
   selector:
     {{- include "rustfs.selectorLabels" . | nindent 4 }}
+---
+{{- if and .Values.config.console.enabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rustfs.fullname" . }}-sticky
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sticky
+  {{- $stickyAnnotations := merge .Values.consoleService.annotations .Values.commonAnnotations }}
+  {{- with $stickyAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.consoleService.type }}
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{ .Values.consoleService.sessionAffinityTimeout }}
+  ports:
+    - port: {{ .Values.consoleService.port }}
+      protocol: TCP
+      name: api
+      targetPort: api
+    - port: {{ .Values.consoleService.consolePort }}
+      protocol: TCP
+      name: console
+      targetPort: console
+  selector:
+    {{- include "rustfs.selectorLabels" . | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ include "rustfs.fullname" . }}-0
+{{- end }}
 {{- end }}

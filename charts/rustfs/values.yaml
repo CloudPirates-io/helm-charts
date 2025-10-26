@@ -116,6 +116,21 @@ service:
   ## @param service.annotations Service annotations
   annotations: {}
 
+## @section Console Service configuration (for StatefulSet only)
+consoleService:
+  ## @param consoleService.enabled Enable Console service that routes to the first pod only
+  enabled: true
+  ## @param consoleService.type Console service type
+  type: ClusterIP
+  ## @param consoleService.port Console service API port
+  port: 9000
+  ## @param consoleService.consolePort Console service console port
+  consolePort: 9001
+  ## @param consoleService.sessionAffinityTimeout Session affinity timeout in seconds
+  sessionAffinityTimeout: 10800
+  ## @param consoleService.annotations Console service annotations
+  annotations: {}
+
 ## @section Ingress configuration
 ingress:
   ## @param ingress.enabled Enable ingress record generation for RustFS API
@@ -140,6 +155,35 @@ ingress:
   #  - secretName: rustfs-tls
   #    hosts:
   #      - rustfs.local
+
+## @section Console Ingress configuration (for StatefulSet only)
+consoleIngress:
+  ## @param consoleIngress.enabled Enable Console ingress record generation for RustFS API (routes to first pod only)
+  enabled: true
+  ## @param consoleIngress.className IngressClass that will be used to implement the Console Ingress
+  className: ""
+  ## @param consoleIngress.annotations Additional annotations for the Console Ingress resource
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/affinity: "cookie"
+    # nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    # nginx.ingress.kubernetes.io/session-cookie-name: "rustfs-console"
+    # nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+  ## @param consoleIngress.hosts[0].host Hostname for Console RustFS API ingress
+  ## @param consoleIngress.hosts[0].paths[0].path Path for Console RustFS API ingress
+  ## @param consoleIngress.hosts[0].paths[0].pathType Path type for Console RustFS API ingress
+  hosts:
+    - host: rustfs-console.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+  ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
+  tls: []
+  #  - secretName: rustfs-console-tls
+  #    hosts:
+  #      - rustfs-console.local
 
 ## @section Resources
 resources:

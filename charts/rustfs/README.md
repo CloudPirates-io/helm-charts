@@ -156,6 +156,17 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `service.consolePort`  | RustFS console service port  | `9001`      |
 | `service.annotations`  | Service annotations          | `{}`        |
 
+### Console Service configuration (for StatefulSet only)
+
+| Parameter                           | Description                                      | Default     |
+| ----------------------------------- | ------------------------------------------------ | ----------- |
+| `consoleService.enabled`            | Enable Console service that routes to the first pod only | `true`      |
+| `consoleService.type`               | Console service type                             | `ClusterIP` |
+| `consoleService.port`               | Console service API port                         | `9000`      |
+| `consoleService.consolePort`        | Console service console port                     | `9001`      |
+| `consoleService.sessionAffinityTimeout` | Session affinity timeout in seconds          | `10800`     |
+| `consoleService.annotations`        | Console service annotations                      | `{}`        |
+
 ### Ingress configuration
 
 | Parameter                      | Description                                   | Default           |
@@ -167,6 +178,18 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `ingress.hosts[0].paths[0].path` | Path for RustFS API ingress                   | `/`               |
 | `ingress.hosts[0].paths[0].pathType` | Path type for RustFS API ingress              | `Prefix`          |
 | `ingress.tls`                  | TLS configuration for RustFS API ingress     | `[]`              |
+
+### Console Ingress configuration (for StatefulSet only)
+
+| Parameter                           | Description                                                     | Default                    |
+| ----------------------------------- | --------------------------------------------------------------- | -------------------------- |
+| `consoleIngress.enabled`            | Enable Console ingress record generation for RustFS API (routes to first pod only) | `true`                     |
+| `consoleIngress.className`          | IngressClass that will be used to implement the Console Ingress | `""`                       |
+| `consoleIngress.annotations`        | Additional annotations for the Console Ingress resource         | `{}`                       |
+| `consoleIngress.hosts[0].host`      | Hostname for Console RustFS API ingress                         | `rustfs-console.localhost` |
+| `consoleIngress.hosts[0].paths[0].path` | Path for Console RustFS API ingress                         | `/`                        |
+| `consoleIngress.hosts[0].paths[0].pathType` | Path type for Console RustFS API ingress                | `Prefix`                   |
+| `consoleIngress.tls`                | TLS configuration for Console RustFS API ingress                | `[]`                       |
 
 ### Resources
 
@@ -282,6 +305,16 @@ helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
   --set consoleIngress.hosts[0].host=rustfs-console.example.com
 ```
 
+### Installation with console service enabled
+
+```bash
+helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
+  --set deploymentType=statefulset \
+  --set consoleService.enabled=true \
+  --set consoleIngress.enabled=true \
+  --set consoleIngress.hosts[0].host=rustfs-console.example.com
+```
+
 ### Installation with custom storage
 
 ```bash
@@ -313,12 +346,15 @@ kubectl port-forward service/my-rustfs 9000:9000
 
 # Access the console
 kubectl port-forward service/my-rustfs 9001:9001
+
+# Access via console service (if enabled and using StatefulSet)
+kubectl port-forward service/my-rustfs-console 9001:9001
 ```
 
 ### Via ingress (if enabled)
 
 - API: `http://rustfs.local` (or your configured hostname)
-- Console: `http://rustfs-console.local` (or your configured hostname)
+- Console: `http://rustfs-console.local` (or your configured hostname via consoleIngress)
 
 ## Health Checks
 
