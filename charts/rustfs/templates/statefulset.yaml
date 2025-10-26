@@ -41,6 +41,24 @@ spec:
 {{- end }}
       serviceAccountName: {{ template "rustfs.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      initContainers:
+        - name: wait-for-pods
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting 5 seconds to ensure all pod domains are resolvable ..."
+              sleep 5
+              echo "Init container completed, starting main container"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}

@@ -138,6 +138,8 @@ Return RustFS TLS PVC name
 
 {{/*
 Return RustFS Stateful Nodes
+Example: http://rfs-rustfs-{0...1}.rfs-rustfs-headless.rustfs.svc.cluster.local
+         http://[NODE].[HEADLESS-SERVICE].[NAMESPACE].svc.cluster.local
 */}}
 {{- define "rustfs.statefulNodes" -}}
 {{- $namespace := .Release.Namespace }}
