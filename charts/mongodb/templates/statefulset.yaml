@@ -39,7 +39,12 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if or .Values.config.content .Values.config.existingConfigmap }}
+          {{- if .Values.image.command }}
+          command: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.image.args }}
+          args: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.args "context" $) | nindent 12 }}
+          {{- else if or .Values.config.content .Values.config.existingConfigmap }}
           args:
             - "--config"
             - {{ include "mongodb.configFullName" . | quote }}
