@@ -6,6 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
+  {{- with (include "nginx.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 data:
   {{- if .Values.config }}
   nginx.conf: |-

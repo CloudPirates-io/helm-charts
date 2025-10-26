@@ -7,7 +7,8 @@ metadata:
   labels:
     {{- include "redis.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics
-  {{- with .Values.metrics.service.annotations }}
+  {{- $annotations := merge .Values.metrics.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

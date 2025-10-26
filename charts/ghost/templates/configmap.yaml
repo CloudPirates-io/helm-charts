@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "ghost.labels" . | nindent 4 }}
+  {{- with (include "ghost.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 data:
   config.production.json: |-
     {

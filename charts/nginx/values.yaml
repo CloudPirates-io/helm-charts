@@ -63,6 +63,8 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.annotations Additional annotations to add to the service
+  annotations: {}
 
 ## @section Ingress parameters
 ingress:

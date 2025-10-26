@@ -6,10 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "minio.labels" . | nindent 4 }}
-  annotations:
-    {{- if .Values.commonAnnotations }}
-    {{- include "minio.annotations" . | nindent 4 }}
-    {{- end }}
+  {{- with (include "minio.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 spec:
   ttlSecondsAfterFinished: 600
   activeDeadlineSeconds: 300
