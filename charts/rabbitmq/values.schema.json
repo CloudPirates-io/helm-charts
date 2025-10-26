@@ -139,6 +139,17 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "preStop": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "array"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
