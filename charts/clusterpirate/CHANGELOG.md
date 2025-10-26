@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 1.2.4 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([1053460](https://github.com/CloudPirates-io/helm-charts/commit/1053460))
+* chore: update CHANGELOG.md for merged changes ([6230965](https://github.com/CloudPirates-io/helm-charts/commit/6230965))
+
 ## 1.2.3 (2025-10-22)
 
 * chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))

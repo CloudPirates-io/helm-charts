@@ -10,7 +10,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "mariadb.labels" . | nindent 4 }}
-  {{- with .Values.persistence.annotations }}
+  {{- $annotations := merge .Values.persistence.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

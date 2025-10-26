@@ -10,7 +10,8 @@ metadata:
   {{- end }}
   labels:
     {{- include "keycloak.metrics.serviceMonitor.labels" . | nindent 4 }}
-  {{- with .Values.metrics.serviceMonitor.annotations }}
+  {{- $annotations := merge .Values.metrics.serviceMonitor.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

@@ -5,6 +5,11 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:

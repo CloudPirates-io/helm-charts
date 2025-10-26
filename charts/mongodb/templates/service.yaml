@@ -5,6 +5,13 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
+  {{- if or (include "mongodb.annotations" .) .Values.service.annotations }}
+  annotations: 
+{{- (include "mongodb.annotations" .) | indent 4 }}
+  {{- if .Values.service.annotations }}
+{{ toYaml .Values.service.annotations | indent 4 }}
+  {{- end }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:

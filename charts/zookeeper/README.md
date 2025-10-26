@@ -99,6 +99,7 @@ zkCli.sh -server my-zookeeper:2181
 | `service.ports.quorum` | ZooKeeper quorum service port | `2888` |
 | `service.ports.leaderElection` | ZooKeeper leader election service port | `3888` |
 | `service.ports.admin` | ZooKeeper admin service port | `8080` |
+| `service.annotations` | Additional annotations to add to the service | `{}` |
 
 ### Persistence
 

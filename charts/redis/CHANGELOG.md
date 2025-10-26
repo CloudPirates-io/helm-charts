@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.9.6 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([d014098](https://github.com/CloudPirates-io/helm-charts/commit/d014098))
+* chore: update CHANGELOG.md for merged changes ([a839665](https://github.com/CloudPirates-io/helm-charts/commit/a839665))
+
+## 0.9.5 (2025-10-22)
+
+* add service support annotations (#446) ([72e7eb7](https://github.com/CloudPirates-io/helm-charts/commit/72e7eb7))
+* chore: update CHANGELOG.md for merged changes ([baf1dea](https://github.com/CloudPirates-io/helm-charts/commit/baf1dea))
+* chore: update CHANGELOG.md for merged changes ([42db63e](https://github.com/CloudPirates-io/helm-charts/commit/42db63e))
+
 ## 0.9.4 (2025-10-22)
 
 * Update charts/redis/values.yaml redis (#434) ([b833a77](https://github.com/CloudPirates-io/helm-charts/commit/b833a77))
