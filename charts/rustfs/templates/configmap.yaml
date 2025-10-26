@@ -20,6 +20,7 @@ data:
   RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS: {{ .Values.config.consoleCorsAllowedOrigins | quote }}
   RUSTFS_LOG_LEVEL: {{ .Values.config.logLevel | quote }}
   RUSTFS_TLS_PATH: {{ .Values.config.tlsPath | quote }}
+  HTTPS_PROXY: http://rustfs.localhost/
   {{- range $key, $value := .Values.config.extraEnvVars }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}

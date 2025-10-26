@@ -11,7 +11,7 @@ metadata:
     {{- include "rustfs.annotations" . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ include "rustfs.replicaCount" . }}
   serviceName: {{ include "rustfs.fullname" . }}-headless
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   updateStrategy:

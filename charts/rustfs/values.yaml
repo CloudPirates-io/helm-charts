@@ -68,7 +68,7 @@ config:
 replicaCount: 1
 ## @section Deployment type configuration
 ## @param deploymentType Type of deployment (deployment or statefulset). StatefulSet needs a replicacount of 4.
-deploymentType: "deployment"
+deploymentType: "statefulset"
 
 ## @param updateStrategy Update strategy for StatefulSet (only applies when deploymentType is statefulset)
 updateStrategy:

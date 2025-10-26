@@ -135,6 +135,20 @@ Return RustFS TLS PVC name
 {{- end -}}
 {{- end }}
 
+{{/*
+Return minimal Replicas in statefulset mode
+*/}}
+{{- define "rustfs.replicaCount" -}}
+{{- if eq .Values.deploymentType "statefulset" }}
+{{- if lt (.Values.replicaCount | int) 4 -}}
+4
+{{- else -}}
+{{- .Values.replicaCount -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.replicaCount -}}
+{{- end }}
+{{- end }}
 
 {{/*
 Return RustFS Stateful Nodes
@@ -144,7 +158,7 @@ Example: http://rfs-rustfs-{0...1}.rfs-rustfs-headless.rustfs.svc.cluster.local
 {{- define "rustfs.statefulNodes" -}}
 {{- $namespace := .Release.Namespace }}
 {{- $name := include "rustfs.fullname" . -}}
-{{- $maxNode := sub (.Values.replicaCount | int) 1 }}
+{{- $maxNode := sub (include "rustfs.replicaCount" . | int) 1 }}
 {{- printf "http://%s-{0...%d}.%s-headless.%s.svc.cluster.local" $name $maxNode $name $namespace -}}
 {{- end }}
 
