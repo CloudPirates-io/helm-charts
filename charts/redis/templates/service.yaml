@@ -5,8 +5,10 @@ metadata:
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
-  {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+  {{- if (include "redis.annotations" .) }}
   annotations:
+{{- (include "redis.annotations" .) | nindent 4 }}
+  {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
     # This service points to all Redis instances for Sentinel-based discovery
     # Applications should use Sentinel clients to discover the current master
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
@@ -14,6 +16,7 @@ metadata:
   {{- with .Values.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- end }}
   {{- end }}
 spec:

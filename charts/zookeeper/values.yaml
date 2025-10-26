@@ -133,6 +133,8 @@ service:
     leaderElection: 3888
     ## @param service.ports.admin Zookeeper admin service port
     admin: 8080
+  ## @param service.annotations Additional annotations to add to the service
+  annotations: {}
 
 ## @section Resources
 resources:
