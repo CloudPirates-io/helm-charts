@@ -1,0 +1,274 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override rustfs.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override rustfs.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @section RustFS image configuration
+image:
+  ## @param image.registry RustFS image registry
+  registry: docker.io
+  ## @param image.repository RustFS image repository
+  repository: rustfs/rustfs
+  ## @param image.tag RustFS image tag (immutable tags are recommended)
+  tag: "1.0.0-alpha.64@sha256:11ba8ff3870e8ee88494ad5b34e6942d1d91321483895c05aa264643f6d99a94"
+  ## @param image.imagePullPolicy RustFS image pull policy
+  imagePullPolicy: Always
+
+## @section RustFS Authentication
+auth:
+  ## @param auth.accessKey RustFS access key
+  accessKey: "rustfsadmin"
+  ## @param auth.secretKey RustFS secret key. If not set, a random password will be generated
+  secretKey: ""
+  ## @param auth.existingSecret Name of existing secret containing RustFS credentials
+  existingSecret: ""
+  ## @param auth.existingSecretAccessKeyKey Key in existing secret containing access key
+  existingSecretAccessKeyKey: "access-key"
+  ## @param auth.existingSecretSecretKeyKey Key in existing secret containing secret key
+  existingSecretSecretKeyKey: "secret-key"
+
+## @section RustFS configuration
+config:
+  ## @param config.volumes RustFS storage volumes configuration TODO (Not implemented yet in this chart)
+  #volumes: "/data/rustfs{0...3}"
+  volumes: "/data"
+  ## @param config.address RustFS server address
+  address: "0.0.0.0:9000"
+  ## @param config.consoleAddress RustFS console address
+  consoleAddress: "0.0.0.0:9001"
+  ## @param config.consoleEnabled Enable RustFS console
+  consoleEnabled: true
+  ## @param config.externalAddress RustFS external address (port your cluster ingress is listening to)
+  externalAddress: ":80"
+  ## @param config.corsAllowedOrigins CORS allowed origins for API
+  corsAllowedOrigins: "*"
+  ## @param config.consoleCorsAllowedOrigins CORS allowed origins for console
+  consoleCorsAllowedOrigins: "*"
+  ## @param config.logLevel RustFS log level (trace, debug, info, warn, error)
+  logLevel: "debug"
+  ## @param config.tlsPath Path to TLS certificates
+  tlsPath: "/opt/tls"
+
+  ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
+  extraEnvVars: []
+
+## @section Deployment configuration
+replicaCount: 1
+## @section Deployment type configuration
+## @param deploymentType Type of deployment (deployment or statefulset). StatefulSet needs a replicacount of 4.
+deploymentType: "deployment"
+
+## @param updateStrategy Update strategy for StatefulSet (only applies when deploymentType is statefulset)
+updateStrategy:
+  type: RollingUpdate
+  ## @param updateStrategy.rollingUpdate.partition Partition for RollingUpdate (only for StatefulSet)
+  rollingUpdate:
+    partition: 0
+
+## @param podManagementPolicy Pod management policy for StatefulSet (Parallel or OrderedReady)
+podManagementPolicy: "Parallel"
+
+## @section Pod annotations and labels
+podAnnotations: {}
+podLabels: {}
+
+## @section Security Context
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
+  fsGroup: 1001
+
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.runAsUser User ID for the RustFS container
+  runAsUser: 1001
+  ## @param containerSecurityContext.runAsGroup Group ID for the RustFS container
+  runAsGroup: 1001
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: false
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
+  capabilities:
+    drop:
+      - ALL
+
+## @section Service configuration
+service:
+  ## @param service.type RustFS service type
+  type: ClusterIP
+  ## @param service.port RustFS API service port
+  port: 9000
+  ## @param service.consolePort RustFS console service port
+  consolePort: 9001
+  ## @param service.annotations Service annotations
+  annotations: {}
+
+## @section Ingress configuration
+ingress:
+  ## @param ingress.enabled Enable ingress record generation for RustFS API
+  enabled: true
+  ## @param ingress.className IngressClass that will be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  ## @param ingress.hosts[0].host Hostname for RustFS API ingress
+  ## @param ingress.hosts[0].paths[0].path Path for RustFS API ingress
+  ## @param ingress.hosts[0].paths[0].pathType Path type for RustFS API ingress
+  hosts:
+    - host: rustfs.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+  ## @param ingress.tls TLS configuration for RustFS API ingress
+  tls: []
+  #  - secretName: rustfs-tls
+  #    hosts:
+  #      - rustfs.local
+
+## @section Resources
+resources:
+  {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+## @section Data Persistence
+dataPersistence:
+  ## @param dataPersistence.enabled Enable data persistence using Persistent Volume Claims
+  enabled: true
+  ## @param dataPersistence.storageClass Persistent Volume storage class for data
+  storageClass: ""
+  ## @param dataPersistence.annotations Persistent Volume Claim annotations for data
+  annotations: {}
+  ## @param dataPersistence.size Persistent Volume size for data
+  size: 10Gi
+  ## @param dataPersistence.accessModes Persistent Volume access modes for data
+  accessModes:
+    - ReadWriteOnce
+  ## @param dataPersistence.existingClaim The name of an existing PVC to use for data persistence
+  existingClaim: ""
+  ## @param dataPersistence.mountPath The path where to mount the data volume
+  mountPath: /data
+
+## @section Logs Persistence
+logsPersistence:
+  ## @param logsPersistence.enabled Enable logs persistence using Persistent Volume Claims
+  enabled: true
+  ## @param logsPersistence.storageClass Persistent Volume storage class for logs
+  storageClass: ""
+  ## @param logsPersistence.annotations Persistent Volume Claim annotations for logs
+  annotations: {}
+  ## @param logsPersistence.size Persistent Volume size for logs
+  size: 1Gi
+  ## @param logsPersistence.accessModes Persistent Volume access modes for logs
+  accessModes:
+    - ReadWriteOnce
+  ## @param logsPersistence.existingClaim The name of an existing PVC to use for logs persistence
+  existingClaim: ""
+  ## @param logsPersistence.mountPath The path where to mount the logs volume
+  mountPath: /app/logs
+
+## @section TLS Persistence
+tlsPersistence:
+  ## @param tlsPersistence.enabled Enable TLS persistence using Persistent Volume Claims
+  enabled: false
+  ## @param tlsPersistence.storageClass Persistent Volume storage class for TLS
+  storageClass: ""
+  ## @param tlsPersistence.annotations Persistent Volume Claim annotations for TLS
+  annotations: {}
+  ## @param tlsPersistence.size Persistent Volume size for TLS
+  size: 100Mi
+  ## @param tlsPersistence.accessModes Persistent Volume access modes for TLS
+  accessModes:
+    - ReadWriteOnce
+  ## @param tlsPersistence.existingClaim The name of an existing PVC to use for TLS persistence
+  existingClaim: ""
+  ## @param tlsPersistence.mountPath The path where to mount the TLS volume
+  mountPath: /opt/tls
+
+serviceAccount:
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount for RustFS
+  create: true
+  ## @param serviceAccount.name Name of the created ServiceAccount
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Enable/disable auto mounting of the service account token
+  automountServiceAccountToken: false
+  ## @param serviceAccount.annotations Custom annotations for RustFS serviceAccount
+  annotations: {}
+
+## @section Liveness and readiness probes
+livenessProbe:
+  ## @param livenessProbe.enabled Enable livenessProbe on RustFS containers
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  initialDelaySeconds: 15
+  ## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+  periodSeconds: 30
+  ## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  timeoutSeconds: 10
+  ## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Success threshold for livenessProbe
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readinessProbe on RustFS containers
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+  periodSeconds: 10
+  ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Success threshold for readinessProbe
+  successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startupProbe on RustFS containers
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  initialDelaySeconds: 5
+  ## @param startupProbe.periodSeconds Period seconds for startupProbe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  timeoutSeconds: 10
+  ## @param startupProbe.failureThreshold Failure threshold for startupProbe
+  failureThreshold: 3
+  ## @param startupProbe.successThreshold Success threshold for startupProbe
+  successThreshold: 1
+
+## @section Node Selection
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
