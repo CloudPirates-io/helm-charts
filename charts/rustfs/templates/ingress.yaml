@@ -1,0 +1,94 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "rustfs.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.ingress.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  name: api
+          {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- if and .Values.config.console.enabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "rustfs.fullname" . }}-sticky
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sticky
+  {{- $stickyAnnotations := merge .Values.consoleIngress.annotations .Values.commonAnnotations }}
+  {{- with $stickyAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.consoleIngress.className }}
+  ingressClassName: {{ .Values.consoleIngress.className }}
+  {{- end }}
+  {{- if .Values.consoleIngress.tls }}
+  tls:
+    {{- range .Values.consoleIngress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.consoleIngress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "rustfs.fullname" $ }}-sticky
+                port:
+                  name: api
+          {{- end }}
+    {{- end }}
+{{- end }}
