@@ -170,9 +170,8 @@ spec:
             - name: RABBITMQ_NODENAME
               value: rabbit@$(NODE_NAME)
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
