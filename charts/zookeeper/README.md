@@ -23,6 +23,24 @@ To install with custom values:
 helm install my-zookeeper ./charts/zookeeper -f values.yaml
 ```
 
+## Security & Signature Verification
+
+This Helm chart is cryptographically signed with Cosign to ensure authenticity and prevent tampering.
+
+**Public Key:**
+
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
+mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+-----END PUBLIC KEY-----
+```
+
+To verify the helm chart before installation, copy the public key to the file `cosign.pub` and run cosign:
+
+```bash
+cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/zookeeper:<version>
+```
 
 ### Getting Started
 
