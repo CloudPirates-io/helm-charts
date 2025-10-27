@@ -70,7 +70,7 @@ spec:
             - -c
             - source /usr/local/bin/galera-entrypoint.sh
           {{- end }}
-          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env .Values.galera.enabled }}
+          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.extraEnvVars .Values.galera.enabled }}
           env:
             {{- if and .Values.auth.enabled }}
             - name: MARIADB_ROOT_PASSWORD
@@ -121,7 +121,7 @@ spec:
             - name: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP
               value: {{ .Values.galera.forceSafeToBootstrap | quote }}
             {{- end }}
-            {{- with .Values.env }}
+            {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
