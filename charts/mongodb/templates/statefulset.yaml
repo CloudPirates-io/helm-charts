@@ -113,9 +113,8 @@ spec:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -180,9 +179,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
-            {{- range .Values.metrics.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.metrics.extraEnvVars }}
+{{ toYaml . | indent 12}}
             {{- end }}
           {{- else }}
           env:
