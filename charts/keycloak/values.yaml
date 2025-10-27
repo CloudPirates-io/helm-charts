@@ -170,14 +170,18 @@ tls:
 
 ## @section Database Configuration
 database:
-  ## @param database.type Database type (postgres, mysql, mariadb)
+  ## @param database.type Database type (postgres, mysql, mariadb, mssql)
   ## Note: H2 databases (h2-file, h2-mem) are not supported due to readonly filesystem restrictions
   ## Use embedded postgres or mariadb instead
   type: postgres
   ## @param database.host Database host (only used when not using embedded database)
   host: ""
-  ## @param database.port Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306)
+  ## @param database.port Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306, mssql=1443)
   port: ""
+  ## @param database.schema Database schema
+  schema: ""
+  ## @param database.urlProperties Additional database url properties
+  urlProperties: ""
   ## @param database.name Database name (only used when not using embedded database)
   name: keycloak
   ## @param database.username Database username (only used when not using embedded database)
