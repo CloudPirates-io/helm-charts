@@ -33,10 +33,14 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ template "minio.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.containerSecurityContext }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          {{- end }}
           image: {{ include "minio.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           command: ["/bin/sh"]
