@@ -45,18 +45,18 @@ spec:
     {{- end }}
 {{- end }}
 
-{{- if and .Values.config.console.enabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
+{{- if and .Values.config.consoleEnabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "rustfs.fullname" . }}-sticky
+  name: {{ include "rustfs.fullname" . }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
-    app.kubernetes.io/component: sticky
-  {{- $stickyAnnotations := merge .Values.consoleIngress.annotations .Values.commonAnnotations }}
-  {{- with $stickyAnnotations }}
+    app.kubernetes.io/component: console
+  {{- $consoleAnnotations := merge .Values.consoleIngress.annotations .Values.commonAnnotations }}
+  {{- with $consoleAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -86,7 +86,7 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "rustfs.fullname" $ }}-sticky
+                name: {{ include "rustfs.fullname" $ }}-console
                 port:
                   name: api
           {{- end }}

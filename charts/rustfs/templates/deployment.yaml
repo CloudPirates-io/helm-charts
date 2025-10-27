@@ -58,7 +58,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: RUSTFS_ADDRESS
+            - name: RUSTFS_ADDRESS_POD_IP
               value: "$(RUSTFS_POD_IP):9000"
           {{- with .Values.config.extraEnvVars }}
           {{- toYaml . | nindent 12 }}

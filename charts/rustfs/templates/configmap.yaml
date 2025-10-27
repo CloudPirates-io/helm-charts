@@ -11,8 +11,7 @@ metadata:
   {{- end }}
 data:
   RUSTFS_VOLUMES: {{ include "rustfs.volumes" . }}
-  RUSTFS_VOLUMES_XX: {{ .Values.config.volumes | quote }}
-  RUSTFS_ADDRESS_XX: {{ .Values.config.address | quote }}
+  RUSTFS_ADDRESS: {{ .Values.config.address | quote }}
   RUSTFS_CONSOLE_ADDRESS: {{ .Values.config.consoleAddress | quote }}
   RUSTFS_CONSOLE_ENABLE: {{ .Values.config.consoleEnabled | quote }}
   RUSTFS_EXTERNAL_ADDRESS: {{ .Values.config.externalAddress | quote }}

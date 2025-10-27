@@ -52,17 +52,17 @@ spec:
   selector:
     {{- include "rustfs.selectorLabels" . | nindent 4 }}
 ---
-{{- if and .Values.config.console.enabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
+{{- if and .Values.config.consoleEnabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "rustfs.fullname" . }}-sticky
+  name: {{ include "rustfs.fullname" . }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
-    app.kubernetes.io/component: sticky
-  {{- $stickyAnnotations := merge .Values.consoleService.annotations .Values.commonAnnotations }}
-  {{- with $stickyAnnotations }}
+    app.kubernetes.io/component: console
+  {{- $consoleAnnotations := merge .Values.consoleService.annotations .Values.commonAnnotations }}
+  {{- with $consoleAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

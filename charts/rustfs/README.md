@@ -2,6 +2,9 @@
 
 A Helm chart for RustFS - High-performance distributed file system written in Rust with S3-compatible API. RustFS is a modern, efficient file system that provides S3-compatible APIs for cloud-native applications.
 
+> [!WARNING]  
+> RustFS is currently in ALPHA stage. It is not recommended for production use by the publisher.
+
 ## Prerequisites
 
 - Kubernetes 1.19+
