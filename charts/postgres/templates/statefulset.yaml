@@ -79,9 +79,8 @@ spec:
             - name: POSTGRES_EFFECTIVE_CACHE_SIZE
               value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
             {{- end }}
-            {{- range $key, $value := .Values.extraEnv }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
