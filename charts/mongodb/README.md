@@ -318,11 +318,10 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 ### Basic Installation with Authentication
 
 ```yaml
-mongodb:
-  auth:
-    enabled: true
-    rootUsername: admin
-    rootPassword: "mySecretPassword"
+auth:
+  enabled: true
+  rootUsername: admin
+  rootPassword: "mySecretPassword"
 
 persistence:
   enabled: true
@@ -347,12 +346,11 @@ persistence:
   storageClass: "default"
   size: 100Gi
 
-mongodb:
-  auth:
-    enabled: true
-    rootUsername: admin
-    existingSecret: mongodb-credentials
-    existingSecretPasswordKey: password
+auth:
+  enabled: true
+  rootUsername: admin
+  existingSecret: mongodb-credentials
+  existingSecretPasswordKey: password
 ```
 
 ### Development Setup (No Persistence)
@@ -361,9 +359,8 @@ mongodb:
 persistence:
   enabled: false
 
-mongodb:
-  auth:
-    enabled: false
+auth:
+  enabled: false
 
 resources:
   limits:
