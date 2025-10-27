@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.5.4 (2025-10-27)
+
+* Remove securitycontext on empty obejct (#474) ([3c288c8](https://github.com/CloudPirates-io/helm-charts/commit/3c288c8))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
 ## 0.5.3 (2025-10-23)
 
 * chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
