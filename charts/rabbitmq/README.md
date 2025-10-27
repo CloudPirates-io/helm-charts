@@ -194,14 +194,15 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Persistence
 
-| Parameter                  | Description                                | Default             |
-| -------------------------- | ------------------------------------------ | ------------------- |
-| `persistence.enabled`      | Enable persistent storage                  | `true`              |
-| `persistence.storageClass` | Storage class to use for persistent volume | `""`                |
-| `persistence.accessModes`  | Persistent Volume access modes             | `["ReadWriteOnce"]` |
-| `persistence.size`         | Size of persistent volume                  | `8Gi`               |
-| `persistence.labels`       | Labels for persistent volume claims        | `{}`                |
-| `persistence.annotations`  | Annotations for persistent volume claims   | `{}`                |
+| Parameter                   | Description                                                                    | Default             |
+| --------------------------- | ------------------------------------------------------------------------------ | ------------------- |
+| `persistence.enabled`       | Enable persistent storage                                                      | `true`              |
+| `persistence.existingClaim` | Name of existing PVC to use (if empty, a new PVC will be created automatically) | `""`                |
+| `persistence.storageClass`  | Storage class to use for persistent volume                                     | `""`                |
+| `persistence.accessModes`   | Persistent Volume access modes                                                 | `["ReadWriteOnce"]` |
+| `persistence.size`          | Size of persistent volume                                                      | `8Gi`               |
+| `persistence.labels`        | Labels for persistent volume claims                                            | `{}`                |
+| `persistence.annotations`   | Annotations for persistent volume claims                                       | `{}`                |
 
 ### Ingress configuration
 

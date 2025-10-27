@@ -286,13 +286,26 @@ spec:
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
           {{- end }}
-          {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+          {{- if or (and .Values.sentinel.enabled (eq .Values.architecture "replication")) .Values.customScripts.postStart.enabled .Values.customScripts.preStop.enabled }}
           lifecycle:
+            {{- if .Values.customScripts.postStart.enabled }}
+            postStart:
+              exec:
+                command:
+                  {{- toYaml .Values.customScripts.postStart.command | nindent 18 }}
+            {{- end }}
+            {{- if .Values.customScripts.preStop.enabled }}
+            preStop:
+              exec:
+                command:
+                  {{- toYaml .Values.customScripts.preStop.command | nindent 18 }}
+            {{- else if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
             preStop:
               exec:
                 command:
                   - /bin/bash
                   - /scripts/prestop.sh
+            {{- end }}
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

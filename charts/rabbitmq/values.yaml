@@ -163,6 +163,8 @@ installPlugins: []
 persistence:
   ## @param persistence.enabled Enable persistent storage
   enabled: true
+  ## @param persistence.existingClaim Name of existing PVC to use (if empty, a new PVC will be created automatically)
+  existingClaim: ""
   ## @param persistence.storageClass Storage class to use for persistent volume
   storageClass: ""
   ## @param persistence.accessModes Persistent Volume access modes
@@ -312,6 +314,18 @@ customScripts:
     # - |
     #   sleep 10
     #   rabbitmq-queues rebalance all
+  ## @param customScripts.preStop PreStop lifecycle hook configuration
+  preStop:
+    ## @param customScripts.preStop.enabled Enable preStop lifecycle hook
+    enabled: false
+    ## @param customScripts.preStop.command Command to execute in preStop hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 10
+    #   rabbitmqctl stop_app
   ## @param customScripts.initContainers Custom init containers to run before RabbitMQ starts
   initContainers: []
   # Example:

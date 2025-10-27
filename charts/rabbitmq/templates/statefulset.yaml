@@ -110,12 +110,20 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rabbitmq.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if .Values.customScripts.postStart.enabled }}
+          {{- if or .Values.customScripts.postStart.enabled .Values.customScripts.preStop.enabled }}
           lifecycle:
+            {{- if .Values.customScripts.postStart.enabled }}
             postStart:
               exec:
                 command:
                   {{- toYaml .Values.customScripts.postStart.command | nindent 18 }}
+            {{- end }}
+            {{- if .Values.customScripts.preStop.enabled }}
+            preStop:
+              exec:
+                command:
+                  {{- toYaml .Values.customScripts.preStop.command | nindent 18 }}
+            {{- end }}
           {{- end }}
           ports:
             - name: amqp
@@ -227,6 +235,10 @@ spec:
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}
+        {{- else if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | quote }}
         {{- end }}
         {{- if .Values.installPlugins }}
         - name: plugins
@@ -267,7 +279,7 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if .Values.persistence.enabled }}
+  {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim

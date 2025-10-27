@@ -351,3 +351,31 @@ extraObjects: []
 #     namespace: "{{ include "common.namespace" . }}"
 #   data:
 #     key: value
+
+## @section Custom Scripts and Hooks
+customScripts:
+  ## @param customScripts.postStart PostStart lifecycle hook configuration
+  postStart:
+    ## @param customScripts.postStart.enabled Enable postStart lifecycle hook
+    enabled: false
+    ## @param customScripts.postStart.command Command to execute in postStart hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 5
+    #   echo "Redis started"
+  ## @param customScripts.preStop PreStop lifecycle hook configuration
+  preStop:
+    ## @param customScripts.preStop.enabled Enable preStop lifecycle hook
+    ## NOTE: When enabled, this overrides the default preStop hook used by Sentinel
+    enabled: false
+    ## @param customScripts.preStop.command Command to execute in preStop hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 10
+    #   redis-cli shutdown
