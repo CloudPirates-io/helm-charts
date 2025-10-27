@@ -197,3 +197,13 @@ extraObjects: []
 #     namespace: "{{ .Release.Namespace }}"
 #   data:
 #     key: value
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key

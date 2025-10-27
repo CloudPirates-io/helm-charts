@@ -200,6 +200,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 | Parameter           | Description                                                             | Default |
 | ------------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects
