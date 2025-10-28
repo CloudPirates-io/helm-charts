@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.6.8 (2025-10-27)
+
+* add mssql support (#469) ([11cdbfb](https://github.com/CloudPirates-io/helm-charts/commit/11cdbfb))
+* chore: update CHANGELOG.md for merged changes ([6813d85](https://github.com/CloudPirates-io/helm-charts/commit/6813d85))
+* chore: update CHANGELOG.md for merged changes ([2e40f13](https://github.com/CloudPirates-io/helm-charts/commit/2e40f13))
+
 ## 0.6.7 (2025-10-26)
 
 * [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.2 (patch) (#453) ([52a01c8](https://github.com/CloudPirates-io/helm-charts/commit/52a01c8))
