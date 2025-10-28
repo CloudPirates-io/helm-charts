@@ -281,6 +281,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
 | `extraVolumeMounts` | Additional volume mounts for Redis container                            | `[]`    |
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
 
 #### Extra Objects
 

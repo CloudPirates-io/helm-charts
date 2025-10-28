@@ -17,6 +17,11 @@ spec:
       targetPort: redis
       protocol: TCP
       name: redis
+    {{- range .Values.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .name }}
+      name: {{ .name }}
+    {{- end }}
     {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
     - port: {{ .Values.sentinel.port }}
       targetPort: sentinel

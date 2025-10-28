@@ -214,6 +214,15 @@ extraEnvVars: []
 ##   - --maxmemory-policy volatile-lru
 extraFlags: []
 
+## @param extraPorts Additional ports to add to the pod and service
+## Example:
+## extraPorts:
+## - name: redis-cluster
+##   port: 16379
+##   targetPort: redis-cluster
+##   containerPort: 16379
+extraPorts: []
+
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
 
