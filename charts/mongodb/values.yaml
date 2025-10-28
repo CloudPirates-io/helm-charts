@@ -162,8 +162,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
@@ -278,7 +285,14 @@ metrics:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-  ## @param metrics.extraEnv Additional environment variables for metrics container
-  extraEnv: []
+  ## @param metrics.extraEnvVars Additional environment variables for metrics container
+  extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
   ## @param metrics.extraArgs Additional command line arguments for MongoDB Exporter
   extraArgs: []

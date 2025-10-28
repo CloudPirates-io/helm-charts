@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.10.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([05fdd01](https://github.com/CloudPirates-io/helm-charts/commit/05fdd01))
+* chore: update CHANGELOG.md for merged changes ([807dd92](https://github.com/CloudPirates-io/helm-charts/commit/807dd92))
+
 ## 0.9.8 (2025-10-27)
 
 * fix service annotations (#470) ([74d2a99](https://github.com/CloudPirates-io/helm-charts/commit/74d2a99))

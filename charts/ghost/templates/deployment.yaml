@@ -70,11 +70,10 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if .Values.extraEnv }}
+          {{- if .Values.extraEnvVars }}
           env:
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}

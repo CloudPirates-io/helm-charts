@@ -188,7 +188,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 | Parameter           | Description                                              | Default |
 | ------------------- | -------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables to set                  | `[]`    |
+| `extraEnvVars`      | Additional environment variables to set                  | `[]`    |
 | `extraVolumes`      | Additional volumes to add to the pod                     | `[]`    |
 | `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container | `[]`    |
 | `extraObjects`      | Array of extra objects to deploy with the release        | `[]`    |
@@ -262,20 +262,10 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Metrics Additional Parameters
 
-| Parameter           | Description                                            | Default |
-| ------------------- | ------------------------------------------------------ | ------- |
-| `metrics.extraEnv`  | Additional environment variables for metrics container | `[]`    |
-| `metrics.extraArgs` | Additional command line arguments for MongoDB Exporter | `[]`    |
-
-
-### Additional Parameters
-
-| Parameter           | Description                                              | Default |
-| ------------------- | -------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables to set                  | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                     | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container | `[]`    |
-| `extraObjects`      | Additional Kubernetes objects to deploy                  | `[]`    |
+| Parameter              | Description                                            | Default |
+| ---------------------- | ------------------------------------------------------ | ------- |
+| `metrics.extraEnvVars` | Additional environment variables for metrics container | `[]`    |
+| `metrics.extraArgs`    | Additional command line arguments for MongoDB Exporter | `[]`    |
 
 #### Extra Objects
 

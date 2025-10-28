@@ -268,10 +268,15 @@ serviceAccount:
   ## @param serviceAccount.automountServiceAccountToken whether to automount the SA token inside the pod
   automountServiceAccountToken: false
 
-## @param extraEnv Additional environment variables from key-value pairs
-extraEnv: {}
-# VARNAME1: value1
-# VARNAME2: value2
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraEnvVarsSecret Name of a secret containing additional environment variables
 extraEnvVarsSecret: ""

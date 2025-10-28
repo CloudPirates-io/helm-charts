@@ -180,9 +180,8 @@ spec:
                   key: {{ include "keycloak.databasePasswordKey" . }}
               {{- end }}
             {{- end }}
-            {{- range $key, $value := .Values.extraEnv }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{- toYaml . | nindent 12 }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:

@@ -201,7 +201,7 @@ zkCli.sh -server my-zookeeper:2181
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `extraEnv` | Additional environment variables | `[]` |
+| `extraEnvVars` | Additional environment variables to set | `[]` |
 | `extraVolumes` | Additional volumes to add to the pod | `[]` |
 | `extraVolumeMounts` | Additional volume mounts | `[]` |
 | `extraObjects` | Array of extra objects to deploy | `[]` |

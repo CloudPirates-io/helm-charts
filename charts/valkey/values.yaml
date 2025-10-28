@@ -203,6 +203,16 @@ tolerations: []
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 # - apiVersion: v1
