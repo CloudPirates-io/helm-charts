@@ -1,8 +1,14 @@
 # Changelog
 
+
+## 0.11.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([9be549e](https://github.com/CloudPirates-io/helm-charts/commit/9be549e))
+* chore: update CHANGELOG.md for merged changes ([2bd99d3](https://github.com/CloudPirates-io/helm-charts/commit/2bd99d3))
+
 ## 0.10.7 (2025-10-27)
 
-* [postgres] add options to set service load balancer ip and external traffic policy ([#475](https://github.com/CloudPirates-io/helm-charts/pull/475))
+* add options to set service load balancer ip and external traffic policy (#475) ([a2db2ab](https://github.com/CloudPirates-io/helm-charts/commit/a2db2ab))
 
 ## 0.10.6 (2025-10-27)
 
