@@ -238,6 +238,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 | Parameter      | Description                                                             | Default |
 | -------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars` | Additional environment variables to set                                 | `[]`    |
 | `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects

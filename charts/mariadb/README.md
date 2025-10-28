@@ -136,33 +136,33 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 > [!WARNING]  
 > You must migrate from a standalone MariaDB to Galera carefully. Do not enable Galera on an existing standalone database without following proper migration steps.
 
-| Parameter                                | Description                                                  | Default         |
-| ---------------------------------------- | ------------------------------------------------------------ | --------------- |
-| `galera.enabled`                         | Enable Galera Cluster mode                                   | `false`         |
-| `galera.name`                            | Galera cluster name                                          | `"galera"`      |
-| `galera.bootstrap.enabled`               | Enable bootstrap mode for the first node in the cluster     | `true`          |
-| `galera.replicaCount`                    | Number of nodes in the Galera cluster                       | `3`             |
-| `galera.wsrepProvider`                   | Path to wsrep provider library                              | `/usr/lib/galera/libgalera_smm.so` |
-| `galera.wsrepMethod`                     | Method for state snapshot transfers (mariabackup, mysqldump, rsync) | `mariabackup`   |
-| `galera.forceSafeToBootstrap`            | Force safe_to_bootstrap=1 in grastate.dat                   | `false`         |
-| `galera.wsrepSlaveThreads`               | Number of slave threads for applying writesets              | `1`             |
-| `galera.wsrepCertifyNonPK`               | Require primary key for replication                         | `true`          |
-| `galera.wsrepMaxWsRows`                  | Maximum number of rows in writeset                          | `0`             |
-| `galera.wsrepMaxWsSize`                  | Maximum size of writeset in bytes                           | `1073741824`    |
-| `galera.wsrepDebug`                      | Enable wsrep debugging                                       | `false`         |
-| `galera.wsrepRetryAutocommit`            | Number of times to retry autocommit                         | `1`             |
-| `galera.wsrepAutoIncrementControl`       | Enable auto increment control                                | `true`          |
-| `galera.wsrepDrupalHack`                 | Enable Drupal compatibility hack                             | `false`         |
-| `galera.wsrepLogConflicts`               | Log conflicts to error log                                   | `false`         |
-| `galera.innodb.flushLogAtTrxCommit`      | InnoDB flush log at transaction commit                       | `0`             |
-| `galera.innodb.bufferPoolSize`           | InnoDB buffer pool size                                      | `"128M"`        |
-| `galera.sst.user`                        | SST user for authentication                                  | `"sstuser"`     |
-| `galera.sst.password`                    | SST password for authentication                              | `""`            |
-| `galera.sst.existingSecret`              | Existing secret containing SST credentials                   | `""`            |
-| `galera.sst.secretKeys.userKey`          | Secret key for SST user                                      | `sst-user`      |
-| `galera.sst.secretKeys.passwordKey`      | Secret key for SST password                                 | `sst-password`  |
-| `galera.recovery.enabled`                | Enable automatic recovery                                    | `true`          |
-| `galera.recovery.clusterBootstrap`       | Enable cluster bootstrap in recovery                         | `true`          |
+| Parameter                           | Description                                                         | Default                            |
+| ----------------------------------- | ------------------------------------------------------------------- | ---------------------------------- |
+| `galera.enabled`                    | Enable Galera Cluster mode                                          | `false`                            |
+| `galera.name`                       | Galera cluster name                                                 | `"galera"`                         |
+| `galera.bootstrap.enabled`          | Enable bootstrap mode for the first node in the cluster             | `true`                             |
+| `galera.replicaCount`               | Number of nodes in the Galera cluster                               | `3`                                |
+| `galera.wsrepProvider`              | Path to wsrep provider library                                      | `/usr/lib/galera/libgalera_smm.so` |
+| `galera.wsrepMethod`                | Method for state snapshot transfers (mariabackup, mysqldump, rsync) | `mariabackup`                      |
+| `galera.forceSafeToBootstrap`       | Force safe_to_bootstrap=1 in grastate.dat                           | `false`                            |
+| `galera.wsrepSlaveThreads`          | Number of slave threads for applying writesets                      | `1`                                |
+| `galera.wsrepCertifyNonPK`          | Require primary key for replication                                 | `true`                             |
+| `galera.wsrepMaxWsRows`             | Maximum number of rows in writeset                                  | `0`                                |
+| `galera.wsrepMaxWsSize`             | Maximum size of writeset in bytes                                   | `1073741824`                       |
+| `galera.wsrepDebug`                 | Enable wsrep debugging                                              | `false`                            |
+| `galera.wsrepRetryAutocommit`       | Number of times to retry autocommit                                 | `1`                                |
+| `galera.wsrepAutoIncrementControl`  | Enable auto increment control                                       | `true`                             |
+| `galera.wsrepDrupalHack`            | Enable Drupal compatibility hack                                    | `false`                            |
+| `galera.wsrepLogConflicts`          | Log conflicts to error log                                          | `false`                            |
+| `galera.innodb.flushLogAtTrxCommit` | InnoDB flush log at transaction commit                              | `0`                                |
+| `galera.innodb.bufferPoolSize`      | InnoDB buffer pool size                                             | `"128M"`                           |
+| `galera.sst.user`                   | SST user for authentication                                         | `"sstuser"`                        |
+| `galera.sst.password`               | SST password for authentication                                     | `""`                               |
+| `galera.sst.existingSecret`         | Existing secret containing SST credentials                          | `""`                               |
+| `galera.sst.secretKeys.userKey`     | Secret key for SST user                                             | `sst-user`                         |
+| `galera.sst.secretKeys.passwordKey` | Secret key for SST password                                         | `sst-password`                     |
+| `galera.recovery.enabled`           | Enable automatic recovery                                           | `true`                             |
+| `galera.recovery.clusterBootstrap`  | Enable cluster bootstrap in recovery                                | `true`                             |
 
 ### Service Parameters
 
@@ -206,7 +206,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 
 | Parameter      | Description                                                                      | Default |
 | -------------- | -------------------------------------------------------------------------------- | ------- |
-| `env`          | A list of additional environment variables                                       | `[]`    |
+| `extraEnvVars` | Additional environment variables to set                                          | `[]`    |
 | `extraSecrets` | A list of additional existing secrets that will be mounted into the container    | `[]`    |
 | `extraConfigs` | A list of additional existing configMaps that will be mounted into the container | `[]`    |
 | `extraVolumes` | A list of additional existing volumes that will be mounted into the container    | `[]`    |
@@ -388,7 +388,7 @@ config:
 
 ```yaml
 # Additional environment variables
-env:
+extraEnvVars:
   - name: MYSQL_INIT_ONLY
     value: "0"
   - name: MARIADB_AUTO_UPGRADE

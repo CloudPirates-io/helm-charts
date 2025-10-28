@@ -12,6 +12,25 @@ A Helm chart for RabbitMQ - A messaging broker that implements the Advanced Mess
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
+## Security & Signature Verification
+
+This Helm chart is cryptographically signed with Cosign to ensure authenticity and prevent tampering.
+
+**Public Key:**
+
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
+mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+-----END PUBLIC KEY-----
+```
+
+To verify the helm chart before installation, copy the public key to the file `cosign.pub` and run cosign:
+
+```bash
+cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/rabbitmq:<version>
+```
+
 ## Installing the Chart
 
 To install the chart with the release name `my-rabbitmq`:
@@ -194,15 +213,15 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Persistence
 
-| Parameter                   | Description                                                                    | Default             |
-| --------------------------- | ------------------------------------------------------------------------------ | ------------------- |
-| `persistence.enabled`       | Enable persistent storage                                                      | `true`              |
+| Parameter                   | Description                                                                     | Default             |
+| --------------------------- | ------------------------------------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable persistent storage                                                       | `true`              |
 | `persistence.existingClaim` | Name of existing PVC to use (if empty, a new PVC will be created automatically) | `""`                |
-| `persistence.storageClass`  | Storage class to use for persistent volume                                     | `""`                |
-| `persistence.accessModes`   | Persistent Volume access modes                                                 | `["ReadWriteOnce"]` |
-| `persistence.size`          | Size of persistent volume                                                      | `8Gi`               |
-| `persistence.labels`        | Labels for persistent volume claims                                            | `{}`                |
-| `persistence.annotations`   | Annotations for persistent volume claims                                       | `{}`                |
+| `persistence.storageClass`  | Storage class to use for persistent volume                                      | `""`                |
+| `persistence.accessModes`   | Persistent Volume access modes                                                  | `["ReadWriteOnce"]` |
+| `persistence.size`          | Size of persistent volume                                                       | `8Gi`               |
+| `persistence.labels`        | Labels for persistent volume claims                                             | `{}`                |
+| `persistence.annotations`   | Annotations for persistent volume claims                                        | `{}`                |
 
 ### Ingress configuration
 
@@ -262,7 +281,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 | Parameter             | Description                                                             | Default        |
 | --------------------- | ----------------------------------------------------------------------- | -------------- |
-| `extraEnv`            | Additional environment variables to set                                 | `[]`           |
+| `extraEnvVars`        | Additional environment variables to set                                 | `[]`           |
 | `extraVolumes`        | Additional volumes to add to the pod                                    | `[]`           |
 | `extraVolumeMounts`   | Additional volume mounts to add to the RabbitMQ container               | `[]`           |
 | `extraObjects`        | A list of additional Kubernetes objects to deploy alongside the release | `[]`           |

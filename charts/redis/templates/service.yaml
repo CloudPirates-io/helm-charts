@@ -25,6 +25,11 @@ spec:
       targetPort: redis
       protocol: TCP
       name: redis
+    {{- range .Values.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .name }}
+      name: {{ .name }}
+    {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
   {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}

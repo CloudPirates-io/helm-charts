@@ -206,6 +206,10 @@ spec:
             - name: redis
               containerPort: 6379
               protocol: TCP
+            {{- range .Values.extraPorts }}
+            - containerPort: {{ .containerPort }}
+              name: {{ .name }}
+            {{- end }}
           {{- if or .Values.auth.enabled .Values.extraEnv }}
           env:
             {{- if .Values.auth.enabled }}
@@ -215,9 +219,8 @@ spec:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}

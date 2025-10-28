@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.10.7
+version: 0.11.0
 appVersion: "18.0.0"
 keywords:
   - postgres
@@ -43,7 +43,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "add options to set service load balancer ip and external traffic policy (#475)"
-          links:
-            - name: "Commit a2db2ab"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/a2db2ab"
+          description: "Chart updated"

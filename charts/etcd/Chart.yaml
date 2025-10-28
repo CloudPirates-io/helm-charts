@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.2.3
+version: 0.3.1
 appVersion: "3.6.5"
 keywords:
   - etcd
@@ -41,4 +41,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "[etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476)"
+          links:
+            - name: "Commit 91c7310"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/91c7310"
