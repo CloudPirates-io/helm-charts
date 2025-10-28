@@ -11,6 +11,19 @@ A Helm chart for RustFS - High-performance distributed file system written in Ru
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
+
+## Modes
+RustFS can be deployed in two modes:
+
+1. **Deployment Mode**: In this mode, RustFS is deployed as a standard Kubernetes Deployment. This mode is suitable for high load scenarios where stateless operation is acceptable. This deployment mode requires mounting persistent volumes in read-write-many (RWX) mode to ensure data persistence across pod restarts.
+
+<p align="center"><img src="docs/deployment.svg" alt="Deployment Diagram" style="width:350;"/></p>
+
+2. **StatefulSet Mode**: In this mode, RustFS is deployed as a StatefulSet. This mode is ideal for scenarios where data consistency and persistence are critical. Each pod in the StatefulSet has a unique identity and stable storage, making it suitable for stateful applications.
+
+<p align="center"><img src="docs/statefulset.svg" alt="StatefulSet Diagram" style="width:350px;"/></p>
+
+
 ## Installing the Chart
 
 To install the chart with the release name `my-rustfs`:
