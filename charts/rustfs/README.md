@@ -17,7 +17,7 @@ RustFS can be deployed in two modes:
 
 1. **Deployment Mode**: In this mode, RustFS is deployed as a standard Kubernetes Deployment. This mode is suitable for high load scenarios where stateless operation is acceptable. This deployment mode requires mounting persistent volumes in read-write-many (RWX) mode to ensure data persistence across pod restarts.
 
-<p align="center"><img src="docs/deployment.svg" alt="Deployment Diagram" style="width:350;"/></p>
+<p align="center"><img src="docs/deployment.svg" alt="Deployment Diagram" style="width:350px;"/></p>
 
 2. **StatefulSet Mode**: In this mode, RustFS is deployed as a StatefulSet. This mode is ideal for scenarios where data consistency and persistence are critical. Each pod in the StatefulSet has a unique identity and stable storage, making it suitable for stateful applications.
 
