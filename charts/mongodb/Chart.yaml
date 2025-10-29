@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.6.0
-appVersion: "8.0.15"
+version: 0.6.1
+appVersion: "8.2.1"
 keywords:
   - mongodb
   - database
@@ -38,5 +38,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+        - kind: added
+          description: "[mongo] Update charts/mongodb/values.yaml mongo to v8.2.1 (minor)"
+          links:
+            - name: "PR #488"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/488"
