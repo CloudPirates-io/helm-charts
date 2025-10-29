@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.11.0 (2025-10-29)
+
+* Add master service for non-sentinel replication mode (#492) ([cafeccd](https://github.com/CloudPirates-io/helm-charts/commit/cafeccd))
+* chore: update CHANGELOG.md for merged changes ([8b84f2b](https://github.com/CloudPirates-io/helm-charts/commit/8b84f2b))
+* chore: update CHANGELOG.md for merged changes ([7bc4166](https://github.com/CloudPirates-io/helm-charts/commit/7bc4166))
+* chore: auto-generate values.schema.json (#487) ([fffe3af](https://github.com/CloudPirates-io/helm-charts/commit/fffe3af))
+* chore: update CHANGELOG.md for merged changes ([c7fa503](https://github.com/CloudPirates-io/helm-charts/commit/c7fa503))
+* chore: update CHANGELOG.md for merged changes ([ad9695d](https://github.com/CloudPirates-io/helm-charts/commit/ad9695d))
+
 ## 0.10.2 (2025-10-28)
 
 * Add support for extraPorts in Services and StatefulSet (#485) ([1805522](https://github.com/CloudPirates-io/helm-charts/commit/1805522))
