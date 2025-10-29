@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.7.2 (2025-10-29)
+
+* chore: update CHANGELOG.md for merged changes ([0e3dfef](https://github.com/CloudPirates-io/helm-charts/commit/0e3dfef))
+* chore: update CHANGELOG.md for merged changes ([a3e93a0](https://github.com/CloudPirates-io/helm-charts/commit/a3e93a0))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.1.5 (patch) (#479) ([090a6b0](https://github.com/CloudPirates-io/helm-charts/commit/090a6b0))
+* chore: update CHANGELOG.md for merged changes ([0ef2300](https://github.com/CloudPirates-io/helm-charts/commit/0ef2300))
+* chore: update CHANGELOG.md for merged changes ([170dd6a](https://github.com/CloudPirates-io/helm-charts/commit/170dd6a))
+* chore: update CHANGELOG.md for merged changes ([9227d83](https://github.com/CloudPirates-io/helm-charts/commit/9227d83))
+
 ## 0.7.1 (2025-10-28)
 
 * [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c7310](https://github.com/CloudPirates-io/helm-charts/commit/91c7310))
