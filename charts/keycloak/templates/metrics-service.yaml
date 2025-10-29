@@ -21,7 +21,7 @@ spec:
     - port: {{ .Values.metrics.service.port }}
       targetPort: {{ .Values.metrics.service.targetPort }}
       protocol: TCP
-      name: http-metrics
+      name: {{ .Values.metrics.service.targetPort }}
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}
 {{- end }}
