@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.3.0
-appVersion: "1.29.2"
+version: 0.3.1
+appVersion: "1.29.3"
 keywords:
   - nginx
   - web server
@@ -42,4 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "Update charts/nginx/values.yaml nginx to v1.29.3 (patch) (#490)"
+          links:
+            - name: "Commit a23c2db"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/a23c2db"
