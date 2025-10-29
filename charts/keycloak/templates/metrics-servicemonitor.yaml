@@ -27,7 +27,7 @@ spec:
     matchNames:
       - {{ .Release.Namespace | quote }}
   endpoints:
-    - port: http-metrics
+    - port: {{ .Values.metrics.service.targetPort }}
       {{- if .Values.metrics.serviceMonitor.interval }}
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       {{- end }}

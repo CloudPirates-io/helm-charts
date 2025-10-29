@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.1 (2025-10-29)
+
+* [keycloak] fix: use metrics service targetPort configuration ([#493](https://github.com/CloudPirates-io/helm-charts/pull/493))
 
 ## 0.7.0 (2025-10-28)
 
