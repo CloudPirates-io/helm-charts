@@ -12,6 +12,8 @@ nameOverride: ""
 fullnameOverride: ""
 ## @param namespaceOverride String to override the namespace for all resources
 namespaceOverride: ""
+## @param clusterDomain Kubernetes cluster domain
+clusterDomain: cluster.local
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -24,17 +26,20 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
+  tag: "8.2.2@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
 ## @section Redis Architecture
-## @param architecture Redis architecture. Allowed values: standalone or replication
+## @param architecture Redis architecture. Allowed values: standalone, replication
+## - standalone: Single Redis instance
+## - replication: Master-replica setup (use sentinel.enabled to enable/disable Sentinel)
 architecture: standalone
 
 ## @param replicaCount Number of Redis instances to deploy (only when architecture=replication)
 ## When using Sentinel, this is the total number of Redis instances (including the initial master)
-## For example: replicaCount: 3 creates 3 Redis instances where Sentinel manages master/replica roles
+## Without Sentinel, pod-0 is always the master and other pods are replicas
+## For example: replicaCount: 3 creates 1 master + 2 replicas
 replicaCount: 3
 
 ## @section Pod labels and annotations
@@ -50,6 +55,8 @@ podAnnotations: {}
 ipFamily: auto
 
 service:
+  ## @param service.annotations Additional custom annotations for Redis service
+  annotations: {}
   ## @param service.type Kubernetes service type
   type: ClusterIP
   ## @param service.port Redis service port
@@ -58,6 +65,8 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
+  ## @param auth.enabled Enable Sentinel authentication
+  sentinel: true
   ## @param auth.password Redis password (if empty, random password will be generated)
   password: ""
   ## @param auth.existingSecret Name of existing secret containing Redis password
@@ -135,14 +144,25 @@ affinity: {}
 topologySpreadConstraints: []
 
 containerSecurityContext:
-  ## @param securityContext.runAsUser User ID to run the container
+  ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 999
-  ## @param securityContext.runAsNonRoot Run as non-root user
+  ## @param containerSecurityContext.runAsGroup Group ID to run the container
+  runAsGroup: 999
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
   runAsNonRoot: true
+  ## @param containerSecurityContext.privileged Set container's privileged mode
+  privileged: false
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Redis container's privilege escalation
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.readOnlyRootFilesystem Read-only root filesystem
   readOnlyRootFilesystem: true
+  ## @param containerSecurityContext.capabilities Linux capabilities to be dropped
+  capabilities:
+    drop:
+      - ALL
+  ## @param containerSecurityContext.seccompProfile Seccomp profile for the container
+  seccompProfile:
+    type: RuntimeDefault
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:
@@ -177,10 +197,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraFlags Additional command-line flags to pass to redis-server
 ## Example:
@@ -188,6 +213,15 @@ extraEnv: []
 ##   - --maxmemory 230mb
 ##   - --maxmemory-policy volatile-lru
 extraFlags: []
+
+## @param extraPorts Additional ports to add to the pod and service
+## Example:
+## extraPorts:
+## - name: redis-cluster
+##   port: 16379
+##   targetPort: redis-cluster
+##   containerPort: 16379
+extraPorts: []
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
@@ -198,14 +232,16 @@ extraVolumeMounts: []
 ## @section Redis Sentinel configuration
 ## This section configures Redis Sentinel for high availability in replication mode
 ## When enabled, Redis instances use dynamic master/replica role assignment managed by Sentinel
+## When disabled with replication architecture, pod-0 is always the master and other pods are replicas
 sentinel:
   ## @param sentinel.enabled Enable Redis Sentinel for high availability
   ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
+  ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.2@sha256:f0957bcaa75fd58a9a1847c1f07caf370579196259d69ac07f2e27b5b389b021"
+    tag: "8.2.2@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
@@ -256,7 +292,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.78.0@sha256:043d380adf3b23c9f73a986d820e79491975c104fe0ce6ecb8639a19914654fd"
+    tag: "v1.79.0@sha256:67e175f144212fe5796b3134dae1f3db33782b57dc53f7c6f5d938f8f70d9754"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -309,6 +345,17 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
 
+## @section Network Policy
+networkPolicy:
+  ## @param networkPolicy.enabled Enable NetworkPolicy
+  enabled: false
+  ## @param networkPolicy.allowExternal Allow external traffic
+  allowExternal: true
+  ## @param networkPolicy.extraIngress Additional ingress rules
+  extraIngress: []
+  ## @param networkPolicy.extraEgress Additional egress rules
+  extraEgress: []
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 # - apiVersion: v1
@@ -318,3 +365,31 @@ extraObjects: []
 #     namespace: "{{ include "common.namespace" . }}"
 #   data:
 #     key: value
+
+## @section Custom Scripts and Hooks
+customScripts:
+  ## @param customScripts.postStart PostStart lifecycle hook configuration
+  postStart:
+    ## @param customScripts.postStart.enabled Enable postStart lifecycle hook
+    enabled: false
+    ## @param customScripts.postStart.command Command to execute in postStart hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 5
+    #   echo "Redis started"
+  ## @param customScripts.preStop PreStop lifecycle hook configuration
+  preStop:
+    ## @param customScripts.preStop.enabled Enable preStop lifecycle hook
+    ## NOTE: When enabled, this overrides the default preStop hook used by Sentinel
+    enabled: false
+    ## @param customScripts.preStop.command Command to execute in preStop hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 10
+    #   redis-cli shutdown

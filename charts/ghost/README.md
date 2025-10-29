@@ -88,111 +88,111 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Global & Common Parameters
 
-| Parameter                | Description                                   | Default         |
-|--------------------------|-----------------------------------------------|-----------------|
-| `global.imageRegistry`   | Global Docker image registry                  | `""`            |
-| `global.imagePullSecrets`| Global Docker registry secret names as array  | `[]`            |
-| `nameOverride`           | String to partially override ghost.fullname   | `""`            |
-| `fullnameOverride`       | String to fully override ghost.fullname       | `""`            |
-| `commonLabels`           | Labels to add to all deployed objects         | `{}`            |
-| `commonAnnotations`      | Annotations to add to all deployed objects    | `{}`            |
+| Parameter                 | Description                                  | Default |
+| ------------------------- | -------------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry                 | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names as array | `[]`    |
+| `nameOverride`            | String to partially override ghost.fullname  | `""`    |
+| `fullnameOverride`        | String to fully override ghost.fullname      | `""`    |
+| `commonLabels`            | Labels to add to all deployed objects        | `{}`    |
+| `commonAnnotations`       | Annotations to add to all deployed objects   | `{}`    |
 
 ### Image Parameters
 
-| Parameter                | Description                                   | Default         |
-|--------------------------|-----------------------------------------------|-----------------|
-| `image.registry`         | Ghost image registry                          | `docker.io`     |
-| `image.repository`       | Ghost image repository                        | `ghost`         |
-| `image.tag`              | Ghost image tag                               | `6.0.9`         |
-| `image.pullPolicy`       | Ghost image pull policy                       | `Always`        |
-| `replicaCount`           | Number of Ghost replicas to deploy            | `1`             |
+| Parameter          | Description                        | Default     |
+| ------------------ | ---------------------------------- | ----------- |
+| `image.registry`   | Ghost image registry               | `docker.io` |
+| `image.repository` | Ghost image repository             | `ghost`     |
+| `image.tag`        | Ghost image tag                    | `6.0.9`     |
+| `image.pullPolicy` | Ghost image pull policy            | `Always`    |
+| `replicaCount`     | Number of Ghost replicas to deploy | `1`         |
 
 ### Network Parameters
 
-| Parameter                | Description                                   | Default         |
-|--------------------------|-----------------------------------------------|-----------------|
-| `containerPorts`         | List of container ports                       | `[{name: http, containerPort: 2368}]` |
-| `service.type`           | Kubernetes service type                       | `ClusterIP`     |
-| `service.ports`          | List of service ports                         | `[{port: 80, targetPort: http}]` |
-| `ingress.enabled`        | Enable ingress record generation              | `true`          |
-| `ingress.className`      | IngressClass for the ingress record           | `""`            |
-| `ingress.annotations`    | Additional ingress annotations                | `{}`            |
-| `ingress.hosts`          | List of ingress hosts                         | `[{host: ghost.localhost, paths:[{path: /, pathType: Prefix}]}, {host: admin.ghost.localhost, paths:[{path: /ghost, pathType: Prefix}]}]` |
-| `ingress.tls`            | TLS configuration for ingress                 | `[]`            |
+| Parameter             | Description                         | Default                                                                                                                                   |
+| --------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `containerPorts`      | List of container ports             | `[{name: http, containerPort: 2368}]`                                                                                                     |
+| `service.type`        | Kubernetes service type             | `ClusterIP`                                                                                                                               |
+| `service.ports`       | List of service ports               | `[{port: 80, targetPort: http}]`                                                                                                          |
+| `ingress.enabled`     | Enable ingress record generation    | `true`                                                                                                                                    |
+| `ingress.className`   | IngressClass for the ingress record | `""`                                                                                                                                      |
+| `ingress.annotations` | Additional ingress annotations      | `{}`                                                                                                                                      |
+| `ingress.hosts`       | List of ingress hosts               | `[{host: ghost.localhost, paths:[{path: /, pathType: Prefix}]}, {host: admin.ghost.localhost, paths:[{path: /ghost, pathType: Prefix}]}]` |
+| `ingress.tls`         | TLS configuration for ingress       | `[]`                                                                                                                                      |
 
 ### Persistence Parameters
 
-| Parameter                   | Description                                | Default         |
-|-----------------------------|--------------------------------------------|-----------------|
-| `persistence.enabled`       | Enable persistence using PVC               | `true`          |
-| `persistence.annotations`   | Annotations for PVC                        | `{}`            |
-| `persistence.existingClaim` | Use an existing PVC                        | `""`            |
-| `persistence.storageClass`  | Storage class of backing PVC               | `""`            |
-| `persistence.accessModes`   | PVC access modes                           | `[ReadWriteOnce]` |
-| `persistence.size`          | Size of persistent volume claim            | `8Gi`           |
+| Parameter                   | Description                     | Default           |
+| --------------------------- | ------------------------------- | ----------------- |
+| `persistence.enabled`       | Enable persistence using PVC    | `true`            |
+| `persistence.annotations`   | Annotations for PVC             | `{}`              |
+| `persistence.existingClaim` | Use an existing PVC             | `""`              |
+| `persistence.storageClass`  | Storage class of backing PVC    | `""`              |
+| `persistence.accessModes`   | PVC access modes                | `[ReadWriteOnce]` |
+| `persistence.size`          | Size of persistent volume claim | `8Gi`             |
 
 ### Database Parameters
 
-| Parameter                    | Description                               | Default         |
-|------------------------------|-------------------------------------------|-----------------|
-| `mariadb.enabled`            | Deploy MariaDB as dependency              | `true`          |
-| `mariadb.auth.database`      | MariaDB database name                     | `ghost`         |
-| `mariadb.auth.username`      | MariaDB username                          | `ghost`         |
-| `mariadb.auth.password`      | MariaDB password                          | `changeme`      |
-| `mariadb.auth.existingSecret`| Existing secret with MariaDB credentials  | `""`            |
-| `mariadb.auth.allowEmptyRootPassword` | Allow empty root password        | `false`         |
+| Parameter                             | Description                              | Default    |
+| ------------------------------------- | ---------------------------------------- | ---------- |
+| `mariadb.enabled`                     | Deploy MariaDB as dependency             | `true`     |
+| `mariadb.auth.database`               | MariaDB database name                    | `ghost`    |
+| `mariadb.auth.username`               | MariaDB username                         | `ghost`    |
+| `mariadb.auth.password`               | MariaDB password                         | `changeme` |
+| `mariadb.auth.existingSecret`         | Existing secret with MariaDB credentials | `""`       |
+| `mariadb.auth.allowEmptyRootPassword` | Allow empty root password                | `false`    |
 
 ### Pod Parameters
 
-| Parameter                    | Description                               | Default         |
-|------------------------------|-------------------------------------------|-----------------|
-| `resources`                  | Resource limits and requests for pod      | `{}`            |
-| `nodeSelector`               | Node selector for pod assignment          | `{}`            |
-| `tolerations`                | Tolerations for pod assignment            | `[]`            |
-| `affinity`                   | Affinity for pod assignment               | `{}`            |
-| `podSecurityContext.fsGroup` | Set pod's Security Context fsGroup        | `1000`          |
-| `containerSecurityContext.runAsUser` | Set container's Security Context runAsUser | `1000` |
-| `containerSecurityContext.runAsNonRoot` | Run as non-root user           | `true`          |
-| `containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation | `false` |
+| Parameter                                           | Description                                | Default |
+| --------------------------------------------------- | ------------------------------------------ | ------- |
+| `resources`                                         | Resource limits and requests for pod       | `{}`    |
+| `nodeSelector`                                      | Node selector for pod assignment           | `{}`    |
+| `tolerations`                                       | Tolerations for pod assignment             | `[]`    |
+| `affinity`                                          | Affinity for pod assignment                | `{}`    |
+| `podSecurityContext.fsGroup`                        | Set pod's Security Context fsGroup         | `1000`  |
+| `containerSecurityContext.runAsUser`                | Set container's Security Context runAsUser | `1000`  |
+| `containerSecurityContext.runAsNonRoot`             | Run as non-root user                       | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation                 | `false` |
 
 ### Health Check Parameters
 
-| Parameter                            | Description                         | Default         |
-|--------------------------------------|-------------------------------------|-----------------|
-| `livenessProbe.enabled`              | Enable liveness probe               | `true`          |
-| `livenessProbe.type`                 | Probe type (tcpSocket or httpGet)   | `tcpSocket`     |
-| `livenessProbe.initialDelaySeconds`  | Initial delay seconds               | `30`            |
-| `livenessProbe.periodSeconds`        | Period seconds                      | `10`            |
-| `readinessProbe.enabled`             | Enable readiness probe              | `true`          |
-| `readinessProbe.type`                | Probe type (tcpSocket or httpGet)   | `tcpSocket`     |
-| `readinessProbe.initialDelaySeconds` | Initial delay seconds               | `5`             |
-| `readinessProbe.periodSeconds`       | Period seconds                      | `12`            |
+| Parameter                            | Description                       | Default     |
+| ------------------------------------ | --------------------------------- | ----------- |
+| `livenessProbe.enabled`              | Enable liveness probe             | `true`      |
+| `livenessProbe.type`                 | Probe type (tcpSocket or httpGet) | `tcpSocket` |
+| `livenessProbe.initialDelaySeconds`  | Initial delay seconds             | `30`        |
+| `livenessProbe.periodSeconds`        | Period seconds                    | `10`        |
+| `readinessProbe.enabled`             | Enable readiness probe            | `true`      |
+| `readinessProbe.type`                | Probe type (tcpSocket or httpGet) | `tcpSocket` |
+| `readinessProbe.initialDelaySeconds` | Initial delay seconds             | `5`         |
+| `readinessProbe.periodSeconds`       | Period seconds                    | `12`        |
 
 ### Init Container Parameters
 
-| Parameter                              | Description                         | Default         |
-|----------------------------------------|-------------------------------------|-----------------|
-| `initContainers.waitForMariadb.image`  | MariaDB init container image        | `mariadb:12.0.2`|
+| Parameter                             | Description                  | Default          |
+| ------------------------------------- | ---------------------------- | ---------------- |
+| `initContainers.waitForMariadb.image` | MariaDB init container image | `mariadb:12.0.2` |
 
 ### Autoscaling Parameters
 
-| Parameter                               | Description                      | Default         |
-|-----------------------------------------|----------------------------------|-----------------|
-| `autoscaling.enabled`                   | Enable autoscaling               | `false`         |
-| `autoscaling.minReplicas`               | Minimum number of replicas       | `""`            |
-| `autoscaling.maxReplicas`               | Maximum number of replicas       | `""`            |
-| `autoscaling.targetCPUUtilizationPercentage` | Target CPU utilization      | `""`            |
-| `autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization| `""`            |
+| Parameter                                       | Description                | Default |
+| ----------------------------------------------- | -------------------------- | ------- |
+| `autoscaling.enabled`                           | Enable autoscaling         | `false` |
+| `autoscaling.minReplicas`                       | Minimum number of replicas | `""`    |
+| `autoscaling.maxReplicas`                       | Maximum number of replicas | `""`    |
+| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization     | `""`    |
+| `autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization  | `""`    |
 
 ### Additional Configuration
 
-| Parameter           | Description                                       | Default         |
-|---------------------|---------------------------------------------------|-----------------|
-| `extraEnv`          | Additional environment variables                  | `[]`            |
-| `extraVolumes`      | Additional volumes                                | `[]`            |
-| `extraVolumeMounts` | Additional volume mounts                          | `[]`            |
-| `extraObjects`      | Extra Kubernetes objects to deploy                | `[]`            |
-| `config`            | Ghost configuration (database, mail, etc.)        | See values.yaml |
+| Parameter           | Description                                | Default         |
+| ------------------- | ------------------------------------------ | --------------- |
+| `extraEnvVars`      | Additional environment variables           | `[]`            |
+| `extraVolumes`      | Additional volumes                         | `[]`            |
+| `extraVolumeMounts` | Additional volume mounts                   | `[]`            |
+| `extraObjects`      | Extra Kubernetes objects to deploy         | `[]`            |
+| `config`            | Ghost configuration (database, mail, etc.) | See values.yaml |
 
 
 ## Example: Custom Ghost Configuration

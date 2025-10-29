@@ -1,746 +1,398 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "MinIO Helm Chart Values Schema",
-  "description": "Schema for MinIO Helm chart values",
-  "properties": {
-    "global": {
-      "type": "object",
-      "title": "Global Parameters",
-      "description": "Global Docker image parameters",
-      "properties": {
-        "imageRegistry": {
-          "type": "string",
-          "title": "Global Docker Image Registry",
-          "description": "Global Docker image registry"
-        },
-        "imagePullSecrets": {
-          "type": "array",
-          "items": {
-            "type": ["string", "object"],
-            "properties": {
-              "name": { "type": "string" }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "image": {
-      "type": "object",
-      "title": "MinIO Image Configuration",
-      "description": "MinIO container image configuration",
-      "properties": {
-        "registry": {
-          "type": "string",
-          "title": "MinIO Image Registry",
-          "description": "MinIO image registry"
-        },
-        "repository": {
-          "type": "string",
-          "title": "MinIO Image Repository",
-          "description": "MinIO image repository"
-        },
-        "tag": {
-          "type": "string",
-          "title": "MinIO Image Tag",
-          "description": "MinIO image tag with digest"
-        },
-        "imagePullPolicy": {
-          "type": "string",
-          "title": "MinIO Image Pull Policy",
-          "description": "MinIO image pull policy",
-          "enum": ["Always", "Never", "IfNotPresent"]
-        }
-      }
-    },
-    "auth": {
-      "type": "object",
-      "title": "MinIO Authentication",
-      "description": "MinIO Authentication configuration",
-      "properties": {
-        "rootUser": {
-          "type": "string",
-          "title": "MinIO Root Username",
-          "description": "MinIO root username"
-        },
-        "rootPassword": {
-          "type": "string",
-          "title": "MinIO Root Password",
-          "description": "MinIO root password. If not set, a random password will be generated"
-        },
-        "existingSecret": {
-          "type": "string",
-          "title": "Existing Secret",
-          "description": "Name of existing secret containing MinIO credentials"
-        },
-        "existingSecretUserKey": {
-          "type": "string",
-          "title": "Existing Secret User Key",
-          "description": "Key in existing secret containing username"
-        },
-        "existingSecretPasswordKey": {
-          "type": "string",
-          "title": "Existing Secret Password Key",
-          "description": "Key in existing secret containing password"
-        }
-      }
-    },
-    "config": {
-      "type": "object",
-      "title": "MinIO Configuration",
-      "description": "MinIO configuration parameters",
-      "properties": {
-        "region": {
-          "type": "string",
-          "title": "MinIO Server Region",
-          "description": "MinIO server default region"
-        },
-        "browserEnabled": {
-          "type": "boolean",
-          "title": "Browser Enabled",
-          "description": "Enable MinIO web browser"
-        },
-        "domain": {
-          "type": "string",
-          "title": "MinIO Server Domain",
-          "description": "MinIO server domain"
-        },
-        "serverUrl": {
-          "type": "string",
-          "title": "MinIO Server URL",
-          "description": "MinIO server URL for console"
-        },
-        "minioOpts": {
-          "type": "string",
-          "title": "MinIO Server Options",
-          "description": "String of parameteres to use when starting the MinIO Server"
-        },
-        "minioVolumes": {
-          "type": "string",
-          "title": "MinIO Volume directories",
-          "description": "The directories or drives the minio server uses as the storage backend"
-        },
-        "minioConfigEnvFile": {
-          "type": "string",
-          "title": "MinIO Config Environment File",
-          "description": "Path to environment file for MinIO to load variables from"
-        },
-        "minioScannerSpeed": {
-          "type": "string",
-          "enum": ["fastest", "fast", "default", "slow", "slowest", ""],
-          "title": "MinIO Scanner Speed",
-          "description": "Manage the maximum wait period for the scanner when balancing MinIO read/write performance to scanner processes"
-        },
-        "minioCompressionEnabled": {
-          "type": "string",
-          "enum": ["on", "off", ""],
-          "title": "MinIO Compression Enabled",
-          "description": "Set to on to enable data compression for new objects"
-        },
-        "minioCompressionAllowEncryption": {
-          "type": "string",
-          "enum": ["on", "off", ""],
-          "title": "MinIO Compression Allow Encryption",
-          "description": "Set to on to encrypt objects after compressing them"
-        },
-        "minioCompressionExtensions": {
-          "type": "string",
-          "title": "MinIO Compression Extentions",
-          "description": "Comma-separated list of the file extensions to compress"
-        },
-        "minioCompressionMimeTypes": {
-          "type": "string",
-          "title": "MinIO Compression MimeTypes",
-          "description": "Comma-separated list of the MIME types to compress"
-        },
-        "extraEnvVars": {
-          "type": "array",
-          "title": "Extra Environment Variables",
-          "description": "Extra environment variables to be set on MinIO containers",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "title": "Variable Name",
-                "description": "Environment variable name"
-              },
-              "value": {
-                "type": "string",
-                "title": "Variable Value",
-                "description": "Environment variable value"
-              }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "replicaCount": {
-      "type": "integer",
-      "title": "Replica Count",
-      "description": "Number of MinIO replicas to deploy",
-      "minimum": 1
-    },
-    "nameOverride": {
-      "type": "string",
-      "title": "Name Override",
-      "description": "String to partially override minio.fullname"
-    },
-    "fullnameOverride": {
-      "type": "string",
-      "title": "Full Name Override",
-      "description": "String to fully override minio.fullname"
-    },
-    "commonLabels": {
-      "type": "object",
-      "title": "Common Labels",
-      "description": "Labels to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "commonAnnotations": {
-      "type": "object",
-      "title": "Common Annotations",
-      "description": "Annotations to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "podAnnotations": {
-      "type": "object",
-      "title": "Pod Annotations",
-      "description": "Pod annotations and labels",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "podLabels": {
-      "type": "object",
-      "title": "Pod Labels",
-      "description": "Pod labels",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "podSecurityContext": {
-      "type": "object",
-      "title": "Pod Security Context",
-      "description": "Security Context configuration",
-      "properties": {
-        "fsGroup": {
-          "type": "integer",
-          "title": "FS Group",
-          "description": "Group ID for the volumes of the pod",
-          "minimum": 0
-        }
-      }
-    },
-    "containerSecurityContext": {
-      "type": "object",
-      "title": "Security Context",
-      "description": "Container security context",
-      "properties": {
-        "allowPrivilegeEscalation": {
-          "type": "boolean",
-          "title": "Allow Privilege Escalation",
-          "description": "Enable container privilege escalation"
-        },
-        "runAsNonRoot": {
-          "type": "boolean",
-          "title": "Run As Non-Root",
-          "description": "Configure the container to run as a non-root user"
-        },
-        "runAsUser": {
-          "type": "integer",
-          "title": "Run As User",
-          "description": "User ID for the MinIO container",
-          "minimum": 0
-        },
-        "runAsGroup": {
-          "type": "integer",
-          "title": "Run As Group",
-          "description": "Group ID for the MinIO container",
-          "minimum": 0
-        },
-        "readOnlyRootFilesystem": {
-          "type": "boolean",
-          "title": "Read-Only Root Filesystem",
-          "description": "Mount container root filesystem as read-only"
-        },
-        "capabilities": {
-          "type": "object",
-          "title": "Capabilities",
-          "description": "Linux capabilities configuration",
-          "properties": {
-            "drop": {
-              "type": "array",
-              "title": "Drop Capabilities",
-              "description": "Linux capabilities to be dropped",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "service": {
-      "type": "object",
-      "title": "Service Configuration",
-      "description": "Service configuration parameters",
-      "properties": {
-        "type": {
-          "type": "string",
-          "title": "Service Type",
-          "description": "MinIO service type",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
-        },
-        "port": {
-          "type": "integer",
-          "title": "Service Port",
-          "description": "MinIO service port",
-          "minimum": 1,
-          "maximum": 65535
-        },
-        "consolePort": {
-          "type": "integer",
-          "title": "Console Service Port",
-          "description": "MinIO console service port",
-          "minimum": 1,
-          "maximum": 65535
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Service Annotations",
-          "description": "Service annotations",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "ingress": {
-      "type": "object",
-      "title": "Ingress Configuration",
-      "description": "Ingress configuration parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Ingress",
-          "description": "Enable ingress record generation for MinIO"
-        },
-        "className": {
-          "type": "string",
-          "title": "Ingress Class Name",
-          "description": "IngressClass that will be used to implement the Ingress"
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Ingress Annotations",
-          "description": "Additional annotations for the Ingress resource",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "hosts": {
-          "type": "array",
-          "title": "Ingress Hosts",
-          "description": "Ingress hosts configuration",
-          "items": {
-            "type": "object",
-            "properties": {
-              "host": {
-                "type": "string",
-                "title": "Host",
-                "description": "Hostname for MinIO ingress"
-              },
-              "paths": {
-                "type": "array",
-                "title": "Paths",
-                "description": "Paths configuration for the host",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "path": {
-                      "type": "string",
-                      "title": "Path",
-                      "description": "Path for MinIO ingress"
-                    },
-                    "pathType": {
-                      "type": "string",
-                      "title": "Path Type",
-                      "description": "Path type for MinIO ingress",
-                      "enum": ["Exact", "Prefix", "ImplementationSpecific"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tls": {
-          "type": "array",
-          "title": "TLS Configuration",
-          "description": "TLS configuration for MinIO ingress",
-          "items": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "affinity": {
             "type": "object"
-          }
-        }
-      }
-    },
-    "consoleIngress": {
-      "type": "object",
-      "title": "Console Ingress Configuration",
-      "description": "Console Ingress configuration parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Console Ingress",
-          "description": "Enable ingress record generation for MinIO Console"
         },
-        "className": {
-          "type": "string",
-          "title": "Console Ingress Class Name",
-          "description": "IngressClass that will be used to implement the Console Ingress"
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Console Ingress Annotations",
-          "description": "Additional annotations for the Console Ingress resource",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "hosts": {
-          "type": "array",
-          "title": "Console Ingress Hosts",
-          "description": "Console ingress hosts configuration",
-          "items": {
+        "auth": {
             "type": "object",
             "properties": {
-              "host": {
-                "type": "string",
-                "title": "Host",
-                "description": "Hostname for MinIO Console ingress"
-              },
-              "paths": {
-                "type": "array",
-                "title": "Paths",
-                "description": "Paths configuration for the host",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "path": {
-                      "type": "string",
-                      "title": "Path",
-                      "description": "Path for MinIO Console ingress"
-                    },
-                    "pathType": {
-                      "type": "string",
-                      "title": "Path Type",
-                      "description": "Path type for MinIO Console ingress",
-                      "enum": ["Exact", "Prefix", "ImplementationSpecific"]
-                    }
-                  }
+                "existingSecret": {
+                    "type": "string"
+                },
+                "existingSecretPasswordKey": {
+                    "type": "string"
+                },
+                "existingSecretUserKey": {
+                    "type": "string"
+                },
+                "rootPassword": {
+                    "type": "string"
+                },
+                "rootUser": {
+                    "type": "string"
                 }
-              }
             }
-          }
         },
-        "tls": {
-          "type": "array",
-          "title": "Console TLS Configuration",
-          "description": "TLS configuration for MinIO Console ingress",
-          "items": {
+        "commonAnnotations": {
             "type": "object"
-          }
-        }
-      }
-    },
-    "resources": {
-      "type": "object",
-      "title": "Resource Configuration",
-      "description": "Resource configuration parameters",
-      "properties": {
-        "limits": {
-          "type": "object",
-          "title": "Resource Limits",
-          "description": "Resource limits for the container",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Limit",
-              "description": "CPU resource limit"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Limit",
-              "description": "Memory resource limit"
+        },
+        "commonLabels": {
+            "type": "object"
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "browserEnabled": {
+                    "type": "boolean"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "extraEnvVars": {
+                    "type": "array"
+                },
+                "minioCompressionAllowEncryption": {
+                    "type": "string"
+                },
+                "minioCompressionEnabled": {
+                    "type": "string"
+                },
+                "minioCompressionExtensions": {
+                    "type": "string"
+                },
+                "minioCompressionMimeTypes": {
+                    "type": "string"
+                },
+                "minioConfigEnvFile": {
+                    "type": "string"
+                },
+                "minioOpts": {
+                    "type": "string"
+                },
+                "minioScannerSpeed": {
+                    "type": "string"
+                },
+                "minioVolumes": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "serverUrl": {
+                    "type": "string"
+                }
             }
-          }
         },
-        "requests": {
-          "type": "object",
-          "title": "Resource Requests",
-          "description": "Resource requests for the container",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Request",
-              "description": "CPU resource request"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Request",
-              "description": "Memory resource request"
+        "consoleIngress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "className": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "array"
+                }
             }
-          }
-        }
-      }
-    },
-    "persistence": {
-      "type": "object",
-      "title": "Persistence Configuration",
-      "description": "Persistence configuration parameters",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Persistence",
-          "description": "Enable persistence using Persistent Volume Claims"
         },
-        "storageClass": {
-          "type": "string",
-          "title": "Storage Class",
-          "description": "Persistent Volume storage class"
+        "containerSecurityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "capabilities": {
+                    "type": "object",
+                    "properties": {
+                        "drop": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "readOnlyRootFilesystem": {
+                    "type": "boolean"
+                },
+                "runAsGroup": {
+                    "type": "integer"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                }
+            }
         },
-        "annotations": {
-          "type": "object",
-          "title": "PVC Annotations",
-          "description": "Persistent Volume Claim annotations",
-          "additionalProperties": {
+        "defaultBuckets": {
             "type": "string"
-          }
         },
-        "size": {
-          "type": "string",
-          "title": "Storage Size",
-          "description": "Persistent Volume size",
-          "pattern": "^\\d+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
+        "extraObjects": {
+            "type": "array"
         },
-        "accessModes": {
-          "type": "array",
-          "title": "Access Modes",
-          "description": "Persistent Volume access modes",
-          "items": {
-            "type": "string",
-            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
-          }
-        },
-        "existingClaim": {
-          "type": "string",
-          "title": "Existing Claim",
-          "description": "The name of an existing PVC to use for persistence"
-        }
-      }
-    },
-    "serviceAccount": {
-      "type": "object",
-      "title": "Service Account Configuration",
-      "description": "Service Account configuration parameters",
-      "properties": {
-        "create": {
-          "type": "boolean",
-          "title": "Create Service Account",
-          "description": "Enable the creation of a ServiceAccount for MinIO",
-          "default": true
-        },
-        "name": {
-          "type": "string",
-          "title": "Service Account Name",
-          "description": "Name of the created ServiceAccount. If not set and create is true, a name is generated using the common.names.fullname template",
-          "default": ""
-        },
-        "automountServiceAccountToken": {
-          "type": "boolean",
-          "title": "Automount Service Account Token",
-          "description": "Enable/disable auto mounting of the service account token",
-          "default": false
-        },
-        "annotations": {
-          "type": "object",
-          "title": "Service Account Annotations",
-          "description": "Custom annotations for MinIO serviceAccount",
-          "additionalProperties": {
+        "fullnameOverride": {
             "type": "string"
-          },
-          "default": {}
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "type": "string"
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "imagePullPolicy": {
+                    "type": "string"
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
+                "tagCpuV1": {
+                    "type": "string"
+                },
+                "useCpuV1": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "className": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "array"
+                }
+            }
+        },
+        "livenessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "persistence": {
+            "type": "object",
+            "properties": {
+                "accessModes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingClaim": {
+                    "type": "string"
+                },
+                "mountPath": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                },
+                "storageClass": {
+                    "type": "string"
+                }
+            }
+        },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podLabels": {
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                }
+            }
+        },
+        "readinessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "replicaCount": {
+            "type": "integer"
+        },
+        "resources": {
+            "type": "object"
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "consolePort": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "startupProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array"
         }
-      }
-    },
-    "livenessProbe": {
-      "type": "object",
-      "title": "Liveness Probe Configuration",
-      "description": "Liveness and readiness probes configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Liveness Probe",
-          "description": "Enable livenessProbe on MinIO containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for livenessProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for livenessProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for livenessProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for livenessProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for livenessProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "readinessProbe": {
-      "type": "object",
-      "title": "Readiness Probe Configuration",
-      "description": "Readiness probe configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Readiness Probe",
-          "description": "Enable readinessProbe on MinIO containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for readinessProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for readinessProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for readinessProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for readinessProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for readinessProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "startupProbe": {
-      "type": "object",
-      "title": "Startup Probe Configuration",
-      "description": "Startup probe configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Startup Probe",
-          "description": "Enable startupProbe on MinIO containers"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay seconds for startupProbe",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "Period seconds for startupProbe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout seconds for startupProbe",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Failure threshold for startupProbe",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Success threshold for startupProbe",
-          "minimum": 1
-        }
-      }
-    },
-    "nodeSelector": {
-      "type": "object",
-      "title": "Node Selector",
-      "description": "Node Selection configuration",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "tolerations": {
-      "type": "array",
-      "title": "Tolerations",
-      "description": "Tolerations for pod assignment",
-      "items": {
-        "type": "object"
-      }
-    },
-    "affinity": {
-      "type": "object",
-      "title": "Affinity Configuration",
-      "description": "Affinity settings for pod assignment"
-    },
-    "extraObjects": {
-      "type": "array",
-      "title": "Extra Objects",
-      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
-      "items": {
-        "type": "object",
-        "description": "A Kubernetes manifest object. All fields are allowed."
-      }
     }
-  }
 }

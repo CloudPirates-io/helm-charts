@@ -52,6 +52,7 @@ data:
             return 1
         fi
         echo "MinIO is ready!"
+        sleep 2
     }
 
     ########################
@@ -77,8 +78,10 @@ data:
                 bucket_name=$(echo "$b" | cut -d':' -f1)
                 bucket_policy=$(echo "$b" | cut -s -d':' -f2)
                 
-                bucket_name=$(echo "$bucket_name" | xargs)
-                
+                # trim whitespaces (xargs and sed are not installed)
+                set -- $bucket_name
+                bucket_name="$1"
+
                 if [ -z "$bucket_name" ]; then
                     continue
                 fi

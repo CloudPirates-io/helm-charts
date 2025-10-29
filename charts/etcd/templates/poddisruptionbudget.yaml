@@ -6,9 +6,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "etcd.labels" . | nindent 4 }}
+  {{- with (include "etcd.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable | quote }}
   {{- end }}
   {{- if .Values.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}

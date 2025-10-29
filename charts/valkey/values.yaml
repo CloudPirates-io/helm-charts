@@ -22,7 +22,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "8.1.4-alpine3.22@sha256:e706d1213aaba6896c162bb6a3a9e1894e1a435f28f8f856d14fab2e10aa098b"
+  tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -203,6 +203,16 @@ tolerations: []
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 # - apiVersion: v1
@@ -223,7 +233,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.78.0-alpine@sha256:bcedc3641b40d26b09d4962a9b7ba84d7582d83a90d224a9ee5aa63829f3aba7"
+    tag: "v1.79.0-alpine@sha256:15a93b250a16537445e0c1bff2c1c0097c829aea79f18ae194ecd2687ae0de07"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container

@@ -52,9 +52,8 @@ spec:
               containerPort: {{ .Values.service.ports.admin | default 8080 }}
               protocol: TCP
           env:
-          {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+          {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
           {{- end }}
             - name: ZOO_MY_ID
               valueFrom:

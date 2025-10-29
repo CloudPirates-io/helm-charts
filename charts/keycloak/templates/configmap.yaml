@@ -14,7 +14,7 @@ data:
   cache-ispn.xml: |
     {{- .Values.cache.configFile | nindent 4 }}
 {{- end }}
-{{- if .Values.realm.import }}
+{{- if .Values.realm.configFile }}
 ---
 kind: ConfigMap
 apiVersion: v1

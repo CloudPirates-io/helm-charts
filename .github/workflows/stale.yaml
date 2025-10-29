@@ -1,0 +1,70 @@
+name: "Close stale issues and PRs"
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Close stale issues and PRs
+        uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v10.1.0
+        with:
+          # Issue settings
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had any activity for 14 days.
+
+            It will be closed in 7 days if no further activity occurs.
+
+            If this issue is still relevant, please comment to keep it open.
+
+            Thank you for your contributions!
+          close-issue-message: |
+            This issue has been automatically closed due to inactivity.
+
+            If you believe this issue is still relevant, please reopen it or create a new issue with updated information.
+
+            Thank you for your understanding!
+          days-before-issue-stale: 14
+          days-before-issue-close: 7
+          stale-issue-label: "stale"
+          exempt-issue-labels: "pinned,security,bug,enhancement,no-stale"
+
+          # PR settings
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had any activity for 14 days.
+
+            It will be closed in 7 days if no further activity occurs.
+
+            If this PR is still relevant, please:
+            - Rebase against the latest main branch
+            - Resolve any conflicts
+            - Address any review comments
+            - Comment on this PR to keep it open
+
+            Thank you for your contributions!
+          close-pr-message: |
+            This pull request has been automatically closed due to inactivity.
+
+            If you would like to continue with these changes, please:
+            1. Rebase your branch against the latest main
+            2. Open a new pull request
+
+            Thank you for your understanding!
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          exempt-pr-labels: "pinned,security,work-in-progress,wip,no-stale"
+
+          # General settings
+          operations-per-run: 100
+          remove-stale-when-updated: true
+          ascending: true

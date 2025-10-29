@@ -240,10 +240,15 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit and push changelog updates
+      - name: Update appVersion in Chart.yaml files
+        if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
+        run: ./update-appversion.sh --all
+
+      - name: Commit and push changelog and chart updates
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
         run: |
           git add charts/*/CHANGELOG.md
+          git add charts/*/Chart.yaml
           
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             COMMIT_MSG="chore: update CHANGELOG.md via manual trigger"

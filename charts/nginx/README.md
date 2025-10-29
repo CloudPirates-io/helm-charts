@@ -204,6 +204,7 @@ containerPorts:
 | ---------------- | ---------------------------------------------------------- | ----------- |
 | `service.type`   | Nginx service type                                         | `ClusterIP` |
 | `service.ports`  | Array of service ports (advanced configuration) - see examples | `[]`    |
+| `service.annotations`  | Additional annotations to add to the service | `{}`    |
 
 #### Service Ports Examples
 
@@ -350,7 +351,7 @@ location /stub_status {
 
 | Parameter           | Description                                                                         | Default |
 | ------------------- | ----------------------------------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables to set                                             | `[]`    |
+| `extraEnvVars`          | Additional environment variables to set                                             | `[]`    |
 | `extraVolumes`      | Additional volumes to add to the pod                                                | `[]`    |
 | `extraVolumeMounts` | Additional volume mounts to add to the Nginx container                             | `[]`    |
 | `extraObjects`      | Array of extra objects to deploy with the release                                   | `[]`    |

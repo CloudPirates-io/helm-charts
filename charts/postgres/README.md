@@ -155,12 +155,14 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### Service configuration
 
-| Parameter             | Description               | Default     |
-| --------------------- | ------------------------- | ----------- |
-| `service.type`        | PostgreSQL service type   | `ClusterIP` |
-| `service.port`        | PostgreSQL service port   | `5432`      |
-| `service.targetPort`  | PostgreSQL container port | `5432`      |
-| `service.annotations` | Service annotations       | `{}`        |
+| Parameter                       | Description                                                                       | Default     |
+| ------------------------------- | --------------------------------------------------------------------------------- | ----------- |
+| `service.type`                  | PostgreSQL service type                                                           | `ClusterIP` |
+| `service.port`                  | PostgreSQL service port                                                           | `5432`      |
+| `service.targetPort`            | PostgreSQL container port                                                         | `5432`      |
+| `service.annotations`           | Service annotations                                                               | `{}`        |
+| `service.loadBalancerIP`        | Load balancer IP (applies if service type is `LoadBalancer`)                      | `""`        |
+| `service.externalTrafficPolicy` | External traffic policy (applies if service type is `LoadBalancer` or `NodePort`) | `Cluster`   |
 
 ### Ingress configuration
 
@@ -239,16 +241,11 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
 | `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
 
-### Extra Environment
-
-| Parameter  | Description                                           | Default |
-| ---------- | ----------------------------------------------------- | ------- |
-| `extraEnv` | Additional environment variables from key-value pairs | `{}`    |
-
 ### Extra Configuration Parameters
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
+| `extraEnvVars` | Additional environment variables to set | `[]`    |
 | `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
 | `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container                | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |

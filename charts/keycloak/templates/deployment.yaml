@@ -138,6 +138,18 @@ spec:
                 secretKeyRef:
                   name: {{ include "keycloak.secretName" . }}
                   key: {{ include "keycloak.adminPasswordKey" . }}
+            {{- if .Values.database.type }}
+            - name: KC_DB
+              value: {{ .Values.database.type }}
+            {{- end }}
+            {{- if .Values.database.schema }}
+            - name: KC_DB_SCHEMA
+              value: {{ .Values.database.schema }}
+            {{- end }}
+            {{- if .Values.database.urlProperties }}
+            - name: KC_DB_URL_PROPERTIES
+              value: {{ .Values.database.urlProperties | quote }}
+            {{- end }}
             {{- if or (eq .Values.database.type "postgres") (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb") }}
             - name: KC_DB_USERNAME
               {{- if and (eq .Values.database.type "postgres") .Values.postgres.enabled }}
@@ -168,9 +180,8 @@ spec:
                   key: {{ include "keycloak.databasePasswordKey" . }}
               {{- end }}
             {{- end }}
-            {{- range $key, $value := .Values.extraEnv }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{- toYaml . | nindent 12 }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
@@ -244,7 +255,7 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
-            {{- if .Values.realm.import }}
+            {{- if .Values.realm.configFile }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
               readOnly: true
@@ -282,7 +293,7 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
-        {{- if .Values.realm.import }}
+        {{- if .Values.realm.configFile }}
         - name: realm-config
           configMap:
             name: {{ include "keycloak.fullname" . }}-realm

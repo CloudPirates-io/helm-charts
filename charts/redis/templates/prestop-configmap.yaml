@@ -6,6 +6,10 @@ metadata:
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
+  {{- with (include "redis.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 data:
   prestop.sh: |
     #!/bin/bash
@@ -19,8 +23,8 @@ data:
     REDIS_PORT="{{ .Values.service.port }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
-    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
-    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+    REDIS_SERVICE="{{ include "redis.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
 
     # Set authentication if enabled
     {{- if .Values.auth.enabled }}
@@ -55,7 +59,7 @@ data:
 
     # Function to run Sentinel commands
     run_sentinel_command() {
-        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
     }
 
     # Function to check if sentinel failover has finished

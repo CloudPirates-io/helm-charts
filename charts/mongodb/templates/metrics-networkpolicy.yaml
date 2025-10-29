@@ -8,6 +8,10 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics
+  {{- with (include "mongodb.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 spec:
   podSelector:
     matchLabels:

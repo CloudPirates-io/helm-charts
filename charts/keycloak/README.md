@@ -108,9 +108,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra init containers for Keycloak pod
 
-| Parameter             | Description                                           | Default |
-| --------------------- | ----------------------------------------------------- | ------- |
-| `extraInitContainers` | Array of initContainer to add to the keycloak pod     | `[]`    |
+| Parameter             | Description                                       | Default |
+| --------------------- | ------------------------------------------------- | ------- |
+| `extraInitContainers` | Array of initContainer to add to the keycloak pod | `[]`    |
 
 ### Security
 
@@ -148,43 +148,45 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### TLS Configuration
 
-| Parameter                                  | Description                                                                                | Default                            |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------- |
-| `tls.enabled`                              | Enable TLS/HTTPS support using custom certificates                                        | `false`                            |
-| `tls.existingSecret`                       | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                               |
-| `tls.certificateFile`                      | Path where the TLS certificate file will be mounted (internal)                            | `"/opt/keycloak/certs/tls.crt"`    |
-| `tls.certificateKeyFile`                   | Path where the TLS certificate key file will be mounted (internal)                        | `"/opt/keycloak/certs/tls.key"`    |
-| `tls.certManager.enabled`                  | Enable cert-manager integration for automatic certificate provisioning                    | `false`                            |
-| `tls.certManager.issuerRef.name`           | Name of the cert-manager Issuer or ClusterIssuer                                          | `""`                               |
-| `tls.certManager.issuerRef.kind`           | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                 | `ClusterIssuer`                    |
-| `tls.certManager.issuerRef.group`          | Group of the cert-manager issuer                                                          | `cert-manager.io`                  |
-| `tls.certManager.duration`                 | Certificate duration (e.g., 2160h for 90 days)                                            | `""`                               |
-| `tls.certManager.renewBefore`              | Time before expiry to renew certificate (e.g., 360h for 15 days)                          | `""`                               |
-| `tls.certManager.commonName`               | Certificate common name (defaults to first dnsName if not specified)                      | `""`                               |
-| `tls.certManager.dnsNames`                 | List of DNS names for the certificate (uses ingress.hosts if not specified)               | `[]`                               |
-| `tls.certManager.ipAddresses`              | List of IP addresses for the certificate                                                  | `[]`                               |
-| `tls.certManager.secretName`               | Name for the generated secret (defaults to `<fullname>-tls`)                              | `""`                               |
-| `tls.certManager.usages`                   | Certificate key usages                                                                    | `["digital signature", "key encipherment"]` |
-| `tls.certManager.annotations`              | Additional annotations for the Certificate resource                                       | `{}`                               |
-| `tls.truststoreEnabled`                    | Enable truststore for client certificate validation or outgoing HTTPS requests            | `false`                            |
-| `tls.truststoreExistingSecret`             | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks) | `""`                               |
-| `tls.truststorePassword`                   | Password for the truststore (use with caution - consider using existing secret)           | `""`                               |
-| `tls.truststoreFile`                       | Path where the truststore file will be mounted (internal)                                 | `"/opt/keycloak/truststore/truststore.jks"` |
+| Parameter                         | Description                                                                                     | Default                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                              | `false`                                     |
+| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                                        |
+| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                  | `"/opt/keycloak/certs/tls.crt"`             |
+| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                              | `"/opt/keycloak/certs/tls.key"`             |
+| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                          | `false`                                     |
+| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                | `""`                                        |
+| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                       | `ClusterIssuer`                             |
+| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                | `cert-manager.io`                           |
+| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                  | `""`                                        |
+| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                | `""`                                        |
+| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                            | `""`                                        |
+| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                     | `[]`                                        |
+| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                        | `[]`                                        |
+| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                    | `""`                                        |
+| `tls.certManager.usages`          | Certificate key usages                                                                          | `["digital signature", "key encipherment"]` |
+| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                             | `{}`                                        |
+| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                  | `false`                                     |
+| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks)  | `""`                                        |
+| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                 | `""`                                        |
+| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                       | `"/opt/keycloak/truststore/truststore.jks"` |
 
 ### Database Configuration
 
-| Parameter                         | Description                                                                                                            | Default         |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `database.type`                   | Database type (postgres, mysql, mariadb). Note: H2 databases are not supported due to readonly filesystem restrictions | `postgres`      |
-| `database.host`                   | Database host (only used when not using embedded database)                                                             | `""`            |
-| `database.port`                   | Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306)                | `""`            |
-| `database.name`                   | Database name (only used when not using embedded database)                                                             | `keycloak`      |
-| `database.username`               | Database username (only used when not using embedded database)                                                         | `keycloak`      |
-| `database.password`               | Database password (only used when not using embedded database)                                                         | `""`            |
-| `database.existingSecret`         | Name of existing secret for database credentials (only used when not using embedded database)                          | `""`            |
-| `database.secretKeys.passwordKey` | Name of key in existing secret for database password                                                                   | `"db-password"` |
-| `database.secretKeys.usernameKey` | Name of key in existing secret for database username                                                                   | `"db-username"` |
-| `database.jdbcParams`             | Additional JDBC parameters                                                                                             | `""`            |
+| Parameter                         | Description                                                                                                                   | Default         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `database.type`                   | Database type (postgres, mysql, mariadb, mssql). Note: H2 databases are not supported due to readonly filesystem restrictions | `postgres`      |
+| `database.host`                   | Database host (only used when not using embedded database)                                                                    | `""`            |
+| `database.port`                   | Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306, mssql=1433)           | `""`            |
+| `database.schema`                 | Database schema                                                                                                               | `""`            |
+| `database.urlProperties`          | Additional database url properties                                                                                            | `""`            |
+| `database.name`                   | Database name (only used when not using embedded database)                                                                    | `keycloak`      |
+| `database.username`               | Database username (only used when not using embedded database)                                                                | `keycloak`      |
+| `database.password`               | Database password (only used when not using embedded database)                                                                | `""`            |
+| `database.existingSecret`         | Name of existing secret for database credentials (only used when not using embedded database)                                 | `""`            |
+| `database.secretKeys.passwordKey` | Name of key in existing secret for database password                                                                          | `"db-password"` |
+| `database.secretKeys.usernameKey` | Name of key in existing secret for database username                                                                          | `"db-username"` |
+| `database.jdbcParams`             | Additional JDBC parameters                                                                                                    | `""`            |
 
 ### Cache Configuration
 
@@ -314,7 +316,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
-| `extraEnv`           | Additional environment variables from key-value pairs                  | `{}`    |
+| `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``      |
 
 ### Extra Configuration Parameters

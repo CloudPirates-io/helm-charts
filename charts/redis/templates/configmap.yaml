@@ -6,6 +6,10 @@ metadata:
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
+  {{- with (include "redis.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 data:
   redis.conf: |
     {{- .Values.config.content | nindent 4 }}

@@ -1,6 +1,59 @@
 # Changelog
 
 
+## 0.6.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([5bf8d10](https://github.com/CloudPirates-io/helm-charts/commit/5bf8d10))
+* chore: update CHANGELOG.md for merged changes ([64bc0ac](https://github.com/CloudPirates-io/helm-charts/commit/64bc0ac))
+* Update README.md (#468) ([26c7a1c](https://github.com/CloudPirates-io/helm-charts/commit/26c7a1c))
+* chore: update CHANGELOG.md for merged changes ([cbf613f](https://github.com/CloudPirates-io/helm-charts/commit/cbf613f))
+* chore: update CHANGELOG.md for merged changes ([48e61e6](https://github.com/CloudPirates-io/helm-charts/commit/48e61e6))
+
+## 0.5.6 (2025-10-26)
+
+
+## 0.5.5 (2025-10-24)
+
+* chore: update CHANGELOG.md for merged changes ([b2b84ce](https://github.com/CloudPirates-io/helm-charts/commit/b2b84ce))
+* chore: update CHANGELOG.md for merged changes ([b1f47df](https://github.com/CloudPirates-io/helm-charts/commit/b1f47df))
+* Allow to set custom command and args (#457) ([06d8f66](https://github.com/CloudPirates-io/helm-charts/commit/06d8f66))
+* chore: auto-generate values.schema.json for updated charts (#455) ([aec6840](https://github.com/CloudPirates-io/helm-charts/commit/aec6840))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.5.4 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
+* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
+* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+
+## 0.5.3 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([bd36e6d](https://github.com/CloudPirates-io/helm-charts/commit/bd36e6d))
+* chore: update CHANGELOG.md for merged changes ([fc6b177](https://github.com/CloudPirates-io/helm-charts/commit/fc6b177))
+
+## 0.5.2 (2025-10-22)
+
+* Fix no auth error in init script (#440) ([54b7221](https://github.com/CloudPirates-io/helm-charts/commit/54b7221))
+* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
+* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
+* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
+* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
+* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
+* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
+* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
+* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
+* chore: update CHANGELOG.md for merged changes ([c76aa29](https://github.com/CloudPirates-io/helm-charts/commit/c76aa29))
+* chore: update CHANGELOG.md for merged changes ([77e0793](https://github.com/CloudPirates-io/helm-charts/commit/77e0793))
+
+## 0.5.1 (2025-10-15)
+
+* chore: update CHANGELOG.md for merged changes ([3361964](https://github.com/CloudPirates-io/helm-charts/commit/3361964))
+* chore: update CHANGELOG.md for merged changes ([7f61172](https://github.com/CloudPirates-io/helm-charts/commit/7f61172))
+* chore: update CHANGELOG.md for merged changes ([1ec9aab](https://github.com/CloudPirates-io/helm-charts/commit/1ec9aab))
+* chore: update CHANGELOG.md for merged changes ([c9ff4ec](https://github.com/CloudPirates-io/helm-charts/commit/c9ff4ec))
+* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+
 ## 0.5.0 (2025-10-14)
 
 * Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))

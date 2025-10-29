@@ -63,6 +63,8 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.annotations Additional annotations to add to the service
+  annotations: {}
 
 ## @section Ingress parameters
 ingress:
@@ -142,6 +144,13 @@ cloneStaticSiteFromGit:
 
   ## @param cloneStaticSiteFromGit.extraEnvVars Additional environment variables for Git containers
   extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
   ## @param cloneStaticSiteFromGit.extraEnvVarsSecret Secret with extra environment variables
   extraEnvVarsSecret: ""
@@ -220,10 +229,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []

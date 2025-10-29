@@ -5,11 +5,18 @@ metadata:
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
-  {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- if or $annotations (and .Values.sentinel.enabled (eq .Values.architecture "replication")) }}
   annotations:
+  {{- if $annotations }}
+{{- toYaml $annotations | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
     # This service points to all Redis instances for Sentinel-based discovery
     # Applications should use Sentinel clients to discover the current master
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  {{- else }}
+  {{- end }}
   {{- end }}
 spec:
   type: {{ .Values.service.type }}
@@ -18,6 +25,11 @@ spec:
       targetPort: redis
       protocol: TCP
       name: redis
+    {{- range .Values.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .name }}
+      name: {{ .name }}
+    {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
   {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}

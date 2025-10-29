@@ -2,7 +2,7 @@ apiVersion: v2
 name: clusterpirate
 description: Client agent for the CloudPirates Managed Observability Platform to connect your Kubernetes cluster to our infrastructure
 type: application
-version: 1.2.0
+version: 1.2.5
 appVersion: "1.0.1"
 keywords:
   - kubernetes
@@ -11,15 +11,33 @@ keywords:
   - observability
   - agent
 home: https://www.cloudpirates.io
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
   - name: valkey
-    version: "0.6.0"
+    version: "0.7.0"
     repository: oci://registry-1.docker.io/cloudpirates
     condition: valkey.enabled
 icon: https://a.storyblok.com/f/143071/512x512/88dc07809a/cluster-pirate-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: monitoring-logging
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |2
+        - kind: changed
+          description: "Chart updated"

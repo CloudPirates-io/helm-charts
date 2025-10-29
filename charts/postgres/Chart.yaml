@@ -2,22 +2,45 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.10.0
-appVersion: "18.0"
+version: 0.11.0
+appVersion: "18.0.0"
 keywords:
   - postgres
   - postgresql
   - database
   - sql
   - relational
-home: https://www.cloudpirates.io
+home: https://www.postgresql.org
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+  - https://github.com/postgres/postgres
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/95e7f13e62/postgres-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: PostgreSQL
+      url: https://www.postgresql.org
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+    - name: Application
+      url: https://github.com/postgres/postgres
+    - name: Docker Image
+      url: https://hub.docker.com/_/postgres
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |2
+        - kind: changed
+          description: "Chart updated"

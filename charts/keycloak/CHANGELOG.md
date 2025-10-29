@@ -1,6 +1,57 @@
 # Changelog
 
 
+## 0.7.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([aec2fd6](https://github.com/CloudPirates-io/helm-charts/commit/aec2fd6))
+* chore: update CHANGELOG.md for merged changes ([8e4ff4a](https://github.com/CloudPirates-io/helm-charts/commit/8e4ff4a))
+* chore: auto-generate values.schema.json (#473) ([d9a38d4](https://github.com/CloudPirates-io/helm-charts/commit/d9a38d4))
+* chore: update CHANGELOG.md for merged changes ([293ae00](https://github.com/CloudPirates-io/helm-charts/commit/293ae00))
+* chore: update CHANGELOG.md for merged changes ([ae9c37b](https://github.com/CloudPirates-io/helm-charts/commit/ae9c37b))
+
+## 0.6.8 (2025-10-27)
+
+* add mssql support (#469) ([11cdbfb](https://github.com/CloudPirates-io/helm-charts/commit/11cdbfb))
+* chore: update CHANGELOG.md for merged changes ([6813d85](https://github.com/CloudPirates-io/helm-charts/commit/6813d85))
+* chore: update CHANGELOG.md for merged changes ([2e40f13](https://github.com/CloudPirates-io/helm-charts/commit/2e40f13))
+
+## 0.6.7 (2025-10-26)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.2 (patch) (#453) ([52a01c8](https://github.com/CloudPirates-io/helm-charts/commit/52a01c8))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.6.6 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
+* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+
+## 0.6.5 (2025-10-22)
+
+* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
+* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
+* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
+* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
+* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
+* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
+* chore: update CHANGELOG.md for merged changes ([b06a24e](https://github.com/CloudPirates-io/helm-charts/commit/b06a24e))
+* chore: update CHANGELOG.md for merged changes ([b70f02c](https://github.com/CloudPirates-io/helm-charts/commit/b70f02c))
+* chore: update CHANGELOG.md for merged changes ([94c7881](https://github.com/CloudPirates-io/helm-charts/commit/94c7881))
+
+## 0.6.4 (2025-10-17)
+
+* realm import (#402) ([4257b8b](https://github.com/CloudPirates-io/helm-charts/commit/4257b8b))
+* chore: update CHANGELOG.md for merged changes ([1184994](https://github.com/CloudPirates-io/helm-charts/commit/1184994))
+* chore: update CHANGELOG.md for merged changes ([8b0e613](https://github.com/CloudPirates-io/helm-charts/commit/8b0e613))
+
+## 0.6.3 (2025-10-17)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.1 (patch) (#400) ([c6f2ca2](https://github.com/CloudPirates-io/helm-charts/commit/c6f2ca2))
+* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
+* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
+* chore: update CHANGELOG.md for merged changes ([48c9191](https://github.com/CloudPirates-io/helm-charts/commit/48c9191))
+* chore: update CHANGELOG.md for merged changes ([46b32bf](https://github.com/CloudPirates-io/helm-charts/commit/46b32bf))
+
 ## 0.6.2 (2025-10-14)
 
 * Add support for templating hostname and hostnameAdmin (#390) ([133f4d5](https://github.com/CloudPirates-io/helm-charts/commit/133f4d5))

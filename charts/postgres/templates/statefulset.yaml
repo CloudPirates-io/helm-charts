@@ -79,16 +79,15 @@ spec:
             - name: POSTGRES_EFFECTIVE_CACHE_SIZE
               value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
             {{- end }}
-            {{- range $key, $value := .Values.extraEnv }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
@@ -101,7 +100,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
@@ -114,7 +113,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
@@ -180,10 +179,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
-            {{- if not .Values.config.existingConfigmap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}
-            {{- end }}
             - name: run
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
@@ -248,12 +245,10 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
-        {{- if not .Values.config.existingConfigmap }}
         - name: config
           configMap:
             name: {{ include "postgres.configmapName" . }}
             optional: true
-        {{- end }}
         - name: run
           emptyDir: {}
         - name: tmp

@@ -1,500 +1,449 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "MongoDB Helm Chart Values Schema",
-  "description": "Schema for MongoDB Helm chart values",
-  "properties": {
-    "global": {
-      "type": "object",
-      "title": "Global parameters",
-      "description": "Global Docker image parameters",
-      "properties": {
-        "imageRegistry": {
-          "type": "string",
-          "title": "Global Docker Image Registry",
-          "description": "Global Docker image registry"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "affinity": {
+            "type": "object"
         },
-        "imagePullSecrets": {
-          "type": "array",
-          "title": "Global Image Pull Secrets",
-          "description": "Global Docker registry secret names as an array of objects",
-          "items": {
+        "auth": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string",
-                "title": "Secret Name",
-                "description": "Name of the image pull secret"
-              }
-            },
-            "required": ["name"]
-          }
-        }
-      }
-    },
-    "replicaCount": {
-      "type": "integer",
-      "title": "Replica Count",
-      "description": "Number of MongoDB replicas to deploy",
-      "minimum": 1
-    },
-    "image": {
-      "type": "object",
-      "title": "MongoDB Image Configuration",
-      "description": "MongoDB container image configuration",
-      "properties": {
-        "registry": {
-          "type": "string",
-          "title": "MongoDB Image Registry",
-          "description": "MongoDB Docker image registry"
-        },
-        "repository": {
-          "type": "string",
-          "title": "MongoDB Image Repository",
-          "description": "MongoDB Docker image repository"
-        },
-        "tag": {
-          "type": "string",
-          "title": "MongoDB Image Tag",
-          "description": "MongoDB image tag"
-        },
-        "pullPolicy": {
-          "type": "string",
-          "title": "MongoDB Image Pull Policy",
-          "description": "MongoDB image pull policy",
-          "enum": ["Always", "Never", "IfNotPresent"]
-        }
-      }
-    },
-    "nameOverride": {
-      "type": "string",
-      "title": "Name Override",
-      "description": "String to partially override mongodb.fullname"
-    },
-    "fullnameOverride": {
-      "type": "string",
-      "title": "Full Name Override",
-      "description": "String to fully override mongodb.fullname"
-    },
-    "commonLabels": {
-      "type": "object",
-      "title": "Common Labels",
-      "description": "Labels to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "commonAnnotations": {
-      "type": "object",
-      "title": "Common Annotations",
-      "description": "Annotations to add to all deployed objects",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "service": {
-      "type": "object",
-      "title": "Service Configuration",
-      "description": "Kubernetes service configuration",
-      "properties": {
-        "type": {
-          "type": "string",
-          "title": "Service Type",
-          "description": "Kubernetes service type",
-          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
-        },
-        "port": {
-          "type": "integer",
-          "title": "Service Port",
-          "description": "MongoDB service port",
-          "minimum": 1,
-          "maximum": 65535
-        }
-      }
-    },
-    "auth": {
-      "type": "object",
-      "title": "MongoDB Authentication",
-      "description": "MongoDB authentication configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Authentication",
-          "description": "Enable MongoDB authentication"
-        },
-        "rootUsername": {
-          "type": "string",
-          "title": "MongoDB Root Username",
-          "description": "MongoDB root username"
-        },
-        "rootPassword": {
-          "type": "string",
-          "title": "MongoDB Root Password",
-          "description": "MongoDB root password (if empty, random password will be generated)"
-        },
-        "existingSecret": {
-          "type": "string",
-          "title": "Existing Secret",
-          "description": "Name of existing secret containing MongoDB password"
-        },
-        "existingSecretPasswordKey": {
-          "type": "string",
-          "title": "Existing Secret Password Key",
-          "description": "Key in existing secret containing MongoDB password"
-        }
-      }
-    },
-    "config": {
-      "type": "object",
-      "title": "MongoDB Configuration",
-      "description": "MongoDB configuration options",
-      "properties": {
-        "mountPath": {
-          "type": "string",
-          "title": "Config Mount Path",
-          "description": "MongoDB configuration options"
-        },
-        "content": {
-          "type": "string",
-          "title": "Config Content",
-          "description": "Include your custom MongoDB configurations here as string"
-        },
-        "existingConfigmap": {
-          "type": "string",
-          "title": "Existing ConfigMap",
-          "description": "Name of an existing Configmap to use instead of creating one"
-        },
-        "existingConfigmapKey": {
-          "type": "string",
-          "title": "Existing ConfigMap Key",
-          "description": "Name of the key in the Configmap that should be used"
-        }
-      }
-    },
-    "customUser": {
-      "type": "object",
-      "title": "Custom User",
-      "description": "Optional user to be created at initialisation with a custom password and database",
-      "properties": {
-        "name": {
-          "type": "string",
-          "title": "Custom User Name",
-          "description": "Name of the custom user to be created"
-        },
-        "database": {
-          "type": "string",
-          "title": "Custom User Database",
-          "description": "Name of the database to be created"
-        },
-        "password": {
-          "type": "string",
-          "title": "Custom User Password",
-          "description": "Password to be used for the custom user"
-        },
-        "existingSecret": {
-          "type": "string",
-          "title": "Custom User Existing Secret",
-          "description": "Existing secret, in which username, password and database name are saved"
-        },
-        "secretKeys": {
-          "type": "object",
-          "title": "Custom User Secret Keys",
-          "description": "Name of keys in existing secret to use the custom user name, password and database",
-          "properties": {
-            "name": {
-              "type": "string",
-              "title": "Secret Key for User Name",
-              "description": "Key name in the secret for username"
-            },
-            "password": {
-              "type": "string",
-              "title": "Secret Key for Password",
-              "description": "Key name in the secret for password"
-            },
-            "database": {
-              "type": "string",
-              "title": "Secret Key for Database",
-              "description": "Key name in the secret for database name"
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "existingSecretPasswordKey": {
+                    "type": "string"
+                },
+                "rootPassword": {
+                    "type": "string"
+                },
+                "rootUsername": {
+                    "type": "string"
+                }
             }
-          }
-        }
-      }
-    },
-    "persistence": {
-      "type": "object",
-      "title": "Persistence Configuration",
-      "description": "MongoDB persistence configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Persistence",
-          "description": "Enable persistent storage"
         },
-        "storageClass": {
-          "type": "string",
-          "title": "Storage Class",
-          "description": "Storage class to use for persistent volume"
+        "commonAnnotations": {
+            "type": "object"
         },
-        "accessMode": {
-          "type": "string",
-          "title": "Access Mode",
-          "description": "Access mode for persistent volume",
-          "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany", "ReadWriteOncePod"]
+        "commonLabels": {
+            "type": "object"
         },
-        "size": {
-          "type": "string",
-          "title": "Storage Size",
-          "description": "Size of persistent volume",
-          "pattern": "^\\d+(Ei|Pi|Ti|Gi|Mi|Ki|E|P|T|G|M|K)?$"
+        "config": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "existingConfigmap": {
+                    "type": "string"
+                },
+                "existingConfigmapKey": {
+                    "type": "string"
+                },
+                "mountPath": {
+                    "type": "string"
+                }
+            }
         },
-        "mountPath": {
-          "type": "string",
-          "title": "Mount Path",
-          "description": "Mount path for MongoDB data"
+        "containerSecurityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "runAsUser": {
+                    "type": "integer"
+                }
+            }
         },
-        "annotations": {
-          "type": "object",
-          "title": "Persistence Annotations",
-          "description": "Annotations for persistent volume claims",
-          "additionalProperties": {
+        "customUser": {
+            "type": "object"
+        },
+        "extraEnvVars": {
+            "type": "array"
+        },
+        "extraObjects": {
+            "type": "array"
+        },
+        "extraVolumeMounts": {
+            "type": "array"
+        },
+        "extraVolumes": {
+            "type": "array"
+        },
+        "fullnameOverride": {
             "type": "string"
-          }
-        }
-      }
-    },
-    "resources": {
-      "type": "object",
-      "title": "Resource Configuration",
-      "description": "Resource limits and requests for MongoDB pod",
-      "properties": {
-        "limits": {
-          "type": "object",
-          "title": "Resource Limits",
-          "description": "Resource limits for the container",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Limit",
-              "description": "CPU resource limit"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Limit",
-              "description": "Memory resource limit"
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "imagePullSecrets": {
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "type": "string"
+                }
             }
-          }
         },
-        "requests": {
-          "type": "object",
-          "title": "Resource Requests",
-          "description": "Resource requests for the container",
-          "properties": {
-            "cpu": {
-              "oneOf": [
-                {"type": "string"},
-                {"type": "number"}
-              ],
-              "title": "CPU Request",
-              "description": "CPU resource request"
-            },
-            "memory": {
-              "type": "string",
-              "title": "Memory Request",
-              "description": "Memory resource request"
+        "image": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array"
+                },
+                "command": {
+                    "type": "array"
+                },
+                "pullPolicy": {
+                    "type": "string"
+                },
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
             }
-          }
+        },
+        "livenessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "metrics": {
+            "type": "object",
+            "properties": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "type": "object",
+                            "properties": {
+                                "drop": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraArgs": {
+                    "type": "array"
+                },
+                "extraEnvVars": {
+                    "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "livenessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "readinessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "labels": {
+                            "type": "object"
+                        },
+                        "port": {
+                            "type": "integer"
+                        },
+                        "targetPort": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "serviceMonitor": {
+                    "type": "object",
+                    "properties": {
+                        "additionalLabels": {
+                            "type": "object"
+                        },
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "jobLabel": {
+                            "type": "string"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "namespace": {
+                            "type": "string"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "networkPolicy": {
+            "type": "object",
+            "properties": {
+                "allowedSources": {
+                    "type": "array"
+                },
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "persistence": {
+            "type": "object",
+            "properties": {
+                "accessMode": {
+                    "type": "string"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "mountPath": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                },
+                "storageClass": {
+                    "type": "string"
+                }
+            }
+        },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podLabels": {
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "fsGroup": {
+                    "type": "integer"
+                }
+            }
+        },
+        "readinessProbe": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                },
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "replicaCount": {
+            "type": "integer"
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "type": "object",
+                    "properties": {
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
+                        "memory": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array"
         }
-      }
-    },
-    "nodeSelector": {
-      "type": "object",
-      "title": "Node Selector",
-      "description": "Node selector for pod assignment",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "tolerations": {
-      "type": "array",
-      "title": "Tolerations",
-      "description": "Tolerations for pod assignment",
-      "items": {
-        "type": "object"
-      }
-    },
-    "affinity": {
-      "type": "object",
-      "title": "Affinity Configuration",
-      "description": "Affinity rules for pod assignment"
-    },
-    "containerSecurityContext": {
-      "type": "object",
-      "title": "Container Security Context",
-      "description": "Security context configuration",
-      "properties": {
-        "runAsUser": {
-          "type": "integer",
-          "title": "Run As User",
-          "description": "User ID to run the container",
-          "minimum": 0
-        },
-        "runAsNonRoot": {
-          "type": "boolean",
-          "title": "Run As Non-Root",
-          "description": "Run as non-root user"
-        },
-        "allowPrivilegeEscalation": {
-          "type": "boolean",
-          "title": "Allow Privilege Escalation",
-          "description": "Set MongoDB container's privilege escalation"
-        }
-      }
-    },
-    "podSecurityContext": {
-      "type": "object",
-      "title": "Pod Security Context",
-      "description": "Security context for the pod",
-      "properties": {
-        "fsGroup": {
-          "type": "integer",
-          "title": "FS Group",
-          "description": "Set MongoDB pod's Security Context fsGroup",
-          "minimum": 0
-        }
-      }
-    },
-    "livenessProbe": {
-      "type": "object",
-      "title": "Liveness Probe Configuration",
-      "description": "MongoDB liveness probe configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Liveness Probe",
-          "description": "Enable liveness probe"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay before starting probes",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "How often to perform the probe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout for each probe attempt",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Number of failures before pod is restarted",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Number of successes to mark probe as successful",
-          "minimum": 1
-        }
-      }
-    },
-    "readinessProbe": {
-      "type": "object",
-      "title": "Readiness Probe Configuration",
-      "description": "MongoDB readiness probe configuration",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Enable Readiness Probe",
-          "description": "Enable readiness probe"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "title": "Initial Delay Seconds",
-          "description": "Initial delay before starting probes",
-          "minimum": 0
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "title": "Period Seconds",
-          "description": "How often to perform the probe",
-          "minimum": 1
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "title": "Timeout Seconds",
-          "description": "Timeout for each probe attempt",
-          "minimum": 1
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "title": "Failure Threshold",
-          "description": "Number of failures before pod is marked unready",
-          "minimum": 1
-        },
-        "successThreshold": {
-          "type": "integer",
-          "title": "Success Threshold",
-          "description": "Number of successes to mark probe as successful",
-          "minimum": 1
-        }
-      }
-    },
-    "extraEnv": {
-      "type": "array",
-      "title": "Extra Environment Variables",
-      "description": "Additional environment variables to set",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Variable Name",
-            "description": "Environment variable name"
-          },
-          "value": {
-            "type": "string",
-            "title": "Variable Value",
-            "description": "Environment variable value"
-          }
-        },
-        "required": ["name"]
-      }
-    },
-    "extraVolumes": {
-      "type": "array",
-      "title": "Extra Volumes",
-      "description": "Additional volumes to add to the pod",
-      "items": {
-        "type": "object"
-      }
-    },
-    "extraVolumeMounts": {
-      "type": "array",
-      "title": "Extra Volume Mounts",
-      "description": "Additional volume mounts to add to the MongoDB container",
-      "items": {
-        "type": "object"
-      }
-    },
-    "extraObjects": {
-      "type": "array",
-      "title": "Extra Objects",
-      "description": "A list of additional Kubernetes objects to deploy alongside the release. Helm templating is supported in any field, but all template expressions must be quoted. Each item should be a valid Kubernetes manifest object.",
-      "items": {
-        "type": "object",
-        "description": "A Kubernetes manifest object. All fields are allowed."
-      }
     }
-  }
 }

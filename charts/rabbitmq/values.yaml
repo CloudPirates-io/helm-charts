@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.1.4-management@sha256:f66d1a21bd0b65fd91a4fd160de656dea92332e6037e58cb48e7174645a0586c"
+  tag: "4.1.5-management@sha256:15e2c345ae69a0ea8c7496a53949d23f1d699d290d53fba2470e34957bcb8805"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -129,7 +129,7 @@ initContainer:
     ## @param initContainer.image.registry Init container image repository
     repository: busybox
     ## @param initContainer.image.tag Init container image tag
-    tag: "1.37.0@sha256:2f590fc602ce325cbff2ccfc39499014d039546dc400ef8bbf5c6ffb860632e7"
+    tag: "1.37.0@sha256:fba0711bd6995f7e0158f397d85f63998b4c8b1a1e3b1e9e0394c7b165585440"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
 
@@ -163,6 +163,8 @@ installPlugins: []
 persistence:
   ## @param persistence.enabled Enable persistent storage
   enabled: true
+  ## @param persistence.existingClaim Name of existing PVC to use (if empty, a new PVC will be created automatically)
+  existingClaim: ""
   ## @param persistence.storageClass Storage class to use for persistent volume
   storageClass: ""
   ## @param persistence.accessModes Persistent Volume access modes
@@ -272,10 +274,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Success threshold for readinessProbe
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
@@ -312,6 +319,18 @@ customScripts:
     # - |
     #   sleep 10
     #   rabbitmq-queues rebalance all
+  ## @param customScripts.preStop PreStop lifecycle hook configuration
+  preStop:
+    ## @param customScripts.preStop.enabled Enable preStop lifecycle hook
+    enabled: false
+    ## @param customScripts.preStop.command Command to execute in preStop hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 10
+    #   rabbitmqctl stop_app
   ## @param customScripts.initContainers Custom init containers to run before RabbitMQ starts
   initContainers: []
   # Example:

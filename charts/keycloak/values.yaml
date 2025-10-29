@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.4.0@sha256:5f3fb534cde6bf006d79f5912473e5d2c828c707cdfc52e16972803aca9d43dd"
+  tag: "26.4.2@sha256:3617b09bb4b7510a8d8d9b9fc5707399e2d70688dbcc2f8fb013a144829be1b9"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -170,14 +170,18 @@ tls:
 
 ## @section Database Configuration
 database:
-  ## @param database.type Database type (postgres, mysql, mariadb)
+  ## @param database.type Database type (postgres, mysql, mariadb, mssql)
   ## Note: H2 databases (h2-file, h2-mem) are not supported due to readonly filesystem restrictions
   ## Use embedded postgres or mariadb instead
   type: postgres
   ## @param database.host Database host (only used when not using embedded database)
   host: ""
-  ## @param database.port Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306)
+  ## @param database.port Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306, mssql=1443)
   port: ""
+  ## @param database.schema Database schema
+  schema: ""
+  ## @param database.urlProperties Additional database url properties
+  urlProperties: ""
   ## @param database.name Database name (only used when not using embedded database)
   name: keycloak
   ## @param database.username Database username (only used when not using embedded database)
@@ -391,10 +395,15 @@ serviceAccount:
   ## @param serviceAccount.automountServiceAccountToken whether to automount the SA token inside the pod
   automountServiceAccountToken: false
 
-## @param extraEnv Additional environment variables from key-value pairs
-extraEnv: {}
-# VARNAME1: value1
-# VARNAME2: value2
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraEnvVarsSecret Name of a secret containing additional environment variables
 extraEnvVarsSecret: ""

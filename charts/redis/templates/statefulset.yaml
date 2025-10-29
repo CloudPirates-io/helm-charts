@@ -40,10 +40,11 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+      {{- if eq .Values.architecture "replication" }}
       initContainers:
         - name: redis-init
           image: {{ include "redis.image" . | quote }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           command:
             - /bin/sh
@@ -65,22 +66,25 @@ spec:
               EOF
               fi
 
+              {{- if .Values.sentinel.enabled }}
               # Add Redis configurations for better Sentinel failover tolerance
               echo "" >> /tmp/redis.conf
               echo "# Configurations for Kubernetes force deletion tolerance" >> /tmp/redis.conf
               echo "min-slaves-to-write 0" >> /tmp/redis.conf
               echo "min-slaves-max-lag 0" >> /tmp/redis.conf
+              {{- end }}
 
               echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
 
+              {{- if .Values.sentinel.enabled }}
               # Try to determine current master from Sentinel (if any sentinel is available)
               CURRENT_MASTER=""
               SENTINEL_FOUND=false
 
               # Check if any sentinel is already running and knows the master
-              for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
+              for i in $(seq 0 $(({{ .Values.replicaCount }} - 1))); do
                 SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
-                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
@@ -149,6 +153,20 @@ spec:
               # Make slaves more eligible for promotion during force deletions
               echo "slave-priority 100" >> /tmp/redis.conf
               echo "replica-read-only yes" >> /tmp/redis.conf
+              {{- else }}
+              # Replication without Sentinel: pod-0 is always master, others are replicas
+              if [ "$POD_ORDINAL" != "0" ]; then
+                echo "Configuring as replica of pod-0 (master)"
+                MASTER_HOSTNAME="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
+                echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- end }}
+                echo "replica-read-only yes" >> /tmp/redis.conf
+              else
+                echo "Pod-0: Configuring as master"
+              fi
+              {{- end }}
           {{- if .Values.auth.enabled }}
           env:
             - name: REDIS_PASSWORD
@@ -173,7 +191,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+              {{- if eq .Values.architecture "replication" }}
               CONFIG_FILE="/tmp/redis.conf"
               {{- else }}
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
@@ -188,6 +206,10 @@ spec:
             - name: redis
               containerPort: 6379
               protocol: TCP
+            {{- range .Values.extraPorts }}
+            - containerPort: {{ .containerPort }}
+              name: {{ .name }}
+            {{- end }}
           {{- if or .Values.auth.enabled .Values.extraEnv }}
           env:
             {{- if .Values.auth.enabled }}
@@ -197,9 +219,8 @@ spec:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
@@ -268,24 +289,39 @@ spec:
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
           {{- end }}
-          {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+          {{- if or (and .Values.sentinel.enabled (eq .Values.architecture "replication")) .Values.customScripts.postStart.enabled .Values.customScripts.preStop.enabled }}
           lifecycle:
+            {{- if .Values.customScripts.postStart.enabled }}
+            postStart:
+              exec:
+                command:
+                  {{- toYaml .Values.customScripts.postStart.command | nindent 18 }}
+            {{- end }}
+            {{- if .Values.customScripts.preStop.enabled }}
+            preStop:
+              exec:
+                command:
+                  {{- toYaml .Values.customScripts.preStop.command | nindent 18 }}
+            {{- else if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
             preStop:
               exec:
                 command:
                   - /bin/bash
                   - /scripts/prestop.sh
+            {{- end }}
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
-            {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+            {{- if eq .Values.architecture "replication" }}
             - name: redis-config
               mountPath: /tmp
+            {{- if .Values.sentinel.enabled }}
             - name: prestop-script
               mountPath: /scripts
               readOnly: true
+            {{- end }}
             {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
@@ -333,7 +369,7 @@ spec:
               for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
                   SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless"
-                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
                     MASTER_HOST="$EXISTING_MASTER"
                     SENTINEL_FOUND_MASTER=true
@@ -347,7 +383,7 @@ spec:
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
                 echo "No Sentinels available, checking Redis instances directly..."
                 for i in $(seq 0 $(({{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }} - 1))); do
-                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+                  REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   ROLE_INFO=$(redis-cli -h "${REDIS_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$REDIS_HOST"
@@ -359,7 +395,7 @@ spec:
 
               # Final fallback: Use pod-0 hostname for initial bootstrap only
               if [ -z "$MASTER_HOST" ]; then
-                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local"
+                MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
@@ -395,6 +431,8 @@ spec:
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              {{- end }}
+              {{- if .Values.auth.sentinel }}
               requirepass "${REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
@@ -438,16 +476,16 @@ spec:
                 - /bin/sh
                 - -c
                 {{- if eq .Values.ipFamily "ipv6" }}
-                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
                 {{- else }}
-                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
                 {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
-          {{- if .Values.auth.enabled }}
+          {{- if or .Values.auth.enabled .Values.auth.sentinel }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -515,15 +553,17 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+        {{- if eq .Values.architecture "replication" }}
         - name: redis-config
           emptyDir: {}
+        {{- if .Values.sentinel.enabled }}
         - name: sentinel-config
           emptyDir: {}
         - name: prestop-script
           configMap:
             name: {{ include "redis.fullname" . }}-prestop-script
             defaultMode: 0755
+        {{- end }}
         {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config

@@ -62,12 +62,13 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Common Parameters
 
-| Parameter           | Description                                     | Default |
-| ------------------- | ----------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override memcached.fullname | `""`    |
-| `fullnameOverride`  | String to fully override memcached.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects           | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects      | `{}`    |
+| Parameter           | Description                                              | Default |
+| ------------------- | -------------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override memcached.fullname          | `""`    |
+| `fullnameOverride`  | String to fully override memcached.fullname              | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects               | `{}`    |
+| `podAnnotations`    | Annotations to add to the pods created by the deployment | `{}`    |
 
 ### Memcached Image Parameters
 
@@ -170,7 +171,7 @@ The following table lists the configurable parameters of the Memcached chart and
 
 | Parameter           | Description                                                                         | Default |
 | ------------------- | ----------------------------------------------------------------------------------- | ------- |
-| `extraEnv`          | A list of additional environment variables                                          | `[]`    |
+| `extraEnvVars`      | Additional environment variables to set                                             | `[]`    |
 | `extraVolumes`      | A list of additional existing volumes that will be mounted into the container       | `[]`    |
 | `extraVolumeMounts` | A list of additional existing volume mounts that will be mounted into the container | `[]`    |
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release             | `[]`    |

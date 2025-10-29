@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.8.2
+version: 0.10.2
 appVersion: "8.2.2"
 keywords:
   - redis
@@ -11,17 +11,38 @@ keywords:
   - in-memory
   - key-value
   - nosql
-home: https://www.cloudpirates.io
+home: https://www.redis.io
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
-annotations:
-  category: Database
-  license: Apache-2.0
+  - https://github.com/redis/redis
 maintainers:
   - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
     version: "2.x.x"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: Redis
+      url: https://redis.io
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - name: Application
+      url: https://github.com/redis/redis
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |2
+        - kind: changed
+          description: "Add support for extraPorts in Services and StatefulSet (#485)"
+          links:
+            - name: "Commit 1805522"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/1805522"

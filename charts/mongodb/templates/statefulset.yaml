@@ -6,8 +6,8 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
   {{- with (include "mongodb.annotations" .) }}
-  annotations:
-    {{- . | nindent 4 }}
+  annotations: 
+{{- . | indent 4 }}
   {{- end }}
 spec:
   serviceName: {{ include "mongodb.fullname" . }}
@@ -19,6 +19,16 @@ spec:
     metadata:
       labels:
         {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+      {{- if or (include "mongodb.annotations" .) .Values.podAnnotations }}
+      annotations: 
+{{- include "mongodb.annotations" . | indent 8 }}
+      {{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
+      {{- end }}
     spec:
 {{- with (include "mongodb.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -29,9 +39,14 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if or .Values.config.content .Values.config.existingConfigmap }}
+          {{- if .Values.image.command }}
+          command: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.image.args }}
+          args: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.args "context" $) | nindent 12 }}
+          {{- else if or .Values.config.content .Values.config.existingConfigmap }}
           args:
-            - "-f"
+            - "--config"
             - {{ include "mongodb.configFullName" . | quote }}
           {{- end }}
           ports:
@@ -53,7 +68,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}
@@ -66,7 +81,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}
@@ -79,7 +94,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
-                  name: {{ .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
                   name: {{ include "mongodb.fullname" . }}-custom-user-secret
                   {{- end }}
@@ -98,9 +113,8 @@ spec:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -132,8 +146,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+            {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
             - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d/
+            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: /etc/mongo
@@ -163,9 +179,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
-            {{- range .Values.metrics.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
+            {{- with .Values.metrics.extraEnvVars }}
+{{ toYaml . | indent 12}}
             {{- end }}
           {{- else }}
           env:
@@ -207,9 +222,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
         - name: init-scripts
           configMap:
             name: {{ include "mongodb.fullname" . }}-init-scripts
+        {{- end }}
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
         - name: config
           configMap:

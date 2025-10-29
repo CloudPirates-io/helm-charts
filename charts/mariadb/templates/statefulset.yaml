@@ -35,13 +35,13 @@ spec:
 {{- with (include "mariadb.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
 {{- end }}
-      securityContext: {{ include "common.renderPodSecurityContext" . | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.galera.enabled }}
       initContainers:
         - name: galera-config-init
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - /bin/bash
             - -c
@@ -63,14 +63,14 @@ spec:
         - name: mariadb
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          securityContext: {{ include "common.renderContainerSecurityContext" . | nindent 12 }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           {{- if .Values.galera.enabled }}
           command: 
             - /bin/bash
             - -c
             - source /usr/local/bin/galera-entrypoint.sh
           {{- end }}
-          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.env .Values.galera.enabled }}
+          {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.extraEnvVars .Values.galera.enabled }}
           env:
             {{- if and .Values.auth.enabled }}
             - name: MARIADB_ROOT_PASSWORD
@@ -121,7 +121,7 @@ spec:
             - name: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP
               value: {{ .Values.galera.forceSafeToBootstrap | quote }}
             {{- end }}
-            {{- with .Values.env }}
+            {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
@@ -219,6 +219,18 @@ spec:
             {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
             - name: run
               mountPath: /var/run/mysqld/
+            {{- end }}
+            {{- range $secret := .Values.extraSecrets }}
+            - name: {{ $secret.name }}
+              mountPath: {{ $secret.mountPath }}
+            {{- end }}
+            {{- range $config := .Values.extraConfigs }}
+            - name: {{ $config.name }}
+              mountPath: {{ $config.mountPath }}
+            {{- end }}
+            {{- range $storage := .Values.extraVolumes }}
+            - name: {{ $storage.name }}
+              mountPath: {{ $storage.mountPath }}
             {{- end }}
       volumes:
         - name: tmp-volume
