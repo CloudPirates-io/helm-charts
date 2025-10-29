@@ -515,7 +515,7 @@ spec:
             {{- end }}
           args:
             {{- if .Values.auth.enabled }}
-            - --redis.password=$(REDIS_PASSWORD)
+            - --redis.password=${REDIS_PASSWORD}
             {{- end }}
             {{- if .Values.metrics.extraArgs }}
             {{- range .Values.metrics.extraArgs }}
