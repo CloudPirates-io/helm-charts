@@ -42,7 +42,7 @@ auth:
 ## @section RustFS configuration
 config:
   ## @param config.volumes RustFS storage volumes configuration TODO (Not implemented yet in this chart)
-  #volumes: "/data/rustfs{0...3}"
+  #  volumes: "/data/rustfs{0...3}"
   volumes: "/data"
   ## @param config.address RustFS server address
   address: "0.0.0.0:9000"
