@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.11.0 (2025-10-29)
+
+* [redis] Add master service for non-sentinel replication mode ([#492](https://github.com/CloudPirates-io/helm-charts/pull/492))
 
 ## 0.10.2 (2025-10-28)
 

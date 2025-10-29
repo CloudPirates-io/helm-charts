@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.10.2
+version: 0.11.0
 appVersion: "8.2.2"
 keywords:
   - redis
@@ -41,8 +41,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: changed
-          description: "Add support for extraPorts in Services and StatefulSet (#485)"
+        - kind: added
+          description: "[redis] Add master service for non-sentinel replication mode"
           links:
-            - name: "Commit 1805522"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/1805522"
+            - name: "PR #492"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/492"
