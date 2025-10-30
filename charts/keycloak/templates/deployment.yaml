@@ -255,6 +255,10 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
+            - name: keycloak-themes
+              mountPath: /opt/keycloak/themes
+            - name: keycloak-providers
+              mountPath: /opt/keycloak/providers
             {{- if .Values.realm.configFile }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
@@ -292,6 +296,10 @@ spec:
         - name: keycloak-work
           emptyDir: {}
         - name: keycloak-lib-quarkus
+          emptyDir: {}
+        - name: keycloak-themes
+          emptyDir: {}
+        - name: keycloak-providers
           emptyDir: {}
         {{- if .Values.realm.configFile }}
         - name: realm-config
