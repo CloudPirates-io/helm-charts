@@ -210,7 +210,7 @@ spec:
             - containerPort: {{ .containerPort }}
               name: {{ .name }}
             {{- end }}
-          {{- if or .Values.auth.enabled .Values.extraEnv }}
+          {{- if or .Values.auth.enabled .Values.extraEnvVars }}
           env:
             {{- if .Values.auth.enabled }}
             - name: REDIS_PASSWORD

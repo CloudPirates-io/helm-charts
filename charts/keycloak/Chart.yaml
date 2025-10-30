@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.7.1
+version: 0.8.0
 appVersion: "26.4.2"
 keywords:
   - keycloak
@@ -52,7 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "fix: use metrics service targetPort configuration (#493)"
+          description: "Provide empty mounts for themes and providers (#504)"
           links:
-            - name: "Commit bd3cc53"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/bd3cc53"
+            - name: "Commit 4d2f107"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/4d2f107"
