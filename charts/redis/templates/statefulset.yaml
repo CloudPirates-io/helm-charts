@@ -165,6 +165,9 @@ spec:
               echo "cluster-node-timeout 5000" >> /tmp/redis.conf
               echo "cluster-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
               echo "databases 1" >> /tmp/redis.conf
+              {{- if .Values.auth.enabled }}
+              echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+              {{- end }}
               echo "" >> /tmp/redis.conf
               echo "# Increased durability" >> /tmp/redis.conf
               echo "appendonly yes" >> /tmp/redis.conf
