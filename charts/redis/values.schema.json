@@ -31,6 +31,9 @@
         "clusterDomain": {
             "type": "string"
         },
+        "clusterReplicaCount": {
+            "type": "integer"
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -570,6 +573,9 @@
             "properties": {
                 "annotations": {
                     "type": "object"
+                },
+                "clusterPort": {
+                    "type": "integer"
                 },
                 "port": {
                     "type": "integer"

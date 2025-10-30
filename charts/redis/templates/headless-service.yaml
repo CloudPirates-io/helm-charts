@@ -28,5 +28,11 @@ spec:
       protocol: TCP
       name: sentinel
     {{- end }}
+    {{- if eq .Values.architecture "cluster" }}
+    - port: {{ .Values.service.clusterPort }}
+      targetPort: cluster
+      protocol: TCP
+      name: cluster
+    {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}

@@ -34,13 +34,22 @@ image:
 ## @param architecture Redis architecture. Allowed values: standalone, replication
 ## - standalone: Single Redis instance
 ## - replication: Master-replica setup (use sentinel.enabled to enable/disable Sentinel)
+## - cluster: Multi-master setup with optional replicas
 architecture: standalone
 
-## @param replicaCount Number of Redis instances to deploy (only when architecture=replication)
-## When using Sentinel, this is the total number of Redis instances (including the initial master)
-## Without Sentinel, pod-0 is always the master and other pods are replicas
-## For example: replicaCount: 3 creates 1 master + 2 replicas
+## @param replicaCount Number of Redis instances to deploy (only when architecture=(replication|cluster))
+## When using architecture=replication:
+##   with Sentinel, this is the total number of Redis instances (including the initial master)
+##   without Sentinel, pod-0 is always the master and other pods are replicas
+##   For example: replicaCount: 3 creates 1 master + 2 replicas
+## When using architecture=cluster:
+##   this is total number of nodes, including replicas
+##   Value should be a multiple of (clusterReplicaCount + 1) and not less than 3
 replicaCount: 3
+
+## @param clusterReplicaCount Number of replicas for each master node when architecture=cluster.
+## For example: replicaCount: 6 and clusterReplicaCount: 1 creates 3 masters + 3 replicas (1 per master)
+clusterReplicaCount: 0
 
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
@@ -61,6 +70,8 @@ service:
   type: ClusterIP
   ## @param service.port Redis service port
   port: 6379
+  ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
+  clusterPort: 16379
 
 auth:
   ## @param auth.enabled Enable Redis authentication
@@ -79,6 +90,7 @@ config:
   ## @param config.mountPath Redis configuration options
   mountPath: /usr/local/etc/redis
   ## @param config.content Include your custom Redis configurations here as string
+  ## If no config is provided, minimal config will be created on the fly
   content: |
     # Redis configuration
     bind * -::*

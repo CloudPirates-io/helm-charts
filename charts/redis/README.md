@@ -89,16 +89,17 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ### Common Parameters
 
-| Parameter           | Description                                                                                                                             | Default         |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `nameOverride`      | String to partially override redis.fullname                                                                                             | `""`            |
-| `fullnameOverride`  | String to fully override redis.fullname                                                                                                 | `""`            |
-| `namespaceOverride` | String to override the namespace for all resources                                                                                      | `""`            |
-| `clusterDomain`     | Kubernetes cluster domain                                                                                                               | `cluster.local` |
-| `commonLabels`      | Labels to add to all deployed objects                                                                                                   | `{}`            |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                                                              | `{}`            |
-| `architecture`      | Redis architecture. `standalone`: Single instance, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover) | `standalone`    |
-| `replicaCount`      | Number of Redis instances (when `architecture=replication`). With Sentinel: total instances. Without: 1 master + (n-1) replicas         | `3`             |
+| Parameter             | Description                                                                                                                                                                             | Default         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `nameOverride`        | String to partially override redis.fullname                                                                                                                                             | `""`            |
+| `fullnameOverride`    | String to fully override redis.fullname                                                                                                                                                 | `""`            |
+| `namespaceOverride`   | String to override the namespace for all resources                                                                                                                                      | `""`            |
+| `clusterDomain`       | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
+| `commonLabels`        | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
+| `commonAnnotations`   | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
+| `architecture`        | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
+| `replicaCount`        | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
+| `clusterReplicaCount` | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
 
 ### Pod labels and annotations
 
@@ -115,6 +116,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `service.annotations` | Kubernetes service annotations | `{}`        |
 | `service.type`        | Kubernetes service type        | `ClusterIP` |
 | `service.port`        | Redis service port             | `6379`      |
+| `service.clusterPort` | Redis cluster service port     | `16379`     |
 
 ### Authentication
 
@@ -190,7 +192,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 | Parameter                                          | Description                                                                    | Default    |
 | -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
-| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the Statefulset                  | `false`    |
+| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the StatefulSet                  | `false`    |
 | `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
 | `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
 
@@ -410,6 +412,27 @@ After deployment, you'll have:
 - Simpler setup with fewer components
 - Lower resource usage (no Sentinel containers)
 
+
+### Cluster mode
+
+Deploy Redis Cluster with 6 nodes - 3 master and 3 replicas for automated failover:
+
+```yaml
+# values-cluster.yaml
+architecture: cluster
+replicaCount: 6
+clusterReplicaCount: 1
+```
+
+```bash
+helm install my-redis ./charts/redis -f values-cluster.yaml
+```
+
+**Key differences with replication**
+
+- Redis Cluster supports single database only
+- Data is automatically divided across multiple nodes for improved performance
+- With cluster-aware client, user can connect to any node (directly or via service) and requests will be automatically redirected, based on MOVED response
 
 ## Upgrading
 

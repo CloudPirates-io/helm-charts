@@ -64,6 +64,17 @@ spec:
             matchLabels:
               {{- include "redis.sentinel.selectorLabels" . | nindent 14 }}
     {{- end }}
+    {{- if eq .Values.architecture "cluster" -}}
+    - ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+        - port: {{ .Values.service.clusterPort }}
+          protocol: TCP
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "redis.selectorLabels" . | nindent 14 }}
+    {{- end }}
     {{- if .Values.metrics.enabled }}
     # Allow metrics scraping
     - ports:
@@ -122,6 +133,17 @@ spec:
         - podSelector:
             matchLabels:
               {{- include "redis.sentinel.selectorLabels" . | nindent 14 }}
+    {{- end }}
+    {{- if eq .Values.architecture "cluster" -}}
+    - ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+        - port: {{ .Values.service.clusterPort }}
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              {{- include "redis.selectorLabels" . | nindent 14 }}
     {{- end }}
     {{- with .Values.networkPolicy.extraEgress }}
     {{- toYaml . | nindent 4 }}
