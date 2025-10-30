@@ -174,3 +174,69 @@ extraVolumeMounts: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+
+## @section Metrics parameters
+## Prometheus metrics configuration
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose Memcached metrics
+  enabled: false
+  ## @param metrics.image.registry Memcached exporter image registry
+  ## @param metrics.image.repository Memcached exporter image repository
+  ## @param metrics.image.tag Memcached exporter image tag
+  ## @param metrics.image.pullPolicy Memcached exporter image pull policy
+  image:
+    registry: docker.io
+    repository: prom/memcached-exporter
+    tag: "v0.15.4@sha256:b6763ecb3c47f2408e0398518851b7f8c5fc46232b2649f8c78a321130c54266"
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources:
+    limits:
+      memory: 64Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  ## @param metrics.extraArgs Extra arguments for Memcached exporter, for example:
+  ## extraArgs:
+  ##   - --log.level=debug
+  ##   - --log.format=json
+  extraArgs: []
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.type Metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Metrics service port
+    port: 9150
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.loadBalancerIP Load balancer IP if metrics service type is `LoadBalancer`
+    loadBalancerIP: ""
+    ## @param metrics.service.loadBalancerSourceRanges Addresses that are allowed when metrics service is LoadBalancer
+    loadBalancerSourceRanges: []
+    ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
+    clusterIP: ""
+    ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
+    nodePort: ""
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
