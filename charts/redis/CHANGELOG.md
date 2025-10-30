@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.11.2 (2025-10-30)
+
+* fix: extraEnvVars parameter in statefulset template (#503) ([b681b99](https://github.com/CloudPirates-io/helm-charts/commit/b681b99))
+* chore: update CHANGELOG.md for merged changes ([434f326](https://github.com/CloudPirates-io/helm-charts/commit/434f326))
+* chore: update CHANGELOG.md for merged changes ([d3545cc](https://github.com/CloudPirates-io/helm-charts/commit/d3545cc))
+
+## 0.11.1 (2025-10-29)
+
+* fix: metrics sidecar variable expansion (#499) ([af02f4a](https://github.com/CloudPirates-io/helm-charts/commit/af02f4a))
+* chore: update CHANGELOG.md for merged changes ([aec72a0](https://github.com/CloudPirates-io/helm-charts/commit/aec72a0))
+* chore: update CHANGELOG.md for merged changes ([5a8f954](https://github.com/CloudPirates-io/helm-charts/commit/5a8f954))
+
 ## 0.11.0 (2025-10-29)
 
 * Add master service for non-sentinel replication mode (#492) ([cafeccd](https://github.com/CloudPirates-io/helm-charts/commit/cafeccd))
