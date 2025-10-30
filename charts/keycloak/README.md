@@ -528,6 +528,53 @@ realm:
     }
 ```
 
+### Using Custom Themes and Providers
+
+The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
+
+**Example: Adding custom themes and providers with an initContainer**
+
+```yaml
+# values-custom-themes.yaml
+extraInitContainers:
+  - name: add-custom-themes
+    image: your-registry/keycloak-themes:latest
+    imagePullPolicy: Always
+    command:
+      - sh
+      - -c
+      - |
+        cp -r /themes/* /opt/keycloak/themes/
+        cp -r /providers/* /opt/keycloak/providers/
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
+      - name: keycloak-providers
+        mountPath: /opt/keycloak/providers
+```
+
+In this example:
+- Create a Docker image containing your custom themes in `/themes` and providers in `/providers`
+- The initContainer copies these files to the mounted volumes
+- Keycloak will automatically detect and use them on startup
+
+You can also use this approach to download themes/providers from external sources:
+
+```yaml
+extraInitContainers:
+  - name: download-themes
+    image: curlimages/curl:latest
+    command:
+      - sh
+      - -c
+      - |
+        curl -L -o /tmp/theme.zip https://example.com/theme.zip
+        unzip /tmp/theme.zip -d /opt/keycloak/themes/
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
+```
+
 ### Using Custom TLS Certificates
 
 #### Option 1: Using cert-manager (Recommended)
