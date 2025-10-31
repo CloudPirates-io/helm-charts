@@ -40,21 +40,6 @@ tests:
   - it: should have a service for metrics when enabled
     set:
       metrics.enabled: true
-#    documentIndex: 1
-#      metrics.image.repository: prefix/prom/memcached-exporter
-#      metrics.image.tag: 1.6.31@sha256:testdigest123
-#      metrics.image.pullPolicy: IfNotPresent
-#      metrics.resources:
-#        limits:
-#          cpu: 150m
-#          memory: 128Mi
-#        requests:
-#          cpu: 25m
-#          memory: 32Mi
-#      metrics.extraArgs:
-#        - --log.level=debug
-#        - --log.format=json
-#      metrics.service.port: 9151
     asserts:
       - isKind:
           of: Service

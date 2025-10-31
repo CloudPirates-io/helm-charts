@@ -214,8 +214,6 @@ metrics:
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
     enabled: false
-    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
-    namespace: ""
     ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
     interval: 30s
     ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
