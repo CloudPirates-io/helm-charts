@@ -1,0 +1,24 @@
+{{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valkey.fullname" . }}-sentinel
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "valkey.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sentinel
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.sentinel.service.type }}
+  ports:
+    - port: {{ .Values.sentinel.service.port }}
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+  selector:
+    {{- include "valkey.selectorLabels" . | nindent 4 }}
+{{- end }}

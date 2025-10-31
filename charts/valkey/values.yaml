@@ -5,6 +5,9 @@ global:
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
 
+## @param clusterDomain Kubernetes cluster domain
+clusterDomain: cluster.local
+
 ## @section Common parameters
 ## @param nameOverride String to partially override valkey.fullname
 nameOverride: ""
@@ -26,9 +29,24 @@ image:
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
-## @section StatefulSet configuration
-## @param replicaCount Number of Valkey replicas to deploy
-replicaCount: 1
+## @section Valkey Architecture
+## @param architecture Valkey architecture. Allowed values: standalone, replication
+## - standalone: Single Valkey instance
+## - replication: Master-replica setup (use sentinel.enabled to enable/disable Sentinel)
+architecture: standalone
+
+## @param replicaCount Number of Valkey instances to deploy (only when architecture=replication)
+## When using architecture=replication:
+##   with Sentinel, this is the total number of Valkey instances (including the initial master)
+##   without Sentinel, pod-0 is always the master and other pods are replicas
+##   For example: replicaCount: 3 creates 1 master + 2 replicas
+replicaCount: 3
+
+## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
+## auto: Uses the first IP returned by hostname -i (default)
+## ipv4: Forces IPv4 address selection
+## ipv6: Forces IPv6 address selection
+ipFamily: auto
 
 ## @section Pod annotations and labels
 ## @param podAnnotations Map of annotations to add to the pods
@@ -268,3 +286,56 @@ metrics:
     metricRelabelings: []
     ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
     namespaceSelector: {}
+
+## @section Valkey Sentinel configuration
+## This section configures Valkey Sentinel for high availability in replication mode
+## When enabled, Valkey instances use dynamic master/replica role assignment managed by Sentinel
+## When disabled with replication architecture, pod-0 is always the master and other pods are replicas
+sentinel:
+  ## @param sentinel.enabled Enable Valkey Sentinel for high availability
+  ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
+  ## When disabled, pod-0 is the master and can be accessed via the -master service
+  enabled: false
+  image:
+    ## @param sentinel.image.repository Valkey Sentinel image repository
+    repository: valkey/valkey
+    ## @param sentinel.image.tag Valkey Sentinel image tag
+    tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+    ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
+    pullPolicy: Always
+  ## @param sentinel.masterName Name of the master server (default: mymaster)
+  masterName: mymaster
+  ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
+  quorum: 2
+  ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
+  downAfterMilliseconds: 1500
+  ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
+  failoverTimeout: 15000
+  ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover
+  parallelSyncs: 1
+  ## @param sentinel.port Sentinel port
+  port: 26379
+  ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
+  extraVolumeMounts: []
+  service:
+    ## @param sentinel.service.type Kubernetes service type for Sentinel
+    type: ClusterIP
+    ## @param sentinel.service.port Sentinel service port
+    port: 26379
+  ## @param sentinel.resources Resource limits and requests for Sentinel pods
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+## @param resources Resource limits and requests for Valkey init container pod
+initContainer:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
