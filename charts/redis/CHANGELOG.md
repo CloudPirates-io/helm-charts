@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.13.0 (2025-10-31)
+
+* Implement startup probe ([579459a](https://github.com/CloudPirates-io/helm-charts/commit/579459a))
+* chore: update CHANGELOG.md for merged changes ([0acfe5d](https://github.com/CloudPirates-io/helm-charts/commit/0acfe5d))
+* chore: update CHANGELOG.md for merged changes ([91ce68f](https://github.com/CloudPirates-io/helm-charts/commit/91ce68f))
+
 ## 0.12.1 (2025-10-31)
 
 * Fix probes commands (#511) ([0ac529f](https://github.com/CloudPirates-io/helm-charts/commit/0ac529f))
