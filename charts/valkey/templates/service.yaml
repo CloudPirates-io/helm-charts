@@ -40,5 +40,11 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: valkey
+    {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+    - port: {{ .Values.sentinel.port }}
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+    {{- end }}
   selector:
     {{- include "valkey.selectorLabels" . | nindent 4 }}
