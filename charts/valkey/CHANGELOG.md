@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.9.0 (2025-10-31)
+
+* [valkey]: Valkey HA (#518) ([d8b1bbe](https://github.com/CloudPirates-io/helm-charts/commit/d8b1bbe))
+* chore: update CHANGELOG.md for merged changes ([6fd22a6](https://github.com/CloudPirates-io/helm-charts/commit/6fd22a6))
+* chore: update CHANGELOG.md for merged changes ([3eb08ee](https://github.com/CloudPirates-io/helm-charts/commit/3eb08ee))
+* chore: auto-generate values.schema.json (#481) ([d37c7ed](https://github.com/CloudPirates-io/helm-charts/commit/d37c7ed))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
 ## 0.8.0 (2025-10-28)
 
 * chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))

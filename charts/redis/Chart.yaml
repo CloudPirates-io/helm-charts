@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.12.1
+version: 0.13.0
 appVersion: "8.2.2"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Fix probes commands (#511)"
+          description: "Implement startup probe"
           links:
-            - name: "Commit 0ac529f"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/0ac529f"
+            - name: "Commit 579459a"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/579459a"
