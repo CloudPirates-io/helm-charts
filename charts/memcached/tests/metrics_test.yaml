@@ -14,7 +14,7 @@ tests:
           path: spec.template.spec.containers[1].imagePullPolicy
           value: Always
       - equal:
-          path: spec.template.spec.containers[1].command
+          path: spec.template.spec.containers[1].args
           value:
             - --memcached.address=localhost:11211
             - --web.listen-address=:9150
@@ -76,7 +76,7 @@ tests:
               cpu: 25m
               memory: 32Mi
       - equal:
-          path: spec.template.spec.containers[1].command
+          path: spec.template.spec.containers[1].args
           value:
             - --memcached.address=localhost:11211
             - --web.listen-address=:9151

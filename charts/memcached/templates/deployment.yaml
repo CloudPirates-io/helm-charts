@@ -86,7 +86,7 @@ spec:
         - name: metrics
           image: {{ include "memcached.metrics.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
-          command:
+          args:
             - "--memcached.address=localhost:{{ .Values.service.port }}"
             - "--web.listen-address=:{{ .Values.metrics.service.port }}"
             {{- range .Values.metrics.extraArgs }}
