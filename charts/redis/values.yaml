@@ -209,6 +209,20 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
+startupProbe:
+  ## @param startupProbe.enabled Enable startup probe
+  enabled: false
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param startupProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Number of failures before pod is restarted (30 * 10s = 5 minutes)
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
   # - name: CUSTOM_VAR
