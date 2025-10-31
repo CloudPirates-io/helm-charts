@@ -66,7 +66,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: {{ .Values.auth.secretKeys.passwordKey }}
+                  key: {{ .Values.auth.secretKeys.passwordKey | quote }}
             {{- if .Values.config.postgresqlMaxConnections }}
             - name: POSTGRES_MAX_CONNECTIONS
               value: {{ .Values.config.postgresqlMaxConnections | quote }}
