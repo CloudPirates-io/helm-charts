@@ -27,7 +27,9 @@
     {
       "customType": "regex",
       "description": "Match etcd image and use GitHub releases",
-      "fileMatch": ["^charts/etcd/values\\.ya?ml$"],
+      "managerFilePatterns": [
+        "/^charts/etcd/values\\.ya?ml$/"
+      ],
       "matchStrings": [
         "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*coreos/etcd\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
