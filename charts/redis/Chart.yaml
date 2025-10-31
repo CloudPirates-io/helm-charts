@@ -41,5 +41,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "Add startupProbe support for Redis pods to handle long DB SYNC during initial startup"
+        - kind: changed
+          description: "Implement startup probe"
+          links:
+            - name: "Commit 579459a"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/579459a"
