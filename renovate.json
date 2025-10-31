@@ -14,6 +14,7 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Match Docker images in all charts",
       "managerFilePatterns": [
         "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
@@ -23,9 +24,33 @@
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Match etcd image and use GitHub releases",
+      "managerFilePatterns": [
+        "/^charts/etcd/values\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*coreos/etcd\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+      ],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "etcd-io/etcd",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ],
   "packageRules": [
+    {
+      "description": "Disable Docker datasource for etcd packages (use GitHub releases instead)",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "coreos/etcd",
+        "quay.io/coreos/etcd"
+      ],
+      "enabled": false
+    },
     {
       "matchManagers": [
         "custom.regex"
@@ -75,6 +100,23 @@
       ],
       "enabled": false,
       "recreateWhen": "never"
+    },
+    {
+      "description": "Configure etcd updates from GitHub releases",
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "etcd-io/etcd"
+      ],
+      "pinDigests": false,
+      "labels": [
+        "dependencies",
+        "renovate"
+      ],
+      "commitMessagePrefix": "[etcd]",
+      "automerge": false,
+      "separateMinorPatch": true
     }
   ]
 }
