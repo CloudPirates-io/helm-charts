@@ -224,8 +224,8 @@ metrics:
     metricRelabelings: []
     ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
     honorLabels: false
-    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
-    selector: {}
+    ## @param metrics.serviceMonitor.labels Additional service monitor labels
+    labels: {}
     ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
     annotations: {}
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor

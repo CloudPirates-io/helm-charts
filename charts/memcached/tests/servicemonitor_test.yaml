@@ -52,7 +52,7 @@ tests:
         metricRelabelings:
           - targetLabel: something
         honorLabels: true
-        selector:
+        labels:
           kubernetes.io/test-1: "true"
           kubernetes.io/test-2: "true"
         annotations:
