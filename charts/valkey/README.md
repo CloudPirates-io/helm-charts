@@ -86,13 +86,16 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 ### Deployment configuration
 
-| Parameter           | Description                                  | Default |
-| ------------------- | -------------------------------------------- | ------- |
-| `replicaCount`      | Number of Valkey replicas to deploy          | `1`     |
-| `nameOverride`      | String to partially override valkey.fullname | `""`    |
-| `fullnameOverride`  | String to fully override valkey.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects        | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects   | `{}`    |
+| Parameter           | Description                                                                                    | Default        |
+| ------------------- | ---------------------------------------------------------------------------------------------- | -------------- |
+| `architecture`      | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`   |
+| `replicaCount`      | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`            |
+| `ipFamily`          | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`         |
+| `clusterDomain`     | Kubernetes cluster domain                                                                      | `cluster.local`|
+| `nameOverride`      | String to partially override valkey.fullname                                                   | `""`           |
+| `fullnameOverride`  | String to fully override valkey.fullname                                                       | `""`           |
+| `commonLabels`      | Labels to add to all deployed objects                                                          | `{}`           |
+| `commonAnnotations` | Annotations to add to all deployed objects                                                     | `{}`           |
 
 ### Pod annotations and labels
 
@@ -234,6 +237,39 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `metrics.serviceMonitor.metricRelabelings` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion   | `[]`                       |
 | `metrics.serviceMonitor.namespaceSelector` | ServiceMonitor namespace selector                                               | `{}`                       |
 
+### Valkey Sentinel Configuration
+
+Sentinel provides high availability for Valkey replication. When enabled, Sentinel monitors the master and automatically promotes a replica to master if the master fails.
+
+| Parameter                           | Description                                                                             | Default                                                                                      |
+| ----------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `sentinel.enabled`                  | Enable Valkey Sentinel for high availability                                            | `false`                                                                                      |
+| `sentinel.image.repository`         | Valkey Sentinel image repository                                                        | `valkey/valkey`                                                                              |
+| `sentinel.image.tag`                | Valkey Sentinel image tag                                                               | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `sentinel.image.pullPolicy`         | Valkey Sentinel image pull policy                                                       | `Always`                                                                                     |
+| `sentinel.masterName`               | Name of the master server                                                               | `mymaster`                                                                                   |
+| `sentinel.quorum`                   | Number of Sentinels that need to agree about the fact the master is not reachable       | `2`                                                                                          |
+| `sentinel.downAfterMilliseconds`    | Time in milliseconds after the master is declared down                                  | `1500`                                                                                       |
+| `sentinel.failoverTimeout`          | Timeout for failover in milliseconds                                                    | `15000`                                                                                      |
+| `sentinel.parallelSyncs`            | Number of replicas that can be reconfigured to use the new master during a failover     | `1`                                                                                          |
+| `sentinel.port`                     | Sentinel port                                                                           | `26379`                                                                                      |
+| `sentinel.extraVolumeMounts`        | Additional volume mounts to add to the Sentinel container                               | `[]`                                                                                         |
+| `sentinel.service.type`             | Kubernetes service type for Sentinel                                                    | `ClusterIP`                                                                                  |
+| `sentinel.service.port`             | Sentinel service port                                                                   | `26379`                                                                                      |
+| `sentinel.resources.limits.memory`  | Memory limit for Sentinel container                                                     | `128Mi`                                                                                      |
+| `sentinel.resources.limits.cpu`     | CPU limit for Sentinel container                                                        | Not set                                                                                      |
+| `sentinel.resources.requests.cpu`   | CPU request for Sentinel container                                                      | `25m`                                                                                        |
+| `sentinel.resources.requests.memory`| Memory request for Sentinel container                                                   | `64Mi`                                                                                       |
+
+### Init Container Configuration
+
+| Parameter                             | Description                                 | Default  |
+| ------------------------------------- | ------------------------------------------- | -------- |
+| `initContainer.resources.limits.cpu`    | CPU limit for init container              | `50m`    |
+| `initContainer.resources.limits.memory` | Memory limit for init container           | `128Mi`  |
+| `initContainer.resources.requests.cpu`  | CPU request for init container            | `25m`    |
+| `initContainer.resources.requests.memory`| Memory request for init container        | `64Mi`   |
+
 ### Additional Configuration
 
 | Parameter      | Description                                                             | Default |
@@ -334,10 +370,105 @@ Deploy with production values:
 helm install my-valkey ./charts/valkey -f values-production.yaml
 ```
 
-### High Availability Configuration
+### High Availability Configuration with Sentinel
+
+Deploy Valkey with Sentinel for automatic failover:
 
 ```yaml
-# values-ha.yaml
+# values-ha-sentinel.yaml
+# Enable replication architecture
+architecture: replication
+
+# Deploy 3 Valkey instances (1 master + 2 replicas)
+replicaCount: 3
+
+# Enable Sentinel for automatic failover
+sentinel:
+  enabled: true
+  masterName: mymaster
+  quorum: 2
+  downAfterMilliseconds: 1500
+  failoverTimeout: 15000
+  parallelSyncs: 1
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+# Enable authentication
+auth:
+  enabled: true
+  password: "your-secure-password"
+
+# Configure persistence
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "fast-ssd"
+
+# Resource allocation for Valkey
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Init container resources
+initContainer:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+# Spread pods across nodes for better availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - valkey
+          topologyKey: kubernetes.io/hostname
+```
+
+Deploy with Sentinel HA:
+
+```bash
+helm install my-valkey ./charts/valkey -f values-ha-sentinel.yaml
+```
+
+**Connecting to Sentinel-enabled Valkey:**
+
+When Sentinel is enabled, your application should use a Sentinel-aware client to automatically discover the current master. The Sentinel service provides endpoints for querying the master:
+
+```bash
+# Get the current master from Sentinel
+kubectl run -it --rm valkey-client --image=valkey/valkey:9.0.0-alpine3.22 --restart=Never -- sh
+valkey-cli -h my-valkey-sentinel -p 26379 SENTINEL get-master-addr-by-name mymaster
+```
+
+Connection URLs for Sentinel-aware clients:
+- Sentinel endpoints: `my-valkey-sentinel:26379`
+- Master name: `mymaster` (or your configured `sentinel.masterName`)
+
+### High Availability Configuration without Sentinel
+
+Deploy multiple replicas without Sentinel (pod-0 is always master):
+
+```yaml
+# values-ha-replication.yaml
+architecture: replication
 replicaCount: 3
 
 affinity:
@@ -420,19 +551,52 @@ curl http://localhost:9121/metrics
 
 ## Access Valkey
 
-### Via kubectl port-forward
+### Standalone or Replication (without Sentinel)
+
+#### Via kubectl port-forward
 
 ```bash
 kubectl port-forward service/my-valkey 6379:6379
 ```
 
-### Connect using valkey-cli
+#### Connect using valkey-cli
 
 ```bash
 # Without authentication
 valkey-cli -h localhost -p 6379
 
 # With authentication
+valkey-cli -h localhost -p 6379 -a your-password
+```
+
+### With Sentinel Enabled
+
+When Sentinel is enabled, three services are created:
+
+1. **my-valkey-sentinel** (port 26379): Sentinel service for querying master/replica information
+2. **my-valkey-master** (port 6379): Points to the current master (headless service)
+3. **my-valkey** (port 6379): Headless service for all Valkey instances
+
+#### Connect to Sentinel
+
+```bash
+# Port-forward to Sentinel
+kubectl port-forward service/my-valkey-sentinel 26379:26379
+
+# Query master information
+valkey-cli -h localhost -p 26379 SENTINEL get-master-addr-by-name mymaster
+
+# List all replicas
+valkey-cli -h localhost -p 26379 SENTINEL replicas mymaster
+```
+
+#### Connect to current master
+
+```bash
+# Port-forward to master service
+kubectl port-forward service/my-valkey-master 6379:6379
+
+# Connect with valkey-cli
 valkey-cli -h localhost -p 6379 -a your-password
 ```
 
@@ -471,6 +635,13 @@ kubectl get secret my-valkey -o jsonpath="{.data.password}" | base64 --decode
    - Check configured maxMemory limit
    - Monitor memory usage with `valkey-cli info memory`
    - Adjust memory eviction policy if needed
+
+5. **Sentinel failover issues**
+   - Ensure `sentinel.quorum` is properly configured (typically `floor(replicas/2) + 1`)
+   - Check Sentinel logs: `kubectl logs <pod-name> -c sentinel`
+   - Verify all Sentinels can communicate with each other
+   - Check if Sentinel can reach all Valkey instances
+   - Review Sentinel configuration: `valkey-cli -h <sentinel-service> -p 26379 SENTINEL master mymaster`
 
 ### Getting Support
 
