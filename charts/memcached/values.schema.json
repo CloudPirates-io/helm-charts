@@ -193,9 +193,6 @@
                         "limits": {
                             "type": "object",
                             "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -243,6 +240,9 @@
                         "interval": {
                             "type": "string"
                         },
+                        "labels": {
+                            "type": "object"
+                        },
                         "metricRelabelings": {
                             "type": "array"
                         },
@@ -254,9 +254,6 @@
                         },
                         "scrapeTimeout": {
                             "type": "string"
-                        },
-                        "labels": {
-                            "type": "object"
                         }
                     }
                 }
