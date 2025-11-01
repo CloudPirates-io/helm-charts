@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.5.0 (2025-11-02)
+
+* Add metrics support (#512) ([5ea2397](https://github.com/CloudPirates-io/helm-charts/commit/5ea2397))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
 ## 0.4.0 (2025-10-28)
 
 * chore: auto-generate values.schema.json for updated charts (#455) ([aec6840](https://github.com/CloudPirates-io/helm-charts/commit/aec6840))

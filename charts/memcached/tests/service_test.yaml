@@ -1,0 +1,102 @@
+suite: test Memcached services
+templates:
+  - service.yaml
+release:
+  name: release-name
+
+tests:
+  - it: should be a Service
+    asserts:
+      - isKind:
+          of: Service
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: release-name-memcached
+
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 11211
+
+  - it: should respect config change
+    set:
+      service:
+        type: NodePort
+        port: 11222
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - equal:
+          path: spec.ports[0].port
+          value: 11222
+
+  - it: should have a service for metrics when enabled
+    set:
+      metrics.enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: release-name-memcached-metrics
+        documentIndex: 1
+
+  - it: should use default metrics values when nothing is overridden
+    set:
+      metrics.enabled: true
+    documentSelector:
+      path: metadata.name
+      value: release-name-memcached-metrics
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: metrics
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 9150
+      - equal:
+          path: spec.ports[0].name
+          value: metrics
+
+  - it: should respect config change in metrics
+    set:
+      metrics.enabled: true
+      metrics.service:
+        type: LoadBalancer
+        port: 8080
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+          service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+          service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "8080"
+      commonAnnotations:
+        kubernetes.io/test: "true"
+
+    documentSelector:
+      path: metadata.name
+      value: release-name-memcached-metrics
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+      - equal:
+          path: metadata.annotations
+          value:
+            service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+            service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+            service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "8080"
+            kubernetes.io/test: "true"
