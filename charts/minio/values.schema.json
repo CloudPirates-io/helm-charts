@@ -348,6 +348,13 @@
                 },
                 "type": {
                     "type": "string"
+                },
+                "nodePorts": {
+                    "type": "object",
+                    "properties": {
+                        "api": { "type": "string" },
+                        "console": { "type": "string" }
+                    }
                 }
             }
         },
