@@ -189,10 +189,11 @@ spec:
                 name: {{ .Values.extraEnvVarsSecret }}
           {{- end }}
           ports:
+            {{- if .Values.keycloak.httpEnabled }}
             - name: http
               containerPort: {{ .Values.keycloak.httpPort }}
               protocol: TCP
-            {{- if and .Values.keycloak.httpsPort (not .Values.keycloak.httpEnabled) }}
+            {{- else }}
             - name: https
               containerPort: {{ .Values.keycloak.httpsPort }}
               protocol: TCP
@@ -206,8 +207,13 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ include "keycloak.probeUrl" . }}
+              {{- if .Values.keycloak.httpEnabled }}
               port: http
               scheme: HTTP
+              {{- else }}
+              port: https
+              scheme: HTTPS
+              {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -218,8 +224,13 @@ spec:
           readinessProbe:
             httpGet:
               path: {{ include "keycloak.probeUrl" . }}
+              {{- if .Values.keycloak.httpEnabled }}
               port: http
               scheme: HTTP
+              {{- else }}
+              port: https
+              scheme: HTTPS
+              {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -230,8 +241,13 @@ spec:
           startupProbe:
             httpGet:
               path: {{ include "keycloak.probeUrl" . }}
+              {{- if .Values.keycloak.httpEnabled }}
               port: http
               scheme: HTTP
+              {{- else }}
+              port: https
+              scheme: HTTPS
+              {{- end }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
