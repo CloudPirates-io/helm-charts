@@ -376,3 +376,6 @@ streamServerConfig: ""
 
 ## @param existingStreamServerConfigmap Name of an existing ConfigMap containing stream-server-config.conf
 existingStreamServerConfigConfigmap: ""
+
+## @param extraInitContainers Additional init containers to add to the pod
+extraInitContainers: []
