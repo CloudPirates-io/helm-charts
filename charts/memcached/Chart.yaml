@@ -2,7 +2,7 @@ apiVersion: v2
 name: memcached
 description: Memcached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.
 type: application
-version: 0.5.0
+version: 0.5.1
 appVersion: "1.6.39"
 keywords:
   - memcached
@@ -39,7 +39,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Add metrics support (#512)"
+          description: "Update charts/memcached/values.yaml memcached (#540)"
           links:
-            - name: "Commit 5ea2397"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/5ea2397"
+            - name: "Commit 80a134a"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/80a134a"
