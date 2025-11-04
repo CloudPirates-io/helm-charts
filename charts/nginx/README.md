@@ -349,12 +349,13 @@ location /stub_status {
 
 ### Extra Configuration Parameters
 
-| Parameter           | Description                                                                         | Default |
-| ------------------- | ----------------------------------------------------------------------------------- | ------- |
-| `extraEnvVars`          | Additional environment variables to set                                             | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                                | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the Nginx container                             | `[]`    |
-| `extraObjects`      | Array of extra objects to deploy with the release                                   | `[]`    |
+| Parameter                  | Description                                                                         | Default |
+| ---------------------------| ----------------------------------------------------------------------------------- | ------- |
+| `extraEnvVars`             | Additional environment variables to set                                             | `[]`    |
+| `extraVolumes`             | Additional volumes to add to the pod                                                | `[]`    |
+| `extraVolumeMounts`        | Additional volume mounts to add to the Nginx container                              | `[]`    |
+| `extraObjects`             | Array of extra objects to deploy with the release                                   | `[]`    |
+| `extrainitContainers`      | Array of extra objects to deploy with the release                                   | `[]`    |
 
 #### Extra Objects
 
