@@ -137,7 +137,7 @@ Get PostgreSQL username
 */}}
 {{- define "postgres.username" -}}
 {{- if .Values.auth.username -}}
-{{- .Values.auth.username -}}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.username "context" .) -}}
 {{- else -}}
 postgres
 {{- end -}}

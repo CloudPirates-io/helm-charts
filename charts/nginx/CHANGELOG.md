@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.3.3 (2025-11-02)
+
+* [nginx]: Add priorityClassName support (#526) ([e77747f](https://github.com/CloudPirates-io/helm-charts/commit/e77747f))
+
+## 0.3.2 (2025-10-30)
+
+* chore: update CHANGELOG.md for merged changes ([5c6a9eb](https://github.com/CloudPirates-io/helm-charts/commit/5c6a9eb))
+* chore: update CHANGELOG.md for merged changes ([597f2b0](https://github.com/CloudPirates-io/helm-charts/commit/597f2b0))
+* Update charts/nginx/values.yaml nginx (#508) ([60891a1](https://github.com/CloudPirates-io/helm-charts/commit/60891a1))
+* chore: update CHANGELOG.md for merged changes ([28332c1](https://github.com/CloudPirates-io/helm-charts/commit/28332c1))
+* chore: update CHANGELOG.md for merged changes ([16071aa](https://github.com/CloudPirates-io/helm-charts/commit/16071aa))
+
 ## 0.3.1 (2025-10-29)
 
 * Update charts/nginx/values.yaml nginx to v1.29.3 (patch) (#490) ([a23c2db](https://github.com/CloudPirates-io/helm-charts/commit/a23c2db))

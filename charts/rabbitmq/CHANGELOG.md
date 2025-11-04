@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.7.6 (2025-11-01)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#523) ([a23a731](https://github.com/CloudPirates-io/helm-charts/commit/a23a731))
+* chore: update CHANGELOG.md for merged changes ([b03d341](https://github.com/CloudPirates-io/helm-charts/commit/b03d341))
+* chore: update CHANGELOG.md for merged changes ([c4dd853](https://github.com/CloudPirates-io/helm-charts/commit/c4dd853))
+
 ## 0.7.5 (2025-10-30)
 
 * Update charts/rabbitmq/values.yaml rabbitmq (#509) ([532e1f5](https://github.com/CloudPirates-io/helm-charts/commit/532e1f5))

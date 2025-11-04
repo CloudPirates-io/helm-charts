@@ -1,0 +1,110 @@
+suite: test Memcached service monitor
+templates:
+  - servicemonitor.yaml
+release:
+  name: release-name
+set:
+  metrics.enabled: true
+  metrics.serviceMonitor.enabled: true
+
+tests:
+  - it: should be a ServiceMonitor
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - isAPIVersion:
+          of: monitoring.coreos.com/v1
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: release-name-memcached
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: metrics
+
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: spec.jobLabel
+          value: release-name-memcached
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/name: memcached
+            app.kubernetes.io/instance: release-name
+            app.kubernetes.io/component: metrics
+      - contains:
+          path: spec.endpoints
+          content:
+            port: metrics
+            interval: 30s
+            path: /metrics
+
+  - it: should respect config change
+    set:
+      metrics.serviceMonitor:
+        interval: 60s
+        ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+        scrapeTimeout: 1s
+        relabelings:
+          - sourceLabels: [ one, two ]
+        metricRelabelings:
+          - targetLabel: something
+        honorLabels: true
+        labels:
+          kubernetes.io/test-1: "true"
+          kubernetes.io/test-2: "true"
+        annotations:
+          kubernetes.io/test-annotation-1: "true"
+          kubernetes.io/test-annotation-2: "true"
+        namespaceSelector:
+          matchNames:
+            - one
+            - two
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: release-name
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: memcached
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: metrics
+      - equal:
+          path: metadata.labels["kubernetes.io/test-1"]
+          value: "true"
+      - equal:
+          path: metadata.labels["kubernetes.io/test-2"]
+          value: "true"
+      - equal:
+          path: metadata.annotations
+          value:
+            kubernetes.io/test-annotation-1: "true"
+            kubernetes.io/test-annotation-2: "true"
+      - equal:
+          path: spec.endpoints[0].interval
+          value: 60s
+      - equal:
+          path: spec.endpoints[0].scrapeTimeout
+          value: 1s
+      - equal:
+          path: spec.endpoints[0].honorLabels
+          value: true
+      - equal:
+          path: spec.endpoints[0].relabelings
+          value:
+            - sourceLabels:
+                - one
+                - two
+      - equal:
+          path: spec.endpoints[0].metricRelabelings
+          value:
+            - targetLabel: something
+      - equal:
+          path: spec.namespaceSelector
+          value:
+            matchNames:
+              - one
+              - two

@@ -56,7 +56,7 @@ spec:
             {{- end }}
             {{- if .Values.auth.username }}
             - name: POSTGRES_USER
-              value: {{ .Values.auth.username | quote }}
+              value: {{ include "postgres.username" .}}
             {{- end }}
             {{- if .Values.auth.database }}
             - name: POSTGRES_DB
@@ -66,7 +66,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: {{ .Values.auth.secretKeys.passwordKey }}
+                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
             {{- if .Values.config.postgresqlMaxConnections }}
             - name: POSTGRES_MAX_CONNECTIONS
               value: {{ .Values.config.postgresqlMaxConnections | quote }}
@@ -213,7 +213,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: {{ .Values.auth.secretKeys.passwordKey }}
+                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
           ports:
             - name: metrics
               containerPort: 9187

@@ -1,6 +1,31 @@
 # Changelog
 
 
+## 0.13.1 (2025-11-03)
+
+* [oliver006/redis_exporter] Update image to v1.80.0 (#532) ([f357771](https://github.com/CloudPirates-io/helm-charts/commit/f357771))
+* chore: update CHANGELOG.md for merged changes ([c86f513](https://github.com/CloudPirates-io/helm-charts/commit/c86f513))
+* chore: update CHANGELOG.md for merged changes ([b74d280](https://github.com/CloudPirates-io/helm-charts/commit/b74d280))
+* chore: auto-generate values.schema.json (#521) ([fe2d15b](https://github.com/CloudPirates-io/helm-charts/commit/fe2d15b))
+
+## 0.13.0 (2025-10-31)
+
+* Implement startup probe ([579459a](https://github.com/CloudPirates-io/helm-charts/commit/579459a))
+* chore: update CHANGELOG.md for merged changes ([0acfe5d](https://github.com/CloudPirates-io/helm-charts/commit/0acfe5d))
+* chore: update CHANGELOG.md for merged changes ([91ce68f](https://github.com/CloudPirates-io/helm-charts/commit/91ce68f))
+
+## 0.12.1 (2025-10-31)
+
+* Fix probes commands (#511) ([0ac529f](https://github.com/CloudPirates-io/helm-charts/commit/0ac529f))
+* chore: update CHANGELOG.md for merged changes ([3c4c441](https://github.com/CloudPirates-io/helm-charts/commit/3c4c441))
+* chore: update CHANGELOG.md for merged changes ([fb351f7](https://github.com/CloudPirates-io/helm-charts/commit/fb351f7))
+
+## 0.12.0 (2025-10-30)
+
+* Add support for Redis Cluster (#507) ([c1e9fa8](https://github.com/CloudPirates-io/helm-charts/commit/c1e9fa8))
+* chore: update CHANGELOG.md for merged changes ([640b0f6](https://github.com/CloudPirates-io/helm-charts/commit/640b0f6))
+* chore: update CHANGELOG.md for merged changes ([bae5763](https://github.com/CloudPirates-io/helm-charts/commit/bae5763))
+
 ## 0.11.2 (2025-10-30)
 
 * fix: extraEnvVars parameter in statefulset template (#503) ([b681b99](https://github.com/CloudPirates-io/helm-charts/commit/b681b99))

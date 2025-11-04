@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.8.1 (2025-11-02)
+
+* [keycloak]: Fix https settings in keycloak when disabling http (#530) ([b0c34f6](https://github.com/CloudPirates-io/helm-charts/commit/b0c34f6))
+* chore: update CHANGELOG.md for merged changes ([3062545](https://github.com/CloudPirates-io/helm-charts/commit/3062545))
+* chore: update CHANGELOG.md for merged changes ([19b8107](https://github.com/CloudPirates-io/helm-charts/commit/19b8107))
+
 ## 0.8.0 (2025-10-30)
 
 * Provide empty mounts for themes and providers (#504) ([4d2f107](https://github.com/CloudPirates-io/helm-charts/commit/4d2f107))

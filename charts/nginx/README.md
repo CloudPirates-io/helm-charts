@@ -395,11 +395,12 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 
 ### Pod Configuration Parameters
 
-| Parameter        | Description                    | Default |
-| ---------------- | ------------------------------ | ------- |
-| `nodeSelector`   | Node selector for pod assignment| `{}`    |
-| `tolerations`    | Tolerations for pod assignment | `[]`    |
-| `affinity`       | Affinity rules for pod assignment| `{}`  |
+| Parameter           | Description                       | Default |
+| ----------------    | ------------------------------    | ------- |
+| `nodeSelector`      | Node selector for pod assignment  | `{}`    |
+| `priorityClassName` | Priority class for pod eviction   | `""`    |
+| `tolerations`       | Tolerations for pod assignment    | `[]`    |
+| `affinity`          | Affinity rules for pod assignment | `{}`    |
 
 ## Examples
 

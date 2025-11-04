@@ -3,7 +3,7 @@ name: ghost
 description: A simple, powerful publishing platform that allows you to share your stories with the world.
 type: application
 version: 0.4.2
-appVersion: "6.5.3"
+appVersion: "6.6.0"
 keywords:
   - ghost
   - blogging
@@ -45,4 +45,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "Update charts/ghost/values.yaml ghost to v6.6.0 (minor) (#539)"
+          links:
+            - name: "Commit fda6611"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/fda6611"

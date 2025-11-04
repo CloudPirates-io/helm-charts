@@ -2,7 +2,7 @@ apiVersion: v2
 name: minio
 description: High Performance Object Storage compatible with Amazon S3 APIs
 type: application
-version: 0.5.4
+version: 0.5.5
 appVersion: "2025.09.07"
 keywords:
   - minio
@@ -41,7 +41,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Remove securitycontext on empty obejct (#474)"
+          description: "Add NodePort support for API and Console in Service configuration (#527)"
           links:
-            - name: "Commit 3c288c8"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/3c288c8"
+            - name: "Commit 57b84d8"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/57b84d8"

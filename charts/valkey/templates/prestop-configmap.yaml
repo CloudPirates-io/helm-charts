@@ -1,0 +1,134 @@
+{{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "valkey.fullname" . }}-prestop-script
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "valkey.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "valkey.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  prestop.sh: |
+    #!/bin/bash
+
+    # Valkey master failover script for graceful shutdown
+    # Based on Redis/Bitnami charts failover handling
+
+    set -e
+
+    # Configuration
+    VALKEY_PORT="{{ .Values.service.port }}"
+    SENTINEL_PORT="{{ .Values.sentinel.port }}"
+    MASTER_NAME="{{ .Values.sentinel.masterName }}"
+    HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+    VALKEY_SERVICE="{{ include "valkey.fullname" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+
+    # Set authentication if enabled
+    {{- if .Values.auth.enabled }}
+    export REDISCLI_AUTH="${VALKEY_PASSWORD}"
+    {{- end }}
+
+    # Set loopback address based on ipFamily configuration
+    {{- if eq .Values.ipFamily "ipv6" }}
+    VALKEY_LOOPBACK="::1"
+    {{- else }}
+    VALKEY_LOOPBACK="127.0.0.1"
+    {{- end }}
+
+    # Function to run Valkey commands
+    run_valkey_command() {
+        local args=("-h" "$VALKEY_LOOPBACK" "-p" "$VALKEY_PORT")
+        valkey-cli "${args[@]}" "$@"
+    }
+
+    # Function to check if current instance is master
+    is_master() {
+        VALKEY_ROLE=$(run_valkey_command role | head -1)
+        [[ "$VALKEY_ROLE" == "master" ]]
+    }
+
+    # Function to get full hostname for a pod
+    get_full_hostname() {
+        hostname="$1"
+        full_hostname="${hostname}.${HEADLESS_SERVICE}"
+        echo "${full_hostname}"
+    }
+
+    # Function to run Sentinel commands
+    run_sentinel_command() {
+        valkey-cli -h "$VALKEY_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} sentinel "$@"
+    }
+
+    # Function to check if sentinel failover has finished
+    sentinel_failover_finished() {
+        VALKEY_SENTINEL_INFO=($(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>/dev/null || echo ""))
+        if [ ${#VALKEY_SENTINEL_INFO[@]} -ge 1 ]; then
+            VALKEY_MASTER_HOST="${VALKEY_SENTINEL_INFO[0]}"
+            [[ "$VALKEY_MASTER_HOST" != "$(get_full_hostname $HOSTNAME)" ]]
+        else
+            # If we can't get master info, assume failover is complete
+            return 0
+        fi
+    }
+
+    # Function to wait with retries
+    retry_while() {
+        local condition="$1"
+        local max_attempts="$2"
+        local sleep_time="$3"
+        local attempt=0
+
+        while [ $attempt -lt $max_attempts ]; do
+            if $condition; then
+                return 0
+            fi
+            sleep "$sleep_time"
+            ((attempt++))
+        done
+        return 1
+    }
+
+    echo "Valkey preStop hook starting for pod: $HOSTNAME"
+
+    # Only proceed with failover if this instance is the master
+    if is_master; then
+        echo "I am the master pod and I'm being stopped. Initiating graceful failover."
+
+        # Pause client write connections to prevent data loss during failover
+        echo "Pausing client write connections for 22 seconds to prevent data loss..."
+        if run_valkey_command CLIENT PAUSE "22000" WRITE; then
+            echo "Client write connections paused successfully"
+        else
+            echo "Warning: Failed to pause client connections, continuing anyway"
+        fi
+
+        # Issue failover command to Sentinel
+        echo "Issuing failover command to Sentinel..."
+        if run_sentinel_command failover "$MASTER_NAME"; then
+            echo "Failover command sent successfully"
+        else
+            echo "Warning: Failed to send failover command, Sentinel may handle this automatically"
+        fi
+
+        # Wait for Sentinel to complete the failover
+        echo "Waiting for Sentinel to complete failover (up to 20 seconds)..."
+        if retry_while "sentinel_failover_finished" "20" "1"; then
+            echo "Sentinel failover completed successfully"
+        else
+            echo "Warning: Failover may still be in progress or Sentinel unavailable"
+        fi
+
+        # Additional delay to ensure new master is fully established
+        echo "Allowing additional time for new master to stabilize..."
+        sleep 3
+
+    else
+        echo "I am not the master, no failover needed"
+    fi
+
+    echo "Valkey preStop hook completed"
+    exit 0
+{{- end }}

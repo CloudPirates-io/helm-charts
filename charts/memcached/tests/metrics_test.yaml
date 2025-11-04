@@ -1,0 +1,84 @@
+suite: test Memcached metrics
+templates:
+  - deployment.yaml
+set:
+  metrics.enabled: true
+
+tests:
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].image
+          value: docker.io/prom/memcached-exporter:v0.15.4@sha256:b6763ecb3c47f2408e0398518851b7f8c5fc46232b2649f8c78a321130c54266
+      - equal:
+          path: spec.template.spec.containers[1].imagePullPolicy
+          value: Always
+      - equal:
+          path: spec.template.spec.containers[1].args
+          value:
+            - --memcached.address=localhost:11211
+            - --web.listen-address=:9150
+      - equal:
+          path: spec.template.spec.containers[1].ports[0].containerPort
+          value: 9150
+      - equal:
+          path: spec.template.spec.containers[1].resources
+          value:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+  - it: should respect config change
+    set:
+      metrics.image.registry: my-registry.com
+      metrics.image.repository: prefix/prom/memcached-exporter
+      metrics.image.tag: 1.6.31@sha256:testdigest123
+      metrics.image.pullPolicy: IfNotPresent
+      metrics.resources:
+        limits:
+          cpu: 150m
+          memory: 128Mi
+        requests:
+          cpu: 25m
+          memory: 32Mi
+      metrics.extraArgs:
+        - --log.level=debug
+        - --log.format=json
+      metrics.service.port: 9151
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].image
+          value: my-registry.com/prefix/prom/memcached-exporter:1.6.31@sha256:testdigest123
+      - equal:
+          path: spec.template.spec.containers[1].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.spec.containers[1].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.spec.containers[1].resources
+          value:
+            limits:
+              cpu: 150m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 32Mi
+      - equal:
+          path: spec.template.spec.containers[1].resources
+          value:
+            limits:
+              cpu: 150m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 32Mi
+      - equal:
+          path: spec.template.spec.containers[1].args
+          value:
+            - --memcached.address=localhost:11211
+            - --web.listen-address=:9151
+            - --log.level=debug
+            - --log.format=json

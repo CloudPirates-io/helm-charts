@@ -1,0 +1,25 @@
+{{- if and (eq .Values.architecture "replication") (not .Values.sentinel.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valkey.fullname" . }}-master
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "valkey.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: valkey
+      protocol: TCP
+      name: valkey
+  selector:
+    {{- include "valkey.selectorLabels" . | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ include "valkey.fullname" . }}-0
+{{- end }}
