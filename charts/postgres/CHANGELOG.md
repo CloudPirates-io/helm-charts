@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.11.2 (2025-11-04)
+
+* chore: update CHANGELOG.md for merged changes ([d18a69d](https://github.com/CloudPirates-io/helm-charts/commit/d18a69d))
+* chore: update CHANGELOG.md for merged changes ([19c8331](https://github.com/CloudPirates-io/helm-charts/commit/19c8331))
+* Update charts/postgres/values.yaml postgres (#541) ([a94dd22](https://github.com/CloudPirates-io/helm-charts/commit/a94dd22))
+* chore: update CHANGELOG.md for merged changes ([332f709](https://github.com/CloudPirates-io/helm-charts/commit/332f709))
+* chore: update CHANGELOG.md for merged changes ([e72bc46](https://github.com/CloudPirates-io/helm-charts/commit/e72bc46))
+
 ## 0.11.1 (2025-10-31)
 
 * [postgres]: fix nesting for auth.username & auth.secretKeys.passwordKey (#513) ([7692045](https://github.com/CloudPirates-io/helm-charts/commit/7692045))

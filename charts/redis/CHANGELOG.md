@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 0.13.4 (2025-11-04)
+
+* Update charts/redis/values.yaml redis (#547) ([f0ba3c6](https://github.com/CloudPirates-io/helm-charts/commit/f0ba3c6))
+
+## 0.13.3 (2025-11-04)
+
+* [redis]: fix sidecar auth args ([967558f](https://github.com/CloudPirates-io/helm-charts/commit/967558f))
+* chore: update CHANGELOG.md for merged changes ([a4d1e7f](https://github.com/CloudPirates-io/helm-charts/commit/a4d1e7f))
+* chore: update CHANGELOG.md for merged changes ([2c4ecc0](https://github.com/CloudPirates-io/helm-charts/commit/2c4ecc0))
+
 ## 0.13.2 (2025-11-04)
 
 * Update charts/redis/values.yaml redis to v8.2.3 (patch) (#536) ([2410eff](https://github.com/CloudPirates-io/helm-charts/commit/2410eff))

@@ -507,22 +507,17 @@ spec:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
           {{- end }}
+          {{- if .Values.metrics.extraArgs }}
           command:
             - /redis_exporter
-            {{- range .Values.metrics.extraArgs }}
-            - {{ . }}
-            {{- end }}
           args:
-            {{- if .Values.auth.enabled }}
-            - --redis.password=${REDIS_PASSWORD}
-            {{- end }}
-            {{- if .Values.metrics.extraArgs }}
             {{- range .Values.metrics.extraArgs }}
-            {{- if not (hasPrefix "--" .) }}
             - {{ . }}
             {{- end }}
-            {{- end }}
-            {{- end }}
+          {{- else }}
+          command:
+            - /redis_exporter
+          {{- end }}
           ports:
             - name: metrics
               containerPort: 9121
