@@ -281,10 +281,8 @@ spec:
               readOnly: true
             {{- end }}
             {{- else }}
-            {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: {{ include "valkey.configDir" . }}
-            {{- end }}
             {{- end }}
             - name: tmp
               mountPath: /tmp
