@@ -1,0 +1,6 @@
+{{- if .Values.ingress.enabled -}}
+URL: http://{{ (index .Values.ingress.hosts 0).host }}
+{{- end }}
+{{ if and .Values.config.consoleEnabled .Values.consoleIngress.enabled .Values.consoleIngress.hosts -}}
+CONSOLE URL: http://{{ (index .Values.consoleIngress.hosts 0).host }}
+{{- end }}

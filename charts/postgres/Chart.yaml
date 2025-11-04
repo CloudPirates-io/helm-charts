@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.10.3
+version: 0.11.1
 appVersion: "18.0.0"
 keywords:
   - postgres
@@ -42,8 +42,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "[postgres] Update charts/postgres/values.yaml postgres"
+        - kind: changed
+          description: "[postgres]: fix nesting for auth.username & auth.secretKeys.passwordKey (#513)"
           links:
-            - name: "PR #448"
-              url: "https://github.com/CloudPirates-io/helm-charts/pull/448"
+            - name: "Commit 7692045"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/7692045"

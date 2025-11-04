@@ -1,6 +1,32 @@
 # Changelog
 
 
+## 1.2.8 (2025-11-03)
+
+
+## 1.2.7 (2025-10-31)
+
+* chore: update CHANGELOG.md for merged changes ([5686ce7](https://github.com/CloudPirates-io/helm-charts/commit/5686ce7))
+* chore: update CHANGELOG.md for merged changes ([20c99bd](https://github.com/CloudPirates-io/helm-charts/commit/20c99bd))
+* chore: update CHANGELOG.md for merged changes ([08e6bc1](https://github.com/CloudPirates-io/helm-charts/commit/08e6bc1))
+* chore: update CHANGELOG.md for merged changes ([5f5500a](https://github.com/CloudPirates-io/helm-charts/commit/5f5500a))
+
+## 1.2.6 (2025-10-29)
+
+* chore: update CHANGELOG.md for merged changes ([82bee53](https://github.com/CloudPirates-io/helm-charts/commit/82bee53))
+* chore: update CHANGELOG.md for merged changes ([0a732be](https://github.com/CloudPirates-io/helm-charts/commit/0a732be))
+* chore: update CHANGELOG.md for merged changes ([4abe8c4](https://github.com/CloudPirates-io/helm-charts/commit/4abe8c4))
+
+## 1.2.5 (2025-10-26)
+
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 1.2.4 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([1053460](https://github.com/CloudPirates-io/helm-charts/commit/1053460))
+* chore: update CHANGELOG.md for merged changes ([6230965](https://github.com/CloudPirates-io/helm-charts/commit/6230965))
+
 ## 1.2.3 (2025-10-22)
 
 * chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))

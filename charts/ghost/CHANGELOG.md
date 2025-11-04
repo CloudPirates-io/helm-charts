@@ -1,6 +1,37 @@
 # Changelog
 
 
+## 0.4.1 (2025-10-30)
+
+* Update charts/ghost/values.yaml ghost (#502) ([5767f7f](https://github.com/CloudPirates-io/helm-charts/commit/5767f7f))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.4.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([a968aa7](https://github.com/CloudPirates-io/helm-charts/commit/a968aa7))
+* chore: update CHANGELOG.md for merged changes ([74ee453](https://github.com/CloudPirates-io/helm-charts/commit/74ee453))
+
+## 0.3.6 (2025-10-25)
+
+* Update charts/ghost/values.yaml ghost to v6.5.3 (patch) (#456) ([3bf647a](https://github.com/CloudPirates-io/helm-charts/commit/3bf647a))
+* chore: update CHANGELOG.md for merged changes ([4cee2f2](https://github.com/CloudPirates-io/helm-charts/commit/4cee2f2))
+* chore: update CHANGELOG.md for merged changes ([2cec192](https://github.com/CloudPirates-io/helm-charts/commit/2cec192))
+* Update charts/ghost/values.yaml ghost (#452) ([4406c00](https://github.com/CloudPirates-io/helm-charts/commit/4406c00))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.3.5 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([844a243](https://github.com/CloudPirates-io/helm-charts/commit/844a243))
+* chore: update CHANGELOG.md for merged changes ([ad40303](https://github.com/CloudPirates-io/helm-charts/commit/ad40303))
+
+## 0.3.4 (2025-10-23)
+
+* Update charts/ghost/values.yaml ghost to v6.5.0 (minor) (#450) ([10e9958](https://github.com/CloudPirates-io/helm-charts/commit/10e9958))
+* chore: update CHANGELOG.md for merged changes ([787c4fb](https://github.com/CloudPirates-io/helm-charts/commit/787c4fb))
+* chore: update CHANGELOG.md for merged changes ([997f383](https://github.com/CloudPirates-io/helm-charts/commit/997f383))
+
 ## 0.3.3 (2025-10-23)
 
 * Update charts/ghost/values.yaml ghost (#447) ([881ef3b](https://github.com/CloudPirates-io/helm-charts/commit/881ef3b))

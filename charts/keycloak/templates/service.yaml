@@ -5,18 +5,20 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
-  {{- with .Values.service.annotations }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
+    {{- if .Values.keycloak.httpEnabled }}
     - port: {{ .Values.service.httpPort }}
       targetPort: {{ .Values.service.httpTargetPort }}
       protocol: TCP
       name: http
-    {{- if .Values.keycloak.httpsPort }}
+    {{- else }}
     - port: {{ .Values.service.httpsPort }}
       targetPort: {{ .Values.service.httpsTargetPort }}
       protocol: TCP

@@ -133,6 +133,8 @@ service:
     leaderElection: 3888
     ## @param service.ports.admin Zookeeper admin service port
     admin: 8080
+  ## @param service.annotations Additional annotations to add to the service
+  annotations: {}
 
 ## @section Resources
 resources:
@@ -222,10 +224,15 @@ startupProbe:
   successThreshold: 1
 
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []

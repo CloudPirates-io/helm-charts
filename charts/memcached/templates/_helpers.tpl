@@ -48,6 +48,13 @@ Return the proper Memcached image name
 {{- end }}
 
 {{/*
+Return the proper Memcached metrics image name
+*/}}
+{{- define "memcached.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "memcached.imagePullSecrets" -}}

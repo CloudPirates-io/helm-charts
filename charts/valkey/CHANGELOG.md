@@ -1,6 +1,32 @@
 # Changelog
 
 
+## 0.9.1 (2025-11-03)
+
+* [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf](https://github.com/CloudPirates-io/helm-charts/commit/57d1caf))
+* chore: update CHANGELOG.md for merged changes ([5e662d8](https://github.com/CloudPirates-io/helm-charts/commit/5e662d8))
+* chore: update CHANGELOG.md for merged changes ([bb1523e](https://github.com/CloudPirates-io/helm-charts/commit/bb1523e))
+
+## 0.9.0 (2025-10-31)
+
+* [valkey]: Valkey HA (#518) ([d8b1bbe](https://github.com/CloudPirates-io/helm-charts/commit/d8b1bbe))
+* chore: update CHANGELOG.md for merged changes ([6fd22a6](https://github.com/CloudPirates-io/helm-charts/commit/6fd22a6))
+* chore: update CHANGELOG.md for merged changes ([3eb08ee](https://github.com/CloudPirates-io/helm-charts/commit/3eb08ee))
+* chore: auto-generate values.schema.json (#481) ([d37c7ed](https://github.com/CloudPirates-io/helm-charts/commit/d37c7ed))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.8.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.7.1 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([bfb9443](https://github.com/CloudPirates-io/helm-charts/commit/bfb9443))
+* chore: update CHANGELOG.md for merged changes ([80edeb0](https://github.com/CloudPirates-io/helm-charts/commit/80edeb0))
+* chore: update CHANGELOG.md for merged changes ([cbb73ba](https://github.com/CloudPirates-io/helm-charts/commit/cbb73ba))
+
 ## 0.7.0 (2025-10-22)
 
 * [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v9 (major) (#442) ([75276a8](https://github.com/CloudPirates-io/helm-charts/commit/75276a8))

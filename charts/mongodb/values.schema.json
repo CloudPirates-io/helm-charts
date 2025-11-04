@@ -65,7 +65,7 @@
         "customUser": {
             "type": "object"
         },
-        "extraEnv": {
+        "extraEnvVars": {
             "type": "array"
         },
         "extraObjects": {
@@ -94,6 +94,12 @@
         "image": {
             "type": "object",
             "properties": {
+                "args": {
+                    "type": "array"
+                },
+                "command": {
+                    "type": "array"
+                },
                 "pullPolicy": {
                     "type": "string"
                 },
@@ -168,7 +174,7 @@
                 "extraArgs": {
                     "type": "array"
                 },
-                "extraEnv": {
+                "extraEnvVars": {
                     "type": "array"
                 },
                 "image": {
@@ -358,6 +364,12 @@
                 }
             }
         },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podLabels": {
+            "type": "object"
+        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -419,6 +431,9 @@
         "service": {
             "type": "object",
             "properties": {
+                "annotations": {
+                    "type": "object"
+                },
                 "port": {
                     "type": "integer"
                 },

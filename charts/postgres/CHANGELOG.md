@@ -1,8 +1,45 @@
 # Changelog
 
-## 0.10.3 (2025-10-22)
 
-* [postgres] Update charts/postgres/values.yaml postgres ([#448](https://github.com/CloudPirates-io/helm-charts/pull/448))
+## 0.11.1 (2025-10-31)
+
+* [postgres]: fix nesting for auth.username & auth.secretKeys.passwordKey (#513) ([7692045](https://github.com/CloudPirates-io/helm-charts/commit/7692045))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.11.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([9be549e](https://github.com/CloudPirates-io/helm-charts/commit/9be549e))
+* chore: update CHANGELOG.md for merged changes ([2bd99d3](https://github.com/CloudPirates-io/helm-charts/commit/2bd99d3))
+
+## 0.10.7 (2025-10-27)
+
+* add options to set service load balancer ip and external traffic policy (#475) ([a2db2ab](https://github.com/CloudPirates-io/helm-charts/commit/a2db2ab))
+
+## 0.10.6 (2025-10-27)
+
+* chore: update CHANGELOG.md for merged changes ([099c280](https://github.com/CloudPirates-io/helm-charts/commit/099c280))
+* chore: update CHANGELOG.md for merged changes ([bcb63d1](https://github.com/CloudPirates-io/helm-charts/commit/bcb63d1))
+* Mount config map when existing configmap is provided (#472) ([f5d08a5](https://github.com/CloudPirates-io/helm-charts/commit/f5d08a5))
+* chore: update CHANGELOG.md for merged changes ([953c05c](https://github.com/CloudPirates-io/helm-charts/commit/953c05c))
+* chore: update CHANGELOG.md for merged changes ([9788604](https://github.com/CloudPirates-io/helm-charts/commit/9788604))
+
+## 0.10.5 (2025-10-26)
+
+* Update charts/postgres/values.yaml postgres (#451) ([45d78b0](https://github.com/CloudPirates-io/helm-charts/commit/45d78b0))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.10.4 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([5ea39c2](https://github.com/CloudPirates-io/helm-charts/commit/5ea39c2))
+* chore: update CHANGELOG.md for merged changes ([1426e0a](https://github.com/CloudPirates-io/helm-charts/commit/1426e0a))
+
+## 0.10.3 (2025-10-23)
+
+* Update charts/postgres/values.yaml postgres (#448) ([fdf19cf](https://github.com/CloudPirates-io/helm-charts/commit/fdf19cf))
+* chore: update CHANGELOG.md for merged changes ([06f9425](https://github.com/CloudPirates-io/helm-charts/commit/06f9425))
+* chore: update CHANGELOG.md for merged changes ([9d439f0](https://github.com/CloudPirates-io/helm-charts/commit/9d439f0))
 
 ## 0.10.2 (2025-10-22)
 

@@ -20,6 +20,7 @@ spec:
     metadata:
       labels:
         {{- include "nginx.selectorLabels" . | nindent 8 }}
+      {{- if or .Values.serverConfig .Values.streamServerConfig (include "nginx.annotations" .) }}
       annotations:
         {{- with (include "nginx.annotations" .) }}
         {{- . | nindent 8 }}
@@ -27,6 +28,7 @@ spec:
         {{- if or .Values.serverConfig .Values.streamServerConfig }}
         checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
+      {{- end }}
     spec:
 {{- with (include "nginx.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -81,12 +83,9 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if .Values.extraEnv }}
+          {{- with .Values.extraEnvVars }}
           env:
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+{{ toYaml . | indent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -301,6 +300,9 @@ spec:
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

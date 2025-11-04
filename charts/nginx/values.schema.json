@@ -151,7 +151,7 @@
         "existingStreamServerConfigConfigmap": {
             "type": "string"
         },
-        "extraEnv": {
+        "extraEnvVars": {
             "type": "array"
         },
         "extraObjects": {
@@ -392,6 +392,9 @@
                 }
             }
         },
+        "priorityClassName": {
+            "type": "string"
+        },
         "readinessProbe": {
             "type": "object",
             "properties": {
@@ -433,6 +436,9 @@
         "service": {
             "type": "object",
             "properties": {
+                "annotations": {
+                    "type": "object"
+                },
                 "ports": {
                     "type": "array",
                     "items": {

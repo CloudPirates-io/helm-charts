@@ -68,29 +68,46 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Global Parameters
 
-| Parameter          | Description                                   | Default |
-| ------------------ | --------------------------------------------- | ------- |
-| `replicaCount`     | Number of MongoDB replicas to deploy          | `1`     |
-| `nameOverride`     | String to partially override mongodb.fullname | `""`    |
-| `fullnameOverride` | String to fully override mongodb.fullname     | `""`    |
+| Parameter                 | Description                                     | Default |
+| ------------------------- | ----------------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker Image registry                    | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
 
-### Image Parameters
+### Common Parameters
 
-| Parameter          | Description                     | Default                                                                     |
-| ------------------ | ------------------------------- | --------------------------------------------------------------------------- |
-| `image.repository` | MongoDB Docker image repository | `mongo`                                                                     |
-| `image.tag`        | MongoDB Docker image tag        | `"8.0.12"`                                                                  |
-| `image.digest`     | MongoDB Docker image digest     | `"sha256:a6bda40d00e56682aeaa1bfc88e024b7dd755782c575c02760104fe02010f94f"` |
-| `image.pullPolicy` | MongoDB image pull policy       | `IfNotPresent`                                                              |
+| Parameter           | Description                                              | Default |
+| ------------------- | -------------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override mongodb.fullname            | `""`    |
+| `fullnameOverride`  | String to fully override mongodb.fullname                | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects               | `{}`    |
+| `podAnnotations`    | Annotations to add to the pod created by the statefulset | `{}`    |
+| `podLabels`         | Labels to add to the pod created by the statefulset      | `{}`    |
+
+### MongoDB Image Parameters
+
+| Parameter          | Description               | Default                                                                            |
+| ------------------ | ------------------------- | ---------------------------------------------------------------------------------- |
+| `image.registry`   | MongoDB image registry    | `docker.io`                                                                        |
+| `image.repository` | MongoDB image repository  | `mongo`                                                                            |
+| `image.tag`        | MongoDB image tag         | `"8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c"` |
+| `image.pullPolicy` | MongoDB image pull policy | `Always`                                                                           |
+
+### Replica Configuration
+
+| Parameter      | Description                          | Default |
+| -------------- | ------------------------------------ | ------- |
+| `replicaCount` | Number of MongoDB replicas to deploy | `1`     |
 
 ### Service Parameters
 
-| Parameter      | Description             | Default     |
-| -------------- | ----------------------- | ----------- |
-| `service.type` | Kubernetes service type | `ClusterIP` |
-| `service.port` | MongoDB service port    | `27017`     |
+| Parameter             | Description                               | Default     |
+| --------------------- | ----------------------------------------- | ----------- |
+| `service.type`        | Kubernetes service type                   | `ClusterIP` |
+| `service.port`        | MongoDB service port                      | `27017`     |
+| `service.annotations` | Annotations to add to the mongodb service | `{}`        |
 
-### MongoDB Configuration Parameters
+### MongoDB Authentication Parameters
 
 | Parameter                        | Description                                                         | Default |
 | -------------------------------- | ------------------------------------------------------------------- | ------- |
@@ -99,17 +116,27 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `auth.rootPassword`              | MongoDB root password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing MongoDB password                 | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing MongoDB password                  | `""`    |
-| `config`                         | MongoDB configuration options                                       | `{}`    |
+
+### MongoDB Configuration Parameters
+
+| Parameter                     | Description                                                  | Default                                                              |
+| ----------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `config.mountPath`            | MongoDB configuration options                                | `/etc/mongo`                                                         |
+| `config.content`              | Include your custom MongoDB configurations here as string    | `systemLog:\n  quiet: true\n  verbosity: 0\nnet:\n  bindIpAll: true` |
+| `config.existingConfigmap`    | Name of an existing Configmap to use instead of creating one | `""`                                                                 |
+| `config.existingConfigmapKey` | Name of the key in the Configmap that should be used         | `""`                                                                 |
 
 ### Custom User Configuration
-| Parameter                   | Description                                                                        | Default                                  |
-| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
-| `customUser`                | Optional user to be created at initialisation with a custom password and database  | `{}`                                     |
-| `customUser.name`           | Name of the custom user to be created                                              | `""`                                     |
-| `customUser.database`       | Name of the database to be created                                                 | `""`                                     |
-| `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
-| `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
-| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
+
+| Parameter                        | Description                                                              | Default |
+| -------------------------------- | ------------------------------------------------------------------------ | ------- |
+| `customUser.name`                | Name of the custom user to be created                                    | `""`    |
+| `customUser.database`            | Name of the database to be created                                       | `""`    |
+| `customUser.password`            | Password to be used for the custom user                                  | `""`    |
+| `customUser.existingSecret`      | Existing secret, in which username, password and database name are saved | `""`    |
+| `customUser.secretKeys.name`     | Name of key in existing secret containing username                       | `""`    |
+| `customUser.secretKeys.password` | Name of key in existing secret containing password                       | `""`    |
+| `customUser.secretKeys.database` | Name of key in existing secret containing database                       | `""`    |
 
 ### Persistence Parameters
 
@@ -124,21 +151,21 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Resource Parameters
 
-| Parameter      | Description                                  | Default |
-| -------------- | -------------------------------------------- | ------- |
-| `resources`    | Resource limits and requests for MongoDB pod | `{}`    |
-| `nodeSelector` | Node selector for pod assignment             | `{}`    |
-| `tolerations`  | Tolerations for pod assignment               | `[]`    |
-| `affinity`     | Affinity rules for pod assignment            | `{}`    |
+| Parameter      | Description                                  | Default                                                        |
+| -------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| `resources`    | Resource limits and requests for MongoDB pod | `limits: {memory: 512Mi}, requests: {cpu: 50m, memory: 512Mi}` |
+| `nodeSelector` | Node selector for pod assignment             | `{}`                                                           |
+| `tolerations`  | Tolerations for pod assignment               | `[]`                                                           |
+| `affinity`     | Affinity rules for pod assignment            | `{}`                                                           |
 
 ### Security Parameters
 
-| Parameter                      | Description                       | Default |
-| ------------------------------ | --------------------------------- | ------- |
-| `securityContext.fsGroup`      | Group ID for filesystem ownership | `999`   |
-| `securityContext.runAsUser`    | User ID to run the container      | `999`   |
-| `securityContext.runAsNonRoot` | Run as non-root user              | `true`  |
-| `podSecurityContext`           | Security context for the pod      | `{}`    |
+| Parameter                                           | Description                                  | Default |
+| --------------------------------------------------- | -------------------------------------------- | ------- |
+| `containerSecurityContext.runAsUser`                | User ID to run the container                 | `999`   |
+| `containerSecurityContext.runAsNonRoot`             | Run as non-root user                         | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Set MongoDB container's privilege escalation | `false` |
+| `podSecurityContext.fsGroup`                        | Set MongoDB pod's Security Context fsGroup   | `999`   |
 
 ### Health Check Parameters
 
@@ -156,6 +183,15 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                  | `5`     |
 | `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready | `6`     |
 | `readinessProbe.successThreshold`    | Number of successes to mark probe as successful | `1`     |
+
+### Additional Parameters
+
+| Parameter           | Description                                              | Default |
+| ------------------- | -------------------------------------------------------- | ------- |
+| `extraEnvVars`      | Additional environment variables to set                  | `[]`    |
+| `extraVolumes`      | Additional volumes to add to the pod                     | `[]`    |
+| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container | `[]`    |
+| `extraObjects`      | Array of extra objects to deploy with the release        | `[]`    |
 
 ### Network Policy Parameters
 
@@ -226,20 +262,10 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Metrics Additional Parameters
 
-| Parameter           | Description                                            | Default |
-| ------------------- | ------------------------------------------------------ | ------- |
-| `metrics.extraEnv`  | Additional environment variables for metrics container | `[]`    |
-| `metrics.extraArgs` | Additional command line arguments for MongoDB Exporter | `[]`    |
-
-
-### Additional Parameters
-
-| Parameter           | Description                                              | Default |
-| ------------------- | -------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables to set                  | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                     | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container | `[]`    |
-| `extraObjects`      | Additional Kubernetes objects to deploy                  | `[]`    |
+| Parameter              | Description                                            | Default |
+| ---------------------- | ------------------------------------------------------ | ------- |
+| `metrics.extraEnvVars` | Additional environment variables for metrics container | `[]`    |
+| `metrics.extraArgs`    | Additional command line arguments for MongoDB Exporter | `[]`    |
 
 #### Extra Objects
 
@@ -282,11 +308,10 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 ### Basic Installation with Authentication
 
 ```yaml
-mongodb:
-  auth:
-    enabled: true
-    rootUsername: admin
-    rootPassword: "mySecretPassword"
+auth:
+  enabled: true
+  rootUsername: admin
+  rootPassword: "mySecretPassword"
 
 persistence:
   enabled: true
@@ -311,12 +336,11 @@ persistence:
   storageClass: "default"
   size: 100Gi
 
-mongodb:
-  auth:
-    enabled: true
-    rootUsername: admin
-    existingSecret: mongodb-credentials
-    existingSecretPasswordKey: password
+auth:
+  enabled: true
+  rootUsername: admin
+  existingSecret: mongodb-credentials
+  existingSecretPasswordKey: password
 ```
 
 ### Development Setup (No Persistence)
@@ -325,9 +349,8 @@ mongodb:
 persistence:
   enabled: false
 
-mongodb:
-  auth:
-    enabled: false
+auth:
+  enabled: false
 
 resources:
   limits:

@@ -1,6 +1,37 @@
 # Changelog
 
 
+## 0.6.1 (2025-10-29)
+
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.6.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([5bf8d10](https://github.com/CloudPirates-io/helm-charts/commit/5bf8d10))
+* chore: update CHANGELOG.md for merged changes ([64bc0ac](https://github.com/CloudPirates-io/helm-charts/commit/64bc0ac))
+* Update README.md (#468) ([26c7a1c](https://github.com/CloudPirates-io/helm-charts/commit/26c7a1c))
+* chore: update CHANGELOG.md for merged changes ([cbf613f](https://github.com/CloudPirates-io/helm-charts/commit/cbf613f))
+* chore: update CHANGELOG.md for merged changes ([48e61e6](https://github.com/CloudPirates-io/helm-charts/commit/48e61e6))
+
+## 0.5.6 (2025-10-26)
+
+
+## 0.5.5 (2025-10-24)
+
+* chore: update CHANGELOG.md for merged changes ([b2b84ce](https://github.com/CloudPirates-io/helm-charts/commit/b2b84ce))
+* chore: update CHANGELOG.md for merged changes ([b1f47df](https://github.com/CloudPirates-io/helm-charts/commit/b1f47df))
+* Allow to set custom command and args (#457) ([06d8f66](https://github.com/CloudPirates-io/helm-charts/commit/06d8f66))
+* chore: auto-generate values.schema.json for updated charts (#455) ([aec6840](https://github.com/CloudPirates-io/helm-charts/commit/aec6840))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
+## 0.5.4 (2025-10-23)
+
+* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
+* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
+* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+
 ## 0.5.3 (2025-10-22)
 
 * chore: update CHANGELOG.md for merged changes ([bd36e6d](https://github.com/CloudPirates-io/helm-charts/commit/bd36e6d))

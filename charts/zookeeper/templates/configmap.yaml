@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
+  {{- with (include "zookeeper.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 data:
   zoo.cfg: |
     tickTime={{ .Values.zookeeperConfig.tickTime | default 2000 }}

@@ -18,6 +18,10 @@ spec:
     metadata:
       labels:
         {{- include "memcached.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
 {{- with (include "memcached.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -49,12 +53,9 @@ spec:
             - name: memcached
               containerPort: 11211
               protocol: TCP
-          {{- if .Values.extraEnv }}
+          {{- with .Values.extraEnvVars }}
           env:
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+{{- toYaml . | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -81,6 +82,40 @@ spec:
           volumeMounts:
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
           {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          image: {{ include "memcached.metrics.image" . | quote }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
+          args:
+            - "--memcached.address=localhost:{{ .Values.service.port }}"
+            - "--web.listen-address=:{{ .Values.metrics.service.port }}"
+            {{- range .Values.metrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          resources: {{ toYaml .Values.metrics.resources | nindent 12 }}
+        {{- end }}
       {{- if .Values.extraVolumes }}
       volumes:
         {{- toYaml .Values.extraVolumes | nindent 8 }}

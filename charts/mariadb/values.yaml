@@ -173,10 +173,15 @@ resources:
   ##   cpu: 100m
 
 ## @section Extra Configs
-## @param env A list of additional environment Variables
-env: []
-## - name: ENV_VARIABLE
-##   value: "value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 ## @param extraSecrets A list of additional existing secrets that will be mounted into the container
 extraSecrets: []
 ##  - name: secret

@@ -57,6 +57,9 @@ spec:
             - name: POSTGRES_EFFECTIVE_CACHE_SIZE
               value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
             {{- end }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
           ports:
             - name: postgresql
               containerPort: {{ .Values.service.targetPort }}

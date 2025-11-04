@@ -6,6 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "memcached.labels" . | nindent 4 }}
+  {{- with (include "memcached.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
 data:
   {{- if .Values.configMap.data }}
   {{- toYaml .Values.configMap.data | nindent 2 }}

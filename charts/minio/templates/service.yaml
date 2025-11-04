@@ -16,8 +16,18 @@ spec:
     - port: {{ .Values.service.port }}
       protocol: TCP
       name: minio
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.api)) }}
+      nodePort: {{ .Values.service.nodePorts.api }}
+      {{- else if eq .Values.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
     - port: {{ .Values.service.consolePort }}
       protocol: TCP
       name: console
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.console)) }}
+      nodePort: {{ .Values.service.nodePorts.console }}
+      {{- else if eq .Values.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
   selector:
     {{- include "minio.selectorLabels" . | nindent 4 }}

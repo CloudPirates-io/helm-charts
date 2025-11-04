@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "keycloak.fullname" . -}}
 {{- $httpPort := .Values.service.httpPort -}}
+{{- $httpsPort := .Values.service.httpsPort -}}
 {{- if and .Values.ingress.className (not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class")) }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
 {{- end }}
@@ -11,9 +12,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- $annotations := merge .Values.ingress.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
+    {{- if not $.Values.keycloak.httpEnabled }}
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    {{- end }}
   {{- end }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
@@ -44,10 +49,18 @@ spec:
               service:
                 name: {{ $fullName }}
                 port:
+                  {{- if $.Values.keycloak.httpEnabled }}
                   number: {{ $httpPort }}
+                  {{- else }}
+                  number: {{ $httpsPort }}
+                  {{- end }}
               {{- else }}
               serviceName: {{ $fullName }}
+              {{- if $.Values.keycloak.httpEnabled }}
               servicePort: {{ $httpPort }}
+              {{- else }}
+              servicePort: {{ $httpsPort }}
+              {{- end }}
               {{- end }}
           {{- end }}
     {{- end }}

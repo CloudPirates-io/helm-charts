@@ -62,12 +62,13 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Common Parameters
 
-| Parameter           | Description                                     | Default |
-| ------------------- | ----------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override memcached.fullname | `""`    |
-| `fullnameOverride`  | String to fully override memcached.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects           | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects      | `{}`    |
+| Parameter           | Description                                              | Default |
+| ------------------- | -------------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override memcached.fullname          | `""`    |
+| `fullnameOverride`  | String to fully override memcached.fullname              | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects               | `{}`    |
+| `podAnnotations`    | Annotations to add to the pods created by the deployment | `{}`    |
 
 ### Memcached Image Parameters
 
@@ -170,7 +171,7 @@ The following table lists the configurable parameters of the Memcached chart and
 
 | Parameter           | Description                                                                         | Default |
 | ------------------- | ----------------------------------------------------------------------------------- | ------- |
-| `extraEnv`          | A list of additional environment variables                                          | `[]`    |
+| `extraEnvVars`      | Additional environment variables to set                                             | `[]`    |
 | `extraVolumes`      | A list of additional existing volumes that will be mounted into the container       | `[]`    |
 | `extraVolumeMounts` | A list of additional existing volume mounts that will be mounted into the container | `[]`    |
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release             | `[]`    |
@@ -220,6 +221,34 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `nodeSelector`   | Node labels for pod assignment | `{}`    |
 | `tolerations`    | Tolerations for pod assignment | `[]`    |
 | `affinity`       | Affinity for pod assignment    | `{}`    |
+
+### Metrics
+
+| Parameter                                  | Description                                                                            | Default                    |
+|--------------------------------------------|----------------------------------------------------------------------------------------|----------------------------|
+| `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Memcached metrics                        | `false`                    |
+| `metrics.image.registry`                   | Memcached exporter image registry                                                      | `docker.io`                |
+| `metrics.image.repository`                 | Memcached exporter image repository                                                    | `prom/memcached-exporter`  |
+| `metrics.image.tag`                        | Memcached exporter image tag                                                           | See values.yaml            |
+| `metrics.image.pullPolicy`                 | Memcached exporter image pull policy                                                   | `Always`                   |
+| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                  | `50m`                      |
+| `metrics.resources.requests.memory`        | Memory request for the metrics container                                               | `64Mi`                     |
+| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                    | `nil`                      |
+| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                 | `64Mi`                     |
+| `metrics.extraArgs`                        | Extra arguments for Memcached exporter (e.g. `--log.level=debug`, `--log.format=json`) | `[]`                       |
+| `metrics.service.type`                     | Metrics service type                                                                   | `ClusterIP`                |
+| `metrics.service.port`                     | Metrics service port                                                                   | `9150`                     |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                                      | `{}`                       |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics using Prometheus Operator          | `false`                    |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                            | `30s`                      |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                | `""`                       |
+| `metrics.serviceMonitor.relabelings`       | Relabeling rules to apply the target’s metadata labels before scraping.                | `[]`                       |
+| `metrics.serviceMonitor.metricRelabelings` | Relabeling rules to apply to the samples before ingestion.                             | `[]`                       |
+| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels when they collide with Prometheus target labels                   | `false`                    |
+| `metrics.serviceMonitor.labels`            | Additional service monitor labels                                                      | `{}`                       |
+| `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                                   | `{}`                       |
+| `metrics.serviceMonitor.namespaceSelector` | Which namespace(s) Prometheus should discover the services in.                         | `{}`                       |
+
 
 ## Examples
 
