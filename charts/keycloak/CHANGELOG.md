@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.2 (2025-11-05)
+
+* [keycloak]: Fix mariadb configuration ([#544](https://github.com/CloudPirates-io/helm-charts/pull/544))
 
 ## 0.8.1 (2025-11-02)
 
