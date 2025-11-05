@@ -18,6 +18,9 @@ commonAnnotations: {}
 ## @param podAnnotations Annotations to add to the pods created by the deployment
 podAnnotations: {}
 
+## @param podLabels Labels to add to the pods created by the deployment
+podLabels: {}
+
 ## @section Memcached image parameters
 image:
   ## @param image.registry Memcached image registry
