@@ -1974,6 +1974,68 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |2
             - kind: changed
+              description: "[keycloak]: Fix https settings in keycloak when disabling http (#530)"
+              links:
+                - name: "Commit b0c34f6"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/b0c34f6"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Keycloak
+          url: https://www.keycloak.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+        - name: Application
+          url: https://github.com/keycloak/keycloak
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 26.4.2
+    created: "2025-11-05T12:41:07.648811179Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.9.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: Open Source Identity and Access Management Solution
+    digest: fc735c0b8eb925bfff1d74b5ad2d2bf22a407f16cd0b38a76874efbcabe185aa
+    home: https://www.keycloak.org
+    icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg
+    keywords:
+    - keycloak
+    - identity
+    - access-management
+    - authentication
+    - authorization
+    - oauth
+    - openid-connect
+    - saml
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: keycloak
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.8.2/keycloak-0.8.2.tgz
+    version: 0.8.2
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "Provide empty mounts for themes and providers (#504)"
               links:
                 - name: "Commit 4d2f107"
@@ -13935,4 +13997,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-04T14:39:22.326129394Z"
+generated: "2025-11-05T12:41:07.890289867Z"
