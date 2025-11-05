@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.3 (2025-11-05)
+
+* [memcached] Add support for pod labels ([#550](https://github.com/CloudPirates-io/helm-charts/pull/550))
 
 ## 0.5.2 (2025-11-04)
 
