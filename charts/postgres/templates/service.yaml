@@ -21,6 +21,9 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
+      {{- if and ( or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort") ) (.Values.service.nodePort) }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
       protocol: TCP
       name: postgresql
   selector:

@@ -137,6 +137,8 @@ service:
   port: 5432
   ## @param service.targetPort PostgreSQL container port
   targetPort: 5432
+  ## @param service.nodePort PostgreSQL NodePort port
+  nodePort: 30432
   ## @param service.annotations Service annotations
   annotations: {}
 
