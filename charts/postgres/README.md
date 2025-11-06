@@ -156,11 +156,11 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 ### Service configuration
 
 | Parameter                       | Description                                                                       | Default     |
-|---------------------------------|-----------------------------------------------------------------------------------| ----------- |
+|---------------------------------|-----------------------------------------------------------------------------------|-------------|
 | `service.type`                  | PostgreSQL service type                                                           | `ClusterIP` |
 | `service.port`                  | PostgreSQL service port                                                           | `5432`      |
 | `service.targetPort`            | PostgreSQL container port                                                         | `5432`      |
-| `service.nodePort`              | PostgreSQL NodePort port                                                          | `5432`      |
+| `service.nodePort`              | PostgreSQL NodePort port                                                          | `30432`     |
 | `service.annotations`           | Service annotations                                                               | `{}`        |
 | `service.loadBalancerIP`        | Load balancer IP (applies if service type is `LoadBalancer`)                      | `""`        |
 | `service.externalTrafficPolicy` | External traffic policy (applies if service type is `LoadBalancer` or `NodePort`) | `Cluster`   |
