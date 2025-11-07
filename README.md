@@ -105,11 +105,10 @@ Want to contribute? Awesome! The most basic way to show your support is to star 
 
 If you want to open a PR, read our [contributing guidelines](CONTRIBUTING.md) for information about setting up your environment and instructions on the signature verification that we require.
 
-> [!TIP] Chat with us!
-> Need help or just want to talk?
-> Chat with us and the community on our [Discord server](https://discord.gg/XUn9Kt5dsy)
->
-> [![Discord](https://img.shields.io/discord/1426189195285762150?logo=discord&label=Discord)](https://discord.gg/XUn9Kt5dsy)
+Chat with us and the community on our [Discord server](https://discord.gg/XUn9Kt5dsy)!\
+Everyone is welcome, wether you have a question, need help with a chart, want to contribute, know what's coming next or just have a talk with us.
+
+[![Discord](https://img.shields.io/discord/1426189195285762150?logo=discord&label=Discord)](https://discord.gg/XUn9Kt5dsy)
 
 **This project is built and maintained by our growing community of contributors!**
 
