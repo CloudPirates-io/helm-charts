@@ -577,6 +577,14 @@
                 "clusterPort": {
                     "type": "integer"
                 },
+                "headless": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        }
+                    }
+                },
                 "port": {
                     "type": "integer"
                 },
