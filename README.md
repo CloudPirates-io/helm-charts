@@ -2,7 +2,7 @@
     <a href="https://artifacthub.io/packages/search?org=cloudpirates">
       <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates" />
     </a>
-    <a href="https://discord.gg/XUn9Kt5dsy">
+    <a href="https://github.com/CloudPirates-io/helm-charts/blob/main/CONTRIBUTING.md">
       <img src="https://img.shields.io/badge/contributions-welcome-purple.svg" />
     </a>
     <a href="https://discord.gg/XUn9Kt5dsy">
