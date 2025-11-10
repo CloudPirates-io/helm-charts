@@ -179,8 +179,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
+            {{- if .Values.config.mountConfigMap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}
+            {{- end }}
             - name: run
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
@@ -245,10 +247,12 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
+        {{- if .Values.config.mountConfigMap }}
         - name: config
           configMap:
             name: {{ include "postgres.configmapName" . }}
             optional: true
+        {{- end }}
         - name: run
           emptyDir: {}
         - name: tmp

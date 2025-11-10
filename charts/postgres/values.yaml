@@ -73,6 +73,8 @@ auth:
 
 ## @section PostgreSQL Configuration
 config:
+  ## @param config.mountConfigMap Enable mounting of ConfigMap with PostgreSQL configuration
+  mountConfigMap: true
   ## @param config.postgresqlSharedPreloadLibraries Shared preload libraries (comma-separated list)
   postgresqlSharedPreloadLibraries: ""
   ## @param config.postgresqlMaxConnections Maximum number of connections
