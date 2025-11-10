@@ -7102,6 +7102,59 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
             - kind: changed
+              description: "Config for NodePort port (#561)"
+              links:
+                - name: "Commit bae2da0"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/bae2da0"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: PostgreSQL
+          url: https://www.postgresql.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+        - name: Application
+          url: https://github.com/postgres/postgres
+        - name: Docker Image
+          url: https://hub.docker.com/_/postgres
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 18.0.0
+    created: "2025-11-10T16:03:42.970987831Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: The World's Most Advanced Open Source Relational Database
+    digest: 29793d9a715d984e861878aae7790d5784733934614f9795939bb3b9367b387a
+    home: https://www.postgresql.org
+    icon: https://a.storyblok.com/f/143071/512x512/95e7f13e62/postgres-logo.svg
+    keywords:
+    - postgres
+    - postgresql
+    - database
+    - sql
+    - relational
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: postgres
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+    - https://github.com/postgres/postgres
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/postgres-0.11.6/postgres-0.11.6.tgz
+    version: 0.11.6
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "Fix logic in init-scripts ConfigMap (#551)"
               links:
                 - name: "Commit 90d61df"
@@ -14365,4 +14418,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-07T17:32:28.949332281Z"
+generated: "2025-11-10T16:03:43.150455088Z"
