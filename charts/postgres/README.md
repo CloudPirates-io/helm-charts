@@ -120,6 +120,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 | Parameter                                     | Description                                                                             | Default |
 | --------------------------------------------- | --------------------------------------------------------------------------------------- | ------- |
+| `config.mountConfigMap`                       | Enable mounting of ConfigMap with PostgreSQL configuration                              | `true`  |
 | `config.postgresqlSharedPreloadLibraries`     | Shared preload libraries (comma-separated list)                                         | `""`    |
 | `config.postgresqlMaxConnections`             | Maximum number of connections                                                           | `100`   |
 | `config.postgresqlSharedBuffers`              | Amount of memory the database server uses for shared memory buffers                     | `""`    |
