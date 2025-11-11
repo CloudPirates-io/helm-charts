@@ -138,6 +138,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "keycloak.secretName" . }}
                   key: {{ include "keycloak.adminPasswordKey" . }}
+            {{- if or .Values.tls.truststorePassword .Values.tls.truststoreExistingSecret }}
+            - name: KC_HTTPS_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tls.truststoreExistingSecret | default (include "keycloak.fullname" .) }}
+                  key: {{ .Values.tls.truststoreExistingSecretKey }}
+            {{- end }}
             {{- if .Values.database.type }}
             - name: KC_DB
               value: {{ .Values.database.type }}
