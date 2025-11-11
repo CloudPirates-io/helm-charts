@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.8.3 (2025-11-11)
+
+* add truststoreExistingSecretKey, add truststorePassword to env-Vars (#574) ([9c97080](https://github.com/CloudPirates-io/helm-charts/commit/9c97080))
+* chore: update CHANGELOG.md for merged changes ([e67a635](https://github.com/CloudPirates-io/helm-charts/commit/e67a635))
+* chore: update CHANGELOG.md for merged changes ([607f120](https://github.com/CloudPirates-io/helm-charts/commit/607f120))
+
 ## 0.8.2 (2025-11-05)
 
 * [keycloak]: Fix mariadb configuration (#544) ([6cec40c](https://github.com/CloudPirates-io/helm-charts/commit/6cec40c))
