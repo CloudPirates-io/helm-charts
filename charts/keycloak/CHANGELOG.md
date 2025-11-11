@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.8.4 (2025-11-11)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.4 (patch) (#563) ([c65d420](https://github.com/CloudPirates-io/helm-charts/commit/c65d420))
+* chore: update CHANGELOG.md for merged changes ([5797494](https://github.com/CloudPirates-io/helm-charts/commit/5797494))
+* chore: update CHANGELOG.md for merged changes ([1a445f9](https://github.com/CloudPirates-io/helm-charts/commit/1a445f9))
+* chore: auto-generate values.schema.json (#578) ([584a535](https://github.com/CloudPirates-io/helm-charts/commit/584a535))
+* chore: update CHANGELOG.md for merged changes ([69f290f](https://github.com/CloudPirates-io/helm-charts/commit/69f290f))
+* chore: update CHANGELOG.md for merged changes ([7b32772](https://github.com/CloudPirates-io/helm-charts/commit/7b32772))
+
 ## 0.8.3 (2025-11-11)
 
 * add truststoreExistingSecretKey, add truststorePassword to env-Vars (#574) ([9c97080](https://github.com/CloudPirates-io/helm-charts/commit/9c97080))
