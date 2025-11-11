@@ -226,6 +226,40 @@ zkCli.sh -server my-zookeeper:2181
 
 See [values.yaml](./values.yaml) for the full list of configurable parameters.
 
+#### Extra Objects
+
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+
+**Example: Deploy a NetworkPolicy with templating**
+
+```yaml
+extraObjects:
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: "{{ .Release.Namespace }}"
+    spec:
+      podSelector: {}
+      policyTypes:
+        - Egress
+      egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+        - ports:
+            - port: 53
+              protocol: UDP
+            - port: 53
+              protocol: TCP
+```
+
 ## Upgrading
 
 To upgrade your ZooKeeper installation:
