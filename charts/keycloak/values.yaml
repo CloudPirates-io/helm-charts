@@ -161,8 +161,10 @@ tls:
   ## @param tls.truststoreEnabled Enable truststore for client certificate validation or outgoing HTTPS requests
   truststoreEnabled: false
   ## @param tls.truststoreExistingSecret Name of existing secret containing truststore file (Java Keystore format)
-  ## The secret should contain 'truststore.jks' key
+  ## The secret should contain 'truststore.jks' key or the key specified in the value 'tls.truststoreExistingSecretKey'
   truststoreExistingSecret: ""
+  ## @param tls.truststoreExistingSecretKey Key of the secret to get the trustStorePassword from
+  truststoreExistingSecretKey: "truststore.jks"
   ## @param tls.truststorePassword Password for the truststore (use with caution - consider using existingSecret)
   truststorePassword: ""
   ## @param tls.truststoreFile Path where the truststore file will be mounted (internal)

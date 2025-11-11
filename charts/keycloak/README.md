@@ -148,28 +148,29 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### TLS Configuration
 
-| Parameter                         | Description                                                                                     | Default                                     |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                              | `false`                                     |
-| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                                        |
-| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                  | `"/opt/keycloak/certs/tls.crt"`             |
-| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                              | `"/opt/keycloak/certs/tls.key"`             |
-| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                          | `false`                                     |
-| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                | `""`                                        |
-| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                       | `ClusterIssuer`                             |
-| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                | `cert-manager.io`                           |
-| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                  | `""`                                        |
-| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                | `""`                                        |
-| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                            | `""`                                        |
-| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                     | `[]`                                        |
-| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                        | `[]`                                        |
-| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                    | `""`                                        |
-| `tls.certManager.usages`          | Certificate key usages                                                                          | `["digital signature", "key encipherment"]` |
-| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                             | `{}`                                        |
-| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                  | `false`                                     |
-| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks)  | `""`                                        |
-| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                 | `""`                                        |
-| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                       | `"/opt/keycloak/truststore/truststore.jks"` |
+| Parameter                         | Description                                                                                            | Default                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                                     | `false`                                     |
+| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key)        | `""`                                        |
+| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                         | `"/opt/keycloak/certs/tls.crt"`             |
+| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                                     | `"/opt/keycloak/certs/tls.key"`             |
+| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                                 | `false`                                     |
+| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                       | `""`                                        |
+| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                              | `ClusterIssuer`                             |
+| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                       | `cert-manager.io`                           |
+| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                         | `""`                                        |
+| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                       | `""`                                        |
+| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                                   | `""`                                        |
+| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                            | `[]`                                        |
+| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                               | `[]`                                        |
+| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                           | `""`                                        |
+| `tls.certManager.usages`          | Certificate key usages                                                                                 | `["digital signature", "key encipherment"]` |
+| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                                    | `{}`                                        |
+| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                         | `false`                                     |
+| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, default-key: truststore.jks) | `""`                                        |
+| `tls.truststoreExistingSecretKey` | Key of the secret to get the trustStorePassword from                                                   | `"truststore.jks"`                          |
+| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                        | `""`                                        |
+| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                              | `"/opt/keycloak/truststore/truststore.jks"` |
 
 ### Database Configuration
 

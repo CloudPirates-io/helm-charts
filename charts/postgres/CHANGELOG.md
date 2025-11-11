@@ -1,8 +1,14 @@
 # Changelog
 
+
 ## 0.11.6 (2025-11-10)
 
-* [postgres] fix: allow not to mount config ([#573](https://github.com/CloudPirates-io/helm-charts/pull/573))
+* fix: allow not to mount config (#573) ([5dac551](https://github.com/CloudPirates-io/helm-charts/commit/5dac551))
+* chore: update CHANGELOG.md for merged changes ([fff2aa9](https://github.com/CloudPirates-io/helm-charts/commit/fff2aa9))
+* chore: update CHANGELOG.md for merged changes ([d439361](https://github.com/CloudPirates-io/helm-charts/commit/d439361))
+* chore: auto-generate values.schema.json (#562) ([ba97fca](https://github.com/CloudPirates-io/helm-charts/commit/ba97fca))
+* chore: update CHANGELOG.md for merged changes ([19a2697](https://github.com/CloudPirates-io/helm-charts/commit/19a2697))
+* chore: update CHANGELOG.md for merged changes ([471eef9](https://github.com/CloudPirates-io/helm-charts/commit/471eef9))
 
 ## 0.11.5 (2025-11-07)
 
