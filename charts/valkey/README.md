@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-valkey"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-valkey" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-valkey" /></a>
 </p>
 
 # Valkey
@@ -74,7 +74,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `global.imageRegistry`    | Global Docker image registry                    | `""`    |
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
 
-### Valkey image configuration
+### Image configuration
 
 | Parameter          | Description                                                                                            | Default         |
 | ------------------ | ------------------------------------------------------------------------------------------------------ | --------------- |
@@ -84,7 +84,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `image.digest`     | Valkey image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`            |
 | `image.pullPolicy` | Valkey image pull policy                                                                               | `IfNotPresent`  |
 
-### Deployment configuration
+### Common configuration
 
 | Parameter           | Description                                                                                    | Default        |
 | ------------------- | ---------------------------------------------------------------------------------------------- | -------------- |
@@ -536,12 +536,6 @@ metrics:
     enabled: true
 ```
 
-Deploy with monitoring enabled:
-
-```bash
-helm install my-valkey ./charts/valkey -f values-monitoring.yaml
-```
-
 You can access metrics directly via port-forward:
 
 ```bash
@@ -649,4 +643,4 @@ For issues related to this Helm chart, please check:
 
 - [Valkey Documentation](https://valkey.io/documentation/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)
