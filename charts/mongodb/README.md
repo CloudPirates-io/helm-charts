@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-mongodb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mongodb" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-mongodb/mongodb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mongodb" /></a>
 </p>
 
 # MongoDB
@@ -90,7 +90,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | ------------------ | ------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`   | MongoDB image registry    | `docker.io`                                                                        |
 | `image.repository` | MongoDB image repository  | `mongo`                                                                            |
-| `image.tag`        | MongoDB image tag         | `"8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c"` |
+| `image.tag`        | MongoDB image tag         | `"8.2.1@sha256:86835e8da0f94efd61334decb320fa43e8a60027688cbd856bf29d065b470338"`  |
 | `image.pullPolicy` | MongoDB image pull policy | `Always`                                                                           |
 
 ### Replica Configuration
@@ -394,3 +394,13 @@ To upgrade the MongoDB deployment:
 ```bash
 helm upgrade my-mongodb ./mongodb -f my-values.yaml
 ```
+
+## Troubleshooting
+
+### Getting Support
+
+For issues related to this Helm chart, please check:
+
+- [MongoDB Documentation](https://www.mongodb.com/docs/get-started/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)
