@@ -239,11 +239,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
-            - name: REDISCLI_AUTH
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "redis.secretName" . }}
-                  key: {{ include "redis.secretPasswordKey" . }}
             {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
@@ -255,7 +250,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -268,7 +263,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -281,7 +276,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
