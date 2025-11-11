@@ -80,8 +80,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | ------------------ | ------------------------------------------------------------------------------------------------------ | --------------- |
 | `image.registry`   | Valkey image registry                                                                                  | `docker.io`     |
 | `image.repository` | Valkey image repository                                                                                | `valkey/valkey` |
-| `image.tag`        | Valkey image tag (immutable tags are recommended)                                                      | `"8.0.1"`       |
-| `image.digest`     | Valkey image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`            |
+| `image.tag`        | Valkey image tag (immutable tags are recommended)                                                      | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"`       |
 | `image.pullPolicy` | Valkey image pull policy                                                                               | `IfNotPresent`  |
 
 ### Common configuration
