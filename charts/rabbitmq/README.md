@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-rabbitmq"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-rabbitmq" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-rabbitmq/rabbitmq"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-rabbitmq" /></a>
 </p>
 
 # RabbitMQ
@@ -8,28 +8,9 @@ A Helm chart for RabbitMQ - A messaging broker that implements the Advanced Mess
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
-
-## Security & Signature Verification
-
-This Helm chart is cryptographically signed with Cosign to ensure authenticity and prevent tampering.
-
-**Public Key:**
-
-```
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
------END PUBLIC KEY-----
-```
-
-To verify the helm chart before installation, copy the public key to the file `cosign.pub` and run cosign:
-
-```bash
-cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/rabbitmq:<version>
-```
 
 ## Installing the Chart
 
@@ -120,12 +101,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### RabbitMQ image parameters
 
-| Parameter               | Description                | Default                                                                                     |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------- |
-| `image.registry`        | RabbitMQ image registry    | `docker.io`                                                                                 |
-| `image.repository`      | RabbitMQ image repository  | `rabbitmq`                                                                                  |
-| `image.tag`             | RabbitMQ image tag         | `"4.1.3-managemen@sha256:4c521003d812dd7b33793e2b7e45fbcc323d764b8c3309dfcb0e4c5db30c56ab"` |
-| `image.imagePullPolicy` | RabbitMQ image pull policy | `Always`                                                                                    |
+| Parameter               | Description                | Default                                                                                      |
+| ----------------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| `image.registry`        | RabbitMQ image registry    | `docker.io`                                                                                  |
+| `image.repository`      | RabbitMQ image repository  | `rabbitmq`                                                                                   |
+| `image.tag`             | RabbitMQ image tag         | `"4.2.0-management@sha256:23676732c0b7bb978c0837c150492222d5b23ff079fc2025b537f4ce5c013d98"` |
+| `image.imagePullPolicy` | RabbitMQ image pull policy | `Always`                                                                                     |
 
 ### Deployment configuration
 
@@ -190,13 +171,13 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### RabbitMQ configuration
 
-| Parameter                            | Description                                                                                                                                                          | Default      |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ                                                                                                                 | `false`      |
-| `config.memoryHighWatermark.type`    | Memory high watermark type. Either `absolute` or `relative`                                                                                                          | `"relative"` |
+| Parameter                            | Description                                                                                                                                                        | Default      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ                                                                                                               | `false`      |
+| `config.memoryHighWatermark.type`    | Memory high watermark type. Either `absolute` or `relative`                                                                                                        | `"relative"` |
 | `config.memoryHighWatermark.value`   | Memory high watermark value. For relative: use number (e.g., `0.4` for 40%). For absolute: use string to avoid scientific notation (e.g., `"8GB"`, `"8590000000"`) | `0.4`        |
-| `config.extraConfiguration`          | Additional RabbitMQ configuration                                                                                                                                    | `""`         |
-| `config.advancedConfiguration`       | Advanced RabbitMQ configuration                                                                                                                                      | `""`         |
+| `config.extraConfiguration`          | Additional RabbitMQ configuration                                                                                                                                  | `""`         |
+| `config.advancedConfiguration`       | Advanced RabbitMQ configuration                                                                                                                                    | `""`         |
 
 ### PeerDiscoveryK8sPlugin configuration
 
@@ -573,3 +554,11 @@ kubectl get secret my-rabbitmq -o jsonpath="{.data.password}" | base64 --decode
    - Monitor resource usage with `kubectl top pod`
    - Adjust memory limits and RabbitMQ memory configuration
    - Consider increasing resources
+
+### Getting Support
+
+For issues related to this Helm chart, please check:
+
+- [RabbitMQ Documentation](https://www.rabbitmq.com/docs)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)
