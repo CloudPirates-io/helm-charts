@@ -352,6 +352,10 @@
         },
         "tolerations": {
             "type": "array"
+        },
+        "deploymentType": {
+            "type": "string",
+            "enum": ["Deployment", "StatefulSet"]
         }
     }
 }

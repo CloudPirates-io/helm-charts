@@ -71,6 +71,13 @@ The following table lists the configurable parameters of the Memcached chart and
 | `podAnnotations`    | Annotations to add to the pods created by the deployment | `{}`    |
 | `podLabels`         | Labels to add to the pods created by the deployment      | `{}`    |
 
+### Deployment Parameters
+
+| Parameter      | Description                                           | Default      |
+|----------------|-------------------------------------------------------|--------------|
+| `replicaCount` | Number of Memcached replicas to deploy                | `1`          |
+| `deploymentType` | Type of workload to deploy (Deployment or StatefulSet) | `Deployment` |
+
 ### Memcached Image Parameters
 
 | Parameter           | Description                                          | Default                                                                            |
@@ -314,6 +321,30 @@ affinity:
                 values:
                   - memcached
           topologyKey: kubernetes.io/hostname
+```
+
+### StatefulSet Deployment
+
+If you need stable network identities or persistent storage, use a StatefulSet instead of a Deployment:
+
+```yaml
+workloadType: StatefulSet
+replicaCount: 3
+
+config:
+  memoryLimit: 256
+  maxConnections: 2048
+
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+# StatefulSets use a headless service for stable network identity
+service:
+  type: ClusterIP
 ```
 
 ### Custom Configuration with ConfigMap

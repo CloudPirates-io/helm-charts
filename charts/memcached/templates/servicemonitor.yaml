@@ -3,6 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "memcached.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "memcached.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics
