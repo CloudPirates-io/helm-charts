@@ -1,3 +1,7 @@
+<p align="center">
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-rustfs/rustfs"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-rustfs" /></a>
+</p>
+
 # RustFS
 
 A Helm chart for RustFS - High-performance distributed file system written in Rust with S3-compatible API. RustFS is a modern, efficient file system that provides S3-compatible APIs for cloud-native applications.
@@ -7,7 +11,7 @@ A Helm chart for RustFS - High-performance distributed file system written in Ru
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -297,58 +301,122 @@ The following table lists the configurable parameters of the RustFS chart and th
 
 ## Examples
 
-### Basic installation with default values
+### Example 1: Simple Single Replica Deployment
 
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs
+This example demonstrates a basic deployment with a single replica, suitable for development or testing environments.
+
+```yaml
+# values-simple.yaml
+
+# Authentication credentials
+auth:
+  accessKey: "myadminuser"
+  secretKey: "mysecretpassword"
+
+# Basic configuration
+config:
+  logLevel: "info"
+
+# Data persistence with 50Gi storage
+dataPersistence:
+  size: 50Gi
+
+# Logs persistence
+logsPersistence:
+  size: 5Gi
+
+# Resource limits
+resources:
+  limits:
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
 ```
 
-### Installation with custom credentials
+### Example 2: StatefulSet with 4 Replicas
 
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
-  --set auth.accessKey=myaccesskey \
-  --set auth.secretKey=mysecretkey
+This example demonstrates a distributed deployment using StatefulSet with 4 replicas, suitable for production environments requiring high availability and data consistency.
+
+```yaml
+# values-statefulset.yaml
+
+# Use StatefulSet with 4 replicas for distributed storage
+deploymentType: "statefulset"
+replicaCount: 4
+
+# Authentication credentials
+auth:
+  accessKey: "myadminuser"
+  secretKey: "mysecretpassword"
+
+# Pod management policy for parallel startup
+podManagementPolicy: "Parallel"
+
+# Configuration
+config:
+  logLevel: "info"
+
+# Enable ingress for API access
+ingress:
+  className: myIngressClass
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  tls:
+   - secretName: rustfs-tls
+     hosts:
+       - rustfs.example.com
+  hosts:
+    - host: rustfs.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Enable console ingress (routes to first pod for admin access)
+consoleIngress:
+  className: myIngressClass
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  tls:
+   - secretName: rustfs-console-tls
+     hosts:
+       - rustfs-console.example.com
+  hosts:
+    - host: rustfs-console.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Data persistence - each pod gets its own PVC
+dataPersistence:
+  size: 100Gi
+
+# Logs persistence
+logsPersistence:
+  size: 10Gi
+
+# Resource limits for production workload
+resources:
+  limits:
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+# Anti-affinity to spread pods across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - rustfs
+          topologyKey: kubernetes.io/hostname
 ```
-
-### Installation with ingress enabled
-
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
-  --set ingress.enabled=true \
-  --set ingress.hosts[0].host=rustfs.example.com \
-  --set consoleIngress.enabled=true \
-  --set consoleIngress.hosts[0].host=rustfs-console.example.com
-```
-
-### Installation with console service enabled
-
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
-  --set deploymentType=statefulset \
-  --set consoleService.enabled=true \
-  --set consoleIngress.enabled=true \
-  --set consoleIngress.hosts[0].host=rustfs-console.example.com
-```
-
-### Installation with custom storage
-
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
-  --set dataPersistence.size=100Gi \
-  --set logsPersistence.size=5Gi \
-  --set dataPersistence.storageClass=fast-ssd
-```
-
-### Installation as StatefulSet
-
-```bash
-helm install my-rustfs oci://registry-1.docker.io/cloudpirates/rustfs \
-  --set deploymentType=statefulset \
-  --set replicaCount=3 \
-  --set podManagementPolicy=OrderedReady
-```
-
 
 ## Accessing RustFS
 
@@ -405,10 +473,10 @@ kubectl get pvc -l app.kubernetes.io/name=rustfs
 kubectl get svc -l app.kubernetes.io/name=rustfs
 ```
 
-## Contributing
+### Getting Support
 
-This chart is maintained by CloudPirates. For issues, feature requests, or contributions, please visit our [GitHub repository](https://github.com/CloudPirates-io/helm-charts).
+For issues related to this Helm chart, please check:
 
-## License
-
-This Helm chart is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+- [RustFS Documentation](https://docs.rustfs.com/installation/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

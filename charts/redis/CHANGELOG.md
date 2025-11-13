@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.14.1 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([02081a5](https://github.com/CloudPirates-io/helm-charts/commit/02081a5))
+* chore: update CHANGELOG.md for merged changes ([9618eff](https://github.com/CloudPirates-io/helm-charts/commit/9618eff))
+* Update charts/redis/values.yaml redis (#554) ([1737c28](https://github.com/CloudPirates-io/helm-charts/commit/1737c28))
+* chore: update CHANGELOG.md for merged changes ([9cccb2e](https://github.com/CloudPirates-io/helm-charts/commit/9cccb2e))
+* chore: update CHANGELOG.md for merged changes ([21d6041](https://github.com/CloudPirates-io/helm-charts/commit/21d6041))
+* chore: auto-generate values.schema.json (#570) ([a23729e](https://github.com/CloudPirates-io/helm-charts/commit/a23729e))
+
 ## 0.14.0 (2025-11-07)
 
 * [redis]: Headless Service annotations ([10daf47](https://github.com/CloudPirates-io/helm-charts/commit/10daf47))

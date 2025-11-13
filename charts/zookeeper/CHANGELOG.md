@@ -1,8 +1,5 @@
 # Changelog
 
-## 0.3.1 (2025-11-12)
-
-* [zookeeper] Update charts/zookeeper/values.yaml zookeeper ([#590](https://github.com/CloudPirates-io/helm-charts/pull/590))
 
 ## 0.3.1 (2025-11-12)
 

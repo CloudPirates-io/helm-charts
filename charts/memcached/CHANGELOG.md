@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.5.4 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([abda166](https://github.com/CloudPirates-io/helm-charts/commit/abda166))
+* chore: update CHANGELOG.md for merged changes ([be2722f](https://github.com/CloudPirates-io/helm-charts/commit/be2722f))
+
 ## 0.5.3 (2025-11-05)
 
 * Add support for pod labels (#550) ([6071930](https://github.com/CloudPirates-io/helm-charts/commit/6071930))

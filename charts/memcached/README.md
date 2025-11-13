@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-memcached"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-memcached" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-memcached/memcached"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-memcached" /></a>
 </p>
 
 # Memcached
@@ -18,6 +18,12 @@ To install with custom values:
 
 ```bash
 helm install my-memcached oci://registry-1.docker.io/cloudpirates/memcached -f my-values.yaml
+```
+
+Or install directly from the local chart:
+
+```bash
+helm install my-valkey ./charts/valkey
 ```
 
 ## Uninstalling the Chart
@@ -63,7 +69,7 @@ The following table lists the configurable parameters of the Memcached chart and
 ### Common Parameters
 
 | Parameter           | Description                                              | Default |
-|---------------------|----------------------------------------------------------| ------- |
+| ------------------- | -------------------------------------------------------- | ------- |
 | `nameOverride`      | String to partially override memcached.fullname          | `""`    |
 | `fullnameOverride`  | String to fully override memcached.fullname              | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
@@ -84,7 +90,7 @@ The following table lists the configurable parameters of the Memcached chart and
 | ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`    | Memcached image registry                             | `docker.io`                                                                        |
 | `image.repository`  | Memcached image repository                           | `memcached`                                                                        |
-| `image.tag`         | Memcached image tag (immutable tags are recommended) | `"1.6.39@sha256:3e4cfa8274fc07f27f040ec994c7506a4438a835e2e229673b3da06c8c3d99b2"` |
+| `image.tag`         | Memcached image tag (immutable tags are recommended) | `"1.6.39@sha256:050de63e6c082df85f93ffed9c388004b3c6257a06f1904e8628a6f87658eb99"` |
 | `image.pullPolicy`  | Memcached image pull policy                          | `Always`                                                                           |
 | `image.pullSecrets` | Memcached image pull secrets                         | `[]`                                                                               |
 
@@ -232,30 +238,30 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 
 ### Metrics
 
-| Parameter                                  | Description                                                                            | Default                    |
-|--------------------------------------------|----------------------------------------------------------------------------------------|----------------------------|
-| `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Memcached metrics                        | `false`                    |
-| `metrics.image.registry`                   | Memcached exporter image registry                                                      | `docker.io`                |
-| `metrics.image.repository`                 | Memcached exporter image repository                                                    | `prom/memcached-exporter`  |
-| `metrics.image.tag`                        | Memcached exporter image tag                                                           | See values.yaml            |
-| `metrics.image.pullPolicy`                 | Memcached exporter image pull policy                                                   | `Always`                   |
-| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                  | `50m`                      |
-| `metrics.resources.requests.memory`        | Memory request for the metrics container                                               | `64Mi`                     |
-| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                    | `nil`                      |
-| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                 | `64Mi`                     |
-| `metrics.extraArgs`                        | Extra arguments for Memcached exporter (e.g. `--log.level=debug`, `--log.format=json`) | `[]`                       |
-| `metrics.service.type`                     | Metrics service type                                                                   | `ClusterIP`                |
-| `metrics.service.port`                     | Metrics service port                                                                   | `9150`                     |
-| `metrics.service.annotations`              | Additional custom annotations for Metrics service                                      | `{}`                       |
-| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics using Prometheus Operator          | `false`                    |
-| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                            | `30s`                      |
-| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                | `""`                       |
-| `metrics.serviceMonitor.relabelings`       | Relabeling rules to apply the target’s metadata labels before scraping.                | `[]`                       |
-| `metrics.serviceMonitor.metricRelabelings` | Relabeling rules to apply to the samples before ingestion.                             | `[]`                       |
-| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels when they collide with Prometheus target labels                   | `false`                    |
-| `metrics.serviceMonitor.labels`            | Additional service monitor labels                                                      | `{}`                       |
-| `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                                   | `{}`                       |
-| `metrics.serviceMonitor.namespaceSelector` | Which namespace(s) Prometheus should discover the services in.                         | `{}`                       |
+| Parameter                                  | Description                                                                            | Default                   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------- |
+| `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Memcached metrics                        | `false`                   |
+| `metrics.image.registry`                   | Memcached exporter image registry                                                      | `docker.io`               |
+| `metrics.image.repository`                 | Memcached exporter image repository                                                    | `prom/memcached-exporter` |
+| `metrics.image.tag`                        | Memcached exporter image tag                                                           | `v0.15.4@sha256...`           |
+| `metrics.image.pullPolicy`                 | Memcached exporter image pull policy                                                   | `Always`                  |
+| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                  | `50m`                     |
+| `metrics.resources.requests.memory`        | Memory request for the metrics container                                               | `64Mi`                    |
+| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                    | `nil`                     |
+| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                 | `64Mi`                    |
+| `metrics.extraArgs`                        | Extra arguments for Memcached exporter (e.g. `--log.level=debug`, `--log.format=json`) | `[]`                      |
+| `metrics.service.type`                     | Metrics service type                                                                   | `ClusterIP`               |
+| `metrics.service.port`                     | Metrics service port                                                                   | `9150`                    |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                                      | `{}`                      |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics using Prometheus Operator          | `false`                   |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                            | `30s`                     |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                | `""`                      |
+| `metrics.serviceMonitor.relabelings`       | Relabeling rules to apply the target’s metadata labels before scraping.                | `[]`                      |
+| `metrics.serviceMonitor.metricRelabelings` | Relabeling rules to apply to the samples before ingestion.                             | `[]`                      |
+| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels when they collide with Prometheus target labels                   | `false`                   |
+| `metrics.serviceMonitor.labels`            | Additional service monitor labels                                                      | `{}`                      |
+| `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                                   | `{}`                      |
+| `metrics.serviceMonitor.namespaceSelector` | Which namespace(s) Prometheus should discover the services in.                         | `{}`                      |
 
 
 ## Examples
@@ -429,3 +435,4 @@ For production workloads, consider:
 - [Memcached Official Documentation](https://memcached.org/)
 - [Memcached Docker Hub](https://hub.docker.com/_/memcached)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

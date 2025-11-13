@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.5.2 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([8455aca](https://github.com/CloudPirates-io/helm-charts/commit/8455aca))
+* chore: update CHANGELOG.md for merged changes ([507dd14](https://github.com/CloudPirates-io/helm-charts/commit/507dd14))
+
 ## 0.5.1 (2025-10-30)
 
 * [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.23.0 (minor) (#498) ([af305d0](https://github.com/CloudPirates-io/helm-charts/commit/af305d0))

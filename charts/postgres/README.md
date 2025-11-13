@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
 </p>
 
 # PostgreSQL
@@ -8,7 +8,7 @@ A Helm chart for PostgreSQL - The World's Most Advanced Open Source Relational D
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-postgres`:
 
 ```bash
 helm install my-postgres oci://registry-1.docker.io/cloudpirates/postgres
+```
+
+To install with custom values:
+
+```bash
+helm install my-postgres oci://registry-1.docker.io/cloudpirates/postgres -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -74,7 +80,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
 | `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
-| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"` |
+| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.0@sha256:6f3e42ad37decc037c508dd405f5941c6dfa7d21f21a7237a43bde9def1e295e"` |
 | `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
 
 ### Deployment configuration
@@ -157,7 +163,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 ### Service configuration
 
 | Parameter                       | Description                                                                       | Default     |
-|---------------------------------|-----------------------------------------------------------------------------------|-------------|
+| ------------------------------- | --------------------------------------------------------------------------------- | ----------- |
 | `service.type`                  | PostgreSQL service type                                                           | `ClusterIP` |
 | `service.port`                  | PostgreSQL service port                                                           | `5432`      |
 | `service.targetPort`            | PostgreSQL container port                                                         | `5432`      |
@@ -247,9 +253,9 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
-| `extraEnvVars` | Additional environment variables to set | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container                | `[]`    |
+| `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
+| `extraVolumes`       | Additional volumes to add to the pod                                   | `[]`    |
+| `extraVolumeMounts`  | Additional volume mounts to add to the MongoDB container               | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 
@@ -446,24 +452,6 @@ config:
   existingConfigmap: "postgres-custom-config"
 ```
 
-Create the ConfigMap first:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-custom-config
-data:
-  postgresql.conf: |
-    # Custom PostgreSQL configuration
-    max_connections = 300
-    shared_buffers = 512MB
-    effective_cache_size = 2GB
-    work_mem = 16MB
-    maintenance_work_mem = 256MB
-    # Add your custom configuration here
-```
-
 ### Monitoring with Prometheus
 
 Enable metrics collection with Prometheus:
@@ -474,12 +462,6 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
-```
-
-Deploy with monitoring enabled:
-
-```bash
-helm install my-postgres ./charts/postgres -f values-monitoring.yaml
 ```
 
 The PostgreSQL exporter will expose metrics on port 9187, and if you have Prometheus Operator installed, the ServiceMonitor will automatically configure Prometheus to scrape the metrics.
@@ -611,4 +593,4 @@ For issues related to this Helm chart, please check:
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)
