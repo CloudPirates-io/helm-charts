@@ -328,7 +328,7 @@ affinity:
 If you need stable network identities or persistent storage, use a StatefulSet instead of a Deployment:
 
 ```yaml
-workloadType: StatefulSet
+deploymentType: StatefulSet
 replicaCount: 3
 
 config:
