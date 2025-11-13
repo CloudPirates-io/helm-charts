@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.1 (2025-11-12)
+
+* [zookeeper] Update charts/zookeeper/values.yaml zookeeper ([#590](https://github.com/CloudPirates-io/helm-charts/pull/590))
+
+## 0.3.1 (2025-11-12)
+
+* Update charts/zookeeper/values.yaml zookeeper (#590) ([ac259f3](https://github.com/CloudPirates-io/helm-charts/commit/ac259f3))
+* chore: update CHANGELOG.md for merged changes ([170dd6a](https://github.com/CloudPirates-io/helm-charts/commit/170dd6a))
+* chore: update CHANGELOG.md for merged changes ([9227d83](https://github.com/CloudPirates-io/helm-charts/commit/9227d83))
+* [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c7310](https://github.com/CloudPirates-io/helm-charts/commit/91c7310))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
 
 ## 0.3.0 (2025-10-28)
 
