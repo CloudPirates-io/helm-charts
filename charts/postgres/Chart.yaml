@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.11.6
+version: 0.11.7
 appVersion: "18.0.0"
 keywords:
   - postgres
@@ -43,7 +43,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "fix: allow not to mount config (#573)"
-          links:
-            - name: "Commit 5dac551"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/5dac551"
+          description: "Chart updated"

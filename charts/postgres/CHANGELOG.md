@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.11.7 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([6e465fd](https://github.com/CloudPirates-io/helm-charts/commit/6e465fd))
+* chore: update CHANGELOG.md for merged changes ([d04f118](https://github.com/CloudPirates-io/helm-charts/commit/d04f118))
+* Update charts/postgres/values.yaml postgres (#555) ([c5f8537](https://github.com/CloudPirates-io/helm-charts/commit/c5f8537))
+* chore: update CHANGELOG.md for merged changes ([04e16c9](https://github.com/CloudPirates-io/helm-charts/commit/04e16c9))
+* chore: update CHANGELOG.md for merged changes ([9e5cb09](https://github.com/CloudPirates-io/helm-charts/commit/9e5cb09))
+* chore: auto-generate values.schema.json (#575) ([8ba3935](https://github.com/CloudPirates-io/helm-charts/commit/8ba3935))
+* chore: update CHANGELOG.md for merged changes ([e5e686d](https://github.com/CloudPirates-io/helm-charts/commit/e5e686d))
+* chore: update CHANGELOG.md for merged changes ([497f5e3](https://github.com/CloudPirates-io/helm-charts/commit/497f5e3))
+
 ## 0.11.6 (2025-11-10)
 
 * fix: allow not to mount config (#573) ([5dac551](https://github.com/CloudPirates-io/helm-charts/commit/5dac551))

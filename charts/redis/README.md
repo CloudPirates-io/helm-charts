@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-redis/redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
 </p>
 
 # Redis Helm Chart
@@ -76,16 +76,21 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ## Configuration
 
+### Global parameters
+
+| Parameter                 | Description                           | Default |
+| ------------------------- | ------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry override | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`    |
+
 ### Image Configuration
 
-| Parameter                 | Description                           | Default                                                                         |
-| ------------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
-| `image.registry`          | Redis image registry                  | `docker.io`                                                                     |
-| `image.repository`        | Redis image repository                | `redis`                                                                         |
-| `image.tag`               | Redis image tag                       | `8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6` |
-| `image.pullPolicy`        | Image pull policy                     | `Always`                                                                        |
-| `global.imageRegistry`    | Global Docker image registry override | `""`                                                                            |
-| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`                                                                            |
+| Parameter          | Description            | Default                                                                         |
+| ------------------ | ---------------------- | ------------------------------------------------------------------------------- |
+| `image.registry`   | Redis image registry   | `docker.io`                                                                     |
+| `image.repository` | Redis image repository | `redis`                                                                         |
+| `image.tag`        | Redis image tag        | `8.2.3@sha256:d318520052025d3cc5850ba3de966810916c7a7b327b412322399f38be39a39c` |
+| `image.pullPolicy` | Image pull policy      | `Always`                                                                        |
 
 ### Common Parameters
 
@@ -456,4 +461,4 @@ For issues related to this Helm chart, please check:
 
 - [Redis Documentation](https://redis.io/docs/latest/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-ghost"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-ghost" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-ghost/ghost"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-ghost" /></a>
 </p>
 
 
@@ -20,6 +20,12 @@ To install with custom values:
 
 ```bash
 helm install my-ghost oci://registry-1.docker.io/cloudpirates/ghost -f my-values.yaml
+```
+
+Or install directly from the local chart:
+
+```bash
+helm install my-valkey ./charts/valkey
 ```
 
 The output should show you the URL's for your Ghost instance and Admin interface accoriding to your settings in my-values.yaml
@@ -86,26 +92,31 @@ config:
 
 The following tables list the configurable parameters of the Ghost chart organized by category:
 
-### Global & Common Parameters
+### Global Parameters
 
 | Parameter                 | Description                                  | Default |
 | ------------------------- | -------------------------------------------- | ------- |
 | `global.imageRegistry`    | Global Docker image registry                 | `""`    |
 | `global.imagePullSecrets` | Global Docker registry secret names as array | `[]`    |
-| `nameOverride`            | String to partially override ghost.fullname  | `""`    |
-| `fullnameOverride`        | String to fully override ghost.fullname      | `""`    |
-| `commonLabels`            | Labels to add to all deployed objects        | `{}`    |
-| `commonAnnotations`       | Annotations to add to all deployed objects   | `{}`    |
+
+### Common Parameters
+
+| Parameter           | Description                                 | Default |
+| ------------------- | ------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override ghost.fullname | `""`    |
+| `fullnameOverride`  | String to fully override ghost.fullname     | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
+| `replicaCount`      | Number of Ghost replicas to deploy          | `1`     |
 
 ### Image Parameters
 
-| Parameter          | Description                        | Default     |
-| ------------------ | ---------------------------------- | ----------- |
-| `image.registry`   | Ghost image registry               | `docker.io` |
-| `image.repository` | Ghost image repository             | `ghost`     |
-| `image.tag`        | Ghost image tag                    | `6.0.9`     |
-| `image.pullPolicy` | Ghost image pull policy            | `Always`    |
-| `replicaCount`     | Number of Ghost replicas to deploy | `1`         |
+| Parameter          | Description             | Default                                                                         |
+| ------------------ | ----------------------- | ------------------------------------------------------------------------------- |
+| `image.registry`   | Ghost image registry    | `docker.io`                                                                     |
+| `image.repository` | Ghost image repository  | `ghost`                                                                         |
+| `image.tag`        | Ghost image tag         | `6.6.1@sha256:1e243c833aaa518c6f0786037e83ebe3a8567f8aeac0aa71a38f6fe9d7790935` |
+| `image.pullPolicy` | Ghost image pull policy | `Always`                                                                        |
 
 ### Network Parameters
 
@@ -321,3 +332,4 @@ config:
 - [Ghost Documentation](https://ghost.org/docs/)
 - [Ghost Docker Hub](https://hub.docker.com/_/ghost)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

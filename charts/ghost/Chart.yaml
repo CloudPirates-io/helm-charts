@@ -2,7 +2,7 @@ apiVersion: v2
 name: ghost
 description: A simple, powerful publishing platform that allows you to share your stories with the world.
 type: application
-version: 0.4.5
+version: 0.4.6
 appVersion: "6.7.0"
 keywords:
   - ghost
@@ -45,7 +45,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update charts/ghost/values.yaml ghost to v6.6.1 (patch) (#558)"
-          links:
-            - name: "Commit 1b95642"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/1b95642"
+          description: "Chart updated"
