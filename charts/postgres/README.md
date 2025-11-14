@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
 | `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
-| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.0@sha256:6f3e42ad37decc037c508dd405f5941c6dfa7d21f21a7237a43bde9def1e295e"` |
+| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
 | `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
 
 ### Deployment configuration
