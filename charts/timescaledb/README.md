@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | ------------------ | ------------------------------------------------------ | ----------------------- |
 | `image.registry`   | TimescaleDB image registry                             | `docker.io`             |
 | `image.repository` | TimescaleDB image repository                           | `timescale/timescaledb` |
-| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.23.0-pg17@sha256:92fcd95150342632b8bcd12c2248599ba58441bc6dd3b80576445027b06cd1eb"`         |
+| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.23.1-pg17@sha256:a6581100f2f1cd1e03a29a94a49c488a174de65e57301c04de255804645e5a31"`         |
 | `image.pullPolicy` | TimescaleDB image pull policy                          | `Always`                |
 
 ### Common configuration
