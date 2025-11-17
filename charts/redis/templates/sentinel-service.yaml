@@ -7,9 +7,9 @@ metadata:
   labels:
     {{- include "redis.labels" . | nindent 4 }}
     app.kubernetes.io/component: sentinel
-  {{- with (include "redis.annotations" .) }}
+  {{- if (include "redis.annotations" .) }}
   annotations:
-    {{- . | nindent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.sentinel.service.type }}

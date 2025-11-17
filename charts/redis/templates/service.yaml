@@ -8,9 +8,7 @@ metadata:
   {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
   {{- if or $annotations (and .Values.sentinel.enabled (eq .Values.architecture "replication")) }}
   annotations:
-  {{- if $annotations }}
-{{- toYaml $annotations | nindent 4 }}
-  {{- end }}
+{{ include "cloudpirates.tplvalues.render" (dict "value" $annotations "context" .) | indent 4 }}
   {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
     # This service points to all Redis instances for Sentinel-based discovery
     # Applications should use Sentinel clients to discover the current master
