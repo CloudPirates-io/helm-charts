@@ -79,9 +79,9 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Deployment Parameters
 
-| Parameter      | Description                                           | Default      |
-|----------------|-------------------------------------------------------|--------------|
-| `replicaCount` | Number of Memcached replicas to deploy                | `1`          |
+| Parameter        | Description                                            | Default      |
+| ---------------- | ------------------------------------------------------ | ------------ |
+| `replicaCount`   | Number of Memcached replicas to deploy                 | `1`          |
 | `deploymentType` | Type of workload to deploy (Deployment or StatefulSet) | `Deployment` |
 
 ### Memcached Image Parameters
@@ -243,7 +243,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Memcached metrics                        | `false`                   |
 | `metrics.image.registry`                   | Memcached exporter image registry                                                      | `docker.io`               |
 | `metrics.image.repository`                 | Memcached exporter image repository                                                    | `prom/memcached-exporter` |
-| `metrics.image.tag`                        | Memcached exporter image tag                                                           | `v0.15.4@sha256...`           |
+| `metrics.image.tag`                        | Memcached exporter image tag                                                           | `v0.15.4@sha256...`       |
 | `metrics.image.pullPolicy`                 | Memcached exporter image pull policy                                                   | `Always`                  |
 | `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                  | `50m`                     |
 | `metrics.resources.requests.memory`        | Memory request for the metrics container                                               | `64Mi`                    |
@@ -254,6 +254,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.service.port`                     | Metrics service port                                                                   | `9150`                    |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                      | `{}`                      |
 | `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource for scraping metrics using Prometheus Operator          | `false`                   |
+| `metrics.serviceMonitor.jobLabel`          | The name of the jobLabel for the ServiceMonitor                                        | `""`                      |
 | `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                            | `30s`                     |
 | `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                                | `""`                      |
 | `metrics.serviceMonitor.relabelings`       | Relabeling rules to apply the target’s metadata labels before scraping.                | `[]`                      |
