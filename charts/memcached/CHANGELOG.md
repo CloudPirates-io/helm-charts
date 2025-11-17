@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.6.0 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([1e00f03](https://github.com/CloudPirates-io/helm-charts/commit/1e00f03))
+* chore: update CHANGELOG.md for merged changes ([4dfd851](https://github.com/CloudPirates-io/helm-charts/commit/4dfd851))
+* support change to statefulset (#592) ([3c74ccf](https://github.com/CloudPirates-io/helm-charts/commit/3c74ccf))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.5.4 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([abda166](https://github.com/CloudPirates-io/helm-charts/commit/abda166))

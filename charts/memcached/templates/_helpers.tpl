@@ -71,3 +71,11 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "memcached.serviceMonitorJobLabel" -}}
+{{- if .Values.metrics.serviceMonitor.jobLabel }}
+{{- .Values.metrics.serviceMonitor.jobLabel }}
+{{- else }}
+{{- include "memcached.fullname" . }}
+{{- end }}
+{{- end }}
