@@ -179,6 +179,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
             {{- if .Values.config.mountConfigMap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}

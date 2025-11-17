@@ -220,6 +220,8 @@ metrics:
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
     enabled: false
+    ## @param metrics.serviceMonitor.jobLabel The name of the jobLabel for the ServiceMonitor
+    jobLabel: ""
     ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
     interval: 30s
     ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended

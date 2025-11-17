@@ -313,6 +313,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
             {{- if (list "replication" "cluster" | has .Values.architecture) }}
             - name: redis-config
               mountPath: /tmp
@@ -547,6 +550,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- end }}
         {{- if (list "replication" "cluster" | has .Values.architecture) }}
         - name: redis-config
           emptyDir: {}
@@ -592,6 +600,7 @@ spec:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
     whenScaled: {{ .Values.persistentVolumeClaimRetentionPolicy.whenScaled }}
   {{- end }}
+  {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
     - apiVersion: v1	
       kind: PersistentVolumeClaim
@@ -610,4 +619,5 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size | quote }}
+    {{- end }}
   {{- end }}

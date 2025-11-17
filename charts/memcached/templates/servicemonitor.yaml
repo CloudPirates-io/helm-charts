@@ -15,7 +15,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  jobLabel: {{ include "memcached.fullname" . }}
+  jobLabel: {{ include "memcached.serviceMonitorJobLabel" . }}
   selector:
     matchLabels:
       {{- include "memcached.selectorLabels" . | nindent 6 }}
