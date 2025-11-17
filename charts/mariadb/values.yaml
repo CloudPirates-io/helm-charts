@@ -172,6 +172,17 @@ resources:
   ##   memory: 300Mi
   ##   cpu: 100m
 
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken whether to automount the SA token inside the pod
+  automountServiceAccountToken: false
+
 ## @section Extra Configs
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
