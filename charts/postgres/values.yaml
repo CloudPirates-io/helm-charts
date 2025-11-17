@@ -198,6 +198,9 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  ## Useful in dev environments and one PV for multiple services
+  subPath: ""
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
