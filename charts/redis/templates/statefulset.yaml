@@ -116,28 +116,10 @@ spec:
                 fi
               fi
 
-              # Configure for Sentinel discovery and force deletion tolerance
-              # Get IP address based on ipFamily setting
-              {{- if eq .Values.ipFamily "ipv4" }}
-              MY_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
-              if [ -z "$MY_IP" ]; then
-                echo "Warning: No IPv4 address found, falling back to first available IP"
-                MY_IP=$(hostname -i | awk '{print $1}')
-              fi
-              {{- else if eq .Values.ipFamily "ipv6" }}
-              MY_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
-              if [ -z "$MY_IP" ]; then
-                echo "Warning: No IPv6 address found, falling back to first available IP"
-                MY_IP=$(hostname -i | awk '{print $1}')
-              fi
-              {{- else }}
-              # auto: Use the first IP address for dual-stack compatibility
-              MY_IP=$(hostname -i | awk '{print $1}')
-              {{- end }}
-              echo "Using IP address: ${MY_IP}"
-              echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "Using hostname: ${HOSTNAME}.{{ include "redis.fullname" . }}-headless"
+              echo "replica-announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless" >> /tmp/redis.conf
               echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
-              echo "slave-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "slave-announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless" >> /tmp/redis.conf
               echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
 
               # Make slaves more eligible for promotion during force deletions
@@ -441,7 +423,7 @@ spec:
               # CRITICAL: Track disconnected slaves for force deletion tolerance
               sentinel_link_buffer_size 32768
               # Allow sentinels to discover each other
-              sentinel announce-ip ${SENTINEL_IP}
+              sentinel announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
               loglevel notice
