@@ -111,11 +111,16 @@ spec:
           startupProbe:
             httpGet:
               path: /health
+              {{- if .Values.metrics.enabled }}
+              port: metrics
+              scheme: HTTP
+              {{- else }}
               port: client
               {{- if .Values.auth.enabled }}
               scheme: HTTPS
               {{- else }}
               scheme: HTTP
+              {{- end }}
               {{- end }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
@@ -127,11 +132,16 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
+              {{- if .Values.metrics.enabled }}
+              port: metrics
+              scheme: HTTP
+              {{- else }}
               port: client
               {{- if .Values.auth.enabled }}
               scheme: HTTPS
               {{- else }}
               scheme: HTTP
+              {{- end }}
               {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -143,11 +153,16 @@ spec:
           readinessProbe:
             httpGet:
               path: /health?serializable=true
+              {{- if .Values.metrics.enabled }}
+              port: metrics
+              scheme: HTTP
+              {{- else }}
               port: client
               {{- if .Values.auth.enabled }}
               scheme: HTTPS
               {{- else }}
               scheme: HTTP
+              {{- end }}
               {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
