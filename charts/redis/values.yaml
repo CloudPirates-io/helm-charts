@@ -379,6 +379,17 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
 
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount
+  create: false
+  ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods
+  automountServiceAccountToken: false
+  ## @param serviceAccount.annotations Additional custom annotations for the ServiceAccount
+  annotations: {}
+
 ## @section Network Policy
 networkPolicy:
   ## @param networkPolicy.enabled Enable NetworkPolicy
