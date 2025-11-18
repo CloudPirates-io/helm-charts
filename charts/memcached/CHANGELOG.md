@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.7.0 (2025-11-17)
+
+* chore: update CHANGELOG.md for merged changes ([439d0b2](https://github.com/CloudPirates-io/helm-charts/commit/439d0b2))
+* chore: update CHANGELOG.md for merged changes ([d356bb2](https://github.com/CloudPirates-io/helm-charts/commit/d356bb2))
+* add serviceMonitor joblabel attribute to values (#610) ([098caf4](https://github.com/CloudPirates-io/helm-charts/commit/098caf4))
+
 ## 0.6.0 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([1e00f03](https://github.com/CloudPirates-io/helm-charts/commit/1e00f03))

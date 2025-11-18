@@ -200,6 +200,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`                |
 
 ### Persistent Volume Claim Retention Policy
 

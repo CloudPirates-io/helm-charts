@@ -207,6 +207,15 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `resources.limits`   | The resources limits for the MariaDB containers    | `{}`    |
 | `resources.requests` | The requested resources for the MariaDB containers | `{}`    |
 
+### Service Account
+
+| Parameter                                     | Description                                                                                                               | Default |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created                                                                     | `false` |
+| `serviceAccount.annotations`                  | Annotations to add to the service account                                                                                 | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
+
 ### Extra Configuration Parameters
 
 | Parameter      | Description                                                                      | Default |

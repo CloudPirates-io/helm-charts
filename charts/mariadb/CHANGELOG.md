@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.7.0 (2025-11-18)
+
+* add support for serviceaccounts (#609) ([1e6d04f](https://github.com/CloudPirates-io/helm-charts/commit/1e6d04f))
+* chore: update CHANGELOG.md for merged changes ([02bb698](https://github.com/CloudPirates-io/helm-charts/commit/02bb698))
+* chore: update CHANGELOG.md for merged changes ([497db78](https://github.com/CloudPirates-io/helm-charts/commit/497db78))
+* Update charts/mariadb/values.yaml mariadb (#598) ([8ea69f6](https://github.com/CloudPirates-io/helm-charts/commit/8ea69f6))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.6.1 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([61b2eea](https://github.com/CloudPirates-io/helm-charts/commit/61b2eea))

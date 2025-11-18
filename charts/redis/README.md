@@ -184,14 +184,16 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ### Persistence
 
-| Parameter                  | Description                              | Default         |
-| -------------------------- | ---------------------------------------- | --------------- |
-| `persistence.enabled`      | Enable persistent storage                | `true`          |
-| `persistence.storageClass` | Storage class for persistent volume      | `""`            |
-| `persistence.accessMode`   | Access mode for persistent volume        | `ReadWriteOnce` |
-| `persistence.size`         | Size of persistent volume                | `8Gi`           |
-| `persistence.mountPath`    | Mount path for Redis data                | `/data`         |
-| `persistence.annotations`  | Annotations for persistent volume claims | `{}`            |
+| Parameter                   | Description                                        | Default         |
+| --------------------------- | -------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                          | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
