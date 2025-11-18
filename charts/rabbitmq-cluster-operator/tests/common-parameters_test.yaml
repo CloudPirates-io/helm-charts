@@ -1,0 +1,97 @@
+suite: test common parameters
+templates:
+  - templates/statefulset.yaml
+  - templates/service.yaml
+  - templates/secret.yaml
+  - templates/configmap.yaml
+tests:
+  - it: should render with default values
+    asserts:
+      - isKind:
+          of: StatefulSet
+        template: templates/statefulset.yaml
+      - isKind:
+          of: Service
+        template: templates/service.yaml
+      - isKind:
+          of: Secret
+        template: templates/secret.yaml
+      - isKind:
+          of: ConfigMap
+        template: templates/configmap.yaml
+
+  - it: should use custom name override
+    set:
+      nameOverride: custom-rabbitmq
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-rabbitmq
+        template: templates/statefulset.yaml
+
+  - it: should use full name override
+    set:
+      fullnameOverride: my-custom-rabbitmq
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-custom-rabbitmq
+        template: templates/statefulset.yaml
+
+  - it: should apply common labels
+    set:
+      commonLabels:
+        customLabel: customValue
+    asserts:
+      - equal:
+          path: metadata.labels.customLabel
+          value: customValue
+        template: templates/statefulset.yaml
+
+  - it: should apply common annotations
+    set:
+      commonAnnotations:
+        customAnnotation: customValue
+    asserts:
+      - equal:
+          path: metadata.annotations.customAnnotation
+          value: customValue
+        template: templates/statefulset.yaml
+
+  - it: should set replica count
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+        template: templates/statefulset.yaml
+
+  - it: should use existing secret
+    set:
+      auth:
+        existingSecret: my-secret
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/secret.yaml
+
+  - it: should disable authentication
+    set:
+      auth:
+        enabled: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0].env
+        template: templates/statefulset.yaml
+
+  - it: should enable clustering
+    set:
+      replicaCount: 3
+      peerDiscoveryK8sPlugin:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+        template: templates/statefulset.yaml

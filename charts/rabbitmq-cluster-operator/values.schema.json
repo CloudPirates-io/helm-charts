@@ -1,0 +1,1499 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RabbitMQ Cluster Operator",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "description": "Global parameters",
+      "properties": {
+        "imageRegistry": {
+          "type": "string",
+          "description": "Global Docker image registry"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "description": "Global Docker registry secret names as an array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "defaultStorageClass": {
+          "type": "string",
+          "description": "Global default StorageClass for Persistent Volume(s)"
+        },
+        "storageClass": {
+          "type": "string",
+          "description": "DEPRECATED: use global.defaultStorageClass instead"
+        },
+        "compatibility": {
+          "type": "object",
+          "description": "Compatibility adaptations for Kubernetes platforms",
+          "properties": {
+            "openshift": {
+              "type": "object",
+              "description": "Compatibility adaptations for Openshift",
+              "properties": {
+                "adaptSecurityContext": {
+                  "type": "string",
+                  "description": "Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC",
+                  "enum": [
+                    "auto",
+                    "force",
+                    "disabled"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "kubeVersion": {
+      "type": "string",
+      "description": "Override Kubernetes version"
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "String to partially override cloudpirates.fullname"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "String to fully override cloudpirates.fullname"
+    },
+    "commonLabels": {
+      "type": "object",
+      "description": "Labels to add to all deployed objects"
+    },
+    "commonAnnotations": {
+      "type": "object",
+      "description": "Annotations to add to all deployed objects"
+    },
+    "clusterDomain": {
+      "type": "string",
+      "description": "Kubernetes cluster domain name"
+    },
+    "extraDeploy": {
+      "type": "array",
+      "description": "Array of extra objects to deploy with the release"
+    },
+    "diagnosticMode": {
+      "type": "object",
+      "description": "Enable diagnostic mode in the deployment(s)/statefulset(s)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable diagnostic mode (all probes will be disabled)"
+        }
+      }
+    },
+    "rabbitmqImage": {
+      "type": "object",
+      "description": "RabbitMQ Image",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "RabbitMQ Image registry"
+        },
+        "repository": {
+          "type": "string",
+          "description": "RabbitMQ Image repository"
+        },
+        "tag": {
+          "type": "string",
+          "description": "RabbitMQ Image tag"
+        },
+        "digest": {
+          "type": "string",
+          "description": "RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag"
+        },
+        "pullSecrets": {
+          "type": "array",
+          "description": "RabbitMQ Image pull secrets",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "credentialUpdaterImage": {
+      "type": "object",
+      "description": "RabbitMQ Default User Credential Updater Image",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "RabbitMQ Default User Credential Updater image registry"
+        },
+        "repository": {
+          "type": "string",
+          "description": "RabbitMQ Default User Credential Updater image repository"
+        },
+        "tag": {
+          "type": "string",
+          "description": "RabbitMQ Default User Credential Updater image tag"
+        },
+        "digest": {
+          "type": "string",
+          "description": "RabbitMQ Default User Credential Updater image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag"
+        },
+        "pullSecrets": {
+          "type": "array",
+          "description": "RabbitMQ Default User Credential Updater image pull secrets",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "clusterOperator": {
+      "type": "object",
+      "description": "RabbitMQ Cluster Operator Parameters",
+      "properties": {
+        "image": {
+          "type": "object",
+          "description": "RabbitMQ Cluster Operator image",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "description": "RabbitMQ Cluster Operator image registry"
+            },
+            "repository": {
+              "type": "string",
+              "description": "RabbitMQ Cluster Operator image repository"
+            },
+            "tag": {
+              "type": "string",
+              "description": "RabbitMQ Cluster Operator image tag"
+            },
+            "digest": {
+              "type": "string",
+              "description": "RabbitMQ Cluster Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "RabbitMQ Cluster Operator image pull policy"
+            },
+            "pullSecrets": {
+              "type": "array",
+              "description": "RabbitMQ Cluster Operator image pull secrets",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "description": "sets number of replicaset to keep in k8s"
+        },
+        "watchAllNamespaces": {
+          "type": "boolean",
+          "description": "Watch for resources in all namespaces"
+        },
+        "watchNamespaces": {
+          "type": "array",
+          "description": "Watch for resources in the given namespaces (ignored if watchAllNamespaces=true)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "replicaCount": {
+          "type": "integer",
+          "description": "Number of RabbitMQ Cluster Operator replicas to deploy"
+        },
+        "schedulerName": {
+          "type": "string",
+          "description": "Alternative scheduler"
+        },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "description": "Topology Spread Constraints for pod assignment"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": [
+            "string",
+            "integer"
+          ],
+          "description": "In seconds, time the given to the %%MAIN_CONTAINER_NAME%% pod needs to terminate gracefully"
+        },
+        "livenessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable livenessProbe on RabbitMQ Cluster Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for livenessProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for livenessProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for livenessProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for livenessProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for livenessProbe"
+            }
+          }
+        },
+        "readinessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable readinessProbe on RabbitMQ Cluster Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for readinessProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for readinessProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for readinessProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for readinessProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for readinessProbe"
+            }
+          }
+        },
+        "startupProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable startupProbe on RabbitMQ Cluster Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for startupProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for startupProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for startupProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for startupProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for startupProbe"
+            }
+          }
+        },
+        "customLivenessProbe": {
+          "type": "object",
+          "description": "Custom livenessProbe that overrides the default one"
+        },
+        "customReadinessProbe": {
+          "type": "object",
+          "description": "Custom readinessProbe that overrides the default one"
+        },
+        "customStartupProbe": {
+          "type": "object",
+          "description": "Custom startupProbe that overrides the default one"
+        },
+        "resources": {
+          "type": "object",
+          "description": "RabbitMQ Cluster Operator resource requests and limits"
+        },
+        "pdb": {
+          "type": "object",
+          "description": "Pod Disruption Budget configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Enable a Pod Disruption Budget creation"
+            },
+            "minAvailable": {
+              "type": [
+                "string",
+                "integer"
+              ],
+              "description": "Minimum number/percentage of pods that should remain scheduled"
+            },
+            "maxUnavailable": {
+              "type": [
+                "string",
+                "integer"
+              ],
+              "description": "Maximum number/percentage of pods that may be made unavailable"
+            }
+          }
+        },
+        "podSecurityContext": {
+          "type": "object",
+          "description": "Configure Pods Security Context",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enabled RabbitMQ Cluster Operator pods' Security Context"
+            },
+            "fsGroupChangePolicy": {
+              "type": "string",
+              "description": "Set filesystem group change policy"
+            },
+            "sysctls": {
+              "type": "array",
+              "description": "Set kernel settings using the sysctl interface"
+            },
+            "supplementalGroups": {
+              "type": "array",
+              "description": "Set filesystem extra groups"
+            },
+            "fsGroup": {
+              "type": "integer",
+              "description": "Set RabbitMQ Cluster Operator pod's Security Context fsGroup"
+            }
+          }
+        },
+        "containerSecurityContext": {
+          "type": "object",
+          "description": "Configure Container Security Context",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enabled containers' Security Context"
+            },
+            "seLinuxOptions": {
+              "type": "object",
+              "description": "Set SELinux options in container"
+            },
+            "runAsUser": {
+              "type": "integer",
+              "description": "Set containers' Security Context runAsUser"
+            },
+            "runAsGroup": {
+              "type": "integer",
+              "description": "Set containers' Security Context runAsGroup"
+            },
+            "runAsNonRoot": {
+              "type": "boolean",
+              "description": "Set container's Security Context runAsNonRoot"
+            },
+            "privileged": {
+              "type": "boolean",
+              "description": "Set container's Security Context privileged"
+            },
+            "readOnlyRootFilesystem": {
+              "type": "boolean",
+              "description": "Set container's Security Context readOnlyRootFilesystem"
+            },
+            "allowPrivilegeEscalation": {
+              "type": "boolean",
+              "description": "Set container's Security Context allowPrivilegeEscalation"
+            },
+            "capabilities": {
+              "type": "object",
+              "properties": {
+                "drop": {
+                  "type": "array",
+                  "description": "List of capabilities to be dropped",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "seccompProfile": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Set container's Security Context seccomp profile"
+                }
+              }
+            }
+          }
+        },
+        "command": {
+          "type": "array",
+          "description": "Override default container command (useful when using custom images)"
+        },
+        "args": {
+          "type": "array",
+          "description": "Override default container args (useful when using custom images)"
+        },
+        "automountServiceAccountToken": {
+          "type": "boolean",
+          "description": "Mount Service Account token in pod"
+        },
+        "hostAliases": {
+          "type": "array",
+          "description": "RabbitMQ Cluster Operator pods host aliases"
+        },
+        "podLabels": {
+          "type": "object",
+          "description": "Extra labels for RabbitMQ Cluster Operator pods"
+        },
+        "podAnnotations": {
+          "type": "object",
+          "description": "Annotations for RabbitMQ Cluster Operator pods"
+        },
+        "affinity": {
+          "type": "object",
+          "description": "Affinity for RabbitMQ Cluster Operator pods assignment"
+        },
+        "nodeSelector": {
+          "type": "object",
+          "description": "Node labels for RabbitMQ Cluster Operator pods assignment"
+        },
+        "tolerations": {
+          "type": "array",
+          "description": "Tolerations for RabbitMQ Cluster Operator pods assignment"
+        },
+        "updateStrategy": {
+          "type": "object",
+          "description": "RabbitMQ Cluster Operator statefulset strategy type",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "StrategyType"
+            }
+          }
+        },
+        "priorityClassName": {
+          "type": "string",
+          "description": "RabbitMQ Cluster Operator pods' priorityClassName"
+        },
+        "lifecycleHooks": {
+          "type": "object",
+          "description": "for the RabbitMQ Cluster Operator container(s) to automate configuration before or after startup"
+        },
+        "containerPorts": {
+          "type": "object",
+          "properties": {
+            "metrics": {
+              "type": "integer",
+              "description": "RabbitMQ Cluster Operator container port (used for metrics)"
+            }
+          }
+        },
+        "extraEnvVars": {
+          "type": "array",
+          "description": "Array with extra environment variables to add to RabbitMQ Cluster Operator nodes"
+        },
+        "extraEnvVarsCM": {
+          "type": "string",
+          "description": "Name of existing ConfigMap containing extra env vars for RabbitMQ Cluster Operator nodes"
+        },
+        "extraEnvVarsSecret": {
+          "type": "string",
+          "description": "Name of existing Secret containing extra env vars for RabbitMQ Cluster Operator nodes"
+        },
+        "extraVolumes": {
+          "type": "array",
+          "description": "Optionally specify extra list of additional volumes for the RabbitMQ Cluster Operator pod(s)"
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "description": "Optionally specify extra list of additional volumeMounts for the RabbitMQ Cluster Operator container(s)"
+        },
+        "sidecars": {
+          "type": "array",
+          "description": "Add additional sidecar containers to the RabbitMQ Cluster Operator pod(s)"
+        },
+        "initContainers": {
+          "type": "array",
+          "description": "Add additional init containers to the RabbitMQ Cluster Operator pod(s)"
+        },
+        "networkPolicy": {
+          "type": "object",
+          "description": "Network Policies",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Specifies whether a NetworkPolicy should be created"
+            },
+            "kubeAPIServerPorts": {
+              "type": "array",
+              "description": "List of possible endpoints to kube-apiserver (limit to your cluster settings to increase security)",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "allowExternal": {
+              "type": "boolean",
+              "description": "Don't require injector label for connections"
+            },
+            "allowExternalEgress": {
+              "type": "boolean",
+              "description": "Allow the pod to access any range of port and all destinations."
+            },
+            "extraIngress": {
+              "type": "array",
+              "description": "Add extra ingress rules to the NetworkPolicy"
+            },
+            "extraEgress": {
+              "type": "array",
+              "description": "Add extra egress rules to the NetworkPolicy"
+            },
+            "ingressNSMatchLabels": {
+              "type": "object",
+              "description": "Labels to match to allow traffic from other namespaces"
+            },
+            "ingressNSPodMatchLabels": {
+              "type": "object",
+              "description": "Pod labels to match to allow traffic from other namespaces"
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "description": "RBAC configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Specifies whether RBAC resources should be created"
+            },
+            "clusterRole": {
+              "type": "object",
+              "properties": {
+                "customRules": {
+                  "type": "array",
+                  "description": "Define custom access rules for the ClusterRole"
+                },
+                "extraRules": {
+                  "type": "array",
+                  "description": "Define extra access rules for the ClusterRole. This has no effect if customerRules is a non-empty array."
+                }
+              }
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "description": "ServiceAccount configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Specifies whether a ServiceAccount should be created"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the ServiceAccount to use."
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Add annotations"
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "description": "Automount API credentials for a service account."
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "description": "RabbitMQ Cluster Operator Metrics parameters",
+          "properties": {
+            "service": {
+              "type": "object",
+              "description": "Metrics service parameters",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Create a service for accessing the metrics endpoint"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service type"
+                },
+                "ports": {
+                  "type": "object",
+                  "properties": {
+                    "http": {
+                      "type": "integer",
+                      "description": "RabbitMQ Cluster Operator metrics service HTTP port"
+                    }
+                  }
+                },
+                "nodePorts": {
+                  "type": "object",
+                  "properties": {
+                    "http": {
+                      "type": "string",
+                      "description": "Node port for HTTP"
+                    }
+                  }
+                },
+                "clusterIP": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service Cluster IP"
+                },
+                "extraPorts": {
+                  "type": "array",
+                  "description": "Extra ports to expose (normally used with the `sidecar` value)"
+                },
+                "loadBalancerIP": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service Load Balancer IP"
+                },
+                "loadBalancerSourceRanges": {
+                  "type": "array",
+                  "description": "RabbitMQ Cluster Operator metrics service Load Balancer sources"
+                },
+                "externalTrafficPolicy": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service external traffic policy"
+                },
+                "annotations": {
+                  "type": "object",
+                  "description": "Additional custom annotations for RabbitMQ Cluster Operator metrics service"
+                },
+                "sessionAffinity": {
+                  "type": "string",
+                  "description": "Session Affinity for Kubernetes service, can be 'None' or 'ClientIP'"
+                },
+                "sessionAffinityConfig": {
+                  "type": "object",
+                  "description": "Additional settings for the sessionAffinity"
+                }
+              }
+            },
+            "serviceMonitor": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Specify if a servicemonitor will be deployed for prometheus-operator"
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "Namespace which Prometheus is running in"
+                },
+                "jobLabel": {
+                  "type": "string",
+                  "description": "Specify the jobLabel to use for the prometheus-operator"
+                },
+                "honorLabels": {
+                  "type": "boolean",
+                  "description": "Honor metrics labels"
+                },
+                "selector": {
+                  "type": "object",
+                  "description": "Prometheus instance selector labels"
+                },
+                "scrapeTimeout": {
+                  "type": "string",
+                  "description": "Timeout after which the scrape is ended"
+                },
+                "interval": {
+                  "type": "string",
+                  "description": "Scrape interval. If not set, the Prometheus default scrape interval is used"
+                },
+                "metricRelabelings": {
+                  "type": "array",
+                  "description": "Specify additional relabeling of metrics"
+                },
+                "relabelings": {
+                  "type": "array",
+                  "description": "Specify general relabeling"
+                },
+                "labels": {
+                  "type": "object",
+                  "description": "Extra labels for the ServiceMonitor"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Define the path used by ServiceMonitor to scrap metrics"
+                },
+                "params": {
+                  "type": "object",
+                  "description": "Define the HTTP URL parameters used by ServiceMonitor"
+                }
+              }
+            },
+            "podMonitor": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Create PodMonitor Resource for scraping metrics using PrometheusOperator"
+                },
+                "jobLabel": {
+                  "type": "string",
+                  "description": "Specify the jobLabel to use for the prometheus-operator"
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "Namespace which Prometheus is running in"
+                },
+                "honorLabels": {
+                  "type": "boolean",
+                  "description": "Honor metrics labels"
+                },
+                "selector": {
+                  "type": "object",
+                  "description": "Prometheus instance selector labels"
+                },
+                "interval": {
+                  "type": "string",
+                  "description": "Specify the interval at which metrics should be scraped"
+                },
+                "scrapeTimeout": {
+                  "type": "string",
+                  "description": "Specify the timeout after which the scrape is ended"
+                },
+                "additionalLabels": {
+                  "type": "object",
+                  "description": "Additional labels that can be used so PodMonitors will be discovered by Prometheus"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "Define HTTP path to scrape for metrics."
+                },
+                "relabelings": {
+                  "type": "array",
+                  "description": "Specify general relabeling"
+                },
+                "metricRelabelings": {
+                  "type": "array",
+                  "description": "Specify additional relabeling of metrics"
+                },
+                "params": {
+                  "type": "object",
+                  "description": "Define the HTTP URL parameters used by PodMonitor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "msgTopologyOperator": {
+      "type": "object",
+      "description": "RabbitMQ Messaging Topology Operator Parameters",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Deploy RabbitMQ Messaging Topology Operator as part of the installation"
+        },
+        "image": {
+          "type": "object",
+          "description": "RabbitMQ Messaging Topology Operator image",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator image registry"
+            },
+            "repository": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator image repository"
+            },
+            "tag": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator image tag"
+            },
+            "digest": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator image pull policy"
+            },
+            "pullSecrets": {
+              "type": "array",
+              "description": "RabbitMQ Messaging Topology Operator image pull secrets",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "description": "sets number of replicaset to keep in k8s"
+        },
+        "watchAllNamespaces": {
+          "type": "boolean",
+          "description": "Watch for resources in all namespaces"
+        },
+        "watchNamespaces": {
+          "type": "array",
+          "description": "Watch for resources in the given namespaces (ignored if watchAllNamespaces=true)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "replicaCount": {
+          "type": "integer",
+          "description": "Number of RabbitMQ Messaging Topology Operator replicas to deploy"
+        },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "description": "Topology Spread Constraints for pod assignment"
+        },
+        "schedulerName": {
+          "type": "string",
+          "description": "Alternative scheduler"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": [
+            "string",
+            "integer"
+          ],
+          "description": "In seconds, time the given to the %%MAIN_CONTAINER_NAME%% pod needs to terminate gracefully"
+        },
+        "hostNetwork": {
+          "type": "string",
+          "description": "Boolean"
+        },
+        "dnsPolicy": {
+          "type": "string",
+          "description": "Alternative DNS policy"
+        },
+        "livenessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable livenessProbe on RabbitMQ Messaging Topology Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for livenessProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for livenessProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for livenessProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for livenessProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for livenessProbe"
+            }
+          }
+        },
+        "readinessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable readinessProbe on RabbitMQ Messaging Topology Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for readinessProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for readinessProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for readinessProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for readinessProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for readinessProbe"
+            }
+          }
+        },
+        "startupProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable startupProbe on RabbitMQ Messaging Topology Operator nodes"
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "description": "Initial delay seconds for startupProbe"
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "description": "Period seconds for startupProbe"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "description": "Timeout seconds for startupProbe"
+            },
+            "failureThreshold": {
+              "type": "integer",
+              "description": "Failure threshold for startupProbe"
+            },
+            "successThreshold": {
+              "type": "integer",
+              "description": "Success threshold for startupProbe"
+            }
+          }
+        },
+        "customLivenessProbe": {
+          "type": "object",
+          "description": "Custom livenessProbe that overrides the default one"
+        },
+        "customReadinessProbe": {
+          "type": "object",
+          "description": "Custom readinessProbe that overrides the default one"
+        },
+        "customStartupProbe": {
+          "type": "object",
+          "description": "Custom startupProbe that overrides the default one"
+        },
+        "skipCreateAdmissionWebhookConfig": {
+          "type": "boolean",
+          "description": "skip creation of ValidationWebhookConfiguration"
+        },
+        "existingWebhookCertSecret": {
+          "type": "string",
+          "description": "name of a secret containing the certificates (use it to avoid certManager creating one)"
+        },
+        "existingWebhookCertCABundle": {
+          "type": "string",
+          "description": "PEM-encoded CA Bundle of the existing secret provided in existingWebhookCertSecret (only if useCertManager=false)"
+        },
+        "resources": {
+          "type": "object",
+          "description": "Set container requests and limits for different resources like CPU or memory (essential for production workloads)"
+        },
+        "pdb": {
+          "type": "object",
+          "description": "Pod Disruption Budget configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Enable a Pod Disruption Budget creation"
+            },
+            "minAvailable": {
+              "type": [
+                "string",
+                "integer"
+              ],
+              "description": "Minimum number/percentage of pods that should remain scheduled"
+            },
+            "maxUnavailable": {
+              "type": [
+                "string",
+                "integer"
+              ],
+              "description": "Maximum number/percentage of pods that may be made unavailable"
+            }
+          }
+        },
+        "podSecurityContext": {
+          "type": "object",
+          "description": "Configure Pods Security Context",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enabled RabbitMQ Messaging Topology Operator pods' Security Context"
+            },
+            "fsGroupChangePolicy": {
+              "type": "string",
+              "description": "Set filesystem group change policy"
+            },
+            "sysctls": {
+              "type": "array",
+              "description": "Set kernel settings using the sysctl interface"
+            },
+            "supplementalGroups": {
+              "type": "array",
+              "description": "Set filesystem extra groups"
+            },
+            "fsGroup": {
+              "type": "integer",
+              "description": "Set RabbitMQ Messaging Topology Operator pod's Security Context fsGroup"
+            }
+          }
+        },
+        "containerSecurityContext": {
+          "type": "object",
+          "description": "Configure Container Security Context",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enabled containers' Security Context"
+            },
+            "seLinuxOptions": {
+              "type": "object",
+              "description": "Set SELinux options in container"
+            },
+            "runAsUser": {
+              "type": "integer",
+              "description": "Set containers' Security Context runAsUser"
+            },
+            "runAsGroup": {
+              "type": "integer",
+              "description": "Set containers' Security Context runAsGroup"
+            },
+            "runAsNonRoot": {
+              "type": "boolean",
+              "description": "Set container's Security Context runAsNonRoot"
+            },
+            "privileged": {
+              "type": "boolean",
+              "description": "Set container's Security Context privileged"
+            },
+            "readOnlyRootFilesystem": {
+              "type": "boolean",
+              "description": "Set container's Security Context readOnlyRootFilesystem"
+            },
+            "allowPrivilegeEscalation": {
+              "type": "boolean",
+              "description": "Set container's Security Context allowPrivilegeEscalation"
+            },
+            "capabilities": {
+              "type": "object",
+              "properties": {
+                "drop": {
+                  "type": "array",
+                  "description": "List of capabilities to be dropped",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "seccompProfile": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Set container's Security Context seccomp profile"
+                }
+              }
+            }
+          }
+        },
+        "fullnameOverride": {
+          "type": "string",
+          "description": "String to fully override rmqco.msgTopologyOperator.fullname template"
+        },
+        "command": {
+          "type": "array",
+          "description": "Override default container command (useful when using custom images)"
+        },
+        "args": {
+          "type": "array",
+          "description": "Override default container args (useful when using custom images)"
+        },
+        "automountServiceAccountToken": {
+          "type": "boolean",
+          "description": "Mount Service Account token in pod"
+        },
+        "hostAliases": {
+          "type": "array",
+          "description": "RabbitMQ Messaging Topology Operator pods host aliases"
+        },
+        "podLabels": {
+          "type": "object",          "description": "Extra labels for RabbitMQ Messaging Topology Operator pods"
+        },
+        "podAnnotations": {
+          "type": "object",
+          "description": "Annotations for RabbitMQ Messaging Topology Operator pods"
+        },
+        "affinity": {
+          "type": "object",
+          "description": "Affinity for RabbitMQ Messaging Topology Operator pods assignment"
+        },
+        "nodeSelector": {
+          "type": "object",
+          "description": "Node labels for RabbitMQ Messaging Topology Operator pods assignment"
+        },
+        "tolerations": {
+          "type": "array",
+          "description": "Tolerations for RabbitMQ Messaging Topology Operator pods assignment"
+        },
+        "updateStrategy": {
+          "type": "object",
+          "description": "RabbitMQ Messaging Topology Operator statefulset strategy type",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "StrategyType"
+            }
+          }
+        },
+        "priorityClassName": {
+          "type": "string",
+          "description": "RabbitMQ Messaging Topology Operator pods' priorityClassName"
+        },
+        "lifecycleHooks": {
+          "type": "object",
+          "description": "for the RabbitMQ Messaging Topology Operator container(s) to automate configuration before or after startup"
+        },
+        "containerPorts": {
+          "type": "object",
+          "properties": {
+            "metrics": {
+              "type": "integer",
+              "description": "RabbitMQ Messaging Topology Operator container port (used for metrics)"
+            }
+          }
+        },
+        "extraEnvVars": {
+          "type": "array",
+          "description": "Array with extra environment variables to add to RabbitMQ Messaging Topology Operator nodes"
+        },
+        "extraEnvVarsCM": {
+          "type": "string",
+          "description": "Name of existing ConfigMap containing extra env vars for RabbitMQ Messaging Topology Operator nodes"
+        },
+        "extraEnvVarsSecret": {
+          "type": "string",
+          "description": "Name of existing Secret containing extra env vars for RabbitMQ Messaging Topology Operator nodes"
+        },
+        "extraVolumes": {
+          "type": "array",
+          "description": "Optionally specify extra list of additional volumes for the RabbitMQ Messaging Topology Operator pod(s)"
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "description": "Optionally specify extra list of additional volumeMounts for the RabbitMQ Messaging Topology Operator container(s)"
+        },
+        "sidecars": {
+          "type": "array",
+          "description": "Add additional sidecar containers to the RabbitMQ Messaging Topology Operator pod(s)"
+        },
+        "initContainers": {
+          "type": "array",
+          "description": "Add additional init containers to the RabbitMQ Messaging Topology Operator pod(s)"
+        },
+        "service": {
+          "type": "object",
+          "description": "Webhook service parameters",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator webhook service type"
+            },
+            "ports": {
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "type": "integer",
+                  "description": "RabbitMQ Messaging Topology Operator webhook service HTTP port"
+                }
+              }
+            },
+            "nodePorts": {
+              "type": "object",
+              "properties": {
+                "http": {
+                  "type": "string",
+                  "description": "Node port for HTTP"
+                }
+              }
+            },
+            "clusterIP": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator webhook service Cluster IP"
+            },
+            "loadBalancerIP": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator webhook service Load Balancer IP"
+            },
+            "extraPorts": {
+              "type": "array",
+              "description": "Extra ports to expose (normally used with the `sidecar` value)"
+            },
+            "loadBalancerSourceRanges": {
+              "type": "array",
+              "description": "RabbitMQ Messaging Topology Operator webhook service Load Balancer sources"
+            },
+            "externalTrafficPolicy": {
+              "type": "string",
+              "description": "RabbitMQ Messaging Topology Operator webhook service external traffic policy"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Additional custom annotations for RabbitMQ Messaging Topology Operator webhook service"
+            },
+            "sessionAffinity": {
+              "type": "string",
+              "description": "Session Affinity for Kubernetes service, can be 'None' or 'ClientIP'"
+            },
+            "sessionAffinityConfig": {
+              "type": "object",
+              "description": "Additional settings for the sessionAffinity"
+            }
+          }
+        },
+        "networkPolicy": {
+          "type": "object",
+          "description": "Network Policies",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Specifies whether a NetworkPolicy should be created"
+            },
+            "kubeAPIServerPorts": {
+              "type": "array",
+              "description": "List of possible endpoints to kube-apiserver (limit to your cluster settings to increase security)",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "allowExternal": {
+              "type": "boolean",
+              "description": "Don't require injector label for connections"
+            },
+            "allowExternalEgress": {
+              "type": "boolean",
+              "description": "Allow the pod to access any range of port and all destinations."
+            },
+            "extraIngress": {
+              "type": "array",
+              "description": "Add extra ingress rules to the NetworkPolicy"
+            },
+            "extraEgress": {
+              "type": "array",
+              "description": "Add extra egress rules to the NetworkPolicy"
+            },
+            "ingressNSMatchLabels": {
+              "type": "object",
+              "description": "Labels to match to allow traffic from other namespaces"
+            },
+            "ingressNSPodMatchLabels": {
+              "type": "object",
+              "description": "Pod labels to match to allow traffic from other namespaces"
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "description": "RBAC configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Specifies whether RBAC resources should be created"
+            },
+            "clusterRole": {
+              "type": "object",
+              "properties": {
+                "customRules": {
+                  "type": "array",
+                  "description": "Define custom access rules for the ClusterRole"
+                },
+                "extraRules": {
+                  "type": "array",
+                  "description": "Define extra access rules for the ClusterRole. This has no effect if customerRules is a non-empty array."
+                }
+              }
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "description": "ServiceAccount configuration",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "description": "Specifies whether a ServiceAccount should be created"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the ServiceAccount to use."
+            },
+            "annotations": {
+              "type": "object",
+              "description": "Add annotations"
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "description": "Automount API credentials for a service account."
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "description": "RabbitMQ Messaging Topology Operator parameters",
+          "properties": {
+            "service": {
+              "type": "object",
+              "description": "Metrics service parameters",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Create a service for accessing the metrics endpoint"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service type"
+                },
+                "ports": {
+                  "type": "object",
+                  "properties": {
+                    "http": {
+                      "type": "integer",
+                      "description": "RabbitMQ Cluster Operator metrics service HTTP port"
+                    }
+                  }
+                },
+                "nodePorts": {
+                  "type": "object",
+                  "properties": {
+                    "http": {
+                      "type": "string",
+                      "description": "Node port for HTTP"
+                    }
+                  }
+                },
+                "clusterIP": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service Cluster IP"
+                },
+                "extraPorts": {
+                  "type": "array",
+                  "description": "Extra ports to expose (normally used with the `sidecar` value)"
+                },
+                "loadBalancerIP": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service Load Balancer IP"
+                },
+                "loadBalancerSourceRanges": {
+                  "type": "array",
+                  "description": "RabbitMQ Cluster Operator metrics service Load Balancer sources"
+                },
+                "externalTrafficPolicy": {
+                  "type": "string",
+                  "description": "RabbitMQ Cluster Operator metrics service external traffic policy"
+                },
+                "annotations": {
+                  "type": "object",
+                  "description": "Additional custom annotations for RabbitMQ Cluster Operator metrics service"
+                },
+                "sessionAffinity": {
+                  "type": "string",
+                  "description": "Session Affinity for Kubernetes service, can be 'None' or 'ClientIP'"
+                },
+                "sessionAffinityConfig": {
+                  "type": "object",
+                  "description": "Additional settings for the sessionAffinity"
+                }
+              }
+            },
+            "serviceMonitor": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Specify if a servicemonitor will be deployed for prometheus-operator"
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "Namespace which Prometheus is running in"
+                },
+                "jobLabel": {
+                  "type": "string",
+                  "description": "Specify the jobLabel to use for the prometheus-operator"
+                },
+                "selector": {
+                  "type": "object"
+                },
+                "honorLabels": {
+                  "type": "boolean",
+                  "description": "Honor metrics labels"
+                },
+                "scrapeTimeout": {
+                  "type": "string",
+                  "description": "Timeout after which the scrape is ended"
+                },
+                "interval": {
+                  "type": "string",
+                  "description": "Scrape interval. If not set, the Prometheus default scrape interval is used"
+                },
+                "metricRelabelings": {
+                  "type": "array",
+                  "description": "Specify additional relabeling of metrics"
+                },
+                "relabelings": {
+                  "type": "array",
+                  "description": "Specify general relabeling"
+                },
+                "labels": {
+                  "type": "object",
+                  "description": "Extra labels for the ServiceMonitor"
+                }
+              }
+            },
+            "podMonitor": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Create PodMonitor Resource for scraping metrics using PrometheusOperator"
+                },
+                "jobLabel": {
+                  "type": "string",
+                  "description": "Specify the jobLabel to use for the prometheus-operator"
+                },
+                "namespace": {
+                  "type": "string",
+                  "description": "Namespace which Prometheus is running in"
+                },
+                "honorLabels": {
+                  "type": "boolean",
+                  "description": "Honor metrics labels"
+                },
+                "selector": {
+                  "type": "object",
+                  "description": "Prometheus instance selector labels"
+                },
+                "interval": {
+                  "type": "string",
+                  "description": "Specify the interval at which metrics should be scraped"
+                },
+                "scrapeTimeout": {
+                  "type": "string",
+                  "description": "Specify the timeout after which the scrape is ended"
+                },
+                "additionalLabels": {
+                  "type": "object",
+                  "description": "Additional labels that can be used so PodMonitors will be discovered by Prometheus"
+                },
+                "relabelings": {
+                  "type": "array",
+                  "description": "Specify general relabeling"
+                },
+                "metricRelabelings": {
+                  "type": "array",
+                  "description": "Specify additional relabeling of metrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "useCertManager": {
+      "type": "boolean",
+      "description": "Deploy cert-manager objects (Issuer and Certificate) for webhooks"
+    }
+  }
+}

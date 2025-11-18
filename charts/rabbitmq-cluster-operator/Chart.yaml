@@ -1,0 +1,44 @@
+apiVersion: v2
+name: rabbitmq-cluster-operator
+description: Kubernetes operator to deploy and manage RabbitMQ clusters.
+type: application
+version: 0.1.0
+appVersion: "2.17.2"
+keywords:
+  - rabbitmq-cluster-operator
+  - rabbitmq
+  - message broker
+  - amqp
+  - messaging
+  - queue
+home: https://www.rabbitmq.com
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+  - https://github.com/rabbitmq/cluster-operator
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
+    url: https://www.cloudpirates.io
+  - name: Gasper Oblak
+    url: https://about.bl4ko.com
+dependencies:
+  - name: common
+    version: "2.x.x"
+    repository: file://../common
+icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: streaming-messaging
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: RabbitMQ
+      url: https://www.rabbitmq.com
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+    - name: Application
+      url: https://github.com/rabbitmq/cluster-operator
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
