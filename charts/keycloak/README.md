@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-keycloak/keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
 </p>
 
 # Keycloak
@@ -8,7 +8,7 @@ A Helm chart for Keycloak - Open Source Identity and Access Management Solution.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-keycloak`:
 
 ```bash
 helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
+```
+
+To install with custom values:
+
+```bash
+helm install my-valkey oci://registry-1.docker.io/cloudpirates/valkey -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -83,7 +89,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.3.4@sha256:2b32a51a31e8d780d9fa9a69a59ead69975263c61b5dd13559090e22aa26f100"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.4@sha256:c6459d5fae1b759f5d667ebdc6237ab3121379c3494e213898569014ede1846d"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
 
 ### Deployment configuration
@@ -108,9 +114,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra init containers for Keycloak pod
 
-| Parameter             | Description                                           | Default |
-| --------------------- | ----------------------------------------------------- | ------- |
-| `extraInitContainers` | Array of initContainer to add to the keycloak pod     | `[]`    |
+| Parameter             | Description                                       | Default |
+| --------------------- | ------------------------------------------------- | ------- |
+| `extraInitContainers` | Array of initContainer to add to the keycloak pod | `[]`    |
 
 ### Security
 
@@ -148,43 +154,46 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### TLS Configuration
 
-| Parameter                                  | Description                                                                                | Default                            |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------- |
-| `tls.enabled`                              | Enable TLS/HTTPS support using custom certificates                                        | `false`                            |
-| `tls.existingSecret`                       | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                               |
-| `tls.certificateFile`                      | Path where the TLS certificate file will be mounted (internal)                            | `"/opt/keycloak/certs/tls.crt"`    |
-| `tls.certificateKeyFile`                   | Path where the TLS certificate key file will be mounted (internal)                        | `"/opt/keycloak/certs/tls.key"`    |
-| `tls.certManager.enabled`                  | Enable cert-manager integration for automatic certificate provisioning                    | `false`                            |
-| `tls.certManager.issuerRef.name`           | Name of the cert-manager Issuer or ClusterIssuer                                          | `""`                               |
-| `tls.certManager.issuerRef.kind`           | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                 | `ClusterIssuer`                    |
-| `tls.certManager.issuerRef.group`          | Group of the cert-manager issuer                                                          | `cert-manager.io`                  |
-| `tls.certManager.duration`                 | Certificate duration (e.g., 2160h for 90 days)                                            | `""`                               |
-| `tls.certManager.renewBefore`              | Time before expiry to renew certificate (e.g., 360h for 15 days)                          | `""`                               |
-| `tls.certManager.commonName`               | Certificate common name (defaults to first dnsName if not specified)                      | `""`                               |
-| `tls.certManager.dnsNames`                 | List of DNS names for the certificate (uses ingress.hosts if not specified)               | `[]`                               |
-| `tls.certManager.ipAddresses`              | List of IP addresses for the certificate                                                  | `[]`                               |
-| `tls.certManager.secretName`               | Name for the generated secret (defaults to `<fullname>-tls`)                              | `""`                               |
-| `tls.certManager.usages`                   | Certificate key usages                                                                    | `["digital signature", "key encipherment"]` |
-| `tls.certManager.annotations`              | Additional annotations for the Certificate resource                                       | `{}`                               |
-| `tls.truststoreEnabled`                    | Enable truststore for client certificate validation or outgoing HTTPS requests            | `false`                            |
-| `tls.truststoreExistingSecret`             | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks) | `""`                               |
-| `tls.truststorePassword`                   | Password for the truststore (use with caution - consider using existing secret)           | `""`                               |
-| `tls.truststoreFile`                       | Path where the truststore file will be mounted (internal)                                 | `"/opt/keycloak/truststore/truststore.jks"` |
+| Parameter                         | Description                                                                                            | Default                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                                     | `false`                                     |
+| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key)        | `""`                                        |
+| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                         | `"/opt/keycloak/certs/tls.crt"`             |
+| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                                     | `"/opt/keycloak/certs/tls.key"`             |
+| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                                 | `false`                                     |
+| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                       | `""`                                        |
+| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                              | `ClusterIssuer`                             |
+| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                       | `cert-manager.io`                           |
+| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                         | `""`                                        |
+| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                       | `""`                                        |
+| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                                   | `""`                                        |
+| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                            | `[]`                                        |
+| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                               | `[]`                                        |
+| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                           | `""`                                        |
+| `tls.certManager.usages`          | Certificate key usages                                                                                 | `["digital signature", "key encipherment"]` |
+| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                                    | `{}`                                        |
+| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                         | `false`                                     |
+| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, default-key: truststore.jks) | `""`                                        |
+| `tls.truststoreExistingSecretKey` | Key of the secret to get the trustStorePassword from                                                   | `"truststore.jks"`                          |
+| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                        | `""`                                        |
+| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                              | `"/opt/keycloak/truststore/truststore.jks"` |
 
 ### Database Configuration
 
-| Parameter                         | Description                                                                                                            | Default         |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `database.type`                   | Database type (postgres, mysql, mariadb). Note: H2 databases are not supported due to readonly filesystem restrictions | `postgres`      |
-| `database.host`                   | Database host (only used when not using embedded database)                                                             | `""`            |
-| `database.port`                   | Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306)                | `""`            |
-| `database.name`                   | Database name (only used when not using embedded database)                                                             | `keycloak`      |
-| `database.username`               | Database username (only used when not using embedded database)                                                         | `keycloak`      |
-| `database.password`               | Database password (only used when not using embedded database)                                                         | `""`            |
-| `database.existingSecret`         | Name of existing secret for database credentials (only used when not using embedded database)                          | `""`            |
-| `database.secretKeys.passwordKey` | Name of key in existing secret for database password                                                                   | `"db-password"` |
-| `database.secretKeys.usernameKey` | Name of key in existing secret for database username                                                                   | `"db-username"` |
-| `database.jdbcParams`             | Additional JDBC parameters                                                                                             | `""`            |
+| Parameter                         | Description                                                                                                                   | Default         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `database.type`                   | Database type (postgres, mysql, mariadb, mssql). Note: H2 databases are not supported due to readonly filesystem restrictions | `postgres`      |
+| `database.host`                   | Database host (only used when not using embedded database)                                                                    | `""`            |
+| `database.port`                   | Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306, mssql=1433)           | `""`            |
+| `database.schema`                 | Database schema                                                                                                               | `""`            |
+| `database.urlProperties`          | Additional database url properties                                                                                            | `""`            |
+| `database.name`                   | Database name (only used when not using embedded database)                                                                    | `keycloak`      |
+| `database.username`               | Database username (only used when not using embedded database)                                                                | `keycloak`      |
+| `database.password`               | Database password (only used when not using embedded database)                                                                | `""`            |
+| `database.existingSecret`         | Name of existing secret for database credentials (only used when not using embedded database)                                 | `""`            |
+| `database.secretKeys.passwordKey` | Name of key in existing secret for database password                                                                          | `"db-password"` |
+| `database.secretKeys.usernameKey` | Name of key in existing secret for database username                                                                          | `"db-username"` |
+| `database.jdbcParams`             | Additional JDBC parameters                                                                                                    | `""`            |
 
 ### Cache Configuration
 
@@ -314,7 +323,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
-| `extraEnv`           | Additional environment variables from key-value pairs                  | `{}`    |
+| `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``      |
 
 ### Extra Configuration Parameters
@@ -327,8 +336,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                              | Description                                 | Default                                                                                  |
 | -------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6`  |
-| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:8a061ef9813cf960f94a262930a32b190c3fbe5c8d3ab58456ef1df4b90fd5dc` |
+| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a`  |
+| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545` |
 
 ### PostgreSQL Configuration
 
@@ -524,6 +533,53 @@ realm:
       "realm": "my-realm",
       "enabled": true
     }
+```
+
+### Using Custom Themes and Providers
+
+The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
+
+**Example: Adding custom themes and providers with an initContainer**
+
+```yaml
+# values-custom-themes.yaml
+extraInitContainers:
+  - name: add-custom-themes
+    image: your-registry/keycloak-themes:latest
+    imagePullPolicy: Always
+    command:
+      - sh
+      - -c
+      - |
+        cp -r /themes/* /opt/keycloak/themes/
+        cp -r /providers/* /opt/keycloak/providers/
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
+      - name: keycloak-providers
+        mountPath: /opt/keycloak/providers
+```
+
+In this example:
+- Create a Docker image containing your custom themes in `/themes` and providers in `/providers`
+- The initContainer copies these files to the mounted volumes
+- Keycloak will automatically detect and use them on startup
+
+You can also use this approach to download themes/providers from external sources:
+
+```yaml
+extraInitContainers:
+  - name: download-themes
+    image: curlimages/curl:latest
+    command:
+      - sh
+      - -c
+      - |
+        curl -L -o /tmp/theme.zip https://example.com/theme.zip
+        unzip /tmp/theme.zip -d /opt/keycloak/themes/
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
 ```
 
 ### Using Custom TLS Certificates
@@ -766,4 +822,4 @@ For issues related to this Helm chart, please check:
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
 - [Keycloak Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

@@ -151,7 +151,10 @@
         "existingStreamServerConfigConfigmap": {
             "type": "string"
         },
-        "extraEnv": {
+        "extraEnvVars": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -384,6 +387,9 @@
         "nodeSelector": {
             "type": "object"
         },
+        "podLabels": {
+            "type": "object"
+        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -391,6 +397,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

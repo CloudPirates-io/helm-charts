@@ -22,7 +22,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.0@sha256:33d0aae6356d4412efdebcdc554e489e7f9e88bb3cf9281f44aa1924fadbb4e7"
+  tag: "18.1@sha256:41bfa2e5b168fff0847a5286694a86cff102bdc4d59719869f6b117bb30b3a24"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
 
@@ -67,12 +67,14 @@ auth:
   database: ""
   ## @param auth.existingSecret Name of existing secret to use for PostgreSQL credentials
   existingSecret: ""
-  ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials
   secretKeys:
-    passwordKey: "postgres-password"
+    ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL admin credentials
+    adminPasswordKey: "postgres-password"
 
 ## @section PostgreSQL Configuration
 config:
+  ## @param config.mountConfigMap Enable mounting of ConfigMap with PostgreSQL configuration
+  mountConfigMap: true
   ## @param config.postgresqlSharedPreloadLibraries Shared preload libraries (comma-separated list)
   postgresqlSharedPreloadLibraries: ""
   ## @param config.postgresqlMaxConnections Maximum number of connections
@@ -137,6 +139,8 @@ service:
   port: 5432
   ## @param service.targetPort PostgreSQL container port
   targetPort: 5432
+  ## @param service.nodePort PostgreSQL NodePort port
+  nodePort: 30432
   ## @param service.annotations Service annotations
   annotations: {}
 
@@ -194,6 +198,9 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  ## Useful in dev environments and one PV for multiple services
+  subPath: ""
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -268,10 +275,15 @@ serviceAccount:
   ## @param serviceAccount.automountServiceAccountToken whether to automount the SA token inside the pod
   automountServiceAccountToken: false
 
-## @param extraEnv Additional environment variables from key-value pairs
-extraEnv: {}
-# VARNAME1: value1
-# VARNAME2: value2
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraEnvVarsSecret Name of a secret containing additional environment variables
 extraEnvVarsSecret: ""

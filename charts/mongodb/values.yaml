@@ -27,7 +27,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c"
+  tag: "8.2.1@sha256:e64a984d36b24419327c558b49a9100cf78191706222da6a7c8cf56a743ad3db"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.command Override default container command (useful when using custom images)
@@ -103,6 +103,11 @@ persistence:
   mountPath: /data/db
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  ## Useful in dev environments and one PV for multiple services
+  subPath: ""
 
 ## @param resources Resource limits and requests for MongoDB pod
 resources:
@@ -162,8 +167,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
@@ -278,7 +290,14 @@ metrics:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-  ## @param metrics.extraEnv Additional environment variables for metrics container
-  extraEnv: []
+  ## @param metrics.extraEnvVars Additional environment variables for metrics container
+  extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
   ## @param metrics.extraArgs Additional command line arguments for MongoDB Exporter
   extraArgs: []

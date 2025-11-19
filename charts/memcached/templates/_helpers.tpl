@@ -48,6 +48,13 @@ Return the proper Memcached image name
 {{- end }}
 
 {{/*
+Return the proper Memcached metrics image name
+*/}}
+{{- define "memcached.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "memcached.imagePullSecrets" -}}
@@ -62,5 +69,13 @@ Create the name of the service account to use
 {{- default (include "memcached.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{- define "memcached.serviceMonitorJobLabel" -}}
+{{- if .Values.metrics.serviceMonitor.jobLabel }}
+{{- .Values.metrics.serviceMonitor.jobLabel }}
+{{- else }}
+{{- include "memcached.fullname" . }}
 {{- end }}
 {{- end }}

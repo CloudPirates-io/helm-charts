@@ -1,6 +1,70 @@
 # Changelog
 
 
+## 0.8.5 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([09bffff](https://github.com/CloudPirates-io/helm-charts/commit/09bffff))
+* chore: update CHANGELOG.md for merged changes ([f48bb48](https://github.com/CloudPirates-io/helm-charts/commit/f48bb48))
+
+## 0.8.4 (2025-11-11)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.4 (patch) (#563) ([c65d420](https://github.com/CloudPirates-io/helm-charts/commit/c65d420))
+* chore: update CHANGELOG.md for merged changes ([5797494](https://github.com/CloudPirates-io/helm-charts/commit/5797494))
+* chore: update CHANGELOG.md for merged changes ([1a445f9](https://github.com/CloudPirates-io/helm-charts/commit/1a445f9))
+* chore: auto-generate values.schema.json (#578) ([584a535](https://github.com/CloudPirates-io/helm-charts/commit/584a535))
+* chore: update CHANGELOG.md for merged changes ([69f290f](https://github.com/CloudPirates-io/helm-charts/commit/69f290f))
+* chore: update CHANGELOG.md for merged changes ([7b32772](https://github.com/CloudPirates-io/helm-charts/commit/7b32772))
+
+## 0.8.3 (2025-11-11)
+
+* add truststoreExistingSecretKey, add truststorePassword to env-Vars (#574) ([9c97080](https://github.com/CloudPirates-io/helm-charts/commit/9c97080))
+* chore: update CHANGELOG.md for merged changes ([e67a635](https://github.com/CloudPirates-io/helm-charts/commit/e67a635))
+* chore: update CHANGELOG.md for merged changes ([607f120](https://github.com/CloudPirates-io/helm-charts/commit/607f120))
+
+## 0.8.2 (2025-11-05)
+
+* [keycloak]: Fix mariadb configuration (#544) ([6cec40c](https://github.com/CloudPirates-io/helm-charts/commit/6cec40c))
+* chore: update CHANGELOG.md for merged changes ([72853a9](https://github.com/CloudPirates-io/helm-charts/commit/72853a9))
+* chore: update CHANGELOG.md for merged changes ([cd5cd19](https://github.com/CloudPirates-io/helm-charts/commit/cd5cd19))
+
+## 0.8.1 (2025-11-02)
+
+* [keycloak]: Fix https settings in keycloak when disabling http (#530) ([b0c34f6](https://github.com/CloudPirates-io/helm-charts/commit/b0c34f6))
+* chore: update CHANGELOG.md for merged changes ([3062545](https://github.com/CloudPirates-io/helm-charts/commit/3062545))
+* chore: update CHANGELOG.md for merged changes ([19b8107](https://github.com/CloudPirates-io/helm-charts/commit/19b8107))
+
+## 0.8.0 (2025-10-30)
+
+* Provide empty mounts for themes and providers (#504) ([4d2f107](https://github.com/CloudPirates-io/helm-charts/commit/4d2f107))
+* chore: update CHANGELOG.md for merged changes ([385f22b](https://github.com/CloudPirates-io/helm-charts/commit/385f22b))
+* chore: update CHANGELOG.md for merged changes ([488fba4](https://github.com/CloudPirates-io/helm-charts/commit/488fba4))
+
+## 0.7.1 (2025-10-29)
+
+* fix: use metrics service targetPort configuration (#493) ([bd3cc53](https://github.com/CloudPirates-io/helm-charts/commit/bd3cc53))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.7.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([aec2fd6](https://github.com/CloudPirates-io/helm-charts/commit/aec2fd6))
+* chore: update CHANGELOG.md for merged changes ([8e4ff4a](https://github.com/CloudPirates-io/helm-charts/commit/8e4ff4a))
+* chore: auto-generate values.schema.json (#473) ([d9a38d4](https://github.com/CloudPirates-io/helm-charts/commit/d9a38d4))
+* chore: update CHANGELOG.md for merged changes ([293ae00](https://github.com/CloudPirates-io/helm-charts/commit/293ae00))
+* chore: update CHANGELOG.md for merged changes ([ae9c37b](https://github.com/CloudPirates-io/helm-charts/commit/ae9c37b))
+
+## 0.6.8 (2025-10-27)
+
+* add mssql support (#469) ([11cdbfb](https://github.com/CloudPirates-io/helm-charts/commit/11cdbfb))
+* chore: update CHANGELOG.md for merged changes ([6813d85](https://github.com/CloudPirates-io/helm-charts/commit/6813d85))
+* chore: update CHANGELOG.md for merged changes ([2e40f13](https://github.com/CloudPirates-io/helm-charts/commit/2e40f13))
+
+## 0.6.7 (2025-10-26)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.2 (patch) (#453) ([52a01c8](https://github.com/CloudPirates-io/helm-charts/commit/52a01c8))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
 ## 0.6.6 (2025-10-23)
 
 * chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))

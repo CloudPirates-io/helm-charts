@@ -10,29 +10,180 @@ metadata:
     {{- include "valkey.annotations" . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
   serviceName: {{ include "valkey.fullname" . }}-headless
   selector:
     matchLabels:
       {{- include "valkey.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      labels:
+        {{- include "valkey.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or (include "valkey.annotations" .) .Values.podAnnotations }}
       annotations:
         {{- include "valkey.annotations" . | nindent 8 }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      labels:
-        {{- include "valkey.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
     spec:
 {{- with (include "valkey.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       serviceAccountName: {{ include "valkey.serviceAccountName" . }}
+      {{- if eq .Values.architecture "replication" }}
+      initContainers:
+        - name: valkey-init
+          image: {{ include "valkey.image" . }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              # Get pod ordinal from hostname
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              MY_HOSTNAME=$(hostname)
+
+              # Create config file
+              touch /tmp/valkey/valkey.conf
+
+              echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
+
+              {{- if .Values.sentinel.enabled }}
+              # Add Valkey configurations for better Sentinel failover tolerance
+              echo "" >> /tmp/valkey/valkey.conf
+              echo "# Configurations for Kubernetes force deletion tolerance" >> /tmp/valkey/valkey.conf
+              echo "min-slaves-to-write 0" >> /tmp/valkey/valkey.conf
+              echo "min-slaves-max-lag 0" >> /tmp/valkey/valkey.conf
+
+              # Try to determine current master from Sentinel (if any sentinel is available)
+              CURRENT_MASTER=""
+              SENTINEL_FOUND=false
+
+              # Check if any sentinel is already running and knows the master
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless"
+                MASTER_INFO=$(valkey-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
+                  CURRENT_MASTER="$MASTER_INFO"
+                  SENTINEL_FOUND=true
+                  echo "Found current master from sentinel: $CURRENT_MASTER"
+                  break
+                fi
+              done
+
+              # Configuration logic
+              if [ "$SENTINEL_FOUND" = true ] && [ -n "$CURRENT_MASTER" ]; then
+                # Sentinel knows the master - configure accordingly
+                MY_HOSTNAME=$(hostname)
+                MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "valkey.fullname" . }}-headless"
+                MY_IP=$(hostname -i)
+
+                # Check if I am the master by hostname or IP
+                if [ "$MY_IP" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME_FQDN" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME" = "$CURRENT_MASTER" ]; then
+                  echo "I am the current master according to Sentinel"
+                else
+                  echo "Configuring as replica of current master: $CURRENT_MASTER"
+                  echo "replicaof $CURRENT_MASTER {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                  {{- if .Values.auth.enabled }}
+                  echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
+                  {{- end }}
+                fi
+              else
+                # No sentinel available - use bootstrap logic
+                if [ "$POD_ORDINAL" != "0" ]; then
+                  echo "Bootstrap mode: configuring as replica of pod-0"
+                  # Use hostname-based replication for better resilience
+                  MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless"
+                  echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                  echo "Bootstrap replica using pod-0 hostname: $MASTER_HOSTNAME"
+                  {{- if .Values.auth.enabled }}
+                  echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
+                  {{- end }}
+                else
+                  echo "Bootstrap mode: pod-0 starting as initial master"
+                fi
+              fi
+
+              # Configure for Sentinel discovery and force deletion tolerance
+              # Get IP address based on ipFamily setting
+              {{- if eq .Values.ipFamily "ipv4" }}
+              MY_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              if [ -z "$MY_IP" ]; then
+                echo "Warning: No IPv4 address found, falling back to first available IP"
+                MY_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              MY_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
+              if [ -z "$MY_IP" ]; then
+                echo "Warning: No IPv6 address found, falling back to first available IP"
+                MY_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else }}
+              # auto: Use the first IP address for dual-stack compatibility
+              MY_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "Using IP address: ${MY_IP}"
+              echo "replica-announce-ip ${MY_IP}" >> /tmp/valkey/valkey.conf
+              echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              echo "slave-announce-ip ${MY_IP}" >> /tmp/valkey/valkey.conf
+              echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+
+              # Make slaves more eligible for promotion during force deletions
+              echo "slave-priority 100" >> /tmp/valkey/valkey.conf
+              echo "replica-read-only yes" >> /tmp/valkey/valkey.conf
+              {{- else }}
+              # Replication without Sentinel: pod-0 is always master, others are replicas
+              if [ "$POD_ORDINAL" != "0" ]; then
+                echo "Configuring as replica of pod-0 (master)"
+                MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless"
+                echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
+                {{- end }}
+                echo "replica-read-only yes" >> /tmp/valkey/valkey.conf
+              else
+                echo "Pod-0: Configuring as master"
+              fi
+              {{- end }}
+
+              # Add user provided settings at the end of file to ensure their precedence
+              echo "" >> /tmp/valkey/valkey.conf
+              # If there is existing config map or .Values.config value provided - use it
+              if [ -f "{{ include "valkey.configFullName" . }}" ]; then
+                echo "# Content from provided config" >> /tmp/valkey/valkey.conf
+                cat {{ include "valkey.configFullName" . }} >> /tmp/valkey/valkey.conf
+              else
+                # Create minimal config if no config exists
+                echo "# Default minimal config" >> /tmp/valkey/valkey.conf
+                cat >> /tmp/valkey/valkey.conf << EOF
+              bind 0.0.0.0
+              port {{ .Values.service.port }}
+              EOF
+              fi
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "valkey.secretName" . }}
+                  key: {{ include "valkey.passwordKey" . }}
+          {{- end }}
+          resources: {{- toYaml .Values.initContainer.resources | nindent 12 }}
+          volumeMounts:
+            {{- if or .Values.config.content .Values.config.existingConfigmap }}
+            - name: config
+              mountPath: {{ .Values.config.mountPath }}
+            {{- end }}
+            - name: valkey-config
+              mountPath: /tmp/valkey
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -41,7 +192,18 @@ spec:
           command:
             - /bin/sh
             - -c
-            - valkey-server /etc/valkey/valkey.conf --requirepass "${VALKEY_PASSWORD}"
+            - |
+              {{- if eq .Values.architecture "replication" }}
+              CONFIG_FILE="/tmp/valkey/valkey.conf"
+              {{- else }}
+              CONFIG_FILE="{{ include "valkey.configFullName" . }}"
+              {{- end }}
+
+              valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
+          ports:
+            - name: valkey
+              containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.targetPort }}{{ end }}
+              protocol: TCP
           env:
             {{- if .Values.auth.enabled }}
             - name: VALKEY_PASSWORD
@@ -49,74 +211,247 @@ spec:
                 secretKeyRef:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
+            - name: REDISCLI_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "valkey.secretName" . }}
+                  key: {{ include "valkey.passwordKey" . }}
             {{- end }}
-          ports:
-            - name: valkey
-              containerPort: {{ .Values.service.targetPort }}
-              protocol: TCP
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             exec:
               command:
-                - sh
+                - /bin/sh
                 - -c
-                - |
-                  {{- if .Values.auth.enabled }}
-                  valkey-cli -a "${VALKEY_PASSWORD}" ping
-                  {{- else }}
-                  valkey-cli ping
-                  {{- end }}
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.livenessProbe.successThreshold }}
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
           {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             exec:
               command:
-                - sh
+                - /bin/sh
                 - -c
-                - |
-                  {{- if .Values.auth.enabled }}
-                  valkey-cli -a "${VALKEY_PASSWORD}" ping
-                  {{- else }}
-                  valkey-cli ping
-                  {{- end }}
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
           {{- end }}
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             exec:
               command:
-                - sh
+                - /bin/sh
                 - -c
-                - |
-                  {{- if .Values.auth.enabled }}
-                  valkey-cli -a "${VALKEY_PASSWORD}" ping
-                  {{- else }}
-                  valkey-cli ping
-                  {{- end }}
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.startupProbe.successThreshold }}
             failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+          {{- end }}
+          {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - /scripts/prestop.sh
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: {{ include "valkey.dataDir" . }}
+            {{- if eq .Values.architecture "replication" }}
+            - name: valkey-config
+              mountPath: /tmp/valkey
+            {{- if .Values.sentinel.enabled }}
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
+            {{- end }}
+            {{- else }}
             - name: config
               mountPath: {{ include "valkey.configDir" . }}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/valkey/tls
+              readOnly: true
+            {{- end }}
             - name: tmp
               mountPath: /tmp
+        {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+        - name: sentinel
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "valkey.sentinel.image" . }}
+          imagePullPolicy: {{ .Values.sentinel.image.pullPolicy }}
+          volumeMounts:
+            - name: sentinel-config
+              mountPath: /tmp
+          {{- if .Values.sentinel.extraVolumeMounts }}
+            {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              # Wait for Valkey to be ready
+              echo "Waiting for Valkey to start..."
+              {{- if eq .Values.ipFamily "ipv6" }}
+              VALKEY_HOST="::1"
+              {{- else }}
+              VALKEY_HOST="127.0.0.1"
+              {{- end }}
+              while ! valkey-cli {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} -h "${VALKEY_HOST}" -p {{ .Values.service.port }} ping >/dev/null 2>&1; do
+                sleep 1
+              done
+              echo "Valkey is ready"
+
+              # Determine initial master: query existing Sentinels first, fallback to pod-0 only for bootstrap
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              MASTER_HOST=""
+              SENTINEL_FOUND_MASTER=false
+
+              # First priority: Try to query other sentinels to find the current master
+              echo "Checking existing Sentinels for current master..."
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                if [ "$i" != "$POD_ORDINAL" ]; then
+                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless"
+                  EXISTING_MASTER=$(valkey-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
+                    MASTER_HOST="$EXISTING_MASTER"
+                    SENTINEL_FOUND_MASTER=true
+                    echo "Found current master via sentinel: $MASTER_HOST"
+                    break
+                  fi
+                fi
+              done
+
+              # Second priority: If no Sentinels found master, check if any Valkey instance claims to be master
+              if [ "$SENTINEL_FOUND_MASTER" = false ]; then
+                echo "No Sentinels available, checking Valkey instances directly..."
+                for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                  VALKEY_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+                  ROLE_INFO=$(valkey-cli -h "${VALKEY_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
+                  if [ -n "$ROLE_INFO" ]; then
+                    MASTER_HOST="$VALKEY_HOST"
+                    echo "Found current master by role check: $MASTER_HOST"
+                    break
+                  fi
+                done
+              fi
+
+              # Final fallback: Use pod-0 hostname for initial bootstrap only
+              if [ -z "$MASTER_HOST" ]; then
+                MASTER_HOST="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+                echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
+              fi
+
+              # Get IP address based on ipFamily setting
+              {{- if eq .Values.ipFamily "ipv4" }}
+              SENTINEL_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              if [ -z "$SENTINEL_IP" ]; then
+                echo "Warning: No IPv4 address found, falling back to first available IP"
+                SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              SENTINEL_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
+              if [ -z "$SENTINEL_IP" ]; then
+                echo "Warning: No IPv6 address found, falling back to first available IP"
+                SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              fi
+              {{- else }}
+              # auto: Use the first IP address for dual-stack compatibility
+              SENTINEL_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "Sentinel using IP address: ${SENTINEL_IP}"
+
+              # Create Sentinel config
+              cat > /tmp/sentinel.conf << EOF
+              port {{ .Values.sentinel.port }}
+              bind * -::*
+              # Enable hostname resolution for Valkey Sentinel
+              sentinel resolve-hostnames yes
+              sentinel announce-hostnames yes
+              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ .Values.service.port }} {{ .Values.sentinel.quorum }}
+              sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
+              sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
+              sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
+              {{- if .Values.auth.enabled }}
+              sentinel auth-pass {{ .Values.sentinel.masterName }} "${VALKEY_PASSWORD}"
+              requirepass "${VALKEY_PASSWORD}"
+              {{- end }}
+              # Make automatic failover more aggressive for Kubernetes force deletions
+              sentinel deny-scripts-reconfig yes
+              # Fix leader election issues during force deletions
+              protected-mode no
+              # Allow sentinels to discover each other
+              sentinel announce-ip ${SENTINEL_IP}
+              sentinel announce-port {{ .Values.sentinel.port }}
+              logfile ""
+              loglevel notice
+              EOF
+
+              # Add known sentinels to help with discovery (using hostnames for resilience)
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                if [ "$i" != "$POD_ORDINAL" ]; then
+                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless"
+                  # Test if the host is resolvable before adding
+                  if getent hosts "$SENTINEL_HOST" >/dev/null 2>&1; then
+                    SENTINEL_IP=$(getent hosts "$SENTINEL_HOST" | awk '{print $1}' | head -1)
+                    if [ -n "$SENTINEL_IP" ]; then
+                      echo "sentinel known-sentinel {{ .Values.sentinel.masterName }} ${SENTINEL_IP} {{ .Values.sentinel.port }}" >> /tmp/sentinel.conf
+                    fi
+                  fi
+                fi
+              done
+
+              echo "Starting Sentinel with config:"
+              cat /tmp/sentinel.conf
+
+              valkey-sentinel /tmp/sentinel.conf
+          ports:
+            - name: sentinel
+              containerPort: {{ .Values.sentinel.port }}
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - valkey-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- else }}
+                - valkey-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "valkey.secretName" . }}
+                  key: {{ include "valkey.passwordKey" . }}
+          {{- end }}
+          resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
+        {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
           image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
@@ -161,15 +496,39 @@ spec:
           {{- end }}
         {{- end }}
       volumes:
-        - name: config
-          configMap:
-            name: {{ include "valkey.configmapName" . }}
-        - name: tmp
-          emptyDir: {}
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if eq .Values.architecture "replication" }}
+        - name: valkey-config
+          emptyDir: {}
+        {{- if .Values.sentinel.enabled }}
+        - name: sentinel-config
+          emptyDir: {}
+        - name: prestop-script
+          configMap:
+            name: {{ include "valkey.fullname" . }}-prestop-script
+            defaultMode: 0755
+        {{- end }}
+        {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "valkey.configmapName" . }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ required "TLS secret name is required when TLS is enabled" .Values.tls.existingSecret }}
+            items:
+              - key: {{ .Values.tls.certFilename }}
+                path: {{ .Values.tls.certFilename }}
+              - key: {{ .Values.tls.certKeyFilename }}
+                path: {{ .Values.tls.certKeyFilename }}
+              - key: {{ .Values.tls.certCAFilename }}
+                path: {{ .Values.tls.certCAFilename }}
+        {{- end }}
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

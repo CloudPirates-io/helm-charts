@@ -1,14 +1,15 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-minio"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-minio" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-minio/minio"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-minio" /></a>
 </p>
 
 # MinIO
 
-A Helm chart for MinIO - High Performance Object Storage compatible with Amazon S3 APIs. MinIO is a high-performance, distributed object storage server designed for large-scale data infrastructure.
+A Helm chart for MinIO - High Performance Object Storage compatible with Amazon S3 APIs. MinIO is a high-performance,
+distributed object storage server designed for large-scale data infrastructure.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -32,7 +33,8 @@ Or install directly from the local chart:
 helm install my-minio ./charts/minio
 ```
 
-The command deploys MinIO on the Kubernetes cluster in the default configuration. The [Configuration](#configuration) section lists the parameters that can be configured during installation.
+The command deploys MinIO on the Kubernetes cluster in the default configuration. The [Configuration](#configuration)
+section lists the parameters that can be configured during installation.
 
 ## Uninstalling the Chart
 
@@ -80,7 +82,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 | ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `image.registry`        | MinIO image registry                                                                                            | `docker.io`                                                                                                  |
 | `image.repository`      | MinIO image repository                                                                                          | `minio/minio`                                                                                                |
-| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2024-08-17T01-24-54Z"`                                                                             |
+| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"`     |
 | `image.useCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `false`                                                                                                      |
 | `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883` |
 | `image.imagePullPolicy` | MinIO image pull policy                                                                                         | `IfNotPresent`                                                                                               |
@@ -130,9 +132,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### Security Context
 
-| Parameter                                  | Description                                       | Default   |
-| ------------------------------------------ | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`               | Group ID for the volumes of the pod               | `1000`    |
+| Parameter                                           | Description                                       | Default   |
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1000`    |
 | `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
 | `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
 | `containerSecurityContext.runAsUser`                | User ID for the MinIO container                   | `1000`    |
@@ -142,12 +144,14 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### Service configuration
 
-| Parameter             | Description                | Default     |
-| --------------------- | -------------------------- | ----------- |
-| `service.type`        | MinIO service type         | `ClusterIP` |
-| `service.port`        | MinIO service port         | `9000`      |
-| `service.consolePort` | MinIO console service port | `9090`      |
-| `service.annotations` | Service annotations        | `{}`        |
+| Parameter                   | Description                | Default     |
+| --------------------------- | -------------------------- | ----------- |
+| `service.type`              | MinIO service type         | `ClusterIP` |
+| `service.port`              | MinIO service port         | `9000`      |
+| `service.consolePort`       | MinIO console service port | `9090`      |
+| `service.annotations`       | Service annotations        | `{}`        |
+| `service.nodePorts.api`     | Service api node port      | `""`        |
+| `service.nodePorts.console` | Service console node port  | `""`        |
 
 ### Ingress configuration
 
@@ -229,9 +233,12 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 #### Extra Objects
 
-You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
+You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps,
+etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by
+the default chart options.
 
-**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the
+release namespace, write `namespace: "{{ .Release.Namespace }}"`.
 
 **Example: Deploy a NetworkPolicy with templating**
 
@@ -243,7 +250,7 @@ extraObjects:
       name: allow-dns
       namespace: "{{ .Release.Namespace }}"
     spec:
-      podSelector: {}
+      podSelector: { }
       policyTypes:
         - Egress
       egress:
@@ -261,7 +268,8 @@ extraObjects:
               protocol: TCP
 ```
 
-All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
+All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest,
+and reference Helm values or built-in objects as needed (just remember to quote template expressions).
 
 ## Examples
 
@@ -329,14 +337,17 @@ helm install my-minio ./charts/minio -f values-production.yaml
 
 ### Exposing a Bucket Publicly (“CDN Server” Setup)
 
-You can make a MinIO bucket publicly accessible (e.g. as a CDN endpoint) using Ingress and MinIO's CLI tool (`mc`). Below is an example configuration 
+You can make a MinIO bucket publicly accessible (e.g. as a CDN endpoint) using Ingress and MinIO's CLI tool (`mc`).
+Below is an example configuration
 and the commands needed to set this up.
 
 #### 1. Install the Helm Chart with Public Ingress
 
-Ensure the **Ingress controller** (like [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)) is deployed in your cluster.
+Ensure the **Ingress controller** (like [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)) is deployed in
+your cluster.
 
-Example `values.yaml` snippet for Helm install (replace `cdn.my-domain.local` and `my-bucket-name` with your own values):
+Example `values.yaml` snippet for Helm install (replace `cdn.my-domain.local` and `my-bucket-name` with your own
+values):
 
 ```yaml
 ingress:
@@ -369,7 +380,8 @@ helm install my-minio <chart> -f values.yaml
 
 #### 2. Configure Your Bucket for Public Access
 
-You need the [MinIO Client (`mc`)](https://min.io/docs/minio/linux/reference/minio-mc.html) to manage bucket policies. You can access `mc` directly in the MinIO pod:
+You need the [MinIO Client (`mc`)](https://min.io/docs/minio/linux/reference/minio-mc.html) to manage bucket policies.
+You can access `mc` directly in the MinIO pod:
 
 ```bash
 kubectl exec -it -n <NAMESPACE> <MINIO_POD_NAME> -- bash
@@ -389,7 +401,8 @@ Inside the pod, configure as follows (replace `my-bucket-name` as needed):
     mc mb local/my-bucket-name
     ```
 
-3. Create a custom policy in `/tmp/policy.json` to only allow `GetObject`, alternatively use the predefined `download` policy:
+3. Create a custom policy in `/tmp/policy.json` to only allow `GetObject`, alternatively use the predefined `download`
+   policy:
     ```bash
     echo '
     {
@@ -423,8 +436,8 @@ Inside the pod, configure as follows (replace `my-bucket-name` as needed):
     ```
 
 **Summary:**  
-After these steps, your bucket (`my-bucket-name`) will be accessible via `https://cdn.my-domain.local/<object>` (if using TLS), and is publicly readable.
-
+After these steps, your bucket (`my-bucket-name`) will be accessible via `https://cdn.my-domain.local/<object>` (if
+using TLS), and is publicly readable.
 
 ### Using Existing Secret for Credentials
 
@@ -473,19 +486,19 @@ kubectl get secret my-minio -o jsonpath="{.data.root-password}" | base64 --decod
 
 1. **Pod fails to start with permission errors**
 
-   - Ensure your storage class supports the required access modes
-   - Check if security contexts are compatible with your cluster policies
+    - Ensure your storage class supports the required access modes
+    - Check if security contexts are compatible with your cluster policies
 
 2. **Cannot access MinIO console**
 
-   - Verify the console service is running: `kubectl get svc`
-   - Check if ingress is properly configured
-   - Ensure firewall rules allow access to port 9090
+    - Verify the console service is running: `kubectl get svc`
+    - Check if ingress is properly configured
+    - Ensure firewall rules allow access to port 9090
 
 3. **Persistent volume not mounting**
-   - Verify storage class exists: `kubectl get storageclass`
-   - Check PVC status: `kubectl get pvc`
-   - Review pod events: `kubectl describe pod <pod-name>`
+    - Verify storage class exists: `kubectl get storageclass`
+    - Check PVC status: `kubectl get pvc`
+    - Review pod events: `kubectl describe pod <pod-name>`
 
 ### Getting Support
 
@@ -493,4 +506,4 @@ For issues related to this Helm chart, please check:
 
 - [MinIO Documentation](https://docs.min.io/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

@@ -5,6 +5,9 @@
         "affinity": {
             "type": "object"
         },
+        "architecture": {
+            "type": "string"
+        },
         "auth": {
             "type": "object",
             "properties": {
@@ -21,6 +24,9 @@
                     "type": "string"
                 }
             }
+        },
+        "clusterDomain": {
+            "type": "string"
         },
         "commonAnnotations": {
             "type": "object"
@@ -78,6 +84,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "extraEnvVars": {
+            "type": "array"
         },
         "extraObjects": {
             "type": "array"
@@ -154,6 +163,41 @@
                     "type": "array"
                 }
             }
+        },
+        "initContainer": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ipFamily": {
+            "type": "string"
         },
         "livenessProbe": {
             "type": "object",
@@ -348,6 +392,84 @@
                 }
             }
         },
+        "sentinel": {
+            "type": "object",
+            "properties": {
+                "downAfterMilliseconds": {
+                    "type": "integer"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraVolumeMounts": {
+                    "type": "array"
+                },
+                "failoverTimeout": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "masterName": {
+                    "type": "string"
+                },
+                "parallelSyncs": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "quorum": {
+                    "type": "integer"
+                },
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        },
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "service": {
             "type": "object",
             "properties": {
@@ -401,6 +523,32 @@
                     "type": "integer"
                 },
                 "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tls": {
+            "type": "object",
+            "properties": {
+                "authClients": {
+                    "type": "boolean"
+                },
+                "certCAFilename": {
+                    "type": "string"
+                },
+                "certFilename": {
+                    "type": "string"
+                },
+                "certKeyFilename": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "port": {
                     "type": "integer"
                 }
             }

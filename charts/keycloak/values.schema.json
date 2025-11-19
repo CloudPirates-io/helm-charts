@@ -74,6 +74,9 @@
                 "port": {
                     "type": "string"
                 },
+                "schema": {
+                    "type": "string"
+                },
                 "secretKeys": {
                     "type": "object",
                     "properties": {
@@ -88,13 +91,16 @@
                 "type": {
                     "type": "string"
                 },
+                "urlProperties": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
             }
         },
-        "extraEnv": {
-            "type": "object"
+        "extraEnvVars": {
+            "type": "array"
         },
         "extraEnvVarsSecret": {
             "type": "string"
@@ -633,6 +639,9 @@
                     "type": "boolean"
                 },
                 "truststoreExistingSecret": {
+                    "type": "string"
+                },
+                "truststoreExistingSecretKey": {
                     "type": "string"
                 },
                 "truststoreFile": {

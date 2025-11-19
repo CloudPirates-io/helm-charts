@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.2@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd"
+  tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -34,13 +34,22 @@ image:
 ## @param architecture Redis architecture. Allowed values: standalone, replication
 ## - standalone: Single Redis instance
 ## - replication: Master-replica setup (use sentinel.enabled to enable/disable Sentinel)
+## - cluster: Multi-master setup with optional replicas
 architecture: standalone
 
-## @param replicaCount Number of Redis instances to deploy (only when architecture=replication)
-## When using Sentinel, this is the total number of Redis instances (including the initial master)
-## Without Sentinel, pod-0 is always the master and other pods are replicas
-## For example: replicaCount: 3 creates 1 master + 2 replicas
+## @param replicaCount Number of Redis instances to deploy (only when architecture=(replication|cluster))
+## When using architecture=replication:
+##   with Sentinel, this is the total number of Redis instances (including the initial master)
+##   without Sentinel, pod-0 is always the master and other pods are replicas
+##   For example: replicaCount: 3 creates 1 master + 2 replicas
+## When using architecture=cluster:
+##   this is total number of nodes, including replicas
+##   Value should be a multiple of (clusterReplicaCount + 1) and not less than 3
 replicaCount: 3
+
+## @param clusterReplicaCount Number of replicas for each master node when architecture=cluster.
+## For example: replicaCount: 6 and clusterReplicaCount: 1 creates 3 masters + 3 replicas (1 per master)
+clusterReplicaCount: 0
 
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
@@ -61,6 +70,11 @@ service:
   type: ClusterIP
   ## @param service.port Redis service port
   port: 6379
+  ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
+  clusterPort: 16379
+  headless:
+    ## @param service.headless.annotations Additional custom annotations for Redis headless service
+    annotations: {}
 
 auth:
   ## @param auth.enabled Enable Redis authentication
@@ -74,15 +88,35 @@ auth:
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
   existingSecretPasswordKey: ""
 
+## @section TLS/SSL configuration
+tls:
+  ## @param tls.enabled Enable TLS/SSL for Redis connections
+  enabled: false
+  ## @param tls.existingSecret Name of an existing secret containing TLS certificates
+  ## Expected keys in the secret: tls.crt, tls.key, ca.crt
+  existingSecret: ""
+  ## @param tls.certFilename Certificate filename in the secret
+  certFilename: "tls.crt"
+  ## @param tls.certKeyFilename Certificate key filename in the secret
+  certKeyFilename: "tls.key"
+  ## @param tls.certCAFilename CA certificate filename in the secret
+  certCAFilename: "ca.crt"
+  ## @param tls.port TLS port for Redis (default: 6380)
+  port: 6380
+  ## @param tls.authClients Require clients to authenticate with a valid client certificate
+  authClients: true
+
 ## @section config Redis configuration options
 config:
   ## @param config.mountPath Redis configuration options
   mountPath: /usr/local/etc/redis
   ## @param config.content Include your custom Redis configurations here as string
+  ## If no config is provided, minimal config will be created on the fly
+  ## NOTE: When TLS is enabled, you should NOT set port directives in this content
+  ## as they will be automatically configured based on tls.enabled
   content: |
     # Redis configuration
     bind * -::*
-    port 6379
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
@@ -110,6 +144,11 @@ persistence:
   mountPath: /data
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  ## Useful in dev environments and one PV for multiple services
+  subPath: ""
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -197,10 +236,29 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+startupProbe:
+  ## @param startupProbe.enabled Enable startup probe
+  enabled: false
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param startupProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Number of failures before pod is restarted (30 * 10s = 5 minutes)
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraFlags Additional command-line flags to pass to redis-server
 ## Example:
@@ -208,6 +266,15 @@ extraEnv: []
 ##   - --maxmemory 230mb
 ##   - --maxmemory-policy volatile-lru
 extraFlags: []
+
+## @param extraPorts Additional ports to add to the pod and service
+## Example:
+## extraPorts:
+## - name: redis-cluster
+##   port: 16379
+##   targetPort: redis-cluster
+##   containerPort: 16379
+extraPorts: []
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
@@ -227,7 +294,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.2@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd"
+    tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
@@ -278,7 +345,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.79.0@sha256:67e175f144212fe5796b3134dae1f3db33782b57dc53f7c6f5d938f8f70d9754"
+    tag: "v1.80.0@sha256:cd5fad1591e585db5b58beec7fca427027c61a4349f50109af67cf2f07964d02"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -331,6 +398,17 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
 
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount
+  create: false
+  ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods
+  automountServiceAccountToken: false
+  ## @param serviceAccount.annotations Additional custom annotations for the ServiceAccount
+  annotations: {}
+
 ## @section Network Policy
 networkPolicy:
   ## @param networkPolicy.enabled Enable NetworkPolicy
@@ -351,3 +429,31 @@ extraObjects: []
 #     namespace: "{{ include "common.namespace" . }}"
 #   data:
 #     key: value
+
+## @section Custom Scripts and Hooks
+customScripts:
+  ## @param customScripts.postStart PostStart lifecycle hook configuration
+  postStart:
+    ## @param customScripts.postStart.enabled Enable postStart lifecycle hook
+    enabled: false
+    ## @param customScripts.postStart.command Command to execute in postStart hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 5
+    #   echo "Redis started"
+  ## @param customScripts.preStop PreStop lifecycle hook configuration
+  preStop:
+    ## @param customScripts.preStop.enabled Enable preStop lifecycle hook
+    ## NOTE: When enabled, this overrides the default preStop hook used by Sentinel
+    enabled: false
+    ## @param customScripts.preStop.command Command to execute in preStop hook
+    command: []
+    # Example:
+    # - /bin/bash
+    # - -c
+    # - |
+    #   sleep 10
+    #   redis-cli shutdown

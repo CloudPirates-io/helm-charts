@@ -10,7 +10,7 @@ metadata:
   {{- $annotations := merge .Values.metrics.service.annotations .Values.commonAnnotations }}
   {{- with $annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" $annotations "context" .) | indent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.metrics.service.type }}

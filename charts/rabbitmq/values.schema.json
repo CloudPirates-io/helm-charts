@@ -86,7 +86,10 @@
                             "type": "string"
                         },
                         "value": {
-                            "type": "number"
+                            "type": [
+                                "number",
+                                "string"
+                            ]
                         }
                     }
                 }
@@ -130,6 +133,17 @@
                     "type": "array"
                 },
                 "postStart": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "array"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "preStop": {
                     "type": "object",
                     "properties": {
                         "command": {
@@ -192,7 +206,7 @@
                 }
             }
         },
-        "extraEnv": {
+        "extraEnvVars": {
             "type": "array"
         },
         "extraObjects": {
@@ -418,6 +432,9 @@
                 },
                 "enabled": {
                     "type": "boolean"
+                },
+                "existingClaim": {
+                    "type": "string"
                 },
                 "labels": {
                     "type": "object"

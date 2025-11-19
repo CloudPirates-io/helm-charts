@@ -13,11 +13,12 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
+    {{- if .Values.keycloak.httpEnabled }}
     - port: {{ .Values.service.httpPort }}
       targetPort: {{ .Values.service.httpTargetPort }}
       protocol: TCP
       name: http
-    {{- if .Values.keycloak.httpsPort }}
+    {{- else }}
     - port: {{ .Values.service.httpsPort }}
       targetPort: {{ .Values.service.httpsTargetPort }}
       protocol: TCP
@@ -25,4 +26,6 @@ spec:
     {{- end }}
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}
+  {{- if .Values.service.trafficDistribution }}
   trafficDistribution: {{ .Values.service.trafficDistribution }}
+  {{- end }}

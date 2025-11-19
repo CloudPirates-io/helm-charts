@@ -76,10 +76,10 @@
                 }
             }
         },
-        "env": {
+        "extraConfigs": {
             "type": "array"
         },
-        "extraConfigs": {
+        "extraEnvVars": {
             "type": "array"
         },
         "extraObjects": {
@@ -419,6 +419,23 @@
                     "type": "integer"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
                     "type": "string"
                 }
             }

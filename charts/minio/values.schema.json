@@ -343,6 +343,17 @@
                 "consolePort": {
                     "type": "integer"
                 },
+                "nodePorts": {
+                    "type": "object",
+                    "properties": {
+                        "api": {
+                            "type": "string"
+                        },
+                        "console": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "port": {
                     "type": "integer"
                 },

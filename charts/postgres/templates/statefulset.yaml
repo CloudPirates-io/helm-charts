@@ -56,7 +56,7 @@ spec:
             {{- end }}
             {{- if .Values.auth.username }}
             - name: POSTGRES_USER
-              value: {{ .Values.auth.username | quote }}
+              value: {{ include "postgres.username" .}}
             {{- end }}
             {{- if .Values.auth.database }}
             - name: POSTGRES_DB
@@ -66,7 +66,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: {{ .Values.auth.secretKeys.passwordKey }}
+                  key: {{ include "postgres.adminPasswordKey" . }}
             {{- if .Values.config.postgresqlMaxConnections }}
             - name: POSTGRES_MAX_CONNECTIONS
               value: {{ .Values.config.postgresqlMaxConnections | quote }}
@@ -79,9 +79,8 @@ spec:
             - name: POSTGRES_EFFECTIVE_CACHE_SIZE
               value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
             {{- end }}
-            {{- range $key, $value := .Values.extraEnv }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
@@ -180,7 +179,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
-            {{- if not .Values.config.existingConfigmap }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+            {{- if .Values.config.mountConfigMap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}
             {{- end }}
@@ -216,7 +218,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: {{ .Values.auth.secretKeys.passwordKey }}
+                  key: {{ include "postgres.adminPasswordKey" . }}
           ports:
             - name: metrics
               containerPort: 9187
@@ -248,7 +250,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
-        {{- if not .Values.config.existingConfigmap }}
+        {{- if .Values.config.mountConfigMap }}
         - name: config
           configMap:
             name: {{ include "postgres.configmapName" . }}

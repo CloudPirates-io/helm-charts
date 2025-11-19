@@ -73,6 +73,32 @@ tests:
           path: data["rabbitmq.conf"]
           pattern: "vm_memory_high_watermark.relative = 0.6"
 
+  - it: should configure memory watermark with absolute string value (human-readable)
+    set:
+      config:
+        memoryHighWatermark:
+          enabled: true
+          type: absolute
+          value: "8GB"
+    template: templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["rabbitmq.conf"]
+          pattern: "vm_memory_high_watermark.absolute = 8GB"
+
+  - it: should configure memory watermark with absolute string value (large number)
+    set:
+      config:
+        memoryHighWatermark:
+          enabled: true
+          type: absolute
+          value: "8590000000"
+    template: templates/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["rabbitmq.conf"]
+          pattern: "vm_memory_high_watermark.absolute = 8590000000"
+
   - it: should enable clustering when configured
     set:
       replicaCount: 3

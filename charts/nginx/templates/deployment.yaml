@@ -20,6 +20,10 @@ spec:
     metadata:
       labels:
         {{- include "nginx.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.serverConfig .Values.streamServerConfig (include "nginx.annotations" .) }}
       annotations:
         {{- with (include "nginx.annotations" .) }}
         {{- . | nindent 8 }}
@@ -27,14 +31,20 @@ spec:
         {{- if or .Values.serverConfig .Values.streamServerConfig }}
         checksum/server-configuration: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
+      {{- end }}
     spec:
 {{- with (include "nginx.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.cloneStaticSiteFromGit.enabled }}
+      {{- if  or .Values.extraInitContainers .Values.cloneStaticSiteFromGit.enabled }}
       initContainers:
+      {{- with .Values.extraInitContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.cloneStaticSiteFromGit.enabled }}
         - name: git-clone-repository
           image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
@@ -45,7 +55,6 @@ spec:
             - /bin/sh
             - -ec
             - |
-              [[ -f "/opt/bitnami/scripts/git/entrypoint.sh" ]] && source "/opt/bitnami/scripts/git/entrypoint.sh"
               git clone {{ .Values.cloneStaticSiteFromGit.repository }} --branch {{ .Values.cloneStaticSiteFromGit.branch }} /app
           {{- end }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.args }}
@@ -81,12 +90,9 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if .Values.extraEnv }}
+          {{- with .Values.extraEnvVars }}
           env:
-            {{- range .Values.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+{{ toYaml . | indent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -174,7 +180,6 @@ spec:
             - /bin/sh
             - -ec
             - |
-              [[ -f "/opt/bitnami/scripts/git/entrypoint.sh" ]] && source "/opt/bitnami/scripts/git/entrypoint.sh"
               while true; do
                 cd /app && git pull origin {{ .Values.cloneStaticSiteFromGit.branch }}
                 sleep {{ .Values.cloneStaticSiteFromGit.interval }}
@@ -301,6 +306,9 @@ spec:
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

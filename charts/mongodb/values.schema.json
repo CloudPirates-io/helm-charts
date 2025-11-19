@@ -65,7 +65,7 @@
         "customUser": {
             "type": "object"
         },
-        "extraEnv": {
+        "extraEnvVars": {
             "type": "array"
         },
         "extraObjects": {
@@ -174,7 +174,7 @@
                 "extraArgs": {
                     "type": "array"
                 },
-                "extraEnv": {
+                "extraEnvVars": {
                     "type": "array"
                 },
                 "image": {
@@ -353,6 +353,9 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "existingClaim": {
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
                 },
@@ -360,6 +363,9 @@
                     "type": "string"
                 },
                 "storageClass": {
+                    "type": "string"
+                },
+                "subPath": {
                     "type": "string"
                 }
             }

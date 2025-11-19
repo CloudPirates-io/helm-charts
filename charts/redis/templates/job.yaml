@@ -1,0 +1,71 @@
+{{- if eq .Values.architecture "cluster" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "redis.fullname" . }}-init-cluster
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+  annotations:
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+{{- with (include "redis.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      restartPolicy: OnFailure
+      containers:
+        - name: redis-cluster-init
+          image: {{ include "redis.image" . | quote }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          env:
+          {{- if .Values.auth.enabled }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.secretName" . }}
+                  key: {{ include "redis.secretPasswordKey" . }}
+            - name: REDISCLI_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "redis.secretName" . }}
+                  key: {{ include "redis.secretPasswordKey" . }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Building list of Redis nodes..."
+              NODES=""
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:{{ .Values.service.port }}"
+              done
+
+              echo "Waiting for all Redis pods to be reachable..."
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p {{ .Values.service.port }} ping 2>/dev/null ; do
+                  echo "Waiting for pod {{ include "redis.fullname" . }}-${i}..."
+                  sleep 3
+                done
+              done
+
+              echo "Creating Redis cluster with nodes: $NODES"
+              redis-cli \
+                -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless \
+                -p {{ .Values.service.port }} \
+                --cluster create \
+                $NODES \
+                {{- if ne (int .Values.clusterReplicaCount) 0 }}
+                --cluster-replicas {{ .Values.clusterReplicaCount }} \
+                {{- end }}
+                --cluster-yes
+{{- end }}

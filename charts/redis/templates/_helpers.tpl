@@ -106,18 +106,22 @@ app.kubernetes.io/component: sentinel
 {{- end }}
 
 {{/*
-Generate Redis CLI command with auth
+Generate Redis CLI command with automated auth
 */}}
 {{- define "redis.cli" -}}
-{{- if .auth -}}
-redis-cli -a "${REDIS_PASSWORD}"
-{{- else -}}
 redis-cli
-{{- end -}}
 {{- end -}}
 
 {{/*
-Generate Sentinel CLI command with auth and connection info
+Generate Redis CLI ping command with automated auth
+*/}}
+{{- define "redis.ping" -}}
+{{ include "redis.cli" . }} ping
+{{- end -}}
+
+
+{{/*
+Generate Sentinel CLI command with automated auth and connection info
 */}}
 {{- define "redis.sentinelCli" -}}
 {{- if .auth -}}
@@ -133,3 +137,14 @@ Common Sentinel master query command
 {{- define "redis.sentinelMasterQuery" -}}
 {{- include "redis.sentinelCli" (dict "auth" .auth "context" .context) }} sentinel get-master-addr-by-name {{ .context.Values.sentinel.masterName }}
 {{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "redis.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "redis.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}

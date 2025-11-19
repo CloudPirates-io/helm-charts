@@ -1,6 +1,78 @@
 # Changelog
 
 
+## 0.7.8 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([8fac24b](https://github.com/CloudPirates-io/helm-charts/commit/8fac24b))
+* chore: update CHANGELOG.md for merged changes ([a843ada](https://github.com/CloudPirates-io/helm-charts/commit/a843ada))
+* Update charts/rabbitmq/values.yaml rabbitmq (#589) ([2a76df9](https://github.com/CloudPirates-io/helm-charts/commit/2a76df9))
+* chore: update CHANGELOG.md for merged changes ([0242dc7](https://github.com/CloudPirates-io/helm-charts/commit/0242dc7))
+* chore: update CHANGELOG.md for merged changes ([59ab686](https://github.com/CloudPirates-io/helm-charts/commit/59ab686))
+* Update charts/rabbitmq/values.yaml rabbitmq (#580) ([bcf5513](https://github.com/CloudPirates-io/helm-charts/commit/bcf5513))
+
+## 0.7.7 (2025-11-07)
+
+* [rabbitmq]: Fix several inconsistencies ([673823a](https://github.com/CloudPirates-io/helm-charts/commit/673823a))
+* chore: update CHANGELOG.md for merged changes ([78a2392](https://github.com/CloudPirates-io/helm-charts/commit/78a2392))
+* chore: update CHANGELOG.md for merged changes ([4d91f9d](https://github.com/CloudPirates-io/helm-charts/commit/4d91f9d))
+
+## 0.7.6 (2025-11-01)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#523) ([a23a731](https://github.com/CloudPirates-io/helm-charts/commit/a23a731))
+* chore: update CHANGELOG.md for merged changes ([b03d341](https://github.com/CloudPirates-io/helm-charts/commit/b03d341))
+* chore: update CHANGELOG.md for merged changes ([c4dd853](https://github.com/CloudPirates-io/helm-charts/commit/c4dd853))
+
+## 0.7.5 (2025-10-30)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#509) ([532e1f5](https://github.com/CloudPirates-io/helm-charts/commit/532e1f5))
+* chore: update CHANGELOG.md for merged changes ([a914ea9](https://github.com/CloudPirates-io/helm-charts/commit/a914ea9))
+* chore: update CHANGELOG.md for merged changes ([4cac53b](https://github.com/CloudPirates-io/helm-charts/commit/4cac53b))
+
+## 0.7.4 (2025-10-30)
+
+* chore: update CHANGELOG.md for merged changes ([1c809bd](https://github.com/CloudPirates-io/helm-charts/commit/1c809bd))
+* chore: update CHANGELOG.md for merged changes ([9640776](https://github.com/CloudPirates-io/helm-charts/commit/9640776))
+
+## 0.7.3 (2025-10-29)
+
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.2.0 (minor) (#480) ([dcef8f3](https://github.com/CloudPirates-io/helm-charts/commit/dcef8f3))
+* chore: update CHANGELOG.md for merged changes ([ca11524](https://github.com/CloudPirates-io/helm-charts/commit/ca11524))
+* chore: update CHANGELOG.md for merged changes ([33ed0c0](https://github.com/CloudPirates-io/helm-charts/commit/33ed0c0))
+
+## 0.7.2 (2025-10-29)
+
+* chore: update CHANGELOG.md for merged changes ([0e3dfef](https://github.com/CloudPirates-io/helm-charts/commit/0e3dfef))
+* chore: update CHANGELOG.md for merged changes ([a3e93a0](https://github.com/CloudPirates-io/helm-charts/commit/a3e93a0))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.1.5 (patch) (#479) ([090a6b0](https://github.com/CloudPirates-io/helm-charts/commit/090a6b0))
+* chore: update CHANGELOG.md for merged changes ([0ef2300](https://github.com/CloudPirates-io/helm-charts/commit/0ef2300))
+* chore: update CHANGELOG.md for merged changes ([170dd6a](https://github.com/CloudPirates-io/helm-charts/commit/170dd6a))
+* chore: update CHANGELOG.md for merged changes ([9227d83](https://github.com/CloudPirates-io/helm-charts/commit/9227d83))
+
+## 0.7.1 (2025-10-28)
+
+* [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c7310](https://github.com/CloudPirates-io/helm-charts/commit/91c7310))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
+## 0.7.0 (2025-10-28)
+
+* chore: update CHANGELOG.md for merged changes ([cb10f6b](https://github.com/CloudPirates-io/helm-charts/commit/cb10f6b))
+* chore: update CHANGELOG.md for merged changes ([ea886c4](https://github.com/CloudPirates-io/helm-charts/commit/ea886c4))
+* chore: auto-generate values.schema.json (#466) ([650333f](https://github.com/CloudPirates-io/helm-charts/commit/650333f))
+
+## 0.6.1 (2025-10-26)
+
+* Redis / Rabbitmq: add lifecyle hooks ([b253776](https://github.com/CloudPirates-io/helm-charts/commit/b253776))
+* chore: update CHANGELOG.md for merged changes ([5eca51e](https://github.com/CloudPirates-io/helm-charts/commit/5eca51e))
+* chore: update CHANGELOG.md for merged changes ([f0b5033](https://github.com/CloudPirates-io/helm-charts/commit/f0b5033))
+* chore: auto-generate values.schema.json (#465) ([217c03d](https://github.com/CloudPirates-io/helm-charts/commit/217c03d))
+
+## 0.6.0 (2025-10-26)
+
+* Adding existing claim as a feature with PVC ([336c4fb](https://github.com/CloudPirates-io/helm-charts/commit/336c4fb))
+* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
+* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+
 ## 0.5.5 (2025-10-23)
 
 * chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))

@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-redis/redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
 </p>
 
 # Redis Helm Chart
@@ -54,31 +54,57 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
 redis-cli -h my-redis -a $REDIS_PASSWORD
 ```
 
+## Security & Signature Verification
+
+This Helm chart is cryptographically signed with Cosign to ensure authenticity and prevent tampering.
+
+**Public Key:**
+
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
+mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+-----END PUBLIC KEY-----
+```
+
+To verify the helm chart before installation, copy the public key to the file `cosign.pub` and run cosign:
+
+```bash
+cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
+```
+
+
 ## Configuration
+
+### Global parameters
+
+| Parameter                 | Description                           | Default |
+| ------------------------- | ------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry override | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`    |
 
 ### Image Configuration
 
-| Parameter                 | Description                           | Default                                                                         |
-| ------------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
-| `image.registry`          | Redis image registry                  | `docker.io`                                                                     |
-| `image.repository`        | Redis image repository                | `redis`                                                                         |
-| `image.tag`               | Redis image tag                       | `8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6` |
-| `image.pullPolicy`        | Image pull policy                     | `Always`                                                                        |
-| `global.imageRegistry`    | Global Docker image registry override | `""`                                                                            |
-| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`                                                                            |
+| Parameter          | Description            | Default                                                                         |
+| ------------------ | ---------------------- | ------------------------------------------------------------------------------- |
+| `image.registry`   | Redis image registry   | `docker.io`                                                                     |
+| `image.repository` | Redis image repository | `redis`                                                                         |
+| `image.tag`        | Redis image tag        | `8.2.3@sha256:d318520052025d3cc5850ba3de966810916c7a7b327b412322399f38be39a39c` |
+| `image.pullPolicy` | Image pull policy      | `Always`                                                                        |
 
 ### Common Parameters
 
-| Parameter           | Description                                                             | Default      |
-|---------------------| ----------------------------------------------------------------------- | ------------ |
-| `nameOverride`      | String to partially override redis.fullname                                                                      | `""`         |
-| `fullnameOverride`  | String to fully override redis.fullname                                                                          | `""`         |
-| `namespaceOverride` | String to override the namespace for all resources                                                               | `""`         |
-| `clusterDomain`     | Kubernetes cluster domain                                                                                        | `cluster.local` |
-| `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`         |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`         |
-| `architecture`      | Redis architecture. `standalone`: Single instance, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover) | `standalone` |
-| `replicaCount`      | Number of Redis instances (when `architecture=replication`). With Sentinel: total instances. Without: 1 master + (n-1) replicas      | `3`          |
+| Parameter             | Description                                                                                                                                                                             | Default         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `nameOverride`        | String to partially override redis.fullname                                                                                                                                             | `""`            |
+| `fullnameOverride`    | String to fully override redis.fullname                                                                                                                                                 | `""`            |
+| `namespaceOverride`   | String to override the namespace for all resources                                                                                                                                      | `""`            |
+| `clusterDomain`       | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
+| `commonLabels`        | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
+| `commonAnnotations`   | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
+| `architecture`        | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
+| `replicaCount`        | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
+| `clusterReplicaCount` | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
 
 ### Pod labels and annotations
 
@@ -90,11 +116,12 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 ### Service Configuration
 
-| Parameter      | Description             | Default     |
-| -------------- | ----------------------- | ----------- |
-| `service.annotations` | Kubernetes service annotations | `{}` |
-| `service.type` | Kubernetes service type | `ClusterIP` |
-| `service.port` | Redis service port      | `6379`      |
+| Parameter             | Description                    | Default     |
+| --------------------- | ------------------------------ | ----------- |
+| `service.annotations` | Kubernetes service annotations | `{}`        |
+| `service.type`        | Kubernetes service type        | `ClusterIP` |
+| `service.port`        | Redis service port             | `6379`      |
+| `service.clusterPort` | Redis cluster service port     | `16379`     |
 
 ### Authentication
 
@@ -149,30 +176,32 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 ### Pod Disruption Budget
 
-| Parameter           | Description                                                    | Default |
-|---------------------|----------------------------------------------------------------|---------|
-| `pdb.enabled`       | Enable Pod Disruption Budget                                   | `false` |
-| `pdb.minAvailable`  | Minimum number/percentage of pods that should remain scheduled | `1`     |
-| `pdb.maxUnavailable`| Maximum number/percentage of pods that may be made unavailable | `""`    |
+| Parameter            | Description                                                    | Default |
+| -------------------- | -------------------------------------------------------------- | ------- |
+| `pdb.enabled`        | Enable Pod Disruption Budget                                   | `false` |
+| `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `1`     |
+| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
 
 ### Persistence
 
-| Parameter                  | Description                              | Default         |
-| -------------------------- | ---------------------------------------- | --------------- |
-| `persistence.enabled`      | Enable persistent storage                | `true`          |
-| `persistence.storageClass` | Storage class for persistent volume      | `""`            |
-| `persistence.accessMode`   | Access mode for persistent volume        | `ReadWriteOnce` |
-| `persistence.size`         | Size of persistent volume                | `8Gi`           |
-| `persistence.mountPath`    | Mount path for Redis data                | `/data`         |
-| `persistence.annotations`  | Annotations for persistent volume claims | `{}`            |
+| Parameter                   | Description                                        | Default         |
+| --------------------------- | -------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                          | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
-| Parameter                                            | Description                                                                     | Default     |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------- | ----------- |
-| `persistentVolumeClaimRetentionPolicy.enabled`      | Enable Persistent volume retention policy for the Statefulset                  | `false`     |
-| `persistentVolumeClaimRetentionPolicy.whenDeleted`  | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"`  |
-| `persistentVolumeClaimRetentionPolicy.whenScaled`   | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"`  |
+| Parameter                                          | Description                                                                    | Default    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the StatefulSet                  | `false`    |
+| `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
+| `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
 
 ### Resource Management
 
@@ -234,33 +263,43 @@ redis-cli -h my-redis -a $REDIS_PASSWORD
 
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable. When disabled with `replication` mode, pod-0 is always the master.
 
-| Parameter                            | Description                                                                                    | Default            |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------ |
+| Parameter                            | Description                                                                                   | Default            |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------ |
 | `sentinel.enabled`                   | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`            |
-| `sentinel.image.repository`          | Redis Sentinel image repository                       | `redis`            |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                              | `8.2.1@sha256:...` |
-| `sentinel.image.pullPolicy`          | Sentinel image pull policy                            | `Always`           |
-| `sentinel.masterName`                | Name of the master server                             | `mymaster`         |
-| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure | `2`                |
-| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down              | `30000`            |
-| `sentinel.failoverTimeout`           | Timeout for failover in ms                            | `180000`           |
-| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover     | `1`                |
-| `sentinel.port`                      | Sentinel port                                         | `26379`            |
-| `sentinel.service.type`              | Kubernetes service type for Sentinel                  | `ClusterIP`        |
-| `sentinel.service.port`              | Sentinel service port                                 | `26379`            |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                        | `128Mi`            |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                         | `25m`              |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                      | `64Mi`             |
-| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container       | `[]`               |
+| `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`            |
+| `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.2.1@sha256:...` |
+| `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`           |
+| `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`         |
+| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure                                         | `2`                |
+| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`            |
+| `sentinel.failoverTimeout`           | Timeout for failover in ms                                                                    | `180000`           |
+| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover                                             | `1`                |
+| `sentinel.port`                      | Sentinel port                                                                                 | `26379`            |
+| `sentinel.service.type`              | Kubernetes service type for Sentinel                                                          | `ClusterIP`        |
+| `sentinel.service.port`              | Sentinel service port                                                                         | `26379`            |
+| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                                                                | `128Mi`            |
+| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                                                                 | `25m`              |
+| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`             |
+| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`               |
+
+### ServiceAccount
+
+| Parameter           | Description                                                             | Default |
+| ------------------- | ----------------------------------------------------------------------- | ------- |
+| `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods | `false` |
+| `serviceAccount.create` | Enable the creation of a ServiceAccount | `false` |
+| `serviceAccount.name` | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""` |
 
 ### Additional Configuration
 
 | Parameter           | Description                                                             | Default |
 | ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnv`          | Additional environment variables                                        | `[]`    |
+| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
 | `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
 | `extraVolumeMounts` | Additional volume mounts for Redis container                            | `[]`    |
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
 
 #### Extra Objects
 
@@ -390,6 +429,27 @@ After deployment, you'll have:
 - Lower resource usage (no Sentinel containers)
 
 
+### Cluster mode
+
+Deploy Redis Cluster with 6 nodes - 3 master and 3 replicas for automated failover:
+
+```yaml
+# values-cluster.yaml
+architecture: cluster
+replicaCount: 6
+clusterReplicaCount: 1
+```
+
+```bash
+helm install my-redis ./charts/redis -f values-cluster.yaml
+```
+
+**Key differences with replication**
+
+- Redis Cluster supports single database only
+- Data is automatically divided across multiple nodes for improved performance
+- With cluster-aware client, user can connect to any node (directly or via service) and requests will be automatically redirected, based on MOVED response
+
 ## Upgrading
 
 To upgrade your Redis installation:
@@ -412,4 +472,4 @@ For issues related to this Helm chart, please check:
 
 - [Redis Documentation](https://redis.io/docs/latest/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

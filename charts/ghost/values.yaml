@@ -14,6 +14,8 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param replicaCount Number of Nginx replicas to deploy
+replicaCount: 1
 
 ## @section Nginx image parameters
 image:
@@ -22,12 +24,10 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.5.3@sha256:dff945f694a9bf9d34b6557fd055e4309a272169c4306938b73edf93763da0fe"
+  tag: "6.8.0@sha256:85e15524ac7e437720fa4ac3cd4633daaae3f95786a25633415d8d4f7382b4c4"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
-## @param replicaCount Number of Nginx replicas to deploy
-replicaCount: 1
 
 ## @section Container port configuration
 ## @param containerPorts Array of container ports
@@ -175,10 +175,15 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
-## @param extraEnv Additional environment variables to set
-extraEnv: []
-# - name: EXTRA_VAR
-#   value: "extra_value"
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
 
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []

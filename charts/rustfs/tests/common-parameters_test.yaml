@@ -1,0 +1,207 @@
+suite: test rustfs common parameters
+templates:
+  - deployment.yaml
+  - statefulset.yaml
+set:
+  deploymentType: statefulset
+  image:
+    tag: latest
+tests:
+  - it: should use default values when nothing is overridden
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/rustfs/rustfs:latest
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should respect global.imageRegistry override
+    template: statefulset.yaml
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry.com/rustfs/rustfs:latest
+
+  - it: should respect nameOverride
+    template: statefulset.yaml
+    set:
+      nameOverride: "custom-rustfs"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-rustfs
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-rustfs
+
+  - it: should respect fullnameOverride
+    template: statefulset.yaml
+    set:
+      fullnameOverride: "completely-custom-rustfs"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-rustfs
+
+  - it: should add commonLabels to all resources
+    template: statefulset.yaml
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: metadata.labels.team
+          value: platform
+
+  - it: should respect image configuration overrides
+    template: statefulset.yaml
+    set:
+      image:
+        registry: "custom-registry.io"
+        repository: "custom/rustfs"
+        tag: "v1.0.0"
+        imagePullPolicy: "IfNotPresent"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/custom/rustfs:v1.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should configure environment variables correctly
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: RUSTFS_ACCESS_KEY
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: RUSTFS_SECRET_KEY
+
+  - it: should configure ports correctly
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: api
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9000
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].name
+          value: console
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 9001
+
+  - it: should configure volume mounts correctly
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].name
+          value: data
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /data
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].name
+          value: logs
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].mountPath
+          value: /app/logs
+
+  - it: should deploy as StatefulSet when deploymentType is statefulset
+    set:
+      deploymentType: statefulset
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-rustfs-headless
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: should configure StatefulSet update strategy correctly
+    set:
+      deploymentType: statefulset
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          partition: 2
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+      - equal:
+          path: spec.updateStrategy.rollingUpdate.partition
+          value: 2
+
+  - it: should create volumeClaimTemplates for StatefulSet
+    set:
+      deploymentType: statefulset
+      dataPersistence:
+        enabled: true
+        size: 20Gi
+      logsPersistence:
+        enabled: true
+        size: 2Gi
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 20Gi
+      - equal:
+          path: spec.volumeClaimTemplates[1].metadata.name
+          value: logs
+      - equal:
+          path: spec.volumeClaimTemplates[1].spec.resources.requests.storage
+          value: 2Gi
+
+  - it: should not deploy Deployment when deploymentType is statefulset
+    set:
+      deploymentType: statefulset
+    template: deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not deploy StatefulSet when deploymentType is deployment
+    set:
+      deploymentType: deployment
+    template: statefulset.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
