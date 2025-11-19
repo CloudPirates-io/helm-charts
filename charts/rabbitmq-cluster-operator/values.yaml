@@ -19,7 +19,6 @@ global:
       ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
       adaptSecurityContext: auto
 
-## @section Common parameters
 ## @param kubeVersion Override Kubernetes version
 kubeVersion: ""
 ## @param nameOverride String to partially override cloudpirates.fullname
@@ -534,7 +533,7 @@ msgTopologyOperator:
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
   terminationGracePeriodSeconds: ""
   ## @param msgTopologyOperator.hostNetwork Boolean
-  hostNetwork: "false"
+  hostNetwork: false
   ## @param msgTopologyOperator.dnsPolicy Alternative DNS policy
   dnsPolicy: "ClusterFirst"
   ## Configure extra options for RabbitMQ Messaging Topology Operator containers' liveness and readiness probes

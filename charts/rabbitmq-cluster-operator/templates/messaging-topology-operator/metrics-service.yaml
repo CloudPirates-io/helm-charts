@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    {{- include "rmqmto.labels" . }}
+    {{- include "rmqmto.labels" . | nindent 4 }}
     type: metrics
   name: {{ printf "%s-metrics" (include "rmqco.msgTopologyOperator.fullname" .) | trunc 63 | trimSuffix "-" }}
   namespace: {{ include "cloudpirates.namespace" . }}
@@ -45,6 +45,6 @@ spec:
     {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.metrics.service.extraPorts "context" $) | nindent 4 }}
     {{- end }}
   selector:
-    {{- include "rmqco.selectorLabels" . | nindent 6 }}
+    {{- include "rmqco.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: messaging-topology-operator
 {{- end }}
