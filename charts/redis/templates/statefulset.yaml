@@ -36,12 +36,12 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- with .Values.topologySpreadConstraints }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "redis.serviceAccountName" . }}
       serviceAccount: {{ include "redis.serviceAccountName" . }}
       {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
