@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
+  tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -275,7 +275,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
+    tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
