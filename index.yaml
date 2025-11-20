@@ -5004,6 +5004,56 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
             - kind: changed
+              description: "add serviceMonitor joblabel attribute to values (#610)"
+              links:
+                - name: "Commit 098caf4"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/098caf4"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Memcached
+          url: https://memcached.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.6.39
+    created: "2025-11-20T14:37:26.13202422Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Memcached is an in-memory key-value store for small chunks of arbitrary
+      data (strings, objects) from results of database calls, API calls, or page rendering.
+    digest: 1a69936af0b94c3d5f06a645fabf747d10fe3a34af75213016f40114f468443c
+    home: https://memcached.org
+    icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
+    keywords:
+    - memcached
+    - cache
+    - in-memory
+    - key-value
+    - distributed
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: memcached
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+    - https://github.com/memcached/memcached
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/memcached-0.7.1/memcached-0.7.1.tgz
+    version: 0.7.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "support change to statefulset (#592)"
               links:
                 - name: "Commit 3c74ccf"
@@ -16303,4 +16353,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-19T12:39:00.245605066Z"
+generated: "2025-11-20T14:37:26.132705062Z"
