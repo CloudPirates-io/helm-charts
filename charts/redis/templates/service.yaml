@@ -9,7 +9,7 @@ metadata:
   {{- if or $annotations (and .Values.sentinel.enabled (eq .Values.architecture "replication")) }}
   annotations:
   {{- if $annotations }}
-{{- toYaml $annotations | nindent 4 }}
+{{ include "cloudpirates.tplvalues.render" (dict "value" $annotations "context" .) | indent 4 }}
   {{- end }}
   {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
     # This service points to all Redis instances for Sentinel-based discovery

@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.14.3
+version: 0.15.2
 appVersion: "8.2.3"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[mongodb/redis/posgres] Add subPath option when using existingClaim (#613)"
+          description: "[redis]: tls support"
           links:
-            - name: "Commit 8aa277e"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/8aa277e"
+            - name: "Commit 963e2b8"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/963e2b8"

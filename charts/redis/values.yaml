@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.3@sha256:5c7c0445ed86918cb9efb96d95a6bfc03ed2059fe2c5f02b4d74f477ffe47915"
+  tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -88,16 +88,35 @@ auth:
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
   existingSecretPasswordKey: ""
 
+## @section TLS/SSL configuration
+tls:
+  ## @param tls.enabled Enable TLS/SSL for Redis connections
+  enabled: false
+  ## @param tls.existingSecret Name of an existing secret containing TLS certificates
+  ## Expected keys in the secret: tls.crt, tls.key, ca.crt
+  existingSecret: ""
+  ## @param tls.certFilename Certificate filename in the secret
+  certFilename: "tls.crt"
+  ## @param tls.certKeyFilename Certificate key filename in the secret
+  certKeyFilename: "tls.key"
+  ## @param tls.certCAFilename CA certificate filename in the secret
+  certCAFilename: "ca.crt"
+  ## @param tls.port TLS port for Redis (default: 6380)
+  port: 6380
+  ## @param tls.authClients Require clients to authenticate with a valid client certificate
+  authClients: true
+
 ## @section config Redis configuration options
 config:
   ## @param config.mountPath Redis configuration options
   mountPath: /usr/local/etc/redis
   ## @param config.content Include your custom Redis configurations here as string
   ## If no config is provided, minimal config will be created on the fly
+  ## NOTE: When TLS is enabled, you should NOT set port directives in this content
+  ## as they will be automatically configured based on tls.enabled
   content: |
     # Redis configuration
     bind * -::*
-    port 6379
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
@@ -275,7 +294,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.3@sha256:5c7c0445ed86918cb9efb96d95a6bfc03ed2059fe2c5f02b4d74f477ffe47915"
+    tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
@@ -378,6 +397,17 @@ metrics:
     annotations: {}
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
+
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount
+  create: false
+  ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods
+  automountServiceAccountToken: false
+  ## @param serviceAccount.annotations Additional custom annotations for the ServiceAccount
+  annotations: {}
 
 ## @section Network Policy
 networkPolicy:

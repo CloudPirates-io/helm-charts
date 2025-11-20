@@ -1,6 +1,33 @@
 # Changelog
 
 
+## 0.15.1 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([ea8e485](https://github.com/CloudPirates-io/helm-charts/commit/ea8e485))
+* [redis]: tls support ([963e2b8](https://github.com/CloudPirates-io/helm-charts/commit/963e2b8))
+
+## 0.15.0 (2025-11-19)
+
+* Add ServiceAccount (#631) ([328f698](https://github.com/CloudPirates-io/helm-charts/commit/328f698))
+* chore: update CHANGELOG.md for merged changes ([de70b98](https://github.com/CloudPirates-io/helm-charts/commit/de70b98))
+* chore: update CHANGELOG.md for merged changes ([47edfb5](https://github.com/CloudPirates-io/helm-charts/commit/47edfb5))
+* Update charts/redis/values.yaml redis (#624) ([a57d0d7](https://github.com/CloudPirates-io/helm-charts/commit/a57d0d7))
+* chore: update CHANGELOG.md for merged changes ([26504d9](https://github.com/CloudPirates-io/helm-charts/commit/26504d9))
+* chore: update CHANGELOG.md for merged changes ([014fde8](https://github.com/CloudPirates-io/helm-charts/commit/014fde8))
+
+## 0.14.4 (2025-11-18)
+
+* add templating to all annotations (#608) ([2a78f9d](https://github.com/CloudPirates-io/helm-charts/commit/2a78f9d))
+
+## 0.14.3 (2025-11-18)
+
+* chore: update CHANGELOG.md for merged changes ([697cb45](https://github.com/CloudPirates-io/helm-charts/commit/697cb45))
+* chore: update CHANGELOG.md for merged changes ([53d3901](https://github.com/CloudPirates-io/helm-charts/commit/53d3901))
+* sentinel use hostnames (#615) ([0a0357b](https://github.com/CloudPirates-io/helm-charts/commit/0a0357b))
+* chore: update CHANGELOG.md for merged changes ([86bdd5d](https://github.com/CloudPirates-io/helm-charts/commit/86bdd5d))
+* chore: update CHANGELOG.md for merged changes ([544e9bd](https://github.com/CloudPirates-io/helm-charts/commit/544e9bd))
+* chore: auto-generate values.schema.json (#616) ([d1d105a](https://github.com/CloudPirates-io/helm-charts/commit/d1d105a))
+
 ## 0.14.2 (2025-11-17)
 
 * chore: update CHANGELOG.md for merged changes ([005861e](https://github.com/CloudPirates-io/helm-charts/commit/005861e))

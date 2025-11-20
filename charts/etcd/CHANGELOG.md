@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.3.3 (2025-11-18)
+
+* chore: update CHANGELOG.md for merged changes ([0f3e7ef](https://github.com/CloudPirates-io/helm-charts/commit/0f3e7ef))
+* chore: update CHANGELOG.md for merged changes ([35c7b94](https://github.com/CloudPirates-io/helm-charts/commit/35c7b94))
+*  [etcd] Use http for probes (#622) ([c9d2054](https://github.com/CloudPirates-io/helm-charts/commit/c9d2054))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.3.2 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([0ef2300](https://github.com/CloudPirates-io/helm-charts/commit/0ef2300))
