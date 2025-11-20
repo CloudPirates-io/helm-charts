@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.0-management@sha256:b1b34ba023e4e7d151425fac47017681578a35b6f66c0dfc0c5f9ed529008e30"
+  tag: "4.2.1-management@sha256:666689981c56f07945fa326aeba67fdd92f2774725f050561a795c30f554a4c1"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -98,7 +98,7 @@ config:
     ##   value: "8GB"            # absolute: 8 gigabytes
     ##   value: "8590000000"     # absolute: 8590000000 bytes (use string for large numbers)
     ##
-    value: 0.4 # @schema type:[number, string]
+    value: 0.4
   ## Logging configuration
   ## ref: https://www.rabbitmq.com/docs/logging
   ##
