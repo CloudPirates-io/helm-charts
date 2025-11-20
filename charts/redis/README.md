@@ -269,6 +269,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`            |
 | `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.2.1@sha256:...` |
 | `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`           |
+| `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`             |
 | `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`         |
 | `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure                                         | `2`                |
 | `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`            |
@@ -284,12 +285,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### ServiceAccount
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
-| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods | `false` |
-| `serviceAccount.create` | Enable the creation of a ServiceAccount | `false` |
-| `serviceAccount.name` | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""` |
+| Parameter                                     | Description                                                                                                                             | Default |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.annotations`                  | Additional custom annotations for the ServiceAccount                                                                                    | `{}`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods                                                                                   | `false` |
+| `serviceAccount.create`                       | Enable the creation of a ServiceAccount                                                                                                 | `false` |
+| `serviceAccount.name`                         | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""`    |
 
 ### Additional Configuration
 
