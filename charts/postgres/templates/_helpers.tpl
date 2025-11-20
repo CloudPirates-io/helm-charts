@@ -67,7 +67,7 @@ Return PostgreSQL admin password key
 */}}
 {{- define "postgres.adminPasswordKey" -}}
 {{- if .Values.auth.existingSecret -}}
-    {{- .Values.auth.secretKeys.adminPasswordKey -}}
+    {{- .Values.auth.secretKeys.adminPasswordKey | default "postgres-password" -}}
 {{- else -}}
 postgres-password
 {{- end -}}

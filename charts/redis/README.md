@@ -282,6 +282,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`             |
 | `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`               |
 
+### ServiceAccount
+
+| Parameter           | Description                                                             | Default |
+| ------------------- | ----------------------------------------------------------------------- | ------- |
+| `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods | `false` |
+| `serviceAccount.create` | Enable the creation of a ServiceAccount | `false` |
+| `serviceAccount.name` | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""` |
+
 ### Additional Configuration
 
 | Parameter           | Description                                                             | Default |

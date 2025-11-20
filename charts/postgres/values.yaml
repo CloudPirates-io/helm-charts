@@ -67,9 +67,9 @@ auth:
   database: ""
   ## @param auth.existingSecret Name of existing secret to use for PostgreSQL credentials
   existingSecret: ""
-  ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials
   secretKeys:
-    passwordKey: "postgres-password"
+    ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL admin credentials
+    adminPasswordKey: "postgres-password"
 
 ## @section PostgreSQL Configuration
 config:

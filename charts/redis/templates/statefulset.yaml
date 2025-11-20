@@ -36,6 +36,11 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "redis.serviceAccountName" . }}
+      serviceAccount: {{ include "redis.serviceAccountName" . }}
+      {{- end }}
       {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
@@ -95,7 +100,7 @@ spec:
                   echo "I am the current master according to Sentinel"
                 else
                   echo "Configuring as replica of current master: $CURRENT_MASTER"
-                  echo "replicaof $CURRENT_MASTER {{ .Values.service.port }}" >> /tmp/redis.conf
+                  echo "replicaof $CURRENT_MASTER {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                   {{- if .Values.auth.enabled }}
                   echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
                   {{- end }}
@@ -106,7 +111,7 @@ spec:
                   echo "Bootstrap mode: configuring as replica of pod-0"
                   # Use hostname-based replication for better resilience
                   MASTER_HOSTNAME="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
-                  echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/redis.conf
+                  echo "replicaof $MASTER_HOSTNAME {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                   echo "Bootstrap replica using pod-0 hostname: $MASTER_HOSTNAME"
                   {{- if .Values.auth.enabled }}
                   echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
@@ -118,9 +123,9 @@ spec:
 
               echo "Using hostname: ${HOSTNAME}.{{ include "redis.fullname" . }}-headless"
               echo "replica-announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless" >> /tmp/redis.conf
-              echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
+              echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
               echo "slave-announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless" >> /tmp/redis.conf
-              echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/redis.conf
+              echo "slave-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
 
               # Make slaves more eligible for promotion during force deletions
               echo "slave-priority 100" >> /tmp/redis.conf
@@ -130,7 +135,7 @@ spec:
               if [ "$POD_ORDINAL" != "0" ]; then
                 echo "Configuring as replica of pod-0 (master)"
                 MASTER_HOSTNAME="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
-                echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/redis.conf
+                echo "replicaof $MASTER_HOSTNAME {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                 {{- if .Values.auth.enabled }}
                 echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
                 {{- end }}
@@ -202,7 +207,7 @@ spec:
               redis-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:
             - name: redis
-              containerPort: 6379
+              containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}6379{{ end }}
               protocol: TCP
             {{- if eq .Values.architecture "cluster" }}
             - name: cluster
@@ -237,7 +242,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -250,7 +255,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -263,7 +268,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -311,6 +316,11 @@ spec:
             - name: config
               mountPath: {{ .Values.config.mountPath }}
             {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/redis/tls
+              readOnly: true
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -322,6 +332,11 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+          {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/redis/tls
+              readOnly: true
+          {{- end }}
           {{- if .Values.sentinel.extraVolumeMounts }}
             {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
           {{- end }}
@@ -338,7 +353,7 @@ spec:
               {{- else }}
               REDIS_HOST="127.0.0.1"
               {{- end }}
-              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h "${REDIS_HOST}" -p {{ .Values.service.port }} ping >/dev/null 2>&1; do
+              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping >/dev/null 2>&1; do
                 sleep 1
               done
               echo "Redis is ready"
@@ -558,6 +573,18 @@ spec:
             name: {{ include "redis.fullname" . }}-config
             {{- end }}
         {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ required "TLS secret name is required when TLS is enabled" .Values.tls.existingSecret }}
+            items:
+              - key: {{ .Values.tls.certFilename }}
+                path: {{ .Values.tls.certFilename }}
+              - key: {{ .Values.tls.certKeyFilename }}
+                path: {{ .Values.tls.certKeyFilename }}
+              - key: {{ .Values.tls.certCAFilename }}
+                path: {{ .Values.tls.certCAFilename }}
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
@@ -584,7 +611,7 @@ spec:
   {{- end }}
   {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
-    - apiVersion: v1	
+    - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
         name: data

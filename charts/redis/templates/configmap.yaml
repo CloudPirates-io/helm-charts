@@ -7,10 +7,27 @@ metadata:
   labels:
     {{- include "redis.labels" . | nindent 4 }}
   {{- if (include "redis.annotations" .) }}
-  annotations: 
+  annotations:
 {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
   {{- end }}
 data:
   redis.conf: |
     {{- .Values.config.content | nindent 4 }}
+    {{- if .Values.tls.enabled }}
+    # TLS/SSL Configuration
+    port 0
+    tls-port {{ .Values.tls.port }}
+    tls-cert-file /etc/redis/tls/{{ .Values.tls.certFilename }}
+    tls-key-file /etc/redis/tls/{{ .Values.tls.certKeyFilename }}
+    tls-ca-cert-file /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+    {{- if .Values.tls.authClients }}
+    tls-auth-clients yes
+    {{- else }}
+    tls-auth-clients no
+    {{- end }}
+    tls-replication yes
+    {{- else }}
+    # Standard Port Configuration
+    port {{ .Values.service.port }}
+    {{- end }}
 {{- end }}
