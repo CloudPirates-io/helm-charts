@@ -14,6 +14,8 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param podLabels Additional labels to add to pods (e.g. for Istio sidecar injection)
+podLabels: {}
 
 ## @section Nginx image parameters
 image:
@@ -376,3 +378,6 @@ streamServerConfig: ""
 
 ## @param existingStreamServerConfigmap Name of an existing ConfigMap containing stream-server-config.conf
 existingStreamServerConfigConfigmap: ""
+
+## @param extraInitContainers Additional init containers to add to the pod
+extraInitContainers: []

@@ -81,9 +81,8 @@ spec:
             - --peer-cert-file=/etc/etcd/certs/peer/tls.crt
             - --peer-key-file=/etc/etcd/certs/peer/tls.key
             {{- end }}
-            {{- if .Values.metrics.enabled }}
+            # Always enable metrics endpoint for health probes (does not require TLS)
             - --listen-metrics-urls=http://{{ .Values.config.listenClientIp }}:{{ .Values.service.metricsPort }}
-            {{- end }}
             {{- range .Values.extraArgs }}
             - {{ . }}
             {{- end }}
@@ -94,11 +93,10 @@ spec:
             - name: peer
               containerPort: {{ .Values.service.peerPort | default 2380 }}
               protocol: TCP
-            {{- if .Values.metrics.enabled }}
+            # Always expose metrics port for health probes
             - name: metrics
               containerPort: {{ .Values.service.metricsPort | default 2381 }}
               protocol: TCP
-            {{- end }}
           env:
             - name: POD_NAME
               valueFrom:
@@ -111,12 +109,8 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: client
-              {{- if .Values.auth.enabled }}
-              scheme: HTTPS
-              {{- else }}
+              port: metrics
               scheme: HTTP
-              {{- end }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -127,12 +121,8 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: client
-              {{- if .Values.auth.enabled }}
-              scheme: HTTPS
-              {{- else }}
+              port: metrics
               scheme: HTTP
-              {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -143,12 +133,8 @@ spec:
           readinessProbe:
             httpGet:
               path: /health?serializable=true
-              port: client
-              {{- if .Values.auth.enabled }}
-              scheme: HTTPS
-              {{- else }}
+              port: metrics
               scheme: HTTP
-              {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}

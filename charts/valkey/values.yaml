@@ -86,6 +86,24 @@ auth:
   ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
   existingSecretPasswordKey: "password"
 
+## @section TLS/SSL configuration
+tls:
+  ## @param tls.enabled Enable TLS/SSL for Valkey connections
+  enabled: false
+  ## @param tls.existingSecret Name of an existing secret containing TLS certificates
+  ## Expected keys in the secret: tls.crt, tls.key, ca.crt
+  existingSecret: ""
+  ## @param tls.certFilename Certificate filename in the secret
+  certFilename: "tls.crt"
+  ## @param tls.certKeyFilename Certificate key filename in the secret
+  certKeyFilename: "tls.key"
+  ## @param tls.certCAFilename CA certificate filename in the secret
+  certCAFilename: "ca.crt"
+  ## @param tls.port TLS port for Valkey (default: 6380)
+  port: 6380
+  ## @param tls.authClients Require clients to authenticate with a valid client certificate
+  authClients: true
+
 ## @section Valkey Configuration
 config:
   ## @param config.maxMemory Maximum memory usage for Valkey (e.g., 256mb, 1gb)

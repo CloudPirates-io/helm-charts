@@ -154,6 +154,9 @@
         "extraEnvVars": {
             "type": "array"
         },
+        "extraInitContainers": {
+            "type": "array"
+        },
         "extraObjects": {
             "type": "array"
         },
@@ -382,6 +385,9 @@
             "type": "string"
         },
         "nodeSelector": {
+            "type": "object"
+        },
+        "podLabels": {
             "type": "object"
         },
         "podSecurityContext": {

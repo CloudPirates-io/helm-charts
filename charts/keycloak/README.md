@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-keycloak/keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
 </p>
 
 # Keycloak
@@ -8,7 +8,7 @@ A Helm chart for Keycloak - Open Source Identity and Access Management Solution.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-keycloak`:
 
 ```bash
 helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
+```
+
+To install with custom values:
+
+```bash
+helm install my-valkey oci://registry-1.docker.io/cloudpirates/valkey -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -83,7 +89,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.3.4@sha256:2b32a51a31e8d780d9fa9a69a59ead69975263c61b5dd13559090e22aa26f100"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.4@sha256:c6459d5fae1b759f5d667ebdc6237ab3121379c3494e213898569014ede1846d"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
 
 ### Deployment configuration
@@ -148,28 +154,29 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### TLS Configuration
 
-| Parameter                         | Description                                                                                     | Default                                     |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                              | `false`                                     |
-| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key) | `""`                                        |
-| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                  | `"/opt/keycloak/certs/tls.crt"`             |
-| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                              | `"/opt/keycloak/certs/tls.key"`             |
-| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                          | `false`                                     |
-| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                | `""`                                        |
-| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                       | `ClusterIssuer`                             |
-| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                | `cert-manager.io`                           |
-| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                  | `""`                                        |
-| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                | `""`                                        |
-| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                            | `""`                                        |
-| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                     | `[]`                                        |
-| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                        | `[]`                                        |
-| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                    | `""`                                        |
-| `tls.certManager.usages`          | Certificate key usages                                                                          | `["digital signature", "key encipherment"]` |
-| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                             | `{}`                                        |
-| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                  | `false`                                     |
-| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, key: truststore.jks)  | `""`                                        |
-| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                 | `""`                                        |
-| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                       | `"/opt/keycloak/truststore/truststore.jks"` |
+| Parameter                         | Description                                                                                            | Default                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `tls.enabled`                     | Enable TLS/HTTPS support using custom certificates                                                     | `false`                                     |
+| `tls.existingSecret`              | Name of existing secret containing TLS certificate and key (PEM format, keys: tls.crt, tls.key)        | `""`                                        |
+| `tls.certificateFile`             | Path where the TLS certificate file will be mounted (internal)                                         | `"/opt/keycloak/certs/tls.crt"`             |
+| `tls.certificateKeyFile`          | Path where the TLS certificate key file will be mounted (internal)                                     | `"/opt/keycloak/certs/tls.key"`             |
+| `tls.certManager.enabled`         | Enable cert-manager integration for automatic certificate provisioning                                 | `false`                                     |
+| `tls.certManager.issuerRef.name`  | Name of the cert-manager Issuer or ClusterIssuer                                                       | `""`                                        |
+| `tls.certManager.issuerRef.kind`  | Kind of the cert-manager issuer (Issuer or ClusterIssuer)                                              | `ClusterIssuer`                             |
+| `tls.certManager.issuerRef.group` | Group of the cert-manager issuer                                                                       | `cert-manager.io`                           |
+| `tls.certManager.duration`        | Certificate duration (e.g., 2160h for 90 days)                                                         | `""`                                        |
+| `tls.certManager.renewBefore`     | Time before expiry to renew certificate (e.g., 360h for 15 days)                                       | `""`                                        |
+| `tls.certManager.commonName`      | Certificate common name (defaults to first dnsName if not specified)                                   | `""`                                        |
+| `tls.certManager.dnsNames`        | List of DNS names for the certificate (uses ingress.hosts if not specified)                            | `[]`                                        |
+| `tls.certManager.ipAddresses`     | List of IP addresses for the certificate                                                               | `[]`                                        |
+| `tls.certManager.secretName`      | Name for the generated secret (defaults to `<fullname>-tls`)                                           | `""`                                        |
+| `tls.certManager.usages`          | Certificate key usages                                                                                 | `["digital signature", "key encipherment"]` |
+| `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                                    | `{}`                                        |
+| `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                         | `false`                                     |
+| `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, default-key: truststore.jks) | `""`                                        |
+| `tls.truststoreExistingSecretKey` | Key of the secret to get the trustStorePassword from                                                   | `"truststore.jks"`                          |
+| `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                        | `""`                                        |
+| `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                              | `"/opt/keycloak/truststore/truststore.jks"` |
 
 ### Database Configuration
 
@@ -329,8 +336,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                              | Description                                 | Default                                                                                  |
 | -------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6`  |
-| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:8a061ef9813cf960f94a262930a32b190c3fbe5c8d3ab58456ef1df4b90fd5dc` |
+| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a`  |
+| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545` |
 
 ### PostgreSQL Configuration
 
@@ -815,4 +822,4 @@ For issues related to this Helm chart, please check:
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
 - [Keycloak Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

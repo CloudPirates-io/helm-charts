@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-mariadb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mariadb" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-mariadb/mariadb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mariadb" /></a>
 </p>
 
 # MariaDB
@@ -20,6 +20,12 @@ To install with custom values:
 
 ```bash
 helm install my-mariadb oci://registry-1.docker.io/cloudpirates/mariadb -f my-values.yaml
+```
+
+Or install directly from the local chart:
+
+```bash
+helm install my-valkey ./charts/valkey
 ```
 
 ## Uninstalling the Chart
@@ -99,14 +105,13 @@ The following table lists the configurable parameters of the MariaDB chart and t
 
 ### MariaDB Image Parameters
 
-| Parameter           | Description                                        | Default        |
-| ------------------- | -------------------------------------------------- | -------------- |
-| `image.registry`    | MariaDB image registry                             | `docker.io`    |
-| `image.repository`  | MariaDB image repository                           | `mariadb`      |
-| `image.tag`         | MariaDB image tag (immutable tags are recommended) | `"11.8.2"`     |
-| `image.digest`      | MariaDB image digest                               | `""`           |
-| `image.pullPolicy`  | MariaDB image pull policy                          | `IfNotPresent` |
-| `image.pullSecrets` | MariaDB image pull secrets                         | `[]`           |
+| Parameter          | Description                                        | Default                                                                            |
+| ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `image.registry`   | MariaDB image registry                             | `docker.io`                                                                        |
+| `image.repository` | MariaDB image repository                           | `mariadb`                                                                          |
+| `image.tag`        | MariaDB image tag (immutable tags are recommended) | `"12.0.2@sha256:5b6a1eac15b85b981a61afb89aea2a22bf76b5f58809d05f0bcc13ab6ec44cb8"` |
+| `image.pullPolicy` | MariaDB image pull policy                          | `IfNotPresent`                                                                     |
+
 
 ### MariaDB Authentication Parameters
 
@@ -201,6 +206,15 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | -------------------- | -------------------------------------------------- | ------- |
 | `resources.limits`   | The resources limits for the MariaDB containers    | `{}`    |
 | `resources.requests` | The requested resources for the MariaDB containers | `{}`    |
+
+### Service Account
+
+| Parameter                                     | Description                                                                                                               | Default |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created                                                                     | `false` |
+| `serviceAccount.annotations`                  | Annotations to add to the service account                                                                                 | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
 
 ### Extra Configuration Parameters
 
@@ -484,3 +498,4 @@ For production workloads, consider:
 - [MariaDB Official Documentation](https://mariadb.org/documentation/)
 - [MariaDB Docker Hub](https://hub.docker.com/_/mariadb)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

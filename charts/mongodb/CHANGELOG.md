@@ -1,6 +1,23 @@
 # Changelog
 
 
+## 0.6.3 (2025-11-17)
+
+* chore: update CHANGELOG.md for merged changes ([005861e](https://github.com/CloudPirates-io/helm-charts/commit/005861e))
+* chore: update CHANGELOG.md for merged changes ([d658aef](https://github.com/CloudPirates-io/helm-charts/commit/d658aef))
+* [mongodb/redis/posgres] Add subPath option when using existingClaim (#613) ([8aa277e](https://github.com/CloudPirates-io/helm-charts/commit/8aa277e))
+* chore: update CHANGELOG.md for merged changes ([f622e2c](https://github.com/CloudPirates-io/helm-charts/commit/f622e2c))
+* chore: update CHANGELOG.md for merged changes ([3dfdb85](https://github.com/CloudPirates-io/helm-charts/commit/3dfdb85))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.6.2 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([a23d7d2](https://github.com/CloudPirates-io/helm-charts/commit/a23d7d2))
+* chore: update CHANGELOG.md for merged changes ([55fb45f](https://github.com/CloudPirates-io/helm-charts/commit/55fb45f))
+* chore: update CHANGELOG.md for merged changes ([5e305ab](https://github.com/CloudPirates-io/helm-charts/commit/5e305ab))
+* chore: update CHANGELOG.md for merged changes ([9ab8da3](https://github.com/CloudPirates-io/helm-charts/commit/9ab8da3))
+
 ## 0.6.1 (2025-10-29)
 
 * chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))

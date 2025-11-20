@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-redis/redis"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-redis" /></a>
 </p>
 
 # Redis Helm Chart
@@ -76,16 +76,21 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ## Configuration
 
+### Global parameters
+
+| Parameter                 | Description                           | Default |
+| ------------------------- | ------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry override | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`    |
+
 ### Image Configuration
 
-| Parameter                 | Description                           | Default                                                                         |
-| ------------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
-| `image.registry`          | Redis image registry                  | `docker.io`                                                                     |
-| `image.repository`        | Redis image repository                | `redis`                                                                         |
-| `image.tag`               | Redis image tag                       | `8.2.0@sha256:e7d6b261beaa22b1dc001f438b677f1c691ac7805607d8979bae65fe0615c2e6` |
-| `image.pullPolicy`        | Image pull policy                     | `Always`                                                                        |
-| `global.imageRegistry`    | Global Docker image registry override | `""`                                                                            |
-| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`                                                                            |
+| Parameter          | Description            | Default                                                                         |
+| ------------------ | ---------------------- | ------------------------------------------------------------------------------- |
+| `image.registry`   | Redis image registry   | `docker.io`                                                                     |
+| `image.repository` | Redis image repository | `redis`                                                                         |
+| `image.tag`        | Redis image tag        | `8.2.3@sha256:d318520052025d3cc5850ba3de966810916c7a7b327b412322399f38be39a39c` |
+| `image.pullPolicy` | Image pull policy      | `Always`                                                                        |
 
 ### Common Parameters
 
@@ -179,14 +184,16 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ### Persistence
 
-| Parameter                  | Description                              | Default         |
-| -------------------------- | ---------------------------------------- | --------------- |
-| `persistence.enabled`      | Enable persistent storage                | `true`          |
-| `persistence.storageClass` | Storage class for persistent volume      | `""`            |
-| `persistence.accessMode`   | Access mode for persistent volume        | `ReadWriteOnce` |
-| `persistence.size`         | Size of persistent volume                | `8Gi`           |
-| `persistence.mountPath`    | Mount path for Redis data                | `/data`         |
-| `persistence.annotations`  | Annotations for persistent volume claims | `{}`            |
+| Parameter                   | Description                                        | Default         |
+| --------------------------- | -------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                          | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -274,6 +281,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                                                                 | `25m`              |
 | `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`             |
 | `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`               |
+
+### ServiceAccount
+
+| Parameter           | Description                                                             | Default |
+| ------------------- | ----------------------------------------------------------------------- | ------- |
+| `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods | `false` |
+| `serviceAccount.create` | Enable the creation of a ServiceAccount | `false` |
+| `serviceAccount.name` | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""` |
 
 ### Additional Configuration
 
@@ -456,4 +472,4 @@ For issues related to this Helm chart, please check:
 
 - [Redis Documentation](https://redis.io/docs/latest/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

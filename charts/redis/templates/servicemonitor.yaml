@@ -12,7 +12,7 @@ metadata:
     {{- end }}
   {{- with .Values.metrics.serviceMonitor.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.metrics.serviceMonitor.annotations "context" .) | indent 4 }}
   {{- end }}
 spec:
   jobLabel: {{ include "redis.fullname" . }}

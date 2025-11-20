@@ -1,6 +1,66 @@
 # Changelog
 
 
+## 0.12.1 (2025-11-17)
+
+* chore: update CHANGELOG.md for merged changes ([005861e](https://github.com/CloudPirates-io/helm-charts/commit/005861e))
+* chore: update CHANGELOG.md for merged changes ([d658aef](https://github.com/CloudPirates-io/helm-charts/commit/d658aef))
+* [mongodb/redis/posgres] Add subPath option when using existingClaim (#613) ([8aa277e](https://github.com/CloudPirates-io/helm-charts/commit/8aa277e))
+
+## 0.12.0 (2025-11-14)
+
+* chore: update CHANGELOG.md for merged changes ([8d8da63](https://github.com/CloudPirates-io/helm-charts/commit/8d8da63))
+* chore: update CHANGELOG.md for merged changes ([798acb8](https://github.com/CloudPirates-io/helm-charts/commit/798acb8))
+* Update charts/postgres/values.yaml postgres to v18.1 (minor) (#597) ([8d6d622](https://github.com/CloudPirates-io/helm-charts/commit/8d6d622))
+* chore: update CHANGELOG.md for merged changes ([f3e1ad1](https://github.com/CloudPirates-io/helm-charts/commit/f3e1ad1))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.11.7 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([6e465fd](https://github.com/CloudPirates-io/helm-charts/commit/6e465fd))
+* chore: update CHANGELOG.md for merged changes ([d04f118](https://github.com/CloudPirates-io/helm-charts/commit/d04f118))
+* Update charts/postgres/values.yaml postgres (#555) ([c5f8537](https://github.com/CloudPirates-io/helm-charts/commit/c5f8537))
+* chore: update CHANGELOG.md for merged changes ([04e16c9](https://github.com/CloudPirates-io/helm-charts/commit/04e16c9))
+* chore: update CHANGELOG.md for merged changes ([9e5cb09](https://github.com/CloudPirates-io/helm-charts/commit/9e5cb09))
+* chore: auto-generate values.schema.json (#575) ([8ba3935](https://github.com/CloudPirates-io/helm-charts/commit/8ba3935))
+* chore: update CHANGELOG.md for merged changes ([e5e686d](https://github.com/CloudPirates-io/helm-charts/commit/e5e686d))
+* chore: update CHANGELOG.md for merged changes ([497f5e3](https://github.com/CloudPirates-io/helm-charts/commit/497f5e3))
+
+## 0.11.6 (2025-11-10)
+
+* fix: allow not to mount config (#573) ([5dac551](https://github.com/CloudPirates-io/helm-charts/commit/5dac551))
+* chore: update CHANGELOG.md for merged changes ([fff2aa9](https://github.com/CloudPirates-io/helm-charts/commit/fff2aa9))
+* chore: update CHANGELOG.md for merged changes ([d439361](https://github.com/CloudPirates-io/helm-charts/commit/d439361))
+* chore: auto-generate values.schema.json (#562) ([ba97fca](https://github.com/CloudPirates-io/helm-charts/commit/ba97fca))
+* chore: update CHANGELOG.md for merged changes ([19a2697](https://github.com/CloudPirates-io/helm-charts/commit/19a2697))
+* chore: update CHANGELOG.md for merged changes ([471eef9](https://github.com/CloudPirates-io/helm-charts/commit/471eef9))
+
+## 0.11.5 (2025-11-07)
+
+* Config for NodePort port (#561) ([bae2da0](https://github.com/CloudPirates-io/helm-charts/commit/bae2da0))
+* chore: update CHANGELOG.md for merged changes ([6e6ea47](https://github.com/CloudPirates-io/helm-charts/commit/6e6ea47))
+* chore: update CHANGELOG.md for merged changes ([63e0c74](https://github.com/CloudPirates-io/helm-charts/commit/63e0c74))
+
+## 0.11.4 (2025-11-05)
+
+* chore: update CHANGELOG.md for merged changes ([b41d586](https://github.com/CloudPirates-io/helm-charts/commit/b41d586))
+* Fix logic in init-scripts ConfigMap (#551) ([90d61df](https://github.com/CloudPirates-io/helm-charts/commit/90d61df))
+
+## 0.11.3 (2025-11-04)
+
+* chore: update CHANGELOG.md for merged changes ([8a36fa3](https://github.com/CloudPirates-io/helm-charts/commit/8a36fa3))
+* chore: update CHANGELOG.md for merged changes ([4b10ac6](https://github.com/CloudPirates-io/helm-charts/commit/4b10ac6))
+* Update charts/postgres/values.yaml postgres (#546) ([cd62d69](https://github.com/CloudPirates-io/helm-charts/commit/cd62d69))
+
+## 0.11.2 (2025-11-04)
+
+* chore: update CHANGELOG.md for merged changes ([d18a69d](https://github.com/CloudPirates-io/helm-charts/commit/d18a69d))
+* chore: update CHANGELOG.md for merged changes ([19c8331](https://github.com/CloudPirates-io/helm-charts/commit/19c8331))
+* Update charts/postgres/values.yaml postgres (#541) ([a94dd22](https://github.com/CloudPirates-io/helm-charts/commit/a94dd22))
+* chore: update CHANGELOG.md for merged changes ([332f709](https://github.com/CloudPirates-io/helm-charts/commit/332f709))
+* chore: update CHANGELOG.md for merged changes ([e72bc46](https://github.com/CloudPirates-io/helm-charts/commit/e72bc46))
+
 ## 0.11.1 (2025-10-31)
 
 * [postgres]: fix nesting for auth.username & auth.secretKeys.passwordKey (#513) ([7692045](https://github.com/CloudPirates-io/helm-charts/commit/7692045))

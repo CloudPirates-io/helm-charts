@@ -20,7 +20,7 @@
                 "secretKeys": {
                     "type": "object",
                     "properties": {
-                        "passwordKey": {
+                        "adminPasswordKey": {
                             "type": "string"
                         }
                     }
@@ -44,6 +44,9 @@
                 },
                 "extraConfig": {
                     "type": "array"
+                },
+                "mountConfigMap": {
+                    "type": "boolean"
                 },
                 "pgHbaConfig": {
                     "type": "string"
@@ -354,6 +357,9 @@
                 },
                 "storageClass": {
                     "type": "string"
+                },
+                "subPath": {
+                    "type": "string"
                 }
             }
         },
@@ -419,6 +425,9 @@
             "properties": {
                 "annotations": {
                     "type": "object"
+                },
+                "nodePort": {
+                    "type": "integer"
                 },
                 "port": {
                     "type": "integer"

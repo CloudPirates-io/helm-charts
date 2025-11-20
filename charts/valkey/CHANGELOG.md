@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 0.10.0 (2025-11-07)
+
+* [valkey]: Support TLS ([3b0b609](https://github.com/CloudPirates-io/helm-charts/commit/3b0b609))
+
+## 0.9.2 (2025-11-03)
+
+* [valkey]: fix broken statement ([49a9fe9](https://github.com/CloudPirates-io/helm-charts/commit/49a9fe9))
+* chore: update CHANGELOG.md for merged changes ([7af5c40](https://github.com/CloudPirates-io/helm-charts/commit/7af5c40))
+* chore: update CHANGELOG.md for merged changes ([e086407](https://github.com/CloudPirates-io/helm-charts/commit/e086407))
+
 ## 0.9.1 (2025-11-03)
 
 * [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf](https://github.com/CloudPirates-io/helm-charts/commit/57d1caf))

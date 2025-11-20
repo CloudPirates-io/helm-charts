@@ -1,4 +1,6 @@
-{{- if or (and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap)) (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+{{- $createCustomUser := and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+{{- $appendInitdbScripts := and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
+{{- if or $createCustomUser $appendInitdbScripts }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,7 +13,7 @@ metadata:
     {{- include "postgres.annotations" . | nindent 4 }}
   {{- end }}
 data: 
-  {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+  {{- if $createCustomUser }}
   00-init-custom-user.sh: |
     #!/bin/sh
     
@@ -32,7 +34,7 @@ data:
     
     echo "✅ Custom user and database created successfully!"
   {{- end }}
-  {{- if .Values.initdb.scripts }}
+  {{- if $appendInitdbScripts }}
   {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
   {{- end }}
 {{- end }}

@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.0-management@sha256:23676732c0b7bb978c0837c150492222d5b23ff079fc2025b537f4ce5c013d98"
+  tag: "4.2.0-management@sha256:b1b34ba023e4e7d151425fac47017681578a35b6f66c0dfc0c5f9ed529008e30"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -86,10 +86,19 @@ config:
     ## Memory high watermark value.
     ## @param memoryHighWatermark.value Memory high watermark value
     ## The default value of 0.4 stands for 40% of available RAM
-    ## Note: the memory relative limit is applied to the resourcesPreset memory limit or the resource.limits.memory to calculate the memory threshold
-    ## You can also use an absolute value, e.g.: 256Mi
+    ## IMPORTANT: For relative type, RabbitMQ will use the container's memory limit (resources.limits.memory)
+    ## instead of the node's total memory when calculating the threshold. If no memory limit is set,
+    ## it will fall back to using the node's memory, which is usually not desired.
+    ## For absolute values, you can use:
+    ##   - Human-readable units as strings: "8GB", "256MiB", "1024MB" (recommended)
+    ##   - Large numbers as strings: "8590000000" (to avoid YAML scientific notation like 8e+9)
+    ##   - Small numbers as integers: 256000000 (only if < 1 million to avoid scientific notation)
+    ## Examples:
+    ##   value: 0.4              # relative: 40% of container memory limit
+    ##   value: "8GB"            # absolute: 8 gigabytes
+    ##   value: "8590000000"     # absolute: 8590000000 bytes (use string for large numbers)
     ##
-    value: 0.4
+    value: 0.4 # @schema type:[number, string]
   ## Logging configuration
   ## ref: https://www.rabbitmq.com/docs/logging
   ##

@@ -1,6 +1,30 @@
 # Changelog
 
 
+## 0.4.2 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([1c247b8](https://github.com/CloudPirates-io/helm-charts/commit/1c247b8))
+* chore: update CHANGELOG.md for merged changes ([454ffde](https://github.com/CloudPirates-io/helm-charts/commit/454ffde))
+* chore: auto-generate values.schema.json (#569) ([6790d09](https://github.com/CloudPirates-io/helm-charts/commit/6790d09))
+
+## 0.4.1 (2025-11-07)
+
+* [nginx]: Add podLabels ([b8d8410](https://github.com/CloudPirates-io/helm-charts/commit/b8d8410))
+* chore: update CHANGELOG.md for merged changes ([40efff1](https://github.com/CloudPirates-io/helm-charts/commit/40efff1))
+* chore: update CHANGELOG.md for merged changes ([e1c0077](https://github.com/CloudPirates-io/helm-charts/commit/e1c0077))
+* chore: auto-generate values.schema.json (#549) ([ac12418](https://github.com/CloudPirates-io/helm-charts/commit/ac12418))
+* chore: update CHANGELOG.md for merged changes ([05acd68](https://github.com/CloudPirates-io/helm-charts/commit/05acd68))
+* chore: update CHANGELOG.md for merged changes ([d909109](https://github.com/CloudPirates-io/helm-charts/commit/d909109))
+
+## 0.4.0 (2025-11-04)
+
+* extraInitContainers (#548) ([686e3e0](https://github.com/CloudPirates-io/helm-charts/commit/686e3e0))
+* chore: update CHANGELOG.md for merged changes ([8dbbdd1](https://github.com/CloudPirates-io/helm-charts/commit/8dbbdd1))
+* chore: update CHANGELOG.md for merged changes ([5d68f20](https://github.com/CloudPirates-io/helm-charts/commit/5d68f20))
+* chore: auto-generate values.schema.json (#529) ([a09c8b1](https://github.com/CloudPirates-io/helm-charts/commit/a09c8b1))
+* chore: update CHANGELOG.md for merged changes ([b9cc0d3](https://github.com/CloudPirates-io/helm-charts/commit/b9cc0d3))
+* chore: update CHANGELOG.md for merged changes ([8d930bc](https://github.com/CloudPirates-io/helm-charts/commit/8d930bc))
+
 ## 0.3.3 (2025-11-02)
 
 * [nginx]: Add priorityClassName support (#526) ([e77747f](https://github.com/CloudPirates-io/helm-charts/commit/e77747f))

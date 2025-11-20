@@ -1,6 +1,32 @@
 # Changelog
 
 
+## 0.8.5 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([09bffff](https://github.com/CloudPirates-io/helm-charts/commit/09bffff))
+* chore: update CHANGELOG.md for merged changes ([f48bb48](https://github.com/CloudPirates-io/helm-charts/commit/f48bb48))
+
+## 0.8.4 (2025-11-11)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.4 (patch) (#563) ([c65d420](https://github.com/CloudPirates-io/helm-charts/commit/c65d420))
+* chore: update CHANGELOG.md for merged changes ([5797494](https://github.com/CloudPirates-io/helm-charts/commit/5797494))
+* chore: update CHANGELOG.md for merged changes ([1a445f9](https://github.com/CloudPirates-io/helm-charts/commit/1a445f9))
+* chore: auto-generate values.schema.json (#578) ([584a535](https://github.com/CloudPirates-io/helm-charts/commit/584a535))
+* chore: update CHANGELOG.md for merged changes ([69f290f](https://github.com/CloudPirates-io/helm-charts/commit/69f290f))
+* chore: update CHANGELOG.md for merged changes ([7b32772](https://github.com/CloudPirates-io/helm-charts/commit/7b32772))
+
+## 0.8.3 (2025-11-11)
+
+* add truststoreExistingSecretKey, add truststorePassword to env-Vars (#574) ([9c97080](https://github.com/CloudPirates-io/helm-charts/commit/9c97080))
+* chore: update CHANGELOG.md for merged changes ([e67a635](https://github.com/CloudPirates-io/helm-charts/commit/e67a635))
+* chore: update CHANGELOG.md for merged changes ([607f120](https://github.com/CloudPirates-io/helm-charts/commit/607f120))
+
+## 0.8.2 (2025-11-05)
+
+* [keycloak]: Fix mariadb configuration (#544) ([6cec40c](https://github.com/CloudPirates-io/helm-charts/commit/6cec40c))
+* chore: update CHANGELOG.md for merged changes ([72853a9](https://github.com/CloudPirates-io/helm-charts/commit/72853a9))
+* chore: update CHANGELOG.md for merged changes ([cd5cd19](https://github.com/CloudPirates-io/helm-charts/commit/cd5cd19))
+
 ## 0.8.1 (2025-11-02)
 
 * [keycloak]: Fix https settings in keycloak when disabling http (#530) ([b0c34f6](https://github.com/CloudPirates-io/helm-charts/commit/b0c34f6))
