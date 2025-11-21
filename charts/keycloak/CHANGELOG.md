@@ -1,5 +1,8 @@
 # Changelog
 
+# 0.8.6
+* chore: make resource apply also to initContainers
+
 
 ## 0.8.5 (2025-11-13)
 
