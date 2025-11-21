@@ -139,10 +139,49 @@ Return the proper RabbitMQ image name
 {{- end -}}
 
 {{/*
-Return the proper Docker Image Registry Secret Names
+Return the imagePullSecrets section for Cluster Operator
 */}}
 {{- define "rmqco.imagePullSecrets" -}}
-{{- include "cloudpirates.imagePullSecrets" . -}}
+{{- $pullSecrets := list }}
+{{- if .Values.global }}
+  {{- range .Values.global.imagePullSecrets -}}
+    {{- $pullSecrets = append $pullSecrets . -}}
+  {{- end -}}
+{{- end -}}
+{{- range (list .Values.clusterOperator.image .Values.rabbitmqImage) -}}
+  {{- range .pullSecrets -}}
+    {{- $pullSecrets = append $pullSecrets . -}}
+  {{- end -}}
+{{- end }}
+{{- if (not (empty $pullSecrets)) }}
+imagePullSecrets:
+  {{- range $pullSecrets | uniq }}
+  - name: {{ . }}
+    {{- end }}
+  {{- end }}
+{{- end -}}
+
+{{/*
+Return the imagePullSecrets section for msgTopologyOperator
+*/}}
+{{- define "rmqmto.imagePullSecrets" -}}
+{{- $pullSecrets := list }}
+{{- if .Values.global }}
+  {{- range .Values.global.imagePullSecrets -}}
+    {{- $pullSecrets = append $pullSecrets . -}}
+  {{- end -}}
+{{- end -}}
+{{- range (list .Values.msgTopologyOperator.image) -}}
+  {{- range .pullSecrets -}}
+    {{- $pullSecrets = append $pullSecrets . -}}
+  {{- end -}}
+{{- end }}
+{{- if (not (empty $pullSecrets)) }}
+imagePullSecrets:
+  {{- range $pullSecrets | uniq }}
+  - name: {{ . }}
+    {{- end }}
+  {{- end }}
 {{- end -}}
 
 {{/*

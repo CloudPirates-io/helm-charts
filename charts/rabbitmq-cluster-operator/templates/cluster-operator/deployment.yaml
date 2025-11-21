@@ -28,7 +28,7 @@ spec:
         {{- include "rmqco.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ template "rmqco.clusterOperator.serviceAccountName" . }}
-      {{- include "rmqco.imagePullSecrets" . | nindent 6 }}
+      {{- include "rmqco.imagePullSecrets" . | indent 6 }}
       {{- if .Values.clusterOperator.schedulerName }}
       schedulerName: {{ .Values.clusterOperator.schedulerName | quote }}
       {{- end }}

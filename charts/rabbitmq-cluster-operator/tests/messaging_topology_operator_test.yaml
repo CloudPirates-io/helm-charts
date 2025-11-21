@@ -38,6 +38,54 @@ tests:
           value: RELEASE-NAME-rabbitmq-messaging-topology-operator
         template: templates/messaging-topology-operator/deployment.yaml
 
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+      msgTopologyOperator.image.pullSecrets:
+        - mySecret2
+        - mySecret3
+        - mySecret4
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[3].name
+          value: mySecret4
+        template: templates/messaging-topology-operator/deployment.yaml
+
   - it: should create service account with default values
     asserts:
       - isKind:

@@ -28,7 +28,7 @@ spec:
         {{- include "rmqmto.labels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ template "rmqco.msgTopologyOperator.serviceAccountName" . }}
-      {{- include "rmqco.imagePullSecrets" . | nindent 6 }}
+      {{- include "rmqmto.imagePullSecrets" . | indent 6 }}
       automountServiceAccountToken: {{ .Values.msgTopologyOperator.automountServiceAccountToken }}
       {{- if .Values.msgTopologyOperator.hostAliases }}
       hostAliases: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.hostAliases "context" $) | nindent 8 }}
