@@ -163,7 +163,7 @@ spec:
             - name: KC_DB_URL_PROPERTIES
               value: {{ .Values.database.urlProperties | quote }}
             {{- end }}
-            {{- if or (eq .Values.database.type "postgres") (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb") }}
+            {{- if or (eq .Values.database.type "postgres") (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb") (eq .Values.database.type "mssql") }}
             - name: KC_DB_USERNAME
               {{- if and (eq .Values.database.type "postgres") .Values.postgres.enabled }}
               value: {{ default "postgres" .Values.postgres.auth.username | quote }}
