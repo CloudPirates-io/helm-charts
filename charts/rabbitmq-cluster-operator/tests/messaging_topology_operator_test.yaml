@@ -1,0 +1,277 @@
+suite: rabbitmq-messaging-topology-operator-tests
+templates:
+  - templates/messaging-topology-operator/deployment.yaml
+  - templates/messaging-topology-operator/sa.yaml
+  - templates/messaging-topology-operator/clusterrole.yaml
+  - templates/messaging-topology-operator/clusterrolebinding.yaml
+  - templates/messaging-topology-operator/role.yaml
+  - templates/messaging-topology-operator/rolebinding.yaml
+  - templates/messaging-topology-operator/networkpolicy.yaml
+  - templates/messaging-topology-operator/pdb.yaml
+  - templates/messaging-topology-operator/webhook-service.yaml
+  - templates/messaging-topology-operator/validating-webhook-configuration.yaml
+  - templates/messaging-topology-operator/metrics-service.yaml
+  - templates/messaging-topology-operator/podmonitor.yaml
+  - templates/messaging-topology-operator/servicemonitor.yaml
+  - templates/messaging-topology-operator/certificate.yaml
+
+tests:
+  - it: should render messaging topology operator deployment with default values
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.replicas
+          value: 1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/rabbitmqoperator/messaging-topology-operator:1.18.1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+      msgTopologyOperator.image.pullSecrets:
+        - mySecret2
+        - mySecret3
+        - mySecret4
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[3].name
+          value: mySecret4
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should create service account with default values
+    asserts:
+      - isKind:
+          of: ServiceAccount
+        template: templates/messaging-topology-operator/sa.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/sa.yaml
+
+  - it: should create clusterrole with default values
+    asserts:
+      - isKind:
+          of: ClusterRole
+        template: templates/messaging-topology-operator/clusterrole.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-NAMESPACE
+        template: templates/messaging-topology-operator/clusterrole.yaml
+
+  - it: should create clusterrolebinding with default values
+    asserts:
+      - isKind:
+          of: ClusterRoleBinding
+        template: templates/messaging-topology-operator/clusterrolebinding.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-NAMESPACE
+        template: templates/messaging-topology-operator/clusterrolebinding.yaml
+      - equal:
+          path: roleRef.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-NAMESPACE
+        template: templates/messaging-topology-operator/clusterrolebinding.yaml
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+        template: templates/messaging-topology-operator/clusterrolebinding.yaml
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/clusterrolebinding.yaml
+
+  - it: should create role with default values
+    asserts:
+      - isKind:
+          of: Role
+        template: templates/messaging-topology-operator/role.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/role.yaml
+
+  - it: should create rolebinding with default values
+    asserts:
+      - isKind:
+          of: RoleBinding
+        template: templates/messaging-topology-operator/rolebinding.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/rolebinding.yaml
+      - equal:
+          path: roleRef.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/rolebinding.yaml
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+        template: templates/messaging-topology-operator/rolebinding.yaml
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/rolebinding.yaml
+
+  - it: should create network policy with default values
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+        template: templates/messaging-topology-operator/networkpolicy.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/networkpolicy.yaml
+
+  - it: should create pdb with default values
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+        template: templates/messaging-topology-operator/pdb.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/pdb.yaml
+
+  - it: should create webhook service with default values
+    asserts:
+      - isKind:
+          of: Service
+        template: templates/messaging-topology-operator/webhook-service.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-webhook
+        template: templates/messaging-topology-operator/webhook-service.yaml
+
+  - it: should create validating webhook configuration with default values
+    asserts:
+      - isKind:
+          of: ValidatingWebhookConfiguration
+        template: templates/messaging-topology-operator/validating-webhook-configuration.yaml
+        documentIndex: 1
+
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-webhook-NAMES
+        template: templates/messaging-topology-operator/validating-webhook-configuration.yaml
+        documentIndex: 1
+
+  - it: should not create metrics service by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/messaging-topology-operator/metrics-service.yaml
+
+  - it: should create metrics service when enabled
+    set:
+      msgTopologyOperator.metrics.service.enabled: true
+    asserts:
+      - isKind:
+          of: Service
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-metrics
+        template: templates/messaging-topology-operator/metrics-service.yaml
+
+  - it: should not create podmonitor by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/messaging-topology-operator/podmonitor.yaml
+
+  - it: should create podmonitor when enabled
+    set:
+      msgTopologyOperator.metrics.podMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: PodMonitor
+        template: templates/messaging-topology-operator/podmonitor.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/podmonitor.yaml
+
+  - it: should not create servicemonitor by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should create servicemonitor when enabled
+    set:
+      msgTopologyOperator.metrics.serviceMonitor.enabled: true
+      msgTopologyOperator.metrics.service.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should not create certificate by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/messaging-topology-operator/certificate.yaml
+
+  - it: should create certificate when useCertManager is enabled
+    set:
+      useCertManager: true
+    asserts:
+      - isKind:
+          of: Certificate
+        template: templates/messaging-topology-operator/certificate.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-messaging-topology-operator-webhook
+        template: templates/messaging-topology-operator/certificate.yaml

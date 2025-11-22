@@ -1,0 +1,14 @@
+{{- if .Values.clusterOperator.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  name: {{ template "rmqco.clusterOperator.serviceAccountName" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if or .Values.commonAnnotations .Values.clusterOperator.serviceAccount.annotations }}
+  {{- $annotations := include "cloudpirates.tplvalues.merge" ( dict "values" ( list .Values.clusterOperator.serviceAccount.annotations .Values.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: {{ .Values.clusterOperator.serviceAccount.automountServiceAccountToken }}
+{{- end }}

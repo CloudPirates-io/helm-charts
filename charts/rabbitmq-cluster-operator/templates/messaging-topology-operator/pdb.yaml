@@ -1,0 +1,23 @@
+{{- if and .Values.msgTopologyOperator.enabled .Values.msgTopologyOperator.pdb.create }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "rmqco.msgTopologyOperator.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.msgTopologyOperator.pdb.minAvailable }}
+  minAvailable: {{ .Values.msgTopologyOperator.pdb.minAvailable }}
+  {{- end  }}
+  {{- if or .Values.msgTopologyOperator.pdb.maxUnavailable (not .Values.msgTopologyOperator.pdb.minAvailable) }}
+  maxUnavailable: {{ .Values.msgTopologyOperator.pdb.maxUnavailable | default 1 }}
+  {{- end  }}
+  selector:
+    matchLabels:
+      {{- include "rmqco.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: messaging-topology-operator
+{{- end }}
