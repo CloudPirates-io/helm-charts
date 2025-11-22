@@ -23,7 +23,7 @@ helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
 To install with custom values:
 
 ```bash
-helm install my-valkey oci://registry-1.docker.io/cloudpirates/valkey -f my-values.yaml
+helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f my-values.yaml
 ```
 
 Or install directly from the local chart:
