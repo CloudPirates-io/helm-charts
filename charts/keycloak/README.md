@@ -242,9 +242,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Resources
 
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
+| Parameter   | Description                                                                 | Default |
+| ----------- |-----------------------------------------------------------------------------| ------- |
+| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
 
 ### Persistence
 
