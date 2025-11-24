@@ -179,7 +179,11 @@ spec:
               {{- if and (eq .Values.database.type "postgres") .Values.postgres.enabled }}
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.postgres.auth.existingSecret }}
+                  name: {{ .Values.postgres.auth.existingSecret }}
+                  {{- else }}
                   name: {{ template "postgres.fullname" .Subcharts.postgres }}
+                  {{- end }}
                   key: postgres-password
               {{- else if and (or (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb")) .Values.mariadb.enabled }}
               valueFrom:
