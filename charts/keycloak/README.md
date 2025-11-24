@@ -301,7 +301,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe           | `60`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe           | `1`     |
 
-### Node Selection
+### Scheduling
 
 | Parameter                   | Description                                    | Default |
 | --------------------------- | ---------------------------------------------- | ------- |
@@ -309,6 +309,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
 | `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
+| `priorityClassName`         | Priority class name for pod eviction           | `""`    |
 
 ### Service Account
 
