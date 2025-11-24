@@ -181,6 +181,8 @@ spec:
                 secretKeyRef:
                   {{- if .Values.postgres.auth.existingSecret }}
                   name: {{ .Values.postgres.auth.existingSecret }}
+                  {{- else if .Values.mariadb.auth.existingSecret }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
                   {{- else }}
                   name: {{ template "postgres.fullname" .Subcharts.postgres }}
                   {{- end }}
