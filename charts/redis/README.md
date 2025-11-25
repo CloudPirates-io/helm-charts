@@ -89,7 +89,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | ------------------ | ---------------------- | ------------------------------------------------------------------------------- |
 | `image.registry`   | Redis image registry   | `docker.io`                                                                     |
 | `image.repository` | Redis image repository | `redis`                                                                         |
-| `image.tag`        | Redis image tag        | `8.2.3@sha256:d318520052025d3cc5850ba3de966810916c7a7b327b412322399f38be39a39c` |
+| `image.tag`        | Redis image tag        | `8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae` |
 | `image.pullPolicy` | Image pull policy      | `Always`                                                                        |
 
 ### Common Parameters
@@ -149,7 +149,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Redis metrics                             | `false`                                                                           |
 | `metrics.image.registry`                   | Redis exporter image registry                                                           | `docker.io`                                                                       |
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter`                                                        |
-| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.58.0@sha256:2e42c98f2c53aaf3ce205e746ff8bfa25d39e30d8b4f401ce0ad2740836bb817` |
+| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1` |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                                                                          |
 | `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                                                                             |
 | `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                                                                            |
@@ -267,7 +267,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | ------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------ |
 | `sentinel.enabled`                   | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`            |
 | `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`            |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.2.1@sha256:...` |
+| `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.4.0` |
 | `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`           |
 | `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`             |
 | `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`         |

@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.15.4 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([b20979c](https://github.com/CloudPirates-io/helm-charts/commit/b20979c))
+* chore: update CHANGELOG.md for merged changes ([f481c10](https://github.com/CloudPirates-io/helm-charts/commit/f481c10))
+* [oliver006/redis_exporter] Update image to v1.80.1 (#655) ([fcb59bc](https://github.com/CloudPirates-io/helm-charts/commit/fcb59bc))
+* chore: auto-generate values.schema.json (#641) ([cced77e](https://github.com/CloudPirates-io/helm-charts/commit/cced77e))
+* chore: update CHANGELOG.md for merged changes ([734cb3b](https://github.com/CloudPirates-io/helm-charts/commit/734cb3b))
+* chore: update CHANGELOG.md for merged changes ([fb2a9cc](https://github.com/CloudPirates-io/helm-charts/commit/fb2a9cc))
+
 ## 0.15.3 (2025-11-20)
 
 * add option to use ip or hostname for sentinal announce-ip (#639) ([639cd31](https://github.com/CloudPirates-io/helm-charts/commit/639cd31))

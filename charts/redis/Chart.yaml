@@ -2,8 +2,8 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.15.3
-appVersion: "8.2.3"
+version: 0.16.0
+appVersion: "8.4.0"
 keywords:
   - redis
   - database
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "add option to use ip or hostname for sentinal announce-ip (#639)"
+          description: "[oliver006/redis_exporter] Update image to v1.80.1 (#655)"
           links:
-            - name: "Commit 639cd31"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/639cd31"
+            - name: "Commit fcb59bc"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/fcb59bc"
