@@ -24,15 +24,15 @@ if [ ! -d "charts" ]; then
 fi
 
 # Check for jq and yq dependencies
-if ! command -v jq &>/dev/null; then
-  echo "Error: jq is not installed. Please install it to run this script."
-  echo "e.g., on macOS: brew install jq"
-  exit 1
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed. Please install it to run this script."
+    echo "e.g., on macOS: brew install jq"
+    exit 1
 fi
-if ! command -v yq &>/dev/null; then
-  echo "Error: yq is not installed. Please install it to run this script."
-  echo "e.g., on macOS: brew install yq"
-  exit 1
+if ! command -v yq &> /dev/null; then
+    echo "Error: yq is not installed. Please install it to run this script."
+    echo "e.g., on macOS: brew install yq"
+    exit 1
 fi
 
 # --- Version discovery and processing ---
@@ -43,10 +43,10 @@ MESSAGING_TOPOLOGY_OPERATOR_VERSION_RAW=""
 
 # Function to extract and clean version from a YAML file
 get_version_from_yaml() {
-  local yaml_path=$1
-  local values_file=$2
-  # Extract the tag, remove potential 'v' prefix, and strip any suffix (e.g., -debian)
-  yq e "${yaml_path}" "${values_file}" | sed 's/^v//' | sed 's/-.*//'
+    local yaml_path=$1
+    local values_file=$2
+    # Extract the tag, remove potential 'v' prefix, and strip any suffix (e.g., -debian)
+    yq e "${yaml_path}" "${values_file}" | sed 's/^v//' | sed 's/-.*//'
 }
 
 # Check arguments: if none are provided, discover versions from values.yaml
@@ -103,7 +103,7 @@ while IFS= read -r line; do
 done < <(curl -sSLf "${CLUSTER_API_URL}" | jq -r '.[].name' | grep '^rabbitmq.com_.*\.yaml$' || true)
 
 if [ ${#CLUSTER_CRDS[@]} -eq 0 ]; then
-  echo "Warning: Could not find any CRDs for Cluster Operator at ${CLUSTER_API_URL}"
+    echo "Warning: Could not find any CRDs for Cluster Operator at ${CLUSTER_API_URL}"
 fi
 
 for crd in "${CLUSTER_CRDS[@]}"; do
@@ -112,30 +112,22 @@ for crd in "${CLUSTER_CRDS[@]}"; do
   echo "  -> Downloading ${crd} from ${URL}"
 
   TMP_FILE_NEW=$(mktemp)
-  if ! curl -sSLf "${URL}" >"${TMP_FILE_NEW}"; then
+  if ! curl -sSLf "${URL}" > "${TMP_FILE_NEW}"; then
     echo "    ERROR: Failed to download ${crd} from ${URL}"
     rm "${TMP_FILE_NEW}"
     continue
   fi
 
-  # For 'rabbitmq.com_rabbitmqclusters.yaml', prepend only the generated-from comment,
-  # as the downloaded file already contains the full copyright header.
-  if [ "${crd}" == "rabbitmq.com_rabbitmqclusters.yaml" ]; then
-    TMP_FINAL=$(mktemp)
-    echo "# Generated from: ${URL}" >"${TMP_FINAL}"
-    cat "${TMP_FILE_NEW}" >>"${TMP_FINAL}"
-    mv "${TMP_FINAL}" "${FILE_PATH}"
-  else
-    # For any other cluster operator CRDs (if they appear), use the simpler header
-    # and assume the downloaded content does NOT start with '---'.
-    {
-      echo "# Generated from: ${URL}"
-      echo "---"
-      cat "${TMP_FILE_NEW}"
-    } >"${FILE_PATH}"
-  fi
+  # The downloaded file contains the full, correct header.
+  # We just prepend our "Generated from" comment.
+  {
+    echo "# Generated from: ${URL}";
+    cat "${TMP_FILE_NEW}";
+  } > "${FILE_PATH}"
+
   rm "${TMP_FILE_NEW}"
 done
+
 
 # --- Messaging Topology Operator CRDs ---
 MESSAGING_CRD_DIR="charts/rabbitmq-cluster-operator/crds/messaging-topology-operator"
@@ -153,7 +145,7 @@ while IFS= read -r line; do
 done < <(curl -sSLf "${MESSAGING_API_URL}" | jq -r '.[].name' | grep '^rabbitmq.com_.*\.yaml$' || true)
 
 if [ ${#MESSAGING_CRDS[@]} -eq 0 ]; then
-  echo "Warning: Could not find any CRDs for Messaging Topology Operator at ${MESSAGING_API_URL}"
+    echo "Warning: Could not find any CRDs for Messaging Topology Operator at ${MESSAGING_API_URL}"
 fi
 
 for crd in "${MESSAGING_CRDS[@]}"; do
@@ -161,14 +153,29 @@ for crd in "${MESSAGING_CRDS[@]}"; do
   FILE_PATH="${MESSAGING_CRD_DIR}/${crd}"
   echo "  -> Downloading ${crd} from ${URL}"
 
-  # For Messaging Topology Operator CRDs, the downloaded content already starts with '---',
-  # so we only prepend our generated-from comment.
-  if ! {
-    echo "# Generated from: ${URL}"
-    curl -sSLf "${URL}"
-  } >"${FILE_PATH}"; then
-    echo "    ERROR: Failed to download or write ${crd}"
+  TMP_FILE_NEW=$(mktemp)
+  if ! curl -sSLf "${URL}" > "${TMP_FILE_NEW}"; then
+    echo "    ERROR: Failed to download ${crd} from ${URL}"
+    rm "${TMP_FILE_NEW}"
+    continue
   fi
+
+  # Strip leading '---' if present, as CRDs in Helm charts are expected to start with apiVersion.
+  TMP_FILE_STRIPPED=$(mktemp)
+  if head -n 1 "${TMP_FILE_NEW}" | grep -q '^\-\-\-$'; then
+    tail -n +2 "${TMP_FILE_NEW}" > "${TMP_FILE_STRIPPED}"
+  else
+    # If not '---', just copy the original content
+    cp "${TMP_FILE_NEW}" "${TMP_FILE_STRIPPED}"
+  fi
+
+  # Construct the final file with the generated-from comment and stripped content
+  {
+      echo "# Generated from: ${URL}";
+      cat "${TMP_FILE_STRIPPED}";
+  } > "${FILE_PATH}"
+
+  rm "${TMP_FILE_NEW}" "${TMP_FILE_STRIPPED}"
 done
 
 echo ""
