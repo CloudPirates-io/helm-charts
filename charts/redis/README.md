@@ -149,7 +149,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Redis metrics                             | `false`                                                                           |
 | `metrics.image.registry`                   | Redis exporter image registry                                                           | `docker.io`                                                                       |
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter`                                                        |
-| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.58.0@sha256:2e42c98f2c53aaf3ce205e746ff8bfa25d39e30d8b4f401ce0ad2740836bb817` |
+| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1` |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                                                                          |
 | `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                                                                             |
 | `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                                                                            |
@@ -269,6 +269,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`            |
 | `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.4.0` |
 | `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`           |
+| `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`             |
 | `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`         |
 | `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure                                         | `2`                |
 | `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`            |
@@ -281,6 +282,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                                                                 | `25m`              |
 | `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`             |
 | `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`               |
+
+### ServiceAccount
+
+| Parameter                                     | Description                                                                                                                             | Default |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.annotations`                  | Additional custom annotations for the ServiceAccount                                                                                    | `{}`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods                                                                                   | `false` |
+| `serviceAccount.create`                       | Enable the creation of a ServiceAccount                                                                                                 | `false` |
+| `serviceAccount.name`                         | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""`    |
 
 ### Additional Configuration
 

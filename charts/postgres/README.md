@@ -114,13 +114,13 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL Authentication
 
-| Parameter                     | Description                                                                                                    | Default               |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `auth.username`               | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
-| `auth.password`               | Password for the custom user to create                                                                         | `""`                  |
-| `auth.database`               | Alternative name for the default database to be created at initialisation                                      | `""`                  |
-| `auth.existingSecret`         | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
-| `auth.secretKeys.passwordKey` | Name of key in existing secret to use for PostgreSQL credentials                                               | `"postgres-password"` |
+| Parameter                          | Description                                                                                                    | Default               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `auth.username`                    | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
+| `auth.password`                    | Password for the custom user to create                                                                         | `""`                  |
+| `auth.database`                    | Alternative name for the default database to be created at initialisation                                      | `""`                  |
+| `auth.existingSecret`              | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
+| `auth.secretKeys.adminPasswordKey` | Name of key in existing secret to use for PostgreSQL admin credentials                                         | `"postgres-password"` |
 
 ### PostgreSQL Configuration
 
@@ -434,15 +434,28 @@ auth:
   existingSecret: "postgres-credentials"
   secretKeys:
     adminPasswordKey: "postgres-password"
-    userPasswordKey: "app-password"
+
+# For custom users, use the customUser section
+customUser:
+  existingSecret: "postgres-custom-user"
+  secretKeys:
+    name: "username"
+    password: "password"
+    database: "database"
 ```
 
-Create the secret first:
+Create the secrets first:
 
 ```bash
+# Admin/superuser credentials
 kubectl create secret generic postgres-credentials \
-  --from-literal=postgres-password=your-admin-password \
-  --from-literal=app-password=your-app-password
+  --from-literal=postgres-password=your-admin-password
+
+# Custom user credentials (optional)
+kubectl create secret generic postgres-custom-user \
+  --from-literal=username=myuser \
+  --from-literal=password=myuserpassword \
+  --from-literal=database=mydb
 ```
 
 ### Custom Configuration with ConfigMap

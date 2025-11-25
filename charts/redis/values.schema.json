@@ -499,6 +499,14 @@
         "sentinel": {
             "type": "object",
             "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "announceHostnames": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },
@@ -599,6 +607,23 @@
                 }
             }
         },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "startupProbe": {
             "type": "object",
             "properties": {
@@ -618,6 +643,32 @@
                     "type": "integer"
                 },
                 "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tls": {
+            "type": "object",
+            "properties": {
+                "authClients": {
+                    "type": "boolean"
+                },
+                "certCAFilename": {
+                    "type": "string"
+                },
+                "certFilename": {
+                    "type": "string"
+                },
+                "certKeyFilename": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "port": {
                     "type": "integer"
                 }
             }

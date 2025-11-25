@@ -41,16 +41,22 @@ spec:
           volumeMounts:
             - name: keycloak-lib-quarkus
               mountPath: /shared-quarkus
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForPostgres.image }}
-          command: ["sh", "-c", "until pg_isready -h {{ .Release.Name }}-postgres -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
+          command: ["sh", "-c", "until pg_isready -h {{ template "postgres.fullname" .Subcharts.postgres }} -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
         {{- else if .Values.mariadb.enabled }}
         - name: wait-for-mariadb
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ .Values.initContainers.waitForMariadb.image }}
-          command: ["sh", "-c", "until mariadb-admin ping -h {{ .Release.Name }}-mariadb -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
+          command: ["sh", "-c", "until mariadb-admin ping -h {{ template "mariadb.fullname" .Subcharts.mariadb }} -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
           {{- toYaml .Values.extraInitContainers | nindent 8 }}
@@ -157,7 +163,7 @@ spec:
             - name: KC_DB_URL_PROPERTIES
               value: {{ .Values.database.urlProperties | quote }}
             {{- end }}
-            {{- if or (eq .Values.database.type "postgres") (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb") }}
+            {{- if or (eq .Values.database.type "postgres") (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb") (eq .Values.database.type "mssql") }}
             - name: KC_DB_USERNAME
               {{- if and (eq .Values.database.type "postgres") .Values.postgres.enabled }}
               value: {{ default "postgres" .Values.postgres.auth.username | quote }}
@@ -173,12 +179,18 @@ spec:
               {{- if and (eq .Values.database.type "postgres") .Values.postgres.enabled }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-postgres
+                  {{- if .Values.postgres.auth.existingSecret }}
+                  name: {{ .Values.postgres.auth.existingSecret }}
+                  {{- else if .Values.mariadb.auth.existingSecret }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  {{- else }}
+                  name: {{ template "postgres.fullname" .Subcharts.postgres }}
+                  {{- end }}
                   key: postgres-password
               {{- else if and (or (eq .Values.database.type "mysql") (eq .Values.database.type "mariadb")) .Values.mariadb.enabled }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mariadb
+                  name: {{ template "mariadb.fullname" .Subcharts.mariadb }}
                   key: {{ if .Values.mariadb.auth.username }}mariadb-password{{ else }}mariadb-root-password{{ end }}
               {{- else }}
               valueFrom:
@@ -357,6 +369,9 @@ spec:
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

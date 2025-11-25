@@ -1,6 +1,33 @@
 # Changelog
 
 
+## 0.15.3 (2025-11-20)
+
+* add option to use ip or hostname for sentinal announce-ip (#639) ([639cd31](https://github.com/CloudPirates-io/helm-charts/commit/639cd31))
+
+## 0.15.2 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([f8a3dd1](https://github.com/CloudPirates-io/helm-charts/commit/f8a3dd1))
+* chore: update CHANGELOG.md for merged changes ([33bf2b6](https://github.com/CloudPirates-io/helm-charts/commit/33bf2b6))
+* fix condition in statefulset (#637) ([8b74e74](https://github.com/CloudPirates-io/helm-charts/commit/8b74e74))
+* chore: update CHANGELOG.md for merged changes ([9c9daa4](https://github.com/CloudPirates-io/helm-charts/commit/9c9daa4))
+* chore: update CHANGELOG.md for merged changes ([ab89d7d](https://github.com/CloudPirates-io/helm-charts/commit/ab89d7d))
+* chore: auto-generate values.schema.json (#635) ([36f2dd4](https://github.com/CloudPirates-io/helm-charts/commit/36f2dd4))
+
+## 0.15.1 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([ea8e485](https://github.com/CloudPirates-io/helm-charts/commit/ea8e485))
+* [redis]: tls support ([963e2b8](https://github.com/CloudPirates-io/helm-charts/commit/963e2b8))
+
+## 0.15.0 (2025-11-19)
+
+* Add ServiceAccount (#631) ([328f698](https://github.com/CloudPirates-io/helm-charts/commit/328f698))
+* chore: update CHANGELOG.md for merged changes ([de70b98](https://github.com/CloudPirates-io/helm-charts/commit/de70b98))
+* chore: update CHANGELOG.md for merged changes ([47edfb5](https://github.com/CloudPirates-io/helm-charts/commit/47edfb5))
+* Update charts/redis/values.yaml redis (#624) ([a57d0d7](https://github.com/CloudPirates-io/helm-charts/commit/a57d0d7))
+* chore: update CHANGELOG.md for merged changes ([26504d9](https://github.com/CloudPirates-io/helm-charts/commit/26504d9))
+* chore: update CHANGELOG.md for merged changes ([014fde8](https://github.com/CloudPirates-io/helm-charts/commit/014fde8))
+
 ## 0.14.4 (2025-11-18)
 
 * add templating to all annotations (#608) ([2a78f9d](https://github.com/CloudPirates-io/helm-charts/commit/2a78f9d))

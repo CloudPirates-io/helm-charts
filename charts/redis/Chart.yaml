@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.15.0
+version: 0.16.0
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "add templating to all annotations (#608)"
+          description: "add option to use ip or hostname for sentinal announce-ip (#639)"
           links:
-            - name: "Commit 2a78f9d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/2a78f9d"
+            - name: "Commit 639cd31"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/639cd31"

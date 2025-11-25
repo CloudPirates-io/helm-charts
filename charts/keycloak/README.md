@@ -23,7 +23,7 @@ helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
 To install with custom values:
 
 ```bash
-helm install my-valkey oci://registry-1.docker.io/cloudpirates/valkey -f my-values.yaml
+helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -242,9 +242,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Resources
 
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
+| Parameter   | Description                                                                 | Default |
+| ----------- |-----------------------------------------------------------------------------| ------- |
+| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
 
 ### Persistence
 
@@ -301,7 +301,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe           | `60`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe           | `1`     |
 
-### Node Selection
+### Scheduling
 
 | Parameter                   | Description                                    | Default |
 | --------------------------- | ---------------------------------------------- | ------- |
@@ -309,6 +309,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
 | `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
+| `priorityClassName`         | Priority class name for pod eviction           | `""`    |
 
 ### Service Account
 
