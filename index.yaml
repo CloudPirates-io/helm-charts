@@ -672,6 +672,31 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/clusterpirate-1.0.6/clusterpirate-1.0.6.tgz
     version: 1.0.6
   common:
+  - annotations:
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "rename templates from common.* to cloudpirates.* to prevent collisions (#377)"
+              links:
+                - name: "Commit 07c6560"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/07c6560"
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.1.0
+    created: "2025-11-25T09:56:59.010703932Z"
+    description: A library chart for common templates and helper functions
+    digest: a54f2048ed220f3a5ba28a1f08f66a0e7daab8df356e91636ec8d5715410096b
+    home: https://www.cloudpirates.io
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: common
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/common
+    type: library
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/common-2.1.0/common-2.1.0.tgz
+    version: 2.1.0
   - apiVersion: v2
     appVersion: 2.0.0
     created: "2025-10-14T09:05:37.917339374Z"
@@ -16703,4 +16728,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-24T12:44:51.269601885Z"
+generated: "2025-11-25T09:56:59.011321313Z"
