@@ -111,6 +111,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ------------------- | ----------------------------------------------------- | ------- |
 | `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
 | `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
+| `preserveThemes`    | Preserve the original themes folder of the image      | `false` |
+| `preserveProviders` | Preserve the original providers folder of the image   | `false` |
 
 ### Extra init containers for Keycloak pod
 
@@ -539,6 +541,8 @@ realm:
 ### Using Custom Themes and Providers
 
 The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
+
+To disable this feature, set preserveThemes = true, preserveProviders = true. This will keep the original themes and providers respectively intact.
 
 **Example: Adding custom themes and providers with an initContainer**
 
