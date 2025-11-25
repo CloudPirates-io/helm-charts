@@ -305,6 +305,8 @@ initContainers: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+## @param priorityClassName Priority class name to be used for the pods
+priorityClassName: ""
 
 ## @section Metrics configuration
 metrics:
