@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.8.6
+version: 0.10.0
 appVersion: "26.4.5"
 keywords:
   - keycloak
@@ -52,4 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "[Keycloak[ improve subchart variables (#652)"
+          links:
+            - name: "Commit e1c50c6"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e1c50c6"

@@ -377,6 +377,9 @@ startupProbe:
 ## @param nodeSelector Node labels for pod assignment
 nodeSelector: {}
 
+## @param priorityClassName for pod eviction
+priorityClassName: ""
+
 ## @param tolerations Toleration labels for pod assignment
 tolerations: []
 

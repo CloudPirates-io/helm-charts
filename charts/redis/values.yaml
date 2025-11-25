@@ -296,6 +296,9 @@ sentinel:
     repository: redis
     tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
     pullPolicy: Always
+  ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  config:
+    announceHostnames: true
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
