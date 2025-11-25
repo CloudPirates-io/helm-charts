@@ -115,7 +115,7 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | ------------------ | ----------------------- | ------------------------------------------------------------------------------- |
 | `image.registry`   | Ghost image registry    | `docker.io`                                                                     |
 | `image.repository` | Ghost image repository  | `ghost`                                                                         |
-| `image.tag`        | Ghost image tag         | `6.8.0@sha256:85e15524ac7e437720fa4ac3cd4633daaae3f95786a25633415d8d4f7382b4c4` |
+| `image.tag`        | Ghost image tag         | `6.8.1@sha256:0c70f4153a05e875c046bf2a763ecd1d47ff403ba2b35c3af5a3fcbe76ded772` |
 | `image.pullPolicy` | Ghost image pull policy | `Always`                                                                        |
 
 ### Network Parameters
