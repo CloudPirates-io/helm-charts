@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.4.3 (2025-11-16)
+
+* chore: update CHANGELOG.md for merged changes ([5521d5f](https://github.com/CloudPirates-io/helm-charts/commit/5521d5f))
+* chore: update CHANGELOG.md for merged changes ([f30dae3](https://github.com/CloudPirates-io/helm-charts/commit/f30dae3))
+* [nginx]: feat: remove optional bitnami script sourcing (#601) ([9f6a837](https://github.com/CloudPirates-io/helm-charts/commit/9f6a837))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.4.2 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([1c247b8](https://github.com/CloudPirates-io/helm-charts/commit/1c247b8))

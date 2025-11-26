@@ -43,6 +43,10 @@ podLabels: {}
 extraVolumes: []
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
 extraVolumeMounts: []
+## @param Specify if the original themes directory must be preserved.
+preserveThemes: false
+## @param Specify if the original providers directory must be preserved.
+preserveProviders: false
 
 ## @section Extra init containers for Keycloak pod
 ## @param Optionnaly specify an extra list of initContainer for the Keycloak pod

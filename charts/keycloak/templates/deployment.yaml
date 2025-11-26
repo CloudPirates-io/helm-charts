@@ -332,10 +332,14 @@ spec:
           emptyDir: {}
         - name: keycloak-lib-quarkus
           emptyDir: {}
+        {{- if not .Values.preserveThemes }}
         - name: keycloak-themes
           emptyDir: {}
+        {{- end }}
+        {{- if not .Values.preserveProviders }}
         - name: keycloak-providers
           emptyDir: {}
+        {{- end }}
         {{- if .Values.realm.configFile }}
         - name: realm-config
           configMap:

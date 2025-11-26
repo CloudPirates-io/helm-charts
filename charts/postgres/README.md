@@ -92,6 +92,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `fullnameOverride`  | String to fully override postgres.fullname                                                                     | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
+| `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
 
 ### Pod annotations and labels
 
