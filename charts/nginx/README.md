@@ -356,6 +356,7 @@ location /stub_status {
 | `extraVolumeMounts`   | Additional volume mounts to add to the Nginx container | `[]`    |
 | `extraObjects`        | Array of extra objects to deploy with the release      | `[]`    |
 | `extrainitContainers` | Array of extra objects to deploy with the release      | `[]`    |
+| `sidecars`            | Additional sidecar containers to add to the pod        | `[]`    |
 
 #### Extra Objects
 
@@ -392,6 +393,58 @@ extraObjects:
 ```
 
 All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
+
+#### Sidecars
+
+You can use the `sidecars` array to add additional sidecar containers to the Nginx pod. This is useful for adding authentication proxies, log collectors, or other supporting containers.
+
+**Example: Add oauth2-proxy sidecar for authentication**
+
+```yaml
+sidecars:
+  - name: oauth2-proxy
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+      - name: oauth2-proxy
+        containerPort: 4180
+        protocol: TCP
+    args:
+      - --provider=github
+      - --upstream=http://localhost:80
+      - --http-address=0.0.0.0:4180
+    env:
+      - name: OAUTH2_PROXY_CLIENT_ID
+        value: "your-client-id"
+      - name: OAUTH2_PROXY_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: oauth2-proxy-secret
+            key: client-secret
+```
+
+**Example: Add Fluent Bit log collector**
+
+```yaml
+sidecars:
+  - name: fluent-bit
+    image: fluent/fluent-bit:2.0
+    volumeMounts:
+      - name: varlog
+        mountPath: /var/log
+      - name: config
+        mountPath: /fluent-bit/etc/
+
+# Don't forget to add corresponding volumes
+extraVolumes:
+  - name: varlog
+    emptyDir: {}
+  - name: config
+    configMap:
+      name: fluent-bit-config
+```
+
+All containers in `sidecars` will be added to the pod and run alongside the main Nginx container.
 
 
 ### Pod Configuration Parameters
