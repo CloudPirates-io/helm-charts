@@ -1,0 +1,2883 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "clusterDomain": {
+            "default": "cluster.local",
+            "description": "#",
+            "required": [],
+            "title": "clusterDomain",
+            "type": "string"
+        },
+        "clusterOperator": {
+            "additionalProperties": false,
+            "description": "#\n# RabbitMQ Cluster Operator image\n# ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator",
+            "properties": {
+                "affinity": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+                    "required": [],
+                    "title": "affinity",
+                    "type": "object"
+                },
+                "args": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "args",
+                    "type": "array"
+                },
+                "automountServiceAccountToken": {
+                    "default": true,
+                    "description": "#",
+                    "required": [],
+                    "title": "automountServiceAccountToken",
+                    "type": "boolean"
+                },
+                "command": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "command",
+                    "type": "array"
+                },
+                "containerPorts": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "properties": {
+                        "metrics": {
+                            "default": 9782,
+                            "required": [],
+                            "title": "metrics",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["metrics"],
+                    "title": "containerPorts",
+                    "type": "object"
+                },
+                "containerSecurityContext": {
+                    "additionalProperties": false,
+                    "description": "# Configure Container Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "allowPrivilegeEscalation",
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "drop": {
+                                    "description": "#",
+                                    "items": {
+                                        "anyOf": [
+                                            {
+                                                "required": [],
+                                                "type": "string"
+                                            }
+                                        ],
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "drop",
+                                    "type": "array"
+                                }
+                            },
+                            "required": ["drop"],
+                            "title": "capabilities",
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "privileged": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "privileged",
+                            "type": "boolean"
+                        },
+                        "readOnlyRootFilesystem": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "readOnlyRootFilesystem",
+                            "type": "boolean"
+                        },
+                        "runAsGroup": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsGroup",
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsNonRoot",
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsUser",
+                            "type": "integer"
+                        },
+                        "seLinuxOptions": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "seLinuxOptions",
+                            "type": "object"
+                        },
+                        "seccompProfile": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": {
+                                    "default": "RuntimeDefault",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "type",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["type"],
+                            "title": "seccompProfile",
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "seLinuxOptions",
+                        "runAsUser",
+                        "runAsGroup",
+                        "runAsNonRoot",
+                        "privileged",
+                        "readOnlyRootFilesystem",
+                        "allowPrivilegeEscalation",
+                        "capabilities",
+                        "seccompProfile"
+                    ],
+                    "title": "containerSecurityContext",
+                    "type": "object"
+                },
+                "customLivenessProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customLivenessProbe",
+                    "type": "object"
+                },
+                "customReadinessProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customReadinessProbe",
+                    "type": "object"
+                },
+                "customStartupProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customStartupProbe",
+                    "type": "object"
+                },
+                "extraEnvVars": {
+                    "description": "#\n# e.g:\n# extraEnvVars:\n#   - name: FOO\n#     value: \"bar\"",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraEnvVars",
+                    "type": "array"
+                },
+                "extraEnvVarsCM": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "extraEnvVarsCM",
+                    "type": "string"
+                },
+                "extraEnvVarsSecret": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "extraEnvVarsSecret",
+                    "type": "string"
+                },
+                "extraVolumeMounts": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraVolumeMounts",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraVolumes",
+                    "type": "array"
+                },
+                "hostAliases": {
+                    "description": "#\n# https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "hostAliases",
+                    "type": "array"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "digest": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "digest",
+                            "type": "string"
+                        },
+                        "pullPolicy": {
+                            "default": "IfNotPresent",
+                            "description": "#\n# Specify a imagePullPolicy\n# ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images",
+                            "required": [],
+                            "title": "pullPolicy",
+                            "type": "string"
+                        },
+                        "pullSecrets": {
+                            "description": "#\n# Optionally specify an array of imagePullSecrets.\n# Secrets must be manually created in the namespace.\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/\n# e.g:\n# pullSecrets:\n#   - myRegistryKeySecretName",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "pullSecrets",
+                            "type": "array"
+                        },
+                        "registry": {
+                            "default": "docker.io",
+                            "description": "#",
+                            "required": [],
+                            "title": "registry",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "default": "rabbitmqoperator/cluster-operator",
+                            "description": "#",
+                            "required": [],
+                            "title": "repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "default": "2.17.2",
+                            "description": "#",
+                            "required": [],
+                            "title": "tag",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["registry", "repository", "tag", "digest", "pullPolicy", "pullSecrets"],
+                    "title": "image",
+                    "type": "object"
+                },
+                "initContainers": {
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/\n# e.g:\n# initContainers:\n#  - name: your-image-name\n#    image: your-image\n#    imagePullPolicy: Always\n#    command: ['sh', '-c', 'echo \"hello world\"']",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "initContainers",
+                    "type": "array"
+                },
+                "lifecycleHooks": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "lifecycleHooks",
+                    "type": "object"
+                },
+                "livenessProbe": {
+                    "additionalProperties": false,
+                    "description": "# Configure extra options for RabbitMQ Cluster Operator containers' liveness and readiness probes\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes",
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "failureThreshold", "successThreshold"],
+                    "title": "livenessProbe",
+                    "type": "object"
+                },
+                "metrics": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "properties": {
+                        "podMonitor": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "additionalLabels": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "additionalLabels",
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "honorLabels": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "honorLabels",
+                                    "type": "boolean"
+                                },
+                                "interval": {
+                                    "default": "30s",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "interval",
+                                    "type": "string"
+                                },
+                                "jobLabel": {
+                                    "default": "app.kubernetes.io/name",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "jobLabel",
+                                    "type": "string"
+                                },
+                                "metricRelabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "metricRelabelings",
+                                    "type": "array"
+                                },
+                                "namespace": {
+                                    "default": "",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "namespace",
+                                    "type": "string"
+                                },
+                                "params": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "params",
+                                    "type": "object"
+                                },
+                                "path": {
+                                    "default": "",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "path",
+                                    "type": "string"
+                                },
+                                "relabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "relabelings",
+                                    "type": "array"
+                                },
+                                "scrapeTimeout": {
+                                    "default": "30s",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "scrapeTimeout",
+                                    "type": "string"
+                                },
+                                "selector": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "selector",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "jobLabel",
+                                "namespace",
+                                "honorLabels",
+                                "selector",
+                                "interval",
+                                "scrapeTimeout",
+                                "additionalLabels",
+                                "path",
+                                "relabelings",
+                                "metricRelabelings",
+                                "params"
+                            ],
+                            "title": "podMonitor",
+                            "type": "object"
+                        },
+                        "service": {
+                            "additionalProperties": false,
+                            "description": "# Metrics service parameters",
+                            "properties": {
+                                "annotations": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "properties": {
+                                        "prometheus.io/port": {
+                                            "default": "{{ .Values.clusterOperator.metrics.service.ports.http }}",
+                                            "required": [],
+                                            "title": "prometheus.io/port",
+                                            "type": "string"
+                                        },
+                                        "prometheus.io/scrape": {
+                                            "default": "true",
+                                            "required": [],
+                                            "title": "prometheus.io/scrape",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["prometheus.io/scrape", "prometheus.io/port"],
+                                    "title": "annotations",
+                                    "type": "object"
+                                },
+                                "clusterIP": {
+                                    "default": "",
+                                    "description": "#\n# e.g.:\n# clusterIP: None",
+                                    "required": [],
+                                    "title": "clusterIP",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "externalTrafficPolicy": {
+                                    "default": "Cluster",
+                                    "description": "#\n# ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip",
+                                    "required": [],
+                                    "title": "externalTrafficPolicy",
+                                    "type": "string"
+                                },
+                                "extraPorts": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "extraPorts",
+                                    "type": "array"
+                                },
+                                "loadBalancerIP": {
+                                    "default": "",
+                                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer",
+                                    "required": [],
+                                    "title": "loadBalancerIP",
+                                    "type": "string"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service\n# e.g:\n# loadBalancerSourceRanges:\n#   - 10.10.10.0/24",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "loadBalancerSourceRanges",
+                                    "type": "array"
+                                },
+                                "nodePorts": {
+                                    "additionalProperties": false,
+                                    "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
+                                    "properties": {
+                                        "http": {
+                                            "default": "",
+                                            "required": [],
+                                            "title": "http",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["http"],
+                                    "title": "nodePorts",
+                                    "type": "object"
+                                },
+                                "ports": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "properties": {
+                                        "http": {
+                                            "default": 80,
+                                            "required": [],
+                                            "title": "http",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": ["http"],
+                                    "title": "ports",
+                                    "type": "object"
+                                },
+                                "sessionAffinity": {
+                                    "default": "None",
+                                    "description": "#\n# If \"ClientIP\", consecutive client requests will be directed to the same Pod\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+                                    "required": [],
+                                    "title": "sessionAffinity",
+                                    "type": "string"
+                                },
+                                "sessionAffinityConfig": {
+                                    "additionalProperties": false,
+                                    "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
+                                    "required": [],
+                                    "title": "sessionAffinityConfig",
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "default": "ClusterIP",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "type",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "type",
+                                "ports",
+                                "nodePorts",
+                                "clusterIP",
+                                "extraPorts",
+                                "loadBalancerIP",
+                                "loadBalancerSourceRanges",
+                                "externalTrafficPolicy",
+                                "annotations",
+                                "sessionAffinity",
+                                "sessionAffinityConfig"
+                            ],
+                            "title": "service",
+                            "type": "object"
+                        },
+                        "serviceMonitor": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "honorLabels": {
+                                    "default": false,
+                                    "description": "#\n# ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint",
+                                    "required": [],
+                                    "title": "honorLabels",
+                                    "type": "boolean"
+                                },
+                                "interval": {
+                                    "default": "",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "interval",
+                                    "type": "string"
+                                },
+                                "jobLabel": {
+                                    "default": "app.kubernetes.io/name",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "jobLabel",
+                                    "type": "string"
+                                },
+                                "labels": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "labels",
+                                    "type": "object"
+                                },
+                                "metricRelabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "metricRelabelings",
+                                    "type": "array"
+                                },
+                                "namespace": {
+                                    "default": "",
+                                    "description": "#\n# e.g:\n# namespace: monitoring",
+                                    "required": [],
+                                    "title": "namespace",
+                                    "type": "string"
+                                },
+                                "params": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "params",
+                                    "type": "object"
+                                },
+                                "path": {
+                                    "default": "",
+                                    "description": "#\n# Could be /metrics for aggregated metrics or /metrics/per-object for more details",
+                                    "required": [],
+                                    "title": "path",
+                                    "type": "string"
+                                },
+                                "relabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "relabelings",
+                                    "type": "array"
+                                },
+                                "scrapeTimeout": {
+                                    "default": "",
+                                    "description": "#\n# ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint\n# e.g:\n# scrapeTimeout: 10s",
+                                    "required": [],
+                                    "title": "scrapeTimeout",
+                                    "type": "string"
+                                },
+                                "selector": {
+                                    "additionalProperties": false,
+                                    "description": "#\n# selector:\n#   prometheus: my-prometheus",
+                                    "required": [],
+                                    "title": "selector",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "namespace",
+                                "jobLabel",
+                                "honorLabels",
+                                "selector",
+                                "scrapeTimeout",
+                                "interval",
+                                "metricRelabelings",
+                                "relabelings",
+                                "labels",
+                                "path",
+                                "params"
+                            ],
+                            "title": "serviceMonitor",
+                            "type": "object"
+                        }
+                    },
+                    "required": ["service", "serviceMonitor", "podMonitor"],
+                    "title": "metrics",
+                    "type": "object"
+                },
+                "networkPolicy": {
+                    "additionalProperties": false,
+                    "description": "# Network Policies\n# Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+                    "properties": {
+                        "allowExternal": {
+                            "default": true,
+                            "description": "#\n# The Policy model to apply. When set to false, only pods with the correct\n# injector label will have network access to the ports injector is listening\n# on. When true, injector will accept connections from any source\n# (with the correct destination port).",
+                            "required": [],
+                            "title": "allowExternal",
+                            "type": "boolean"
+                        },
+                        "allowExternalEgress": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "allowExternalEgress",
+                            "type": "boolean"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "extraEgress": {
+                            "description": "#\n# e.g:\n# extraEgress:\n#   - ports:\n#       - port: 1234\n#     to:\n#       - podSelector:\n#           - matchLabels:\n#               - role: frontend\n#       - podSelector:\n#           - matchExpressions:\n#               - key: role\n#                 operator: In\n#                 values:\n#                   - frontend",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "extraEgress",
+                            "type": "array"
+                        },
+                        "extraIngress": {
+                            "description": "#\n# e.g:\n# extraIngress:\n#   - ports:\n#       - port: 1234\n#     from:\n#       - podSelector:\n#           - matchLabels:\n#               - role: frontend\n#       - podSelector:\n#           - matchExpressions:\n#               - key: role\n#                 operator: In\n#                 values:\n#                   - frontend",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "extraIngress",
+                            "type": "array"
+                        },
+                        "ingressNSMatchLabels": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "ingressNSMatchLabels",
+                            "type": "object"
+                        },
+                        "ingressNSPodMatchLabels": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "ingressNSPodMatchLabels",
+                            "type": "object"
+                        },
+                        "kubeAPIServerPorts": {
+                            "description": "#",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    }
+                                ],
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "kubeAPIServerPorts",
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "kubeAPIServerPorts",
+                        "allowExternal",
+                        "allowExternalEgress",
+                        "extraIngress",
+                        "extraEgress",
+                        "ingressNSMatchLabels",
+                        "ingressNSPodMatchLabels"
+                    ],
+                    "title": "networkPolicy",
+                    "type": "object"
+                },
+                "nodeSelector": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
+                    "required": [],
+                    "title": "nodeSelector",
+                    "type": "object"
+                },
+                "pdb": {
+                    "additionalProperties": false,
+                    "description": "# Pod Disruption Budget configuration\n# ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/",
+                    "properties": {
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        },
+                        "maxUnavailable": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "maxUnavailable",
+                            "type": "string"
+                        },
+                        "minAvailable": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "minAvailable",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["create", "minAvailable", "maxUnavailable"],
+                    "title": "pdb",
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/",
+                    "required": [],
+                    "title": "podAnnotations",
+                    "type": "object"
+                },
+                "podLabels": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                    "required": [],
+                    "title": "podLabels",
+                    "type": "object"
+                },
+                "podSecurityContext": {
+                    "additionalProperties": false,
+                    "description": "# Configure Pods Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "fsGroup": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "fsGroup",
+                            "type": "integer"
+                        },
+                        "fsGroupChangePolicy": {
+                            "default": "Always",
+                            "description": "#",
+                            "required": [],
+                            "title": "fsGroupChangePolicy",
+                            "type": "string"
+                        },
+                        "supplementalGroups": {
+                            "description": "#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "supplementalGroups",
+                            "type": "array"
+                        },
+                        "sysctls": {
+                            "description": "#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "sysctls",
+                            "type": "array"
+                        }
+                    },
+                    "required": ["enabled", "fsGroupChangePolicy", "sysctls", "supplementalGroups", "fsGroup"],
+                    "title": "podSecurityContext",
+                    "type": "object"
+                },
+                "priorityClassName": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "priorityClassName",
+                    "type": "string"
+                },
+                "rbac": {
+                    "additionalProperties": false,
+                    "description": "# RBAC configuration",
+                    "properties": {
+                        "clusterRole": {
+                            "additionalProperties": false,
+                            "description": "# ClusterRole parameters",
+                            "properties": {
+                                "customRules": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole\n# e.g:\n# customRules:\n#   - apiGroups: A list of API groups (e.g., [\"\"], [\"apps\"]).\n#   - resources: A list of resource names (e.g., [\"configmaps\", \"pods\"]).\n#   - verbs: A list of allowed access verbs (e.g., [\"create\", \"get\", \"list\"]).",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "customRules",
+                                    "type": "array"
+                                },
+                                "extraRules": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole\n# e.g:\n# extraRules:\n#   - apiGroups: A list of API groups (e.g., [\"\"], [\"apps\"]).\n#   - resources: A list of resource names (e.g., [\"configmaps\", \"pods\"]).\n#   - verbs: A list of allowed access verbs (e.g., [\"create\", \"get\", \"list\"]).",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "extraRules",
+                                    "type": "array"
+                                }
+                            },
+                            "required": ["customRules", "extraRules"],
+                            "title": "clusterRole",
+                            "type": "object"
+                        },
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["create", "clusterRole"],
+                    "title": "rbac",
+                    "type": "object"
+                },
+                "readinessProbe": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "successThreshold", "failureThreshold"],
+                    "title": "readinessProbe",
+                    "type": "object"
+                },
+                "replicaCount": {
+                    "default": 1,
+                    "description": "#",
+                    "required": [],
+                    "title": "replicaCount",
+                    "type": "integer"
+                },
+                "resources": {
+                    "additionalProperties": false,
+                    "description": "# RabbitMQ Cluster Operator resource requests and limits\n# Example:\n# resources:\n#   requests:\n#     cpu: 2\n#     memory: 512Mi\n#   limits:\n#     cpu: 3\n#     memory: 1024Mi",
+                    "required": [],
+                    "title": "resources",
+                    "type": "object"
+                },
+                "revisionHistoryLimit": {
+                    "default": 10,
+                    "description": "#",
+                    "required": [],
+                    "title": "revisionHistoryLimit",
+                    "type": "integer"
+                },
+                "schedulerName": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "schedulerName",
+                    "type": "string"
+                },
+                "serviceAccount": {
+                    "additionalProperties": false,
+                    "description": "# ServiceAccount configuration",
+                    "properties": {
+                        "annotations": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "annotations",
+                            "type": "object"
+                        },
+                        "automountServiceAccountToken": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "automountServiceAccountToken",
+                            "type": "boolean"
+                        },
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        },
+                        "name": {
+                            "default": "",
+                            "description": "#\n# If not set and create is true, a name is generated using the cloudpirates.fullname template",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["create", "name", "annotations", "automountServiceAccountToken"],
+                    "title": "serviceAccount",
+                    "type": "object"
+                },
+                "sidecars": {
+                    "description": "#\n# e.g:\n# sidecars:\n#   - name: your-image-name\n#     image: your-image\n#     imagePullPolicy: Always\n#     ports:\n#       - name: portname\n#         containerPort: 1234",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "sidecars",
+                    "type": "array"
+                },
+                "startupProbe": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "successThreshold", "failureThreshold"],
+                    "title": "startupProbe",
+                    "type": "object"
+                },
+                "terminationGracePeriodSeconds": {
+                    "default": "",
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods",
+                    "required": [],
+                    "title": "terminationGracePeriodSeconds",
+                    "type": "string"
+                },
+                "tolerations": {
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "tolerations",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "#\n# https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/\n# The value is evaluated as a template",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "topologySpreadConstraints",
+                    "type": "array"
+                },
+                "updateStrategy": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies",
+                    "properties": {
+                        "type": {
+                            "default": "RollingUpdate",
+                            "description": "# StrategyType\n# Can be set to RollingUpdate or OnDelete",
+                            "required": [],
+                            "title": "type",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["type"],
+                    "title": "updateStrategy",
+                    "type": "object"
+                },
+                "watchAllNamespaces": {
+                    "default": true,
+                    "description": "#",
+                    "required": [],
+                    "title": "watchAllNamespaces",
+                    "type": "boolean"
+                },
+                "watchNamespaces": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "watchNamespaces",
+                    "type": "array"
+                }
+            },
+            "required": [
+                "image",
+                "revisionHistoryLimit",
+                "watchAllNamespaces",
+                "watchNamespaces",
+                "replicaCount",
+                "schedulerName",
+                "topologySpreadConstraints",
+                "terminationGracePeriodSeconds",
+                "livenessProbe",
+                "readinessProbe",
+                "startupProbe",
+                "customLivenessProbe",
+                "customReadinessProbe",
+                "customStartupProbe",
+                "resources",
+                "pdb",
+                "podSecurityContext",
+                "containerSecurityContext",
+                "command",
+                "args",
+                "automountServiceAccountToken",
+                "hostAliases",
+                "podLabels",
+                "podAnnotations",
+                "affinity",
+                "nodeSelector",
+                "tolerations",
+                "updateStrategy",
+                "priorityClassName",
+                "lifecycleHooks",
+                "containerPorts",
+                "extraEnvVars",
+                "extraEnvVarsCM",
+                "extraEnvVarsSecret",
+                "extraVolumes",
+                "extraVolumeMounts",
+                "sidecars",
+                "initContainers",
+                "networkPolicy",
+                "rbac",
+                "serviceAccount",
+                "metrics"
+            ],
+            "title": "clusterOperator",
+            "type": "object"
+        },
+        "commonAnnotations": {
+            "additionalProperties": false,
+            "description": "#",
+            "required": [],
+            "title": "commonAnnotations",
+            "type": "object"
+        },
+        "commonLabels": {
+            "additionalProperties": false,
+            "description": "#",
+            "required": [],
+            "title": "commonLabels",
+            "type": "object"
+        },
+        "credentialUpdaterImage": {
+            "additionalProperties": false,
+            "description": "# RabbitMQ Default User Credential Updater Image\n# ref: https://hub.docker.com/r/rabbitmqoperator/default-user-credential-updater/tags",
+            "properties": {
+                "digest": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "digest",
+                    "type": "string"
+                },
+                "pullSecrets": {
+                    "description": "#\n# Optionally specify an array of imagePullSecrets.\n# Secrets must be manually created in the namespace.\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-credentialUpdaterImage-private-registry/\n# e.g:\n# pullSecrets:\n#   - myRegistryKeySecretName",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "pullSecrets",
+                    "type": "array"
+                },
+                "registry": {
+                    "default": "docker.io",
+                    "description": "#",
+                    "required": [],
+                    "title": "registry",
+                    "type": "string"
+                },
+                "repository": {
+                    "default": "rabbitmqoperator/default-user-credential-updater",
+                    "description": "#",
+                    "required": [],
+                    "title": "repository",
+                    "type": "string"
+                },
+                "tag": {
+                    "default": "1.0.9",
+                    "description": "#",
+                    "required": [],
+                    "title": "tag",
+                    "type": "string"
+                }
+            },
+            "required": ["registry", "repository", "tag", "digest", "pullSecrets"],
+            "title": "credentialUpdaterImage",
+            "type": "object"
+        },
+        "diagnosticMode": {
+            "additionalProperties": false,
+            "description": "# Enable diagnostic mode in the deployment(s)/statefulset(s)",
+            "properties": {
+                "enabled": {
+                    "default": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "enabled",
+                    "type": "boolean"
+                }
+            },
+            "required": ["enabled"],
+            "title": "diagnosticMode",
+            "type": "object"
+        },
+        "extraDeploy": {
+            "description": "#",
+            "items": {
+                "required": []
+            },
+            "required": [],
+            "title": "extraDeploy",
+            "type": "array"
+        },
+        "fullnameOverride": {
+            "default": "",
+            "description": "#",
+            "required": [],
+            "title": "fullnameOverride",
+            "type": "string"
+        },
+        "global": {
+            "additionalProperties": false,
+            "description": "#\n# Please, note that this will override the image parameters, including dependencies, configured to use the global value",
+            "properties": {
+                "compatibility": {
+                    "additionalProperties": false,
+                    "description": "# Compatibility adaptations for Kubernetes platforms",
+                    "properties": {
+                        "openshift": {
+                            "additionalProperties": false,
+                            "description": "# Compatibility adaptations for Openshift",
+                            "properties": {
+                                "adaptSecurityContext": {
+                                    "default": "auto",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "adaptSecurityContext",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["adaptSecurityContext"],
+                            "title": "openshift",
+                            "type": "object"
+                        }
+                    },
+                    "required": ["openshift"],
+                    "title": "compatibility",
+                    "type": "object"
+                },
+                "defaultStorageClass": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "defaultStorageClass",
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "description": "# E.g.\n# imagePullSecrets:\n#   - myRegistryKeySecretName\n#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "imagePullSecrets",
+                    "type": "array"
+                },
+                "imageRegistry": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "imageRegistry",
+                    "type": "string"
+                },
+                "storageClass": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "storageClass",
+                    "type": "string"
+                }
+            },
+            "required": ["imageRegistry", "imagePullSecrets", "defaultStorageClass", "storageClass", "compatibility"],
+            "title": "global",
+            "type": "object"
+        },
+        "kubeVersion": {
+            "default": "",
+            "description": "#",
+            "required": [],
+            "title": "kubeVersion",
+            "type": "string"
+        },
+        "msgTopologyOperator": {
+            "additionalProperties": false,
+            "description": "#",
+            "properties": {
+                "affinity": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+                    "required": [],
+                    "title": "affinity",
+                    "type": "object"
+                },
+                "args": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "args",
+                    "type": "array"
+                },
+                "automountServiceAccountToken": {
+                    "default": true,
+                    "description": "#",
+                    "required": [],
+                    "title": "automountServiceAccountToken",
+                    "type": "boolean"
+                },
+                "command": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "command",
+                    "type": "array"
+                },
+                "containerPorts": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "properties": {
+                        "metrics": {
+                            "default": 8080,
+                            "required": [],
+                            "title": "metrics",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["metrics"],
+                    "title": "containerPorts",
+                    "type": "object"
+                },
+                "containerSecurityContext": {
+                    "additionalProperties": false,
+                    "description": "# Configure Container Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "allowPrivilegeEscalation",
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "drop": {
+                                    "description": "#",
+                                    "items": {
+                                        "anyOf": [
+                                            {
+                                                "required": [],
+                                                "type": "string"
+                                            }
+                                        ],
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "drop",
+                                    "type": "array"
+                                }
+                            },
+                            "required": ["drop"],
+                            "title": "capabilities",
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "privileged": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "privileged",
+                            "type": "boolean"
+                        },
+                        "readOnlyRootFilesystem": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "readOnlyRootFilesystem",
+                            "type": "boolean"
+                        },
+                        "runAsGroup": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsGroup",
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsNonRoot",
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "runAsUser",
+                            "type": "integer"
+                        },
+                        "seLinuxOptions": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "seLinuxOptions",
+                            "type": "object"
+                        },
+                        "seccompProfile": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "type": {
+                                    "default": "RuntimeDefault",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "type",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["type"],
+                            "title": "seccompProfile",
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "seLinuxOptions",
+                        "runAsUser",
+                        "runAsGroup",
+                        "runAsNonRoot",
+                        "privileged",
+                        "readOnlyRootFilesystem",
+                        "allowPrivilegeEscalation",
+                        "capabilities",
+                        "seccompProfile"
+                    ],
+                    "title": "containerSecurityContext",
+                    "type": "object"
+                },
+                "customLivenessProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customLivenessProbe",
+                    "type": "object"
+                },
+                "customReadinessProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customReadinessProbe",
+                    "type": "object"
+                },
+                "customStartupProbe": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "customStartupProbe",
+                    "type": "object"
+                },
+                "dnsPolicy": {
+                    "default": "ClusterFirst",
+                    "description": "#",
+                    "required": [],
+                    "title": "dnsPolicy",
+                    "type": "string"
+                },
+                "enabled": {
+                    "default": true,
+                    "description": "#",
+                    "required": [],
+                    "title": "enabled",
+                    "type": "boolean"
+                },
+                "existingWebhookCertCABundle": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "existingWebhookCertCABundle",
+                    "type": "string"
+                },
+                "existingWebhookCertSecret": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "existingWebhookCertSecret",
+                    "type": "string"
+                },
+                "extraEnvVars": {
+                    "description": "#\n# e.g:\n# extraEnvVars:\n#   - name: FOO\n#     value: \"bar\"",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraEnvVars",
+                    "type": "array"
+                },
+                "extraEnvVarsCM": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "extraEnvVarsCM",
+                    "type": "string"
+                },
+                "extraEnvVarsSecret": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "extraEnvVarsSecret",
+                    "type": "string"
+                },
+                "extraVolumeMounts": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraVolumeMounts",
+                    "type": "array"
+                },
+                "extraVolumes": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "extraVolumes",
+                    "type": "array"
+                },
+                "fullnameOverride": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "fullnameOverride",
+                    "type": "string"
+                },
+                "hostAliases": {
+                    "description": "#\n# https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "hostAliases",
+                    "type": "array"
+                },
+                "hostNetwork": {
+                    "default": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "hostNetwork",
+                    "type": "boolean"
+                },
+                "image": {
+                    "additionalProperties": false,
+                    "description": "# RabbitMQ Messaging Topology Operator image\n# ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator/tags",
+                    "properties": {
+                        "digest": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "digest",
+                            "type": "string"
+                        },
+                        "pullPolicy": {
+                            "default": "IfNotPresent",
+                            "description": "# Specify a imagePullPolicy\n# ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images\n#",
+                            "required": [],
+                            "title": "pullPolicy",
+                            "type": "string"
+                        },
+                        "pullSecrets": {
+                            "description": "# Optionally specify an array of imagePullSecrets.\n# Secrets must be manually created in the namespace.\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/\n# e.g:\n# pullSecrets:\n#   - myRegistryKeySecretName\n#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "pullSecrets",
+                            "type": "array"
+                        },
+                        "registry": {
+                            "default": "docker.io",
+                            "description": "#",
+                            "required": [],
+                            "title": "registry",
+                            "type": "string"
+                        },
+                        "repository": {
+                            "default": "rabbitmqoperator/messaging-topology-operator",
+                            "description": "#",
+                            "required": [],
+                            "title": "repository",
+                            "type": "string"
+                        },
+                        "tag": {
+                            "default": "1.18.1",
+                            "description": "#",
+                            "required": [],
+                            "title": "tag",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["registry", "repository", "tag", "digest", "pullPolicy", "pullSecrets"],
+                    "title": "image",
+                    "type": "object"
+                },
+                "initContainers": {
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/\n# e.g:\n# initContainers:\n#  - name: your-image-name\n#    image: your-image\n#    imagePullPolicy: Always\n#    command: ['sh', '-c', 'echo \"hello world\"']",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "initContainers",
+                    "type": "array"
+                },
+                "lifecycleHooks": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "lifecycleHooks",
+                    "type": "object"
+                },
+                "livenessProbe": {
+                    "additionalProperties": false,
+                    "description": "# Configure extra options for RabbitMQ Messaging Topology Operator containers' liveness and readiness probes\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes",
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "successThreshold", "failureThreshold"],
+                    "title": "livenessProbe",
+                    "type": "object"
+                },
+                "metrics": {
+                    "additionalProperties": false,
+                    "description": "#",
+                    "properties": {
+                        "podMonitor": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "additionalLabels": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "additionalLabels",
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "honorLabels": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "honorLabels",
+                                    "type": "boolean"
+                                },
+                                "interval": {
+                                    "default": "30s",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "interval",
+                                    "type": "string"
+                                },
+                                "jobLabel": {
+                                    "default": "app.kubernetes.io/name",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "jobLabel",
+                                    "type": "string"
+                                },
+                                "metricRelabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "metricRelabelings",
+                                    "type": "array"
+                                },
+                                "namespace": {
+                                    "default": "",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "namespace",
+                                    "type": "string"
+                                },
+                                "relabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "relabelings",
+                                    "type": "array"
+                                },
+                                "scrapeTimeout": {
+                                    "default": "30s",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "scrapeTimeout",
+                                    "type": "string"
+                                },
+                                "selector": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "selector",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "jobLabel",
+                                "namespace",
+                                "honorLabels",
+                                "selector",
+                                "interval",
+                                "scrapeTimeout",
+                                "additionalLabels",
+                                "relabelings",
+                                "metricRelabelings"
+                            ],
+                            "title": "podMonitor",
+                            "type": "object"
+                        },
+                        "service": {
+                            "additionalProperties": false,
+                            "description": "# Metrics service parameters",
+                            "properties": {
+                                "annotations": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "properties": {
+                                        "prometheus.io/port": {
+                                            "default": "{{ .Values.msgTopologyOperator.metrics.service.ports.http }}",
+                                            "required": [],
+                                            "title": "prometheus.io/port",
+                                            "type": "string"
+                                        },
+                                        "prometheus.io/scrape": {
+                                            "default": "true",
+                                            "required": [],
+                                            "title": "prometheus.io/scrape",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["prometheus.io/scrape", "prometheus.io/port"],
+                                    "title": "annotations",
+                                    "type": "object"
+                                },
+                                "clusterIP": {
+                                    "default": "",
+                                    "description": "#\n# e.g.:\n# clusterIP: None",
+                                    "required": [],
+                                    "title": "clusterIP",
+                                    "type": "string"
+                                },
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "externalTrafficPolicy": {
+                                    "default": "Cluster",
+                                    "description": "#\n# ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip",
+                                    "required": [],
+                                    "title": "externalTrafficPolicy",
+                                    "type": "string"
+                                },
+                                "extraPorts": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "extraPorts",
+                                    "type": "array"
+                                },
+                                "loadBalancerIP": {
+                                    "default": "",
+                                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer",
+                                    "required": [],
+                                    "title": "loadBalancerIP",
+                                    "type": "string"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service\n# e.g:\n# loadBalancerSourceRanges:\n#   - 10.10.10.0/24",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "loadBalancerSourceRanges",
+                                    "type": "array"
+                                },
+                                "nodePorts": {
+                                    "additionalProperties": false,
+                                    "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
+                                    "properties": {
+                                        "http": {
+                                            "default": "",
+                                            "required": [],
+                                            "title": "http",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["http"],
+                                    "title": "nodePorts",
+                                    "type": "object"
+                                },
+                                "ports": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "properties": {
+                                        "http": {
+                                            "default": 80,
+                                            "required": [],
+                                            "title": "http",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": ["http"],
+                                    "title": "ports",
+                                    "type": "object"
+                                },
+                                "sessionAffinity": {
+                                    "default": "None",
+                                    "description": "#\n# If \"ClientIP\", consecutive client requests will be directed to the same Pod\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+                                    "required": [],
+                                    "title": "sessionAffinity",
+                                    "type": "string"
+                                },
+                                "sessionAffinityConfig": {
+                                    "additionalProperties": false,
+                                    "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
+                                    "required": [],
+                                    "title": "sessionAffinityConfig",
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "default": "ClusterIP",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "type",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "type",
+                                "ports",
+                                "nodePorts",
+                                "clusterIP",
+                                "extraPorts",
+                                "loadBalancerIP",
+                                "loadBalancerSourceRanges",
+                                "externalTrafficPolicy",
+                                "annotations",
+                                "sessionAffinity",
+                                "sessionAffinityConfig"
+                            ],
+                            "title": "service",
+                            "type": "object"
+                        },
+                        "serviceMonitor": {
+                            "additionalProperties": false,
+                            "properties": {
+                                "enabled": {
+                                    "default": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "enabled",
+                                    "type": "boolean"
+                                },
+                                "honorLabels": {
+                                    "default": false,
+                                    "description": "#\n# ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint",
+                                    "required": [],
+                                    "title": "honorLabels",
+                                    "type": "boolean"
+                                },
+                                "interval": {
+                                    "default": "",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "interval",
+                                    "type": "string"
+                                },
+                                "jobLabel": {
+                                    "default": "app.kubernetes.io/name",
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "jobLabel",
+                                    "type": "string"
+                                },
+                                "labels": {
+                                    "additionalProperties": false,
+                                    "description": "#",
+                                    "required": [],
+                                    "title": "labels",
+                                    "type": "object"
+                                },
+                                "metricRelabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "metricRelabelings",
+                                    "type": "array"
+                                },
+                                "namespace": {
+                                    "default": "",
+                                    "description": "#\n# e.g:\n# namespace: monitoring",
+                                    "required": [],
+                                    "title": "namespace",
+                                    "type": "string"
+                                },
+                                "relabelings": {
+                                    "description": "#",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "relabelings",
+                                    "type": "array"
+                                },
+                                "scrapeTimeout": {
+                                    "default": "",
+                                    "description": "#\n# ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint\n# e.g:\n# scrapeTimeout: 10s",
+                                    "required": [],
+                                    "title": "scrapeTimeout",
+                                    "type": "string"
+                                },
+                                "selector": {
+                                    "additionalProperties": false,
+                                    "description": "# DEPRECATED: Use msgTopologyOperator.metrics.serviceMonitor.labels instead.\n# This value will be removed in a future release\n# additionalLabels: {}",
+                                    "required": [],
+                                    "title": "selector",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [
+                                "enabled",
+                                "namespace",
+                                "jobLabel",
+                                "selector",
+                                "honorLabels",
+                                "scrapeTimeout",
+                                "interval",
+                                "metricRelabelings",
+                                "relabelings",
+                                "labels"
+                            ],
+                            "title": "serviceMonitor",
+                            "type": "object"
+                        }
+                    },
+                    "required": ["service", "serviceMonitor", "podMonitor"],
+                    "title": "metrics",
+                    "type": "object"
+                },
+                "networkPolicy": {
+                    "additionalProperties": false,
+                    "description": "# Network Policies\n# Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+                    "properties": {
+                        "allowExternal": {
+                            "default": true,
+                            "description": "#\n# The Policy model to apply. When set to false, only pods with the correct\n# injector label will have network access to the ports injector is listening\n# on. When true, injector will accept connections from any source\n# (with the correct destination port).",
+                            "required": [],
+                            "title": "allowExternal",
+                            "type": "boolean"
+                        },
+                        "allowExternalEgress": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "allowExternalEgress",
+                            "type": "boolean"
+                        },
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "extraEgress": {
+                            "description": "#\n# e.g:\n# extraEgress:\n#   - ports:\n#       - port: 1234\n#     to:\n#       - podSelector:\n#           - matchLabels:\n#               - role: frontend\n#       - podSelector:\n#           - matchExpressions:\n#               - key: role\n#                 operator: In\n#                 values:\n#                   - frontend",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "extraEgress",
+                            "type": "array"
+                        },
+                        "extraIngress": {
+                            "description": "#\n# e.g:\n# extraIngress:\n#   - ports:\n#       - port: 1234\n#     from:\n#       - podSelector:\n#           - matchLabels:\n#               - role: frontend\n#       - podSelector:\n#           - matchExpressions:\n#               - key: role\n#                 operator: In\n#                 values:\n#                   - frontend",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "extraIngress",
+                            "type": "array"
+                        },
+                        "ingressNSMatchLabels": {
+                            "additionalProperties": false,
+                            "description": "#\n#",
+                            "required": [],
+                            "title": "ingressNSMatchLabels",
+                            "type": "object"
+                        },
+                        "ingressNSPodMatchLabels": {
+                            "additionalProperties": false,
+                            "required": [],
+                            "title": "ingressNSPodMatchLabels",
+                            "type": "object"
+                        },
+                        "kubeAPIServerPorts": {
+                            "description": "#",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "required": [],
+                                        "type": "integer"
+                                    }
+                                ],
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "kubeAPIServerPorts",
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "enabled",
+                        "kubeAPIServerPorts",
+                        "allowExternal",
+                        "allowExternalEgress",
+                        "extraIngress",
+                        "extraEgress",
+                        "ingressNSMatchLabels",
+                        "ingressNSPodMatchLabels"
+                    ],
+                    "title": "networkPolicy",
+                    "type": "object"
+                },
+                "nodeSelector": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
+                    "required": [],
+                    "title": "nodeSelector",
+                    "type": "object"
+                },
+                "pdb": {
+                    "additionalProperties": false,
+                    "description": "# Pod Disruption Budget configuration\n# ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/",
+                    "properties": {
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        },
+                        "maxUnavailable": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "maxUnavailable",
+                            "type": "string"
+                        },
+                        "minAvailable": {
+                            "default": "",
+                            "description": "#",
+                            "required": [],
+                            "title": "minAvailable",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["create", "minAvailable", "maxUnavailable"],
+                    "title": "pdb",
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/",
+                    "required": [],
+                    "title": "podAnnotations",
+                    "type": "object"
+                },
+                "podLabels": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+                    "required": [],
+                    "title": "podLabels",
+                    "type": "object"
+                },
+                "podSecurityContext": {
+                    "additionalProperties": false,
+                    "description": "# Configure Pods Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "fsGroup": {
+                            "default": 1001,
+                            "description": "#",
+                            "required": [],
+                            "title": "fsGroup",
+                            "type": "integer"
+                        },
+                        "fsGroupChangePolicy": {
+                            "default": "Always",
+                            "description": "#",
+                            "required": [],
+                            "title": "fsGroupChangePolicy",
+                            "type": "string"
+                        },
+                        "supplementalGroups": {
+                            "description": "#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "supplementalGroups",
+                            "type": "array"
+                        },
+                        "sysctls": {
+                            "description": "#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "sysctls",
+                            "type": "array"
+                        }
+                    },
+                    "required": ["enabled", "fsGroupChangePolicy", "sysctls", "supplementalGroups", "fsGroup"],
+                    "title": "podSecurityContext",
+                    "type": "object"
+                },
+                "priorityClassName": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "priorityClassName",
+                    "type": "string"
+                },
+                "rbac": {
+                    "additionalProperties": false,
+                    "description": "# RBAC configuration",
+                    "properties": {
+                        "clusterRole": {
+                            "additionalProperties": false,
+                            "description": "# ClusterRole parameters",
+                            "properties": {
+                                "customRules": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole\n# e.g:\n# customRules:\n#   - apiGroups: A list of API groups (e.g., [\"\"], [\"apps\"]).\n#   - resources: A list of resource names (e.g., [\"configmaps\", \"pods\"]).\n#   - verbs: A list of allowed access verbs (e.g., [\"create\", \"get\", \"list\"]).",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "customRules",
+                                    "type": "array"
+                                },
+                                "extraRules": {
+                                    "description": "#\n# ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole\n# e.g:\n# extraRules:\n#   - apiGroups: A list of API groups (e.g., [\"\"], [\"apps\"]).\n#   - resources: A list of resource names (e.g., [\"configmaps\", \"pods\"]).\n#   - verbs: A list of allowed access verbs (e.g., [\"create\", \"get\", \"list\"]).",
+                                    "items": {
+                                        "required": []
+                                    },
+                                    "required": [],
+                                    "title": "extraRules",
+                                    "type": "array"
+                                }
+                            },
+                            "required": ["customRules", "extraRules"],
+                            "title": "clusterRole",
+                            "type": "object"
+                        },
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["create", "clusterRole"],
+                    "title": "rbac",
+                    "type": "object"
+                },
+                "readinessProbe": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "successThreshold", "failureThreshold"],
+                    "title": "readinessProbe",
+                    "type": "object"
+                },
+                "replicaCount": {
+                    "default": 1,
+                    "description": "#",
+                    "required": [],
+                    "title": "replicaCount",
+                    "type": "integer"
+                },
+                "resources": {
+                    "additionalProperties": false,
+                    "description": "#\n# Example:\n# resources:\n#   requests:\n#     cpu: 2\n#     memory: 512Mi\n#   limits:\n#     cpu: 3\n#     memory: 1024Mi",
+                    "required": [],
+                    "title": "resources",
+                    "type": "object"
+                },
+                "revisionHistoryLimit": {
+                    "default": 10,
+                    "description": "#",
+                    "required": [],
+                    "title": "revisionHistoryLimit",
+                    "type": "integer"
+                },
+                "schedulerName": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "schedulerName",
+                    "type": "string"
+                },
+                "service": {
+                    "additionalProperties": false,
+                    "description": "# Webhook service parameters",
+                    "properties": {
+                        "annotations": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "annotations",
+                            "type": "object"
+                        },
+                        "clusterIP": {
+                            "default": "",
+                            "description": "#\n# e.g.:\n# clusterIP: None",
+                            "required": [],
+                            "title": "clusterIP",
+                            "type": "string"
+                        },
+                        "externalTrafficPolicy": {
+                            "default": "Cluster",
+                            "description": "#\n# ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip",
+                            "required": [],
+                            "title": "externalTrafficPolicy",
+                            "type": "string"
+                        },
+                        "extraPorts": {
+                            "description": "#",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "extraPorts",
+                            "type": "array"
+                        },
+                        "loadBalancerIP": {
+                            "default": "",
+                            "description": "#\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer",
+                            "required": [],
+                            "title": "loadBalancerIP",
+                            "type": "string"
+                        },
+                        "loadBalancerSourceRanges": {
+                            "description": "#\n# ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service\n# e.g:\n# loadBalancerSourceRanges:\n#   - 10.10.10.0/24",
+                            "items": {
+                                "required": []
+                            },
+                            "required": [],
+                            "title": "loadBalancerSourceRanges",
+                            "type": "array"
+                        },
+                        "nodePorts": {
+                            "additionalProperties": false,
+                            "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
+                            "properties": {
+                                "http": {
+                                    "default": "",
+                                    "required": [],
+                                    "title": "http",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["http"],
+                            "title": "nodePorts",
+                            "type": "object"
+                        },
+                        "ports": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "properties": {
+                                "webhook": {
+                                    "default": 443,
+                                    "required": [],
+                                    "title": "webhook",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["webhook"],
+                            "title": "ports",
+                            "type": "object"
+                        },
+                        "sessionAffinity": {
+                            "default": "None",
+                            "description": "#\n# If \"ClientIP\", consecutive client requests will be directed to the same Pod\n# ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+                            "required": [],
+                            "title": "sessionAffinity",
+                            "type": "string"
+                        },
+                        "sessionAffinityConfig": {
+                            "additionalProperties": false,
+                            "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
+                            "required": [],
+                            "title": "sessionAffinityConfig",
+                            "type": "object"
+                        },
+                        "type": {
+                            "default": "ClusterIP",
+                            "description": "#",
+                            "required": [],
+                            "title": "type",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "ports",
+                        "nodePorts",
+                        "clusterIP",
+                        "loadBalancerIP",
+                        "extraPorts",
+                        "loadBalancerSourceRanges",
+                        "externalTrafficPolicy",
+                        "annotations",
+                        "sessionAffinity",
+                        "sessionAffinityConfig"
+                    ],
+                    "title": "service",
+                    "type": "object"
+                },
+                "serviceAccount": {
+                    "additionalProperties": false,
+                    "description": "# ServiceAccount configuration",
+                    "properties": {
+                        "annotations": {
+                            "additionalProperties": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "annotations",
+                            "type": "object"
+                        },
+                        "automountServiceAccountToken": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "automountServiceAccountToken",
+                            "type": "boolean"
+                        },
+                        "create": {
+                            "default": true,
+                            "description": "#",
+                            "required": [],
+                            "title": "create",
+                            "type": "boolean"
+                        },
+                        "name": {
+                            "default": "",
+                            "description": "#\n# If not set and create is true, a name is generated using the cloudpirates.fullname template",
+                            "required": [],
+                            "title": "name",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["create", "name", "annotations", "automountServiceAccountToken"],
+                    "title": "serviceAccount",
+                    "type": "object"
+                },
+                "sidecars": {
+                    "description": "#\n# e.g:\n# sidecars:\n#   - name: your-image-name\n#     image: your-image\n#     imagePullPolicy: Always\n#     ports:\n#       - name: portname\n#         containerPort: 1234",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "sidecars",
+                    "type": "array"
+                },
+                "skipCreateAdmissionWebhookConfig": {
+                    "default": false,
+                    "description": "#",
+                    "required": [],
+                    "title": "skipCreateAdmissionWebhookConfig",
+                    "type": "boolean"
+                },
+                "startupProbe": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "description": "#",
+                            "required": [],
+                            "title": "enabled",
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "failureThreshold",
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "initialDelaySeconds",
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "default": 30,
+                            "description": "#",
+                            "required": [],
+                            "title": "periodSeconds",
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "default": 1,
+                            "description": "#",
+                            "required": [],
+                            "title": "successThreshold",
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "default": 5,
+                            "description": "#",
+                            "required": [],
+                            "title": "timeoutSeconds",
+                            "type": "integer"
+                        }
+                    },
+                    "required": ["enabled", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "successThreshold", "failureThreshold"],
+                    "title": "startupProbe",
+                    "type": "object"
+                },
+                "terminationGracePeriodSeconds": {
+                    "default": "",
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods",
+                    "required": [],
+                    "title": "terminationGracePeriodSeconds",
+                    "type": "string"
+                },
+                "tolerations": {
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "tolerations",
+                    "type": "array"
+                },
+                "topologySpreadConstraints": {
+                    "description": "#\n# https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/\n# The value is evaluated as a template",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "topologySpreadConstraints",
+                    "type": "array"
+                },
+                "updateStrategy": {
+                    "additionalProperties": false,
+                    "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies",
+                    "properties": {
+                        "type": {
+                            "default": "RollingUpdate",
+                            "description": "# StrategyType\n# Can be set to RollingUpdate or OnDelete",
+                            "required": [],
+                            "title": "type",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["type"],
+                    "title": "updateStrategy",
+                    "type": "object"
+                },
+                "watchAllNamespaces": {
+                    "default": true,
+                    "description": "#",
+                    "required": [],
+                    "title": "watchAllNamespaces",
+                    "type": "boolean"
+                },
+                "watchNamespaces": {
+                    "description": "#",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "watchNamespaces",
+                    "type": "array"
+                }
+            },
+            "required": [
+                "enabled",
+                "image",
+                "revisionHistoryLimit",
+                "watchAllNamespaces",
+                "watchNamespaces",
+                "replicaCount",
+                "topologySpreadConstraints",
+                "schedulerName",
+                "terminationGracePeriodSeconds",
+                "hostNetwork",
+                "dnsPolicy",
+                "livenessProbe",
+                "readinessProbe",
+                "startupProbe",
+                "customLivenessProbe",
+                "customReadinessProbe",
+                "customStartupProbe",
+                "skipCreateAdmissionWebhookConfig",
+                "existingWebhookCertSecret",
+                "existingWebhookCertCABundle",
+                "resources",
+                "pdb",
+                "podSecurityContext",
+                "containerSecurityContext",
+                "fullnameOverride",
+                "command",
+                "args",
+                "automountServiceAccountToken",
+                "hostAliases",
+                "podLabels",
+                "podAnnotations",
+                "affinity",
+                "nodeSelector",
+                "tolerations",
+                "updateStrategy",
+                "priorityClassName",
+                "lifecycleHooks",
+                "containerPorts",
+                "extraEnvVars",
+                "extraEnvVarsCM",
+                "extraEnvVarsSecret",
+                "extraVolumes",
+                "extraVolumeMounts",
+                "sidecars",
+                "initContainers",
+                "service",
+                "networkPolicy",
+                "rbac",
+                "serviceAccount",
+                "metrics"
+            ],
+            "title": "msgTopologyOperator",
+            "type": "object"
+        },
+        "nameOverride": {
+            "default": "",
+            "description": "#",
+            "required": [],
+            "title": "nameOverride",
+            "type": "string"
+        },
+        "rabbitmqImage": {
+            "additionalProperties": false,
+            "description": "#\n# ref: https://hub.docker.com/_/rabbitmq/tags",
+            "properties": {
+                "digest": {
+                    "default": "",
+                    "description": "#",
+                    "required": [],
+                    "title": "digest",
+                    "type": "string"
+                },
+                "pullSecrets": {
+                    "description": "#\n# Optionally specify an array of imagePullSecrets.\n# Secrets must be manually created in the namespace.\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-rabbitmqImage-private-registry/\n# e.g:\n# pullSecrets:\n#   - myRegistryKeySecretName",
+                    "items": {
+                        "required": []
+                    },
+                    "required": [],
+                    "title": "pullSecrets",
+                    "type": "array"
+                },
+                "registry": {
+                    "default": "docker.io",
+                    "description": "#",
+                    "required": [],
+                    "title": "registry",
+                    "type": "string"
+                },
+                "repository": {
+                    "default": "library/rabbitmq",
+                    "description": "#",
+                    "required": [],
+                    "title": "repository",
+                    "type": "string"
+                },
+                "tag": {
+                    "default": "4.1.3-alpine",
+                    "description": "#",
+                    "required": [],
+                    "title": "tag",
+                    "type": "string"
+                }
+            },
+            "required": ["registry", "repository", "tag", "digest", "pullSecrets"],
+            "title": "rabbitmqImage",
+            "type": "object"
+        },
+        "useCertManager": {
+            "default": false,
+            "description": "#",
+            "required": [],
+            "title": "useCertManager",
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "global",
+        "kubeVersion",
+        "nameOverride",
+        "fullnameOverride",
+        "commonLabels",
+        "commonAnnotations",
+        "clusterDomain",
+        "extraDeploy",
+        "diagnosticMode",
+        "rabbitmqImage",
+        "credentialUpdaterImage",
+        "clusterOperator",
+        "msgTopologyOperator",
+        "useCertManager"
+    ],
+    "type": "object"
+}

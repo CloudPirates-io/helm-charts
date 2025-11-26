@@ -1,0 +1,49 @@
+{{- if .Values.msgTopologyOperator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  name: {{ template "rmqco.msgTopologyOperator.webhook.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if or .Values.commonAnnotations .Values.msgTopologyOperator.service.annotations }}
+  {{- $annotations := include "cloudpirates.tplvalues.merge" ( dict "values" ( list .Values.msgTopologyOperator.service.annotations .Values.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.msgTopologyOperator.service.type }}
+  {{- if (or (eq .Values.msgTopologyOperator.service.type "LoadBalancer") (eq .Values.msgTopologyOperator.service.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.msgTopologyOperator.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if .Values.msgTopologyOperator.service.clusterIP }}
+  clusterIP: {{ .Values.msgTopologyOperator.service.clusterIP }}
+  {{- end }}
+  {{- if eq .Values.msgTopologyOperator.service.type "LoadBalancer" }}
+  loadBalancerSourceRanges: {{ .Values.msgTopologyOperator.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if (and (eq .Values.msgTopologyOperator.service.type "LoadBalancer") (not (empty .Values.msgTopologyOperator.service.loadBalancerIP))) }}
+  loadBalancerIP: {{ .Values.msgTopologyOperator.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.msgTopologyOperator.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.msgTopologyOperator.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.msgTopologyOperator.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.service.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: https
+      port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
+      targetPort: https-webhook
+      protocol: TCP
+      {{- if (and (or (eq .Values.msgTopologyOperator.service.type "NodePort") (eq .Values.msgTopologyOperator.service.type "LoadBalancer")) (not (empty .Values.msgTopologyOperator.service.nodePorts.http))) }}
+      nodePort: {{ .Values.msgTopologyOperator.service.nodePorts.http }}
+      {{- else if eq .Values.msgTopologyOperator.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- if .Values.msgTopologyOperator.service.extraPorts }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.service.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  selector:
+    {{- include "rmqco.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: messaging-topology-operator
+{{- end }}
