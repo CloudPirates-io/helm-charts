@@ -73,9 +73,9 @@ spec:
             - start
             {{- else }}
             - start-dev
+            {{- end }}
             {{- if .Values.realm.import }}
             - --import-realm
-            {{- end }}
             {{- end }}
             {{- if .Values.keycloak.httpEnabled }}
             - --http-enabled=true
