@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.10.2 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([3191aa5](https://github.com/CloudPirates-io/helm-charts/commit/3191aa5))
+* Use correct metrics path if httpRelativePath is set (#666) ([87276ae](https://github.com/CloudPirates-io/helm-charts/commit/87276ae))
+
 ## 0.10.1 (2025-11-26)
 
 * chore: update CHANGELOG.md for merged changes ([0ff63ff](https://github.com/CloudPirates-io/helm-charts/commit/0ff63ff))
