@@ -381,3 +381,27 @@ existingStreamServerConfigConfigmap: ""
 
 ## @param extraInitContainers Additional init containers to add to the pod
 extraInitContainers: []
+
+## @param sidecars Additional sidecar containers to add to the pod
+## Example for oauth2-proxy:
+## sidecars:
+##   - name: oauth2-proxy
+##     image: quay.io/oauth2-proxy/oauth2-proxy:latest
+##     imagePullPolicy: IfNotPresent
+##     ports:
+##       - name: oauth2-proxy
+##         containerPort: 4180
+##         protocol: TCP
+##     args:
+##       - --provider=github
+##       - --upstream=http://localhost:80
+##       - --http-address=0.0.0.0:4180
+##     env:
+##       - name: OAUTH2_PROXY_CLIENT_ID
+##         value: "your-client-id"
+##       - name: OAUTH2_PROXY_CLIENT_SECRET
+##         valueFrom:
+##           secretKeyRef:
+##             name: oauth2-proxy-secret
+##             key: client-secret
+sidecars: []
