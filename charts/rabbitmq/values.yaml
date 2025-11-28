@@ -382,6 +382,8 @@ serviceAccount:
   create: true
   ## @param serviceAccount.name Name of serviceAccount
   name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the RabbitMQ pods
+  automountServiceAccountToken: false
   ## @param serviceAccount.annotations Annotations for service account.
   annotations: {}
 

@@ -86,11 +86,11 @@ Return the proper Docker Image Registry Secret Names
 {{- end -}}
 
 {{- define "rabbitmq.serviceAccountName" -}}
-    {{- if or .Values.peerDiscoveryK8sPlugin.enabled -}}
-        {{- default (include "rabbitmq.fullname" .) .Values.serviceAccount.name }}
-    {{- else -}}
-        {{- default "default" .Values.serviceAccount.name -}}
-    {{- end -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "rabbitmq.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
 {{- end -}}
 
 {{/*
