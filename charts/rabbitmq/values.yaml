@@ -96,9 +96,9 @@ config:
     ## Examples:
     ##   value: 0.4              # relative: 40% of container memory limit
     ##   value: "8GB"            # absolute: 8 gigabytes
-    ##   value: "8590000000"     # absolute: 8590000000 bytes (use string for large numbers)
+    ##   value: "8590000000"       # absolute: 8590000000 bytes (use string for large numbers)
     ##
-    value: 0.4 # @schema type:[number, string]
+    value: 0.4  # @schema type:[number, string]
   ## Logging configuration
   ## ref: https://www.rabbitmq.com/docs/logging
   ##
