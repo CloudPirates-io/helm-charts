@@ -67,6 +67,9 @@ tests:
           enabled: true
           type: relative
           value: 0.6
+      resources:
+        limits:
+          memory: 2Gi
     template: templates/configmap.yaml
     asserts:
       - matchRegex:
