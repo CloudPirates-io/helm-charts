@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.3 (2025-11-28)
+
+* [postgres] fix nesting of auth.secretKeys.adminPasswordKey (#674) ([#674](https://github.com/CloudPirates-io/helm-charts/pull/674))
+
+
 ## 0.12.2 (2025-11-26)
 
 * [postgres] added support for priorityClassName (#662) ([#663](https://github.com/CloudPirates-io/helm-charts/pull/663))
