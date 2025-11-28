@@ -31,7 +31,11 @@ spec:
       {{- with (include "rabbitmq.imagePullSecrets" .) }}
       {{ . | nindent 6 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
+      serviceAccount: {{ include "rabbitmq.serviceAccountName" . }}
+      {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       initContainers:
         - name: init-erlang-cookie
