@@ -2,7 +2,7 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.6.5
+version: 0.6.6
 appVersion: "8.2.2"
 keywords:
   - mongodb
@@ -39,4 +39,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "[percona/mongodb_exporter] Update image to v0.47.2 (#656)"
+          links:
+            - name: "Commit e3cebb5"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e3cebb5"

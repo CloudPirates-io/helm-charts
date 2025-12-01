@@ -284,9 +284,9 @@ spec:
       kind: PersistentVolumeClaim
       metadata:
         name: data
-        {{- with .Values.persistence.labels }}
+        {{- with $labels := merge (include "rabbitmq.labels" . | fromYaml) .Values.persistence.labels }} 
         labels:
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml $labels | nindent 10 }}
         {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:

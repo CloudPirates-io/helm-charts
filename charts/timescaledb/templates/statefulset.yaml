@@ -150,6 +150,8 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      labels:
+        {{- include "timescaledb.labels" . | nindent 8 }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

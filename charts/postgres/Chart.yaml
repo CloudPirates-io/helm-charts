@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.12.3
+version: 0.12.4
 appVersion: "18.1.0"
 keywords:
   - postgres
@@ -43,7 +43,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "added support for priorityClassName (#662) (#663)"
+          description: "fix nesting of auth.secretKeys.adminPasswordKey (#674)"
           links:
-            - name: "Commit 9a33e0c"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/9a33e0c"
+            - name: "Commit ed4f3e3"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/ed4f3e3"

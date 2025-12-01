@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.12.3 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([e0cfe02](https://github.com/CloudPirates-io/helm-charts/commit/e0cfe02))
+* fix nesting of auth.secretKeys.adminPasswordKey (#674) ([ed4f3e3](https://github.com/CloudPirates-io/helm-charts/commit/ed4f3e3))
+
 ## 0.12.2 (2025-11-26)
 
 * chore: update CHANGELOG.md for merged changes ([0cde35e](https://github.com/CloudPirates-io/helm-charts/commit/0cde35e))

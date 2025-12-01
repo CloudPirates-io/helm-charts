@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.6.5 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([bdf9baf](https://github.com/CloudPirates-io/helm-charts/commit/bdf9baf))
+* chore: update CHANGELOG.md for merged changes ([882e6db](https://github.com/CloudPirates-io/helm-charts/commit/882e6db))
+* [percona/mongodb_exporter] Update image to v0.47.2 (#656) ([e3cebb5](https://github.com/CloudPirates-io/helm-charts/commit/e3cebb5))
+* chore: update CHANGELOG.md for merged changes ([a88b267](https://github.com/CloudPirates-io/helm-charts/commit/a88b267))
+* chore: update CHANGELOG.md for merged changes ([5cf594e](https://github.com/CloudPirates-io/helm-charts/commit/5cf594e))
+
 ## 0.6.4 (2025-11-20)
 
 * chore: update CHANGELOG.md for merged changes ([86bdd5d](https://github.com/CloudPirates-io/helm-charts/commit/86bdd5d))

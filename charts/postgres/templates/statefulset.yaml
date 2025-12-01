@@ -294,6 +294,8 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      labels:
+        {{- include "postgres.labels" . | nindent 8 }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
