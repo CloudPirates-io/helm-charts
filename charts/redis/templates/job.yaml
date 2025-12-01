@@ -23,6 +23,7 @@ spec:
           image: {{ include "redis.image" . | quote }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          resources: {{- toYaml .Values.clusterInitJob.resources | nindent 12 }}
           env:
           {{- if .Values.auth.enabled }}
             - name: REDIS_PASSWORD
