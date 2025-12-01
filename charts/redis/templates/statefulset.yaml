@@ -646,6 +646,8 @@ spec:
       kind: PersistentVolumeClaim
       metadata:
         name: data
+        labels:
+          {{- include "redis.labels" . | nindent 10 }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}

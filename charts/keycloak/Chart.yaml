@@ -2,8 +2,8 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.11.0
-appVersion: "26.4.5"
+version: 0.11.2
+appVersion: "26.4.7"
 keywords:
   - keycloak
   - identity
@@ -52,7 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Use correct metrics path if httpRelativePath is set (#666)"
+          description: "[keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.7 (patch) (#664)"
           links:
-            - name: "Commit 87276ae"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/87276ae"
+            - name: "Commit 3224ae7"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/3224ae7"

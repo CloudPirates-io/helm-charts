@@ -1,6 +1,20 @@
 # Changelog
 
 
+## cluster-operator-0.1.0 (2025-12-01)
+
+* No changes recorded
+
+## 0.7.9 (2025-11-19)
+
+* [rabbitmq]: calculate memoryHighWatermark based on pods total memory instead of nodes total memory ([1a25f28](https://github.com/CloudPirates-io/helm-charts/commit/1a25f28))
+* chore: update CHANGELOG.md for merged changes ([0ae9e19](https://github.com/CloudPirates-io/helm-charts/commit/0ae9e19))
+* chore: update CHANGELOG.md for merged changes ([88bebfe](https://github.com/CloudPirates-io/helm-charts/commit/88bebfe))
+* add values type for schema generation (#617) ([8633ab8](https://github.com/CloudPirates-io/helm-charts/commit/8633ab8))
+* chore: update CHANGELOG.md for merged changes ([f3e1ad1](https://github.com/CloudPirates-io/helm-charts/commit/f3e1ad1))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.7.8 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([8fac24b](https://github.com/CloudPirates-io/helm-charts/commit/8fac24b))
