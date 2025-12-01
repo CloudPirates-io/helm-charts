@@ -12555,6 +12555,59 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-0.0.2/rabbitmq-0.0.2.tgz
     version: 0.0.2
+  rabbitmq-cluster-operator:
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |2
+            - kind: added
+              description: "Initial chart release"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RabbitMQ
+          url: https://www.rabbitmq.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+        - name: RabbitMQ Cluster Operator
+          url: https://github.com/rabbitmq/cluster-operator
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.17.2
+    created: "2025-12-01T09:30:39.101768375Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.1.0
+    description: Kubernetes operator to deploy and manage RabbitMQ clusters.
+    digest: d51a7452be5367e20876cbf06d1749dfa8550104815e15c27c2898701811a5b7
+    home: https://www.rabbitmq.com
+    icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+    keywords:
+    - rabbitmq-cluster-operator
+    - rabbitmq
+    - operator
+    - message broker
+    - amqp
+    - messaging
+    - queue
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - name: Gasper Oblak
+      url: https://about.bl4ko.com
+    name: rabbitmq-cluster-operator
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+    - https://github.com/rabbitmq/cluster-operator
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-cluster-operator-0.1.0/rabbitmq-cluster-operator-0.1.0.tgz
+    version: 0.1.0
   redis:
   - annotations:
       artifacthub.io/category: database
@@ -17460,4 +17513,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-26T18:41:14.067603248Z"
+generated: "2025-12-01T09:30:40.502556071Z"
