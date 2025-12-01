@@ -1289,6 +1289,62 @@ entries:
   - annotations:
       artifacthub.io/changes: |2
             - kind: changed
+              description: "Update charts/ghost/values.yaml ghost to v6.8.1 (patch) (#621)"
+              links:
+                - name: "Commit a20f994"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/a20f994"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Ghost
+          url: https://ghost.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+        - name: Application
+          url: https://github.com/TryGhost/Ghost
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 6.9.1
+    created: "2025-12-01T13:29:12.972149136Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: A simple, powerful publishing platform that allows you to share your
+      stories with the world.
+    digest: 28077c3f8c60a2dc4fa794b9560d57b286a73d452dab32eb2c74428bdfaa6712
+    home: https://ghost.org
+    icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+    keywords:
+    - ghost
+    - blogging
+    - content management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: ghost
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - https://github.com/TryGhost/Ghost
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.6.0/ghost-0.6.0.tgz
+    version: 0.6.0
+  - annotations:
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "Update charts/ghost/values.yaml ghost to v6.8.0 (minor) (#605)"
               links:
                 - name: "Commit 7ab26d7"
@@ -17981,4 +18037,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-01T13:18:42.812780417Z"
+generated: "2025-12-01T13:29:15.121575301Z"
