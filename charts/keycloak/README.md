@@ -89,7 +89,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.4@sha256:c6459d5fae1b759f5d667ebdc6237ab3121379c3494e213898569014ede1846d"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
 
 ### Deployment configuration
