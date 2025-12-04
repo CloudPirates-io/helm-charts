@@ -1,6 +1,36 @@
 # Changelog
 
-## 0.10.1 ()
+## 0.11.1 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([5ead46d](https://github.com/CloudPirates-io/helm-charts/commit/5ead46d))
+* chore: update CHANGELOG.md for merged changes ([5428a9d](https://github.com/CloudPirates-io/helm-charts/commit/5428a9d))
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.7 (patch) (#664) ([3224ae7](https://github.com/CloudPirates-io/helm-charts/commit/3224ae7))
+
+## 0.11.0 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([b4e5184](https://github.com/CloudPirates-io/helm-charts/commit/b4e5184))
+* chore: update CHANGELOG.md for merged changes ([84cd609](https://github.com/CloudPirates-io/helm-charts/commit/84cd609))
+* Fix/allow realm import on production mode (#668) ([be3939e](https://github.com/CloudPirates-io/helm-charts/commit/be3939e))
+* chore: update CHANGELOG.md for merged changes ([bdc9c44](https://github.com/CloudPirates-io/helm-charts/commit/bdc9c44))
+* chore: update CHANGELOG.md for merged changes ([79f87c5](https://github.com/CloudPirates-io/helm-charts/commit/79f87c5))
+
+## 0.10.2 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([3191aa5](https://github.com/CloudPirates-io/helm-charts/commit/3191aa5))
+* Use correct metrics path if httpRelativePath is set (#666) ([87276ae](https://github.com/CloudPirates-io/helm-charts/commit/87276ae))
+
+## 0.10.1 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([0ff63ff](https://github.com/CloudPirates-io/helm-charts/commit/0ff63ff))
+* chore: update CHANGELOG.md for merged changes ([b7aabd2](https://github.com/CloudPirates-io/helm-charts/commit/b7aabd2))
+* Preserve themes and providers options (#660) ([1bf70b4](https://github.com/CloudPirates-io/helm-charts/commit/1bf70b4))
+
+## 0.10.0 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([723bd23](https://github.com/CloudPirates-io/helm-charts/commit/723bd23))
+* chore: update CHANGELOG.md for merged changes ([786bcaf](https://github.com/CloudPirates-io/helm-charts/commit/786bcaf))
+* Add support for PriorityClass (#651) ([0aaf369](https://github.com/CloudPirates-io/helm-charts/commit/0aaf369))
+
 ## 0.9.1 (2025-11-24)
 
 * chore: update CHANGELOG.md for merged changes ([fe5d8ec](https://github.com/CloudPirates-io/helm-charts/commit/fe5d8ec))

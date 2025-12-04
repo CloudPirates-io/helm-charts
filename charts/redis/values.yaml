@@ -460,3 +460,13 @@ customScripts:
     # - |
     #   sleep 10
     #   redis-cli shutdown
+
+## @section clusterInitJob Configurations for the Job-Template
+clusterInitJob:
+  ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi

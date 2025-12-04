@@ -30,4 +30,7 @@ data:
     # Standard Port Configuration
     port {{ .Values.service.port }}
     {{- end }}
+    {{- if not .Values.persistence.enabled }}
+    save ""
+    {{- end }}
 {{- end }}

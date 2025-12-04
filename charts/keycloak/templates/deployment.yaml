@@ -73,9 +73,9 @@ spec:
             - start
             {{- else }}
             - start-dev
+            {{- end }}
             {{- if .Values.realm.import }}
             - --import-realm
-            {{- end }}
             {{- end }}
             {{- if .Values.keycloak.httpEnabled }}
             - --http-enabled=true
@@ -290,10 +290,14 @@ spec:
               mountPath: /opt/keycloak/work
             - name: keycloak-lib-quarkus
               mountPath: /opt/keycloak/lib/quarkus
+            {{- if not .Values.preserveThemes }}
             - name: keycloak-themes
               mountPath: /opt/keycloak/themes
+            {{- end }}
+            {{- if not .Values.preserveProviders }}
             - name: keycloak-providers
               mountPath: /opt/keycloak/providers
+            {{- end }}
             {{- if .Values.realm.configFile }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
