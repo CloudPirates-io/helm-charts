@@ -93,6 +93,12 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`    |
 
+### Pod labels
+
+| Parameter        | Description     | Default |
+| ---------------- | --------------- | ------- |
+| `podLabels`      | Pod labels      | `{}`    |
+
 ### Security Context
 
 | Parameter                                           | Description                                       | Default   |
