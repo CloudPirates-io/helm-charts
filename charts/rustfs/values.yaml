@@ -68,7 +68,7 @@ config:
 replicaCount: 1
 ## @section Deployment type configuration
 ## @param deploymentType Type of deployment (deployment or statefulset). StatefulSet needs a replicacount of 4.
-deploymentType: "deployment"
+deploymentType: "statefulset"
 
 ## @param updateStrategy Update strategy for StatefulSet (only applies when deploymentType is statefulset)
 updateStrategy:
@@ -207,6 +207,8 @@ dataPersistence:
   storageClass: ""
   ## @param dataPersistence.annotations Persistent Volume Claim annotations for data
   annotations: {}
+  ## @param dataPersistence.labels Labels for the data persistent volume claim
+  labels: {}
   ## @param dataPersistence.size Persistent Volume size for data
   size: 10Gi
   ## @param dataPersistence.accessModes Persistent Volume access modes for data
@@ -225,6 +227,8 @@ logsPersistence:
   storageClass: ""
   ## @param logsPersistence.annotations Persistent Volume Claim annotations for logs
   annotations: {}
+  ## @param logsPersistence.labels Labels for the logs persistent volume claim
+  labels: {}
   ## @param logsPersistence.size Persistent Volume size for logs
   size: 1Gi
   ## @param logsPersistence.accessModes Persistent Volume access modes for logs
