@@ -25,7 +25,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+  tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -318,7 +318,7 @@ sentinel:
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
-    tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+    tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)
