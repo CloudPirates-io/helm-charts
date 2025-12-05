@@ -647,7 +647,10 @@ spec:
       metadata:
         name: data
         labels:
-          {{- include "redis.labels" . | nindent 10 }}
+          {{- include "redis.selectorLabels" . | nindent 10 }}
+          {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}
