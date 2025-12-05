@@ -545,8 +545,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with $labels := merge (include "valkey.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
         labels:
-          {{- include "valkey.labels" . | nindent 10 }}
+          {{- toYaml $labels | nindent 8 }}
+        {{- end }}
         {{- if .Values.persistence.annotations }}
         annotations:
           {{- toYaml .Values.persistence.annotations | nindent 10 }}
