@@ -188,6 +188,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
 | `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
 | `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
+| `persistence.labels`       | Labels for persistent volume claims         | `{}`                |
 | `persistence.selector`     | Additional labels for the PVC               | `{}`                |
 
 ### Security Context Parameters

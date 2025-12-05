@@ -142,6 +142,8 @@ persistence:
   size: 8Gi
   ## @param persistence.annotations Additional custom annotations for the PVC
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.selector Additional labels for the PVC
   selector: {}
 
