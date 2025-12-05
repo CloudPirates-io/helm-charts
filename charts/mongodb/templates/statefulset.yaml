@@ -264,8 +264,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with $labels := merge (include "mongodb.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
         labels:
-          {{- include "mongodb.labels" . | nindent 10 }}
+          {{- toYaml $labels | nindent 8 }}
+        {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}
