@@ -22,7 +22,7 @@ image:
   ## @param image.repository TimescaleDB image repository
   repository: timescale/timescaledb
   ## @param image.tag TimescaleDB image tag (immutable tags are recommended)
-  tag: "2.23.1-pg17@sha256:a6581100f2f1cd1e03a29a94a49c488a174de65e57301c04de255804645e5a31"
+  tag: "2.24.0-pg17@sha256:e953289fe276c1b0e3867af65f03af4b677072e96a507a3e5b852b64d3be91d4"
   ## @param image.imagePullPolicy TimescaleDB image pull policy
   imagePullPolicy: Always
 
@@ -34,6 +34,9 @@ replicaCount: 1
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+
+## @section Pod labels
+podLabels: {}
 
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
@@ -127,6 +130,8 @@ persistence:
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.size Persistent Volume size
   size: 8Gi
   ## @param persistence.accessModes Persistent Volume access modes

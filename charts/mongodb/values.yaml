@@ -103,6 +103,8 @@ persistence:
   mountPath: /data/db
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claim
+  labels: {}
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param persistence.subPath The subdirectory of the volume to mount to
