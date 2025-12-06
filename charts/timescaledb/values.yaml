@@ -35,6 +35,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
 
+## @section Pod labels
+podLabels: {}
+
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
   allowPrivilegeEscalation: false
@@ -127,6 +130,8 @@ persistence:
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.size Persistent Volume size
   size: 8Gi
   ## @param persistence.accessModes Persistent Volume access modes

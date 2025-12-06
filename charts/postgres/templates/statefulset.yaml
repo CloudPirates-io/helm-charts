@@ -294,8 +294,10 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
       labels:
-        {{- include "postgres.labels" . | nindent 8 }}
+        {{- toYaml $labels | nindent 8 }}
+      {{- end }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

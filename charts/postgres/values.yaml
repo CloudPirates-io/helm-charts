@@ -203,6 +203,8 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
