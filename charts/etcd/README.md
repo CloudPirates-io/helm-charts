@@ -84,19 +84,19 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 ## Configuration
 
 ### Global Parameters
-| Parameter                 | Description                           | Default                 |
-| ------------------------- | ------------------------------------- | ----------------------- |
-| `global.imageRegistry`    | Global Docker image registry override | `""`                    |
-| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`                    |
+| Parameter                 | Description                           | Default |
+| ------------------------- | ------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry override | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`    |
 
 ### Image Configuration
 
-| Parameter                 | Description                           | Default                 |
-| ------------------------- | ------------------------------------- | ----------------------- |
-| `image.registry`          | etcd image registry                   | `gcr.io`                |
-| `image.repository`        | etcd image repository                 | `etcd-development/etcd` |
-| `image.tag`               | etcd image tag                        | `v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3`        |
-| `image.pullPolicy`        | Image pull policy                     | `IfNotPresent`          |
+| Parameter          | Description           | Default                                                                          |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------- |
+| `image.registry`   | etcd image registry   | `gcr.io`                                                                         |
+| `image.repository` | etcd image repository | `etcd-development/etcd`                                                          |
+| `image.tag`        | etcd image tag        | `v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3` |
+| `image.pullPolicy` | Image pull policy     | `IfNotPresent`                                                                   |
 
 ### Common Parameters
 
@@ -150,14 +150,15 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 
 ### Persistence
 
-| Parameter                  | Description                    | Default           |
-| -------------------------- | ------------------------------ | ----------------- |
-| `persistence.enabled`      | Enable persistence using PVC   | `true`            |
-| `persistence.storageClass` | Storage class of backing PVC   | `""`              |
-| `persistence.annotations`  | Annotations for the PVC        | `{}`              |
-| `persistence.size`         | Size of data volume            | `8Gi`             |
-| `persistence.accessModes`  | Persistent Volume Access Modes | `[ReadWriteOnce]` |
-| `persistence.mountPath`    | Mount path for data volume     | `/var/run/etcd`   |
+| Parameter                  | Description                         | Default           |
+| -------------------------- | ----------------------------------- | ----------------- |
+| `persistence.enabled`      | Enable persistence using PVC        | `true`            |
+| `persistence.storageClass` | Storage class of backing PVC        | `""`              |
+| `persistence.annotations`  | Annotations for the PVC             | `{}`              |
+| `persistence.labels`       | Labels for persistent volume claims | `{}`              |
+| `persistence.size`         | Size of data volume                 | `8Gi`             |
+| `persistence.accessModes`  | Persistent Volume Access Modes      | `[ReadWriteOnce]` |
+| `persistence.mountPath`    | Mount path for data volume          | `/var/run/etcd`   |
 
 ### Resources
 

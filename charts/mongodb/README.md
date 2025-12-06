@@ -148,6 +148,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `persistence.size`          | Size of persistent volume                          | `8Gi`           |
 | `persistence.mountPath`     | Mount path for MongoDB data                        | `/data/db`      |
 | `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`            |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
 | `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 

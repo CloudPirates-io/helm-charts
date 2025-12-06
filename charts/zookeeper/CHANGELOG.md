@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.3.4 (2025-12-04)
+
+* chore: update CHANGELOG.md for merged changes ([f13ea15](https://github.com/CloudPirates-io/helm-charts/commit/f13ea15))
+* chore: update CHANGELOG.md for merged changes ([3c33f3e](https://github.com/CloudPirates-io/helm-charts/commit/3c33f3e))
+* fix network policy switch (#690) ([f7b8ae2](https://github.com/CloudPirates-io/helm-charts/commit/f7b8ae2))
+
 ## 0.3.3 (2025-12-01)
 
 * chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))

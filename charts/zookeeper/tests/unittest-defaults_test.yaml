@@ -44,3 +44,56 @@ tests:
       - matchRegex:
           path: data["zoo.cfg"]
           pattern: "tickTime=2000"
+
+  - it: should create volumeClaimTemplates by default (persistence enabled)
+    template: statefulset.yaml
+    asserts:
+      - isNotNull:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.accessModes[0]
+          value: ReadWriteOnce
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 8Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+
+  - it: should use emptyDir when persistence is disabled
+    template: statefulset.yaml
+    set:
+      persistence:
+        enabled: false
+    asserts:
+      - isNull:
+          path: spec.volumeClaimTemplates
+      - isNotNull:
+          path: spec.template.spec.volumes
+      - equal:
+          path: spec.template.spec.volumes[0].name
+          value: data
+      - isNotNull:
+          path: spec.template.spec.volumes[0].emptyDir
+
+  - it: should use existing PVC when existingClaim is set
+    template: statefulset.yaml
+    set:
+      persistence:
+        enabled: true
+        existingClaim: my-existing-pvc
+    asserts:
+      - isNull:
+          path: spec.volumeClaimTemplates
+      - isNotNull:
+          path: spec.template.spec.volumes
+      - equal:
+          path: spec.template.spec.volumes[0].name
+          value: data
+      - equal:
+          path: spec.template.spec.volumes[0].persistentVolumeClaim.claimName
+          value: my-existing-pvc
