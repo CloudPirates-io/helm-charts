@@ -25,7 +25,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+  tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -85,6 +85,24 @@ auth:
   existingSecret: ""
   ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
   existingSecretPasswordKey: "password"
+
+## @section TLS/SSL configuration
+tls:
+  ## @param tls.enabled Enable TLS/SSL for Valkey connections
+  enabled: false
+  ## @param tls.existingSecret Name of an existing secret containing TLS certificates
+  ## Expected keys in the secret: tls.crt, tls.key, ca.crt
+  existingSecret: ""
+  ## @param tls.certFilename Certificate filename in the secret
+  certFilename: "tls.crt"
+  ## @param tls.certKeyFilename Certificate key filename in the secret
+  certKeyFilename: "tls.key"
+  ## @param tls.certCAFilename CA certificate filename in the secret
+  certCAFilename: "ca.crt"
+  ## @param tls.port TLS port for Valkey (default: 6380)
+  port: 6380
+  ## @param tls.authClients Require clients to authenticate with a valid client certificate
+  authClients: true
 
 ## @section Valkey Configuration
 config:
@@ -162,6 +180,8 @@ persistence:
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.size Persistent Volume size
   size: 8Gi
   ## @param persistence.accessModes Persistent Volume access modes
@@ -251,7 +271,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.80.0-alpine@sha256:1484ab443e344ac4fd23bb2df8edd297b704abb9e0a354ab5103017764b4a311"
+    tag: "v1.80.1-alpine@sha256:9c6a2f80054875ab36ca7020edbe68a1d05dd6745d030cc6317812ad14333897"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -300,7 +320,7 @@ sentinel:
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
-    tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+    tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.masterName Name of the master server (default: mymaster)

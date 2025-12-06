@@ -398,6 +398,9 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "existingClaim": {
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
                 },
@@ -405,6 +408,9 @@
                     "type": "string"
                 },
                 "storageClass": {
+                    "type": "string"
+                },
+                "subPath": {
                     "type": "string"
                 }
             }
@@ -493,6 +499,14 @@
         "sentinel": {
             "type": "object",
             "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "announceHostnames": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },
@@ -577,10 +591,35 @@
                 "clusterPort": {
                     "type": "integer"
                 },
+                "headless": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        }
+                    }
+                },
                 "port": {
                     "type": "integer"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -604,6 +643,32 @@
                     "type": "integer"
                 },
                 "timeoutSeconds": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tls": {
+            "type": "object",
+            "properties": {
+                "authClients": {
+                    "type": "boolean"
+                },
+                "certCAFilename": {
+                    "type": "string"
+                },
+                "certFilename": {
+                    "type": "string"
+                },
+                "certKeyFilename": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "port": {
                     "type": "integer"
                 }
             }

@@ -67,6 +67,18 @@ Validate values of MariaDB - Authentication
 {{- end }}
 
 {{/*
+Return the MariaDB initdb scripts ConfigMap Name
+*/}}
+{{- define "mariadb.initdbScriptsConfigMap" -}}
+{{- if .Values.initdbScriptsConfigMap }}
+{{- printf "%s" (tpl .Values.initdbScriptsConfigMap $) -}}
+{{- else }}
+{{- printf "" }}
+{{- end }}
+{{- end }}
+
+
+{{/*
 Return the MariaDB ConfigMap Name
 */}}
 {{- define "mariadb.configMapName" -}}
@@ -121,4 +133,15 @@ Generate Galera node address
 */}}
 {{- define "mariadb.galeraNodeAddress" -}}
 {{- printf "%s-%s.%s.%s.svc.cluster.local" (include "mariadb.fullname" .) "REPLICA_NUM" (include "mariadb.fullname" .) .Release.Namespace -}}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "mariadb.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "mariadb.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
 {{- end }}

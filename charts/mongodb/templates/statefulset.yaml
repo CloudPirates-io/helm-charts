@@ -146,6 +146,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
             {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
             - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d/
@@ -222,6 +225,11 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- end }}
         {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
         - name: init-scripts
           configMap:
@@ -252,9 +260,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- if .Values.persistence.enabled }}
+  {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with $labels := merge (include "mongodb.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+        labels:
+          {{- toYaml $labels | nindent 10 }}
+        {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}
@@ -268,4 +281,5 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size | quote }}
+    {{- end }}
   {{- end }}

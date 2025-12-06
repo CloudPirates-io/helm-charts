@@ -1,8 +1,12 @@
 apiVersion: apps/v1
+{{- if eq .Values.deploymentType "StatefulSet" }}
+kind: StatefulSet
+{{- else }}
 kind: Deployment
+{{- end }}
 metadata:
   name: {{ include "memcached.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "memcached.labels" . | nindent 4 }}
   {{- with (include "memcached.annotations" .) }}
@@ -11,6 +15,9 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- if eq .Values.deploymentType "StatefulSet" }}
+  serviceName: {{ include "memcached.fullname" . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "memcached.selectorLabels" . | nindent 6 }}
@@ -18,6 +25,9 @@ spec:
     metadata:
       labels:
         {{- include "memcached.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

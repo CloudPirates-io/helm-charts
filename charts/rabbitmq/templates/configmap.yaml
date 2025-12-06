@@ -51,6 +51,13 @@ data:
 
     {{- if .Values.config.memoryHighWatermark.enabled }}
     # Memory configuration
+    # Note: Large absolute values should be specified as strings (e.g., "8GB" or "8590000000")
+    # to avoid scientific notation conversion by YAML (e.g., 8e+9)
+    {{- if and (eq .Values.config.memoryHighWatermark.type "relative") .Values.resources.limits .Values.resources.limits.memory }}
+    # Override available memory calculation to use container memory limit instead of node memory
+    # This ensures relative memory watermark is calculated based on container limits
+    total_memory_available_override_value = {{ .Values.resources.limits.memory }}
+    {{- end }}
     vm_memory_high_watermark.{{ .Values.config.memoryHighWatermark.type }} = {{ .Values.config.memoryHighWatermark.value }}
     {{- end }}
 

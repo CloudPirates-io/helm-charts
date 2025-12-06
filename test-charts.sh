@@ -159,6 +159,28 @@ test_chart() {
         return 1
     fi
     
+    # For library charts, we can't do much more than linting and unit tests.
+    if grep -q "type: library" Chart.yaml; then
+        echo -e "${YELLOW}ℹ️  Library chart detected. Skipping installation tests.${NC}"
+
+        # Helm unittest (if tests exist and not disabled)
+        if [ -f ".disable-unittest" ]; then
+            echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
+        elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+            echo "🧪 Running Helm unittest..."
+            if ! helm unittest .; then
+                echo -e "${RED}❌ Helm unittest failed for $chart${NC}"
+                return 1
+            fi
+        else
+            echo -e "${YELLOW}ℹ️  No unittest tests found for $chart${NC}"
+        fi
+
+        echo -e "${GREEN}✅ Chart $chart (library) tested successfully${NC}"
+        cd "$SCRIPT_DIR"
+        return 0
+    fi
+    
     # Test template rendering
     echo "📝 Testing template rendering..."
 
@@ -343,7 +365,7 @@ main() {
         fi
     else
         # Test all charts
-        CHARTS=($(find "$CHARTS_DIR" -maxdepth 1 -type d ! -name '.' ! -name 'charts' ! -name 'common' -exec basename {} \;))
+        CHARTS=($(find "$CHARTS_DIR" -maxdepth 1 -type d ! -name '.' ! -name 'charts' -exec basename {} \; | sort))
         
         if [ ${#CHARTS[@]} -eq 0 ]; then
             echo -e "${RED}❌ No charts found in $CHARTS_DIR${NC}"

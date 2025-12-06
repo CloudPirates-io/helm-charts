@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-timescaledb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-timescaledb" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-timescaledb/timescaledb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-timescaledb" /></a>
 </p>
 
 # TimescaleDB
@@ -8,7 +8,7 @@ A Helm chart for TimescaleDB - The Open Source Time-Series Database for PostgreS
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-timescaledb`:
 
 ```bash
 helm install my-timescaledb oci://registry-1.docker.io/cloudpirates/timescaledb
+```
+
+To install with custom values:
+
+```bash
+helm install my-timescaledb oci://registry-1.docker.io/cloudpirates/timescaledb -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -68,16 +74,16 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `global.imageRegistry`    | Global Docker image registry                    | `""`    |
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
 
-### TimescaleDB image configuration
+### Image configuration
 
-| Parameter          | Description                                            | Default                 |
-| ------------------ | ------------------------------------------------------ | ----------------------- |
-| `image.registry`   | TimescaleDB image registry                             | `docker.io`             |
-| `image.repository` | TimescaleDB image repository                           | `timescale/timescaledb` |
-| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.17.2-pg17"`         |
-| `image.pullPolicy` | TimescaleDB image pull policy                          | `Always`                |
+| Parameter          | Description                                            | Default                                                                                 |
+| ------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `image.registry`   | TimescaleDB image registry                             | `docker.io`                                                                             |
+| `image.repository` | TimescaleDB image repository                           | `timescale/timescaledb`                                                                 |
+| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.23.1-pg17@sha256:a6581100f2f1cd1e03a29a94a49c488a174de65e57301c04de255804645e5a31"` |
+| `image.pullPolicy` | TimescaleDB image pull policy                          | `Always`                                                                                |
 
-### Deployment configuration
+### Common configuration
 
 | Parameter           | Description                                                                                                      | Default |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
@@ -86,6 +92,12 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `fullnameOverride`  | String to fully override timescaledb.fullname                                                                    | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`    |
+
+### Pod labels
+
+| Parameter        | Description     | Default |
+| ---------------- | --------------- | ------- |
+| `podLabels`      | Pod labels      | `{}`    |
 
 ### Security Context
 
@@ -161,6 +173,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
@@ -198,10 +211,10 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| Parameter      | Description                                                             | Default |
+| -------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars` | Additional environment variables to set                                 | `[]`    |
+| `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects
 
@@ -410,38 +423,7 @@ kubectl port-forward service/my-timescaledb 5432:5432
 
 ```bash
 # Connect as postgres user
-PGPASSWORD=your-password psql -h localhost -U postgres -d postgres
-
-# Connect to default postgres database
-PGPASSWORD=your-password psql -h localhost -U postgres -d postgres
-```
-
-### Working with Time-Series Data
-
-Once connected, you can create hypertables for time-series data:
-
-```sql
--- Create a regular table
-CREATE TABLE sensor_data (
-  time TIMESTAMPTZ NOT NULL,
-  sensor_id INTEGER,
-  temperature DOUBLE PRECISION,
-  humidity DOUBLE PRECISION
-);
-
--- Convert it to a hypertable
-SELECT create_hypertable('sensor_data', 'time');
-
--- Insert time-series data
-INSERT INTO sensor_data VALUES
-  (NOW(), 1, 20.5, 65.2),
-  (NOW() - INTERVAL '1 hour', 1, 19.8, 64.1),
-  (NOW() - INTERVAL '2 hours', 1, 21.2, 66.8);
-
--- Query recent data
-SELECT * FROM sensor_data
-WHERE time > NOW() - INTERVAL '24 hours'
-ORDER BY time DESC;
+psql -h localhost -U postgres -d postgres -W
 ```
 
 ### Default Credentials
@@ -540,21 +522,6 @@ kubectl exec -it <pod-name> -- pg_dump -U postgres -d mydb --schema-only > schem
 kubectl exec -it <pod-name> -- pg_dump -U postgres -d mydb --data-only > data.sql
 ```
 
-### Monitoring Time-Series Performance
-
-Check hypertable statistics:
-
-```sql
-SELECT * FROM timescaledb_information.hypertables;
-SELECT * FROM timescaledb_information.chunks;
-```
-
-Monitor compression:
-
-```sql
-SELECT * FROM timescaledb_information.compression_settings;
-```
-
 ### Getting Support
 
 For issues related to this Helm chart, please check:
@@ -562,4 +529,4 @@ For issues related to this Helm chart, please check:
 - [TimescaleDB Documentation](https://docs.timescale.com/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

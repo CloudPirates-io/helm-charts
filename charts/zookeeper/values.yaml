@@ -24,7 +24,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.4@sha256:2408ba6f6eb91a4dbf65548428b90f9e5e9cf9d77e5f280a4bf80270d465a80f"
+  tag: "3.9.4@sha256:b87f5ea0cdc73d71c74875277ca2e862f7abb3c0bfa365bd818db71eef870917"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -39,7 +39,7 @@ podDisruptionBudget:
 
 networkPolicy:
   ## @param networkPolicy.enabled Enable network policies
-  enabled: true
+  enabled: false
 
 ## @section Zookeeper configuration parameters
 ## @see https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_configuration
