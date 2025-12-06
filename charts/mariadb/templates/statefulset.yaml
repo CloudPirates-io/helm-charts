@@ -264,7 +264,7 @@ spec:
         {{- if .Values.initdbScriptsConfigMap }}
         - name: custom-init-scripts
           configMap:
-            name: {{ .Values.initdbScriptsConfigMap }}
+            name: {{ include "mariadb.initdbScriptsConfigMap" . }}
         {{- end }}
         {{- range $secret := .Values.extraSecrets }}
         - name: {{ $secret.name }}
@@ -301,9 +301,9 @@ spec:
       kind: PersistentVolumeClaim
       metadata:
         name: data
-        {{- with .Values.commonLabels }}
-        labels: 
-{{ toYaml . | indent 10}}
+        {{- with $labels := merge (include "mariadb.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+        labels:
+          {{- toYaml $labels | nindent 10 }}
         {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:

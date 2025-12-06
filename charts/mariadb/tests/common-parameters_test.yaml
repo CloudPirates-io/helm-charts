@@ -172,3 +172,18 @@ tests:
       - equal:
           path: spec.template.spec.imagePullSecrets[0].name
           value: global-secret
+  - it: initdbScriptsConfigMap should evaluate template strings
+    set:
+      initdbScriptsConfigMap: "{{ .Release.Name }}-init-db-script"
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="custom-init-scripts")].configMap.name
+          value: RELEASE-NAME-init-db-script
+  - it: initdbScriptsConfigMap is optional
+    template: statefulset.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.volumes[?(@.name=="custom-init-scripts")]
+      - notExists:
+          path: spec.template.spec.containers[?(@.name=="mariadb")].volumeMounts[?(@.name=="custom-init-scripts")]          

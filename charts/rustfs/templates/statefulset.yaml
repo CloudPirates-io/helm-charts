@@ -183,8 +183,10 @@ spec:
     - metadata:
         name: data
         labels:
-          {{- include "rustfs.labels" . | nindent 10 }}
           app.kubernetes.io/component: data
+          {{- with $labels := merge (include "rustfs.selectorLabels" . | fromYaml) .Values.dataPersistence.labels .Values.podLabels }}
+            {{- toYaml $labels | nindent 10 }}
+          {{- end }}
         {{- $annotations := merge .Values.dataPersistence.annotations .Values.commonAnnotations }}
         {{- with $annotations }}
         annotations:
@@ -210,8 +212,10 @@ spec:
     - metadata:
         name: logs
         labels:
-          {{- include "rustfs.labels" . | nindent 10 }}
           app.kubernetes.io/component: logs
+          {{- with $labels := merge (include "rustfs.selectorLabels" . | fromYaml) .Values.logsPersistence.labels .Values.podLabels }}
+            {{- toYaml $labels | nindent 10 }}
+          {{- end }}
         {{- $annotations := merge .Values.logsPersistence.annotations .Values.commonAnnotations }}
         {{- with $annotations }}
         annotations:
