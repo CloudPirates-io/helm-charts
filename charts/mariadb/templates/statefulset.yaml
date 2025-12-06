@@ -264,7 +264,7 @@ spec:
         {{- if .Values.initdbScriptsConfigMap }}
         - name: custom-init-scripts
           configMap:
-            name: {{ .Values.initdbScriptsConfigMap }}
+            name: {{ include "mariadb.initdbScriptsConfigMap" . }}
         {{- end }}
         {{- range $secret := .Values.extraSecrets }}
         - name: {{ $secret.name }}
