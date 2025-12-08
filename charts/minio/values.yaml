@@ -77,7 +77,13 @@ config:
 ## @param defaultBuckets Comma, semi-colon or space separated list of buckets to create at initialization
 ## Format: "bucket-name" or "bucket-name:policy" where policy can be: none, download, upload, or public
 ## e.g: "my-bucket, my-second-bucket:download, my-public-bucket:public"
-defaultBuckets: ""
+defaultBuckets: "test"
+
+## @section postJob Configuration for the Job '{{ .Release.Name }}-post-job'
+postJob:
+  ## postJob.annotations Additional annotations for the Job
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
 
 ## @section Deployment configuration
 replicaCount: 1
