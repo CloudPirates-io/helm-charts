@@ -6,9 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "minio.labels" . | nindent 4 }}
-  {{- with (include "minio.annotations" .) }}
+  {{- $annotations := merge (include "minio.annotations" . | fromYaml) .Values.postJob.annotations }}
+  {{- with $annotations }}
   annotations: 
-{{- . | indent 4 }}
+{{ toYaml . | indent 4 }}
   {{- end }}
 spec:
   ttlSecondsAfterFinished: 600
