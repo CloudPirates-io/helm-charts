@@ -183,6 +183,18 @@ The following table lists the configurable parameters of the MinIO chart and the
 | ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
 
+### Bucket provisioning
+
+| Parameter        | Description                                                                    | Default |
+| ---------------- | ------------------------------------------------------------------------------ | ------- |
+| `defaultBuckets` | Comma, semi-colon or space separated list of buckets to create at installation | `""`    |
+
+### Configuration for the Job '{{ .Release.Name }}-post-job'
+
+| Parameter             | Description                        | Default                                   |
+| --------------------- | ---------------------------------- | ----------------------------------------- |
+| `postJob.annotations` | Additional annotations for the Job | `helm.sh/hook: post-install,post-upgrade` |
+
 ### Persistence
 
 | Parameter                   | Description                                        | Default             |

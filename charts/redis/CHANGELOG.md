@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.16.7 (2025-12-09)
+
+* [redis] Update charts/redis/values.yaml redis ([#713](https://github.com/CloudPirates-io/helm-charts/pull/713))
+
+## 0.16.6 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([efa3d5c](https://github.com/CloudPirates-io/helm-charts/commit/efa3d5c))
+* chore: update CHANGELOG.md for merged changes ([4828bdb](https://github.com/CloudPirates-io/helm-charts/commit/4828bdb))
+* return fqdn for sentinel replicas lookup (#700) (#701) ([76a4a10](https://github.com/CloudPirates-io/helm-charts/commit/76a4a10))
+* chore: update CHANGELOG.md for merged changes ([1b3a65d](https://github.com/CloudPirates-io/helm-charts/commit/1b3a65d))
+* chore: update CHANGELOG.md for merged changes ([b0df43c](https://github.com/CloudPirates-io/helm-charts/commit/b0df43c))
 
 ## 0.16.5 (2025-12-05)
 
