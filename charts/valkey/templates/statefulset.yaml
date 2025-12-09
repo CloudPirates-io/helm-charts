@@ -187,10 +187,8 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.initContainer.resources | nindent 12 }}
           volumeMounts:
-            {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: {{ .Values.config.mountPath }}
-            {{- end }}
             - name: valkey-config
               mountPath: /tmp/valkey
       {{- end }}

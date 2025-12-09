@@ -106,6 +106,8 @@ tls:
 
 ## @section Valkey Configuration
 config:
+  ## @param config.mountPath Redis configuration options
+  mountPath: /etc/valkey
   ## @param config.maxMemory Maximum memory usage for Valkey (e.g., 256mb, 1gb)
   maxMemory: ""
   ## @param config.maxMemoryPolicy Memory eviction policy when maxmemory is reached
