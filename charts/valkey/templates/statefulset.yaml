@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "valkey.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "valkey.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}
@@ -82,7 +82,7 @@ spec:
               if [ "$SENTINEL_FOUND" = true ] && [ -n "$CURRENT_MASTER" ]; then
                 # Sentinel knows the master - configure accordingly
                 MY_HOSTNAME=$(hostname)
-                MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "valkey.fullname" . }}-headless"
+                MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 MY_IP=$(hostname -i)
 
                 # Check if I am the master by hostname or IP
@@ -112,6 +112,8 @@ spec:
               fi
 
               # Configure for Sentinel discovery and force deletion tolerance
+              {{ if not .Values.sentinel.config.announceHostnames }}
+              # Configure for Sentinel discovery and force deletion tolerance
               # Get IP address based on ipFamily setting
               {{- if eq .Values.ipFamily "ipv4" }}
               MY_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
@@ -129,11 +131,19 @@ spec:
               # auto: Use the first IP address for dual-stack compatibility
               MY_IP=$(hostname -i | awk '{print $1}')
               {{- end }}
+
               echo "Using IP address: ${MY_IP}"
               echo "replica-announce-ip ${MY_IP}" >> /tmp/valkey/valkey.conf
-              echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
               echo "slave-announce-ip ${MY_IP}" >> /tmp/valkey/valkey.conf
+              echo "slave-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
+              {{- else }}
+              echo "Using hostname: ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+              echo "replica-announce-ip ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}" >> /tmp/valkey/valkey.conf
+              echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              echo "slave-announce-ip ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}" >> /tmp/valkey/valkey.conf
               echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              {{- end }}
 
               # Make slaves more eligible for promotion during force deletions
               echo "slave-priority 100" >> /tmp/valkey/valkey.conf
@@ -142,7 +152,7 @@ spec:
               # Replication without Sentinel: pod-0 is always master, others are replicas
               if [ "$POD_ORDINAL" != "0" ]; then
                 echo "Configuring as replica of pod-0 (master)"
-                MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless"
+                MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
                 {{- if .Values.auth.enabled }}
                 echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
@@ -329,7 +339,7 @@ spec:
               echo "Checking existing Sentinels for current master..."
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
-                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless"
+                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   EXISTING_MASTER=$(valkey-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
                     MASTER_HOST="$EXISTING_MASTER"
@@ -344,7 +354,7 @@ spec:
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
                 echo "No Sentinels available, checking Valkey instances directly..."
                 for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                  VALKEY_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+                  VALKEY_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   ROLE_INFO=$(valkey-cli -h "${VALKEY_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$VALKEY_HOST"
@@ -356,7 +366,7 @@ spec:
 
               # Final fallback: Use pod-0 hostname for initial bootstrap only
               if [ -z "$MASTER_HOST" ]; then
-                MASTER_HOST="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+                MASTER_HOST="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
@@ -399,7 +409,11 @@ spec:
               # Fix leader election issues during force deletions
               protected-mode no
               # Allow sentinels to discover each other
+              {{ if .Values.sentinel.config.announceHostnames }}
+              sentinel announce-ip ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
+              {{- else }}
               sentinel announce-ip ${SENTINEL_IP}
+              {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
               loglevel notice
@@ -408,7 +422,7 @@ spec:
               # Add known sentinels to help with discovery (using hostnames for resilience)
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
-                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless"
+                  SENTINEL_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   # Test if the host is resolvable before adding
                   if getent hosts "$SENTINEL_HOST" >/dev/null 2>&1; then
                     SENTINEL_IP=$(getent hosts "$SENTINEL_HOST" | awk '{print $1}' | head -1)

@@ -146,8 +146,7 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts[0].host Hostname for Valkey ingress
@@ -323,6 +322,9 @@ sentinel:
     tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
+  ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  config:
+    announceHostnames: true
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
