@@ -9878,6 +9878,59 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
+            - kind: changed
+              description: "Update charts/postgres/values.yaml postgres (#712)"
+              links:
+                - name: "Commit a266333"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/a266333"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: PostgreSQL
+          url: https://www.postgresql.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+        - name: Application
+          url: https://github.com/postgres/postgres
+        - name: Docker Image
+          url: https://hub.docker.com/_/postgres
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 18.1.0
+    created: "2025-12-09T12:47:16.769083352Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: The World's Most Advanced Open Source Relational Database
+    digest: a591e5167dba309c8bdcbcc1a85ea8f378b8eb46d30ed92770c0f3254c1735df
+    home: https://www.postgresql.org
+    icon: https://a.storyblok.com/f/143071/512x512/95e7f13e62/postgres-logo.svg
+    keywords:
+    - postgres
+    - postgresql
+    - database
+    - sql
+    - relational
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: postgres
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+    - https://github.com/postgres/postgres
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/postgres-0.13.2/postgres-0.13.2.tgz
+    version: 0.13.2
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
             - kind: added
               description: "[postgres] Update charts/postgres/values.yaml postgres"
               links:
@@ -19633,4 +19686,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-09T12:31:16.195504221Z"
+generated: "2025-12-09T12:47:17.982935172Z"
