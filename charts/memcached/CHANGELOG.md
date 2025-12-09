@@ -1,6 +1,31 @@
 # Changelog
 
 
+## 0.7.0 (2025-11-17)
+
+* chore: update CHANGELOG.md for merged changes ([439d0b2](https://github.com/CloudPirates-io/helm-charts/commit/439d0b2))
+* chore: update CHANGELOG.md for merged changes ([d356bb2](https://github.com/CloudPirates-io/helm-charts/commit/d356bb2))
+* add serviceMonitor joblabel attribute to values (#610) ([098caf4](https://github.com/CloudPirates-io/helm-charts/commit/098caf4))
+
+## 0.6.0 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([1e00f03](https://github.com/CloudPirates-io/helm-charts/commit/1e00f03))
+* chore: update CHANGELOG.md for merged changes ([4dfd851](https://github.com/CloudPirates-io/helm-charts/commit/4dfd851))
+* support change to statefulset (#592) ([3c74ccf](https://github.com/CloudPirates-io/helm-charts/commit/3c74ccf))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.5.4 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([abda166](https://github.com/CloudPirates-io/helm-charts/commit/abda166))
+* chore: update CHANGELOG.md for merged changes ([be2722f](https://github.com/CloudPirates-io/helm-charts/commit/be2722f))
+
+## 0.5.3 (2025-11-05)
+
+* Add support for pod labels (#550) ([6071930](https://github.com/CloudPirates-io/helm-charts/commit/6071930))
+* chore: update CHANGELOG.md for merged changes ([d944483](https://github.com/CloudPirates-io/helm-charts/commit/d944483))
+* chore: update CHANGELOG.md for merged changes ([6038560](https://github.com/CloudPirates-io/helm-charts/commit/6038560))
+
 ## 0.5.2 (2025-11-04)
 
 * Update charts/memcached/values.yaml memcached (#543) ([8653b45](https://github.com/CloudPirates-io/helm-charts/commit/8653b45))

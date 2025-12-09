@@ -527,6 +527,32 @@
                 }
             }
         },
+        "tls": {
+            "type": "object",
+            "properties": {
+                "authClients": {
+                    "type": "boolean"
+                },
+                "certCAFilename": {
+                    "type": "string"
+                },
+                "certFilename": {
+                    "type": "string"
+                },
+                "certKeyFilename": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                }
+            }
+        },
         "tolerations": {
             "type": "array"
         }

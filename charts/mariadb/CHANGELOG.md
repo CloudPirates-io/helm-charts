@@ -1,6 +1,46 @@
 # Changelog
 
 
+## 0.9.0 (2025-12-06)
+
+
+## 0.8.1 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([af262f9](https://github.com/CloudPirates-io/helm-charts/commit/af262f9))
+* chore: update CHANGELOG.md for merged changes ([06224a4](https://github.com/CloudPirates-io/helm-charts/commit/06224a4))
+* Add template evaluation for initdbScriptsConfigMap (#697) ([56a2bb1](https://github.com/CloudPirates-io/helm-charts/commit/56a2bb1))
+
+## 0.8.0 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([fcd14c9](https://github.com/CloudPirates-io/helm-charts/commit/fcd14c9))
+* chore: update CHANGELOG.md for merged changes ([2c94b00](https://github.com/CloudPirates-io/helm-charts/commit/2c94b00))
+* Update charts/mariadb/values.yaml mariadb to v12.1.2 (minor) (#642) ([84a45fc](https://github.com/CloudPirates-io/helm-charts/commit/84a45fc))
+* chore: update CHANGELOG.md for merged changes ([d022e79](https://github.com/CloudPirates-io/helm-charts/commit/d022e79))
+* chore: update CHANGELOG.md for merged changes ([f8c2afc](https://github.com/CloudPirates-io/helm-charts/commit/f8c2afc))
+* chore: auto-generate values.schema.json (#625) ([68a23c4](https://github.com/CloudPirates-io/helm-charts/commit/68a23c4))
+* chore: update CHANGELOG.md for merged changes ([e28838e](https://github.com/CloudPirates-io/helm-charts/commit/e28838e))
+* chore: update CHANGELOG.md for merged changes ([9a592e4](https://github.com/CloudPirates-io/helm-charts/commit/9a592e4))
+
+## 0.7.0 (2025-11-18)
+
+* add support for serviceaccounts (#609) ([1e6d04f](https://github.com/CloudPirates-io/helm-charts/commit/1e6d04f))
+* chore: update CHANGELOG.md for merged changes ([02bb698](https://github.com/CloudPirates-io/helm-charts/commit/02bb698))
+* chore: update CHANGELOG.md for merged changes ([497db78](https://github.com/CloudPirates-io/helm-charts/commit/497db78))
+* Update charts/mariadb/values.yaml mariadb (#598) ([8ea69f6](https://github.com/CloudPirates-io/helm-charts/commit/8ea69f6))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.6.1 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([61b2eea](https://github.com/CloudPirates-io/helm-charts/commit/61b2eea))
+* chore: update CHANGELOG.md for merged changes ([5d5c386](https://github.com/CloudPirates-io/helm-charts/commit/5d5c386))
+* Update charts/mariadb/values.yaml mariadb (#579) ([dcf1d70](https://github.com/CloudPirates-io/helm-charts/commit/dcf1d70))
+* chore: update CHANGELOG.md for merged changes ([6fd22a6](https://github.com/CloudPirates-io/helm-charts/commit/6fd22a6))
+* chore: update CHANGELOG.md for merged changes ([3eb08ee](https://github.com/CloudPirates-io/helm-charts/commit/3eb08ee))
+* chore: auto-generate values.schema.json (#481) ([d37c7ed](https://github.com/CloudPirates-io/helm-charts/commit/d37c7ed))
+* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
+* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+
 ## 0.6.0 (2025-10-28)
 
 * chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))

@@ -154,6 +154,9 @@
         "extraEnvVars": {
             "type": "array"
         },
+        "extraInitContainers": {
+            "type": "array"
+        },
         "extraObjects": {
             "type": "array"
         },
@@ -384,6 +387,9 @@
         "nodeSelector": {
             "type": "object"
         },
+        "podLabels": {
+            "type": "object"
+        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -480,6 +486,9 @@
                     "type": "string"
                 }
             }
+        },
+        "sidecars": {
+            "type": "array"
         },
         "streamServerConfig": {
             "type": "string"

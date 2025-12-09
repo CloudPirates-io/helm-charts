@@ -137,3 +137,14 @@ Common Sentinel master query command
 {{- define "redis.sentinelMasterQuery" -}}
 {{- include "redis.sentinelCli" (dict "auth" .auth "context" .context) }} sentinel get-master-addr-by-name {{ .context.Values.sentinel.masterName }}
 {{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "redis.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "redis.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}

@@ -37,7 +37,11 @@ spec:
       {{- if .Values.metrics.serviceMonitor.honorLabels }}
       honorLabels: {{ .Values.metrics.serviceMonitor.honorLabels }}
       {{- end }}
+      {{- if or (eq .Values.keycloak.httpRelativePath "") (eq .Values.keycloak.httpRelativePath "/") }}
       path: /metrics
+      {{- else }}
+      path: {{ printf "%s/metrics" .Values.keycloak.httpRelativePath }}
+      {{- end }}
       {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
         {{- toYaml . | nindent 8 }}

@@ -16,7 +16,21 @@ data:
     
     # Network
     bind 0.0.0.0
+    {{- if .Values.tls.enabled }}
+    port 0
+    tls-port {{ .Values.tls.port }}
+    tls-cert-file /etc/valkey/tls/{{ .Values.tls.certFilename }}
+    tls-key-file /etc/valkey/tls/{{ .Values.tls.certKeyFilename }}
+    tls-ca-cert-file /etc/valkey/tls/{{ .Values.tls.certCAFilename }}
+    {{- if .Values.tls.authClients }}
+    tls-auth-clients yes
+    {{- else }}
+    tls-auth-clients no
+    {{- end }}
+    tls-replication yes
+    {{- else }}
     port {{ .Values.service.targetPort }}
+    {{- end }}
     
     # General
     daemonize no
