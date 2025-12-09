@@ -27,7 +27,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.1@sha256:e64a984d36b24419327c558b49a9100cf78191706222da6a7c8cf56a743ad3db"
+  tag: "8.2.2@sha256:7245ffb851d149dbfac67397caf91bae4974d899972f9fd1d8985fc6eea3c13d"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.command Override default container command (useful when using custom images)
@@ -103,6 +103,8 @@ persistence:
   mountPath: /data/db
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claim
+  labels: {}
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param persistence.subPath The subdirectory of the volume to mount to
@@ -212,7 +214,7 @@ metrics:
   image:
     registry: docker.io
     repository: percona/mongodb_exporter
-    tag: "0.47.1"
+    tag: "0.47.2"
     pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:

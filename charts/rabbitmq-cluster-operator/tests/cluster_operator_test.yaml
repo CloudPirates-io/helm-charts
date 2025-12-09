@@ -1,0 +1,233 @@
+suite: rabbitmq-cluster-operator-tests
+templates:
+  - templates/cluster-operator/deployment.yaml
+  - templates/cluster-operator/sa.yaml
+  - templates/cluster-operator/clusterrole.yaml
+  - templates/cluster-operator/clusterrolebinding.yaml
+  - templates/cluster-operator/role.yaml
+  - templates/cluster-operator/rolebinding.yaml
+  - templates/cluster-operator/networkpolicy.yaml
+  - templates/cluster-operator/pdb.yaml
+  - templates/cluster-operator/metrics-service.yaml
+  - templates/cluster-operator/podmonitor.yaml
+  - templates/cluster-operator/servicemonitor.yaml
+
+tests:
+  - it: should render cluster operator deployment with default values
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.replicas
+          value: 1
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/rabbitmqoperator/cluster-operator:2.17.2
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: When setting global image pull secrets, deployment should include them
+    set:
+      global.imagePullSecrets:
+        - mySecret1
+        - mySecret2
+        - mySecret3
+      clusterOperator.image.pullSecrets:
+        - mySecret2
+        - mySecret3
+        - mySecret4
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mySecret1
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: mySecret2
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[2].name
+          value: mySecret3
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets[3].name
+          value: mySecret4
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: should create service account with default values
+    asserts:
+      - isKind:
+          of: ServiceAccount
+        template: templates/cluster-operator/sa.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/sa.yaml
+
+  - it: should create clusterrole with default values
+    asserts:
+      - isKind:
+          of: ClusterRole
+        template: templates/cluster-operator/clusterrole.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-NAMESPACE
+        template: templates/cluster-operator/clusterrole.yaml
+
+  - it: should create clusterrolebinding with default values
+    asserts:
+      - isKind:
+          of: ClusterRoleBinding
+        template: templates/cluster-operator/clusterrolebinding.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-NAMESPACE
+        template: templates/cluster-operator/clusterrolebinding.yaml
+      - equal:
+          path: roleRef.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-NAMESPACE
+        template: templates/cluster-operator/clusterrolebinding.yaml
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+        template: templates/cluster-operator/clusterrolebinding.yaml
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/clusterrolebinding.yaml
+
+  - it: should create role with default values
+    asserts:
+      - isKind:
+          of: Role
+        template: templates/cluster-operator/role.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/role.yaml
+
+  - it: should create rolebinding with default values
+    asserts:
+      - isKind:
+          of: RoleBinding
+        template: templates/cluster-operator/rolebinding.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/rolebinding.yaml
+      - equal:
+          path: roleRef.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/rolebinding.yaml
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+        template: templates/cluster-operator/rolebinding.yaml
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/rolebinding.yaml
+
+  - it: should create network policy with default values
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+        template: templates/cluster-operator/networkpolicy.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/networkpolicy.yaml
+
+  - it: should create pdb with default values
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+        template: templates/cluster-operator/pdb.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/pdb.yaml
+
+  - it: should not create metrics service by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/metrics-service.yaml
+
+  - it: should create metrics service when enabled
+    set:
+      clusterOperator.metrics.service.enabled: true
+    asserts:
+      - isKind:
+          of: Service
+        template: templates/cluster-operator/metrics-service.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-metrics
+        template: templates/cluster-operator/metrics-service.yaml
+
+  - it: should not create podmonitor by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/podmonitor.yaml
+
+  - it: should create podmonitor when enabled
+    set:
+      clusterOperator.metrics.podMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: PodMonitor
+        template: templates/cluster-operator/podmonitor.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-metrics
+        template: templates/cluster-operator/podmonitor.yaml
+
+  - it: should not create servicemonitor by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/servicemonitor.yaml
+
+  - it: should create servicemonitor when enabled
+    set:
+      clusterOperator.metrics.serviceMonitor.enabled: true
+      clusterOperator.metrics.service.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator
+        template: templates/cluster-operator/servicemonitor.yaml

@@ -92,6 +92,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `fullnameOverride`  | String to fully override postgres.fullname                                                                     | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
+| `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
 
 ### Pod annotations and labels
 
@@ -197,6 +198,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |

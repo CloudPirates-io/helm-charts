@@ -6,6 +6,10 @@ templates:
   - templates/secret.yaml
   - templates/serviceaccount.yaml
   - templates/pvc.yaml
+set:
+  image:
+    tag: 26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
+
 tests:
   - it: should render default values correctly
     asserts:

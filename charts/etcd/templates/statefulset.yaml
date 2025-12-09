@@ -209,6 +209,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with $labels := merge (include "etcd.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+        labels:
+          {{- toYaml $labels | nindent 10 }}
+        {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}

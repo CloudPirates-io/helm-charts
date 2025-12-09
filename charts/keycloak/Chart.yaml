@@ -2,8 +2,8 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.8.6
-appVersion: "26.4.5"
+version: 0.11.3
+appVersion: "26.4.7"
 keywords:
   - keycloak
   - identity
@@ -52,4 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "quote dnsnames for certificates (#678)"
+          links:
+            - name: "Commit 1dde1f7"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/1dde1f7"

@@ -23,7 +23,7 @@ helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
 To install with custom values:
 
 ```bash
-helm install my-valkey oci://registry-1.docker.io/cloudpirates/valkey -f my-values.yaml
+helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -89,7 +89,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.4@sha256:c6459d5fae1b759f5d667ebdc6237ab3121379c3494e213898569014ede1846d"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
 
 ### Deployment configuration
@@ -111,6 +111,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ------------------- | ----------------------------------------------------- | ------- |
 | `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
 | `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
+| `preserveThemes`    | Preserve the original themes folder of the image      | `false` |
+| `preserveProviders` | Preserve the original providers folder of the image   | `false` |
 
 ### Extra init containers for Keycloak pod
 
@@ -242,9 +244,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Resources
 
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
+| Parameter   | Description                                                                 | Default |
+| ----------- |-----------------------------------------------------------------------------| ------- |
+| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
 
 ### Persistence
 
@@ -301,7 +303,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe           | `60`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe           | `1`     |
 
-### Node Selection
+### Scheduling
 
 | Parameter                   | Description                                    | Default |
 | --------------------------- | ---------------------------------------------- | ------- |
@@ -309,6 +311,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
 | `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
+| `priorityClassName`         | Priority class name for pod eviction           | `""`    |
 
 ### Service Account
 
@@ -538,6 +541,8 @@ realm:
 ### Using Custom Themes and Providers
 
 The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
+
+To disable this feature, set preserveThemes = true, preserveProviders = true. This will keep the original themes and providers respectively intact.
 
 **Example: Adding custom themes and providers with an initContainer**
 

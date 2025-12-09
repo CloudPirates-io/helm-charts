@@ -1,6 +1,60 @@
 # Changelog
 
 
+## 0.16.5 (2025-12-05)
+
+* Fix Redis issue with immutableFields cause by the label addition on volumeClaimTemplate (#695) ([f5ce66f](https://github.com/CloudPirates-io/helm-charts/commit/f5ce66f))
+
+## 0.16.4 (2025-12-03)
+
+* chore: update CHANGELOG.md for merged changes ([fffc3d2](https://github.com/CloudPirates-io/helm-charts/commit/fffc3d2))
+* chore: update CHANGELOG.md for merged changes ([17f253f](https://github.com/CloudPirates-io/helm-charts/commit/17f253f))
+* metrics service annotation does not work (#687) ([6c053af](https://github.com/CloudPirates-io/helm-charts/commit/6c053af))
+
+## 0.16.3 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([f0a81fa](https://github.com/CloudPirates-io/helm-charts/commit/f0a81fa))
+* add resources to init-cluster job (#680) ([63f8d22](https://github.com/CloudPirates-io/helm-charts/commit/63f8d22))
+
+## 0.16.2 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([1219e3d](https://github.com/CloudPirates-io/helm-charts/commit/1219e3d))
+* chore: update CHANGELOG.md for merged changes ([d1978ba](https://github.com/CloudPirates-io/helm-charts/commit/d1978ba))
+* set save in config if persistence is disabled (#677) ([4fdcde0](https://github.com/CloudPirates-io/helm-charts/commit/4fdcde0))
+
+## 0.16.1 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+
+## 0.16.0 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([f16dc26](https://github.com/CloudPirates-io/helm-charts/commit/f16dc26))
+* chore: update CHANGELOG.md for merged changes ([524f481](https://github.com/CloudPirates-io/helm-charts/commit/524f481))
+* Update charts/redis/values.yaml redis to v8.4.0 (minor) (#633) ([96c8dd7](https://github.com/CloudPirates-io/helm-charts/commit/96c8dd7))
+
+## 0.15.4 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([b20979c](https://github.com/CloudPirates-io/helm-charts/commit/b20979c))
+* chore: update CHANGELOG.md for merged changes ([f481c10](https://github.com/CloudPirates-io/helm-charts/commit/f481c10))
+* [oliver006/redis_exporter] Update image to v1.80.1 (#655) ([fcb59bc](https://github.com/CloudPirates-io/helm-charts/commit/fcb59bc))
+* chore: auto-generate values.schema.json (#641) ([cced77e](https://github.com/CloudPirates-io/helm-charts/commit/cced77e))
+* chore: update CHANGELOG.md for merged changes ([734cb3b](https://github.com/CloudPirates-io/helm-charts/commit/734cb3b))
+* chore: update CHANGELOG.md for merged changes ([fb2a9cc](https://github.com/CloudPirates-io/helm-charts/commit/fb2a9cc))
+
+## 0.15.3 (2025-11-20)
+
+* add option to use ip or hostname for sentinal announce-ip (#639) ([639cd31](https://github.com/CloudPirates-io/helm-charts/commit/639cd31))
+
+## 0.15.2 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([f8a3dd1](https://github.com/CloudPirates-io/helm-charts/commit/f8a3dd1))
+* chore: update CHANGELOG.md for merged changes ([33bf2b6](https://github.com/CloudPirates-io/helm-charts/commit/33bf2b6))
+* fix condition in statefulset (#637) ([8b74e74](https://github.com/CloudPirates-io/helm-charts/commit/8b74e74))
+* chore: update CHANGELOG.md for merged changes ([9c9daa4](https://github.com/CloudPirates-io/helm-charts/commit/9c9daa4))
+* chore: update CHANGELOG.md for merged changes ([ab89d7d](https://github.com/CloudPirates-io/helm-charts/commit/ab89d7d))
+* chore: auto-generate values.schema.json (#635) ([36f2dd4](https://github.com/CloudPirates-io/helm-charts/commit/36f2dd4))
+
 ## 0.15.1 (2025-11-19)
 
 * chore: update CHANGELOG.md for merged changes ([ea8e485](https://github.com/CloudPirates-io/helm-charts/commit/ea8e485))

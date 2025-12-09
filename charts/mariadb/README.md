@@ -109,7 +109,7 @@ The following table lists the configurable parameters of the MariaDB chart and t
 | ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`   | MariaDB image registry                             | `docker.io`                                                                        |
 | `image.repository` | MariaDB image repository                           | `mariadb`                                                                          |
-| `image.tag`        | MariaDB image tag (immutable tags are recommended) | `"12.0.2@sha256:5b6a1eac15b85b981a61afb89aea2a22bf76b5f58809d05f0bcc13ab6ec44cb8"` |
+| `image.tag`        | MariaDB image tag (immutable tags are recommended) | `"12.1.2@sha256:e1bcd6f85781f4a875abefb11c4166c1d79e4237c23de597bf0df81fec225b40"` |
 | `image.pullPolicy` | MariaDB image pull policy                          | `IfNotPresent`                                                                     |
 
 
@@ -188,6 +188,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
 | `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
 | `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
+| `persistence.labels`       | Labels for persistent volume claims         | `{}`                |
 | `persistence.selector`     | Additional labels for the PVC               | `{}`                |
 
 ### Security Context Parameters

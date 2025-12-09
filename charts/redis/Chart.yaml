@@ -2,8 +2,8 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.15.2
-appVersion: "8.2.3"
+version: 0.16.6
+appVersion: "8.4.0"
 keywords:
   - redis
   - database
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[redis]: tls support"
+          description: "Fix Redis issue with immutableFields cause by the label addition on volumeClaimTemplate (#695)"
           links:
-            - name: "Commit 963e2b8"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/963e2b8"
+            - name: "Commit f5ce66f"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/f5ce66f"

@@ -76,25 +76,25 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 ### Image configuration
 
-| Parameter          | Description                                                                                            | Default         |
-| ------------------ | ------------------------------------------------------------------------------------------------------ | --------------- |
-| `image.registry`   | Valkey image registry                                                                                  | `docker.io`     |
-| `image.repository` | Valkey image repository                                                                                | `valkey/valkey` |
-| `image.tag`        | Valkey image tag (immutable tags are recommended)                                                      | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"`       |
-| `image.pullPolicy` | Valkey image pull policy                                                                               | `IfNotPresent`  |
+| Parameter          | Description                                       | Default                                                                                      |
+| ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `image.registry`   | Valkey image registry                             | `docker.io`                                                                                  |
+| `image.repository` | Valkey image repository                           | `valkey/valkey`                                                                              |
+| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `image.pullPolicy` | Valkey image pull policy                          | `IfNotPresent`                                                                               |
 
 ### Common configuration
 
-| Parameter           | Description                                                                                    | Default        |
-| ------------------- | ---------------------------------------------------------------------------------------------- | -------------- |
-| `architecture`      | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`   |
-| `replicaCount`      | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`            |
-| `ipFamily`          | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`         |
-| `clusterDomain`     | Kubernetes cluster domain                                                                      | `cluster.local`|
-| `nameOverride`      | String to partially override valkey.fullname                                                   | `""`           |
-| `fullnameOverride`  | String to fully override valkey.fullname                                                       | `""`           |
-| `commonLabels`      | Labels to add to all deployed objects                                                          | `{}`           |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                     | `{}`           |
+| Parameter           | Description                                                                                    | Default         |
+| ------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| `architecture`      | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`    |
+| `replicaCount`      | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`             |
+| `ipFamily`          | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`          |
+| `clusterDomain`     | Kubernetes cluster domain                                                                      | `cluster.local` |
+| `nameOverride`      | String to partially override valkey.fullname                                                   | `""`            |
+| `fullnameOverride`  | String to fully override valkey.fullname                                                       | `""`            |
+| `commonLabels`      | Labels to add to all deployed objects                                                          | `{}`            |
+| `commonAnnotations` | Annotations to add to all deployed objects                                                     | `{}`            |
 
 ### Pod annotations and labels
 
@@ -177,6 +177,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
+| `persistence.labels`        | Labels for persistence volume claims               | `{}`                |
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
@@ -219,7 +220,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `metrics.enabled`                          | Start a sidecar prometheus exporter to expose Valkey metrics                    | `false`                    |
 | `metrics.image.registry`                   | Valkey exporter image registry                                                  | `docker.io`                |
 | `metrics.image.repository`                 | Valkey exporter image repository                                                | `oliver006/redis_exporter` |
-| `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.78.0-alpine`           |
+| `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Valkey exporter image pull policy                                               | `Always`                   |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                       |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                       |
@@ -240,34 +241,34 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 Sentinel provides high availability for Valkey replication. When enabled, Sentinel monitors the master and automatically promotes a replica to master if the master fails.
 
-| Parameter                           | Description                                                                             | Default                                                                                      |
-| ----------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `sentinel.enabled`                  | Enable Valkey Sentinel for high availability                                            | `false`                                                                                      |
-| `sentinel.image.repository`         | Valkey Sentinel image repository                                                        | `valkey/valkey`                                                                              |
-| `sentinel.image.tag`                | Valkey Sentinel image tag                                                               | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
-| `sentinel.image.pullPolicy`         | Valkey Sentinel image pull policy                                                       | `Always`                                                                                     |
-| `sentinel.masterName`               | Name of the master server                                                               | `mymaster`                                                                                   |
-| `sentinel.quorum`                   | Number of Sentinels that need to agree about the fact the master is not reachable       | `2`                                                                                          |
-| `sentinel.downAfterMilliseconds`    | Time in milliseconds after the master is declared down                                  | `1500`                                                                                       |
-| `sentinel.failoverTimeout`          | Timeout for failover in milliseconds                                                    | `15000`                                                                                      |
-| `sentinel.parallelSyncs`            | Number of replicas that can be reconfigured to use the new master during a failover     | `1`                                                                                          |
-| `sentinel.port`                     | Sentinel port                                                                           | `26379`                                                                                      |
-| `sentinel.extraVolumeMounts`        | Additional volume mounts to add to the Sentinel container                               | `[]`                                                                                         |
-| `sentinel.service.type`             | Kubernetes service type for Sentinel                                                    | `ClusterIP`                                                                                  |
-| `sentinel.service.port`             | Sentinel service port                                                                   | `26379`                                                                                      |
-| `sentinel.resources.limits.memory`  | Memory limit for Sentinel container                                                     | `128Mi`                                                                                      |
-| `sentinel.resources.limits.cpu`     | CPU limit for Sentinel container                                                        | Not set                                                                                      |
-| `sentinel.resources.requests.cpu`   | CPU request for Sentinel container                                                      | `25m`                                                                                        |
-| `sentinel.resources.requests.memory`| Memory request for Sentinel container                                                   | `64Mi`                                                                                       |
+| Parameter                            | Description                                                                         | Default                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
+| `sentinel.image.repository`          | Valkey Sentinel image repository                                                    | `valkey/valkey`                                                                              |
+| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `sentinel.image.pullPolicy`          | Valkey Sentinel image pull policy                                                   | `Always`                                                                                     |
+| `sentinel.masterName`                | Name of the master server                                                           | `mymaster`                                                                                   |
+| `sentinel.quorum`                    | Number of Sentinels that need to agree about the fact the master is not reachable   | `2`                                                                                          |
+| `sentinel.downAfterMilliseconds`     | Time in milliseconds after the master is declared down                              | `1500`                                                                                       |
+| `sentinel.failoverTimeout`           | Timeout for failover in milliseconds                                                | `15000`                                                                                      |
+| `sentinel.parallelSyncs`             | Number of replicas that can be reconfigured to use the new master during a failover | `1`                                                                                          |
+| `sentinel.port`                      | Sentinel port                                                                       | `26379`                                                                                      |
+| `sentinel.extraVolumeMounts`         | Additional volume mounts to add to the Sentinel container                           | `[]`                                                                                         |
+| `sentinel.service.type`              | Kubernetes service type for Sentinel                                                | `ClusterIP`                                                                                  |
+| `sentinel.service.port`              | Sentinel service port                                                               | `26379`                                                                                      |
+| `sentinel.resources.limits.memory`   | Memory limit for Sentinel container                                                 | `128Mi`                                                                                      |
+| `sentinel.resources.limits.cpu`      | CPU limit for Sentinel container                                                    | Not set                                                                                      |
+| `sentinel.resources.requests.cpu`    | CPU request for Sentinel container                                                  | `25m`                                                                                        |
+| `sentinel.resources.requests.memory` | Memory request for Sentinel container                                               | `64Mi`                                                                                       |
 
 ### Init Container Configuration
 
-| Parameter                             | Description                                 | Default  |
-| ------------------------------------- | ------------------------------------------- | -------- |
-| `initContainer.resources.limits.cpu`    | CPU limit for init container              | `50m`    |
-| `initContainer.resources.limits.memory` | Memory limit for init container           | `128Mi`  |
-| `initContainer.resources.requests.cpu`  | CPU request for init container            | `25m`    |
-| `initContainer.resources.requests.memory`| Memory request for init container        | `64Mi`   |
+| Parameter                                 | Description                       | Default |
+| ----------------------------------------- | --------------------------------- | ------- |
+| `initContainer.resources.limits.cpu`      | CPU limit for init container      | `50m`   |
+| `initContainer.resources.limits.memory`   | Memory limit for init container   | `128Mi` |
+| `initContainer.resources.requests.cpu`    | CPU request for init container    | `25m`   |
+| `initContainer.resources.requests.memory` | Memory request for init container | `64Mi`  |
 
 ### Additional Configuration
 

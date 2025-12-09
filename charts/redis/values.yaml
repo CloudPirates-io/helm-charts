@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
+  tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -294,8 +294,11 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.2.3@sha256:49887660cd57f34b2b3bfb73ae135e2265320c48c3d76a9294e9851265e140d6"
+    tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
     pullPolicy: Always
+  ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  config:
+    announceHostnames: true
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
@@ -345,7 +348,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.80.0@sha256:cd5fad1591e585db5b58beec7fca427027c61a4349f50109af67cf2f07964d02"
+    tag: "v1.80.1@sha256:bac9872da2b48e6eebbffb11517a5dcda59958eda51e1e4231eeb5dd516b4a5f"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -457,3 +460,13 @@ customScripts:
     # - |
     #   sleep 10
     #   redis-cli shutdown
+
+## @section clusterInitJob Configurations for the Job-Template
+clusterInitJob:
+  ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi

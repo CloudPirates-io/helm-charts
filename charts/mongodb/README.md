@@ -148,6 +148,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `persistence.size`          | Size of persistent volume                          | `8Gi`           |
 | `persistence.mountPath`     | Mount path for MongoDB data                        | `/data/db`      |
 | `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`            |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
 | `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 
@@ -210,7 +211,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `metrics.username`                 | Username for metrics collection (defaults to root if not specified) | `""`                                                                                                                                 |
 | `metrics.image.registry`           | MongoDB Exporter image registry                                     | `docker.io`                                                                                                                          |
 | `metrics.image.repository`         | MongoDB Exporter image repository                                   | `percona/mongodb_exporter`                                                                                                           |
-| `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.1`                                                                                                                             |
+| `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.2`                                                                                                                             |
 | `metrics.image.pullPolicy`         | MongoDB Exporter image pull policy                                  | `IfNotPresent`                                                                                                                       |
 | `metrics.resources`                | Resource limits and requests for metrics container                  | `limits: { memory: 256Mi }, requests: { cpu: 10m, memory: 64Mi }`                                                                    |
 | `metrics.containerSecurityContext` | Security context for metrics container                              | `runAsUser: 65534, runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] }` |

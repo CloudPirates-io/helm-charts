@@ -30,6 +30,9 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "postgres.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
@@ -291,6 +294,10 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+      labels:
+        {{- toYaml $labels | nindent 8 }}
+      {{- end }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

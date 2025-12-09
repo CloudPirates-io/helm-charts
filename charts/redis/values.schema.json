@@ -499,6 +499,14 @@
         "sentinel": {
             "type": "object",
             "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "announceHostnames": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },

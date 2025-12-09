@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.12.1
+version: 0.13.0
 appVersion: "18.1.0"
 keywords:
   - postgres
@@ -43,7 +43,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[mongodb/redis/posgres] Add subPath option when using existingClaim (#613)"
-          links:
-            - name: "Commit 8aa277e"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/8aa277e"
+          description: "Chart updated"

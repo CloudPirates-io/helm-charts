@@ -22,7 +22,7 @@ image:
   ## @param image.repository MariaDB image repository
   repository: mariadb
   ## @param image.tag MariaDB image tag (immutable tags are recommended)
-  tag: "12.0.2@sha256:607835cd628b78e2876f6a586d0ec37b296c47683b31ef750002d3d17d3d8f7a"
+  tag: "12.1.2@sha256:e1bcd6f85781f4a875abefb11c4166c1d79e4237c23de597bf0df81fec225b40"
   ## @param image.pullPolicy MariaDB image pull policy
   imagePullPolicy: Always
 
@@ -142,6 +142,8 @@ persistence:
   size: 8Gi
   ## @param persistence.annotations Additional custom annotations for the PVC
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.selector Additional labels for the PVC
   selector: {}
 
