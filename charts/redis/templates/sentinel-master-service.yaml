@@ -1,0 +1,31 @@
+{{- if and .Values.sentinel.enabled .Values.sentinel.masterService.enabled (eq .Values.architecture "replication") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "redis.fullname" . }}-master
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master
+  {{- if (include "redis.annotations" .) }}
+  annotations:
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: redis
+      protocol: TCP
+      name: redis
+    {{- range .Values.extraPorts }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort | default .name }}
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    {{- include "redis.selectorLabels" . | nindent 4 }}
+    # This selector will be dynamically updated by the master discovery deployment
+    # to point to the current master pod
+    statefulset.kubernetes.io/pod-name: not-yet-decided
+{{- end }}
