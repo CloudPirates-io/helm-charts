@@ -1,0 +1,21 @@
+{{- if and (.Values.msgTopologyOperator.enabled) (.Values.useCertManager) (not .Values.msgTopologyOperator.existingWebhookCertSecret) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  name: {{ template "rmqco.msgTopologyOperator.webhook.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  commonName: {{ template "rmqco.msgTopologyOperator.webhook.fullname" . }}
+  dnsNames:
+    - {{ printf "%s.%s.svc" (include "rmqco.msgTopologyOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) }}
+    - {{ printf "%s.%s.svc.%s" (include "rmqco.msgTopologyOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) .Values.clusterDomain }}
+  issuerRef:
+    kind: Issuer
+    name: {{ template "cloudpirates.fullname" . }}
+  secretName: {{ template "rmqco.msgTopologyOperator.webhook.fullname" . }}
+{{- end }}

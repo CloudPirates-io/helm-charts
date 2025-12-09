@@ -67,7 +67,7 @@ Return PostgreSQL admin password key
 */}}
 {{- define "postgres.adminPasswordKey" -}}
 {{- if .Values.auth.existingSecret -}}
-    {{- .Values.auth.secretKeys.adminPasswordKey -}}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.adminPasswordKey "context" .) | default "postgres-password" -}}
 {{- else -}}
 postgres-password
 {{- end -}}

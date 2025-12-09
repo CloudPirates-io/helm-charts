@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.4.2@sha256:3617b09bb4b7510a8d8d9b9fc5707399e2d70688dbcc2f8fb013a144829be1b9"
+  tag: "26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -43,6 +43,10 @@ podLabels: {}
 extraVolumes: []
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
 extraVolumeMounts: []
+## @param Specify if the original themes directory must be preserved.
+preserveThemes: false
+## @param Specify if the original providers directory must be preserved.
+preserveProviders: false
 
 ## @section Extra init containers for Keycloak pod
 ## @param Optionnaly specify an extra list of initContainer for the Keycloak pod
@@ -161,8 +165,10 @@ tls:
   ## @param tls.truststoreEnabled Enable truststore for client certificate validation or outgoing HTTPS requests
   truststoreEnabled: false
   ## @param tls.truststoreExistingSecret Name of existing secret containing truststore file (Java Keystore format)
-  ## The secret should contain 'truststore.jks' key
+  ## The secret should contain 'truststore.jks' key or the key specified in the value 'tls.truststoreExistingSecretKey'
   truststoreExistingSecret: ""
+  ## @param tls.truststoreExistingSecretKey Key of the secret to get the trustStorePassword from
+  truststoreExistingSecretKey: "truststore.jks"
   ## @param tls.truststorePassword Password for the truststore (use with caution - consider using existingSecret)
   truststorePassword: ""
   ## @param tls.truststoreFile Path where the truststore file will be mounted (internal)
@@ -374,6 +380,9 @@ startupProbe:
 ## @section Node Selection
 ## @param nodeSelector Node labels for pod assignment
 nodeSelector: {}
+
+## @param priorityClassName for pod eviction
+priorityClassName: ""
 
 ## @param tolerations Toleration labels for pod assignment
 tolerations: []

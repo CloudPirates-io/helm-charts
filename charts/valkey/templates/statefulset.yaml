@@ -202,7 +202,7 @@ spec:
               valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
           ports:
             - name: valkey
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.targetPort }}{{ end }}
               protocol: TCP
           env:
             {{- if .Values.auth.enabled }}
@@ -226,7 +226,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -239,7 +239,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -252,7 +252,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} ping
+                - valkey-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -283,6 +283,11 @@ spec:
             {{- else }}
             - name: config
               mountPath: {{ include "valkey.configDir" . }}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/valkey/tls
+              readOnly: true
             {{- end }}
             - name: tmp
               mountPath: /tmp
@@ -510,6 +515,18 @@ spec:
         - name: config
           configMap:
             name: {{ include "valkey.configmapName" . }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ required "TLS secret name is required when TLS is enabled" .Values.tls.existingSecret }}
+            items:
+              - key: {{ .Values.tls.certFilename }}
+                path: {{ .Values.tls.certFilename }}
+              - key: {{ .Values.tls.certKeyFilename }}
+                path: {{ .Values.tls.certKeyFilename }}
+              - key: {{ .Values.tls.certCAFilename }}
+                path: {{ .Values.tls.certCAFilename }}
+        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}
@@ -528,6 +545,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with $labels := merge (include "valkey.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+        labels:
+          {{- toYaml $labels | nindent 10 }}
+        {{- end }}
         {{- if .Values.persistence.annotations }}
         annotations:
           {{- toYaml .Values.persistence.annotations | nindent 10 }}

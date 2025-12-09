@@ -6,6 +6,10 @@ templates:
   - templates/secret.yaml
   - templates/serviceaccount.yaml
   - templates/pvc.yaml
+set:
+  image:
+    tag: 26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
+
 tests:
   - it: should render default values correctly
     asserts:
@@ -22,7 +26,7 @@ tests:
         template: templates/deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/keycloak/keycloak:26.4.2@sha256:3617b09bb4b7510a8d8d9b9fc5707399e2d70688dbcc2f8fb013a144829be1b9
+          value: docker.io/keycloak/keycloak:26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
         template: templates/deployment.yaml
 
   - it: should render custom name and fullname overrides
@@ -62,7 +66,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: custom-registry.io/keycloak/keycloak:26.4.2@sha256:3617b09bb4b7510a8d8d9b9fc5707399e2d70688dbcc2f8fb013a144829be1b9
+          value: custom-registry.io/keycloak/keycloak:26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
         template: templates/deployment.yaml
 
   - it: should render custom replica count

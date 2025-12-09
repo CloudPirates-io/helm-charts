@@ -465,6 +465,9 @@
                 }
             }
         },
+        "priorityClassName": {
+            "type": "string"
+        },
         "readinessProbe": {
             "type": "object",
             "properties": {
@@ -639,6 +642,9 @@
                     "type": "boolean"
                 },
                 "truststoreExistingSecret": {
+                    "type": "string"
+                },
+                "truststoreExistingSecretKey": {
                     "type": "string"
                 },
                 "truststoreFile": {
