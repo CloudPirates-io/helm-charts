@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
 </p>
 
 # PostgreSQL
@@ -8,7 +8,7 @@ A Helm chart for PostgreSQL - The World's Most Advanced Open Source Relational D
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-postgres`:
 
 ```bash
 helm install my-postgres oci://registry-1.docker.io/cloudpirates/postgres
+```
+
+To install with custom values:
+
+```bash
+helm install my-postgres oci://registry-1.docker.io/cloudpirates/postgres -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -74,7 +80,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
 | `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
-| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6"` |
+| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
 | `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
 
 ### Deployment configuration
@@ -86,6 +92,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `fullnameOverride`  | String to fully override postgres.fullname                                                                     | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
+| `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
 
 ### Pod annotations and labels
 
@@ -108,13 +115,13 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL Authentication
 
-| Parameter                     | Description                                                                                                    | Default               |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `auth.username`               | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
-| `auth.password`               | Password for the custom user to create                                                                         | `""`                  |
-| `auth.database`               | Alternative name for the default database to be created at initialisation                                      | `""`                  |
-| `auth.existingSecret`         | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
-| `auth.secretKeys.passwordKey` | Name of key in existing secret to use for PostgreSQL credentials                                               | `"postgres-password"` |
+| Parameter                          | Description                                                                                                    | Default               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `auth.username`                    | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
+| `auth.password`                    | Password for the custom user to create                                                                         | `""`                  |
+| `auth.database`                    | Alternative name for the default database to be created at initialisation                                      | `""`                  |
+| `auth.existingSecret`              | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
+| `auth.secretKeys.adminPasswordKey` | Name of key in existing secret to use for PostgreSQL admin credentials                                         | `"postgres-password"` |
 
 ### PostgreSQL Configuration
 
@@ -157,7 +164,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 ### Service configuration
 
 | Parameter                       | Description                                                                       | Default     |
-|---------------------------------|-----------------------------------------------------------------------------------|-------------|
+| ------------------------------- | --------------------------------------------------------------------------------- | ----------- |
 | `service.type`                  | PostgreSQL service type                                                           | `ClusterIP` |
 | `service.port`                  | PostgreSQL service port                                                           | `5432`      |
 | `service.targetPort`            | PostgreSQL container port                                                         | `5432`      |
@@ -191,9 +198,11 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`                |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -247,9 +256,9 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
-| `extraEnvVars` | Additional environment variables to set | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts to add to the MongoDB container                | `[]`    |
+| `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
+| `extraVolumes`       | Additional volumes to add to the pod                                   | `[]`    |
+| `extraVolumeMounts`  | Additional volume mounts to add to the MongoDB container               | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 
@@ -427,15 +436,28 @@ auth:
   existingSecret: "postgres-credentials"
   secretKeys:
     adminPasswordKey: "postgres-password"
-    userPasswordKey: "app-password"
+
+# For custom users, use the customUser section
+customUser:
+  existingSecret: "postgres-custom-user"
+  secretKeys:
+    name: "username"
+    password: "password"
+    database: "database"
 ```
 
-Create the secret first:
+Create the secrets first:
 
 ```bash
+# Admin/superuser credentials
 kubectl create secret generic postgres-credentials \
-  --from-literal=postgres-password=your-admin-password \
-  --from-literal=app-password=your-app-password
+  --from-literal=postgres-password=your-admin-password
+
+# Custom user credentials (optional)
+kubectl create secret generic postgres-custom-user \
+  --from-literal=username=myuser \
+  --from-literal=password=myuserpassword \
+  --from-literal=database=mydb
 ```
 
 ### Custom Configuration with ConfigMap
@@ -444,24 +466,6 @@ kubectl create secret generic postgres-credentials \
 # values-custom-config.yaml
 config:
   existingConfigmap: "postgres-custom-config"
-```
-
-Create the ConfigMap first:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-custom-config
-data:
-  postgresql.conf: |
-    # Custom PostgreSQL configuration
-    max_connections = 300
-    shared_buffers = 512MB
-    effective_cache_size = 2GB
-    work_mem = 16MB
-    maintenance_work_mem = 256MB
-    # Add your custom configuration here
 ```
 
 ### Monitoring with Prometheus
@@ -474,12 +478,6 @@ metrics:
   enabled: true
   serviceMonitor:
     enabled: true
-```
-
-Deploy with monitoring enabled:
-
-```bash
-helm install my-postgres ./charts/postgres -f values-monitoring.yaml
 ```
 
 The PostgreSQL exporter will expose metrics on port 9187, and if you have Prometheus Operator installed, the ServiceMonitor will automatically configure Prometheus to scrape the metrics.
@@ -611,4 +609,4 @@ For issues related to this Helm chart, please check:
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

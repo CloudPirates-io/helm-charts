@@ -30,6 +30,9 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "postgres.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
@@ -66,7 +69,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
+                  key: {{ include "postgres.adminPasswordKey" . }}
             {{- if .Values.config.postgresqlMaxConnections }}
             - name: POSTGRES_MAX_CONNECTIONS
               value: {{ .Values.config.postgresqlMaxConnections | quote }}
@@ -179,6 +182,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
             {{- if .Values.config.mountConfigMap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}
@@ -215,7 +221,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
+                  key: {{ include "postgres.adminPasswordKey" . }}
           ports:
             - name: metrics
               containerPort: 9187
@@ -288,6 +294,10 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+      labels:
+        {{- toYaml $labels | nindent 8 }}
+      {{- end }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

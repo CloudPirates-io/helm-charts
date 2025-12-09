@@ -1,0 +1,14 @@
+{{- if and .Values.msgTopologyOperator.enabled .Values.msgTopologyOperator.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  name: {{ template "rmqco.msgTopologyOperator.serviceAccountName" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if or .Values.commonAnnotations .Values.msgTopologyOperator.serviceAccount.annotations }}
+  {{- $annotations := include "cloudpirates.tplvalues.merge" ( dict "values" ( list .Values.msgTopologyOperator.serviceAccount.annotations .Values.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: {{ .Values.msgTopologyOperator.serviceAccount.automountServiceAccountToken }}
+{{- end }}

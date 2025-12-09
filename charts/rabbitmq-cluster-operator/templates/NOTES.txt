@@ -1,0 +1,54 @@
+_________ .__                   ._____________.__               __
+\_   ___ \|  |   ____  __ __  __| _/\______   \__|___________ _/  |_  ____   ______
+/    \  \/|  |  /  _ \|  |  \/ __ |  |     ___/  \_  __ \__  \\   __\/ __ \ /  ___/
+\     \___|  |_(  <_> )  |  / /_/ |  |    |   |  ||  | \// __ \|  | \  ___/ \___ \
+ \______  /____/\____/|____/\____ |  |____|   |__||__|  (____  /__|  \___  >____  >
+        \/                       \/                          \/          \/     \/
+
+
+CHART NAME: {{ .Chart.Name }}
+CHART VERSION: {{ .Chart.Version }}
+APP VERSION: {{ .Chart.AppVersion }}
+
+** Please be patient while the chart is being deployed **
+
+Watch the RabbitMQ Cluster Operator and RabbitMQ Messaging Topology Operator Deployment status using the command:
+
+    kubectl get deploy -w --namespace {{ include "cloudpirates.namespace" . }} -l app.kubernetes.io/name={{ include "cloudpirates.name" . }},app.kubernetes.io/instance={{ .Release.Name }}
+
+{{- if .Values.clusterOperator.rbac.create }}
+{{- if .Values.clusterOperator.watchAllNamespaces }}
+WARNING: RabbitMQ Cluster Operator can access all secrets in the cluster. This could pose a security risk if the application gets compromised.
+
+You can limit allowed namespaces by setting clusterOperator.watchAllNamespaces = false and configuring clusterOperator.watchNamespaces
+{{- else }}
+
+RabbitMQ Cluster Operator can ONLY access resources in the following namespaces:
+{{ $namespaces := .Values.clusterOperator.watchAllNamespaces | default (list (include "cloudpirates.namespace" .)) }}
+{{- range $namespace := $namespaces }}
+  - {{ $namespace }}
+{{- end }}
+
+RabbitMQ Cluster Operator won't be able to access resources in other namespaces. You can configure this behavior by setting clusterOperator.watchNamespaces
+
+{{- end }}
+{{- end }}
+
+{{- if .Values.msgTopologyOperator.rbac.create }}
+{{- if .Values.msgTopologyOperator.watchAllNamespaces }}
+WARNING: RabbitMQ Messaging Topology Operator can access all secrets in the cluster. This could pose a security risk if the application gets compromised.
+
+You can limit allowed namespaces by setting msgTopologyOperator.watchAllNamespaces = false and configuring msgTopologyOperator.watchNamespaces
+{{- else }}
+
+RabbitMQ Messaging Topology Operator can ONLY access resources in the following namespaces:
+{{ $namespaces := .Values.msgTopologyOperator.watchAllNamespaces | default (list (include "cloudpirates.namespace" .)) }}
+{{- range $namespace := $namespaces }}
+  - {{ $namespace }}
+{{- end }}
+
+RabbitMQ Messaging Topology Operator won't be able to access resources in other namespaces. You can configure this behavior by setting msgTopologyOperator.watchNamespaces
+
+{{- end }}
+{{- end }}
+

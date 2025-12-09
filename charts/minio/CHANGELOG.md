@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 0.5.6 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([5dec604](https://github.com/CloudPirates-io/helm-charts/commit/5dec604))
+* chore: update CHANGELOG.md for merged changes ([dd468cc](https://github.com/CloudPirates-io/helm-charts/commit/dd468cc))
+* chore: auto-generate values.schema.json (#528) ([157c32a](https://github.com/CloudPirates-io/helm-charts/commit/157c32a))
+* chore: update CHANGELOG.md for merged changes ([17003cb](https://github.com/CloudPirates-io/helm-charts/commit/17003cb))
+* chore: update CHANGELOG.md for merged changes ([37028f5](https://github.com/CloudPirates-io/helm-charts/commit/37028f5))
+
 ## 0.5.5 (2025-11-02)
 
 * Add NodePort support for API and Console in Service configuration (#527) ([57b84d8](https://github.com/CloudPirates-io/helm-charts/commit/57b84d8))

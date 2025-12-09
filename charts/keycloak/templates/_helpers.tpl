@@ -180,7 +180,7 @@ Return the database JDBC URL
 {{- printf "jdbc:%s://%s:%s/%s%s" .Values.database.type .Values.database.host (default "3306" (.Values.database.port | toString)) .Values.database.name (ternary (printf "?%s" .Values.database.jdbcParams) "" (ne .Values.database.jdbcParams "")) -}}
 {{- end -}}
 {{- else if eq .Values.database.type "mssql" -}}
-{{- printf "jdbc:mssql://%s:%s/%s%s" .Values.database.host (default "1433" (.Values.database.port | toString)) .Values.database.name (ternary (printf "?%s" .Values.database.jdbcParams) "" (ne .Values.database.jdbcParams "")) -}}
+{{- printf "jdbc:sqlserver://%s:%s;databaseName=%s;%s" .Values.database.host (default "1433" (.Values.database.port | toString)) .Values.database.name (ternary (printf "%s" .Values.database.jdbcParams) "" (ne .Values.database.jdbcParams "")) -}}
 {{- end -}}
 {{- end }}
 

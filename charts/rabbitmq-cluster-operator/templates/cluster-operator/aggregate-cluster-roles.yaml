@@ -1,0 +1,25 @@
+{{- if .Values.clusterOperator.rbac.create -}}
+{{- $readonlyVerbs := list "get" "list" "watch" }}
+{{- $allVerbs := list "create" "delete" "deletecollection" "get" "list" "patch" "update" "watch" }}
+{{- $roles := dict "view" $readonlyVerbs "edit" $allVerbs "admin" $allVerbs }}
+{{- range $role, $verbs := $roles -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "cloudpirates.fullname.namespace" $ }}-{{ $role }}
+  labels:
+    {{- include "rmqco.labels" $ | nindent 4 }}
+    rbac.authorization.k8s.io/aggregate-to-{{ $role }}: "true"
+  {{- if $.Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+rules:
+  - apiGroups:
+      - rabbitmq.com
+    resources:
+      - rabbitmqclusters
+      - rabbitmqclusters/finalizers
+    verbs: {{ $verbs | toYaml | nindent 6 }}
+{{ end }}
+{{- end }}

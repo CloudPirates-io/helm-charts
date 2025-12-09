@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-mongodb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mongodb" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-mongodb/mongodb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mongodb" /></a>
 </p>
 
 # MongoDB
@@ -86,12 +86,12 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### MongoDB Image Parameters
 
-| Parameter          | Description               | Default                                                                            |
-| ------------------ | ------------------------- | ---------------------------------------------------------------------------------- |
-| `image.registry`   | MongoDB image registry    | `docker.io`                                                                        |
-| `image.repository` | MongoDB image repository  | `mongo`                                                                            |
-| `image.tag`        | MongoDB image tag         | `"8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c"` |
-| `image.pullPolicy` | MongoDB image pull policy | `Always`                                                                           |
+| Parameter          | Description               | Default                                                                           |
+| ------------------ | ------------------------- | --------------------------------------------------------------------------------- |
+| `image.registry`   | MongoDB image registry    | `docker.io`                                                                       |
+| `image.repository` | MongoDB image repository  | `mongo`                                                                           |
+| `image.tag`        | MongoDB image tag         | `"8.2.1@sha256:86835e8da0f94efd61334decb320fa43e8a60027688cbd856bf29d065b470338"` |
+| `image.pullPolicy` | MongoDB image pull policy | `Always`                                                                          |
 
 ### Replica Configuration
 
@@ -140,14 +140,17 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Persistence Parameters
 
-| Parameter                  | Description                                | Default         |
-| -------------------------- | ------------------------------------------ | --------------- |
-| `persistence.enabled`      | Enable persistent storage                  | `true`          |
-| `persistence.storageClass` | Storage class to use for persistent volume | `""`            |
-| `persistence.accessMode`   | Access mode for persistent volume          | `ReadWriteOnce` |
-| `persistence.size`         | Size of persistent volume                  | `8Gi`           |
-| `persistence.mountPath`    | Mount path for MongoDB data                | `/data/db`      |
-| `persistence.annotations`  | Annotations for persistent volume claims   | `{}`            |
+| Parameter                   | Description                                        | Default         |
+| --------------------------- | -------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                          | `true`          |
+| `persistence.storageClass`  | Storage class to use for persistent volume         | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
+| `persistence.mountPath`     | Mount path for MongoDB data                        | `/data/db`      |
+| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
 
 ### Resource Parameters
 
@@ -208,7 +211,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `metrics.username`                 | Username for metrics collection (defaults to root if not specified) | `""`                                                                                                                                 |
 | `metrics.image.registry`           | MongoDB Exporter image registry                                     | `docker.io`                                                                                                                          |
 | `metrics.image.repository`         | MongoDB Exporter image repository                                   | `percona/mongodb_exporter`                                                                                                           |
-| `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.1`                                                                                                                             |
+| `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.2`                                                                                                                             |
 | `metrics.image.pullPolicy`         | MongoDB Exporter image pull policy                                  | `IfNotPresent`                                                                                                                       |
 | `metrics.resources`                | Resource limits and requests for metrics container                  | `limits: { memory: 256Mi }, requests: { cpu: 10m, memory: 64Mi }`                                                                    |
 | `metrics.containerSecurityContext` | Security context for metrics container                              | `runAsUser: 65534, runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] }` |
@@ -394,3 +397,13 @@ To upgrade the MongoDB deployment:
 ```bash
 helm upgrade my-mongodb ./mongodb -f my-values.yaml
 ```
+
+## Troubleshooting
+
+### Getting Support
+
+For issues related to this Helm chart, please check:
+
+- [MongoDB Documentation](https://www.mongodb.com/docs/get-started/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

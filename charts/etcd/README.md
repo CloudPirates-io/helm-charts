@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-etcd"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-etcd" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-etcd/etcd"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-etcd" /></a>
 </p>
 
 # etcd Helm Chart
@@ -32,6 +32,14 @@ Or install directly from the local chart:
 
 ```bash
 helm install my-etcd ./charts/etcd
+```
+
+### Uninstalling
+
+To uninstall/delete the `my-etcd` deployment:
+
+```bash
+helm delete my-etcd
 ```
 
 ### Getting Started
@@ -75,16 +83,20 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 
 ## Configuration
 
+### Global Parameters
+| Parameter                 | Description                           | Default |
+| ------------------------- | ------------------------------------- | ------- |
+| `global.imageRegistry`    | Global Docker image registry override | `""`    |
+| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`    |
+
 ### Image Configuration
 
-| Parameter                 | Description                           | Default                 |
-| ------------------------- | ------------------------------------- | ----------------------- |
-| `image.registry`          | etcd image registry                   | `gcr.io`                |
-| `image.repository`        | etcd image repository                 | `etcd-development/etcd` |
-| `image.tag`               | etcd image tag                        | `v3.6.0-alpha.0`        |
-| `image.pullPolicy`        | Image pull policy                     | `IfNotPresent`          |
-| `global.imageRegistry`    | Global Docker image registry override | `""`                    |
-| `global.imagePullSecrets` | Global Docker registry secret names   | `[]`                    |
+| Parameter          | Description           | Default                                                                          |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------- |
+| `image.registry`   | etcd image registry   | `gcr.io`                                                                         |
+| `image.repository` | etcd image repository | `etcd-development/etcd`                                                          |
+| `image.tag`        | etcd image tag        | `v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3` |
+| `image.pullPolicy` | Image pull policy     | `IfNotPresent`                                                                   |
 
 ### Common Parameters
 
@@ -138,14 +150,15 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 
 ### Persistence
 
-| Parameter                  | Description                    | Default           |
-| -------------------------- | ------------------------------ | ----------------- |
-| `persistence.enabled`      | Enable persistence using PVC   | `true`            |
-| `persistence.storageClass` | Storage class of backing PVC   | `""`              |
-| `persistence.annotations`  | Annotations for the PVC        | `{}`              |
-| `persistence.size`         | Size of data volume            | `8Gi`             |
-| `persistence.accessModes`  | Persistent Volume Access Modes | `[ReadWriteOnce]` |
-| `persistence.mountPath`    | Mount path for data volume     | `/var/run/etcd`   |
+| Parameter                  | Description                         | Default           |
+| -------------------------- | ----------------------------------- | ----------------- |
+| `persistence.enabled`      | Enable persistence using PVC        | `true`            |
+| `persistence.storageClass` | Storage class of backing PVC        | `""`              |
+| `persistence.annotations`  | Annotations for the PVC             | `{}`              |
+| `persistence.labels`       | Labels for persistent volume claims | `{}`              |
+| `persistence.size`         | Size of data volume                 | `8Gi`             |
+| `persistence.accessModes`  | Persistent Volume Access Modes      | `[ReadWriteOnce]` |
+| `persistence.mountPath`    | Mount path for data volume          | `/var/run/etcd`   |
 
 ### Resources
 
@@ -259,26 +272,12 @@ To upgrade your release:
 helm upgrade my-etcd oci://registry-1.docker.io/cloudpirates/etcd
 ```
 
-## Uninstalling
+## Troubleshooting
 
-To uninstall/delete the `my-etcd` deployment:
+### Getting Support
 
-```bash
-helm delete my-etcd
-```
+For issues related to this Helm chart, please check:
 
-## License
-
-Copyright © 2024 CloudPirates GmbH & Co. KG
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+- [Etcd Documentation](https://etcd.io/docs/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

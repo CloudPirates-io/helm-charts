@@ -1,6 +1,81 @@
 # Changelog
 
 
+## 0.11.2 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([5bef5a3](https://github.com/CloudPirates-io/helm-charts/commit/5bef5a3))
+* quote dnsnames for certificates (#678) ([1dde1f7](https://github.com/CloudPirates-io/helm-charts/commit/1dde1f7))
+
+## 0.11.1 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([5ead46d](https://github.com/CloudPirates-io/helm-charts/commit/5ead46d))
+* chore: update CHANGELOG.md for merged changes ([5428a9d](https://github.com/CloudPirates-io/helm-charts/commit/5428a9d))
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.7 (patch) (#664) ([3224ae7](https://github.com/CloudPirates-io/helm-charts/commit/3224ae7))
+
+## 0.11.0 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([b4e5184](https://github.com/CloudPirates-io/helm-charts/commit/b4e5184))
+* chore: update CHANGELOG.md for merged changes ([84cd609](https://github.com/CloudPirates-io/helm-charts/commit/84cd609))
+* Fix/allow realm import on production mode (#668) ([be3939e](https://github.com/CloudPirates-io/helm-charts/commit/be3939e))
+* chore: update CHANGELOG.md for merged changes ([bdc9c44](https://github.com/CloudPirates-io/helm-charts/commit/bdc9c44))
+* chore: update CHANGELOG.md for merged changes ([79f87c5](https://github.com/CloudPirates-io/helm-charts/commit/79f87c5))
+
+## 0.10.2 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([3191aa5](https://github.com/CloudPirates-io/helm-charts/commit/3191aa5))
+* Use correct metrics path if httpRelativePath is set (#666) ([87276ae](https://github.com/CloudPirates-io/helm-charts/commit/87276ae))
+
+## 0.10.1 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([0ff63ff](https://github.com/CloudPirates-io/helm-charts/commit/0ff63ff))
+* chore: update CHANGELOG.md for merged changes ([b7aabd2](https://github.com/CloudPirates-io/helm-charts/commit/b7aabd2))
+* Preserve themes and providers options (#660) ([1bf70b4](https://github.com/CloudPirates-io/helm-charts/commit/1bf70b4))
+
+## 0.10.0 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([723bd23](https://github.com/CloudPirates-io/helm-charts/commit/723bd23))
+* chore: update CHANGELOG.md for merged changes ([786bcaf](https://github.com/CloudPirates-io/helm-charts/commit/786bcaf))
+* Add support for PriorityClass (#651) ([0aaf369](https://github.com/CloudPirates-io/helm-charts/commit/0aaf369))
+
+## 0.9.1 (2025-11-24)
+
+* chore: update CHANGELOG.md for merged changes ([fe5d8ec](https://github.com/CloudPirates-io/helm-charts/commit/fe5d8ec))
+* chore: update CHANGELOG.md for merged changes ([6ad9df0](https://github.com/CloudPirates-io/helm-charts/commit/6ad9df0))
+* [Keycloak[ improve subchart variables (#652) ([e1c50c6](https://github.com/CloudPirates-io/helm-charts/commit/e1c50c6))
+
+## 0.9.0 (2025-11-24)
+
+* chore: update CHANGELOG.md for merged changes ([56c82a4](https://github.com/CloudPirates-io/helm-charts/commit/56c82a4))
+* chore: update CHANGELOG.md for merged changes ([6a0f6d4](https://github.com/CloudPirates-io/helm-charts/commit/6a0f6d4))
+* Keycloak/subchart variables (#649) ([bb0520a](https://github.com/CloudPirates-io/helm-charts/commit/bb0520a))
+
+## 0.8.8 (2025-11-24)
+
+* chore: update CHANGELOG.md for merged changes ([1e61a3e](https://github.com/CloudPirates-io/helm-charts/commit/1e61a3e))
+* chore: update CHANGELOG.md for merged changes ([768186e](https://github.com/CloudPirates-io/helm-charts/commit/768186e))
+* Fix JDBC connection string when using mssql database (#643) (#644) ([639db93](https://github.com/CloudPirates-io/helm-charts/commit/639db93))
+* chore: update CHANGELOG.md for merged changes ([266b5f5](https://github.com/CloudPirates-io/helm-charts/commit/266b5f5))
+* fix: correct installation command in the  (#646) ([b88029b](https://github.com/CloudPirates-io/helm-charts/commit/b88029b))
+
+## 0.8.7 (2025-11-22)
+
+* chore: update CHANGELOG.md for merged changes ([61c0c0c](https://github.com/CloudPirates-io/helm-charts/commit/61c0c0c))
+* chore: update CHANGELOG.md for merged changes ([b810690](https://github.com/CloudPirates-io/helm-charts/commit/b810690))
+* Make resources apply to initContainers (#645) ([35f4ac3](https://github.com/CloudPirates-io/helm-charts/commit/35f4ac3))
+
+## 0.8.6 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([9c2e3e2](https://github.com/CloudPirates-io/helm-charts/commit/9c2e3e2))
+* chore: update CHANGELOG.md for merged changes ([2e45ccd](https://github.com/CloudPirates-io/helm-charts/commit/2e45ccd))
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.5 (patch) (#593) ([a4cfe0c](https://github.com/CloudPirates-io/helm-charts/commit/a4cfe0c))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.8.5 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([09bffff](https://github.com/CloudPirates-io/helm-charts/commit/09bffff))
+* chore: update CHANGELOG.md for merged changes ([f48bb48](https://github.com/CloudPirates-io/helm-charts/commit/f48bb48))
+
 ## 0.8.4 (2025-11-11)
 
 * [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.4.4 (patch) (#563) ([c65d420](https://github.com/CloudPirates-io/helm-charts/commit/c65d420))

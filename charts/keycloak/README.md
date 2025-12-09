@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-keycloak/keycloak"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-keycloak" /></a>
 </p>
 
 # Keycloak
@@ -8,7 +8,7 @@ A Helm chart for Keycloak - Open Source Identity and Access Management Solution.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -18,6 +18,12 @@ To install the chart with the release name `my-keycloak`:
 
 ```bash
 helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak
+```
+
+To install with custom values:
+
+```bash
+helm install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f my-values.yaml
 ```
 
 Or install directly from the local chart:
@@ -83,7 +89,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.3.4@sha256:2b32a51a31e8d780d9fa9a69a59ead69975263c61b5dd13559090e22aa26f100"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
 
 ### Deployment configuration
@@ -105,6 +111,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ------------------- | ----------------------------------------------------- | ------- |
 | `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
 | `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
+| `preserveThemes`    | Preserve the original themes folder of the image      | `false` |
+| `preserveProviders` | Preserve the original providers folder of the image   | `false` |
 
 ### Extra init containers for Keycloak pod
 
@@ -236,9 +244,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Resources
 
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
+| Parameter   | Description                                                                 | Default |
+| ----------- |-----------------------------------------------------------------------------| ------- |
+| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
 
 ### Persistence
 
@@ -295,7 +303,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe           | `60`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe           | `1`     |
 
-### Node Selection
+### Scheduling
 
 | Parameter                   | Description                                    | Default |
 | --------------------------- | ---------------------------------------------- | ------- |
@@ -303,6 +311,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `tolerations`               | Toleration labels for pod assignment           | `[]`    |
 | `affinity`                  | Affinity settings for pod assignment           | `{}`    |
 | `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
+| `priorityClassName`         | Priority class name for pod eviction           | `""`    |
 
 ### Service Account
 
@@ -330,8 +339,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                              | Description                                 | Default                                                                                  |
 | -------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6`  |
-| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:8a061ef9813cf960f94a262930a32b190c3fbe5c8d3ab58456ef1df4b90fd5dc` |
+| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a`  |
+| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545` |
 
 ### PostgreSQL Configuration
 
@@ -532,6 +541,8 @@ realm:
 ### Using Custom Themes and Providers
 
 The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
+
+To disable this feature, set preserveThemes = true, preserveProviders = true. This will keep the original themes and providers respectively intact.
 
 **Example: Adding custom themes and providers with an initContainer**
 
@@ -816,4 +827,4 @@ For issues related to this Helm chart, please check:
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
 - [Keycloak Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

@@ -20,7 +20,7 @@
                 "secretKeys": {
                     "type": "object",
                     "properties": {
-                        "passwordKey": {
+                        "adminPasswordKey": {
                             "type": "string"
                         }
                     }
@@ -357,6 +357,9 @@
                 },
                 "storageClass": {
                     "type": "string"
+                },
+                "subPath": {
+                    "type": "string"
                 }
             }
         },
@@ -387,6 +390,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

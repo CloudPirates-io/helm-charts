@@ -1,6 +1,25 @@
 # Changelog
 
 
+## 0.5.0 (2025-11-26)
+
+* chore: update CHANGELOG.md for merged changes ([1050496](https://github.com/CloudPirates-io/helm-charts/commit/1050496))
+* [nginx]: Configurable side car containers ([f525b11](https://github.com/CloudPirates-io/helm-charts/commit/f525b11))
+
+## 0.4.3 (2025-11-16)
+
+* chore: update CHANGELOG.md for merged changes ([5521d5f](https://github.com/CloudPirates-io/helm-charts/commit/5521d5f))
+* chore: update CHANGELOG.md for merged changes ([f30dae3](https://github.com/CloudPirates-io/helm-charts/commit/f30dae3))
+* [nginx]: feat: remove optional bitnami script sourcing (#601) ([9f6a837](https://github.com/CloudPirates-io/helm-charts/commit/9f6a837))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.4.2 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([1c247b8](https://github.com/CloudPirates-io/helm-charts/commit/1c247b8))
+* chore: update CHANGELOG.md for merged changes ([454ffde](https://github.com/CloudPirates-io/helm-charts/commit/454ffde))
+* chore: auto-generate values.schema.json (#569) ([6790d09](https://github.com/CloudPirates-io/helm-charts/commit/6790d09))
+
 ## 0.4.1 (2025-11-07)
 
 * [nginx]: Add podLabels ([b8d8410](https://github.com/CloudPirates-io/helm-charts/commit/b8d8410))

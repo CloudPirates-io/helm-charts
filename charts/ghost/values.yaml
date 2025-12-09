@@ -14,6 +14,8 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param replicaCount Number of Nginx replicas to deploy
+replicaCount: 1
 
 ## @section Nginx image parameters
 image:
@@ -22,12 +24,10 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.6.1@sha256:1e243c833aaa518c6f0786037e83ebe3a8567f8aeac0aa71a38f6fe9d7790935"
+  tag: "6.10.1@sha256:9ab5c2aa45b3df9845cb0f8578dff76857be0d98ef93b88f58186508c8f2c610"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
-## @param replicaCount Number of Nginx replicas to deploy
-replicaCount: 1
 
 ## @section Container port configuration
 ## @param containerPorts Array of container ports

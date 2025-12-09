@@ -2,7 +2,7 @@ apiVersion: v2
 name: valkey
 description: High performance in-memory data structure store, fork of Redis. Valkey is an open-source, high-performance key/value datastore that supports a variety of workloads such as caching, message queues, and can act as a primary database.
 type: application
-version: 0.10.0
+version: 0.11.1
 appVersion: "9.0.0"
 home: https://www.valkey.io
 sources:
@@ -43,7 +43,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[valkey]: Support TLS"
-          links:
-            - name: "Commit 3b0b609"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/3b0b609"
+          description: "Chart updated"

@@ -14,6 +14,8 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param priorityClassName Priority class name to be used for the pods
+priorityClassName: ""
 
 ## @section PostgreSQL image configuration
 image:
@@ -22,7 +24,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.0@sha256:6f3e42ad37decc037c508dd405f5941c6dfa7d21f21a7237a43bde9def1e295e"
+  tag: "18.1@sha256:0033c194dc640cc4dcc62ef7c3117e5791365cca5fc1a2998e5c1693254784bc"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
 
@@ -67,9 +69,9 @@ auth:
   database: ""
   ## @param auth.existingSecret Name of existing secret to use for PostgreSQL credentials
   existingSecret: ""
-  ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials
   secretKeys:
-    passwordKey: "postgres-password"
+    ## @param auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL admin credentials
+    adminPasswordKey: "postgres-password"
 
 ## @section PostgreSQL Configuration
 config:
@@ -198,6 +200,11 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  ## Useful in dev environments and one PV for multiple services
+  subPath: ""
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:

@@ -53,6 +53,9 @@
                 }
             }
         },
+        "deploymentType": {
+            "type": "string"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -238,6 +241,9 @@
                             "type": "boolean"
                         },
                         "interval": {
+                            "type": "string"
+                        },
+                        "jobLabel": {
                             "type": "string"
                         },
                         "labels": {
