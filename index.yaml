@@ -6280,6 +6280,56 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
+            - kind: added
+              description: "[memcached] Update charts/memcached/values.yaml memcached"
+              links:
+                - name: "PR #710"
+                  url: "https://github.com/CloudPirates-io/helm-charts/pull/710"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Memcached
+          url: https://memcached.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.6.39
+    created: "2025-12-09T12:20:10.242548505Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Memcached is an in-memory key-value store for small chunks of arbitrary
+      data (strings, objects) from results of database calls, API calls, or page rendering.
+    digest: ccd2e2998b3682a67352486aa96f6d589467f9fa7a4fcecd125577a0b12ba3f4
+    home: https://memcached.org
+    icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
+    keywords:
+    - memcached
+    - cache
+    - in-memory
+    - key-value
+    - distributed
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: memcached
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+    - https://github.com/memcached/memcached
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/memcached-0.7.2/memcached-0.7.2.tgz
+    version: 0.7.2
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
             - kind: changed
               description: "add serviceMonitor joblabel attribute to values (#610)"
               links:
@@ -19486,4 +19536,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-09T12:15:23.308935451Z"
+generated: "2025-12-09T12:20:11.416234983Z"
