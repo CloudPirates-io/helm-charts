@@ -94,17 +94,18 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ### Common Parameters
 
-| Parameter             | Description                                                                                                                                                                             | Default         |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `nameOverride`        | String to partially override redis.fullname                                                                                                                                             | `""`            |
-| `fullnameOverride`    | String to fully override redis.fullname                                                                                                                                                 | `""`            |
-| `namespaceOverride`   | String to override the namespace for all resources                                                                                                                                      | `""`            |
-| `clusterDomain`       | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
-| `commonLabels`        | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
-| `commonAnnotations`   | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
-| `architecture`        | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
-| `replicaCount`        | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
-| `clusterReplicaCount` | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
+| Parameter              | Description                                                                                                                                                                             | Default         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `nameOverride`         | String to partially override redis.fullname                                                                                                                                             | `""`            |
+| `fullnameOverride`     | String to fully override redis.fullname                                                                                                                                                 | `""`            |
+| `namespaceOverride`    | String to override the namespace for all resources                                                                                                                                      | `""`            |
+| `clusterDomain`        | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
+| `commonLabels`         | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
+| `commonAnnotations`    | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
+| `architecture`         | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
+| `replicaCount`         | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
+| `clusterReplicaCount`  | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                                                                                                            | `10`            |
 
 ### Pod labels and annotations
 

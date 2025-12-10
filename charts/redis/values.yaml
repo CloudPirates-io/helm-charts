@@ -51,6 +51,9 @@ replicaCount: 3
 ## For example: replicaCount: 6 and clusterReplicaCount: 1 creates 3 masters + 3 replicas (1 per master)
 clusterReplicaCount: 0
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}

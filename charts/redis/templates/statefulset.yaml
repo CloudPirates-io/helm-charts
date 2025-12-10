@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "redis.fullname" . }}-headless
   replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 10 }}
   selector:
     matchLabels:
       {{- include "redis.selectorLabels" . | nindent 6 }}
