@@ -91,21 +91,31 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+
+            {{/* Custom user setup if a name or an existing secret is defined */}}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
+
+              {{/* Setup a secret ref if a key is defined */}}
+              {{- if .Values.customUser.secretKeys.database }}
               valueFrom:
                 secretKeyRef:
+                  {{/* Reference the existing secret */}}
                   {{- if .Values.customUser.existingSecret }}
                   name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
+                  {{/* Reference the generated secret */}}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.database }}
-                  {{- else }}
-                  key: CUSTOM_DB
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.database . | quote }}
+              {{- else }}
+
+              {{/* Fallback to static value otherwise */}}
+              value: {{ tpl .Values.customUser.database . | quote }}
+              {{- end }}
+
             - name: CUSTOM_USER
+              {{- if .Values.customUser.secretKeys.name }}
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
@@ -113,11 +123,11 @@ spec:
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.name }}
-                  {{- else }}
-                  key: CUSTOM_USER
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.name . | quote }}
+              {{- else }}
+              value: {{ tpl .Values.customUser.name . | quote }}
+              {{- end }}
+
             - name: CUSTOM_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -126,11 +136,7 @@ spec:
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.password }}
-                  {{- else }}
-                  key: CUSTOM_PASSWORD
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.password . | quote }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
