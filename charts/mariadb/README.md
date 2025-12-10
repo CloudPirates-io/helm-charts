@@ -323,6 +323,22 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `tolerations`    | Tolerations for pod assignment | `[]`    |
 | `affinity`       | Affinity for pod assignment    | `{}`    |
 
+### Metrics
+
+| Parameter                          | Description                                                 | Default                                         |
+| ---------------------------------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| `metrics.enabled`                  | Enable metrics exporter sidecar                             | `false`                                         |
+| `metrics.image.registry`           | Metrics exporter image registry                             | `docker.io`                                     |
+| `metrics.image.repository`         | Metrics exporter image repository                           | `prom/mysqld-exporter`                          |
+| `metrics.image.tag`                | Metrics exporter image tag (immutable tags are recommended) | `v0.18.0@sha256:[...]`                          |
+| `metrics.image.pullPolicy`         | Metrics exporter image pull policy                          | `Always`                                        |
+| `metrics.port`                     | Metrics exporter port                                       | `9104`                                          |
+| `metrics.containerSecurityContext` | Security context for metrics container                      | `{runAsUser: 65534, runAsNonRoot: true, ...}`   |
+| `metrics.resources`                | Resource limits and requests for metrics container          | `{}`                                            |
+| `metrics.extraEnvVars`             | Additional environment variables for metrics exporter       | `[]`                                            |
+| `metrics.livenessProbe`            | LivenessProbe for metrics container                         | `{enabled: true, initialDelaySeconds: 30, ...}` |
+| `metrics.readinessProbe`           | ReadinessProbe for metrics container                        | `{enabled: true, initialDelaySeconds: 30, ...}` |
+
 ## Examples
 
 ### Basic Installation
