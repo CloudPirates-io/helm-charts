@@ -34,6 +34,9 @@ clusterDomain: cluster.local
 ## @param replicaCount Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas)
 replicaCount: 1
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @section Service configuration
 service:
   ## @param service.type Kubernetes service type

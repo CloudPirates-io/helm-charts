@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "rabbitmq.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   selector:
     matchLabels:

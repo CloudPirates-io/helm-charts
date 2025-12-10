@@ -110,10 +110,11 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Deployment configuration
 
-| Parameter             | Description                                                                                        | Default        |
-| --------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
-| `replicaCount`        | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
-| `podManagementPolicy` | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| Parameter              | Description                                                                                        | Default        |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
+| `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
+| `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
 
 ### StatefulSet & Pod metadata
 
