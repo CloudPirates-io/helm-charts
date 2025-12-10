@@ -42,6 +42,9 @@ architecture: standalone
 ##   For example: replicaCount: 3 creates 1 master + 2 replicas
 replicaCount: 3
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
 ## auto: Uses the first IP returned by hostname -i (default)
 ## ipv4: Forces IPv4 address selection

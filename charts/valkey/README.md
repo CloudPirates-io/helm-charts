@@ -85,16 +85,17 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 ### Common configuration
 
-| Parameter           | Description                                                                                    | Default         |
-| ------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
-| `architecture`      | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`    |
-| `replicaCount`      | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`             |
-| `ipFamily`          | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`          |
-| `clusterDomain`     | Kubernetes cluster domain                                                                      | `cluster.local` |
-| `nameOverride`      | String to partially override valkey.fullname                                                   | `""`            |
-| `fullnameOverride`  | String to fully override valkey.fullname                                                       | `""`            |
-| `commonLabels`      | Labels to add to all deployed objects                                                          | `{}`            |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                     | `{}`            |
+| Parameter              | Description                                                                                    | Default         |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| `architecture`         | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`    |
+| `replicaCount`         | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`             |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                   | `10`            |
+| `ipFamily`             | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`          |
+| `clusterDomain`        | Kubernetes cluster domain                                                                      | `cluster.local` |
+| `nameOverride`         | String to partially override valkey.fullname                                                   | `""`            |
+| `fullnameOverride`     | String to fully override valkey.fullname                                                       | `""`            |
+| `commonLabels`         | Labels to add to all deployed objects                                                          | `{}`            |
+| `commonAnnotations`    | Annotations to add to all deployed objects                                                     | `{}`            |
 
 ### Pod annotations and labels
 
