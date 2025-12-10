@@ -128,6 +128,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 | Parameter                  | Description                                               | Default                   |
 | -------------------------- | --------------------------------------------------------- | ------------------------- |
+| `config.mountPath`         | Redis configuration mount path                            | `/etc/valkey`             |
 | `config.maxMemory`         | Maximum memory usage for Valkey (e.g., 256mb, 1gb)        | `""`                      |
 | `config.maxMemoryPolicy`   | Memory eviction policy when maxmemory is reached          | `"allkeys-lru"`           |
 | `config.save`              | Valkey save configuration (e.g., "900 1 300 10 60 10000") | `"900 1 300 10 60 10000"` |
