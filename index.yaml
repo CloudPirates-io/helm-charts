@@ -8922,6 +8922,58 @@ entries:
       artifacthub.io/category: networking
       artifacthub.io/changes: |2
             - kind: changed
+              description: "[nginx]: Configurable side car containers"
+              links:
+                - name: "Commit f525b11"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/f525b11"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Nginx
+          url: https://www.nginx.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+        - name: Application
+          url: https://github.com/nginx/nginx
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.29.4
+    created: "2025-12-10T13:07:36.63115519Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Nginx is a high-performance HTTP server and reverse proxy.
+    digest: 16e0f2baf55ac03063dfcd65cdbb181c9bcb00a17b893367bcd8110bdb14c8b3
+    home: https://www.nginx.com
+    icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg
+    keywords:
+    - nginx
+    - web server
+    - http
+    - reverse proxy
+    - load balancer
+    - proxy
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: nginx
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+    - https://github.com/nginx/nginx
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/nginx-0.5.1/nginx-0.5.1.tgz
+    version: 0.5.1
+  - annotations:
+      artifacthub.io/category: networking
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "[nginx]: feat: remove optional bitnami script sourcing (#601)"
               links:
                 - name: "Commit 9f6a837"
@@ -19741,4 +19793,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-10T11:49:59.597290472Z"
+generated: "2025-12-10T13:07:37.902800664Z"
