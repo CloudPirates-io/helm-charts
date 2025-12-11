@@ -304,11 +304,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### ServiceAccount
 
-| Parameter                    | Description                       | Default |
-| ---------------------------- | --------------------------------- | ------- |
-| `serviceAccount.create`      | Enable creation of ServiceAccount | `true`  |
-| `serviceAccount.name`        | Name of serviceAccount            | `""`    |
-| `serviceAccount.annotations` | Annotations for service account   | `{}`    |
+| Parameter                                   | Description                                              | Default |
+| ------------------------------------------- | -------------------------------------------------------- | ------- |
+| `serviceAccount.create`                     | Enable creation of ServiceAccount                        | `true`  |
+| `serviceAccount.name`                       | Name of serviceAccount                                   | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the RabbitMQ pods | `false` |
+| `serviceAccount.annotations`                | Annotations for service account                          | `{}`    |
 
 ### RBAC parameters
 

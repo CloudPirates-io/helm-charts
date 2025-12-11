@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.13.2 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([aa25c3a](https://github.com/CloudPirates-io/helm-charts/commit/aa25c3a))
+* Fix non crashloopbackoff on broken scripts ([35a5175](https://github.com/CloudPirates-io/helm-charts/commit/35a5175))
+* chore: update CHANGELOG.md for merged changes ([a598f4d](https://github.com/CloudPirates-io/helm-charts/commit/a598f4d))
+
 ## 0.13.1 (2025-12-09)
 
 * chore: update CHANGELOG.md for merged changes ([b841a05](https://github.com/CloudPirates-io/helm-charts/commit/b841a05))
