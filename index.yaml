@@ -11986,6 +11986,55 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 4.2.0
+    created: "2025-12-11T15:06:09.298482004Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: A messaging broker that implements the Advanced Message Queuing Protocol
+      (AMQP)
+    digest: 450ae9eaefa66e0f37d0712855e888ba41d49c9398f322c9e575c928b9384501
+    home: https://www.rabbitmq.com
+    icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+    keywords:
+    - rabbitmq
+    - message broker
+    - amqp
+    - messaging
+    - queue
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: rabbitmq
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
+    - https://github.com/rabbitmq/rabbitmq-server
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-0.10.0/rabbitmq-0.10.0.tgz
+    version: 0.10.0
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "Chart updated"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RabbitMQ
+          url: https://www.rabbitmq.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
+        - name: Application
+          url: https://github.com/rabbitmq/rabbitmq-server
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 4.2.0
     created: "2025-12-11T11:53:30.416225545Z"
     dependencies:
     - name: common
@@ -14049,6 +14098,59 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-cluster-operator-0.1.0/rabbitmq-cluster-operator-0.1.0.tgz
     version: 0.1.0
   redis:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "fix(redis): prevent password logging in sentinel startup (#731)"
+              links:
+                - name: "Commit 2e85940"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/2e85940"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Redis
+          url: https://redis.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+        - name: Application
+          url: https://github.com/redis/redis
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.4.0
+    created: "2025-12-11T15:06:09.565612674Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: An open source, in-memory data structure store used as a database,
+      cache, and message broker.
+    digest: 7cfd07f43945aeb9770a5b4bc76ba16e0c3a7f0d4903bcde2c30ecd7a128edad
+    home: https://www.redis.io
+    icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+    keywords:
+    - redis
+    - database
+    - cache
+    - in-memory
+    - key-value
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: redis
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - https://github.com/redis/redis
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/redis-0.17.3/redis-0.17.3.tgz
+    version: 0.17.3
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
@@ -18213,6 +18315,61 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
             - kind: changed
+              description: "Port #615, #639, #701 & fix custom config never being used (#715)"
+              links:
+                - name: "Commit 58035e4"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/58035e4"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Valkey
+          url: https://valkey.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+        - name: Application
+          url: https://github.com/valkey-io/valkey
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 9.0.0
+    created: "2025-12-11T15:06:10.110970919Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: High performance in-memory data structure store, fork of Redis. Valkey
+      is an open-source, high-performance key/value datastore that supports a variety
+      of workloads such as caching, message queues, and can act as a primary database.
+    digest: f0c6c5f916348f258250c66598fa15118998de9e6b81238d5ff83ac4e0bb8876
+    home: https://www.valkey.io
+    icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
+    keywords:
+    - valkey
+    - redis
+    - cache
+    - database
+    - key-value
+    - in-memory
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: valkey
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+    - https://github.com/valkey-io/valkey
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/valkey-0.13.0/valkey-0.13.0.tgz
+    version: 0.13.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "[valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694)"
               links:
                 - name: "Commit beb428d"
@@ -19379,6 +19536,61 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |2
             - kind: changed
+              description: "Update zookeeper statefulset to use existing peristent volume claim if set (#698)"
+              links:
+                - name: "Commit 1bf1992"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/1bf1992"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: ZooKeeper
+          url: https://zookeeper.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+        - name: Application
+          url: https://github.com/apache/zookeeper
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.9.4
+    created: "2025-12-11T15:06:10.406969881Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Apache ZooKeeper is a centralized service for maintaining configuration
+      information, naming, providing distributed synchronization, and providing group
+      services.
+    digest: a976f655233b4a04607a12399bb6f2149b80aacbc42e509316dfecbf984aaac5
+    home: https://zookeeper.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg
+    keywords:
+    - zookeeper
+    - distributed
+    - coordination
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: zookeeper
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+    - https://github.com/apache/zookeeper
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.3.6/zookeeper-0.3.6.tgz
+    version: 0.3.6
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "fix network policy switch (#690)"
               links:
                 - name: "Commit f7b8ae2"
@@ -20054,4 +20266,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-11T13:16:19.192918211Z"
+generated: "2025-12-11T15:06:10.408383303Z"
