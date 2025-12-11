@@ -11,6 +11,7 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   serviceName: {{ include "valkey.fullname" . }}-headless
   selector:
     matchLabels:

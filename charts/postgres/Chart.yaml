@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.13.2
+version: 0.13.3
 appVersion: "18.1.0"
 keywords:
   - postgres
@@ -43,7 +43,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update charts/postgres/values.yaml postgres (#712)"
+          description: "Fix non crashloopbackoff on broken scripts"
           links:
-            - name: "Commit a266333"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/a266333"
+            - name: "Commit 35a5175"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/35a5175"

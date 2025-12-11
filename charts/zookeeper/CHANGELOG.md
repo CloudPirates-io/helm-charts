@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.3.5 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([d0daaa6](https://github.com/CloudPirates-io/helm-charts/commit/d0daaa6))
+* chore: update CHANGELOG.md for merged changes ([c9c2ccd](https://github.com/CloudPirates-io/helm-charts/commit/c9c2ccd))
+* Update zookeeper statefulset to use existing peristent volume claim if set (#698) ([1bf1992](https://github.com/CloudPirates-io/helm-charts/commit/1bf1992))
+
 ## 0.3.4 (2025-12-04)
 
 * chore: update CHANGELOG.md for merged changes ([f13ea15](https://github.com/CloudPirates-io/helm-charts/commit/f13ea15))

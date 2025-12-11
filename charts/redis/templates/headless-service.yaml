@@ -7,8 +7,12 @@ metadata:
     {{- include "redis.labels" . | nindent 4 }}
   {{- if or (include "redis.annotations" .) .Values.service.headless.annotations }}
   annotations:
-{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
-{{ include "cloudpirates.tplvalues.render" (dict "value" .Values.service.headless.annotations "context" .) | indent 4 }}
+    {{- with (include "redis.annotations" .) }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
+    {{- with .Values.service.headless.annotations }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   type: ClusterIP

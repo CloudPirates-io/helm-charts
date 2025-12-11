@@ -308,6 +308,9 @@ sentinel:
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
   downAfterMilliseconds: 1500
+  ## @param sentinel.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
+  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
+  loglevel: notice
   ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
   failoverTimeout: 15000
   ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover

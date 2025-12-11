@@ -441,9 +441,9 @@ auth:
 customUser:
   existingSecret: "postgres-custom-user"
   secretKeys:
-    name: "username"
+    name: "username"  # Set empty for fallback to customUser.name
+    database: "database"  # Set empty for fallback to customUser.database
     password: "password"
-    database: "database"
 ```
 
 Create the secrets first:
