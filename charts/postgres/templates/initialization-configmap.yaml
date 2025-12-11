@@ -25,11 +25,15 @@ data:
     set -e
     echo "Creating custom user: $CUSTOM_USER and database: $CUSTOM_DB"
 
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v DATABASENAME="$CUSTOM_DB" -v USERNAME="$CUSTOM_USER" -v PASSWORD="'$CUSTOM_PASSWORD'" <<-EOSQL
-      CREATE USER :USERNAME WITH PASSWORD :PASSWORD;
-      CREATE DATABASE :DATABASENAME;
-      GRANT ALL PRIVILEGES ON DATABASE :DATABASENAME TO :USERNAME;
-      ALTER DATABASE :DATABASENAME OWNER TO :USERNAME;
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v DATABASENAME="$CUSTOM_DB" -v USERNAME="$CUSTOM_USER" -v PASSWORD="$CUSTOM_PASSWORD" <<-EOSQL
+      SELECT quote_ident(:'USERNAME') AS uname \gset
+      SELECT quote_ident(:'DATABASENAME') AS udb \gset
+      SELECT quote_literal(:'PASSWORD') AS upass \gset
+
+      CREATE USER :uname WITH PASSWORD :upass;
+      CREATE DATABASE :udb;
+      GRANT ALL PRIVILEGES ON DATABASE :udb TO :uname;
+      ALTER DATABASE :udb OWNER TO :uname;
     EOSQL
 
     echo "✅ Custom user and database created successfully!"
