@@ -12,8 +12,12 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   trafficDistribution: {{ .Values.service.trafficDistribution }}
-  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
   allocateLoadBalancerNodePorts: {{ .Values.service.allocateLoadBalancerNodePorts }}
+  {{- end }}
+  {{- if or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer") }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.amqpPort }}
       targetPort: amqp
