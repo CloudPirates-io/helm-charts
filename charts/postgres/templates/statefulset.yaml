@@ -92,11 +92,11 @@ spec:
 {{ toYaml . | indent 12 }}
             {{- end }}
 
-            {{/* Custom user setup if a name or an existing secret is defined */}}
+            {{- /* Custom user setup if a name or an existing secret is defined */}}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
 
-              {{/* Setup a secret ref if a key is defined */}}
+              {{- /* Setup a secret ref if a key is defined */}}
               {{- if .Values.customUser.secretKeys.database }}
               valueFrom:
                 secretKeyRef:
@@ -109,11 +109,9 @@ spec:
                   {{- end }}
                   key: {{ tpl .Values.customUser.secretKeys.database . | quote }}
               {{- else }}
-
-              {{/* Fallback to static value otherwise */}}
+              {{- /* Fallback to static value otherwise */}}
               value: {{ tpl .Values.customUser.database . | quote }}
               {{- end }}
-
             - name: CUSTOM_USER
               {{- if .Values.customUser.secretKeys.name }}
               valueFrom:
@@ -127,7 +125,6 @@ spec:
               {{- else }}
               value: {{ tpl .Values.customUser.name . | quote }}
               {{- end }}
-
             - name: CUSTOM_PASSWORD
               valueFrom:
                 secretKeyRef:
