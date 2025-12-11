@@ -12,6 +12,8 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   trafficDistribution: {{ .Values.service.trafficDistribution }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  allocateLoadBalancerNodePorts: {{ .Values.service.allocateLoadBalancerNodePorts }}
   ports:
     - port: {{ .Values.service.amqpPort }}
       targetPort: amqp

@@ -146,16 +146,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Service configuration
 
-| Parameter                     | Description                                 | Default     |
-| ----------------------------- | ------------------------------------------- | ----------- |
-| `service.type`                | Kubernetes service type                     | `ClusterIP` |
-| `service.amqpPort`            | RabbitMQ AMQP service port                  | `5672`      |
-| `service.managementPort`      | RabbitMQ management UI port                 | `15672`     |
-| `service.epmdPort`            | RabbitMQ EPMD port                          | `4369`      |
-| `service.distPort`            | RabbitMQ distribution port                  | `25672`     |
-| `service.annotations`         | Kubernetes service annotations              | `{}`        |
-| `service.annotationsHeadless` | Kubernetes service annotationsHeadless      | `25672`     |
-| `service.trafficDistribution` | Traffic distribution policy for the service | `""`        |
+| Parameter                              | Description                                                 | Default     |
+| -------------------------------------- | ----------------------------------------------------------- | ----------- |
+| `service.type`                         | Kubernetes service type                                     | `ClusterIP` |
+| `service.amqpPort`                     | RabbitMQ AMQP service port                                  | `5672`      |
+| `service.managementPort`               | RabbitMQ management UI port                                 | `15672`     |
+| `service.epmdPort`                     | RabbitMQ EPMD port                                          | `4369`      |
+| `service.distPort`                     | RabbitMQ distribution port                                  | `25672`     |
+| `service.annotations`                  | Kubernetes service annotations                              | `{}`        |
+| `service.annotationsHeadless`          | Kubernetes service annotationsHeadless                      | `25672`     |
+| `service.trafficDistribution`          | Traffic distribution policy for the service                 | `""`        |
+| `service.externalTrafficPolicy`        | External Traffic Policy for the service                     | `Cluster`   |
+| `service.allocateLoadBalancerNodePorts`| Whether to allocate NodePorts for service type LoadBalancer | `true`      |
 
 ### RabbitMQ Authentication
 
