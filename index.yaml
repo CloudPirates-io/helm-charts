@@ -6328,6 +6328,56 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
+            - kind: changed
+              description: "Update charts/memcached/values.yaml memcached (#710)"
+              links:
+                - name: "Commit 9a0f0bc"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/9a0f0bc"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Memcached
+          url: https://memcached.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.6.39
+    created: "2025-12-12T10:48:06.154115425Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Memcached is an in-memory key-value store for small chunks of arbitrary
+      data (strings, objects) from results of database calls, API calls, or page rendering.
+    digest: ded516dd5af35e9550ca1d2e1450121948cda6311575babe23cf884887c96cb8
+    home: https://memcached.org
+    icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
+    keywords:
+    - memcached
+    - cache
+    - in-memory
+    - key-value
+    - distributed
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: memcached
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+    - https://github.com/memcached/memcached
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/memcached-0.8.0/memcached-0.8.0.tgz
+    version: 0.8.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
             - kind: added
               description: "[memcached] Update charts/memcached/values.yaml memcached"
               links:
@@ -20315,4 +20365,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-12T09:50:48.917606011Z"
+generated: "2025-12-12T10:48:07.217431466Z"
