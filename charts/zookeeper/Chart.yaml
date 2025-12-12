@@ -2,7 +2,7 @@ apiVersion: v2
 name: zookeeper
 description: Apache ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 type: application
-version: 0.3.5
+version: 0.3.6
 appVersion: "3.9.4"
 keywords:
   - zookeeper
@@ -43,7 +43,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "fix network policy switch (#690)"
+          description: "Update zookeeper statefulset to use existing peristent volume claim if set (#698)"
           links:
-            - name: "Commit f7b8ae2"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f7b8ae2"
+            - name: "Commit 1bf1992"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/1bf1992"

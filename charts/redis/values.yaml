@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
+  tag: "8.4.0@sha256:3906b477e4b60250660573105110c28bfce93b01243eab37610a484daebceb04"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -50,6 +50,9 @@ replicaCount: 3
 ## @param clusterReplicaCount Number of replicas for each master node when architecture=cluster.
 ## For example: replicaCount: 6 and clusterReplicaCount: 1 creates 3 masters + 3 replicas (1 per master)
 clusterReplicaCount: 0
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
 
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
@@ -294,7 +297,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae"
+    tag: "8.4.0@sha256:3906b477e4b60250660573105110c28bfce93b01243eab37610a484daebceb04"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   config:
@@ -305,6 +308,9 @@ sentinel:
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
   downAfterMilliseconds: 1500
+  ## @param sentinel.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
+  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
+  loglevel: notice
   ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
   failoverTimeout: 15000
   ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover

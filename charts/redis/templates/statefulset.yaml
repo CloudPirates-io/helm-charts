@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "redis.fullname" . }}-headless
   replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "redis.selectorLabels" . | nindent 6 }}
@@ -475,7 +476,7 @@ spec:
               {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
-              loglevel notice
+              loglevel {{ .Values.sentinel.loglevel }}
               EOF
 
               # Add known sentinels to help with discovery (using hostnames for resilience)
@@ -492,8 +493,12 @@ spec:
                 fi
               done
 
+              {{- if eq .Values.sentinel.loglevel "debug" }}
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
+              {{- else }}
+              echo "Starting Sentinel..."
+              {{- end }}
 
               redis-sentinel /tmp/sentinel.conf
           ports:
