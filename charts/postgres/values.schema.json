@@ -118,7 +118,35 @@
             }
         },
         "customUser": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "secretKeys": {
+                    "type": "object",
+                    "properties": {
+                        "database": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         },
         "extraEnvVars": {
             "type": "array"
@@ -351,6 +379,9 @@
                 },
                 "existingClaim": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object"
                 },
                 "size": {
                     "type": "string"

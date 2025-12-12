@@ -31,6 +31,35 @@
         "clusterDomain": {
             "type": "string"
         },
+        "clusterInitJob": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "clusterReplicaCount": {
             "type": "integer"
         },
@@ -535,6 +564,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "loglevel": {
+                    "type": "string"
                 },
                 "masterName": {
                     "type": "string"

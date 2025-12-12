@@ -524,6 +524,9 @@
         "service": {
             "type": "object",
             "properties": {
+                "allocateLoadBalancerNodePorts": {
+                    "type": "boolean"
+                },
                 "amqpPort": {
                     "type": "integer"
                 },
@@ -539,17 +542,14 @@
                 "epmdPort": {
                     "type": "integer"
                 },
+                "externalTrafficPolicy": {
+                    "type": "string"
+                },
                 "managementPort": {
                     "type": "integer"
                 },
                 "trafficDistribution": {
                     "type": "string"
-                },
-                "externalTrafficPolicy": {
-                    "type": "string"
-                },
-                "allocateLoadBalancerNodePorts": {
-                    "type": "boolean"
                 },
                 "type": {
                     "type": "string"
