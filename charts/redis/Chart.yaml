@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.17.0
+version: 0.17.3
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Update charts/redis/values.yaml redis (#713)"
+          description: "fix(redis): prevent password logging in sentinel startup (#731)"
           links:
-            - name: "Commit 689ef89"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/689ef89"
+            - name: "Commit 2e85940"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/2e85940"

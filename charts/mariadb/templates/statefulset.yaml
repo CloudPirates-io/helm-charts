@@ -123,6 +123,13 @@ spec:
             - name: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP
               value: {{ .Values.galera.forceSafeToBootstrap | quote }}
             {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mariadb.secretName" . }}
+                  key: metricsExporterPassword
+            {{- end }}
             {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -218,6 +225,11 @@ spec:
             - name: custom-init-scripts
               mountPath: /docker-entrypoint-initdb.d
             {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: exporter-init-scripts
+              mountPath: /docker-entrypoint-initdb.d/initMetricsUser.sql
+              subPath: initMetricsUser.sql
+            {{- end }}
             {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
             - name: run
               mountPath: /var/run/mysqld/
@@ -234,6 +246,57 @@ spec:
             - name: {{ $storage.name }}
               mountPath: {{ $storage.mountPath }}
             {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          image: {{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          args: 
+            - "--mysqld.username=exporter"
+            - "--mysqld.address=localhost:3306"
+          {{- if .Values.metrics.containerSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
+          {{- end }}
+          env: 
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mariadb.secretName" . }}
+                  key: metricsExporterPassword
+          {{- with .Values.metrics.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
+          {{- if .Values.metrics.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.metrics.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.metrics.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.metrics.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.metrics.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.metrics.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.metrics.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.metrics.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.metrics.resources }}
+          resources:
+            {{- toYaml .Values.metrics.resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
       volumes:
         - name: tmp-volume
           emptyDir: {}
@@ -265,6 +328,11 @@ spec:
         - name: custom-init-scripts
           configMap:
             name: {{ include "mariadb.initdbScriptsConfigMap" . }}
+        {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: exporter-init-scripts
+          configMap:
+            name: {{ include "mariadb.fullname" . }}-init-exporter-user
         {{- end }}
         {{- range $secret := .Values.extraSecrets }}
         - name: {{ $secret.name }}

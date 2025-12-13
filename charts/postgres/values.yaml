@@ -24,7 +24,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.1@sha256:0033c194dc640cc4dcc62ef7c3117e5791365cca5fc1a2998e5c1693254784bc"
+  tag: "18.1@sha256:38d5c9d522037d8bf0864c9068e4df2f8a60127c6489ab06f98fdeda535560f9"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
 
@@ -107,20 +107,22 @@ config:
   pgHbaConfig: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
-customUser: {}
+customUser:
   ## @param customUser.name Name of the custom user to be created
-  # name: ""
+  name: ""
   ## @param customUser.database Name of the database to be created
-  # database: ""
+  database: ""
   ## @param customUser.password Password to be used for the custom user
-  # password: ""
+  password: ""
   ## @param customUser.existingSecret Existing secret, in which username, password and database name are saved
-  # existingSecret: ""
+  existingSecret: ""
   ## @param customUser.secretKeys Name of keys in existing secret to use the custom user name, password and database
-  # secretKeys:
-  #   name: ""
-  #   password: ""
-  #   database: ""
+  secretKeys:
+    ## @param customUser.secretKeys.name Custom user name secret reference (set empty to fallback to customUser.name)
+    name: "CUSTOM_USER"
+    ## @param customUser.secretKeys.database Custom user database secret reference (set empty to fallback to customUser.database)
+    database: "CUSTOM_DB"
+    password: "CUSTOM_PASSWORD"
 
 ## @section PostgreSQL Initdb configuration
 initdb:

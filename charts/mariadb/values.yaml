@@ -318,3 +318,62 @@ affinity: {}
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+## @section Metrics
+metrics:
+  ## @param metrics.enabled Enable metrics exporter sidecar
+  enabled: true
+  ## @param metrics.image.registry Metrics exporter image registry
+  ## @param metrics.image.repository Metrics exporter image repository
+  ## @param metrics.image.tag Metrics exporter image tag (immutable tags are recommended)
+  ## @param metrics.image.pullPolicy Metrics exporter image pull policy
+  image:
+    registry: docker.io
+    repository: prom/mysqld-exporter
+    tag: "v0.18.0@sha256:2598c0571f383708e19016d119bb45c06128a9ebc962c9f49483278ac5a94c41"
+    pullPolicy: Always
+  ## @param metrics.port Metrics exporter port
+  port: 9104
+  ## @param metrics.containerSecurityContext Security context for metrics container
+  containerSecurityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   memory: 64Mi
+    #   cpu: 10m
+  ## @param metrics.extraEnvVars Additional environment variables for metrics exporter
+  extraEnvVars: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+  ## @param metrics.livenessProbe.enabled Enable livenessProbe for metrics container
+  ## @param metrics.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param metrics.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param metrics.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param metrics.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param metrics.livenessProbe.successThreshold Success threshold for livenessProbe
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param metrics.readinessProbe.enabled Enable readinessProbe for metrics container
+  ## @param metrics.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param metrics.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param metrics.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param metrics.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param metrics.readinessProbe.successThreshold Success threshold for readinessProbe
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1

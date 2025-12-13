@@ -24,15 +24,15 @@ data:
 
     # Check if PGDATA exists and semaphore doesn't
     if [ -d "$PGDATA_PATH" ] && [ ! -f "$SEMAPHORE_FILE" ]; then
-      echo "❌ ERROR: Database directory exists but initialization scripts did not complete successfully"
-      echo "❌ This indicates that initialization scripts failed during the previous run"
-      echo "❌ Removing PGDATA to force re-initialization..."
-      rm -rf "$PGDATA_PATH"
-      echo "✅ PGDATA removed. Database will be re-initialized with init scripts"
+      echo "Existing database detected without semaphore file"
+      echo "This is likely an upgrade from a previous version"
+      echo "Creating semaphore file to mark database as initialized"
+      touch "$SEMAPHORE_FILE"
+      echo "Semaphore file created - database marked as properly initialized"
     elif [ -f "$SEMAPHORE_FILE" ]; then
-      echo "✅ Semaphore file found - initialization scripts completed successfully in a previous run"
+      echo "Semaphore file found - initialization scripts completed successfully in a previous run"
     else
-      echo "ℹ️  First run - database will be initialized with init scripts"
+      echo "First run - database will be initialized with init scripts"
     fi
 
     echo "Starting PostgreSQL..."

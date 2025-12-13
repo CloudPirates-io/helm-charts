@@ -276,6 +276,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`           | Timeout for failover in ms                                                                    | `180000`    |
 | `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover                                             | `1`         |
+| `sentinel.loglevel`                  | Sentinel log level (debug, verbose, notice, warning). When 'debug', full config is logged     | `notice`    |
 | `sentinel.port`                      | Sentinel port                                                                                 | `26379`     |
 | `sentinel.service.type`              | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
 | `sentinel.service.port`              | Sentinel service port                                                                         | `26379`     |

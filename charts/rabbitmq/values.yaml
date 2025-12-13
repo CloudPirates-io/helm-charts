@@ -34,12 +34,19 @@ clusterDomain: cluster.local
 ## @param replicaCount Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas)
 replicaCount: 1
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @section Service configuration
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
   ## @param service.trafficDistribution Traffic distribution policy for the service
   trafficDistribution: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: Cluster
+  ## @param service.allocateLoadBalancerNodePorts Allocate node ports for LoadBalancer service type
+  allocateLoadBalancerNodePorts: true
   ## @param service.amqpPort RabbitMQ AMQP service port
   amqpPort: 5672
   ## @param service.managementPort RabbitMQ management UI port
@@ -193,8 +200,7 @@ ingress:
   ## @param ingress.className Ingress class name
   className: ""
   ## @param ingress.annotations Ingress annotations
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts Ingress hosts configuration
@@ -208,8 +214,7 @@ ingress:
 
 ## @section Resources
 ## @param resources Resource limits and requests for RabbitMQ pods
-resources:
-  {}
+resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -382,6 +387,8 @@ serviceAccount:
   create: true
   ## @param serviceAccount.name Name of serviceAccount
   name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the RabbitMQ pods
+  automountServiceAccountToken: false
   ## @param serviceAccount.annotations Annotations for service account.
   annotations: {}
 
