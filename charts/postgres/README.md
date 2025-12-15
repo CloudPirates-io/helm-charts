@@ -93,6 +93,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
 | `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
+| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
 
 ### Pod annotations and labels
 
