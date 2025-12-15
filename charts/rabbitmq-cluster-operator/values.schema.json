@@ -13,7 +13,6 @@
             "description": "#\n# RabbitMQ Cluster Operator image\n# ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator",
             "properties": {
                 "affinity": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
                     "required": [],
                     "title": "affinity",
@@ -136,7 +135,6 @@
                             "type": "integer"
                         },
                         "seLinuxOptions": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "seLinuxOptions",
@@ -174,21 +172,18 @@
                     "type": "object"
                 },
                 "customLivenessProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customLivenessProbe",
                     "type": "object"
                 },
                 "customReadinessProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customReadinessProbe",
                     "type": "object"
                 },
                 "customStartupProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customStartupProbe",
@@ -306,7 +301,6 @@
                     "type": "array"
                 },
                 "lifecycleHooks": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "lifecycleHooks",
@@ -825,7 +819,6 @@
                     "type": "object"
                 },
                 "nodeSelector": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
                     "required": [],
                     "title": "nodeSelector",
@@ -862,14 +855,12 @@
                     "type": "object"
                 },
                 "podAnnotations": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/",
                     "required": [],
                     "title": "podAnnotations",
                     "type": "object"
                 },
                 "podLabels": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
                     "required": [],
                     "title": "podLabels",
@@ -1031,7 +1022,6 @@
                     "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": false,
                     "description": "# RabbitMQ Cluster Operator resource requests and limits\n# Example:\n# resources:\n#   requests:\n#     cpu: 2\n#     memory: 512Mi\n#   limits:\n#     cpu: 3\n#     memory: 1024Mi",
                     "required": [],
                     "title": "resources",
@@ -1253,14 +1243,12 @@
             "type": "object"
         },
         "commonAnnotations": {
-            "additionalProperties": false,
             "description": "#",
             "required": [],
             "title": "commonAnnotations",
             "type": "object"
         },
         "commonLabels": {
-            "additionalProperties": false,
             "description": "#",
             "required": [],
             "title": "commonLabels",
@@ -1420,7 +1408,6 @@
             "description": "#",
             "properties": {
                 "affinity": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
                     "required": [],
                     "title": "affinity",
@@ -1543,7 +1530,6 @@
                             "type": "integer"
                         },
                         "seLinuxOptions": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "seLinuxOptions",
@@ -1581,21 +1567,18 @@
                     "type": "object"
                 },
                 "customLivenessProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customLivenessProbe",
                     "type": "object"
                 },
                 "customReadinessProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customReadinessProbe",
                     "type": "object"
                 },
                 "customStartupProbe": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "customStartupProbe",
@@ -1756,7 +1739,6 @@
                     "type": "array"
                 },
                 "lifecycleHooks": {
-                    "additionalProperties": false,
                     "description": "#",
                     "required": [],
                     "title": "lifecycleHooks",
@@ -2242,7 +2224,6 @@
                     "type": "object"
                 },
                 "nodeSelector": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
                     "required": [],
                     "title": "nodeSelector",
@@ -2279,14 +2260,12 @@
                     "type": "object"
                 },
                 "podAnnotations": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/",
                     "required": [],
                     "title": "podAnnotations",
                     "type": "object"
                 },
                 "podLabels": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
                     "required": [],
                     "title": "podLabels",
@@ -2448,7 +2427,6 @@
                     "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": false,
                     "description": "#\n# Example:\n# resources:\n#   requests:\n#     cpu: 2\n#     memory: 512Mi\n#   limits:\n#     cpu: 3\n#     memory: 1024Mi",
                     "required": [],
                     "title": "resources",
