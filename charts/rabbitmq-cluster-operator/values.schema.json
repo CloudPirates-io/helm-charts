@@ -9,7 +9,6 @@
             "type": "string"
         },
         "clusterOperator": {
-            "additionalProperties": false,
             "description": "#\n# RabbitMQ Cluster Operator image\n# ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator",
             "properties": {
                 "affinity": {
@@ -44,7 +43,6 @@
                     "type": "array"
                 },
                 "containerPorts": {
-                    "additionalProperties": false,
                     "description": "#",
                     "properties": {
                         "metrics": {
@@ -59,7 +57,6 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": false,
                     "description": "# Configure Container Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
                     "properties": {
                         "allowPrivilegeEscalation": {
@@ -70,7 +67,6 @@
                             "type": "boolean"
                         },
                         "capabilities": {
-                            "additionalProperties": false,
                             "properties": {
                                 "drop": {
                                     "description": "#",
@@ -141,7 +137,6 @@
                             "type": "object"
                         },
                         "seccompProfile": {
-                            "additionalProperties": false,
                             "properties": {
                                 "type": {
                                     "default": "RuntimeDefault",
@@ -240,7 +235,6 @@
                     "type": "array"
                 },
                 "image": {
-                    "additionalProperties": false,
                     "properties": {
                         "digest": {
                             "default": "",
@@ -307,7 +301,6 @@
                     "type": "object"
                 },
                 "livenessProbe": {
-                    "additionalProperties": false,
                     "description": "# Configure extra options for RabbitMQ Cluster Operator containers' liveness and readiness probes\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes",
                     "properties": {
                         "enabled": {
@@ -358,14 +351,11 @@
                     "type": "object"
                 },
                 "metrics": {
-                    "additionalProperties": false,
                     "description": "#",
                     "properties": {
                         "podMonitor": {
-                            "additionalProperties": false,
                             "properties": {
                                 "additionalLabels": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "additionalLabels",
@@ -416,7 +406,6 @@
                                     "type": "string"
                                 },
                                 "params": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "params",
@@ -446,7 +435,6 @@
                                     "type": "string"
                                 },
                                 "selector": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "selector",
@@ -471,11 +459,9 @@
                             "type": "object"
                         },
                         "service": {
-                            "additionalProperties": false,
                             "description": "# Metrics service parameters",
                             "properties": {
                                 "annotations": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "properties": {
                                         "prometheus.io/port": {
@@ -542,7 +528,6 @@
                                     "type": "array"
                                 },
                                 "nodePorts": {
-                                    "additionalProperties": false,
                                     "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
                                     "properties": {
                                         "http": {
@@ -557,7 +542,6 @@
                                     "type": "object"
                                 },
                                 "ports": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "properties": {
                                         "http": {
@@ -579,7 +563,6 @@
                                     "type": "string"
                                 },
                                 "sessionAffinityConfig": {
-                                    "additionalProperties": false,
                                     "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
                                     "required": [],
                                     "title": "sessionAffinityConfig",
@@ -611,7 +594,6 @@
                             "type": "object"
                         },
                         "serviceMonitor": {
-                            "additionalProperties": false,
                             "properties": {
                                 "enabled": {
                                     "default": false,
@@ -642,7 +624,6 @@
                                     "type": "string"
                                 },
                                 "labels": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "labels",
@@ -665,7 +646,6 @@
                                     "type": "string"
                                 },
                                 "params": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "params",
@@ -695,7 +675,6 @@
                                     "type": "string"
                                 },
                                 "selector": {
-                                    "additionalProperties": false,
                                     "description": "#\n# selector:\n#   prometheus: my-prometheus",
                                     "required": [],
                                     "title": "selector",
@@ -725,7 +704,6 @@
                     "type": "object"
                 },
                 "networkPolicy": {
-                    "additionalProperties": false,
                     "description": "# Network Policies\n# Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/",
                     "properties": {
                         "allowExternal": {
@@ -768,14 +746,12 @@
                             "type": "array"
                         },
                         "ingressNSMatchLabels": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "ingressNSMatchLabels",
                             "type": "object"
                         },
                         "ingressNSPodMatchLabels": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "ingressNSPodMatchLabels",
@@ -825,7 +801,6 @@
                     "type": "object"
                 },
                 "pdb": {
-                    "additionalProperties": false,
                     "description": "# Pod Disruption Budget configuration\n# ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/",
                     "properties": {
                         "create": {
@@ -867,7 +842,6 @@
                     "type": "object"
                 },
                 "podSecurityContext": {
-                    "additionalProperties": false,
                     "description": "# Configure Pods Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
                     "properties": {
                         "enabled": {
@@ -922,11 +896,9 @@
                     "type": "string"
                 },
                 "rbac": {
-                    "additionalProperties": false,
                     "description": "# RBAC configuration",
                     "properties": {
                         "clusterRole": {
-                            "additionalProperties": false,
                             "description": "# ClusterRole parameters",
                             "properties": {
                                 "customRules": {
@@ -965,7 +937,6 @@
                     "type": "object"
                 },
                 "readinessProbe": {
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "default": true,
@@ -1042,11 +1013,9 @@
                     "type": "string"
                 },
                 "serviceAccount": {
-                    "additionalProperties": false,
                     "description": "# ServiceAccount configuration",
                     "properties": {
                         "annotations": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "annotations",
@@ -1088,7 +1057,6 @@
                     "type": "array"
                 },
                 "startupProbe": {
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "default": false,
@@ -1163,7 +1131,6 @@
                     "type": "array"
                 },
                 "updateStrategy": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies",
                     "properties": {
                         "type": {
@@ -1255,7 +1222,6 @@
             "type": "object"
         },
         "credentialUpdaterImage": {
-            "additionalProperties": false,
             "description": "# RabbitMQ Default User Credential Updater Image\n# ref: https://hub.docker.com/r/rabbitmqoperator/default-user-credential-updater/tags",
             "properties": {
                 "digest": {
@@ -1301,7 +1267,6 @@
             "type": "object"
         },
         "diagnosticMode": {
-            "additionalProperties": false,
             "description": "# Enable diagnostic mode in the deployment(s)/statefulset(s)",
             "properties": {
                 "enabled": {
@@ -1333,15 +1298,12 @@
             "type": "string"
         },
         "global": {
-            "additionalProperties": false,
             "description": "#\n# Please, note that this will override the image parameters, including dependencies, configured to use the global value",
             "properties": {
                 "compatibility": {
-                    "additionalProperties": false,
                     "description": "# Compatibility adaptations for Kubernetes platforms",
                     "properties": {
                         "openshift": {
-                            "additionalProperties": false,
                             "description": "# Compatibility adaptations for Openshift",
                             "properties": {
                                 "adaptSecurityContext": {
@@ -1404,7 +1366,6 @@
             "type": "string"
         },
         "msgTopologyOperator": {
-            "additionalProperties": false,
             "description": "#",
             "properties": {
                 "affinity": {
@@ -1439,7 +1400,6 @@
                     "type": "array"
                 },
                 "containerPorts": {
-                    "additionalProperties": false,
                     "description": "#",
                     "properties": {
                         "metrics": {
@@ -1454,7 +1414,6 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": false,
                     "description": "# Configure Container Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
                     "properties": {
                         "allowPrivilegeEscalation": {
@@ -1465,7 +1424,6 @@
                             "type": "boolean"
                         },
                         "capabilities": {
-                            "additionalProperties": false,
                             "properties": {
                                 "drop": {
                                     "description": "#",
@@ -1536,7 +1494,6 @@
                             "type": "object"
                         },
                         "seccompProfile": {
-                            "additionalProperties": false,
                             "properties": {
                                 "type": {
                                     "default": "RuntimeDefault",
@@ -1677,7 +1634,6 @@
                     "type": "boolean"
                 },
                 "image": {
-                    "additionalProperties": false,
                     "description": "# RabbitMQ Messaging Topology Operator image\n# ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator/tags",
                     "properties": {
                         "digest": {
@@ -1745,7 +1701,6 @@
                     "type": "object"
                 },
                 "livenessProbe": {
-                    "additionalProperties": false,
                     "description": "# Configure extra options for RabbitMQ Messaging Topology Operator containers' liveness and readiness probes\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes",
                     "properties": {
                         "enabled": {
@@ -1796,14 +1751,11 @@
                     "type": "object"
                 },
                 "metrics": {
-                    "additionalProperties": false,
                     "description": "#",
                     "properties": {
                         "podMonitor": {
-                            "additionalProperties": false,
                             "properties": {
                                 "additionalLabels": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "additionalLabels",
@@ -1870,7 +1822,6 @@
                                     "type": "string"
                                 },
                                 "selector": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "selector",
@@ -1893,11 +1844,9 @@
                             "type": "object"
                         },
                         "service": {
-                            "additionalProperties": false,
                             "description": "# Metrics service parameters",
                             "properties": {
                                 "annotations": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "properties": {
                                         "prometheus.io/port": {
@@ -1964,7 +1913,6 @@
                                     "type": "array"
                                 },
                                 "nodePorts": {
-                                    "additionalProperties": false,
                                     "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
                                     "properties": {
                                         "http": {
@@ -1979,7 +1927,6 @@
                                     "type": "object"
                                 },
                                 "ports": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "properties": {
                                         "http": {
@@ -2001,7 +1948,6 @@
                                     "type": "string"
                                 },
                                 "sessionAffinityConfig": {
-                                    "additionalProperties": false,
                                     "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
                                     "required": [],
                                     "title": "sessionAffinityConfig",
@@ -2033,7 +1979,6 @@
                             "type": "object"
                         },
                         "serviceMonitor": {
-                            "additionalProperties": false,
                             "properties": {
                                 "enabled": {
                                     "default": false,
@@ -2064,7 +2009,6 @@
                                     "type": "string"
                                 },
                                 "labels": {
-                                    "additionalProperties": false,
                                     "description": "#",
                                     "required": [],
                                     "title": "labels",
@@ -2103,7 +2047,6 @@
                                     "type": "string"
                                 },
                                 "selector": {
-                                    "additionalProperties": false,
                                     "description": "# DEPRECATED: Use msgTopologyOperator.metrics.serviceMonitor.labels instead.\n# This value will be removed in a future release\n# additionalLabels: {}",
                                     "required": [],
                                     "title": "selector",
@@ -2131,7 +2074,6 @@
                     "type": "object"
                 },
                 "networkPolicy": {
-                    "additionalProperties": false,
                     "description": "# Network Policies\n# Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/",
                     "properties": {
                         "allowExternal": {
@@ -2174,14 +2116,12 @@
                             "type": "array"
                         },
                         "ingressNSMatchLabels": {
-                            "additionalProperties": false,
                             "description": "#\n#",
                             "required": [],
                             "title": "ingressNSMatchLabels",
                             "type": "object"
                         },
                         "ingressNSPodMatchLabels": {
-                            "additionalProperties": false,
                             "required": [],
                             "title": "ingressNSPodMatchLabels",
                             "type": "object"
@@ -2230,7 +2170,6 @@
                     "type": "object"
                 },
                 "pdb": {
-                    "additionalProperties": false,
                     "description": "# Pod Disruption Budget configuration\n# ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/",
                     "properties": {
                         "create": {
@@ -2272,7 +2211,6 @@
                     "type": "object"
                 },
                 "podSecurityContext": {
-                    "additionalProperties": false,
                     "description": "# Configure Pods Security Context\n# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
                     "properties": {
                         "enabled": {
@@ -2327,11 +2265,9 @@
                     "type": "string"
                 },
                 "rbac": {
-                    "additionalProperties": false,
                     "description": "# RBAC configuration",
                     "properties": {
                         "clusterRole": {
-                            "additionalProperties": false,
                             "description": "# ClusterRole parameters",
                             "properties": {
                                 "customRules": {
@@ -2370,7 +2306,6 @@
                     "type": "object"
                 },
                 "readinessProbe": {
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "default": true,
@@ -2447,11 +2382,9 @@
                     "type": "string"
                 },
                 "service": {
-                    "additionalProperties": false,
                     "description": "# Webhook service parameters",
                     "properties": {
                         "annotations": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "annotations",
@@ -2497,7 +2430,6 @@
                             "type": "array"
                         },
                         "nodePorts": {
-                            "additionalProperties": false,
                             "description": "# Node ports to expose\n#\n# NOTE: choose port between \u003c30000-32767\u003e",
                             "properties": {
                                 "http": {
@@ -2512,7 +2444,6 @@
                             "type": "object"
                         },
                         "ports": {
-                            "additionalProperties": false,
                             "description": "#",
                             "properties": {
                                 "webhook": {
@@ -2534,7 +2465,6 @@
                             "type": "string"
                         },
                         "sessionAffinityConfig": {
-                            "additionalProperties": false,
                             "description": "#\n# sessionAffinityConfig:\n#   clientIP:\n#     timeoutSeconds: 300",
                             "required": [],
                             "title": "sessionAffinityConfig",
@@ -2565,11 +2495,9 @@
                     "type": "object"
                 },
                 "serviceAccount": {
-                    "additionalProperties": false,
                     "description": "# ServiceAccount configuration",
                     "properties": {
                         "annotations": {
-                            "additionalProperties": false,
                             "description": "#",
                             "required": [],
                             "title": "annotations",
@@ -2618,7 +2546,6 @@
                     "type": "boolean"
                 },
                 "startupProbe": {
-                    "additionalProperties": false,
                     "properties": {
                         "enabled": {
                             "default": false,
@@ -2693,7 +2620,6 @@
                     "type": "array"
                 },
                 "updateStrategy": {
-                    "additionalProperties": false,
                     "description": "#\n# ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies",
                     "properties": {
                         "type": {
@@ -2788,7 +2714,6 @@
             "type": "string"
         },
         "rabbitmqImage": {
-            "additionalProperties": false,
             "description": "#\n# ref: https://hub.docker.com/_/rabbitmq/tags",
             "properties": {
                 "digest": {
