@@ -17,6 +17,9 @@ commonAnnotations: {}
 ## @param priorityClassName Priority class name to be used for the pods
 priorityClassName: ""
 
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
+
 ## @section PostgreSQL image configuration
 image:
   ## @param image.registry PostgreSQL image registry
