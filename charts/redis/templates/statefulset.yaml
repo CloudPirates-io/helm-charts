@@ -188,6 +188,15 @@ spec:
               echo "appendonly yes" >> /tmp/redis.conf
               {{- end }}
 
+              {{- if and .Values.auth.enabled (ne .Values.architecture "standalone") }}
+              # IMPORTANT: Always add masterauth for non-standalone architectures
+              # Even if this pod starts as master, it may become a replica after failover
+              # Without masterauth, SLAVEOF commands from sentinel will fail with NOAUTH
+              echo "" >> /tmp/redis.conf
+              echo "# Authentication for replication (required for failover scenarios)" >> /tmp/redis.conf
+              echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+              {{- end }}
+
               # Add user provided settings at the end of file to ensure their precedence
               echo "" >> /tmp/redis.conf
               # If there is existing config map or .Values.config value provided - use it
