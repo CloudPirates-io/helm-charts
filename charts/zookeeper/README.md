@@ -147,7 +147,8 @@ zkCli.sh -server my-zookeeper:2181
 | `persistence.size`          | Persistent Volume size              | `8Gi`                     |
 | `persistence.accessModes`   | Persistent Volume access modes      | `[ReadWriteOnce]`         |
 | `persistence.existingClaim` | Name of existing PVC to use         | `""`                      |
-| `persistence.mountPath`     | Path to mount the data volume       | `/var/lib/zookeeper/data` |
+| `persistence.mountPath`     | Path to mount the data volume       | `/data`                   |
+| `persistence.dataDir  `     | The directory where to store the data | `/data`                   |
 
 ### Resource Management
 
