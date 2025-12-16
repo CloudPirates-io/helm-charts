@@ -536,6 +536,29 @@
                         }
                     }
                 },
+                "livenessProbe": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "failureThreshold": {
+                      "type": "integer"
+                    },
+                    "initialDelaySeconds": {
+                      "type": "integer"
+                    },
+                    "periodSeconds": {
+                      "type": "integer"
+                    },
+                    "successThreshold": {
+                      "type": "integer"
+                    },
+                    "timeoutSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                },
                 "masterName": {
                     "type": "string"
                 },
@@ -547,6 +570,29 @@
                 },
                 "quorum": {
                     "type": "integer"
+                },
+                "readinessProbe": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "failureThreshold": {
+                      "type": "integer"
+                    },
+                    "initialDelaySeconds": {
+                      "type": "integer"
+                    },
+                    "periodSeconds": {
+                      "type": "integer"
+                    },
+                    "successThreshold": {
+                      "type": "integer"
+                    },
+                    "timeoutSeconds": {
+                      "type": "integer"
+                    }
+                  }
                 },
                 "resources": {
                     "type": "object",

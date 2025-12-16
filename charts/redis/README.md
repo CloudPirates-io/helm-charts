@@ -264,26 +264,38 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable. When disabled with `replication` mode, pod-0 is always the master.
 
-| Parameter                            | Description                                                                                   | Default     |
-| ------------------------------------ | --------------------------------------------------------------------------------------------- | ----------- |
-| `sentinel.enabled`                   | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
-| `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.4.0`     |
-| `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`    |
-| `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
-| `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`  |
-| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure                                         | `2`         |
-| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`     |
-| `sentinel.failoverTimeout`           | Timeout for failover in ms                                                                    | `180000`    |
-| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover                                             | `1`         |
-| `sentinel.loglevel`                  | Sentinel log level (debug, verbose, notice, warning). When 'debug', full config is logged     | `notice`    |
-| `sentinel.port`                      | Sentinel port                                                                                 | `26379`     |
-| `sentinel.service.type`              | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
-| `sentinel.service.port`              | Sentinel service port                                                                         | `26379`     |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                                                                | `128Mi`     |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                                                                 | `25m`       |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`      |
-| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`        |
+| Parameter                                     | Description                                                                                   | Default     |
+|-----------------------------------------------|-----------------------------------------------------------------------------------------------|-------------|
+| `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
+| `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
+| `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
+| `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
+| `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
+| `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
+| `sentinel.parallelSyncs`                      | Number of replicas to reconfigure during failover                                             | `1`         |
+| `sentinel.loglevel`                           | Sentinel log level (debug, verbose, notice, warning). When 'debug', full config is logged     | `notice`    |
+| `sentinel.port`                               | Sentinel port                                                                                 | `26379`     |
+| `sentinel.service.type`                       | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
+| `sentinel.service.port`                       | Sentinel service port                                                                         | `26379`     |
+| `sentinel.resources.limits.memory`            | Memory limit for Sentinel pods                                                                | `128Mi`     |
+| `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
+| `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
+| `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
+| `sentinel.livenessProbe.enabled`              | Enable liveness probe                                                                         | `true`      |
+| `sentinel.livenessProbe.initialDelaySeconds`  | Initial delay before starting probes                                                          | `30`        |
+| `sentinel.livenessProbe.periodSeconds`        | How often to perform the probe                                                                | `10`        |
+| `sentinel.livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                                                                | `5`         |
+| `sentinel.livenessProbe.failureThreshold`     | Number of failures before pod is restarted                                                    | `6`         |
+| `sentinel.livenessProbe.successThreshold`     | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.readinessProbe.enabled`             | Enable readiness probe                                                                        | `true`      |
+| `sentinel.readinessProbe.initialDelaySeconds` | Initial delay before starting probes                                                          | `5`         |
+| `sentinel.readinessProbe.periodSeconds`       | How often to perform the probe                                                                | `10`        |
+| `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
+| `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
+| `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
 
 ### ServiceAccount
 

@@ -332,6 +332,34 @@ sentinel:
       cpu: 25m
       memory: 64Mi
 
+  livenessProbe:
+    ## @param sentinel.livenessProbe.enabled Enable liveness probe
+    enabled: true
+    ## @param sentinel.livenessProbe.initialDelaySeconds Initial delay before starting probes
+    initialDelaySeconds: 30
+    ## @param sentinel.livenessProbe.periodSeconds How often to perform the probe
+    periodSeconds: 10
+    ## @param sentinel.livenessProbe.timeoutSeconds Timeout for each probe attempt
+    timeoutSeconds: 5
+    ## @param sentinel.livenessProbe.failureThreshold Number of failures before pod is restarted
+    failureThreshold: 6
+    ## @param sentinel.livenessProbe.successThreshold Number of successes to mark probe as successful
+    successThreshold: 1
+
+  readinessProbe:
+    ## @param sentinel.readinessProbe.enabled Enable readiness probe
+    enabled: true
+    ## @param sentinel.readinessProbe.initialDelaySeconds Initial delay before starting probes
+    initialDelaySeconds: 5
+    ## @param sentinel.readinessProbe.periodSeconds How often to perform the probe
+    periodSeconds: 10
+    ## @param sentinel.readinessProbe.timeoutSeconds Timeout for each probe attempt
+    timeoutSeconds: 5
+    ## @param sentinel.readinessProbe.failureThreshold Number of failures before pod is marked unready
+    failureThreshold: 6
+    ## @param sentinel.readinessProbe.successThreshold Number of successes to mark probe as successful
+    successThreshold: 1
+
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
   resources:
