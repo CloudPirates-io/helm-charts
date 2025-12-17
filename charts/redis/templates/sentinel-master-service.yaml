@@ -7,12 +7,16 @@ metadata:
   labels:
     {{- include "redis.labels" . | nindent 4 }}
     app.kubernetes.io/component: master
-  {{- if (include "redis.annotations" .) }}
+  {{- if or .Values.sentinel.masterService.annotations (include "redis.annotations" .) }}
   annotations:
-{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
+    {{- if .Values.sentinel.masterService.annotations }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.sentinel.masterService.annotations "context" .) | nindent 4 }}
+    {{- else }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.sentinel.masterService.type | default .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: redis

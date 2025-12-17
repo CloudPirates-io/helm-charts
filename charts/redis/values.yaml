@@ -336,6 +336,10 @@ sentinel:
   masterService:
     ## @param sentinel.masterService.enabled Enable dynamic master service for non-Sentinel-aware clients
     enabled: false
+    ## @param sentinel.masterService.type Kubernetes service type for master service (defaults to service.type if not set)
+    type: ""
+    ## @param sentinel.masterService.annotations Additional custom annotations for master service
+    annotations: {}
     ## @param sentinel.masterService.checkInterval Interval in seconds to check for master changes
     checkInterval: 60
     ## @param sentinel.masterService.image.repository Image for master discovery deployment

@@ -597,6 +597,9 @@
                 "masterService": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
                         "checkInterval": {
                             "type": "integer"
                         },
@@ -640,6 +643,9 @@
                                     }
                                 }
                             }
+                        },
+                        "type": {
+                            "type": "string"
                         }
                     }
                 },
