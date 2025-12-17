@@ -1,6 +1,38 @@
 # Changelog
 
 
+## 0.13.5 (2025-12-15)
+
+* chore: update CHANGELOG.md for merged changes ([a8f42a3](https://github.com/CloudPirates-io/helm-charts/commit/a8f42a3))
+* Support pgvector image tags (#744) ([8a69448](https://github.com/CloudPirates-io/helm-charts/commit/8a69448))
+
+## 0.13.4 (2025-12-12)
+
+* Bump postgres chart version to 0.13.4 ([7173689](https://github.com/CloudPirates-io/helm-charts/commit/7173689))
+* Update charts/postgres/values.yaml postgres (#726) ([fd08dc9](https://github.com/CloudPirates-io/helm-charts/commit/fd08dc9))
+* chore: update CHANGELOG.md for merged changes ([14dd356](https://github.com/CloudPirates-io/helm-charts/commit/14dd356))
+* Re-release postgresql 0.13.2 ([1e6e97b](https://github.com/CloudPirates-io/helm-charts/commit/1e6e97b))
+
+## 0.13.3 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([d77a000](https://github.com/CloudPirates-io/helm-charts/commit/d77a000))
+* chore: update CHANGELOG.md for merged changes ([566dba2](https://github.com/CloudPirates-io/helm-charts/commit/566dba2))
+* Add support for password secret reference only (#719) ([c4ccbb0](https://github.com/CloudPirates-io/helm-charts/commit/c4ccbb0))
+
+## 0.13.2 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([aa25c3a](https://github.com/CloudPirates-io/helm-charts/commit/aa25c3a))
+* Fix non crashloopbackoff on broken scripts ([35a5175](https://github.com/CloudPirates-io/helm-charts/commit/35a5175))
+* chore: update CHANGELOG.md for merged changes ([a598f4d](https://github.com/CloudPirates-io/helm-charts/commit/a598f4d))
+
+## 0.13.1 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([b841a05](https://github.com/CloudPirates-io/helm-charts/commit/b841a05))
+* Update charts/postgres/values.yaml postgres (#712) ([a266333](https://github.com/CloudPirates-io/helm-charts/commit/a266333))
+* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+
 ## 0.13.0 (2025-12-06)
 
 * chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))

@@ -25,6 +25,38 @@
                 }
             }
         },
+        "bucketInitJob": {
+            "type": "object",
+            "properties": {
+                "activeDeadlineSeconds": {
+                    "type": "integer"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "backoffLimit": {
+                    "type": "integer"
+                },
+                "completions": {
+                    "type": "integer"
+                },
+                "parallelism": {
+                    "type": "integer"
+                },
+                "podAnnotations": {
+                    "type": "object"
+                },
+                "resources": {
+                    "type": "object"
+                },
+                "restartPolicy": {
+                    "type": "string"
+                },
+                "ttlSecondsAfterFinished": {
+                    "type": "integer"
+                }
+            }
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -302,6 +334,14 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                }
+            }
+        },
+        "postJob": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
                 }
             }
         },

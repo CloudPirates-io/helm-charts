@@ -1,6 +1,21 @@
 # Changelog
 
 
+## 0.12.0 (2025-12-10)
+
+* chore: update CHANGELOG.md for merged changes ([ae1cb60](https://github.com/CloudPirates-io/helm-charts/commit/ae1cb60))
+* chore: update CHANGELOG.md for merged changes ([1151f2d](https://github.com/CloudPirates-io/helm-charts/commit/1151f2d))
+* Port #615, #639, #701 & fix custom config never being used (#715) ([58035e4](https://github.com/CloudPirates-io/helm-charts/commit/58035e4))
+
+## 0.11.1 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([46971c0](https://github.com/CloudPirates-io/helm-charts/commit/46971c0))
+* chore: update CHANGELOG.md for merged changes ([e4e2794](https://github.com/CloudPirates-io/helm-charts/commit/e4e2794))
+* [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694) ([beb428d](https://github.com/CloudPirates-io/helm-charts/commit/beb428d))
+* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+
 ## 0.11.0 (2025-12-06)
 
 

@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.6.0 (2025-12-15)
+
+* Rename post job and add variables to configure it (#741) ([289cc4c](https://github.com/CloudPirates-io/helm-charts/commit/289cc4c))
+
+## 0.5.7 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([6659608](https://github.com/CloudPirates-io/helm-charts/commit/6659608))
+* chore: update CHANGELOG.md for merged changes ([7f09b2d](https://github.com/CloudPirates-io/helm-charts/commit/7f09b2d))
+* add post-job helm-hook annotation, update readme (#706) ([64e36bd](https://github.com/CloudPirates-io/helm-charts/commit/64e36bd))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.5.6 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([5dec604](https://github.com/CloudPirates-io/helm-charts/commit/5dec604))

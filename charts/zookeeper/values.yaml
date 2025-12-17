@@ -178,6 +178,8 @@ persistence:
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
   mountPath: /data
+  ## @param persistance.dataDir The directory where to store the data
+  dataDir: /data
 
 ## @section Liveness and readiness probes
 livenessProbe:

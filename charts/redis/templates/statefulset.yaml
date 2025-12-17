@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "redis.fullname" . }}-headless
   replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "redis.selectorLabels" . | nindent 6 }}
@@ -185,6 +186,15 @@ spec:
               echo "" >> /tmp/redis.conf
               echo "# Increased durability" >> /tmp/redis.conf
               echo "appendonly yes" >> /tmp/redis.conf
+              {{- end }}
+
+              {{- if and .Values.auth.enabled (ne .Values.architecture "standalone") }}
+              # IMPORTANT: Always add masterauth for non-standalone architectures
+              # Even if this pod starts as master, it may become a replica after failover
+              # Without masterauth, SLAVEOF commands from sentinel will fail with NOAUTH
+              echo "" >> /tmp/redis.conf
+              echo "# Authentication for replication (required for failover scenarios)" >> /tmp/redis.conf
+              echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
               {{- end }}
 
               # Add user provided settings at the end of file to ensure their precedence
@@ -475,7 +485,7 @@ spec:
               {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
-              loglevel notice
+              loglevel {{ .Values.sentinel.loglevel }}
               EOF
 
               # Add known sentinels to help with discovery (using hostnames for resilience)
@@ -492,14 +502,19 @@ spec:
                 fi
               done
 
+              {{- if eq .Values.sentinel.loglevel "debug" }}
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
+              {{- else }}
+              echo "Starting Sentinel..."
+              {{- end }}
 
               redis-sentinel /tmp/sentinel.conf
           ports:
             - name: sentinel
               containerPort: {{ .Values.sentinel.port }}
               protocol: TCP
+          {{- if .Values.sentinel.readinessProbe.enabled }}
           readinessProbe:
             exec:
               command:
@@ -510,11 +525,29 @@ spec:
                 {{- else }}
                 - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
                 {{- end }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-            successThreshold: 1
+            initialDelaySeconds: {{ .Values.sentinel.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sentinel.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sentinel.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sentinel.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.sentinel.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.sentinel.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                {{- if eq .Values.ipFamily "ipv6" }}
+                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- else }}
+                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                {{- end }}
+            initialDelaySeconds: {{ .Values.sentinel.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sentinel.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sentinel.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sentinel.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.sentinel.livenessProbe.successThreshold }}
+          {{- end }}
           {{- if or .Values.auth.enabled .Values.auth.sentinel }}
           env:
             - name: REDIS_PASSWORD

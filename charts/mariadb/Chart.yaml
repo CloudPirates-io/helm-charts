@@ -2,7 +2,7 @@ apiVersion: v2
 name: mariadb
 description: MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. Supports both single-node and Galera Cluster deployments.
 type: application
-version: 0.9.0
+version: 0.10.1
 appVersion: "12.1.2"
 keywords:
   - mariadb
@@ -52,4 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "add metrics-exporter (#720)"
+          links:
+            - name: "Commit 29c2378"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/29c2378"

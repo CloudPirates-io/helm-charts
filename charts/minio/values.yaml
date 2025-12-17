@@ -79,6 +79,39 @@ config:
 ## e.g: "my-bucket, my-second-bucket:download, my-public-bucket:public"
 defaultBuckets: ""
 
+## @section postJob Configuration for the Job '{{ .Release.Name }}-post-job'
+postJob:
+  ## postJob.annotations Additional annotations for the Job
+  annotations:
+    helm.sh/hook: post-install,post-upgrade # @schema hidden: true
+
+## @section Bucket Initialization Job
+bucketInitJob:
+  ## @param bucketInitJob.ttlSecondsAfterFinished Seconds after which the job is automatically deleted after completion (success or failure)
+  ttlSecondsAfterFinished: 30
+  ## @param bucketInitJob.activeDeadlineSeconds Maximum duration in seconds for the job execution before it is terminated
+  activeDeadlineSeconds: 300
+  ## @param bucketInitJob.completions Number of successful completions required for the job
+  completions: 1
+  ## @param bucketInitJob.parallelism Number of pods running in parallel
+  parallelism: 1
+  ## @param bucketInitJob.backoffLimit Number of retries before considering the job as failed
+  backoffLimit: 3
+  ## @param bucketInitJob.restartPolicy Restart policy for the job pods (OnFailure or Never)
+  restartPolicy: OnFailure
+  ## @param bucketInitJob.annotations Additional annotations for the bucket initialization job
+  annotations: {}
+  ## @param bucketInitJob.podAnnotations Additional annotations for the bucket initialization job pods
+  podAnnotations: {}
+  ## @param bucketInitJob.resources Resource requests and limits for the bucket initialization job
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
+
 ## @section Deployment configuration
 replicaCount: 1
 

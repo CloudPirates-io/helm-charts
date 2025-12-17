@@ -1,6 +1,18 @@
 # Changelog
 
 
+## 0.3.6 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+
+## 0.3.5 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([d0daaa6](https://github.com/CloudPirates-io/helm-charts/commit/d0daaa6))
+* chore: update CHANGELOG.md for merged changes ([c9c2ccd](https://github.com/CloudPirates-io/helm-charts/commit/c9c2ccd))
+* Update zookeeper statefulset to use existing peristent volume claim if set (#698) ([1bf1992](https://github.com/CloudPirates-io/helm-charts/commit/1bf1992))
+
 ## 0.3.4 (2025-12-04)
 
 * chore: update CHANGELOG.md for merged changes ([f13ea15](https://github.com/CloudPirates-io/helm-charts/commit/f13ea15))

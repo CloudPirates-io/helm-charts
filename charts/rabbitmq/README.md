@@ -110,10 +110,11 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Deployment configuration
 
-| Parameter             | Description                                                                                        | Default        |
-| --------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
-| `replicaCount`        | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
-| `podManagementPolicy` | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| Parameter              | Description                                                                                        | Default        |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
+| `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
+| `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
 
 ### StatefulSet & Pod metadata
 
@@ -146,16 +147,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Service configuration
 
-| Parameter                     | Description                                 | Default     |
-| ----------------------------- | ------------------------------------------- | ----------- |
-| `service.type`                | Kubernetes service type                     | `ClusterIP` |
-| `service.amqpPort`            | RabbitMQ AMQP service port                  | `5672`      |
-| `service.managementPort`      | RabbitMQ management UI port                 | `15672`     |
-| `service.epmdPort`            | RabbitMQ EPMD port                          | `4369`      |
-| `service.distPort`            | RabbitMQ distribution port                  | `25672`     |
-| `service.annotations`         | Kubernetes service annotations              | `{}`        |
-| `service.annotationsHeadless` | Kubernetes service annotationsHeadless      | `25672`     |
-| `service.trafficDistribution` | Traffic distribution policy for the service | `""`        |
+| Parameter                              | Description                                                 | Default     |
+| -------------------------------------- | ----------------------------------------------------------- | ----------- |
+| `service.type`                         | Kubernetes service type                                     | `ClusterIP` |
+| `service.amqpPort`                     | RabbitMQ AMQP service port                                  | `5672`      |
+| `service.managementPort`               | RabbitMQ management UI port                                 | `15672`     |
+| `service.epmdPort`                     | RabbitMQ EPMD port                                          | `4369`      |
+| `service.distPort`                     | RabbitMQ distribution port                                  | `25672`     |
+| `service.annotations`                  | Kubernetes service annotations                              | `{}`        |
+| `service.annotationsHeadless`          | Kubernetes service annotationsHeadless                      | `25672`     |
+| `service.trafficDistribution`          | Traffic distribution policy for the service                 | `""`        |
+| `service.externalTrafficPolicy`        | External Traffic Policy for the service                     | `Cluster`   |
+| `service.allocateLoadBalancerNodePorts`| Whether to allocate NodePorts for service type LoadBalancer | `true`      |
 
 ### RabbitMQ Authentication
 
@@ -304,11 +307,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### ServiceAccount
 
-| Parameter                    | Description                       | Default |
-| ---------------------------- | --------------------------------- | ------- |
-| `serviceAccount.create`      | Enable creation of ServiceAccount | `true`  |
-| `serviceAccount.name`        | Name of serviceAccount            | `""`    |
-| `serviceAccount.annotations` | Annotations for service account   | `{}`    |
+| Parameter                                   | Description                                              | Default |
+| ------------------------------------------- | -------------------------------------------------------- | ------- |
+| `serviceAccount.create`                     | Enable creation of ServiceAccount                        | `true`  |
+| `serviceAccount.name`                       | Name of serviceAccount                                   | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the RabbitMQ pods | `false` |
+| `serviceAccount.annotations`                | Annotations for service account                          | `{}`    |
 
 ### RBAC parameters
 
