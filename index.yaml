@@ -20128,6 +20128,61 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |2
             - kind: changed
+              description: "[redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725)"
+              links:
+                - name: "Commit ac9e1ba"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: ZooKeeper
+          url: https://zookeeper.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+        - name: Application
+          url: https://github.com/apache/zookeeper
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.9.4
+    created: "2025-12-17T07:42:50.846713004Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Apache ZooKeeper is a centralized service for maintaining configuration
+      information, naming, providing distributed synchronization, and providing group
+      services.
+    digest: 81fee0198a7ff17e82347c439d94c2c179a97c38683556cac03f38d76de31b2f
+    home: https://zookeeper.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg
+    keywords:
+    - zookeeper
+    - distributed
+    - coordination
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: zookeeper
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+    - https://github.com/apache/zookeeper
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.3.7/zookeeper-0.3.7.tgz
+    version: 0.3.7
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "Update zookeeper statefulset to use existing peristent volume claim if set (#698)"
               links:
                 - name: "Commit 1bf1992"
@@ -20858,4 +20913,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-17T07:42:08.619015315Z"
+generated: "2025-12-17T07:42:50.847569436Z"
