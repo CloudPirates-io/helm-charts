@@ -8225,6 +8225,52 @@ entries:
         url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
       license: Apache-2.0
     apiVersion: v2
+    appVersion: 8.2.3
+    created: "2025-12-22T13:30:36.989616481Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 889bd1e25eee610d5068f5b94977eee0049c6c3dea8ac1e69028063c938b29eb
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.7.1/mongodb-0.7.1.tgz
+    version: 0.7.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "Chart updated"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
     appVersion: 8.2.2
     created: "2025-12-06T16:21:14.85095949Z"
     dependencies:
@@ -21120,4 +21166,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-22T13:29:27.410027542Z"
+generated: "2025-12-22T13:30:37.437864927Z"
