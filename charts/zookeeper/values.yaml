@@ -12,6 +12,17 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override redis.fullname
 fullnameOverride: ""
+## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
+## When migrating from Bitnami Zookeeper:
+##   1. Set serverIdOffset: 1 (Bitnami uses 1-based myid: 1,2,3 vs default 0-based: 0,1,2)
+##   2. Set persistence.mountPath to match Bitnami data location (e.g., /bitnami/zookeeper)
+##   3. Set persistence.dataDir to the actual data directory (e.g., /bitnami/zookeeper/data)
+##   4. Add ZOO_DATA_DIR env var via extraEnvVars to point to the data directory
+## Example extraEnvVars for Bitnami migration:
+##   extraEnvVars:
+##     - name: ZOO_DATA_DIR
+##       value: "/bitnami/zookeeper/data"
+serverIdOffset: 0
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -178,6 +189,8 @@ persistence:
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
   mountPath: /data
+  ## @param persistance.dataDir The directory where to store the data
+  dataDir: /data
 
 ## @section Liveness and readiness probes
 livenessProbe:

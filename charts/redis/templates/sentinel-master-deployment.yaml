@@ -1,0 +1,132 @@
+{{- if and .Values.sentinel.enabled .Values.sentinel.masterService.enabled (eq .Values.architecture "replication") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "redis.fullname" . }}-master-discovery
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master-discovery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "redis.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: master-discovery
+  template:
+    metadata:
+      labels:
+        {{- include "redis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: master-discovery
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "redis.serviceAccountName" . }}
+      automountServiceAccountToken: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: master-discovery
+        image: "{{ .Values.sentinel.masterService.image.repository }}:{{ .Values.sentinel.masterService.image.tag }}"
+        imagePullPolicy: {{ .Values.sentinel.masterService.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        resources:
+          {{- toYaml .Values.sentinel.masterService.resources | nindent 10 }}
+        {{- if .Values.auth.enabled }}
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "redis.secretName" . }}
+                key: {{ include "redis.secretPasswordKey" . }}
+        {{- end }}
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -e
+
+            RELEASE_NAME="{{ include "redis.fullname" . }}"
+            NAMESPACE="{{ include "cloudpirates.namespace" . }}"
+            MASTER_SERVICE="${RELEASE_NAME}-master"
+            SENTINEL_MASTER_NAME="{{ .Values.sentinel.masterName }}"
+            CHECK_INTERVAL="{{ .Values.sentinel.masterService.checkInterval }}"
+
+            echo "Starting Redis master discovery service..."
+            echo "Namespace: $NAMESPACE"
+            echo "Master Service: $MASTER_SERVICE"
+            echo "Sentinel Master Name: $SENTINEL_MASTER_NAME"
+            echo "Check Interval: ${CHECK_INTERVAL}s"
+
+            oldmaster="<none>"
+
+            while true; do
+              # Get a random Redis pod to query Sentinel from
+              pod=$(kubectl get pods -n "$NAMESPACE" \
+                --selector="app.kubernetes.io/instance={{ .Release.Name }}" \
+                --selector="app.kubernetes.io/name={{ include "redis.name" . }}" \
+                -o name 2>/dev/null | shuf | head -n1)
+
+              if [ -z "$pod" ]; then
+                echo "Warning: No Redis pods found, retrying in 10s..."
+                sleep 10
+                continue
+              fi
+
+              echo "Querying Sentinel via pod: $pod"
+
+              # Query Sentinel for the current master hostname
+              # Use the first pod (redis-0) as it should always be available
+              master_hostname=$(kubectl exec -n "$NAMESPACE" "${RELEASE_NAME}-0" -c sentinel -- \
+                redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.auth.sentinel }} -a "$REDIS_PASSWORD"{{- end }} \
+                sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
+                | head -n1 || echo "")
+
+              # Extract just the pod name from the hostname (e.g., test-redis-0 from test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
+              master=$(echo "$master_hostname" | cut -d'.' -f1)
+
+              if [ -z "$master" ]; then
+                echo "Warning: Could not determine master from Sentinel, retrying in 10s..."
+                sleep 10
+                continue
+              fi
+
+              echo "Current master from Sentinel: $master"
+
+              # Check if master has changed
+              if [ "$master" = "$oldmaster" ]; then
+                echo "Master unchanged, sleeping for ${CHECK_INTERVAL}s..."
+                sleep "$CHECK_INTERVAL"
+                continue
+              fi
+
+              echo "Master changed from '$oldmaster' to '$master', updating service..."
+
+              # Update the service selector to point to the new master
+              if kubectl patch service "$MASTER_SERVICE" -n "$NAMESPACE" \
+                -p "{\"spec\": {\"selector\": {\"statefulset.kubernetes.io/pod-name\": \"$master\"}}}"; then
+                echo "Successfully updated service to point to master: $master"
+                oldmaster="$master"
+              else
+                echo "Error: Failed to update service, will retry..."
+                sleep 10
+                continue
+              fi
+
+              sleep "$CHECK_INTERVAL"
+            done
+{{- end }}

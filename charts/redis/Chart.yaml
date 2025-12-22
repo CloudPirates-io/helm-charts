@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.17.4
+version: 0.17.6
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "add readiness and liveness probes to redis sentinel (#755)"
-          links:
-            - name: "Commit 594cf3d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/594cf3d"
+          description: "Chart updated"

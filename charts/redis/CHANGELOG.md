@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.17.5 (2025-12-17)
+
+* chore: update CHANGELOG.md for merged changes ([5e82a83](https://github.com/CloudPirates-io/helm-charts/commit/5e82a83))
+* chore: update CHANGELOG.md for merged changes ([8c639a3](https://github.com/CloudPirates-io/helm-charts/commit/8c639a3))
+* chore(redis): Bump version to 0.17.5 (#762) ([daa894e](https://github.com/CloudPirates-io/helm-charts/commit/daa894e))
+* chore: update CHANGELOG.md for merged changes ([2f36405](https://github.com/CloudPirates-io/helm-charts/commit/2f36405))
+* chore: update CHANGELOG.md for merged changes ([4fa5a56](https://github.com/CloudPirates-io/helm-charts/commit/4fa5a56))
+* fix(redis): Always set masterauth for non-standalone architectures (#750) ([a8b07f4](https://github.com/CloudPirates-io/helm-charts/commit/a8b07f4))
+* chore: update CHANGELOG.md for merged changes ([23b03ec](https://github.com/CloudPirates-io/helm-charts/commit/23b03ec))
+* chore: auto-generate values.schema.json (#757) ([424c2bd](https://github.com/CloudPirates-io/helm-charts/commit/424c2bd))
+
 ## 0.17.4 (2025-12-16)
 
 * chore: update CHANGELOG.md for merged changes ([87e0273](https://github.com/CloudPirates-io/helm-charts/commit/87e0273))

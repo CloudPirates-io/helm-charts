@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.8.0 (2025-12-12)
+
+* chore: update CHANGELOG.md for merged changes ([7093866](https://github.com/CloudPirates-io/helm-charts/commit/7093866))
+* chore: update CHANGELOG.md for merged changes ([f17b7eb](https://github.com/CloudPirates-io/helm-charts/commit/f17b7eb))
+* change default deploymentType to deployment (#736) ([3b61ed2](https://github.com/CloudPirates-io/helm-charts/commit/3b61ed2))
+* chore: update CHANGELOG.md for merged changes ([7892753](https://github.com/CloudPirates-io/helm-charts/commit/7892753))
+
 ## 0.7.2 (2025-12-09)
 
 * chore: update CHANGELOG.md for merged changes ([8641004](https://github.com/CloudPirates-io/helm-charts/commit/8641004))

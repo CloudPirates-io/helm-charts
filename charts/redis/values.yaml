@@ -331,6 +331,29 @@ sentinel:
     requests:
       cpu: 25m
       memory: 64Mi
+  ## Master Service Discovery - Provides a stable endpoint for non-Sentinel-aware clients
+  ## When enabled, creates a service that always points to the current master by querying Sentinel
+  masterService:
+    ## @param sentinel.masterService.enabled Enable dynamic master service for non-Sentinel-aware clients
+    enabled: false
+    ## @param sentinel.masterService.type Kubernetes service type for master service (defaults to service.type if not set)
+    type: ""
+    ## @param sentinel.masterService.annotations Additional custom annotations for master service
+    annotations: {}
+    ## @param sentinel.masterService.checkInterval Interval in seconds to check for master changes
+    checkInterval: 60
+    ## @param sentinel.masterService.image.repository Image for master discovery deployment
+    image:
+      repository: alpine/kubectl
+      tag: "1.34.2"
+      pullPolicy: IfNotPresent
+    ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
+    resources:
+      limits:
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
@@ -437,7 +460,7 @@ metrics:
 
 ## @section Service Account
 serviceAccount:
-  ## @param serviceAccount.create Enable the creation of a ServiceAccount
+  ## @param serviceAccount.create Enable the creation of a ServiceAccount (automatically enabled when sentinel.masterService.enabled is true)
   create: false
   ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
   name: ""
