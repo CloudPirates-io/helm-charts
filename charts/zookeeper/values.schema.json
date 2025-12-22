@@ -167,6 +167,9 @@
                 "annotations": {
                     "type": "object"
                 },
+                "dataDir": {
+                    "type": "string"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -233,6 +236,9 @@
             "type": "object"
         },
         "revisionHistoryLimit": {
+            "type": "integer"
+        },
+        "serverIdOffset": {
             "type": "integer"
         },
         "service": {

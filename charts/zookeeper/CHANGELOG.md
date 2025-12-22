@@ -1,6 +1,19 @@
 # Changelog
 
 
+## 0.3.8 (2025-12-21)
+
+* Add support for Bitnami Zookeeper migration with multiple replicas (#768) ([65c0764](https://github.com/CloudPirates-io/helm-charts/commit/65c0764))
+* chore: update CHANGELOG.md for merged changes ([525494a](https://github.com/CloudPirates-io/helm-charts/commit/525494a))
+* chore: update CHANGELOG.md for merged changes ([cd5cb04](https://github.com/CloudPirates-io/helm-charts/commit/cd5cb04))
+* chore: auto-generate values.schema.json (#764) ([5a39be4](https://github.com/CloudPirates-io/helm-charts/commit/5a39be4))
+
+## 0.3.7 (2025-12-17)
+
+* chore: update CHANGELOG.md for merged changes ([ee986d5](https://github.com/CloudPirates-io/helm-charts/commit/ee986d5))
+* chore: update CHANGELOG.md for merged changes ([ee8d729](https://github.com/CloudPirates-io/helm-charts/commit/ee8d729))
+* Add dataDir option to override path to data folder (#763) ([092def6](https://github.com/CloudPirates-io/helm-charts/commit/092def6))
+
 ## 0.3.6 (2025-12-11)
 
 * chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
