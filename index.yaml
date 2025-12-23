@@ -14843,6 +14843,59 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
+            - kind: added
+              description: "[redis]: add missing label for sentinel"
+              links:
+                - name: "PR #773"
+                  url: "https://github.com/CloudPirates-io/helm-charts/pull/773"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Redis
+          url: https://redis.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+        - name: Application
+          url: https://github.com/redis/redis
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.4.0
+    created: "2025-12-23T22:44:33.984784472Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: An open source, in-memory data structure store used as a database,
+      cache, and message broker.
+    digest: 34e4d05ad3c4c7a90bf5c6517106c5563ca84f0f59df06bdf1a96b46009a1c26
+    home: https://www.redis.io
+    icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+    keywords:
+    - redis
+    - database
+    - cache
+    - in-memory
+    - key-value
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: redis
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - https://github.com/redis/redis
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/redis-0.17.7/redis-0.17.7.tgz
+    version: 0.17.7
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
             - kind: changed
               description: "Chart updated"
       artifacthub.io/containsSecurityUpdates: "false"
@@ -21329,4 +21382,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-23T22:42:56.494558771Z"
+generated: "2025-12-23T22:44:34.285918639Z"
