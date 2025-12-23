@@ -23,6 +23,9 @@ spec:
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+        app.kubernetes.io/component: sentinel
+        {{- end }}
       annotations:
         {{- if .Values.config.existingConfigmap }}
         checksum/config: {{ .Values.config.existingConfigmap | sha256sum }}
