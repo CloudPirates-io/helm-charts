@@ -597,7 +597,7 @@ kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
 
    - Occurs when switching from standard postgres image (UID 999) to hardened image (e.g., UID 70)
    - Existing data directory has wrong ownership
-   - Solution: Add init container to fix permissions (see [Using Hardened Images](#using-hardened-images))
+   - Solution: Add init container to fix permissions
    - After successful startup, remove the init container
 
 6. **Performance issues**
