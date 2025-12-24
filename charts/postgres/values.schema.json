@@ -5,6 +5,12 @@
         "affinity": {
             "type": "object"
         },
+        "args": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string"
+            }
+        },
         "auth": {
             "type": "object",
             "properties": {
@@ -28,6 +34,12 @@
                 "username": {
                     "type": "string"
                 }
+            }
+        },
+        "command": {
+            "type": "array",
+            "items": {
+                "type": "string"
             }
         },
         "commonAnnotations": {

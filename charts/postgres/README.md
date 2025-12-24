@@ -154,6 +154,15 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
 | `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
 
+### Container Command/Args Override
+
+| Parameter | Description                                                                                                                                       | Default |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `command` | Override default container command (useful for hardened images)                                                                                   | `[]`    |
+| `args`    | Override default container args (useful for hardened images that handle startup differently). Set to `null` to use defaults, `[]` to disable args | `null`  |
+
+These parameters are useful when using hardened PostgreSQL images (such as from DHI or other security-focused registries) that have different entrypoint behaviors than the standard Docker Hub postgres image. When using such images, you may need to set `args: []` to prevent passing the default `postgres` binary name and configuration arguments.
+
 ### PostgreSQL Initdb Configuration
 
 | Parameter                 | Description                                                                      | Default |
@@ -490,6 +499,36 @@ kubectl port-forward service/my-postgres-metrics 9187:9187
 curl http://localhost:9187/metrics
 ```
 
+### Using Hardened Images
+
+When using hardened PostgreSQL images (such as from DHI or other security-focused registries), you may need to disable the default args:
+
+```yaml
+# values-hardened-image.yaml
+image:
+  registry: dhi.io
+  repository: postgres
+  tag: "18.1"
+  imagePullPolicy: IfNotPresent
+
+# Disable default args for hardened images
+args: []
+
+# Adjust security context to match hardened image requirements
+podSecurityContext:
+  fsGroup: 70
+
+containerSecurityContext:
+  runAsUser: 70
+  runAsGroup: 70
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+```
+
 ## Access PostgreSQL
 
 ### Via kubectl port-forward
@@ -548,7 +587,20 @@ kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
    - Verify environment variables are set correctly
    - Review pod events: `kubectl describe pod <pod-name>`
 
-4. **Performance issues**
+4. **Hardened image fails with "invalid argument: postgres"**
+
+   - This occurs when using hardened images with different entrypoint behavior
+   - Solution: Set `args: []` in your values file to disable default args
+   - See [Using Hardened Images](#using-hardened-images) example
+
+5. **Permission denied errors with hardened images**
+
+   - Occurs when switching from standard postgres image (UID 999) to hardened image (e.g., UID 70)
+   - Existing data directory has wrong ownership
+   - Solution: Add init container to fix permissions (see [Using Hardened Images](#using-hardened-images))
+   - After successful startup, remove the init container
+
+6. **Performance issues**
    - Check configured memory settings
    - Monitor resource usage with `kubectl top pod`
    - Adjust PostgreSQL configuration parameters

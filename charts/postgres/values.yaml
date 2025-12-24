@@ -312,6 +312,13 @@ initContainers: []
 #     - name: data
 #       mountPath: /var/lib/postgresql/data
 
+## @section Container command/args override
+## @param command Override default container command (useful for hardened images)
+command: []
+## @param args Override default container args (useful for hardened images that handle startup differently)
+## Leave unset or null to use default args, set to empty array [] to disable default args for hardened images like DHI
+args: null
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 
