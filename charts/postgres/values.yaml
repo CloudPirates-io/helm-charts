@@ -30,6 +30,8 @@ image:
   tag: "18.1@sha256:38d5c9d522037d8bf0864c9068e4df2f8a60127c6489ab06f98fdeda535560f9"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
+  ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
+  useHardenedImage: false
 
 ## @section Deployment configuration
 ## @param replicaCount Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default)

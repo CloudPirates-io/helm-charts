@@ -76,12 +76,13 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL image configuration
 
-| Parameter               | Description                                           | Default                                                                          |
-| ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
-| `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
-| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
-| `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
+| Parameter                  | Description                                                                                              | Default                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `image.registry`           | PostgreSQL image registry                                                                                | `docker.io`                                                                      |
+| `image.repository`         | PostgreSQL image repository                                                                              | `postgres`                                                                       |
+| `image.tag`                | PostgreSQL image tag (immutable tags are recommended)                                                    | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
+| `image.imagePullPolicy`    | PostgreSQL image pull policy                                                                             | `Always`                                                                         |
+| `image.useHardenedImage`   | Set to `true` when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18   | `false`                                                                          |
 
 ### Deployment configuration
 
@@ -501,7 +502,7 @@ curl http://localhost:9187/metrics
 
 ### Using Hardened Images
 
-When using hardened PostgreSQL images (such as from DHI or other security-focused registries), you may need to disable the default args:
+When using hardened PostgreSQL images (such as from DHI or other security-focused registries), you need to configure several settings:
 
 ```yaml
 # values-hardened-image.yaml
@@ -510,6 +511,8 @@ image:
   repository: postgres
   tag: "18.1"
   imagePullPolicy: IfNotPresent
+  # Enable hardened image mode for correct PGDATA paths (required for Postgres <18)
+  useHardenedImage: true
 
 # Disable default args for hardened images
 args: []
@@ -528,6 +531,8 @@ containerSecurityContext:
     drop:
       - ALL
 ```
+
+**Note:** The `image.useHardenedImage` parameter is particularly important for PostgreSQL versions below 18, as hardened images use different PGDATA paths (`/var/lib/postgresql/<version>/data`) compared to standard images (`/var/lib/postgresql/data/pgdata`). For PostgreSQL 18+, both image types use the same path structure.
 
 ## Access PostgreSQL
 
