@@ -94,7 +94,7 @@ auth:
   acl:
     ## @param auth.acl.enabled Enable custom ACL rules.
     enabled: false
-    ## @param existingSecret Name of existing secret containing ACL rules
+    ## @param auth.acl.existingSecret Name of existing secret containing ACL rules
     existingSecret: ""
     ## @param existingSecretACLKey Key in existing secret containing ACL rules
     ## Key should represent an ACL file content:
