@@ -85,6 +85,10 @@ spec:
               {{- if .Values.auth.acl.enabled }}
               echo "aclfile /etc/redis/users.acl" >> /tmp/redis.conf
               REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              if [ -z "$REDIS_PASSWORD" ]; then
+                echo "ERROR: ACL is enabled but no password found for 'user default' in /etc/redis/users.acl"
+                exit 1
+              fi
               REDIS_SENTINEL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
               [ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
               {{- end }}
