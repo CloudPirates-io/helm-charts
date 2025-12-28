@@ -38,7 +38,26 @@
                         "existingSecretACLKey": {
                             "type": "string"
                         }
-                    }
+                    },
+                    "allOf": [
+                        {
+                            "if": {
+                                "properties": {
+                                    "enabled": {
+                                        "const": true
+                                    }
+                                },
+                                "required": [
+                                    "enabled"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "existingSecret"
+                                ]
+                            }
+                        }
+                    ]
                 }
             }
         },
