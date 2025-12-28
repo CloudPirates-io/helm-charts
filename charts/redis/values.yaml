@@ -101,7 +101,7 @@ auth:
     ##
     ## user default >masterpassword ~* +@all
     ## user readonly >readonlypassword ~* +@read
-    ## user sentinel >sentinelpassword ~* +@all
+    ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
     existingSecretACLKey: ""
 
 ## @section TLS/SSL configuration
