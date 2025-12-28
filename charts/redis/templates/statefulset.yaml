@@ -243,8 +243,8 @@ spec:
               mountPath: /tmp
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
-              mountPath: /etc/redis/users.acl
-              subPath: users.acl
+              mountPath: /etc/redis/{{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              subPath: {{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
               readOnly: true
             {{- end }}
       {{- end }}
