@@ -42,5 +42,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "Initial chart release"
+        - kind: changed
+          description: "fix(zookeeper): add apiVersion and kind to volumeClaimTemplates to prevent OutOfSync on Server-Side-Apply with ArgoCD (#777)"
+          links:
+            - name: "Commit 6800e29"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/6800e29"
