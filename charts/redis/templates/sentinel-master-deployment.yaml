@@ -55,6 +55,13 @@ spec:
                 name: {{ include "redis.secretName" . }}
                 key: {{ include "redis.secretPasswordKey" . }}
         {{- end }}
+        {{- if .Values.auth.acl.enabled }}
+        volumeMounts:
+          - name: acl-file
+            mountPath: /etc/redis/users.acl
+            subPath: users.acl
+            readOnly: true
+        {{- end }}
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -65,6 +72,16 @@ spec:
             MASTER_SERVICE="${RELEASE_NAME}-master"
             SENTINEL_MASTER_NAME="{{ .Values.sentinel.masterName }}"
             CHECK_INTERVAL="{{ .Values.sentinel.masterService.checkInterval }}"
+
+            {{- if .Values.auth.acl.enabled }}
+            if [ -f /etc/redis/users.acl ]; then
+              ACL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              [ -z "$ACL_PASSWORD" ] && ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              if [ -n "$ACL_PASSWORD" ]; then
+                REDIS_PASSWORD="$ACL_PASSWORD"
+              fi
+            fi
+            {{- end }}
 
             echo "Starting Redis master discovery service..."
             echo "Namespace: $NAMESPACE"
@@ -129,4 +146,10 @@ spec:
 
               sleep "$CHECK_INTERVAL"
             done
+      {{- if .Values.auth.acl.enabled }}
+      volumes:
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+      {{- end }}
 {{- end }}

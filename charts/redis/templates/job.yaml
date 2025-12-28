@@ -40,11 +40,29 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+          {{- if .Values.auth.acl.enabled }}
+          volumeMounts:
+            - name: acl-file
+              mountPath: /etc/redis/users.acl
+              subPath: users.acl
+              readOnly: true
+          {{- end }}
           command:
             - /bin/sh
             - -c
             - |
               set -e
+
+              {{- if .Values.auth.acl.enabled }}
+              if [ -f /etc/redis/users.acl ]; then
+                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                if [ -n "$ACL_PASSWORD" ]; then
+                  export REDIS_PASSWORD="$ACL_PASSWORD"
+                  export REDISCLI_AUTH="$ACL_PASSWORD"
+                fi
+              fi
+              {{- end }}
+
               echo "Building list of Redis nodes..."
               NODES=""
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
@@ -69,4 +87,10 @@ spec:
                 --cluster-replicas {{ .Values.clusterReplicaCount }} \
                 {{- end }}
                 --cluster-yes
+      {{- if .Values.auth.acl.enabled }}
+      volumes:
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+      {{- end }}
 {{- end }}

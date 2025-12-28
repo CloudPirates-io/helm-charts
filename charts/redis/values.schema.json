@@ -25,6 +25,20 @@
                 },
                 "sentinel": {
                     "type": "boolean"
+                },
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },

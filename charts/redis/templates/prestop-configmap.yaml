@@ -31,6 +31,25 @@ data:
     export REDISCLI_AUTH="${REDIS_PASSWORD}"
     {{- end }}
 
+    # Check for ACL authentication
+    {{- if .Values.auth.acl.enabled }}
+    if [ -f /etc/redis/users.acl ]; then
+        ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+        if [ -n "$ACL_PASSWORD" ]; then
+            export REDISCLI_AUTH="$ACL_PASSWORD"
+            export REDIS_PASSWORD="$ACL_PASSWORD"
+        fi
+        
+        # Try to find sentinel password if different
+        SENTINEL_ACL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+        if [ -n "$SENTINEL_ACL_PASSWORD" ]; then
+            export REDIS_SENTINEL_PASSWORD="$SENTINEL_ACL_PASSWORD"
+        else
+            export REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
+        fi
+    fi
+    {{- end }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -59,7 +78,7 @@ data:
 
     # Function to run Sentinel commands
     run_sentinel_command() {
-        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel "$@"
     }
 
     # Function to check if sentinel failover has finished

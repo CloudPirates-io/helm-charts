@@ -133,6 +133,9 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing Redis password             | `""`    |
+| `auth.acl.enabled`               | Enable custom ACL rules (disables default user)              | `false` |
+| `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
+| `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 
 ### Redis Configuration
 

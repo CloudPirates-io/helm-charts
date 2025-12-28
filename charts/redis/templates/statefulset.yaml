@@ -79,11 +79,20 @@ spec:
               # Try to determine current master from Sentinel (if any sentinel is available)
               CURRENT_MASTER=""
               SENTINEL_FOUND=false
+              SENTINEL_PASSWORD="${REDIS_PASSWORD}"
+
+              # Check if we are using ACL authentication
+              {{- if .Values.auth.acl.enabled }}
+              echo "aclfile: /etc/redis/users.acl" >> /tmp/redis.conf
+              REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              REDIS_SENTINEL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              [ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
+              {{- end }}
 
               # Check if any sentinel is already running and knows the master
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
@@ -144,7 +153,7 @@ spec:
               # auto: Use the first IP address for dual-stack compatibility
               MY_IP=$(hostname -i | awk '{print $1}')
               {{- end }}
-              
+
               echo "Using IP address: ${MY_IP}"
               echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
@@ -228,6 +237,12 @@ spec:
               mountPath: {{ .Values.config.mountPath }}
             - name: redis-config
               mountPath: /tmp
+            {{- if .Values.auth.acl.enabled }}
+            - name: acl-file
+              mountPath: /etc/redis/users.acl
+              subPath: users.acl
+              readOnly: true
+            {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -282,7 +297,11 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
+                - |
+                  {{- if .Values.auth.acl.enabled }}
+                  export REDISCLI_AUTH=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  {{- end }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -295,7 +314,11 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                - |
+                  {{- if .Values.auth.acl.enabled }}
+                  export REDISCLI_AUTH=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  {{- end }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -308,7 +331,11 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
+                - |
+                  {{- if .Values.auth.acl.enabled }}
+                  export REDISCLI_AUTH=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  {{- end }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -361,6 +388,12 @@ spec:
               mountPath: /etc/redis/tls
               readOnly: true
             {{- end }}
+            {{- if .Values.auth.acl.enabled }}
+            - name: acl-file
+              mountPath: /etc/redis/users.acl
+              subPath: users.acl
+              readOnly: true
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -372,6 +405,12 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+          {{- if .Values.auth.acl.enabled }}
+            - name: acl-file
+              mountPath: /etc/redis/users.acl
+              subPath: users.acl
+              readOnly: true
+          {{- end }}
           {{- if .Values.tls.enabled }}
             - name: tls-certs
               mountPath: /etc/redis/tls
@@ -385,6 +424,14 @@ spec:
             - -c
             - |
               set -e
+
+              {{- if .Values.auth.acl.enabled }}
+              if [ -f /etc/redis/users.acl ]; then
+                REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                REDIS_SENTINEL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                [ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
+              fi
+              {{- end }}
 
               # Wait for Redis to be ready
               echo "Waiting for Redis to start..."
@@ -408,7 +455,7 @@ spec:
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
                   SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
                     MASTER_HOST="$EXISTING_MASTER"
                     SENTINEL_FOUND_MASTER=true
@@ -472,7 +519,7 @@ spec:
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
               {{- end }}
               {{- if .Values.auth.sentinel }}
-              requirepass "${REDIS_PASSWORD}"
+              requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
               sentinel deny-scripts-reconfig yes
@@ -523,11 +570,16 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                {{- if eq .Values.ipFamily "ipv6" }}
-                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- else }}
-                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- end }}
+                - |
+                  {{- if .Values.auth.acl.enabled }}
+                  export REDIS_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  [ -z "$REDIS_PASSWORD" ] && export REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  {{- end }}
+                  {{- if eq .Values.ipFamily "ipv6" }}
+                  redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                  {{- else }}
+                  redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                  {{- end }}
             initialDelaySeconds: {{ .Values.sentinel.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sentinel.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.sentinel.readinessProbe.timeoutSeconds }}
@@ -540,11 +592,16 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                {{- if eq .Values.ipFamily "ipv6" }}
-                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- else }}
-                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- end }}
+                - |
+                  {{- if .Values.auth.acl.enabled }}
+                  export REDIS_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  [ -z "$REDIS_PASSWORD" ] && export REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                  {{- end }}
+                  {{- if eq .Values.ipFamily "ipv6" }}
+                  redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                  {{- else }}
+                  redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
+                  {{- end }}
             initialDelaySeconds: {{ .Values.sentinel.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sentinel.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.sentinel.livenessProbe.timeoutSeconds }}
@@ -576,14 +633,32 @@ spec:
           {{- end }}
           {{- if .Values.metrics.extraArgs }}
           command:
-            - /redis_exporter
-          args:
-            {{- range .Values.metrics.extraArgs }}
-            - {{ . }}
-            {{- end }}
+            - /bin/sh
+            - -c
+            - |
+              {{- if .Values.auth.acl.enabled }}
+              if [ -f /etc/redis/users.acl ]; then
+                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                if [ -n "$ACL_PASSWORD" ]; then
+                  export REDIS_PASSWORD="$ACL_PASSWORD"
+                fi
+              fi
+              {{- end }}
+              /redis_exporter {{- range .Values.metrics.extraArgs }} {{ . }}{{- end }}
           {{- else }}
           command:
-            - /redis_exporter
+            - /bin/sh
+            - -c
+            - |
+              {{- if .Values.auth.acl.enabled }}
+              if [ -f /etc/redis/users.acl ]; then
+                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+                if [ -n "$ACL_PASSWORD" ]; then
+                  export REDIS_PASSWORD="$ACL_PASSWORD"
+                fi
+              fi
+              {{- end }}
+              /redis_exporter
           {{- end }}
           ports:
             - name: metrics
@@ -608,6 +683,13 @@ spec:
             failureThreshold: 3
             successThreshold: 1
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+          {{- if .Values.auth.acl.enabled }}
+          volumeMounts:
+            - name: acl-file
+              mountPath: /etc/redis/users.acl
+              subPath: users.acl
+              readOnly: true
+          {{- end }}
         {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
@@ -651,6 +733,11 @@ spec:
                 path: {{ .Values.tls.certKeyFilename }}
               - key: {{ .Values.tls.certCAFilename }}
                 path: {{ .Values.tls.certCAFilename }}
+        {{- end }}
+        {{- if .Values.auth.acl.enabled }}
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
