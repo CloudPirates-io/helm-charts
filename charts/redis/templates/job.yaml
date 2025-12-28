@@ -42,9 +42,10 @@ spec:
             {{- end }}
           {{- if .Values.auth.acl.enabled }}
           volumeMounts:
+            {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
             - name: acl-file
-              mountPath: /etc/redis/users.acl
-              subPath: users.acl
+              mountPath: /etc/redis/{{ $aclFile }}
+              subPath: {{ $aclFile }}
               readOnly: true
           {{- end }}
           command:
@@ -54,8 +55,9 @@ spec:
               set -e
 
               {{- if .Values.auth.acl.enabled }}
-              if [ -f /etc/redis/users.acl ]; then
-                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
+              {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              if [ -f /etc/redis/{{ $aclFile }} ]; then
+                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
                 if [ -n "$ACL_PASSWORD" ]; then
                   export REDIS_PASSWORD="$ACL_PASSWORD"
                   export REDISCLI_AUTH="$ACL_PASSWORD"

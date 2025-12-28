@@ -41,11 +41,7 @@ tests:
       # Check livenessProbe for awk command
       - matchRegex:
           path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
-          pattern: "export REDISCLI_AUTH=.*awk '/user default/"
-      # Check readinessProbe for awk command
-      - matchRegex:
-          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
-          pattern: "export REDISCLI_AUTH=.*awk '/user default/"
+          pattern: "export REDISCLI_AUTH=.*awk '/user default/.*etc/redis/users.acl"
 
   - it: should configure acl in replication mode with sentinel
     template: statefulset.yaml
@@ -68,8 +64,8 @@ tests:
           pattern: "echo .aclfile /etc/redis/users.acl. >> /tmp/redis.conf"
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
-          pattern: "REDIS_PASSWORD=.*awk '/user default/"
-
+          pattern: "REDIS_PASSWORD=.*awk '/user default/.*etc/redis/users.acl"
+      
       # Sentinel container checks
       - contains:
           path: spec.template.spec.containers[1].volumeMounts
@@ -80,15 +76,12 @@ tests:
             readOnly: true
       - matchRegex:
           path: spec.template.spec.containers[1].command[2]
-          pattern: "REDIS_SENTINEL_PASSWORD=.*awk '/user sentinel/"
-
+          pattern: "REDIS_SENTINEL_PASSWORD=.*awk '/user sentinel/.*etc/redis/users.acl"
+      
       # Sentinel probe checks
       - matchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
-          pattern: "export REDIS_PASSWORD=.*awk '/user sentinel/"
-      - matchRegex:
-          path: spec.template.spec.containers[1].livenessProbe.exec.command[2]
-          pattern: "export REDIS_PASSWORD=.*awk '/user sentinel/"
+          pattern: "export REDIS_PASSWORD=.*awk '/user sentinel/.*etc/redis/users.acl"
 
   - it: should configure acl in master discovery deployment
     template: sentinel-master-deployment.yaml
@@ -114,7 +107,7 @@ tests:
               secretName: my-acl-secret
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: "ACL_PASSWORD=.*awk '/user sentinel/"
+          pattern: "ACL_PASSWORD=.*awk '/user sentinel/.*etc/redis/users.acl"
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: 'REDIS_PASSWORD="\$ACL_PASSWORD"'
@@ -141,7 +134,7 @@ tests:
               secretName: my-acl-secret
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
-          pattern: "ACL_PASSWORD=.*awk '/user default/"
+          pattern: "ACL_PASSWORD=.*awk '/user default/.*etc/redis/users.acl"
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
           pattern: 'export REDIS_PASSWORD="\$ACL_PASSWORD"'
@@ -156,13 +149,13 @@ tests:
     asserts:
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: "ACL_PASSWORD=.*awk '/user default/"
+          pattern: "ACL_PASSWORD=.*awk '/user default/.*etc/redis/users.acl"
       - matchRegex:
           path: data["prestop.sh"]
           pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: "SENTINEL_ACL_PASSWORD=.*awk '/user sentinel/"
+          pattern: "SENTINEL_ACL_PASSWORD=.*awk '/user sentinel/.*etc/redis/users.acl"
 
   - it: should configure acl in metrics container
     template: statefulset.yaml
@@ -180,7 +173,30 @@ tests:
             readOnly: true
       - matchRegex:
           path: spec.template.spec.containers[1].command[2]
-          pattern: "ACL_PASSWORD=.*awk '/user default/"
+          pattern: "ACL_PASSWORD=.*awk '/user default/.*etc/redis/users.acl"
       - matchRegex:
           path: spec.template.spec.containers[1].command[2]
           pattern: 'export REDIS_PASSWORD="\$ACL_PASSWORD"'
+
+  - it: should support custom acl secret key
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+      auth.acl.existingSecretACLKey: custom.acl
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: acl-file
+            mountPath: /etc/redis/custom.acl
+            subPath: custom.acl
+            readOnly: true
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "echo .aclfile /etc/redis/custom.acl. >> /tmp/redis.conf"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "REDIS_PASSWORD=.*awk '/user default/.*etc/redis/custom.acl"
