@@ -65,7 +65,7 @@ tests:
             readOnly: true
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
-          pattern: "echo .aclfile: /etc/redis/users.acl. >> /tmp/redis.conf"
+          pattern: "echo .aclfile /etc/redis/users.acl. >> /tmp/redis.conf"
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: "REDIS_PASSWORD=.*awk '/user default/"

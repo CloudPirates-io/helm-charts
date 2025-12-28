@@ -83,7 +83,7 @@ spec:
 
               # Check if we are using ACL authentication
               {{- if .Values.auth.acl.enabled }}
-              echo "aclfile: /etc/redis/users.acl" >> /tmp/redis.conf
+              echo "aclfile /etc/redis/users.acl" >> /tmp/redis.conf
               REDIS_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
               REDIS_SENTINEL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/users.acl)
               [ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
