@@ -96,7 +96,7 @@ auth:
     enabled: false
     ## @param auth.acl.existingSecret Name of existing secret containing ACL rules
     existingSecret: ""
-    ## @param existingSecretACLKey Key in existing secret containing ACL rules
+    ## @param auth.acl.existingSecretACLKey Key in existing secret containing ACL rules
     ## Key should represent an ACL file content:
     ##
     ## user default >masterpassword ~* +@all
