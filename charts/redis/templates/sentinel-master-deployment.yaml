@@ -57,10 +57,9 @@ spec:
         {{- end }}
         {{- if .Values.auth.acl.enabled }}
         volumeMounts:
-          {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
           - name: acl-file
-            mountPath: /etc/redis/{{ $aclFile }}
-            subPath: {{ $aclFile }}
+            mountPath: {{ include "redis.auth.acl.path" . }}
+            subPath: {{ include "redis.auth.acl.file" . }}
             readOnly: true
         {{- end }}
         command: ["/bin/sh", "-c"]

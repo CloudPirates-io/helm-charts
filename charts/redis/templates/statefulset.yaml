@@ -234,8 +234,8 @@ spec:
               mountPath: /tmp
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
-              mountPath: /etc/redis/{{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-              subPath: {{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
       {{- end }}
@@ -379,8 +379,8 @@ spec:
             {{- end }}
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
-              mountPath: /etc/redis/{{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-              subPath: {{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
@@ -396,8 +396,8 @@ spec:
               mountPath: /tmp
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
-              mountPath: /etc/redis/{{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-              subPath: {{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
             {{- if .Values.tls.enabled }}
@@ -649,8 +649,8 @@ spec:
           {{- if .Values.auth.acl.enabled }}
           volumeMounts:
             - name: acl-file
-              mountPath: /etc/redis/{{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-              subPath: {{ default "users.acl" .Values.auth.acl.existingSecretACLKey }}
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
           {{- end }}
         {{- end }}
