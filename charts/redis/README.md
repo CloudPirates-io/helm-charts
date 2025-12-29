@@ -289,6 +289,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
 | `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
 | `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
+| `sentinel.preStop.enabled`                    | Enable preStop hook for Sentinel container (waits for failover before terminating)            | `true`      |
 | `sentinel.livenessProbe.enabled`              | Enable liveness probe                                                                         | `true`      |
 | `sentinel.livenessProbe.initialDelaySeconds`  | Initial delay before starting probes                                                          | `30`        |
 | `sentinel.livenessProbe.periodSeconds`        | How often to perform the probe                                                                | `10`        |
@@ -408,7 +409,9 @@ sentinel:
   quorum: 2
   downAfterMilliseconds: 30000
   failoverTimeout: 180000
-  redisShutdownWaitFailover: true  # Enable zero-downtime upgrades
+  redisShutdownWaitFailover: true  # Redis waits for failover before shutdown
+  preStop:
+    enabled: true  # Sentinel waits for failover before terminating
 
 # Required for graceful failover during helm upgrades
 terminationGracePeriodSeconds: 60

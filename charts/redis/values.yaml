@@ -406,6 +406,14 @@ sentinel:
     ## @param sentinel.readinessProbe.successThreshold Number of successes to mark probe as successful
     successThreshold: 1
 
+  ## Sentinel preStop hook configuration for zero-downtime rolling updates
+  ## Waits for Redis failover to complete before Sentinel terminates
+  preStop:
+    ## @param sentinel.preStop.enabled Enable preStop hook for Sentinel container
+    ## When enabled, Sentinel waits for failover to complete before terminating
+    ## This ensures clients can still connect to Sentinel during rolling updates
+    enabled: true
+
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
   resources:
