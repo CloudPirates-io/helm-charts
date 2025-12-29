@@ -321,6 +321,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 | `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
 
+### Custom Scripts and Hooks
+
+| Parameter                        | Description                                                                  | Default |
+| -------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| `customScripts.postStart.enabled` | Enable postStart lifecycle hook                                             | `false` |
+| `customScripts.postStart.command` | Command to execute in postStart hook                                        | `[]`    |
+| `customScripts.preStop.enabled`   | Enable preStop lifecycle hook (overrides default Sentinel preStop hook)     | `false` |
+| `customScripts.preStop.command`   | Command to execute in preStop hook                                          | `[]`    |
+
 ### Configurations for the Job-Template
 
 | Parameter                                  | Description                                      | Default |
