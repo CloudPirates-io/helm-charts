@@ -199,10 +199,12 @@ fi
 {{- else if eq .type "job" -}}
 if [ -f /etc/redis/{{ $aclFile }} ]; then
   ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "default" "context" .context) }})
-  if [ -n "$ACL_PASSWORD" ]; then
-    export REDIS_PASSWORD="$ACL_PASSWORD"
-    export REDISCLI_AUTH="$ACL_PASSWORD"
+  if [ -z "$ACL_PASSWORD" ]; then
+    echo "ERROR: ACL is enabled but no password found for 'user default' in /etc/redis/{{ $aclFile }}"
+    exit 1
   fi
+  export REDIS_PASSWORD="$ACL_PASSWORD"
+  export REDISCLI_AUTH="$ACL_PASSWORD"
 fi
 {{- else if eq .type "prestop" -}}
 if [ -f /etc/redis/{{ $aclFile }} ]; then
