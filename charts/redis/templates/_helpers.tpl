@@ -162,7 +162,7 @@ Usage: {{ include "redis.auth.acl.awkCommand" (dict "user" "default" "context" $
 */}}
 {{- define "redis.auth.acl.awkCommand" -}}
 {{- $aclFile := include "redis.auth.acl.file" .context -}}
-awk '/user {{ .user }}/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }}
+awk '$1=="user" && $2=="{{ .user }}" { for (i=3; i<=NF; i++) if ($i ~ /^>/) { print substr($i,2); break } }' /etc/redis/{{ $aclFile }}
 {{- end -}}
 
 {{/*
