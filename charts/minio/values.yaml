@@ -83,7 +83,7 @@ defaultBuckets: ""
 postJob:
   ## postJob.annotations Additional annotations for the Job
   annotations:
-    helm.sh/hook: post-install,post-upgrade # @schema hidden: true
+    helm.sh/hook: post-install,post-upgrade  # @schema hidden: true
 
 ## @section Bucket Initialization Job
 bucketInitJob:
