@@ -54,16 +54,7 @@ spec:
             - |
               set -e
 
-              {{- if .Values.auth.acl.enabled }}
-              {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-              if [ -f /etc/redis/{{ $aclFile }} ]; then
-                ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
-                if [ -n "$ACL_PASSWORD" ]; then
-                  export REDIS_PASSWORD="$ACL_PASSWORD"
-                  export REDISCLI_AUTH="$ACL_PASSWORD"
-                fi
-              fi
-              {{- end }}
+              {{- include "redis.auth.acl.setupScript" (dict "type" "job" "context" .) | nindent 14 }}
 
               echo "Building list of Redis nodes..."
               NODES=""

@@ -32,30 +32,7 @@ data:
     {{- end }}
 
     # Check for ACL authentication
-
-    {{- if .Values.auth.acl.enabled }}
-
-    {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-
-    if [ -f /etc/redis/{{ $aclFile }} ]; then
-        ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
-
-        if [ -n "$ACL_PASSWORD" ]; then
-            export REDISCLI_AUTH="$ACL_PASSWORD"
-            export REDIS_PASSWORD="$ACL_PASSWORD"
-        fi
-
-        # Try to find sentinel password if different
-        SENTINEL_ACL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
-
-        if [ -n "$SENTINEL_ACL_PASSWORD" ]; then
-            export REDIS_SENTINEL_PASSWORD="$SENTINEL_ACL_PASSWORD"
-        else
-            export REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
-        fi
-    fi
-
-    {{- end }}
+    {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
 
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}

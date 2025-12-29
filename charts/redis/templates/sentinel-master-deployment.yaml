@@ -74,16 +74,7 @@ spec:
             SENTINEL_MASTER_NAME="{{ .Values.sentinel.masterName }}"
             CHECK_INTERVAL="{{ .Values.sentinel.masterService.checkInterval }}"
 
-            {{- if .Values.auth.acl.enabled }}
-            {{- $aclFile := default "users.acl" .Values.auth.acl.existingSecretACLKey }}
-            if [ -f /etc/redis/{{ $aclFile }} ]; then
-              ACL_PASSWORD=$(awk '/user sentinel/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
-              [ -z "$ACL_PASSWORD" ] && ACL_PASSWORD=$(awk '/user default/ { for(i=1;i<=NF;i++) if($i ~ /^>/) print substr($i,2) }' /etc/redis/{{ $aclFile }})
-              if [ -n "$ACL_PASSWORD" ]; then
-                REDIS_PASSWORD="$ACL_PASSWORD"
-              fi
-            fi
-            {{- end }}
+            {{- include "redis.auth.acl.setupScript" (dict "type" "master-discovery" "context" .) | nindent 12 }}
 
             echo "Starting Redis master discovery service..."
             echo "Namespace: $NAMESPACE"
