@@ -222,8 +222,9 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `nodeSelector`              | Node selector for pod assignment               | `{}`    |
 | `priorityClassName`         | Priority class for pod eviction                | `""`    |
 | `tolerations`               | Tolerations for pod assignment                 | `[]`    |
-| `affinity`                  | Affinity rules for pod assignment              | `{}`    |
-| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
+| `affinity`                       | Affinity rules for pod assignment                                                          | `{}`    |
+| `terminationGracePeriodSeconds`  | Seconds Kubernetes waits for pod to terminate gracefully (recommended: 60 for Sentinel)   | `30`    |
+| `topologySpreadConstraints`      | Topology spread constraints for pod assignment                                             | `[]`    |
 
 ### Security Context
 
@@ -287,6 +288,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
 | `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
 | `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
+| `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
 | `sentinel.livenessProbe.enabled`              | Enable liveness probe                                                                         | `true`      |
 | `sentinel.livenessProbe.initialDelaySeconds`  | Initial delay before starting probes                                                          | `30`        |
 | `sentinel.livenessProbe.periodSeconds`        | How often to perform the probe                                                                | `10`        |
@@ -397,6 +399,10 @@ sentinel:
   quorum: 2
   downAfterMilliseconds: 30000
   failoverTimeout: 180000
+  redisShutdownWaitFailover: true  # Enable zero-downtime upgrades
+
+# Required for graceful failover during helm upgrades
+terminationGracePeriodSeconds: 60
 
 auth:
   enabled: true
