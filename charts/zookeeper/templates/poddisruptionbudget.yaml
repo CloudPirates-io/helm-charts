@@ -11,7 +11,12 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
-  maxUnavailable: 1
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/instance: release-name
