@@ -8,9 +8,9 @@ global:
   #  - my-secret-2
 
 ## @section Common parameters
-## @param nameOverride String to partially override redis.fullname
+## @param nameOverride String to partially override zookeeper.fullname
 nameOverride: ""
-## @param fullnameOverride String to fully override redis.fullname
+## @param fullnameOverride String to fully override zookeeper.fullname
 fullnameOverride: ""
 ## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
 ## When migrating from Bitnami Zookeeper:
@@ -106,17 +106,17 @@ metrics:
     port: 7000
 
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-## @section MariaDB Container Security Context
+## @section Zookeeper Container Security Context
 containerSecurityContext:
-  ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
+  ## @param containerSecurityContext.runAsUser Set Zookeeper container's Security Context runAsUser
   runAsUser: 1000
-  ## @param containerSecurityContext.runAsGroup Set MariaDB container's Security Context runAsGroup
+  ## @param containerSecurityContext.runAsGroup Set Zookeeper container's Security Context runAsGroup
   runAsGroup: 1000
   ## @param containerSecurityContext.seLinuxOptions Set container's Security Context seLinuxOptions
   seLinuxOptions: {}
-  ## @param containerSecurityContext.runAsNonRoot Set MariaDB container's Security Context runAsNonRoot
+  ## @param containerSecurityContext.runAsNonRoot Set Zookeeper container's Security Context runAsNonRoot
   runAsNonRoot: true
-  ## @param containerSecurityContext.allowPrivilegeEscalation Set MariaDB container's privilege escalation
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set Zookeeper container's privilege escalation
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.privileged Set container's privileged mode
   privileged: false
@@ -198,7 +198,7 @@ persistence:
 
 ## @section Liveness and readiness probes
 livenessProbe:
-  ## @param livenessProbe.enabled Enable livenessProbe on MinIO containers
+  ## @param livenessProbe.enabled Enable livenessProbe on zookeeper containers
   enabled: true
   ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   initialDelaySeconds: 30
@@ -212,7 +212,7 @@ livenessProbe:
   successThreshold: 1
 
 readinessProbe:
-  ## @param readinessProbe.enabled Enable readinessProbe on MinIO containers
+  ## @param readinessProbe.enabled Enable readinessProbe on zookeeper containers
   enabled: true
   ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   initialDelaySeconds: 5
@@ -227,7 +227,7 @@ readinessProbe:
 
 
 startupProbe:
-  ## @param startupProbe.enabled Enable startupProbe on MinIO containers
+  ## @param startupProbe.enabled Enable startupProbe on zookeeper containers
   enabled: false
   ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   initialDelaySeconds: 10
@@ -254,7 +254,7 @@ extraEnvVars: []
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
 
-## @param extraVolumeMounts Additional volume mounts to add to the Redis container
+## @param extraVolumeMounts Additional volume mounts to add to the zookeeper container
 extraVolumeMounts: []
 
 ## @param extraObjects Array of extra objects to deploy with the release
