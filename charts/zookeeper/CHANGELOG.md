@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.3.10 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([f4e9ecf](https://github.com/CloudPirates-io/helm-charts/commit/f4e9ecf))
+* chore: update CHANGELOG.md for merged changes ([1935e6a](https://github.com/CloudPirates-io/helm-charts/commit/1935e6a))
+* Final fix for supporting migration from bitnami zookeeper (#778) ([474ab06](https://github.com/CloudPirates-io/helm-charts/commit/474ab06))
+
 ## 0.3.9 (2025-12-23)
 
 * chore: update CHANGELOG.md for merged changes ([16be02d](https://github.com/CloudPirates-io/helm-charts/commit/16be02d))
