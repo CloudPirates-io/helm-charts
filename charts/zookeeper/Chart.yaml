@@ -2,7 +2,7 @@ apiVersion: v2
 name: zookeeper
 description: Apache ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 type: application
-version: 0.3.10
+version: 0.4.1
 appVersion: "3.9.4"
 keywords:
   - zookeeper
@@ -43,7 +43,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "fix(zookeeper): add apiVersion and kind to volumeClaimTemplates to prevent OutOfSync on Server-Side-Apply with ArgoCD (#777)"
-          links:
-            - name: "Commit 6800e29"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/6800e29"
+          description: "Chart updated"
