@@ -195,6 +195,11 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for pod to terminate gracefully
+## When using Sentinel, this should be high enough to allow failover to complete
+## Recommended: 60 seconds for Sentinel setups (failover takes ~45 seconds)
+terminationGracePeriodSeconds: 30
+
 ## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
 topologySpreadConstraints: []
 
@@ -344,6 +349,11 @@ sentinel:
     requests:
       cpu: 25m
       memory: 64Mi
+  ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
+  ## When true: On master termination, waits for failover to complete (zero-downtime)
+  ## When false: Shuts down immediately without waiting for failover
+  redisShutdownWaitFailover: true
+
   ## Master Service Discovery - Provides a stable endpoint for non-Sentinel-aware clients
   ## When enabled, creates a service that always points to the current master by querying Sentinel
   masterService:
@@ -395,6 +405,14 @@ sentinel:
     failureThreshold: 6
     ## @param sentinel.readinessProbe.successThreshold Number of successes to mark probe as successful
     successThreshold: 1
+
+  ## Sentinel preStop hook configuration for zero-downtime rolling updates
+  ## Waits for Redis failover to complete before Sentinel terminates
+  preStop:
+    ## @param sentinel.preStop.enabled Enable preStop hook for Sentinel container
+    ## When enabled, Sentinel waits for failover to complete before terminating
+    ## This ensures clients can still connect to Sentinel during rolling updates
+    enabled: true
 
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
