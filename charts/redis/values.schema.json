@@ -11,6 +11,20 @@
         "auth": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -25,39 +39,6 @@
                 },
                 "sentinel": {
                     "type": "boolean"
-                },
-                "acl": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "existingSecret": {
-                            "type": "string"
-                        },
-                        "existingSecretACLKey": {
-                            "type": "string"
-                        }
-                    },
-                    "allOf": [
-                        {
-                            "if": {
-                                "properties": {
-                                    "enabled": {
-                                        "const": true
-                                    }
-                                },
-                                "required": [
-                                    "enabled"
-                                ]
-                            },
-                            "then": {
-                                "required": [
-                                    "existingSecret"
-                                ]
-                            }
-                        }
-                    ]
                 }
             }
         },
