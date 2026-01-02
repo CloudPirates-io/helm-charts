@@ -19,6 +19,5 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/instance: release-name
-      app.kubernetes.io/name: zookeeper
+      {{- include "zookeeper.labels" . | nindent 6 }}
 {{- end }}

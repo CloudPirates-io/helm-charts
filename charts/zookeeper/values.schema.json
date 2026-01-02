@@ -136,6 +136,44 @@
                         },
                         "type": {
                             "type": "string"
+                        },
+                        "annotations": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "serviceMonitor": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "namespace": {
+                            "type": "string"
+                        },
+                        "namespaceSelector": {
+                            "type": "object"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "selector": {
+                            "type": "object"
                         }
                     }
                 }

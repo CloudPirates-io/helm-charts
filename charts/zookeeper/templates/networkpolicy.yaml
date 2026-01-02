@@ -13,14 +13,19 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/instance: release-name
-      app.kubernetes.io/name: zookeeper
+      {{- include "zookeeper.labels" . | nindent 6 }}
   policyTypes:
     - Ingress
     - Egress
   egress:
     - {}
   ingress:
+    {{- if .Values.metrics.enabled }}
+    # Allow metrics scraping
+    - ports:
+        - port: {{ .Values.metrics.service.port }}
+          protocol: TCP
+    {{- end }}
     # Allow inbound connections to ZooKeeper
     - ports:
         - port: {{ .Values.service.ports.client | default 2181 }}
@@ -31,6 +36,5 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/instance: release-name
-              app.kubernetes.io/name: zookeeper
+            {{- include "zookeeper.labels" . | nindent 12 }}
 {{- end }}

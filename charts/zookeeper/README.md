@@ -122,11 +122,22 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Metrics
 
-| Parameter                    | Description                        | Default     |
-| ---------------------------- | ---------------------------------- | ----------- |
-| `metrics.enabled`            | Enable Prometheus metrics exporter | `true`      |
-| `metrics.service.type`       | Metrics service type               | `ClusterIP` |
-| `metrics.service.ports.port` | Metrics service port               | `7000`      |
+| Parameter                                  | Description                                                                      | Default     |
+| ------------------------------------------ | -------------------------------------------------------------------------------- | ----------- |
+| `metrics.enabled`                          | Enable Prometheus metrics exporter                                               | `true`      |
+| `metrics.service.type`                     | Metrics service type                                                             | `ClusterIP` |
+| `metrics.service.ports.port`               | Metrics service port                                                             | `7000`      |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service                                | `{}`        |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using Prometheus Operator | `false` |
+| `metrics.serviceMonitor.namespace`         | Namespace in which to create ServiceMonitor resource(s)                          | `""`    |
+| `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                      | `10s`   |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                          | `""`    |
+| `metrics.serviceMonitor.relabelings`       | Additional relabeling of metrics                                                 | `[]`    |
+| `metrics.serviceMonitor.metricRelabelings` | Additional metric relabeling of metrics                                          | `[]`    |
+| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels                                                             | `false` |
+| `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                              | `{}`    |
+| `metrics.serviceMonitor.annotations`       | Additional custom annotations for the ServiceMonitor                             | `{}`    |
+| `metrics.serviceMonitor.namespaceSelector` | Namespace selector for ServiceMonitor                                            | `{}`    |
 
 ### Service Configuration
 
