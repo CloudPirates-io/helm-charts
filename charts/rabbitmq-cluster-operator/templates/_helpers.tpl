@@ -225,3 +225,19 @@ Create the name of the service account to use (Messaging Topology Operator)
     {{ default "default" .Values.msgTopologyOperator.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Render podSecurityContext using the common helper with proper parameter mapping.
+*/}}
+{{- define "rmqco.renderPodSecurityContext" -}}
+{{- $ctx := merge (dict "Values" (dict "podSecurityContext" (omit .securityContext "enabled"))) .context }}
+{{- include "cloudpirates.renderPodSecurityContext" $ctx }}
+{{- end }}
+
+{{/*
+Render containerSecurityContext using the common helper with proper parameter mapping.
+*/}}
+{{- define "rmqco.renderContainerSecurityContext" -}}
+{{- $ctx := merge (dict "Values" (dict "containerSecurityContext" (omit .securityContext "enabled"))) .context }}
+{{- include "cloudpirates.renderContainerSecurityContext" $ctx }}
+{{- end -}}
