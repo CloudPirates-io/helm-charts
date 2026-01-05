@@ -13,7 +13,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      {{- include "zookeeper.labels" . | nindent 6 }}
+      {{- include "zookeeper.selectorLabels" . | nindent 6 }}
   policyTypes:
     - Ingress
     - Egress
@@ -36,5 +36,5 @@ spec:
       from:
         - podSelector:
             matchLabels:
-            {{- include "zookeeper.labels" . | nindent 12 }}
+              {{- include "zookeeper.selectorLabels" . | nindent 14 }}
 {{- end }}
