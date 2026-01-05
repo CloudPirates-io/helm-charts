@@ -170,8 +170,12 @@ Extract PostgreSQL major version from image tag
 */}}
 {{- define "postgres.majorVersion" -}}
 {{- $tag := .Values.image.tag -}}
+{{/* Cut "@suffix" */}}
 {{- if contains "@" $tag -}}
   {{- $tag = (split "@" $tag)._0 -}}
+{{/* Cut "-suffix" */}}
+{{- else if contains "-" $tag -}}
+  {{- $tag = (split "-" $tag)._0 -}}
 {{- end -}}
 {{- if regexMatch "pg[0-9]+" $tag -}}
   {{- regexReplaceAll ".*pg([0-9]+).*" $tag "${1}" -}}
