@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.19.0 (2026-01-01)
+
+* chore: update CHANGELOG.md for merged changes ([217930a](https://github.com/CloudPirates-io/helm-charts/commit/217930a))
+* chore: update CHANGELOG.md for merged changes ([ad7422d](https://github.com/CloudPirates-io/helm-charts/commit/ad7422d))
+* chore: auto-generate values.schema.json (#791) ([f4b3275](https://github.com/CloudPirates-io/helm-charts/commit/f4b3275))
+* chore: update CHANGELOG.md for merged changes ([e6ca29f](https://github.com/CloudPirates-io/helm-charts/commit/e6ca29f))
+* chore: update CHANGELOG.md for merged changes ([332799f](https://github.com/CloudPirates-io/helm-charts/commit/332799f))
+* add option to configure auth via acl (#780) ([208eaad](https://github.com/CloudPirates-io/helm-charts/commit/208eaad))
+
 ## 0.18.0 (2025-12-23)
 
 * chore: update CHANGELOG.md for merged changes ([e0ca85e](https://github.com/CloudPirates-io/helm-charts/commit/e0ca85e))

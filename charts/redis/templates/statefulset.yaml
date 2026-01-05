@@ -394,13 +394,16 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
               mountPath: {{ include "redis.auth.acl.path" . }}
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
-            {{- if .Values.tls.enabled }}
+          {{- if .Values.tls.enabled }}
             - name: tls-certs
               mountPath: /etc/redis/tls
               readOnly: true
@@ -593,6 +596,14 @@ spec:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
           {{- end }}
+          {{- if .Values.sentinel.preStop.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - /scripts/prestop-sentinel.sh
+          {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.metrics.enabled }}
@@ -720,6 +731,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
   {{- if .Values.persistence.enabled }}
   {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:

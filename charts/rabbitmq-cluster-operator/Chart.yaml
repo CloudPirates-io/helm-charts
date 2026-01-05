@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq-cluster-operator
 description: Kubernetes operator to deploy and manage RabbitMQ clusters.
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "2.18.0"
 keywords:
   - rabbitmq-cluster-operator
@@ -45,7 +45,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[rmq-cluster-operator] Adding new chart for RabbitMQ Cluster Kubernetes Operator (#638)"
-          links:
-            - name: "Commit e36a47a"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/e36a47a"
+          description: "Chart updated"
