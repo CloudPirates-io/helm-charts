@@ -669,6 +669,14 @@
                 "port": {
                     "type": "integer"
                 },
+                "preStop": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "quorum": {
                     "type": "integer"
                 },
@@ -694,6 +702,9 @@
                             "type": "integer"
                         }
                     }
+                },
+                "redisShutdownWaitFailover": {
+                    "type": "boolean"
                 },
                 "resources": {
                     "type": "object",
@@ -796,6 +807,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tls": {
             "type": "object",
