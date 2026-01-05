@@ -173,14 +173,13 @@ Extract PostgreSQL major version from image tag
 {{/* Cut "@suffix" */}}
 {{- if contains "@" $tag -}}
   {{- $tag = (split "@" $tag)._0 -}}
-{{/* Cut "-suffix" */}}
-{{- else if contains "-" $tag -}}
-  {{- $tag = (split "-" $tag)._0 -}}
 {{- end -}}
 {{- if regexMatch "pg[0-9]+" $tag -}}
   {{- regexReplaceAll ".*pg([0-9]+).*" $tag "${1}" -}}
 {{- else if contains "." $tag -}}
   {{- (split "." $tag)._0 -}}
+{{- else if contains "-" $tag -}}
+  {{- regexReplaceAll "-[^-]+$" $tag "" -}}
 {{- else -}}
   {{- $tag -}}
 {{- end -}}
