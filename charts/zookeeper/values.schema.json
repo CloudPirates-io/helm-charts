@@ -131,14 +131,14 @@
                 "service": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
                         "port": {
                             "type": "integer"
                         },
                         "type": {
                             "type": "string"
-                        },
-                        "annotations": {
-                            "type": "object"
                         }
                     }
                 },
