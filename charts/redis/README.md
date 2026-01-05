@@ -73,7 +73,6 @@ To verify the helm chart before installation, copy the public key to the file `c
 cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 ```
 
-
 ## Configuration
 
 ### Global parameters
@@ -114,7 +113,6 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 
-
 ### Service Configuration
 
 | Parameter             | Description                    | Default     |
@@ -153,7 +151,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Redis metrics                             | `false`                    |
 | `metrics.image.registry`                   | Redis exporter image registry                                                           | `docker.io`                |
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter` |
-| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1`                  |
+| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
 | `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                      |
 | `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                     |
@@ -268,7 +266,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable. When disabled with `replication` mode, pod-0 is always the master.
 
 | Parameter                                     | Description                                                                                   | Default     |
-|-----------------------------------------------|-----------------------------------------------------------------------------------------------|-------------|
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------- |
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
 | `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
@@ -327,7 +325,6 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `clusterInitJob.resources.limits.memory`   | Memory limit for clusterInit Job                 | `128Mi` |
 | `clusterInitJob.resources.requests.cpu`    | CPU request for clusterInit Job                  | `10m`   |
 | `clusterInitJob.resources.requests.memory` | Memory request for clusterInit Job               | `64Mi`  |
-
 
 #### Extra Objects
 
@@ -435,7 +432,7 @@ Deploy Redis with replication but without Sentinel for scenarios where automatic
 
 ```yaml
 architecture: replication
-replicaCount: 3  # 1 master + 2 replicas
+replicaCount: 3 # 1 master + 2 replicas
 sentinel:
   enabled: false
 
@@ -455,7 +452,6 @@ After deployment, you'll have:
 - No automatic failover - if the master fails, manual intervention is required
 - Simpler setup with fewer components
 - Lower resource usage (no Sentinel containers)
-
 
 ### Cluster mode
 
