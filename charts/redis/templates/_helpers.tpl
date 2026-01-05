@@ -173,7 +173,7 @@ if [ ! -f '{{ $aclPath }}' ]; then
   echo "ERROR: ACL file '{{ $aclPath }}' not found"
   exit 1
 fi
-{{- end -}}
+{{- end }}
 
 {{/*
 Shell command to extract password for a user from ACL file
