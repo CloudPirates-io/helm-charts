@@ -128,3 +128,15 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].volumeMounts[0].mountPath
           value: /var/lib/postgresql
+
+  - it: should correctly parse standard postgres tag with flavor
+    set:
+      image:
+        tag: "18.1-alpine3.22"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
