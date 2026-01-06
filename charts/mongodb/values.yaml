@@ -20,6 +20,14 @@ podAnnotations: {}
 ## @param podLabels Labels to add to the pod created by the statefulset
 podLabels: {}
 
+## @param revisionHistoryLimit Maximum number of revisions maintained in revision history
+revisionHistoryLimit: 10
+## @param podManagementPolicy Pod management policy
+podManagementPolicy: OrderedReady
+## param updateStrategyType Pod update strategy
+updateStrategyType: RollingUpdate
+
+
 ## @section MongoDB image parameters
 image:
   ## @param image.registry MongoDB image registry
@@ -43,8 +51,10 @@ service:
   type: ClusterIP
   ## @param service.port MongoDB service port
   port: 27017
-  ## @param serivce.annotations Annotations to add to the mongodb service
+  ## @param service.annotations Annotations to add to the mongodb service
   annotations: {}
+  ## @param service.headlessServiceSuffix
+  headlessServiceSuffix: headless
 
 auth:
   ## @param auth.enabled Enable MongoDB authentication
@@ -168,6 +178,23 @@ readinessProbe:
   failureThreshold: 6
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startup probe
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+  ## @param startupProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+
+## @param initResources Resources for the init-container
+initResources: {}
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -303,3 +330,119 @@ metrics:
   #       key: secret-key
   ## @param metrics.extraArgs Additional command line arguments for MongoDB Exporter
   extraArgs: []
+
+## @section serviceAccount Optional service account
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+## Parameters to build a MongoDB replica set (HA mode)
+replicaSet:
+  ## Enables replica set deployment mode
+  enabled: false
+  ## Replica set name
+  name: "repl"
+  ## Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
+  key:
+  ## Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
+  keySecretName:
+  ## Default Kubernetes cluster domain
+  clusterDomain: cluster.local
+  ## Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)
+  secondaries: 2
+  ## Creates hidden secondary instances when configured
+  hiddenSecondaries:
+    # Number of hidden secondary instances
+    instances: 0
+    # Suffix of the headless service name for hidden secondary instances
+    headlessServiceSuffix: hidden
+    ## Additional node selector
+    nodeSelector: {}
+    ## Pod tolerations
+    tolerations: []
+    ## Pod affinity
+    affinity: {}
+    ## Topology spread constraints for pods
+    topologySpreadConstraints: {}
+    # Storage of the hidden secondary
+    storage:
+      ## Set persistentVolumenClaimName to reference an existing PVC
+      persistentVolumeClaimName:
+      ## Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      persistentVolumeClaimRetentionPolicy:
+      ## Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-hidden-volume"
+      ## Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize: 8Gi
+      ## the storage class name
+      className:
+      ## Default access mode (ReadWriteOnce)
+      accessModes:
+        - ReadWriteOnce
+      ## Additional storage annotations
+      annotations: {}
+      ## Additional storage labels
+      labels: {}
+  ## Creates an additional arbiter when enabled
+  arbiter:
+    # Enable arbiter deployment
+    enabled: false
+    # Suffix of the arbiters headless service name
+    headlessServiceSuffix: arbiter
+    ## Resource limits and requests for the arbiter
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    ## Additional node selector
+    nodeSelector: {}
+    ## Pod tolerations
+    tolerations: []
+    ## Pod affinity
+    affinity: {}
+    ## Topology spread constraints for pods
+    topologySpreadConstraints: {}
+    # Storage of the arbiter
+    storage:
+      ## Set persistentVolumenClaimName to reference an existing PVC
+      persistentVolumeClaimName:
+      ## Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      persistentVolumeClaimRetentionPolicy:
+      ## Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-arbiter-volume"
+      ## Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize:
+      ## the storage class name
+      className:
+      ## Default access mode (ReadWriteOnce)
+      accessModes:
+        - ReadWriteOnce
+      ## Additional storage annotations
+      annotations: {}
+      ## Additional storage labels
+      labels: {}
+    ## @param replicaSet.arbiter.extraArgs Additional arguments for the arbiter container
+    extraArgs: []
+
+  ## Internal configuration for extra initialization phase which is used during replicaset configuration
+  extraInit:
+    ## Number of retries to detect whether mongod is fully up and running in background
+    retries: 10
+    ## Seconds to wait between retries
+    delay: 3
+    ## Seconds to wait after mongod is running to give it time for internal initialization
+    initDelay: 5
+  ## Internal shutdown configuration
+  shutdown:
+    ## Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
+    delay: 10
