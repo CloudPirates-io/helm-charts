@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: primary-secondary
   {{- with (include "mongodb.annotations" .) }}
   annotations: 
 {{- . | indent 4 }}
@@ -23,10 +24,12 @@ spec:
   selector:
     matchLabels:
       {{- include "mongodb.selectorLabels" . | nindent 6 }}
+      service-type: primary-secondary
   template:
     metadata:
       labels:
         {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        service-type: primary-secondary
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
@@ -51,9 +54,15 @@ spec:
             - mountPath: /extrainitscripts
               name: extrainitscripts
             - mountPath: /scripts
-              name: init-scripts
+              name: custom-scripts
+            - mountPath: /initscripts
+              name: initscripts
             - mountPath: /configs
               name: configs
+            {{- if or .Values.config.content .Values.config.existingConfigmap }}
+            - name: custom-config
+              mountPath: /customconfig
+            {{- end }}
             {{- if .Values.replicaSet.enabled }}
             - mountPath: /replicaset
               name: keyfile
@@ -182,13 +191,15 @@ spec:
           volumeMounts:
             - mountPath: /extrainitscripts
               name: extrainitscripts
+            - mountPath: /docker-entrypoint-initdb.d
+              name: initscripts
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
-            - name: config
+            - name: configs
               mountPath: /etc/mongo
             {{- end }}
             {{- if .Values.replicaSet.enabled }}
@@ -261,6 +272,8 @@ spec:
       volumes:
         - name: extrainitscripts
           emptyDir: {}
+        - name: initscripts
+          emptyDir: {}
         - name: configs
           emptyDir: {}
         - name: keyfile
@@ -274,12 +287,12 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
-        - name: init-scripts
+        - name: custom-scripts
           configMap:
             name: {{ include "mongodb.fullname" . }}-init-scripts
             defaultMode: 0555
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
-        - name: config
+        - name: custom-config
           configMap:
             {{- if .Values.config.existingConfigmap }}
             name: {{ .Values.config.existingConfigmap }}
