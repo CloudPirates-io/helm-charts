@@ -29,6 +29,13 @@
 
 * No changes recorded
 
+## 0.11.1 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([c37cd64](https://github.com/CloudPirates-io/helm-charts/commit/c37cd64))
+* chore: update CHANGELOG.md for merged changes ([8221fb3](https://github.com/CloudPirates-io/helm-charts/commit/8221fb3))
+* chore: auto-generate values.schema.json (#816) ([3602636](https://github.com/CloudPirates-io/helm-charts/commit/3602636))
+* chore: update CHANGELOG.md for merged changes ([135a999](https://github.com/CloudPirates-io/helm-charts/commit/135a999))
+
 ## 0.11.0 (2026-01-08)
 
 * queues not balanced #653 ([b3e74ad](https://github.com/CloudPirates-io/helm-charts/commit/b3e74ad))
