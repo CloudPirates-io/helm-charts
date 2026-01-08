@@ -90,6 +90,19 @@ auth:
   existingSecret: ""
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
   existingSecretPasswordKey: ""
+  ## @param auth.acl Custom ACL rules to be applied. When set, all users, including the 'default' user, must be explicitly configured in the ACL file.
+  acl:
+    ## @param auth.acl.enabled Enable custom ACL rules.
+    enabled: false
+    ## @param auth.acl.existingSecret Name of existing secret containing ACL rules
+    existingSecret: ""
+    ## @param auth.acl.existingSecretACLKey Key in existing secret containing ACL rules
+    ## Key should represent an ACL file content:
+    ##
+    ## user default >masterpassword ~* +@all
+    ## user readonly >readonlypassword ~* +@read
+    ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
+    existingSecretACLKey: ""
 
 ## @section TLS/SSL configuration
 tls:
@@ -124,6 +137,33 @@ config:
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
   existingConfigmapKey: ""
+
+## @section cluster Redis Cluster configuration (only applicable when architecture=cluster)
+cluster:
+  ## @param cluster.announceHostnames Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes)
+  ## When enabled, Redis will announce pod hostnames instead of IPs, making cluster more resilient to pod restarts
+  ## This addresses the issue where pod IP changes on restart cause connection errors
+  announceHostnames: false
+  ## @param cluster.config Additional cluster-specific configuration settings
+  ## These settings are automatically applied when architecture=cluster
+  config:
+    ## @param cluster.config.nodeTimeout Cluster node timeout in milliseconds
+    nodeTimeout: 15000
+    ## @param cluster.config.requireFullCoverage Require full coverage to accept queries
+    requireFullCoverage: true
+
+## @param extraConfig Additional Redis configuration to be appended to the generated config
+## This provides flexibility to add any Redis configuration directives
+## Example:
+## extraConfig: |
+##   # Custom memory policy
+##   maxmemory-policy allkeys-lru
+##   maxmemory 256mb
+##
+##   # Custom save intervals
+##   save 900 1
+##   save 300 10
+extraConfig: ""
 
 ## @Section Pod Disruption Budget
 pdb:
@@ -165,6 +205,7 @@ persistentVolumeClaimRetentionPolicy:
 ## @param resources Resource limits and requests for Redis pod
 resources:
   limits:
+    cpu: 100m
     memory: 128Mi
   requests:
     cpu: 50m
@@ -181,6 +222,11 @@ tolerations: []
 
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
+
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for pod to terminate gracefully
+## When using Sentinel, this should be high enough to allow failover to complete
+## Recommended: 60 seconds for Sentinel setups (failover takes ~45 seconds)
+terminationGracePeriodSeconds: 30
 
 ## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
 topologySpreadConstraints: []
@@ -327,10 +373,16 @@ sentinel:
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
   resources:
     limits:
+      cpu: 50m
       memory: 128Mi
     requests:
       cpu: 25m
       memory: 64Mi
+  ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
+  ## When true: On master termination, waits for failover to complete (zero-downtime)
+  ## When false: Shuts down immediately without waiting for failover
+  redisShutdownWaitFailover: true
+
   ## Master Service Discovery - Provides a stable endpoint for non-Sentinel-aware clients
   ## When enabled, creates a service that always points to the current master by querying Sentinel
   masterService:
@@ -345,11 +397,12 @@ sentinel:
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
       repository: alpine/kubectl
-      tag: "1.34.2"
+      tag: "1.35.0"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources:
       limits:
+        cpu: 25m
         memory: 64Mi
       requests:
         cpu: 10m
@@ -383,6 +436,14 @@ sentinel:
     ## @param sentinel.readinessProbe.successThreshold Number of successes to mark probe as successful
     successThreshold: 1
 
+  ## Sentinel preStop hook configuration for zero-downtime rolling updates
+  ## Waits for Redis failover to complete before Sentinel terminates
+  preStop:
+    ## @param sentinel.preStop.enabled Enable preStop hook for Sentinel container
+    ## When enabled, Sentinel waits for failover to complete before terminating
+    ## This ensures clients can still connect to Sentinel during rolling updates
+    enabled: true
+
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
   resources:
@@ -405,11 +466,12 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.80.1@sha256:bac9872da2b48e6eebbffb11517a5dcda59958eda51e1e4231eeb5dd516b4a5f"
+    tag: "v1.80.1-alpine"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
     limits:
+      cpu: 100m
       memory: 64Mi
     requests:
       cpu: 50m
@@ -523,6 +585,7 @@ clusterInitJob:
   ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
   resources:
     limits:
+      cpu: 25m
       memory: 128Mi
     requests:
       cpu: 10m

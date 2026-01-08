@@ -131,11 +131,49 @@
                 "service": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
                         "port": {
                             "type": "integer"
                         },
                         "type": {
                             "type": "string"
+                        }
+                    }
+                },
+                "serviceMonitor": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "namespace": {
+                            "type": "string"
+                        },
+                        "namespaceSelector": {
+                            "type": "object"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "selector": {
+                            "type": "object"
                         }
                     }
                 }
@@ -192,6 +230,12 @@
             "properties": {
                 "enabled": {
                     "type": "boolean"
+                },
+                "maxUnavailable": {
+                    "type": "string"
+                },
+                "minAvailable": {
+                    "type": "string"
                 }
             }
         },

@@ -1,6 +1,27 @@
 # Changelog
 
 
+## 0.5.0 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([4309c14](https://github.com/CloudPirates-io/helm-charts/commit/4309c14))
+* chore: update CHANGELOG.md for merged changes ([78ae03c](https://github.com/CloudPirates-io/helm-charts/commit/78ae03c))
+* [zookeeper]: add ServiceMonitor (#792) ([3831796](https://github.com/CloudPirates-io/helm-charts/commit/3831796))
+* chore: update CHANGELOG.md for merged changes ([02c5d47](https://github.com/CloudPirates-io/helm-charts/commit/02c5d47))
+* chore: update CHANGELOG.md for merged changes ([2c04385](https://github.com/CloudPirates-io/helm-charts/commit/2c04385))
+* chore: auto-generate values.schema.json (#790) ([39d877a](https://github.com/CloudPirates-io/helm-charts/commit/39d877a))
+
+## 0.4.1 (2026-01-01)
+
+* chore: update CHANGELOG.md for merged changes ([be92c3a](https://github.com/CloudPirates-io/helm-charts/commit/be92c3a))
+* chore: update CHANGELOG.md for merged changes ([655b893](https://github.com/CloudPirates-io/helm-charts/commit/655b893))
+* [zookeeper]: fix typos and set automountServiceAccountToken to false (#789) ([343fb3d](https://github.com/CloudPirates-io/helm-charts/commit/343fb3d))
+
+## 0.3.10 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([f4e9ecf](https://github.com/CloudPirates-io/helm-charts/commit/f4e9ecf))
+* chore: update CHANGELOG.md for merged changes ([1935e6a](https://github.com/CloudPirates-io/helm-charts/commit/1935e6a))
+* Final fix for supporting migration from bitnami zookeeper (#778) ([474ab06](https://github.com/CloudPirates-io/helm-charts/commit/474ab06))
+
 ## 0.3.9 (2025-12-23)
 
 * chore: update CHANGELOG.md for merged changes ([16be02d](https://github.com/CloudPirates-io/helm-charts/commit/16be02d))

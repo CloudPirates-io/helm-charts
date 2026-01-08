@@ -1,6 +1,12 @@
 # Changelog
 
 
+## cluster-operator-0.1.2 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([5495451](https://github.com/CloudPirates-io/helm-charts/commit/5495451))
+* chore: update CHANGELOG.md for merged changes ([b2973f3](https://github.com/CloudPirates-io/helm-charts/commit/b2973f3))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.2.2 (patch) (#760) ([3ddf1ed](https://github.com/CloudPirates-io/helm-charts/commit/3ddf1ed))
+
 ## cluster-operator-0.1.1 (2025-12-16)
 
 * chore: update CHANGELOG.md for merged changes ([1f90423](https://github.com/CloudPirates-io/helm-charts/commit/1f90423))
@@ -22,6 +28,16 @@
 ## cluster-operator-0.1.0 (2025-12-01)
 
 * No changes recorded
+
+## 0.11.0 (2026-01-08)
+
+* queues not balanced #653 ([b3e74ad](https://github.com/CloudPirates-io/helm-charts/commit/b3e74ad))
+
+## 0.10.2 (2025-12-22)
+
+* chore: update CHANGELOG.md for merged changes ([5495451](https://github.com/CloudPirates-io/helm-charts/commit/5495451))
+* chore: update CHANGELOG.md for merged changes ([b2973f3](https://github.com/CloudPirates-io/helm-charts/commit/b2973f3))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.2.2 (patch) (#760) ([3ddf1ed](https://github.com/CloudPirates-io/helm-charts/commit/3ddf1ed))
 
 ## 0.10.1 (2025-12-12)
 

@@ -32,6 +32,7 @@ spec:
 {{- with (include "zookeeper.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      automountServiceAccountToken: false
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
@@ -51,6 +52,11 @@ spec:
             - name: admin
               containerPort: {{ .Values.service.ports.admin | default 8080 }}
               protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.service.port | default 7000 }}
+              protocol: TCP
+            {{- end }}
           env:
           {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}

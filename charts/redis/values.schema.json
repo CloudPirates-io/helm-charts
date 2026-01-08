@@ -11,6 +11,20 @@
         "auth": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -28,6 +42,25 @@
                 }
             }
         },
+        "cluster": {
+            "type": "object",
+            "properties": {
+                "announceHostnames": {
+                    "type": "boolean"
+                },
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "nodeTimeout": {
+                            "type": "integer"
+                        },
+                        "requireFullCoverage": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "clusterDomain": {
             "type": "string"
         },
@@ -40,6 +73,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -154,6 +190,9 @@
                     }
                 }
             }
+        },
+        "extraConfig": {
+            "type": "string"
         },
         "extraEnvVars": {
             "type": "array"
@@ -294,6 +333,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -507,6 +549,9 @@
                 "limits": {
                     "type": "object",
                     "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
                         "memory": {
                             "type": "string"
                         }
@@ -626,6 +671,9 @@
                                 "limits": {
                                     "type": "object",
                                     "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
                                         "memory": {
                                             "type": "string"
                                         }
@@ -655,6 +703,14 @@
                 "port": {
                     "type": "integer"
                 },
+                "preStop": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "quorum": {
                     "type": "integer"
                 },
@@ -681,12 +737,18 @@
                         }
                     }
                 },
+                "redisShutdownWaitFailover": {
+                    "type": "boolean"
+                },
                 "resources": {
                     "type": "object",
                     "properties": {
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -782,6 +844,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tls": {
             "type": "object",

@@ -123,6 +123,115 @@ config:
   ## @param config.advancedConfiguration Advanced RabbitMQ configuration
   advancedConfiguration: ""
 
+## @section Queue Balancing and Distribution Configuration
+## Addresses GitHub issue #653: Unbalanced queue distribution in multi-node RabbitMQ clusters
+##
+## Example configuration for a 3-node RabbitMQ cluster with balanced queues:
+##
+## queueBalancing:
+##   enabled: true
+##   queueLeaderLocator: "balanced"
+##   clusterFormation:
+##     targetClusterSizeHint: 3
+##   quorumQueues:
+##     continuousMembershipReconciliation:
+##       enabled: true
+##       targetGroupSize: 3
+##   autoRebalance:
+##     enabled: true
+##     delay: 30
+##     vhosts: ["/", "app"]
+##
+queueBalancing:
+  ## @param queueBalancing.enabled Enable queue balancing and distribution features
+  ## When enabled, configures RabbitMQ for better queue distribution across cluster nodes
+  enabled: false
+
+  ## Queue leader locator strategy for new queues
+  ## @param queueBalancing.queueLeaderLocator Strategy for placing queue leaders across cluster nodes
+  ## Options: "client-local" (default), "balanced", "min-masters" (deprecated)
+  ## - "client-local": Place queue leader on the node the creating client is connected to (default RabbitMQ behavior)
+  ## - "balanced": Distribute queue leaders evenly across all cluster nodes (recommended for multi-node clusters)
+  ## - "min-masters": Legacy option, use "balanced" instead
+  queueLeaderLocator: "balanced"
+
+  ## Cluster formation hints
+  ## @param queueBalancing.clusterFormation.targetClusterSizeHint Hint about expected cluster size
+  ## Helps RabbitMQ make better decisions during cluster formation and queue placement
+  clusterFormation:
+    targetClusterSizeHint: ""
+
+  ## Quorum queue reconciliation settings (for RabbitMQ 3.10+)
+  ## Helps ensure quorum queues have the correct number of replicas across cluster nodes
+  quorumQueues:
+    ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.enabled Enable continuous membership reconciliation for quorum queues
+    ## Automatically adds/removes quorum queue members to match cluster size
+    continuousMembershipReconciliation:
+      enabled: false
+      ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize Target number of members per quorum queue
+      ## Set to cluster size for full replication, or leave empty to use cluster_formation.target_cluster_size_hint
+      targetGroupSize: ""
+      ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.interval Reconciliation check interval in seconds
+      interval: 10
+
+  ## Automatic queue rebalancing
+  ## @param queueBalancing.autoRebalance.enabled Enable automatic queue rebalancing on pod startup
+  ## Uses a postStart hook to rebalance queues across cluster nodes when pods start
+  autoRebalance:
+    enabled: false
+    ## @param queueBalancing.autoRebalance.delay Delay in seconds before starting rebalancing
+    ## Allows time for the cluster to stabilize before rebalancing
+    delay: 30
+    ## @param queueBalancing.autoRebalance.vhosts List of vhosts to rebalance (empty = all vhosts)
+    ## Example: ["/", "app", "staging"]
+    vhosts: []
+
+## Usage Examples:
+##
+## 1. Basic queue balancing (recommended for most multi-node clusters):
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##
+## 2. Full configuration for 3-node cluster with quorum queues:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      clusterFormation:
+##        targetClusterSizeHint: 3
+##      quorumQueues:
+##        continuousMembershipReconciliation:
+##          enabled: true
+##          targetGroupSize: 3
+##
+## 3. With automatic rebalancing for existing deployments:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      autoRebalance:
+##        enabled: true
+##        delay: 60  # Wait longer for large clusters
+##
+## 4. Production setup with specific vhosts:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      clusterFormation:
+##        targetClusterSizeHint: 5
+##      autoRebalance:
+##        enabled: true
+##        delay: 45
+##        vhosts: ["/", "production", "staging"]
+##      quorumQueues:
+##        continuousMembershipReconciliation:
+##          enabled: true
+##          targetGroupSize: 3  # 3 replicas even in 5-node cluster
+##          interval: 15
+##
+## Note: When upgrading existing RabbitMQ deployments, enable autoRebalance
+##       to redistribute existing queues. For new deployments, queueLeaderLocator
+##       alone is usually sufficient.
+
 ## @section PeerDiscoveryK8sPlugin configuration
 peerDiscoveryK8sPlugin:
   ## @param peerDiscoveryK8sPlugin.enabled Enable K8s peer discovery plugin for a RabbitMQ HA-cluster

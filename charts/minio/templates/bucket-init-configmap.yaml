@@ -88,17 +88,12 @@ data:
                 
                 echo "Processing bucket: $bucket_name"
                 
-                if mc ls "local/$bucket_name" >/dev/null 2>&1; then
-                    echo "Bucket local/$bucket_name already exists, skipping creation."
-                else
-                    echo "Creating bucket: local/$bucket_name"
-                    {{- if .Values.config.region }}
-                    mc mb --region "{{ .Values.config.region }}" "local/$bucket_name"
-                    {{- else }}
-                    mc mb "local/$bucket_name"
-                    {{- end }}
-                    echo "Bucket local/$bucket_name created successfully."
-                fi
+                {{- if .Values.config.region }}
+                mc mb --ignore-existing --region "{{ .Values.config.region }}" "local/$bucket_name"
+                {{- else }}
+                mc mb --ignore-existing "local/$bucket_name"
+                {{- end }}
+                echo "Bucket local/$bucket_name processed."
                 
                 if [ -n "$bucket_policy" ]; then
                     echo "Setting policy $bucket_policy for local bucket $bucket_name"

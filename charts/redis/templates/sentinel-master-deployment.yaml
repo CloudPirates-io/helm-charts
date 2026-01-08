@@ -55,6 +55,13 @@ spec:
                 name: {{ include "redis.secretName" . }}
                 key: {{ include "redis.secretPasswordKey" . }}
         {{- end }}
+        {{- if .Values.auth.acl.enabled }}
+        volumeMounts:
+          - name: acl-file
+            mountPath: {{ include "redis.auth.acl.path" . }}
+            subPath: {{ include "redis.auth.acl.file" . }}
+            readOnly: true
+        {{- end }}
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -65,6 +72,8 @@ spec:
             MASTER_SERVICE="${RELEASE_NAME}-master"
             SENTINEL_MASTER_NAME="{{ .Values.sentinel.masterName }}"
             CHECK_INTERVAL="{{ .Values.sentinel.masterService.checkInterval }}"
+
+            {{- include "redis.auth.acl.setupScript" (dict "type" "master-discovery" "context" .) | nindent 12 }}
 
             echo "Starting Redis master discovery service..."
             echo "Namespace: $NAMESPACE"
@@ -129,4 +138,10 @@ spec:
 
               sleep "$CHECK_INTERVAL"
             done
+      {{- if .Values.auth.acl.enabled }}
+      volumes:
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+      {{- end }}
 {{- end }}

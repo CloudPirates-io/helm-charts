@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 0.1.1 (2025-12-16)
+
+* chore: auto-generate values.schema.json (#759) ([9978318](https://github.com/CloudPirates-io/helm-charts/commit/9978318))
+* chore: update CHANGELOG.md for merged changes ([19083d0](https://github.com/CloudPirates-io/helm-charts/commit/19083d0))
+* chore: update CHANGELOG.md for merged changes ([148fceb](https://github.com/CloudPirates-io/helm-charts/commit/148fceb))
+* update to latest version and fix schema issues (#752) ([7f9f9d7](https://github.com/CloudPirates-io/helm-charts/commit/7f9f9d7))
+* chore: update CHANGELOG.md for merged changes ([7f35c2c](https://github.com/CloudPirates-io/helm-charts/commit/7f35c2c))
+* chore: update CHANGELOG.md for merged changes ([4c8d912](https://github.com/CloudPirates-io/helm-charts/commit/4c8d912))
+* change file-ending of artifacthub-repo.yaml to .yml (#679) ([1d59052](https://github.com/CloudPirates-io/helm-charts/commit/1d59052))
+
 ## 0.1.0 (2025-12-01)
 
 * Initial tagged release
