@@ -173,7 +173,7 @@ if [ ! -f '{{ $aclPath }}' ]; then
   echo "ERROR: ACL file '{{ $aclPath }}' not found"
   exit 1
 fi
-{{- end -}}
+{{ end }}
 
 {{/*
 Shell command to extract password for a user from ACL file
@@ -189,9 +189,9 @@ Script block to setup ACL passwords in shell scripts
 Usage: {{ include "redis.auth.acl.setupScript" (dict "type" "init|sentinel|metrics|job|prestop|probe" "context" $) }}
 */}}
 {{- define "redis.auth.acl.setupScript" -}}
-{{- if .context.Values.auth.acl.enabled -}}
+{{- if .context.Values.auth.acl.enabled }}
 {{- $aclPath := include "redis.auth.acl.path" .context -}}
-{{- include "redis.auth.acl.checkFile" .context }}
+{{ include "redis.auth.acl.checkFile" .context }}
 {{- if eq .type "init" -}}
 echo "aclfile {{ $aclPath }}" >> /tmp/redis.conf
 REDIS_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "default" "context" .context) }})

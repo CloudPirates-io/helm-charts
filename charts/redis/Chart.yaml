@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.19.1
+version: 0.20.5
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[redis]: add sentinel monitoring (#774)"
+          description: "Cluster add support for custom conig in redis.conf #756"
           links:
-            - name: "Commit 00e4fef"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/00e4fef"
+            - name: "Commit 90ed6a7"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/90ed6a7"

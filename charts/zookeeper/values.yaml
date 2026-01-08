@@ -104,6 +104,31 @@ metrics:
     type: ClusterIP
     ## @param metrics.service.ports.port Zookeeper metrics service port
     port: 7000
+    ## @param metrics.service.annotations Additional annotations for metrics service
+    annotations: {}
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 10s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
+
 
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @section Zookeeper Container Security Context

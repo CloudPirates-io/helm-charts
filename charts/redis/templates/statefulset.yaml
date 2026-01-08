@@ -32,6 +32,9 @@ spec:
         {{- else if .Values.config.content }}
         checksum/config: {{ .Values.config.content | sha256sum }}
         {{- end }}
+        {{- if .Values.extraConfig }}
+        checksum/extraConfig: {{ .Values.extraConfig | sha256sum }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -181,17 +184,49 @@ spec:
               {{- end }}
               {{- else if eq .Values.architecture "cluster" }}
               echo "" >> /tmp/redis.conf
-              echo "# Default cluster settings" >> /tmp/redis.conf
+              echo "# Redis Cluster Configuration" >> /tmp/redis.conf
               echo "cluster-enabled yes" >> /tmp/redis.conf
               echo "cluster-config-file nodes.conf" >> /tmp/redis.conf
-              echo "cluster-node-timeout 5000" >> /tmp/redis.conf
+              echo "cluster-node-timeout {{ .Values.cluster.config.nodeTimeout }}" >> /tmp/redis.conf
               echo "cluster-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- if .Values.cluster.config.requireFullCoverage }}
+              echo "cluster-require-full-coverage yes" >> /tmp/redis.conf
+              {{- else }}
+              echo "cluster-require-full-coverage no" >> /tmp/redis.conf
+              {{- end }}
               echo "databases 1" >> /tmp/redis.conf
+
+              {{- if .Values.cluster.announceHostnames }}
+              # Hostname-based cluster announcements (recommended for Kubernetes)
+              MY_HOSTNAME=$(hostname)
+              MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster hostname-based announcements for Kubernetes resilience" >> /tmp/redis.conf
+              echo "cluster-preferred-endpoint-type hostname" >> /tmp/redis.conf
+              echo "cluster-announce-hostname ${MY_HOSTNAME_FQDN}" >> /tmp/redis.conf
+              echo "cluster-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- else }}
+              # IP-based cluster announcements (default Redis behavior)
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster IP-based announcements (default behavior)" >> /tmp/redis.conf
+              {{- if eq .Values.ipFamily "ipv4" }}
+              MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9a-fA-F:]+$' | head -n1)
+              {{- else }}
+              MY_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "cluster-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "cluster-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- end }}
+
               {{- if .Values.auth.enabled }}
               echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
               {{- end }}
               echo "" >> /tmp/redis.conf
-              echo "# Increased durability" >> /tmp/redis.conf
+              echo "# Increased durability for cluster mode" >> /tmp/redis.conf
               echo "appendonly yes" >> /tmp/redis.conf
               {{- end }}
 
@@ -218,6 +253,15 @@ spec:
               port {{ .Values.service.port }}
               EOF
               fi
+
+              {{- if .Values.extraConfig }}
+              # Add extra configuration from values.yaml
+              echo "" >> /tmp/redis.conf
+              echo "# Extra configuration from values.yaml" >> /tmp/redis.conf
+              cat >> /tmp/redis.conf << 'EOF'
+              {{- .Values.extraConfig | nindent 14 }}
+              EOF
+              {{- end }}
           {{- if .Values.auth.enabled }}
           env:
             - name: REDIS_PASSWORD
@@ -394,13 +438,16 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
             {{- if .Values.auth.acl.enabled }}
             - name: acl-file
               mountPath: {{ include "redis.auth.acl.path" . }}
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
-            {{- if .Values.tls.enabled }}
+          {{- if .Values.tls.enabled }}
             - name: tls-certs
               mountPath: /etc/redis/tls
               readOnly: true
@@ -593,6 +640,14 @@ spec:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
           {{- end }}
+          {{- if .Values.sentinel.preStop.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - /scripts/prestop-sentinel.sh
+          {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.metrics.enabled }}
@@ -720,6 +775,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
   {{- if .Values.persistence.enabled }}
   {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:

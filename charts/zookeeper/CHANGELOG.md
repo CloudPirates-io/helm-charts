@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.5.0 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([4309c14](https://github.com/CloudPirates-io/helm-charts/commit/4309c14))
+* chore: update CHANGELOG.md for merged changes ([78ae03c](https://github.com/CloudPirates-io/helm-charts/commit/78ae03c))
+* [zookeeper]: add ServiceMonitor (#792) ([3831796](https://github.com/CloudPirates-io/helm-charts/commit/3831796))
+* chore: update CHANGELOG.md for merged changes ([02c5d47](https://github.com/CloudPirates-io/helm-charts/commit/02c5d47))
+* chore: update CHANGELOG.md for merged changes ([2c04385](https://github.com/CloudPirates-io/helm-charts/commit/2c04385))
+* chore: auto-generate values.schema.json (#790) ([39d877a](https://github.com/CloudPirates-io/helm-charts/commit/39d877a))
+
 ## 0.4.1 (2026-01-01)
 
 * chore: update CHANGELOG.md for merged changes ([be92c3a](https://github.com/CloudPirates-io/helm-charts/commit/be92c3a))
