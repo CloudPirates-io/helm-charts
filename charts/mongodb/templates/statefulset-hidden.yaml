@@ -57,11 +57,11 @@ spec:
       {{- end }}
       initContainers:
         - name: {{ .Chart.Name }}-init
-          {{- with .Values.securityContext }}
+          {{- with .Values.containerSecurityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             {{- if .Values.extraScripts }}
@@ -104,11 +104,11 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          {{- with .Values.securityContext }}
+          {{- with .Values.containerSecurityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "/extrainitscripts/extra-init.sh" ]
           args:
@@ -116,7 +116,7 @@ spec:
             - {{ . }}
             {{- end }}
             - --config
-            - /etc/mongo/custom.conf
+            - /etc/mongo/mongod.conf
             {{- if .Values.replicaSet.enabled }}
             - --replSet
             - {{ .Values.replicaSet.name | quote }}
@@ -194,6 +194,65 @@ spec:
           env:
             - name: "MONGOTYPE"
               value: "HIDDEN"
+          {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+            - name: MONGO_CUSTOM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.name }}
+                  key: {{ .Values.customUser.secretKeys.name }}
+                  {{- else }}
+                  key: CUSTOM_USER
+                  {{- end }}
+            - name: MONGO_CUSTOM_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.password }}
+                  key: {{ .Values.customUser.secretKeys.password }}
+                  {{- else }}
+                  key: CUSTOM_PASSWORD
+                  {{- end }}
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.database }}
+                  key: {{ .Values.customUser.secretKeys.database }}
+                  {{- else }}
+                  key: CUSTOM_DB
+                  {{- end }}
+            {{- end }}
+            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+          {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -202,7 +261,7 @@ spec:
               mountPath: /tmp
             - name: extrainitscripts
               mountPath: /extrainitscripts
-            - name: {{ .Values.replicaSet.hiddenSecondaries.volumeName }}
+            - name: {{ .Values.replicaSet.hiddenSecondaries.storage.volumeName }}
               mountPath: /data/db
             - mountPath: /docker-entrypoint-initdb.d
               name: initscripts
@@ -241,7 +300,7 @@ spec:
           emptyDir: {}
         - name: scripts
           configMap:
-            name: {{ include "mongodb.fullname" . }}-scripts
+            name: {{ include "mongodb.fullname" . }}-init-scripts
             defaultMode: 0555
         {{- if and .Values.replicaSet.enabled .Values.replicaSet.keySecretName }}
         - name: keyfile-secret
