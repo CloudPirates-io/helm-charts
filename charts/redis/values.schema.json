@@ -42,6 +42,25 @@
                 }
             }
         },
+        "cluster": {
+            "type": "object",
+            "properties": {
+                "announceHostnames": {
+                    "type": "boolean"
+                },
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "nodeTimeout": {
+                            "type": "integer"
+                        },
+                        "requireFullCoverage": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "clusterDomain": {
             "type": "string"
         },
@@ -171,6 +190,9 @@
                     }
                 }
             }
+        },
+        "extraConfig": {
+            "type": "string"
         },
         "extraEnvVars": {
             "type": "array"
