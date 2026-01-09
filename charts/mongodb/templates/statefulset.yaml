@@ -83,11 +83,11 @@ spec:
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           command: [ "/extrainitscripts/extra-init.sh" ]
           args:
-            {{- range .Values.extraArgs }}
+            {{- range .Values.image.extraArgs }}
             - {{ . }}
             {{- end }}
             - --config
-            - /etc/mongo/mongod.conf
+            - {{ include "mongodb.configFullName" . | quote }}
             {{- if .Values.replicaSet.enabled }}
             - --replSet
             - {{ .Values.replicaSet.name | quote }}
@@ -200,7 +200,7 @@ spec:
               {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: configs
-              mountPath: /etc/mongo
+              mountPath: {{ .Values.config.mountPath }}
             {{- end }}
             {{- if .Values.replicaSet.enabled }}
             - mountPath: /replicaset

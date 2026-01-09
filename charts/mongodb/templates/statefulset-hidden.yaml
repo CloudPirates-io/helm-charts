@@ -64,22 +64,6 @@ spec:
           image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
-            {{- if .Values.extraScripts }}
-            - mountPath: /extrascripts
-              name: extrascripts-volume
-            {{- end }}
-            {{- if .Values.extraSecretConfigs }}
-            - mountPath: /extraconfigs
-              name: extraconfigs-volume
-            {{- end }}
-            {{- if .Values.customScripts }}
-            - mountPath: /customscripts
-              name: customscripts-volume
-            {{- end }}
-            {{- if .Values.customConfig }}
-            - mountPath: /customconfig
-              name: customconfig-volume
-            {{- end }}
             - mountPath: /initscripts
               name: initscripts
             - mountPath: /extrainitscripts
@@ -95,7 +79,7 @@ spec:
               name: keyfile-secret
             {{- end }}
           command: [ "/scripts/init.sh" ]
-          {{- with .Values.initResources }}
+          {{- with .Values.initContainer.Resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -112,11 +96,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "/extrainitscripts/extra-init.sh" ]
           args:
-            {{- range .Values.args }}
+            {{- range .Values.replicaSet.hiddenSecondaries.extraArgs }}
             - {{ . }}
             {{- end }}
             - --config
-            - /etc/mongo/mongod.conf
+            - {{ include "mongodb.configFullName" . | quote }}
             {{- if .Values.replicaSet.enabled }}
             - --replSet
             - {{ .Values.replicaSet.name | quote }}
@@ -187,7 +171,7 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-          {{- with .Values.resources }}
+          {{- with .Values.replicaSet.hiddenSecondaries.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -265,7 +249,7 @@ spec:
               mountPath: /data/db
             - mountPath: /docker-entrypoint-initdb.d
               name: initscripts
-            - mountPath: /etc/mongo
+            - mountPath: {{ .Values.config.mountPath }}
               name: configs
             {{- if .Values.replicaSet.enabled }}
             - mountPath: /replicaset
@@ -311,7 +295,7 @@ spec:
 {{- with .Values.replicaSet.hiddenSecondaries.storage }}
   {{- $createPvc := and (empty .persistentVolumeClaimName) .requestedSize }}
   {{- if not $createPvc }}
-        - name: {{ $.Values.replicaSet.hiddenSecondaries.storage.volumeName }}
+        - name: {{ .volumeName }}
         {{- if .persistentVolumeClaimName }}
           persistentVolumeClaim:
             claimName: {{ .persistentVolumeClaimName }}
@@ -321,7 +305,7 @@ spec:
   {{- else }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ $.Values.replicaSet.hiddenSecondaries.storage.volumeName }}
+        name: {{ .volumeName }}
       {{- with .labels }}
         labels:
         {{- toYaml . | nindent 10 }}

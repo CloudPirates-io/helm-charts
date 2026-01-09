@@ -38,10 +38,8 @@ image:
   tag: "8.2.3@sha256:7f5bbdafebde7c42e42e33396d01c0eda3eb753da8dae99071a30e350568a0a4"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
-  ## @param image.command Override default container command (useful when using custom images)
-  command: []
   ## @param image.args Override default container args (useful when using custom images)
-  args: []
+  extraArgs: []
 
 ## @param replicaCount Number of MongoDB replicas to deploy
 replicaCount: 1
@@ -81,8 +79,6 @@ config:
       bindIpAll: true
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
-  ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
-  existingConfigmapKey: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser: {}
@@ -341,61 +337,39 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-## Parameters to build a MongoDB replica set (HA mode)
+initContainer:
+  ## @param initContainer.resources Resource limits and requests for the arbiter
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+## @section replicaSet Parameters to build a MongoDB replica set (HA mode)
 replicaSet:
-  ## Enables replica set deployment mode
+  ## @param replicaSet.enabled Enables replica set deployment mode
   enabled: false
-  ## Replica set name
+  ## @param replicaSet.name Replica set name
   name: "repl"
-  ## Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
+  ## @param replicaSet.key Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
   key:
-  ## Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
+  ## @param replicaSet.keySecretName Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
   keySecretName:
-  ## Default Kubernetes cluster domain
+  ## @param replicaSet.clusterDomain Default Kubernetes cluster domain
   clusterDomain: cluster.local
-  ## Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)
+  ## @param replicaSet.secondaries Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)
   secondaries: 2
-  ## Creates hidden secondary instances when configured
+  ## @param replicaSet.hiddenSecondaries Creates hidden secondary instances when configured
   hiddenSecondaries:
-    # Number of hidden secondary instances
+    ## @param replicaSet.hiddenSecondaries.instances Number of hidden secondary instances
     instances: 0
-    # Suffix of the headless service name for hidden secondary instances
+    ## @param replicaSet.hiddenSecondaries.headlessServiceSuffix Suffix of the headless service name for hidden secondary instances
     headlessServiceSuffix: hidden
-    ## Additional node selector
+    ## @param replicaSet.hiddenSecondaries.nodeSelector Additional node selector
     nodeSelector: {}
-    ## Pod tolerations
-    tolerations: []
-    ## Pod affinity
-    affinity: {}
-    ## Topology spread constraints for pods
-    topologySpreadConstraints: {}
-    # Storage of the hidden secondary
-    storage:
-      ## Set persistentVolumenClaimName to reference an existing PVC
-      persistentVolumeClaimName:
-      ## Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
-      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
-      persistentVolumeClaimRetentionPolicy:
-      ## Internal volume name and prefix of a created PVC
-      volumeName: "mongodb-hidden-volume"
-      ## Alternative set requestedSize to define a size for a dynamically created PVC
-      requestedSize: 8Gi
-      ## the storage class name
-      className:
-      ## Default access mode (ReadWriteOnce)
-      accessModes:
-        - ReadWriteOnce
-      ## Additional storage annotations
-      annotations: {}
-      ## Additional storage labels
-      labels: {}
-  ## Creates an additional arbiter when enabled
-  arbiter:
-    # Enable arbiter deployment
-    enabled: false
-    # Suffix of the arbiters headless service name
-    headlessServiceSuffix: arbiter
-    ## Resource limits and requests for the arbiter
+    ## @param replicaSet.hiddenSecondaries.resources Resource limits and requests for the hidden secondary instance
     resources: {}
       # limits:
       #   cpu: 100m
@@ -403,46 +377,88 @@ replicaSet:
       # requests:
       #   cpu: 100m
       #   memory: 128Mi
-    ## Additional node selector
-    nodeSelector: {}
-    ## Pod tolerations
+    ## @param replicaSet.hiddenSecondaries.tolerations Pod tolerations
     tolerations: []
-    ## Pod affinity
+    ## @param replicaSet.hiddenSecondaries.affinity Pod affinity
     affinity: {}
-    ## Topology spread constraints for pods
+    ## @param replicaSet.hiddenSecondaries.topologySpreadContraints Topology spread constraints for pods
     topologySpreadConstraints: {}
-    # Storage of the arbiter
+    ## @param replicaSet.hiddenSecondaries.storage Storage of the hidden secondary
     storage:
-      ## Set persistentVolumenClaimName to reference an existing PVC
+      ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
       persistentVolumeClaimName:
-      ## Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
       persistentVolumeClaimRetentionPolicy:
-      ## Internal volume name and prefix of a created PVC
-      volumeName: "mongodb-arbiter-volume"
-      ## Alternative set requestedSize to define a size for a dynamically created PVC
-      requestedSize:
-      ## the storage class name
-      className:
-      ## Default access mode (ReadWriteOnce)
+      ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-hidden-volume"
+      ## @param replicaSet.hiddenSecondaries.storage.requestedSize Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize: 8Gi
+      ## @param replicaSet.hiddenSecondaries.storage.className the storage class name
+      className: 
+      ## @param replicaSet.hiddenSecondaries.storage.accessModes Default access mode (ReadWriteOnce)
       accessModes:
         - ReadWriteOnce
-      ## Additional storage annotations
+      ## @param replicaSet.hiddenSecondaries.storage.annotations Additional storage annotations
       annotations: {}
-      ## Additional storage labels
+      ## @param replicaSet.hiddenSecondaries.storage.labels Additional storage labels
+      labels: {}
+    ## @param replicaSet.hiddenSecondaries.extraArgs Additional arguments for the hiddenSecondarie container
+    extraArgs: []
+  ## @param replicaSet.arbiter Creates an additional arbiter when enabled
+  arbiter:
+    ## @param replicaSet.arbiter.enabled Enable arbiter deployment
+    enabled: false
+    ## @param replicaSet.arbiter.headlessServiceSuffix Suffix of the arbiters headless service name
+    headlessServiceSuffix: arbiter
+    ## @param replicaSet.arbiter.resources Resource limits and requests for the arbiter
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    ## @param replicaSet.arbiter.nodeSelector Additional node selector
+    nodeSelector: {}
+    ## @param replicaSet.arbiter.tolerations Pod tolerations
+    tolerations: []
+    ## @param replicaSet.arbiter.affinity Pod affinity
+    affinity: {}
+    ## @param replicaSet.arbiter.topologySpreadConstraints Topology spread constraints for pods
+    topologySpreadConstraints: {}
+    ## @param replicaSet.arbiter.storage Storage of the arbiter
+    storage:
+      ## @param replicaSet.arbiter.storage.persistenVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
+      persistentVolumeClaimName:
+      ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      persistentVolumeClaimRetentionPolicy:
+      ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-arbiter-volume"
+      ## @param replicaSet.arbiter.storage.requestedSize Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize:
+      ## @param replicaSet.arbiter.storage.className the storage class name
+      className:
+      ## @param replicaSet.arbiter.storage.accessModes Default access mode (ReadWriteOnce)
+      accessModes:
+        - ReadWriteOnce
+      ## @param replicaSet.arbiter.storage.annotations Additional storage annotations
+      annotations: {}
+      ## @param replicaSet.arbiter.storage.labels Additional storage labels
       labels: {}
     ## @param replicaSet.arbiter.extraArgs Additional arguments for the arbiter container
     extraArgs: []
 
-  ## Internal configuration for extra initialization phase which is used during replicaset configuration
+  ## @param replicaSet.extraInit Internal configuration for extra initialization phase which is used during replicaset configuration
   extraInit:
-    ## Number of retries to detect whether mongod is fully up and running in background
+    ## @param replicaSet.extraInit.retries Number of retries to detect whether mongod is fully up and running in background
     retries: 10
-    ## Seconds to wait between retries
+    ## @param replicaSet.extraInit.delay Seconds to wait between retries
     delay: 3
-    ## Seconds to wait after mongod is running to give it time for internal initialization
+    ## @param replicaSet.extraInit.initDelay Seconds to wait after mongod is running to give it time for internal initialization
     initDelay: 5
-  ## Internal shutdown configuration
+  ## @param replicaSet.shutdown Internal shutdown configuration
   shutdown:
-    ## Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
+    ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10

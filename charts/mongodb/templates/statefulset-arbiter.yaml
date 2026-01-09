@@ -93,7 +93,7 @@ spec:
             - {{ . }}
             {{- end }}
             - --config
-            - /etc/mongo/mongod.conf
+            - {{ include "mongodb.configFullName" . | quote }}
             - --replSet
             - {{ .Values.replicaSet.name | quote }}
             - --keyFile
@@ -223,7 +223,7 @@ spec:
               mountPath: /extrainitscripts
             - name: {{ .Values.replicaSet.arbiter.storage.volumeName }}
               mountPath: /data/db
-            - mountPath: /etc/mongo
+            - mountPath: {{ .Values.config.mountPath }}
               name: configs
             - mountPath: /replicaset
               name: keyfile
