@@ -28,6 +28,13 @@ $ helm install my-rabbitmq ./charts/rabbitmq
 
 The command deploys RabbitMQ on the Kubernetes cluster in the default configuration. The [Configuration](#configuration) section lists the parameters that can be configured during installation.
 
+## Upgrading the Chart
+
+For HA setups the erlang-cookie is used to join nodes to the cluster. If no erlang-cookie is set, a random one is generated with each chart update and restarted pods wont be able to rejoin the cluster with the new erlang-cookie.
+
+For existing installations this can be fixed after an update by getting the current erlang-cookie from the ENV-Vars, inside the still running old pods, and replacing the newly generated erlang-cookie in the k8s secret with the old one.
+
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `my-rabbitmq` deployment:
@@ -429,6 +436,8 @@ helm install my-rabbitmq ./charts/rabbitmq -f values-production.yaml
 # values-cluster.yaml
 replicaCount: 3
 
+auth:
+  erlangCookie: "somerandomstring" # chart updates will fail in ha cluster setups without this or existingErlangCookieKey
 peerDiscoveryK8sPlugin:
   enabled: true
   useLongname: true
