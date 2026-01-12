@@ -160,7 +160,7 @@ queueBalancing:
   ## Helps RabbitMQ make better decisions during cluster formation and queue placement
   ## Leave empty/null to use RabbitMQ's default
   clusterFormation:
-    targetClusterSizeHint: null
+    targetClusterSizeHint: null  # @schema type:number
 
   ## Quorum queue reconciliation settings (for RabbitMQ 3.10+)
   ## Helps ensure quorum queues have the correct number of replicas across cluster nodes
@@ -171,13 +171,13 @@ queueBalancing:
       enabled: false
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize Target number of members per quorum queue (integer)
       ## Set to cluster size for full replication, or leave empty/null to use cluster_formation.target_cluster_size_hint
-      targetGroupSize: null
+      targetGroupSize: null  # @schema type:number
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.interval Reconciliation check interval in milliseconds
       ## Default: 3600000 (1 hour) to match RabbitMQ's default
       interval: 3600000
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval How often to trigger reconciliation in milliseconds (integer)
       ## Leave empty/null to use RabbitMQ's default
-      triggerInterval: null
+      triggerInterval: null  # @schema type:number
 
   ## Automatic queue rebalancing
   ## @param queueBalancing.autoRebalance.enabled Enable automatic queue rebalancing on pod startup
