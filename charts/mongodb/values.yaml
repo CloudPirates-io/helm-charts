@@ -189,9 +189,6 @@ startupProbe:
   ## @param startupProbe.periodSeconds How often to perform the probe
   periodSeconds: 10
 
-## @param initResources Resources for the init-container
-initResources: {}
-
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
   # - name: CUSTOM_VAR
