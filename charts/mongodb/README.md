@@ -75,23 +75,27 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Common Parameters
 
-| Parameter           | Description                                              | Default |
-| ------------------- | -------------------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override mongodb.fullname            | `""`    |
-| `fullnameOverride`  | String to fully override mongodb.fullname                | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects               | `{}`    |
-| `podAnnotations`    | Annotations to add to the pod created by the statefulset | `{}`    |
-| `podLabels`         | Labels to add to the pod created by the statefulset      | `{}`    |
+| Parameter              | Description                                                | Default         |
+| ---------------------- | ---------------------------------------------------------- | --------------- |
+| `nameOverride`         | String to partially override mongodb.fullname              | `""`            |
+| `fullnameOverride`     | String to fully override mongodb.fullname                  | `""`            |
+| `commonLabels`         | Labels to add to all deployed objects                      | `{}`            |
+| `commonAnnotations`    | Annotations to add to all deployed objects                 | `{}`            |
+| `podAnnotations`       | Annotations to add to the pod created by the statefulset   | `{}`            |
+| `podLabels`            | Labels to add to the pod created by the statefulset        | `{}`            |
+| `revisionHistoryLimit` | Maximum number of revisions maintained in revision history | `10`            |
+| `podManagementPolicy`  | Pod management policy                                      | `OrderedReady`  |
+| `updateStrategyType`   | Pod update strategy                                        | `RollingUpdate` |
 
 ### MongoDB Image Parameters
 
-| Parameter          | Description               | Default                                                                           |
-| ------------------ | ------------------------- | --------------------------------------------------------------------------------- |
-| `image.registry`   | MongoDB image registry    | `docker.io`                                                                       |
-| `image.repository` | MongoDB image repository  | `mongo`                                                                           |
-| `image.tag`        | MongoDB image tag         | `"8.2.1@sha256:86835e8da0f94efd61334decb320fa43e8a60027688cbd856bf29d065b470338"` |
-| `image.pullPolicy` | MongoDB image pull policy | `Always`                                                                          |
+| Parameter          | Description                                                       | Default                                                                           |
+| ------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `image.registry`   | MongoDB image registry                                            | `docker.io`                                                                       |
+| `image.repository` | MongoDB image repository                                          | `mongo`                                                                           |
+| `image.tag`        | MongoDB image tag                                                 | `"8.2.1@sha256:86835e8da0f94efd61334decb320fa43e8a60027688cbd856bf29d065b470338"` |
+| `image.pullPolicy` | MongoDB image pull policy                                         | `Always`                                                                          |
+| `image.extraArgs`  | Override default container args (useful when using custom images) | `[]`                                                                              |
 
 ### Replica Configuration
 
@@ -101,11 +105,12 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Service Parameters
 
-| Parameter             | Description                               | Default     |
-| --------------------- | ----------------------------------------- | ----------- |
-| `service.type`        | Kubernetes service type                   | `ClusterIP` |
-| `service.port`        | MongoDB service port                      | `27017`     |
-| `service.annotations` | Annotations to add to the mongodb service | `{}`        |
+| Parameter                       | Description                               | Default     |
+| ------------------------------- | ----------------------------------------- | ----------- |
+| `service.type`                  | Kubernetes service type                   | `ClusterIP` |
+| `service.port`                  | MongoDB service port                      | `27017`     |
+| `service.annotations`           | Annotations to add to the mongodb service | `{}`        |
+| `service.headlessServiceSuffix` |                                           | `headless`  |
 
 ### MongoDB Authentication Parameters
 
@@ -186,6 +191,12 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                  | `5`     |
 | `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready | `6`     |
 | `readinessProbe.successThreshold`    | Number of successes to mark probe as successful | `1`     |
+| `startupProbe.enabled`               | Enable startup probe                            | `true`  |
+| `startupProbe.initialDelaySeconds`   | Initial delay before starting probes            | `10`    |
+| `startupProbe.timeoutSeconds`        | Timeout for each probe attempt                  | `5`     |
+| `startupProbe.failureThreshold`      | Number of failures before pod is marked unready | `30`    |
+| `startupProbe.successThreshold`      | Number of successes to mark probe as successful | `1`     |
+| `startupProbe.periodSeconds`         | How often to perform the probe                  | `10`    |
 
 ### Additional Parameters
 
@@ -269,6 +280,87 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | ---------------------- | ------------------------------------------------------ | ------- |
 | `metrics.extraEnvVars` | Additional environment variables for metrics container | `[]`    |
 | `metrics.extraArgs`    | Additional command line arguments for MongoDB Exporter | `[]`    |
+
+### Service Account Parameters
+
+| Parameter                    | Description                                                                                                            | Default |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`      | Specifies whether a service account should be created                                                                  | `false` |
+| `serviceAccount.annotations` | Annotations to add to the service account                                                                              | `{}`    |
+| `serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""`    |
+
+### Init Container Parameters
+
+| Parameter                 | Description                                  | Default |
+| ------------------------- | -------------------------------------------- | ------- |
+| `initContainer.resources` | Resource limits and requests for the arbiter | `{}`    |
+
+### Replica Set Parameters
+
+| Parameter                  | Description                                                                                                            | Default         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `replicaSet.enabled`       | Enables replica set deployment mode                                                                                    | `false`         |
+| `replicaSet.name`          | Replica set name                                                                                                       | `"repl"`        |
+| `replicaSet.key`           | Key for internal replica set authentication (base64 encoded string 6-1024 chars.)                                      |                 |
+| `replicaSet.keySecretName` | Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string |                 |
+| `replicaSet.clusterDomain` | Default Kubernetes cluster domain                                                                                      | `cluster.local` |
+| `replicaSet.secondaries`   | Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)                               | `2`             |
+
+### Replica Set Hidden Secondaries Parameters
+
+| Parameter                                                                   | Description                                                                                                                                             | Default                   |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `replicaSet.hiddenSecondaries.instances`                                    | Number of hidden secondary instances                                                                                                                    | `0`                       |
+| `replicaSet.hiddenSecondaries.headlessServiceSuffix`                        | Suffix of the headless service name for hidden secondary instances                                                                                      | `hidden`                  |
+| `replicaSet.hiddenSecondaries.nodeSelector`                                 | Additional node selector                                                                                                                                | `{}`                      |
+| `replicaSet.hiddenSecondaries.resources`                                    | Resource limits and requests for the hidden secondary instance                                                                                          | `{}`                      |
+| `replicaSet.hiddenSecondaries.tolerations`                                  | Pod tolerations                                                                                                                                         | `[]`                      |
+| `replicaSet.hiddenSecondaries.affinity`                                     | Pod affinity                                                                                                                                            | `{}`                      |
+| `replicaSet.hiddenSecondaries.topologySpreadConstraints`                    | Topology spread constraints for pods                                                                                                                    | `{}`                      |
+| `replicaSet.hiddenSecondaries.storage.persistentVolumeClaimName`            | Set persistentVolumenClaimName to reference an existing PVC                                                                                             |                           |
+| `replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy` | Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted. (new feature in k8s 1.32) |                           |
+| `replicaSet.hiddenSecondaries.storage.volumeName`                           | Internal volume name and prefix of a created PVC                                                                                                        | `"mongodb-hidden-volume"` |
+| `replicaSet.hiddenSecondaries.storage.requestedSize`                        | Alternative set requestedSize to define a size for a dynamically created PVC                                                                            | `8Gi`                     |
+| `replicaSet.hiddenSecondaries.storage.className`                            | The storage class name                                                                                                                                  |                           |
+| `replicaSet.hiddenSecondaries.storage.accessModes`                          | Default access mode (ReadWriteOnce)                                                                                                                     | `ReadWriteOnce`           |
+| `replicaSet.hiddenSecondaries.storage.annotations`                          | Additional storage annotations                                                                                                                          | `{}`                      |
+| `replicaSet.hiddenSecondaries.storage.labels`                               | Additional storage labels                                                                                                                               | `{}`                      |
+| `replicaSet.hiddenSecondaries.extraArgs`                                    | Additional arguments for the hiddenSecondarie container                                                                                                 | `[]`                      |
+
+### Replica Set Arbiter Parameters
+
+| Parameter                                                         | Description                                                                                                                                             | Default                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `replicaSet.arbiter.enabled`                                      | Enable arbiter deployment                                                                                                                               | `false`                    |
+| `replicaSet.arbiter.headlessServiceSuffix`                        | Suffix of the arbiters headless service name                                                                                                            | `arbiter`                  |
+| `replicaSet.arbiter.resources`                                    | Resource limits and requests for the arbiter                                                                                                            | `{}`                       |
+| `replicaSet.arbiter.nodeSelector`                                 | Additional node selector                                                                                                                                | `{}`                       |
+| `replicaSet.arbiter.tolerations`                                  | Pod tolerations                                                                                                                                         | `[]`                       |
+| `replicaSet.arbiter.affinity`                                     | Pod affinity                                                                                                                                            | `{}`                       |
+| `replicaSet.arbiter.topologySpreadConstraints`                    | Topology spread constraints for pods                                                                                                                    | `{}`                       |
+| `replicaSet.arbiter.storage.persistentVolumeClaimName`            | Set persistentVolumenClaimName to reference an existing PVC                                                                                             |                            |
+| `replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy` | Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted. (new feature in k8s 1.32) |                            |
+| `replicaSet.arbiter.storage.volumeName`                           | Internal volume name and prefix of a created PVC                                                                                                        | `"mongodb-arbiter-volume"` |
+| `replicaSet.arbiter.storage.requestedSize`                        | Alternative set requestedSize to define a size for a dynamically created PVC                                                                            |                            |
+| `replicaSet.arbiter.storage.className`                            | The storage class name                                                                                                                                  |                            |
+| `replicaSet.arbiter.storage.accessModes`                          | Default access mode (ReadWriteOnce)                                                                                                                     | `ReadWriteOnce`            |
+| `replicaSet.arbiter.storage.annotations`                          | Additional storage annotations                                                                                                                          | `{}`                       |
+| `replicaSet.arbiter.storage.labels`                               | Additional storage labels                                                                                                                               | `{}`                       |
+| `replicaSet.arbiter.extraArgs`                                    | Additional arguments for the arbiter container                                                                                                          | `[]`                       |
+
+### Replica Set Extra Init Parameters
+
+| Parameter                        | Description                                                                         | Default |
+| -------------------------------- | ----------------------------------------------------------------------------------- | ------- |
+| `replicaSet.extraInit.retries`   | Number of retries to detect whether mongod is fully up and running in background    | `10`    |
+| `replicaSet.extraInit.delay`     | Seconds to wait between retries                                                     | `3`     |
+| `replicaSet.extraInit.initDelay` | Seconds to wait after mongod is running to give it time for internal initialization | `5`     |
+
+### Replica Set Shutdown Parameters
+
+| Parameter                   | Description                                                                                                                | Default |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `replicaSet.shutdown.delay` | Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance | `10`    |
 
 #### Extra Objects
 
