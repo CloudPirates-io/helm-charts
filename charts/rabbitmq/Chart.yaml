@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.10.2
+version: 0.11.4
 appVersion: "4.2.2"
 keywords:
   - rabbitmq
@@ -41,7 +41,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Add externalTrafficPolicy and allocateLoadBalancerNodePorts to service spec (#730)"
+          description: "Update README.md : ha cluster config and chart update infos (#826)"
           links:
-            - name: "Commit 22ec7fe"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/22ec7fe"
+            - name: "Commit 54caf60"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/54caf60"

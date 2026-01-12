@@ -1,6 +1,40 @@
 # Changelog
 
 
+## 0.20.5 (2026-01-08)
+
+* [alpine/kubectl] Update image to v1.35.0 (#775) ([4f78b86](https://github.com/CloudPirates-io/helm-charts/commit/4f78b86))
+* chore: update CHANGELOG.md for merged changes ([1e112ae](https://github.com/CloudPirates-io/helm-charts/commit/1e112ae))
+* chore: update CHANGELOG.md for merged changes ([414809c](https://github.com/CloudPirates-io/helm-charts/commit/414809c))
+* chore: auto-generate values.schema.json (#815) ([4135c97](https://github.com/CloudPirates-io/helm-charts/commit/4135c97))
+
+## 0.20.4 (2026-01-08)
+
+* Cluster add support for custom conig in redis.conf #756 ([90ed6a7](https://github.com/CloudPirates-io/helm-charts/commit/90ed6a7))
+* chore: update CHANGELOG.md for merged changes ([28e759e](https://github.com/CloudPirates-io/helm-charts/commit/28e759e))
+* chore: update CHANGELOG.md for merged changes ([b10cae9](https://github.com/CloudPirates-io/helm-charts/commit/b10cae9))
+* chore: auto-generate values.schema.json (#813) ([9267d0e](https://github.com/CloudPirates-io/helm-charts/commit/9267d0e))
+* chore: update CHANGELOG.md for merged changes ([ac8f4a5](https://github.com/CloudPirates-io/helm-charts/commit/ac8f4a5))
+
+## 0.20.3 (2026-01-08)
+
+* [redis]: Missing CPU Limit in values.yaml #800 ([b09ce6d](https://github.com/CloudPirates-io/helm-charts/commit/b09ce6d))
+
+## 0.20.2 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([f173e0b](https://github.com/CloudPirates-io/helm-charts/commit/f173e0b))
+* chore: update CHANGELOG.md for merged changes ([1503bf7](https://github.com/CloudPirates-io/helm-charts/commit/1503bf7))
+* [redis]: fix prestop failover verification logic (#803) ([4c10918](https://github.com/CloudPirates-io/helm-charts/commit/4c10918))
+
+## 0.20.1 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([fa4d988](https://github.com/CloudPirates-io/helm-charts/commit/fa4d988))
+* chore: update CHANGELOG.md for merged changes ([6e040a6](https://github.com/CloudPirates-io/helm-charts/commit/6e040a6))
+* chore: auto-generate values.schema.json (#798) ([91e633c](https://github.com/CloudPirates-io/helm-charts/commit/91e633c))
+* chore: update CHANGELOG.md for merged changes ([5faa674](https://github.com/CloudPirates-io/helm-charts/commit/5faa674))
+* chore: update CHANGELOG.md for merged changes ([ec82171](https://github.com/CloudPirates-io/helm-charts/commit/ec82171))
+* change exporter image to alpine based and fix command rendering (#795) ([63662dc](https://github.com/CloudPirates-io/helm-charts/commit/63662dc))
+
 ## 0.20.0 (2026-01-05)
 
 * chore: update CHANGELOG.md for merged changes ([3fd8a7a](https://github.com/CloudPirates-io/helm-charts/commit/3fd8a7a))

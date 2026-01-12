@@ -70,6 +70,26 @@ data:
     management.load_definitions = /etc/rabbitmq-definitions/defs.json
     {{- end }}
 
+    {{- if .Values.queueBalancing.enabled }}
+    # Queue Balancing and Distribution Configuration
+    {{- if .Values.queueBalancing.queueLeaderLocator }}
+    queue_leader_locator = {{ .Values.queueBalancing.queueLeaderLocator }}
+    {{- end }}
+    {{- if .Values.queueBalancing.clusterFormation.targetClusterSizeHint }}
+    cluster_formation.target_cluster_size_hint = {{ .Values.queueBalancing.clusterFormation.targetClusterSizeHint }}
+    {{- end }}
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.enabled }}
+    quorum_queue.continuous_membership_reconciliation.enabled = true
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
+    quorum_queue.continuous_membership_reconciliation.target_group_size = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
+    {{- end }}
+    quorum_queue.continuous_membership_reconciliation.interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.interval }}
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval }}
+    quorum_queue.continuous_membership_reconciliation.trigger_interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+
     # Logging configuration
     log.console = {{ .Values.config.logging.console.enabled }}
     {{- if .Values.config.logging.console.enabled }}

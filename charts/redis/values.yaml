@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.4.0@sha256:3906b477e4b60250660573105110c28bfce93b01243eab37610a484daebceb04"
+  tag: "8.4.0@sha256:47200b04138293fae39737e50878a238b13ec0781083126b1b0c63cf5d992e8d"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -138,6 +138,33 @@ config:
   ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
   existingConfigmapKey: ""
 
+## @section cluster Redis Cluster configuration (only applicable when architecture=cluster)
+cluster:
+  ## @param cluster.announceHostnames Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes)
+  ## When enabled, Redis will announce pod hostnames instead of IPs, making cluster more resilient to pod restarts
+  ## This addresses the issue where pod IP changes on restart cause connection errors
+  announceHostnames: false
+  ## @param cluster.config Additional cluster-specific configuration settings
+  ## These settings are automatically applied when architecture=cluster
+  config:
+    ## @param cluster.config.nodeTimeout Cluster node timeout in milliseconds
+    nodeTimeout: 15000
+    ## @param cluster.config.requireFullCoverage Require full coverage to accept queries
+    requireFullCoverage: true
+
+## @param extraConfig Additional Redis configuration to be appended to the generated config
+## This provides flexibility to add any Redis configuration directives
+## Example:
+## extraConfig: |
+##   # Custom memory policy
+##   maxmemory-policy allkeys-lru
+##   maxmemory 256mb
+##
+##   # Custom save intervals
+##   save 900 1
+##   save 300 10
+extraConfig: ""
+
 ## @Section Pod Disruption Budget
 pdb:
   ## @param pdb.enabled Enable Pod Disruption Budget
@@ -178,6 +205,7 @@ persistentVolumeClaimRetentionPolicy:
 ## @param resources Resource limits and requests for Redis pod
 resources:
   limits:
+    cpu: 100m
     memory: 128Mi
   requests:
     cpu: 50m
@@ -315,7 +343,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.4.0@sha256:3906b477e4b60250660573105110c28bfce93b01243eab37610a484daebceb04"
+    tag: "8.4.0@sha256:47200b04138293fae39737e50878a238b13ec0781083126b1b0c63cf5d992e8d"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   config:
@@ -345,6 +373,7 @@ sentinel:
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
   resources:
     limits:
+      cpu: 50m
       memory: 128Mi
     requests:
       cpu: 25m
@@ -368,11 +397,12 @@ sentinel:
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
       repository: alpine/kubectl
-      tag: "1.34.2"
+      tag: "1.35.0"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources:
       limits:
+        cpu: 25m
         memory: 64Mi
       requests:
         cpu: 10m
@@ -441,6 +471,7 @@ metrics:
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
     limits:
+      cpu: 100m
       memory: 64Mi
     requests:
       cpu: 50m
@@ -554,6 +585,7 @@ clusterInitJob:
   ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
   resources:
     limits:
+      cpu: 25m
       memory: 128Mi
     requests:
       cpu: 10m

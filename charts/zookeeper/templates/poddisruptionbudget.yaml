@@ -19,5 +19,5 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "zookeeper.labels" . | nindent 6 }}
+      {{- include "zookeeper.selectorLabels" . | nindent 6 }}
 {{- end }}

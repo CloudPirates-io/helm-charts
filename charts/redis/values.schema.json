@@ -42,6 +42,25 @@
                 }
             }
         },
+        "cluster": {
+            "type": "object",
+            "properties": {
+                "announceHostnames": {
+                    "type": "boolean"
+                },
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "nodeTimeout": {
+                            "type": "integer"
+                        },
+                        "requireFullCoverage": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "clusterDomain": {
             "type": "string"
         },
@@ -54,6 +73,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -168,6 +190,9 @@
                     }
                 }
             }
+        },
+        "extraConfig": {
+            "type": "string"
         },
         "extraEnvVars": {
             "type": "array"
@@ -308,6 +333,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -521,6 +549,9 @@
                 "limits": {
                     "type": "object",
                     "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
                         "memory": {
                             "type": "string"
                         }
@@ -640,6 +671,9 @@
                                 "limits": {
                                     "type": "object",
                                     "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
                                         "memory": {
                                             "type": "string"
                                         }
@@ -712,6 +746,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }

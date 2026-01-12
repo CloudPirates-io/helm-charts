@@ -2,7 +2,7 @@ apiVersion: v2
 name: zookeeper
 description: Apache ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 type: application
-version: 0.5.0
+version: 0.5.1
 appVersion: "3.9.4"
 keywords:
   - zookeeper
@@ -42,8 +42,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "chore: auto-generate values.schema.json"
+        - kind: changed
+          description: "[zookeeper]: add ServiceMonitor (#792)"
           links:
-            - name: "PR #797"
-              url: "https://github.com/CloudPirates-io/helm-charts/pull/797"
+            - name: "Commit 3831796"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/3831796"

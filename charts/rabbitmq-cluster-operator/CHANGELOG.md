@@ -1,6 +1,11 @@
 # Changelog
 
 
+## 0.1.2 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([bfff753](https://github.com/CloudPirates-io/helm-charts/commit/bfff753))
+* Fix securityContext rendering for operators (#793) ([c513db8](https://github.com/CloudPirates-io/helm-charts/commit/c513db8))
+
 ## 0.1.1 (2025-12-16)
 
 * chore: auto-generate values.schema.json (#759) ([9978318](https://github.com/CloudPirates-io/helm-charts/commit/9978318))
