@@ -532,7 +532,62 @@ containerSecurityContext:
       - ALL
 ```
 
-**Note:** The `image.useHardenedImage` parameter is particularly important for PostgreSQL versions below 18, as hardened images use different PGDATA paths (`/var/lib/postgresql/<version>/data`) compared to standard images (`/var/lib/postgresql/data/pgdata`). For PostgreSQL 18+, both image types use the same path structure.
+**Important Notes:**
+
+1. **PGDATA Paths:** The `image.useHardenedImage` parameter is particularly important for PostgreSQL versions below 18, as hardened images use different PGDATA paths (`/var/lib/postgresql/<version>/data`) compared to standard images (`/var/lib/postgresql/data/pgdata`). For PostgreSQL 18+, both image types use the same path structure.
+
+2. **Persistent Storage:** When using hardened images with persistent storage, you **must** add an initContainer to fix directory permissions. Hardened images enforce strict permission checks (0700 or 0750) and will fail to start if the Kubernetes-managed volumes have incorrect permissions (typically 2770 with setgid bit).
+
+```yaml
+# values-hardened-image-with-persistence.yaml
+image:
+  registry: dhi.io
+  repository: postgres
+  tag: "17.7"
+  imagePullPolicy: IfNotPresent
+  useHardenedImage: true
+
+args: []
+
+podSecurityContext:
+  fsGroup: 70
+
+containerSecurityContext:
+  runAsUser: 70
+  runAsGroup: 70
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Enable persistence
+persistence:
+  enabled: true
+  size: 10Gi
+
+# REQUIRED: Init container to fix permissions for hardened images with persistence
+initContainers:
+  - name: fix-permissions
+    image: busybox:1.36
+    command:
+      - sh
+      - -c
+      - |
+        chown -R 70:70 /var/lib/postgresql
+        find /var/lib/postgresql -type d -exec chmod 750 {} \;
+    securityContext:
+      runAsUser: 0
+      runAsNonRoot: false
+    volumeMounts:
+      - name: data
+        mountPath: /var/lib/postgresql
+```
+
+**Why is the initContainer needed?**
+
+Hardened PostgreSQL images have strict security requirements and will not automatically fix directory permissions. When Kubernetes creates persistent volumes with `fsGroup`, it sets permissions to 2770 (including the setgid bit), which PostgreSQL's hardened images reject. The initContainer runs once before PostgreSQL starts to correct these permissions.
 
 ## Access PostgreSQL
 
