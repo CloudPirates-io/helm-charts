@@ -41,6 +41,17 @@ Common annotations
 {{- end }}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "mongodb.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "mongodb.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Get the secret name for MongoDB root password
 */}}
 {{- define "mongodb.secretName" -}}

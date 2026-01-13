@@ -2,23 +2,34 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: primary-secondary
   {{- with (include "mongodb.annotations" .) }}
   annotations: 
 {{- . | indent 4 }}
   {{- end }}
 spec:
-  serviceName: {{ include "mongodb.fullname" . }}
-  replicas: {{ .Values.replicaCount }}
+  {{- if .Values.replicaSet.enabled }}
+  serviceName: {{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  updateStrategy:
+    type: {{ .Values.updateStrategyType }}
+  replicas: {{ add1 .Values.replicaSet.secondaries }}
+  {{- end }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "mongodb.selectorLabels" . | nindent 6 }}
+      service-type: primary-secondary
   template:
     metadata:
       labels:
         {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        service-type: primary-secondary
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
@@ -34,21 +45,55 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }} 
+          image: {{ include "mongodb.image" . | quote }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          volumeMounts:
+            - mountPath: /extrainitscripts
+              name: extrainitscripts
+            - mountPath: /scripts
+              name: custom-scripts
+            - mountPath: /initscripts
+              name: initscripts
+            - mountPath: /configs
+              name: configs
+            {{- if or .Values.config.content .Values.config.existingConfigmap }}
+            - name: custom-config
+              mountPath: /customconfig
+            {{- end }}
+            {{- if .Values.replicaSet.enabled }}
+            - mountPath: /replicaset
+              name: keyfile
+            {{- end }}
+            {{- if .Values.replicaSet.keySecretName }}
+            - mountPath: /keyfile-secret
+              name: keyfile-secret
+            {{- end }}
+          command: [ "/scripts/init.sh" ]
+          {{- with .Values.initContainer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "mongodb.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if .Values.image.command }}
-          command: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.command "context" $) | nindent 12 }}
-          {{- end }}
-          {{- if .Values.image.args }}
-          args: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.image.args "context" $) | nindent 12 }}
-          {{- else if or .Values.config.content .Values.config.existingConfigmap }}
+          command: [ "/extrainitscripts/extra-init.sh" ]
           args:
-            - "--config"
+            {{- range .Values.image.extraArgs }}
+            - {{ . }}
+            {{- end }}
+            - --config
             - {{ include "mongodb.configFullName" . | quote }}
-          {{- end }}
+            {{- if .Values.replicaSet.enabled }}
+            - --replSet
+            - {{ .Values.replicaSet.name | quote }}
+            - --keyFile
+            - "/replicaset/keyfile"
+            {{- end }}
           ports:
             - name: mongodb
               containerPort: 27017
@@ -144,18 +189,22 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            - mountPath: /extrainitscripts
+              name: extrainitscripts
+            - mountPath: /docker-entrypoint-initdb.d
+              name: initscripts
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
-            {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
-            - name: init-scripts
-              mountPath: /docker-entrypoint-initdb.d/
-            {{- end }}
             {{- if or .Values.config.content .Values.config.existingConfigmap }}
-            - name: config
-              mountPath: /etc/mongo
+            - name: configs
+              mountPath: {{ .Values.config.mountPath }}
+            {{- end }}
+            {{- if .Values.replicaSet.enabled }}
+            - mountPath: /replicaset
+              name: keyfile
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -221,6 +270,14 @@ spec:
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
 {{- end }}
       volumes:
+        - name: extrainitscripts
+          emptyDir: {}
+        - name: initscripts
+          emptyDir: {}
+        - name: configs
+          emptyDir: {}
+        - name: keyfile
+          emptyDir: {}
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}
@@ -230,13 +287,12 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
-        {{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
-        - name: init-scripts
+        - name: custom-scripts
           configMap:
             name: {{ include "mongodb.fullname" . }}-init-scripts
-        {{- end }}
+            defaultMode: 0555
         {{- if or .Values.config.content .Values.config.existingConfigmap }}
-        - name: config
+        - name: custom-config
           configMap:
             {{- if .Values.config.existingConfigmap }}
             name: {{ .Values.config.existingConfigmap }}

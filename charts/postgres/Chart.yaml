@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.13.7
+version: 0.13.9
 appVersion: "18.1.0"
 keywords:
   - postgres
@@ -43,7 +43,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Support pgvector image tags (#744)"
+          description: "Update image digest to bfe50b2 (#817)"
           links:
-            - name: "Commit 8a69448"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/8a69448"
+            - name: "Commit 3f1807b"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/3f1807b"

@@ -195,6 +195,9 @@
                 "existingClaim": {
                     "type": "string"
                 },
+                "labels": {
+                    "type": "object"
+                },
                 "size": {
                     "type": "string"
                 },
@@ -202,6 +205,9 @@
                     "type": "string"
                 }
             }
+        },
+        "podLabels": {
+            "type": "object"
         },
         "podSecurityContext": {
             "type": "object",

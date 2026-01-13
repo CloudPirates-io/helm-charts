@@ -2,10 +2,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "redis.fullname" . }}-metrics
+  name: {{ include "zookeeper.fullname" . }}-metrics
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
-    {{- include "redis.labels" . | nindent 4 }}
+    {{- include "zookeeper.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics
     {{- with .Values.metrics.serviceMonitor.selector }}
     {{- toYaml . | nindent 4 }}
@@ -15,10 +15,10 @@ metadata:
 {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.metrics.serviceMonitor.annotations "context" .) | indent 4 }}
   {{- end }}
 spec:
-  jobLabel: {{ include "redis.fullname" . }}
+  jobLabel: {{ include "zookeeper.fullname" . }}
   selector:
     matchLabels:
-      {{- include "redis.selectorLabels" . | nindent 6 }}
+      {{- include "zookeeper.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: metrics
   endpoints:
     - port: metrics
@@ -39,30 +39,6 @@ spec:
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
       metricRelabelings:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
-    - port: metrics
-      {{- with .Values.metrics.serviceMonitor.interval }}
-      interval: {{ . }}
-      {{- end }}
-      {{- with .Values.metrics.serviceMonitor.scrapeTimeout }}
-      scrapeTimeout: {{ . }}
-      {{- end }}
-      path: /scrape
-      {{- with .Values.metrics.serviceMonitor.honorLabels }}
-      honorLabels: {{ . }}
-      {{- end }}
-      {{- with .Values.metrics.serviceMonitor.relabelings }}
-      relabelings:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
-      metricRelabelings:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      params:
-        target:
-        - localhost:26379
       {{- end }}
   {{- with .Values.metrics.serviceMonitor.namespaceSelector }}
   namespaceSelector:

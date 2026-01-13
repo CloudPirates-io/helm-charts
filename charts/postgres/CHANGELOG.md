@@ -1,6 +1,25 @@
 # Changelog
 
 
+## 0.13.8 (2026-01-08)
+
+* Update image digest to bfe50b2 (#817) ([3f1807b](https://github.com/CloudPirates-io/helm-charts/commit/3f1807b))
+
+## 0.13.7 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([93e6cb9](https://github.com/CloudPirates-io/helm-charts/commit/93e6cb9))
+* chore: update CHANGELOG.md for merged changes ([d45e6e3](https://github.com/CloudPirates-io/helm-charts/commit/d45e6e3))
+* Fix detection of major version for "-" suffixed tags (#799) ([8fada5b](https://github.com/CloudPirates-io/helm-charts/commit/8fada5b))
+
+## 0.13.6 (2025-12-16)
+
+* chore: update CHANGELOG.md for merged changes ([55b8ad5](https://github.com/CloudPirates-io/helm-charts/commit/55b8ad5))
+* chore: update CHANGELOG.md for merged changes ([618fa91](https://github.com/CloudPirates-io/helm-charts/commit/618fa91))
+* chore: auto-generate values.schema.json (#758) ([b9cc388](https://github.com/CloudPirates-io/helm-charts/commit/b9cc388))
+* chore: update CHANGELOG.md for merged changes ([7a4c5ef](https://github.com/CloudPirates-io/helm-charts/commit/7a4c5ef))
+* chore: update CHANGELOG.md for merged changes ([55d2ff8](https://github.com/CloudPirates-io/helm-charts/commit/55d2ff8))
+*  Add terminationGracePeriodSeconds (#754) ([e8cb0c2](https://github.com/CloudPirates-io/helm-charts/commit/e8cb0c2))
+
 ## 0.13.5 (2025-12-15)
 
 * chore: update CHANGELOG.md for merged changes ([a8f42a3](https://github.com/CloudPirates-io/helm-charts/commit/a8f42a3))

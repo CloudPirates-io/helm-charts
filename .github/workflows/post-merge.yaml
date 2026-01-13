@@ -242,7 +242,15 @@ jobs:
 
       - name: Update appVersion in Chart.yaml files
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
-        run: ./update-appversion.sh --all
+        run: |
+          CHANGED_CHARTS="${{ steps.charts-to-update.outputs.changedCharts }}"
+          echo "Updating appVersion for changed charts: $CHANGED_CHARTS"
+
+          for chart_directory in $CHANGED_CHARTS; do
+            CHART_NAME=${chart_directory#charts/}
+            echo "Updating appVersion for chart: $CHART_NAME"
+            ./update-appversion.sh --chart "$CHART_NAME"
+          done
 
       - name: Commit and push changelog and chart updates
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'

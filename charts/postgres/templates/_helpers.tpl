@@ -169,17 +169,23 @@ Create the name of the service account to use
 Extract PostgreSQL major version from image tag
 */}}
 {{- define "postgres.majorVersion" -}}
-{{- $tag := .Values.image.tag -}}
-{{- if contains "@" $tag -}}
-  {{- $tag = (split "@" $tag)._0 -}}
-{{- end -}}
-{{- if regexMatch "pg[0-9]+" $tag -}}
-  {{- regexReplaceAll ".*pg([0-9]+).*" $tag "${1}" -}}
-{{- else if contains "." $tag -}}
-  {{- (split "." $tag)._0 -}}
-{{- else -}}
-  {{- $tag -}}
-{{- end -}}
+  {{- $tag := .Values.image.tag -}}
+  {{- if contains "@" $tag -}}
+    {{- $tag = (split "@" $tag)._0 -}}
+  {{- end -}}
+
+  {{- if regexMatch "pg[0-9]+" $tag -}}
+    {{- regexReplaceAll ".*pg([0-9]+).*" $tag "${1}" -}}
+  {{- else -}}
+    {{- if contains "-" $tag -}}
+      {{- $tag = (regexReplaceAll "-.*" $tag "") -}}
+    {{- end -}}
+    {{- if contains "." $tag -}}
+      {{- (split "." $tag)._0 -}}
+    {{- else -}}
+      {{- $tag -}}
+    {{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{/*
