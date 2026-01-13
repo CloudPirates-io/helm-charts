@@ -147,6 +147,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set MongoDB pod's Security Context fsGroup
   fsGroup: 999
 
+## @param priorityClassName Priority class for the mongodb instance
+priorityClassName: ""
+
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
