@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 0.8.0 (2026-01-13)
+
+* add replication architecture (#829) ([7845f5f](https://github.com/CloudPirates-io/helm-charts/commit/7845f5f))
+
 ## 0.7.1 (2025-12-22)
 
 * chore: update CHANGELOG.md for merged changes ([9d5553d](https://github.com/CloudPirates-io/helm-charts/commit/9d5553d))
