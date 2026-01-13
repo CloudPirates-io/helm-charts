@@ -200,6 +200,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
+| `priorityClassName`   | Priority class for the MariaDB instance | `""` |
 
 ### Resources Parameters
 

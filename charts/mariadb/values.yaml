@@ -163,6 +163,9 @@ containerSecurityContext:
   ## @param containerSecurityContext.readOnlyRootFilesystem Set MariaDB container's Security Context readOnlyRootFilesystem
   readOnlyRootFilesystem: false
 
+## @param priorityClassName Priority class for the MariaDB instance
+priorityClassName: ""
+
 ## @section Resources parameters
 resources:
   {}
