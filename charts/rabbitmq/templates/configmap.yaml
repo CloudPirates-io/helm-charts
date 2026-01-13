@@ -83,9 +83,9 @@ data:
     {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
     quorum_queue.continuous_membership_reconciliation.target_group_size = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
     {{- end }}
-    quorum_queue.continuous_membership_reconciliation.interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.interval }}
+    quorum_queue.continuous_membership_reconciliation.interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.interval | int }}
     {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval }}
-    quorum_queue.continuous_membership_reconciliation.trigger_interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval }}
+    quorum_queue.continuous_membership_reconciliation.trigger_interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval | int }}
     {{- end }}
     {{- end }}
     {{- end }}

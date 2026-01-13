@@ -499,7 +499,10 @@
                     "type": "object",
                     "properties": {
                         "targetClusterSizeHint": {
-                            "type": "string"
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
                         }
                     }
                 },
@@ -522,10 +525,16 @@
                                     "type": "integer"
                                 },
                                 "targetGroupSize": {
-                                    "type": "string"
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
                                 },
                                 "triggerInterval": {
-                                    "type": "string"
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
                                 }
                             }
                         }

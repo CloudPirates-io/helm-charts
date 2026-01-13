@@ -44,6 +44,14 @@
 
 * No changes recorded
 
+## 0.11.5 (2026-01-12)
+
+* queuebalancing schema types (#831) ([f1f1fbf](https://github.com/CloudPirates-io/helm-charts/commit/f1f1fbf))
+* chore: update CHANGELOG.md for merged changes ([e40975d](https://github.com/CloudPirates-io/helm-charts/commit/e40975d))
+* chore: update CHANGELOG.md for merged changes ([85eca5b](https://github.com/CloudPirates-io/helm-charts/commit/85eca5b))
+* chore: auto-generate values.schema.json (#828) ([ecbf971](https://github.com/CloudPirates-io/helm-charts/commit/ecbf971))
+* chore: update CHANGELOG.md for merged changes ([a1f6adc](https://github.com/CloudPirates-io/helm-charts/commit/a1f6adc))
+
 ## 0.11.4 (2026-01-10)
 
 * queues not balanced #653 ([a9f6a5d](https://github.com/CloudPirates-io/helm-charts/commit/a9f6a5d))
