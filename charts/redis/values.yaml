@@ -537,6 +537,8 @@ networkPolicy:
   enabled: false
   ## @param networkPolicy.allowExternal Allow external traffic
   allowExternal: true
+  ## @param networkPolicy.egressEnabled Enable egress rules in NetworkPolicy
+  egressEnabled: true
   ## @param networkPolicy.extraIngress Additional ingress rules
   extraIngress: []
   ## @param networkPolicy.extraEgress Additional egress rules
