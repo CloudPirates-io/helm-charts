@@ -30,6 +30,8 @@ image:
   tag: "18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
+  ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
+  useHardenedImage: false
 
 ## @section Deployment configuration
 ## @param replicaCount Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default)
@@ -311,6 +313,13 @@ initContainers: []
 #   volumeMounts:
 #     - name: data
 #       mountPath: /var/lib/postgresql/data
+
+## @section Container command/args override
+## @param command Override default container command (useful for hardened images)
+command: []
+## @param args Override default container args (useful for hardened images that handle startup differently)
+## Leave unset or null to use default args, set to empty array [] to disable default args for hardened images like DHI
+args: null
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
