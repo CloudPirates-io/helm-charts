@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 0.13.0 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+
 ## 0.12.0 (2025-12-10)
 
 * chore: update CHANGELOG.md for merged changes ([ae1cb60](https://github.com/CloudPirates-io/helm-charts/commit/ae1cb60))

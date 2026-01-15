@@ -140,6 +140,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the minio instance
+priorityClassName: ""
+
 ## @section Service configuration
 service:
   ## @param service.type MinIO service type

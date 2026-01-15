@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 0.6.2 (2026-01-08)
+
+* [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb (#822) ([adc651a](https://github.com/CloudPirates-io/helm-charts/commit/adc651a))
+
 ## 0.6.1 (2025-12-06)
 
 * chore: update CHANGELOG.md for merged changes ([d62c089](https://github.com/CloudPirates-io/helm-charts/commit/d62c089))

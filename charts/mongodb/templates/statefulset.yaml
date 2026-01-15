@@ -45,6 +45,9 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       initContainers:
         - name: {{ .Chart.Name }}-init
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }} 

@@ -36,6 +36,9 @@ spec:
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       serviceAccountName: {{ include "valkey.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       {{- if eq .Values.architecture "replication" }}
       initContainers:
         - name: valkey-init

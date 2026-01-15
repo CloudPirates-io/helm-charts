@@ -78,6 +78,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the valkey instance
+priorityClassName: ""
+
 ## @section Valkey Authentication
 auth:
   ## @param auth.enabled Enable password authentication

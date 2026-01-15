@@ -95,9 +95,9 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Pod labels
 
-| Parameter        | Description     | Default |
-| ---------------- | --------------- | ------- |
-| `podLabels`      | Pod labels      | `{}`    |
+| Parameter   | Description | Default |
+| ----------- | ----------- | ------- |
+| `podLabels` | Pod labels  | `{}`    |
 
 ### Security Context
 
@@ -110,6 +110,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `containerSecurityContext.runAsGroup`               | Group ID for the TimescaleDB container            | `999`     |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the timescaledb instance       | `""`      |
 
 ### TimescaleDB Authentication
 

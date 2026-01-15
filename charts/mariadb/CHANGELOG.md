@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.10.1 (2025-12-15)
+
+* chore: update CHANGELOG.md for merged changes ([8ebdaee](https://github.com/CloudPirates-io/helm-charts/commit/8ebdaee))
+* chore: update CHANGELOG.md for merged changes ([57e2dd6](https://github.com/CloudPirates-io/helm-charts/commit/57e2dd6))
+* mariadb: dont enable metrics-exporter by default (#748) ([6e3d667](https://github.com/CloudPirates-io/helm-charts/commit/6e3d667))
+* chore: update CHANGELOG.md for merged changes ([0ec9dd4](https://github.com/CloudPirates-io/helm-charts/commit/0ec9dd4))
+* chore: update CHANGELOG.md for merged changes ([c0cad09](https://github.com/CloudPirates-io/helm-charts/commit/c0cad09))
+* chore: auto-generate values.schema.json (#740) ([f98c3e4](https://github.com/CloudPirates-io/helm-charts/commit/f98c3e4))
+
 ## 0.10.0 (2025-12-12)
 
 * chore: update CHANGELOG.md for merged changes ([ed8335f](https://github.com/CloudPirates-io/helm-charts/commit/ed8335f))

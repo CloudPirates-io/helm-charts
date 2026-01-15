@@ -174,6 +174,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `containerSecurityContext.runAsNonRoot`             | Run as non-root user                         | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MongoDB container's privilege escalation | `false` |
 | `podSecurityContext.fsGroup`                        | Set MongoDB pod's Security Context fsGroup   | `999`   |
+| `priorityClassName`                                 | Priority class for the mongodb instance      | `""`    |
 
 ### Health Check Parameters
 
