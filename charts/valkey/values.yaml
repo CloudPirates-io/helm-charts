@@ -180,6 +180,8 @@ resources:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for Valkey data volume
+  existingClaim: ""
   ## @param persistence.storageClass Persistent Volume storage class
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
