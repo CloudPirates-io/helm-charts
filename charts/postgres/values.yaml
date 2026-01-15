@@ -319,7 +319,7 @@ initContainers: []
 command: []
 ## @param args Override default container args (useful for hardened images that handle startup differently)
 ## Leave unset or null to use default args, set to empty array [] to disable default args for hardened images like DHI
-args: null
+args: null  # @schema type:[array, null]
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
