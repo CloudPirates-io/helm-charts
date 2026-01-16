@@ -133,6 +133,8 @@ service:
 persistence:
   ## @param persistence.enabled Enable MariaDB data persistence using PVC
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for MariaDB data volume
+  existingClaim: ""
   ## @param persistence.storageClass PVC Storage Class for MariaDB data volume
   storageClass: ""
   ## @param persistence.accessModes PVC Access modes
@@ -162,6 +164,9 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.readOnlyRootFilesystem Set MariaDB container's Security Context readOnlyRootFilesystem
   readOnlyRootFilesystem: false
+
+## @param priorityClassName Priority class for the MariaDB instance
+priorityClassName: ""
 
 ## @section Resources parameters
 resources:

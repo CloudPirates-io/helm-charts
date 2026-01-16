@@ -129,6 +129,9 @@ containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Memcached container's privilege escalation
   allowPrivilegeEscalation: false
 
+## @param priorityClassName Priority class for the memcached instance
+priorityClassName: ""
+
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Memcached pod's Security Context fsGroup

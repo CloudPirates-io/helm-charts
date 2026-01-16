@@ -165,6 +165,7 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | `containerSecurityContext.runAsUser`                | Set container's Security Context runAsUser | `1000`  |
 | `containerSecurityContext.runAsNonRoot`             | Run as non-root user                       | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation                 | `false` |
+| `priorityClassName`                                 | Priority class for the ghost instance      | `""`    |
 
 ### Health Check Parameters
 

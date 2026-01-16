@@ -181,15 +181,16 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 
 ### Persistence Parameters
 
-| Parameter                  | Description                                 | Default             |
-| -------------------------- | ------------------------------------------- | ------------------- |
-| `persistence.enabled`      | Enable MariaDB data persistence using PVC   | `true`              |
-| `persistence.storageClass` | PVC Storage Class for MariaDB data volume   | `""`                |
-| `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
-| `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
-| `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
-| `persistence.labels`       | Labels for persistent volume claims         | `{}`                |
-| `persistence.selector`     | Additional labels for the PVC               | `{}`                |
+| Parameter                   | Description                                                | Default             |
+| --------------------------- | ---------------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable MariaDB data persistence using PVC                  | `true`              |
+| `persistence.existingClaim` | Name of an existing PVC to use for MariaDB data volume     | `""`                |
+| `persistence.storageClass`  | PVC Storage Class for MariaDB data volume                  | `""`                |
+| `persistence.accessModes`   | PVC Access modes                                           | `["ReadWriteOnce"]` |
+| `persistence.size`          | PVC Storage Request for MariaDB data volume                | `8Gi`               |
+| `persistence.annotations`   | Additional custom annotations for the PVC                  | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                        | `{}`                |
+| `persistence.selector`      | Additional labels for the PVC                              | `{}`                |
 
 ### Security Context Parameters
 
@@ -200,6 +201,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
+| `priorityClassName`                                 | Priority class for the MariaDB instance                         | `""`    |
 
 ### Resources Parameters
 
@@ -401,6 +403,16 @@ auth:
     rootPasswordKey: "root-password"
     userPasswordKey: "user-password"
 ```
+
+### Using Existing PersistentVolumeClaim
+
+```yaml
+persistence:
+  enabled: true
+  existingClaim: "my-existing-pvc"
+```
+
+> **Note:** When using an existing PVC, the `storageClass`, `accessModes`, `size`, and `selector` parameters are ignored, as these properties are already defined in the existing PVC.
 
 ### Custom Configuration
 

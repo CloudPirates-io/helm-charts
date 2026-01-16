@@ -115,6 +115,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `containerSecurityContext.runAsGroup`               | Group ID for the Valkey container                 | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the valkey instance            | `""`      |
 
 ### Valkey Authentication
 

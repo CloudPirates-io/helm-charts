@@ -373,6 +373,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
 
+## @param priorityClassName Priority class for the rabbitmq instance
+priorityClassName: ""
+
 ## @section Liveness and readiness probes
 livenessProbe:
   ## @param livenessProbe.enabled Enable livenessProbe on RabbitMQ containers
