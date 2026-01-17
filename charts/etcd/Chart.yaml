@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.4.0
+version: 0.5.0
 appVersion: "3.6.5"
 keywords:
   - etcd
@@ -40,5 +40,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+        - kind: added
+          description: "chore: auto-generate values.schema.json"
+          links:
+            - name: "PR #849"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/849"

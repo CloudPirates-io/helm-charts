@@ -41,6 +41,9 @@ spec:
 {{- end }}
       serviceAccountName: {{ template "rustfs.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       initContainers:
         - name: wait-for-pods
           image: busybox:1.35
@@ -153,10 +156,18 @@ spec:
         {{- if not .Values.dataPersistence.enabled }}
         - name: data
           emptyDir: {}
+        {{- else if .Values.dataPersistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "rustfs.dataPvcName" . }}
         {{- end }}
         {{- if not .Values.logsPersistence.enabled }}
         - name: logs
           emptyDir: {}
+        {{- else if .Values.logsPersistence.existingClaim }}
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ include "rustfs.logsPvcName" . }}
         {{- end }}
         {{- if .Values.tlsPersistence.enabled }}
         - name: tls
@@ -177,9 +188,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if or .Values.dataPersistence.enabled .Values.logsPersistence.enabled }}
+  {{- if or (and .Values.dataPersistence.enabled (not .Values.dataPersistence.existingClaim)) (and .Values.logsPersistence.enabled (not .Values.logsPersistence.existingClaim)) }}
   volumeClaimTemplates:
-    {{- if .Values.dataPersistence.enabled }}
+    {{- if and .Values.dataPersistence.enabled (not .Values.dataPersistence.existingClaim) }}
     - metadata:
         name: data
         labels:
@@ -208,7 +219,7 @@ spec:
         {{- end }}
         {{- end }}
     {{- end }}
-    {{- if .Values.logsPersistence.enabled }}
+    {{- if and .Values.logsPersistence.enabled (not .Values.logsPersistence.existingClaim) }}
     - metadata:
         name: logs
         labels:
