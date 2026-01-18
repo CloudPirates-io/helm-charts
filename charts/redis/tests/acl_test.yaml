@@ -5,6 +5,7 @@ templates:
   - job.yaml
   - prestop-configmap.yaml
   - configmap.yaml
+  - secret.yaml
 tests:
   - it: should not have acl configuration by default
     asserts:
@@ -234,3 +235,35 @@ tests:
       - matchRegex:
           path: data["redis.conf"]
           pattern: 'aclfile /etc/redis/users.acl'
+
+  - it: should setup acl in initContainer for replication mode without sentinel
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: false
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+
+  - it: should setup acl in initContainer for cluster mode
+    template: statefulset.yaml
+    set:
+      architecture: cluster
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+
+  - it: should not render secret when acl is enabled
+    template: secret.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+    asserts:
+      - hasDocuments:
+          count: 0
