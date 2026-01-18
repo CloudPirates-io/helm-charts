@@ -262,7 +262,7 @@ spec:
               {{- .Values.extraConfig | nindent 14 }}
               EOF
               {{- end }}
-          {{- if .Values.auth.enabled }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -298,7 +298,7 @@ spec:
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
               {{- end }}
 
-              redis-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
+              redis-server "$CONFIG_FILE" {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:
             - name: redis
               containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}6379{{ end }}
@@ -314,7 +314,7 @@ spec:
             {{- end }}
           {{- if or .Values.auth.enabled .Values.extraEnvVars }}
           env:
-            {{- if .Values.auth.enabled }}
+            {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -632,7 +632,7 @@ spec:
             failureThreshold: {{ .Values.sentinel.livenessProbe.failureThreshold }}
             successThreshold: {{ .Values.sentinel.livenessProbe.successThreshold }}
           {{- end }}
-          {{- if or .Values.auth.enabled .Values.auth.sentinel }}
+          {{- if and (or .Values.auth.enabled .Values.auth.sentinel) (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -655,7 +655,7 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.metrics.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
-          {{- if .Values.auth.enabled }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
