@@ -33,4 +33,7 @@ data:
     {{- if not .Values.persistence.enabled }}
     save ""
     {{- end }}
+    {{- if .Values.auth.acl.enabled }}
+    aclfile {{ include "redis.auth.acl.path" . }}
+    {{- end }}
 {{- end }}

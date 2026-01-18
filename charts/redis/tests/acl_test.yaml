@@ -4,6 +4,7 @@ templates:
   - sentinel-master-deployment.yaml
   - job.yaml
   - prestop-configmap.yaml
+  - configmap.yaml
 tests:
   - it: should not have acl configuration by default
     asserts:
@@ -223,3 +224,13 @@ tests:
           content:
             name: FOO
             value: BAR
+
+  - it: should add aclfile to configmap
+    template: configmap.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+    asserts:
+      - matchRegex:
+          path: data["redis.conf"]
+          pattern: 'aclfile /etc/redis/users.acl'
