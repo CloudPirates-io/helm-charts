@@ -20,62 +20,18 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Get commit information
-        id: get-commits
-        run: |
-          # Fetch base branch for comparison
-          git fetch origin ${{ github.event.pull_request.base.ref }}
-
-          # Get all commits with hash, author name, and signature status
-          # Format: HASH|AUTHOR|SIGNATURE_STATUS
-          # Signature status: G=good, B=bad, U=untrusted, X=expired, Y=good from expired key, R=good from revoked key, E=cannot be checked, N=no signature
-          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --format="%H|%an|%G?")
-
-          {
-            echo 'commits<<EOF'
-            echo "$COMMITS"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
       - name: Check signed commits (excluding verified bots)
         id: check-signed
         continue-on-error: true
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            const commitsData = `${{ steps.get-commits.outputs.commits }}`;
-
-            const commits = commitsData.trim().split('\n')
-              .filter(line => line.length > 0)
-              .map(line => {
-                const [hash, author, sigStatus] = line.split('|');
-                return { hash, author, sigStatus };
-              });
-
-            // Get unique authors to minimize API calls
-            const uniqueAuthors = [...new Set(commits.map(c => c.author))];
-
-            // Check which authors are bots via GitHub API
-            const botAuthors = new Set();
-            const humanAuthors = new Set();
-
-            for (const author of uniqueAuthors) {
-              try {
-                // GitHub API requires the full username including [bot] suffix
-                const { data: user } = await github.rest.users.getByUsername({
-                  username: author
-                });
-
-                if (user.type === 'Bot') {
-                  botAuthors.add(author);
-                } else {
-                  humanAuthors.add(author);
-                }
-              } catch (error) {
-                // If user not found or API error, treat as human (fail-safe)
-                humanAuthors.add(author);
-              }
-            }
+            // Get all commits in the PR
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
 
             const unsignedCommits = [];
             let humanCommitCount = 0;
@@ -83,7 +39,11 @@ jobs:
             let signedHumanCount = 0;
 
             for (const commit of commits) {
-              const isBot = botAuthors.has(commit.author);
+              const author = commit.author;
+              const commitData = commit.commit;
+
+              // Check if author is a bot
+              const isBot = author && author.type === 'Bot';
 
               if (isBot) {
                 botCommitCount++;
@@ -91,12 +51,19 @@ jobs:
               }
 
               humanCommitCount++;
-              const isSigned = commit.sigStatus === 'G' || commit.sigStatus === 'U';
 
-              if (isSigned) {
+              // Use GitHub's verification status from the API
+              const isVerified = commitData.verification && commitData.verification.verified;
+
+              if (isVerified) {
                 signedHumanCount++;
               } else {
-                unsignedCommits.push(commit);
+                const authorName = author?.login || commitData.author.name;
+                unsignedCommits.push({
+                  hash: commit.sha,
+                  author: authorName,
+                  reason: commitData.verification?.reason || 'no signature'
+                });
               }
             }
 
@@ -122,9 +89,10 @@ jobs:
             const unsignedCount = '${{ steps.check-signed.outputs.unsigned_count }}';
 
             // Build commit list for comment
-            const commitList = unsignedCommits.map(c =>
-              `- \`${c.hash.substring(0, 7)}\` by **${c.author}**`
-            ).join('\n');
+            const commitList = unsignedCommits.map(c => {
+              const reasonText = c.reason ? ` (${c.reason})` : '';
+              return `- \`${c.hash.substring(0, 7)}\` by **${c.author}**${reasonText}`;
+            }).join('\n');
 
             const comment = `## ⚠️ Unsigned Commits Detected
 
