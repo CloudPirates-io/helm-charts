@@ -1,0 +1,142 @@
+suite: test postgres pgvector image tag support
+templates:
+  - statefulset.yaml
+tests:
+  - it: should correctly parse pgvector tag pg18-trixie
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: pg18-trixie
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse pgvector tag pg18
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: pg18
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse pgvector tag 0.8.1-pg18-bookworm
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: 0.8.1-pg18-bookworm
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse pgvector tag 0.8.1-pg18
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: 0.8.1-pg18
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse pgvector tag pg17-bookworm for older PG version
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: pg17-bookworm
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/data/pgdata
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql/data
+
+  - it: should correctly parse pgvector tag 0.8.1-pg16-trixie
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: 0.8.1-pg16-trixie
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/data/pgdata
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql/data
+
+  - it: should correctly parse pgvector tag pg15
+    set:
+      image:
+        repository: pgvector/pgvector
+        tag: pg15
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/data/pgdata
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql/data
+
+  - it: should correctly parse standard postgres tag 18.1
+    set:
+      image:
+        tag: "18.1"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse standard postgres tag with digest
+    set:
+      image:
+        tag: "17.6@sha256:abc123"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/data/pgdata
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql/data
+
+  - it: should correctly parse standard postgres tag with flavor
+    set:
+      image:
+        tag: "18-alpine"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql
+
+  - it: should correctly parse standard postgres tag with flavor
+    set:
+      image:
+        tag: "18.1-alpine3.22"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")].value
+          value: /var/lib/postgresql/18/docker
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/postgresql

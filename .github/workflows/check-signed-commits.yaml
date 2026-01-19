@@ -15,41 +15,94 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Check for bot commits
-        id: check-bots
-        run: |
-          # Get all commits in the PR
-          git fetch origin ${{ github.event.pull_request.base.ref }}
-          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --format="%an")
-
-          echo "Commits in PR:"
-          echo "$COMMITS"
-
-          # Check if any commits are NOT from bots
-          # grep -v returns 0 (true) if it finds lines NOT matching the pattern
-          # grep -v returns 1 (false) if all lines match the pattern (all are bots)
-          if echo "$COMMITS" | grep -qv '\[bot\]'; then
-            echo "Found human commits"
-            echo "has_human_commits=true" >> $GITHUB_OUTPUT
-          else
-            echo "All commits are from bots"
-            echo "has_human_commits=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check signed commits in PR
-        if: steps.check-bots.outputs.has_human_commits == 'true'
+      - name: Check signed commits (excluding verified bots)
+        id: check-signed
         continue-on-error: true
-        uses: 1Password/check-signed-commits-action@ed2885f3ed2577a4f5d3c3fe895432a557d23d52 # v1.2.0
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          comment: |
-            ## ⚠️ Unsigned Commits Detected
+          script: |
+            // Get all commits in the PR
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
 
-            This pull request contains unsigned commits.
+            const unsignedCommits = [];
+            let humanCommitCount = 0;
+            let botCommitCount = 0;
+            let signedHumanCount = 0;
+
+            for (const commit of commits) {
+              const author = commit.author;
+              const commitData = commit.commit;
+
+              // Check if author is a bot
+              const isBot = author && author.type === 'Bot';
+
+              if (isBot) {
+                botCommitCount++;
+                continue;
+              }
+
+              humanCommitCount++;
+
+              // Use GitHub's verification status from the API
+              const isVerified = commitData.verification && commitData.verification.verified;
+
+              if (isVerified) {
+                signedHumanCount++;
+              } else {
+                const authorName = author?.login || commitData.author.name;
+                unsignedCommits.push({
+                  hash: commit.sha,
+                  author: authorName,
+                  reason: commitData.verification?.reason || 'no signature'
+                });
+              }
+            }
+
+            // Set outputs
+            core.setOutput('has_unsigned_commits', unsignedCommits.length > 0 ? 'true' : 'false');
+            core.setOutput('unsigned_count', unsignedCommits.length.toString());
+
+            if (unsignedCommits.length > 0) {
+              core.setOutput('unsigned_commits', JSON.stringify(unsignedCommits));
+            }
+
+            // Fail the step if there are unsigned human commits (but continue-on-error is set)
+            if (unsignedCommits.length > 0) {
+              core.setFailed(`Found ${unsignedCommits.length} unsigned commit(s) from human contributors`);
+            }
+
+      - name: Comment on unsigned commits
+        if: steps.check-signed.outputs.has_unsigned_commits == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const unsignedCommits = JSON.parse(`${{ steps.check-signed.outputs.unsigned_commits }}`);
+            const unsignedCount = '${{ steps.check-signed.outputs.unsigned_count }}';
+
+            // Build commit list for comment
+            const commitList = unsignedCommits.map(c => {
+              const reasonText = c.reason ? ` (${c.reason})` : '';
+              return `- \`${c.hash.substring(0, 7)}\` by **${c.author}**${reasonText}`;
+            }).join('\n');
+
+            const comment = `## ⚠️ Unsigned Commits Detected
+
+            This pull request contains **${unsignedCount}** unsigned human commit(s).
+
+            **Note:** Bot commits are automatically verified via GitHub API and excluded from this check.
+
+            ### Unsigned Commits
+
+            ${commitList}
 
             ### What does this mean?
 
@@ -72,4 +125,12 @@ jobs:
 
             ---
 
-            _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._
+            _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._`;
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

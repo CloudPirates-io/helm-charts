@@ -141,6 +141,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 | `containerSecurityContext.runAsGroup`               | Group ID for the MinIO container                  | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the minio instance             | `""`      |
+
+
 
 ### Service configuration
 
@@ -182,6 +185,18 @@ The following table lists the configurable parameters of the MinIO chart and the
 | Parameter   | Description                                 | Default |
 | ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
+
+### Bucket provisioning
+
+| Parameter        | Description                                                                    | Default |
+| ---------------- | ------------------------------------------------------------------------------ | ------- |
+| `defaultBuckets` | Comma, semi-colon or space separated list of buckets to create at installation | `""`    |
+
+### Configuration for the Job '{{ .Release.Name }}-post-job'
+
+| Parameter             | Description                        | Default                                   |
+| --------------------- | ---------------------------------- | ----------------------------------------- |
+| `postJob.annotations` | Additional annotations for the Job | `helm.sh/hook: post-install,post-upgrade` |
 
 ### Persistence
 

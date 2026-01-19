@@ -1,6 +1,23 @@
 # Changelog
 
 
+## 0.11.5 (2026-01-19)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.1 (patch) (#860) ([8b8713d](https://github.com/CloudPirates-io/helm-charts/commit/8b8713d))
+* chore: update CHANGELOG.md for merged changes ([2b47b4b](https://github.com/CloudPirates-io/helm-charts/commit/2b47b4b))
+* chore: update CHANGELOG.md for merged changes ([f764d87](https://github.com/CloudPirates-io/helm-charts/commit/f764d87))
+* chore: update CHANGELOG.md for merged changes ([de14f91](https://github.com/CloudPirates-io/helm-charts/commit/de14f91))
+
+## 0.11.4 (2026-01-08)
+
+* [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.0 (minor) (#823) ([7e1eb1c](https://github.com/CloudPirates-io/helm-charts/commit/7e1eb1c))
+
+## 0.11.3 (2025-12-04)
+
+* chore: update CHANGELOG.md for merged changes ([f9db9cb](https://github.com/CloudPirates-io/helm-charts/commit/f9db9cb))
+* chore: update CHANGELOG.md for merged changes ([b310b06](https://github.com/CloudPirates-io/helm-charts/commit/b310b06))
+* Apply preserveThemes and preserveProviders to the deployment for volume mounts (#689) ([58d54a8](https://github.com/CloudPirates-io/helm-charts/commit/58d54a8))
+
 ## 0.11.2 (2025-12-01)
 
 * chore: update CHANGELOG.md for merged changes ([5bef5a3](https://github.com/CloudPirates-io/helm-charts/commit/5bef5a3))

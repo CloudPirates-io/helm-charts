@@ -33,6 +33,9 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       serviceAccountName: {{ template "minio.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       {{- if .Values.podSecurityContext }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- end }}
