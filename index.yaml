@@ -1502,6 +1502,62 @@ entries:
         url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
       license: Apache-2.0
     apiVersion: v2
+    appVersion: 6.13.2
+    created: "2026-01-19T08:30:54.57309146Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: A simple, powerful publishing platform that allows you to share your
+      stories with the world.
+    digest: d4030ed44bfb9230c8f6e6963b988364d4231e8536e6efc9639dafb92c852eff
+    home: https://ghost.org
+    icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+    keywords:
+    - ghost
+    - blogging
+    - content management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: ghost
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - https://github.com/TryGhost/Ghost
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.8.0/ghost-0.8.0.tgz
+    version: 0.8.0
+  - annotations:
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "Update charts/ghost/values.yaml ghost (#819)"
+              links:
+                - name: "Commit 888e117"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/888e117"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Ghost
+          url: https://ghost.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+        - name: Application
+          url: https://github.com/TryGhost/Ghost
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
     appVersion: 6.10.3
     created: "2026-01-15T15:34:08.781849394Z"
     dependencies:
@@ -24446,4 +24502,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-19T08:24:48.873911885Z"
+generated: "2026-01-19T08:30:55.880790337Z"
