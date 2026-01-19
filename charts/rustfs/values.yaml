@@ -105,6 +105,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the rustfs instance
+priorityClassName: ""
+
 ## @section Service configuration
 service:
   ## @param service.type RustFS service type

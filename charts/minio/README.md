@@ -141,6 +141,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 | `containerSecurityContext.runAsGroup`               | Group ID for the MinIO container                  | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the minio instance             | `""`      |
+
+
 
 ### Service configuration
 

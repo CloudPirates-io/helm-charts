@@ -435,6 +435,9 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "existingClaim": {
+                    "type": "string"
+                },
                 "labels": {
                     "type": "object"
                 },
@@ -476,6 +479,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

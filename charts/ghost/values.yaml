@@ -134,6 +134,9 @@ containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Nginx container's privilege escalation
   allowPrivilegeEscalation: false
 
+## @param priorityClassName Priority class for the ghost instance
+priorityClassName: ""
+
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup

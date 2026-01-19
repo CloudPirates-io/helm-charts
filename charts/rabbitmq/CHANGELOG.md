@@ -1,6 +1,22 @@
 # Changelog
 
 
+## cluster-operator-0.1.4 (2026-01-19)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([e23b802](https://github.com/CloudPirates-io/helm-charts/commit/e23b802))
+* chore: update CHANGELOG.md for merged changes ([bfcd147](https://github.com/CloudPirates-io/helm-charts/commit/bfcd147))
+* chore: auto-generate values.schema.json (#832) ([16e54d2](https://github.com/CloudPirates-io/helm-charts/commit/16e54d2))
+* chore: update CHANGELOG.md for merged changes ([f867495](https://github.com/CloudPirates-io/helm-charts/commit/f867495))
+* chore: update CHANGELOG.md for merged changes ([bd29fbc](https://github.com/CloudPirates-io/helm-charts/commit/bd29fbc))
+* chore: update CHANGELOG.md for merged changes ([b37e0c7](https://github.com/CloudPirates-io/helm-charts/commit/b37e0c7))
+* queuebalancing schema types (#831) ([f1f1fbf](https://github.com/CloudPirates-io/helm-charts/commit/f1f1fbf))
+* chore: update CHANGELOG.md for merged changes ([e40975d](https://github.com/CloudPirates-io/helm-charts/commit/e40975d))
+* chore: update CHANGELOG.md for merged changes ([85eca5b](https://github.com/CloudPirates-io/helm-charts/commit/85eca5b))
+* chore: auto-generate values.schema.json (#828) ([ecbf971](https://github.com/CloudPirates-io/helm-charts/commit/ecbf971))
+* chore: update CHANGELOG.md for merged changes ([a1f6adc](https://github.com/CloudPirates-io/helm-charts/commit/a1f6adc))
+* queues not balanced #653 ([a9f6a5d](https://github.com/CloudPirates-io/helm-charts/commit/a9f6a5d))
+
 ## cluster-operator-0.1.3 (2026-01-09)
 
 * chore: update CHANGELOG.md for merged changes ([96d70b8](https://github.com/CloudPirates-io/helm-charts/commit/96d70b8))
@@ -43,6 +59,16 @@
 ## cluster-operator-0.1.0 (2025-12-01)
 
 * No changes recorded
+
+## 0.12.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([e23b802](https://github.com/CloudPirates-io/helm-charts/commit/e23b802))
+* chore: update CHANGELOG.md for merged changes ([bfcd147](https://github.com/CloudPirates-io/helm-charts/commit/bfcd147))
+* chore: auto-generate values.schema.json (#832) ([16e54d2](https://github.com/CloudPirates-io/helm-charts/commit/16e54d2))
+* chore: update CHANGELOG.md for merged changes ([f867495](https://github.com/CloudPirates-io/helm-charts/commit/f867495))
+* chore: update CHANGELOG.md for merged changes ([bd29fbc](https://github.com/CloudPirates-io/helm-charts/commit/bd29fbc))
+* chore: update CHANGELOG.md for merged changes ([b37e0c7](https://github.com/CloudPirates-io/helm-charts/commit/b37e0c7))
 
 ## 0.11.5 (2026-01-12)
 

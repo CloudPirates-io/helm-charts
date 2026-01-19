@@ -48,15 +48,21 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "postgres.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+          {{- if .Values.command }}
+          command: {{- toYaml .Values.command | nindent 12 }}
+          {{- else if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
           command:
             - /bin/bash
             - /scripts/postgres-wrapper.sh
           {{- end }}
+          {{- if kindIs "invalid" .Values.args }}
           args:
             - postgres
             - -c
             - 'config_file={{ include "postgres.configDir" . }}/postgresql.conf'
+          {{- else if .Values.args }}
+          args: {{- toYaml .Values.args | nindent 12 }}
+          {{- end }}
           env:
             - name: PGDATA
               value: {{ include "postgres.pgdataPath" . }}

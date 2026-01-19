@@ -5,6 +5,12 @@
         "affinity": {
             "type": "object"
         },
+        "args": {
+            "type": [
+                "array",
+                "null"
+            ]
+        },
         "auth": {
             "type": "object",
             "properties": {
@@ -29,6 +35,9 @@
                     "type": "string"
                 }
             }
+        },
+        "command": {
+            "type": "array"
         },
         "commonAnnotations": {
             "type": "object"
@@ -191,6 +200,9 @@
                 },
                 "tag": {
                     "type": "string"
+                },
+                "useHardenedImage": {
+                    "type": "boolean"
                 }
             }
         },

@@ -22,7 +22,7 @@ image:
   ## @param image.repository MariaDB image repository
   repository: mariadb
   ## @param image.tag MariaDB image tag (immutable tags are recommended)
-  tag: "12.1.2@sha256:e1bcd6f85781f4a875abefb11c4166c1d79e4237c23de597bf0df81fec225b40"
+  tag: "12.1.2@sha256:f54db0cb3ccfe9431aba6d08c65a1763c499789b116b4cb651dd7fcf325965b3"
   ## @param image.pullPolicy MariaDB image pull policy
   imagePullPolicy: Always
 
@@ -133,6 +133,8 @@ service:
 persistence:
   ## @param persistence.enabled Enable MariaDB data persistence using PVC
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for MariaDB data volume
+  existingClaim: ""
   ## @param persistence.storageClass PVC Storage Class for MariaDB data volume
   storageClass: ""
   ## @param persistence.accessModes PVC Access modes
@@ -162,6 +164,9 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.readOnlyRootFilesystem Set MariaDB container's Security Context readOnlyRootFilesystem
   readOnlyRootFilesystem: false
+
+## @param priorityClassName Priority class for the MariaDB instance
+priorityClassName: ""
 
 ## @section Resources parameters
 resources:

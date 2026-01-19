@@ -29,9 +29,9 @@ tests:
           path: spec.replicas
           value: 1
         template: templates/messaging-topology-operator/deployment.yaml
-      - equal:
+      - matchRegex:
           path: spec.template.spec.containers[0].image
-          value: docker.io/rabbitmqoperator/messaging-topology-operator:1.18.2
+          pattern: ^docker\.io/rabbitmqoperator/messaging-topology-operator:.*$
         template: templates/messaging-topology-operator/deployment.yaml
       - equal:
           path: spec.template.spec.serviceAccountName

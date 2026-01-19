@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.6.1 (2026-01-01)
+
+* chore: update CHANGELOG.md for merged changes ([c0bc9a4](https://github.com/CloudPirates-io/helm-charts/commit/c0bc9a4))
+* chore: update CHANGELOG.md for merged changes ([ae84171](https://github.com/CloudPirates-io/helm-charts/commit/ae84171))
+* MinIO Bucket Init Job Improvements (#779) ([3cdf608](https://github.com/CloudPirates-io/helm-charts/commit/3cdf608))
+* chore: update CHANGELOG.md for merged changes ([375abdb](https://github.com/CloudPirates-io/helm-charts/commit/375abdb))
+* chore: update CHANGELOG.md for merged changes ([afd24db](https://github.com/CloudPirates-io/helm-charts/commit/afd24db))
+* chore: auto-generate values.schema.json (#749) ([87470d6](https://github.com/CloudPirates-io/helm-charts/commit/87470d6))
+* chore: update CHANGELOG.md for merged changes ([edc5bc1](https://github.com/CloudPirates-io/helm-charts/commit/edc5bc1))
+* chore: update CHANGELOG.md for merged changes ([25a6726](https://github.com/CloudPirates-io/helm-charts/commit/25a6726))
+
 ## 0.6.0 (2025-12-15)
 
 * Rename post job and add variables to configure it (#741) ([289cc4c](https://github.com/CloudPirates-io/helm-charts/commit/289cc4c))

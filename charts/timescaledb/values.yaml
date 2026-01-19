@@ -54,6 +54,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the timescaledb instance
+priorityClassName: ""
+
 ## @section TimescaleDB Authentication
 auth:
   ## @param auth.postgresPassword Password for the postgres admin user. If not set, a random password will be generated
