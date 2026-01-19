@@ -1,6 +1,260 @@
 # Changelog
 
 
+## 0.20.9 (2026-01-19)
+
+* Update charts/redis/values.yaml redis (#857) ([625d9f5](https://github.com/CloudPirates-io/helm-charts/commit/625d9f5))
+* chore: update CHANGELOG.md for merged changes ([f11acd9](https://github.com/CloudPirates-io/helm-charts/commit/f11acd9))
+* chore: update CHANGELOG.md for merged changes ([ada889d](https://github.com/CloudPirates-io/helm-charts/commit/ada889d))
+
+## 0.20.8 (2026-01-19)
+
+* don't create secret when acl is enabled (#851) ([21cb78c](https://github.com/CloudPirates-io/helm-charts/commit/21cb78c))
+* chore: update CHANGELOG.md for merged changes ([604ee92](https://github.com/CloudPirates-io/helm-charts/commit/604ee92))
+* chore: auto-generate values.schema.json (#850) ([3de3115](https://github.com/CloudPirates-io/helm-charts/commit/3de3115))
+* chore: update CHANGELOG.md for merged changes ([8cfc620](https://github.com/CloudPirates-io/helm-charts/commit/8cfc620))
+
+## 0.20.7 (2026-01-17)
+
+* chore: update CHANGELOG.md for merged changes ([70a510d](https://github.com/CloudPirates-io/helm-charts/commit/70a510d))
+* Allow disabling egress in network policy, headless service should publish not ready addresses when sentinel is enabled (#843) ([3211908](https://github.com/CloudPirates-io/helm-charts/commit/3211908))
+
+## 0.20.6 (2026-01-09)
+
+* chore: update CHANGELOG.md for merged changes ([a971b23](https://github.com/CloudPirates-io/helm-charts/commit/a971b23))
+* chore: update CHANGELOG.md for merged changes ([f13c915](https://github.com/CloudPirates-io/helm-charts/commit/f13c915))
+* Include Sentinel port in default service when enabled (#811) ([32afbf1](https://github.com/CloudPirates-io/helm-charts/commit/32afbf1))
+* chore: update CHANGELOG.md for merged changes ([ae6e4cc](https://github.com/CloudPirates-io/helm-charts/commit/ae6e4cc))
+* chore: update CHANGELOG.md for merged changes ([4a96127](https://github.com/CloudPirates-io/helm-charts/commit/4a96127))
+* Update charts/redis/values.yaml redis (#820) ([8bac28e](https://github.com/CloudPirates-io/helm-charts/commit/8bac28e))
+* chore: update CHANGELOG.md for merged changes ([f2fe777](https://github.com/CloudPirates-io/helm-charts/commit/f2fe777))
+* chore: update CHANGELOG.md for merged changes ([7b27905](https://github.com/CloudPirates-io/helm-charts/commit/7b27905))
+
+## 0.20.5 (2026-01-08)
+
+* [alpine/kubectl] Update image to v1.35.0 (#775) ([4f78b86](https://github.com/CloudPirates-io/helm-charts/commit/4f78b86))
+* chore: update CHANGELOG.md for merged changes ([1e112ae](https://github.com/CloudPirates-io/helm-charts/commit/1e112ae))
+* chore: update CHANGELOG.md for merged changes ([414809c](https://github.com/CloudPirates-io/helm-charts/commit/414809c))
+* chore: auto-generate values.schema.json (#815) ([4135c97](https://github.com/CloudPirates-io/helm-charts/commit/4135c97))
+
+## 0.20.4 (2026-01-08)
+
+* Cluster add support for custom conig in redis.conf #756 ([90ed6a7](https://github.com/CloudPirates-io/helm-charts/commit/90ed6a7))
+* chore: update CHANGELOG.md for merged changes ([28e759e](https://github.com/CloudPirates-io/helm-charts/commit/28e759e))
+* chore: update CHANGELOG.md for merged changes ([b10cae9](https://github.com/CloudPirates-io/helm-charts/commit/b10cae9))
+* chore: auto-generate values.schema.json (#813) ([9267d0e](https://github.com/CloudPirates-io/helm-charts/commit/9267d0e))
+* chore: update CHANGELOG.md for merged changes ([ac8f4a5](https://github.com/CloudPirates-io/helm-charts/commit/ac8f4a5))
+
+## 0.20.3 (2026-01-08)
+
+* [redis]: Missing CPU Limit in values.yaml #800 ([b09ce6d](https://github.com/CloudPirates-io/helm-charts/commit/b09ce6d))
+
+## 0.20.2 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([f173e0b](https://github.com/CloudPirates-io/helm-charts/commit/f173e0b))
+* chore: update CHANGELOG.md for merged changes ([1503bf7](https://github.com/CloudPirates-io/helm-charts/commit/1503bf7))
+* [redis]: fix prestop failover verification logic (#803) ([4c10918](https://github.com/CloudPirates-io/helm-charts/commit/4c10918))
+
+## 0.20.1 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([fa4d988](https://github.com/CloudPirates-io/helm-charts/commit/fa4d988))
+* chore: update CHANGELOG.md for merged changes ([6e040a6](https://github.com/CloudPirates-io/helm-charts/commit/6e040a6))
+* chore: auto-generate values.schema.json (#798) ([91e633c](https://github.com/CloudPirates-io/helm-charts/commit/91e633c))
+* chore: update CHANGELOG.md for merged changes ([5faa674](https://github.com/CloudPirates-io/helm-charts/commit/5faa674))
+* chore: update CHANGELOG.md for merged changes ([ec82171](https://github.com/CloudPirates-io/helm-charts/commit/ec82171))
+* change exporter image to alpine based and fix command rendering (#795) ([63662dc](https://github.com/CloudPirates-io/helm-charts/commit/63662dc))
+
+## 0.20.0 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([3fd8a7a](https://github.com/CloudPirates-io/helm-charts/commit/3fd8a7a))
+* chore: update CHANGELOG.md for merged changes ([ef9ba07](https://github.com/CloudPirates-io/helm-charts/commit/ef9ba07))
+* [redis]: support zero-downtime upgrades with Sentinel failover (#782) ([1be7c75](https://github.com/CloudPirates-io/helm-charts/commit/1be7c75))
+
+## 0.19.0 (2026-01-01)
+
+* chore: update CHANGELOG.md for merged changes ([217930a](https://github.com/CloudPirates-io/helm-charts/commit/217930a))
+* chore: update CHANGELOG.md for merged changes ([ad7422d](https://github.com/CloudPirates-io/helm-charts/commit/ad7422d))
+* chore: auto-generate values.schema.json (#791) ([f4b3275](https://github.com/CloudPirates-io/helm-charts/commit/f4b3275))
+* chore: update CHANGELOG.md for merged changes ([e6ca29f](https://github.com/CloudPirates-io/helm-charts/commit/e6ca29f))
+* chore: update CHANGELOG.md for merged changes ([332799f](https://github.com/CloudPirates-io/helm-charts/commit/332799f))
+* add option to configure auth via acl (#780) ([208eaad](https://github.com/CloudPirates-io/helm-charts/commit/208eaad))
+
+## 0.18.0 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([e0ca85e](https://github.com/CloudPirates-io/helm-charts/commit/e0ca85e))
+* chore: update CHANGELOG.md for merged changes ([17a8b8a](https://github.com/CloudPirates-io/helm-charts/commit/17a8b8a))
+* [redis]: add sentinel monitoring (#774) ([00e4fef](https://github.com/CloudPirates-io/helm-charts/commit/00e4fef))
+* chore: update CHANGELOG.md for merged changes ([fd643ed](https://github.com/CloudPirates-io/helm-charts/commit/fd643ed))
+* chore: update CHANGELOG.md for merged changes ([b82783b](https://github.com/CloudPirates-io/helm-charts/commit/b82783b))
+
+## 0.17.7 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([b9df2cc](https://github.com/CloudPirates-io/helm-charts/commit/b9df2cc))
+* [redis]: add missing label for sentinel (#773) ([9df4b00](https://github.com/CloudPirates-io/helm-charts/commit/9df4b00))
+
+## 0.17.6 (2025-12-22)
+
+* chore: update CHANGELOG.md for merged changes ([b7f89e2](https://github.com/CloudPirates-io/helm-charts/commit/b7f89e2))
+* chore: update CHANGELOG.md for merged changes ([6bc99e0](https://github.com/CloudPirates-io/helm-charts/commit/6bc99e0))
+* [redis]: Implement proxy for non sentinel aware proxies (#703) ([0e2ac9f](https://github.com/CloudPirates-io/helm-charts/commit/0e2ac9f))
+
+## 0.17.5 (2025-12-17)
+
+* chore: update CHANGELOG.md for merged changes ([5e82a83](https://github.com/CloudPirates-io/helm-charts/commit/5e82a83))
+* chore: update CHANGELOG.md for merged changes ([8c639a3](https://github.com/CloudPirates-io/helm-charts/commit/8c639a3))
+* chore(redis): Bump version to 0.17.5 (#762) ([daa894e](https://github.com/CloudPirates-io/helm-charts/commit/daa894e))
+* chore: update CHANGELOG.md for merged changes ([2f36405](https://github.com/CloudPirates-io/helm-charts/commit/2f36405))
+* chore: update CHANGELOG.md for merged changes ([4fa5a56](https://github.com/CloudPirates-io/helm-charts/commit/4fa5a56))
+* fix(redis): Always set masterauth for non-standalone architectures (#750) ([a8b07f4](https://github.com/CloudPirates-io/helm-charts/commit/a8b07f4))
+* chore: update CHANGELOG.md for merged changes ([23b03ec](https://github.com/CloudPirates-io/helm-charts/commit/23b03ec))
+* chore: auto-generate values.schema.json (#757) ([424c2bd](https://github.com/CloudPirates-io/helm-charts/commit/424c2bd))
+
+## 0.17.4 (2025-12-16)
+
+* chore: update CHANGELOG.md for merged changes ([87e0273](https://github.com/CloudPirates-io/helm-charts/commit/87e0273))
+* chore: update CHANGELOG.md for merged changes ([dd14022](https://github.com/CloudPirates-io/helm-charts/commit/dd14022))
+* add readiness and liveness probes to redis sentinel (#755) ([594cf3d](https://github.com/CloudPirates-io/helm-charts/commit/594cf3d))
+
+## 0.17.3 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+
+## 0.17.2 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([48cbf93](https://github.com/CloudPirates-io/helm-charts/commit/48cbf93))
+* chore: update CHANGELOG.md for merged changes ([e8c8153](https://github.com/CloudPirates-io/helm-charts/commit/e8c8153))
+* fix(redis): prevent password logging in sentinel startup (#731) ([2e85940](https://github.com/CloudPirates-io/helm-charts/commit/2e85940))
+
+## 0.17.1 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([73e51b2](https://github.com/CloudPirates-io/helm-charts/commit/73e51b2))
+* chore: update CHANGELOG.md for merged changes ([b8cefc8](https://github.com/CloudPirates-io/helm-charts/commit/b8cefc8))
+* fix(redis): Fix headless-service annotations rendering for empty values (#734) ([4e95aa6](https://github.com/CloudPirates-io/helm-charts/commit/4e95aa6))
+
+## 0.17.0 (2025-12-10)
+
+* chore: update CHANGELOG.md for merged changes ([e03556b](https://github.com/CloudPirates-io/helm-charts/commit/e03556b))
+* chore: update CHANGELOG.md for merged changes ([6b059fb](https://github.com/CloudPirates-io/helm-charts/commit/6b059fb))
+* [redis]: allow changing revisionHistoryLimit (#723) ([38a4238](https://github.com/CloudPirates-io/helm-charts/commit/38a4238))
+* chore: update CHANGELOG.md for merged changes ([2e78166](https://github.com/CloudPirates-io/helm-charts/commit/2e78166))
+* chore: update CHANGELOG.md for merged changes ([3b004ad](https://github.com/CloudPirates-io/helm-charts/commit/3b004ad))
+* Update charts/redis/values.yaml redis (#716) ([887591b](https://github.com/CloudPirates-io/helm-charts/commit/887591b))
+
+## 0.16.7 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([f8868b3](https://github.com/CloudPirates-io/helm-charts/commit/f8868b3))
+* chore: update CHANGELOG.md for merged changes ([b28e014](https://github.com/CloudPirates-io/helm-charts/commit/b28e014))
+* Update charts/redis/values.yaml redis (#713) ([689ef89](https://github.com/CloudPirates-io/helm-charts/commit/689ef89))
+
+## 0.16.6 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([efa3d5c](https://github.com/CloudPirates-io/helm-charts/commit/efa3d5c))
+* chore: update CHANGELOG.md for merged changes ([4828bdb](https://github.com/CloudPirates-io/helm-charts/commit/4828bdb))
+* return fqdn for sentinel replicas lookup (#700) (#701) ([76a4a10](https://github.com/CloudPirates-io/helm-charts/commit/76a4a10))
+* chore: update CHANGELOG.md for merged changes ([1b3a65d](https://github.com/CloudPirates-io/helm-charts/commit/1b3a65d))
+* chore: update CHANGELOG.md for merged changes ([b0df43c](https://github.com/CloudPirates-io/helm-charts/commit/b0df43c))
+
+## 0.16.5 (2025-12-05)
+
+* Fix Redis issue with immutableFields cause by the label addition on volumeClaimTemplate (#695) ([f5ce66f](https://github.com/CloudPirates-io/helm-charts/commit/f5ce66f))
+
+## 0.16.4 (2025-12-03)
+
+* chore: update CHANGELOG.md for merged changes ([fffc3d2](https://github.com/CloudPirates-io/helm-charts/commit/fffc3d2))
+* chore: update CHANGELOG.md for merged changes ([17f253f](https://github.com/CloudPirates-io/helm-charts/commit/17f253f))
+* metrics service annotation does not work (#687) ([6c053af](https://github.com/CloudPirates-io/helm-charts/commit/6c053af))
+
+## 0.16.3 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([f0a81fa](https://github.com/CloudPirates-io/helm-charts/commit/f0a81fa))
+* add resources to init-cluster job (#680) ([63f8d22](https://github.com/CloudPirates-io/helm-charts/commit/63f8d22))
+
+## 0.16.2 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([1219e3d](https://github.com/CloudPirates-io/helm-charts/commit/1219e3d))
+* chore: update CHANGELOG.md for merged changes ([d1978ba](https://github.com/CloudPirates-io/helm-charts/commit/d1978ba))
+* set save in config if persistence is disabled (#677) ([4fdcde0](https://github.com/CloudPirates-io/helm-charts/commit/4fdcde0))
+
+## 0.16.1 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+
+## 0.16.0 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([f16dc26](https://github.com/CloudPirates-io/helm-charts/commit/f16dc26))
+* chore: update CHANGELOG.md for merged changes ([524f481](https://github.com/CloudPirates-io/helm-charts/commit/524f481))
+* Update charts/redis/values.yaml redis to v8.4.0 (minor) (#633) ([96c8dd7](https://github.com/CloudPirates-io/helm-charts/commit/96c8dd7))
+
+## 0.15.4 (2025-11-25)
+
+* chore: update CHANGELOG.md for merged changes ([b20979c](https://github.com/CloudPirates-io/helm-charts/commit/b20979c))
+* chore: update CHANGELOG.md for merged changes ([f481c10](https://github.com/CloudPirates-io/helm-charts/commit/f481c10))
+* [oliver006/redis_exporter] Update image to v1.80.1 (#655) ([fcb59bc](https://github.com/CloudPirates-io/helm-charts/commit/fcb59bc))
+* chore: auto-generate values.schema.json (#641) ([cced77e](https://github.com/CloudPirates-io/helm-charts/commit/cced77e))
+* chore: update CHANGELOG.md for merged changes ([734cb3b](https://github.com/CloudPirates-io/helm-charts/commit/734cb3b))
+* chore: update CHANGELOG.md for merged changes ([fb2a9cc](https://github.com/CloudPirates-io/helm-charts/commit/fb2a9cc))
+
+## 0.15.3 (2025-11-20)
+
+* add option to use ip or hostname for sentinal announce-ip (#639) ([639cd31](https://github.com/CloudPirates-io/helm-charts/commit/639cd31))
+
+## 0.15.2 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([f8a3dd1](https://github.com/CloudPirates-io/helm-charts/commit/f8a3dd1))
+* chore: update CHANGELOG.md for merged changes ([33bf2b6](https://github.com/CloudPirates-io/helm-charts/commit/33bf2b6))
+* fix condition in statefulset (#637) ([8b74e74](https://github.com/CloudPirates-io/helm-charts/commit/8b74e74))
+* chore: update CHANGELOG.md for merged changes ([9c9daa4](https://github.com/CloudPirates-io/helm-charts/commit/9c9daa4))
+* chore: update CHANGELOG.md for merged changes ([ab89d7d](https://github.com/CloudPirates-io/helm-charts/commit/ab89d7d))
+* chore: auto-generate values.schema.json (#635) ([36f2dd4](https://github.com/CloudPirates-io/helm-charts/commit/36f2dd4))
+
+## 0.15.1 (2025-11-19)
+
+* chore: update CHANGELOG.md for merged changes ([ea8e485](https://github.com/CloudPirates-io/helm-charts/commit/ea8e485))
+* [redis]: tls support ([963e2b8](https://github.com/CloudPirates-io/helm-charts/commit/963e2b8))
+
+## 0.15.0 (2025-11-19)
+
+* Add ServiceAccount (#631) ([328f698](https://github.com/CloudPirates-io/helm-charts/commit/328f698))
+* chore: update CHANGELOG.md for merged changes ([de70b98](https://github.com/CloudPirates-io/helm-charts/commit/de70b98))
+* chore: update CHANGELOG.md for merged changes ([47edfb5](https://github.com/CloudPirates-io/helm-charts/commit/47edfb5))
+* Update charts/redis/values.yaml redis (#624) ([a57d0d7](https://github.com/CloudPirates-io/helm-charts/commit/a57d0d7))
+* chore: update CHANGELOG.md for merged changes ([26504d9](https://github.com/CloudPirates-io/helm-charts/commit/26504d9))
+* chore: update CHANGELOG.md for merged changes ([014fde8](https://github.com/CloudPirates-io/helm-charts/commit/014fde8))
+
+## 0.14.4 (2025-11-18)
+
+* add templating to all annotations (#608) ([2a78f9d](https://github.com/CloudPirates-io/helm-charts/commit/2a78f9d))
+
+## 0.14.3 (2025-11-18)
+
+* chore: update CHANGELOG.md for merged changes ([697cb45](https://github.com/CloudPirates-io/helm-charts/commit/697cb45))
+* chore: update CHANGELOG.md for merged changes ([53d3901](https://github.com/CloudPirates-io/helm-charts/commit/53d3901))
+* sentinel use hostnames (#615) ([0a0357b](https://github.com/CloudPirates-io/helm-charts/commit/0a0357b))
+* chore: update CHANGELOG.md for merged changes ([86bdd5d](https://github.com/CloudPirates-io/helm-charts/commit/86bdd5d))
+* chore: update CHANGELOG.md for merged changes ([544e9bd](https://github.com/CloudPirates-io/helm-charts/commit/544e9bd))
+* chore: auto-generate values.schema.json (#616) ([d1d105a](https://github.com/CloudPirates-io/helm-charts/commit/d1d105a))
+
+## 0.14.2 (2025-11-17)
+
+* chore: update CHANGELOG.md for merged changes ([005861e](https://github.com/CloudPirates-io/helm-charts/commit/005861e))
+* chore: update CHANGELOG.md for merged changes ([d658aef](https://github.com/CloudPirates-io/helm-charts/commit/d658aef))
+* [mongodb/redis/posgres] Add subPath option when using existingClaim (#613) ([8aa277e](https://github.com/CloudPirates-io/helm-charts/commit/8aa277e))
+* chore: update CHANGELOG.md for merged changes ([f3e1ad1](https://github.com/CloudPirates-io/helm-charts/commit/f3e1ad1))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.14.1 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([02081a5](https://github.com/CloudPirates-io/helm-charts/commit/02081a5))
+* chore: update CHANGELOG.md for merged changes ([9618eff](https://github.com/CloudPirates-io/helm-charts/commit/9618eff))
+* Update charts/redis/values.yaml redis (#554) ([1737c28](https://github.com/CloudPirates-io/helm-charts/commit/1737c28))
+* chore: update CHANGELOG.md for merged changes ([9cccb2e](https://github.com/CloudPirates-io/helm-charts/commit/9cccb2e))
+* chore: update CHANGELOG.md for merged changes ([21d6041](https://github.com/CloudPirates-io/helm-charts/commit/21d6041))
+* chore: auto-generate values.schema.json (#570) ([a23729e](https://github.com/CloudPirates-io/helm-charts/commit/a23729e))
+
 ## 0.14.0 (2025-11-07)
 
 * [redis]: Headless Service annotations ([10daf47](https://github.com/CloudPirates-io/helm-charts/commit/10daf47))

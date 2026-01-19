@@ -30,6 +30,9 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
 {{- with (include "postgres.imagePullSecrets" .) }}
 {{- . | nindent 6 }}
@@ -39,14 +42,27 @@ spec:
       initContainers:
         {{- toYaml .Values.initContainers | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "postgres.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- if .Values.command }}
+          command: {{- toYaml .Values.command | nindent 12 }}
+          {{- else if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+          command:
+            - /bin/bash
+            - /scripts/postgres-wrapper.sh
+          {{- end }}
+          {{- if kindIs "invalid" .Values.args }}
           args:
+            - postgres
             - -c
             - 'config_file={{ include "postgres.configDir" . }}/postgresql.conf'
+          {{- else if .Values.args }}
+          args: {{- toYaml .Values.args | nindent 12 }}
+          {{- end }}
           env:
             - name: PGDATA
               value: {{ include "postgres.pgdataPath" . }}
@@ -66,7 +82,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
+                  key: {{ include "postgres.adminPasswordKey" . }}
             {{- if .Values.config.postgresqlMaxConnections }}
             - name: POSTGRES_MAX_CONNECTIONS
               value: {{ .Values.config.postgresqlMaxConnections | quote }}
@@ -82,21 +98,29 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+
+            {{- /* Custom user setup if a name or an existing secret is defined */}}
             {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
             - name: CUSTOM_DB
+
+              {{- /* Setup a secret ref if a key is defined */}}
+              {{- if .Values.customUser.secretKeys.database }}
               valueFrom:
                 secretKeyRef:
+                  {{/* Reference the existing secret */}}
                   {{- if .Values.customUser.existingSecret }}
                   name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
                   {{- else }}
+                  {{/* Reference the generated secret */}}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.database }}
-                  {{- else }}
-                  key: CUSTOM_DB
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.database . | quote }}
+              {{- else }}
+              {{- /* Fallback to static value otherwise */}}
+              value: {{ tpl .Values.customUser.database . | quote }}
+              {{- end }}
             - name: CUSTOM_USER
+              {{- if .Values.customUser.secretKeys.name }}
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.customUser.existingSecret }}
@@ -104,11 +128,10 @@ spec:
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.name }}
-                  {{- else }}
-                  key: CUSTOM_USER
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.name . | quote }}
+              {{- else }}
+              value: {{ tpl .Values.customUser.name . | quote }}
+              {{- end }}
             - name: CUSTOM_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -117,11 +140,7 @@ spec:
                   {{- else }}
                   name: {{ include "postgres.custom-user-configname" . }}
                   {{- end }}
-                  {{- if .Values.customUser.secretKeys }}
-                  key: {{ .Values.customUser.secretKeys.password }}
-                  {{- else }}
-                  key: CUSTOM_PASSWORD
-                  {{- end }}
+                  key: {{ tpl .Values.customUser.secretKeys.password . | quote }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
@@ -179,6 +198,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
             {{- if .Values.config.mountConfigMap }}
             - name: config
               mountPath: {{ include "postgres.configDir" . }}
@@ -190,6 +212,8 @@ spec:
             {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
+            - name: wrapper-script
+              mountPath: /scripts
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -215,7 +239,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
-                  key: "{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.auth.secretKeys.passwordKey "context" .) -}}"
+                  key: {{ include "postgres.adminPasswordKey" . }}
           ports:
             - name: metrics
               containerPort: 9187
@@ -262,6 +286,10 @@ spec:
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
             defaultMode: 0755
+        - name: wrapper-script
+          configMap:
+            name: {{ printf "%s-wrapper" (include "postgres.fullname" .) }}
+            defaultMode: 0755
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
@@ -288,6 +316,10 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
+      labels:
+        {{- toYaml $labels | nindent 8 }}
+      {{- end }}
       {{- with .Values.persistence.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

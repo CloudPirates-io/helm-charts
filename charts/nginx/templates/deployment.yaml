@@ -46,6 +46,9 @@ spec:
       {{- end }}
       {{- if .Values.cloneStaticSiteFromGit.enabled }}
         - name: git-clone-repository
+          {{- if .Values.initContainerSecurityContext }}
+          securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.command }}
@@ -55,7 +58,6 @@ spec:
             - /bin/sh
             - -ec
             - |
-              [[ -f "/opt/bitnami/scripts/git/entrypoint.sh" ]] && source "/opt/bitnami/scripts/git/entrypoint.sh"
               git clone {{ .Values.cloneStaticSiteFromGit.repository }} --branch {{ .Values.cloneStaticSiteFromGit.branch }} /app
           {{- end }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.args }}
@@ -181,7 +183,6 @@ spec:
             - /bin/sh
             - -ec
             - |
-              [[ -f "/opt/bitnami/scripts/git/entrypoint.sh" ]] && source "/opt/bitnami/scripts/git/entrypoint.sh"
               while true; do
                 cd /app && git pull origin {{ .Values.cloneStaticSiteFromGit.branch }}
                 sleep {{ .Values.cloneStaticSiteFromGit.interval }}
@@ -251,6 +252,9 @@ spec:
             failureThreshold: 3
             successThreshold: 1
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+        {{- end }}
+        {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
         - name: emptydir

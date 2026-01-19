@@ -28,12 +28,15 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.39@sha256:050de63e6c082df85f93ffed9c388004b3c6257a06f1904e8628a6f87658eb99"
+  tag: "1.6.40@sha256:e4e5eca37e4334f9579f10fcdd88a58c4eb9d0a8eacedde6ec49d4ea4391637a"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
 ## @param replicaCount Number of Memcached replicas to deploy
 replicaCount: 1
+
+## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
+deploymentType: Deployment
 
 service:
   ## @param service.type Kubernetes service type
@@ -126,6 +129,9 @@ containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Memcached container's privilege escalation
   allowPrivilegeEscalation: false
 
+## @param priorityClassName Priority class for the memcached instance
+priorityClassName: ""
+
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Memcached pod's Security Context fsGroup
@@ -191,7 +197,7 @@ metrics:
   image:
     registry: docker.io
     repository: prom/memcached-exporter
-    tag: "v0.15.4@sha256:b6763ecb3c47f2408e0398518851b7f8c5fc46232b2649f8c78a321130c54266"
+    tag: "v0.15.5@sha256:92a6ad5a3d3e2dffc75efd4e18d1470fa5703dd79b6bace53fe11312b634578e"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -217,6 +223,8 @@ metrics:
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
     enabled: false
+    ## @param metrics.serviceMonitor.jobLabel The name of the jobLabel for the ServiceMonitor
+    jobLabel: ""
     ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
     interval: 30s
     ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended

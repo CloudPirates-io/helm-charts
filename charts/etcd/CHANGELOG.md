@@ -1,6 +1,36 @@
 # Changelog
 
 
+## 0.5.0 (2026-01-15)
+
+* [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+
+## 0.4.0 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+
+## 0.3.4 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+* chore: update CHANGELOG.md for merged changes ([60a1994](https://github.com/CloudPirates-io/helm-charts/commit/60a1994))
+* [etcd]: fix probes https ([12ec01c](https://github.com/CloudPirates-io/helm-charts/commit/12ec01c))
+
+## 0.3.3 (2025-11-18)
+
+* chore: update CHANGELOG.md for merged changes ([0f3e7ef](https://github.com/CloudPirates-io/helm-charts/commit/0f3e7ef))
+* chore: update CHANGELOG.md for merged changes ([35c7b94](https://github.com/CloudPirates-io/helm-charts/commit/35c7b94))
+*  [etcd] Use http for probes (#622) ([c9d2054](https://github.com/CloudPirates-io/helm-charts/commit/c9d2054))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
+## 0.3.2 (2025-11-13)
+
+* chore: update CHANGELOG.md for merged changes ([0ef2300](https://github.com/CloudPirates-io/helm-charts/commit/0ef2300))
+* chore: update CHANGELOG.md for merged changes ([170dd6a](https://github.com/CloudPirates-io/helm-charts/commit/170dd6a))
+* chore: update CHANGELOG.md for merged changes ([9227d83](https://github.com/CloudPirates-io/helm-charts/commit/9227d83))
+
 ## 0.3.1 (2025-10-28)
 
 * [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c7310](https://github.com/CloudPirates-io/helm-charts/commit/91c7310))

@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-minio"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-minio" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-minio/minio"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-minio" /></a>
 </p>
 
 # MinIO
@@ -9,7 +9,7 @@ distributed object storage server designed for large-scale data infrastructure.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
@@ -72,17 +72,17 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Global parameters
 
 | Parameter                 | Description                                     | Default |
-|---------------------------|-------------------------------------------------|---------|
+| ------------------------- | ----------------------------------------------- | ------- |
 | `global.imageRegistry`    | Global Docker image registry                    | `""`    |
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
 
 ### MinIO image configuration
 
 | Parameter               | Description                                                                                                     | Default                                                                                                      |
-|-------------------------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `image.registry`        | MinIO image registry                                                                                            | `docker.io`                                                                                                  |
 | `image.repository`      | MinIO image repository                                                                                          | `minio/minio`                                                                                                |
-| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2024-08-17T01-24-54Z"`                                                                             |
+| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"`     |
 | `image.useCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `false`                                                                                                      |
 | `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883` |
 | `image.imagePullPolicy` | MinIO image pull policy                                                                                         | `IfNotPresent`                                                                                               |
@@ -90,7 +90,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### MinIO Authentication
 
 | Parameter                        | Description                                                          | Default      |
-|----------------------------------|----------------------------------------------------------------------|--------------|
+| -------------------------------- | -------------------------------------------------------------------- | ------------ |
 | `auth.rootUser`                  | MinIO root username                                                  | `"admin"`    |
 | `auth.rootPassword`              | MinIO root password. If not set, a random password will be generated | `""`         |
 | `auth.existingSecret`            | Name of existing secret containing MinIO credentials                 | `""`         |
@@ -100,7 +100,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### MinIO configuration
 
 | Parameter                                | Description                                                                                                                                                                                           | Default |
-|------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `config.region`                          | MinIO server default region                                                                                                                                                                           | `""`    |
 | `config.browserEnabled`                  | Enable MinIO web browser                                                                                                                                                                              | `true`  |
 | `config.domain`                          | MinIO server domain                                                                                                                                                                                   | `""`    |
@@ -118,7 +118,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Deployment configuration
 
 | Parameter          | Description                                 | Default |
-|--------------------|---------------------------------------------|---------|
+| ------------------ | ------------------------------------------- | ------- |
 | `replicaCount`     | Number of MinIO replicas to deploy          | `1`     |
 | `nameOverride`     | String to partially override minio.fullname | `""`    |
 | `fullnameOverride` | String to fully override minio.fullname     | `""`    |
@@ -126,14 +126,14 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Pod annotations and labels
 
 | Parameter        | Description                           | Default |
-|------------------|---------------------------------------|---------|
+| ---------------- | ------------------------------------- | ------- |
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
 ### Security Context
 
 | Parameter                                           | Description                                       | Default   |
-|-----------------------------------------------------|---------------------------------------------------|-----------|
+| --------------------------------------------------- | ------------------------------------------------- | --------- |
 | `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1000`    |
 | `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
 | `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
@@ -141,11 +141,14 @@ The following table lists the configurable parameters of the MinIO chart and the
 | `containerSecurityContext.runAsGroup`               | Group ID for the MinIO container                  | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the minio instance             | `""`      |
+
+
 
 ### Service configuration
 
 | Parameter                   | Description                | Default     |
-|-----------------------------|----------------------------|-------------|
+| --------------------------- | -------------------------- | ----------- |
 | `service.type`              | MinIO service type         | `ClusterIP` |
 | `service.port`              | MinIO service port         | `9000`      |
 | `service.consolePort`       | MinIO console service port | `9090`      |
@@ -156,7 +159,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Ingress configuration
 
 | Parameter                            | Description                                             | Default       |
-|--------------------------------------|---------------------------------------------------------|---------------|
+| ------------------------------------ | ------------------------------------------------------- | ------------- |
 | `ingress.enabled`                    | Enable ingress record generation for MinIO              | `false`       |
 | `ingress.className`                  | IngressClass that will be used to implement the Ingress | `""`          |
 | `ingress.annotations`                | Additional annotations for the Ingress resource         | `{}`          |
@@ -168,7 +171,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Console Ingress configuration
 
 | Parameter                                   | Description                                             | Default               |
-|---------------------------------------------|---------------------------------------------------------|-----------------------|
+| ------------------------------------------- | ------------------------------------------------------- | --------------------- |
 | `consoleIngress.enabled`                    | Enable ingress record generation for MinIO Console      | `false`               |
 | `consoleIngress.className`                  | IngressClass that will be used to implement the Ingress | `""`                  |
 | `consoleIngress.annotations`                | Additional annotations for the Console Ingress resource | `{}`                  |
@@ -180,13 +183,25 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Resources
 
 | Parameter   | Description                                 | Default |
-|-------------|---------------------------------------------|---------|
+| ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
+
+### Bucket provisioning
+
+| Parameter        | Description                                                                    | Default |
+| ---------------- | ------------------------------------------------------------------------------ | ------- |
+| `defaultBuckets` | Comma, semi-colon or space separated list of buckets to create at installation | `""`    |
+
+### Configuration for the Job '{{ .Release.Name }}-post-job'
+
+| Parameter             | Description                        | Default                                   |
+| --------------------- | ---------------------------------- | ----------------------------------------- |
+| `postJob.annotations` | Additional annotations for the Job | `helm.sh/hook: post-install,post-upgrade` |
 
 ### Persistence
 
 | Parameter                   | Description                                        | Default             |
-|-----------------------------|----------------------------------------------------|---------------------|
+| --------------------------- | -------------------------------------------------- | ------------------- |
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
@@ -197,7 +212,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Liveness and readiness probes
 
 | Parameter                            | Description                               | Default |
-|--------------------------------------|-------------------------------------------|---------|
+| ------------------------------------ | ----------------------------------------- | ------- |
 | `livenessProbe.enabled`              | Enable livenessProbe on MinIO containers  | `true`  |
 | `livenessProbe.initialDelaySeconds`  | Initial delay seconds for livenessProbe   | `30`    |
 | `livenessProbe.periodSeconds`        | Period seconds for livenessProbe          | `10`    |
@@ -220,7 +235,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Node Selection
 
 | Parameter      | Description                          | Default |
-|----------------|--------------------------------------|---------|
+| -------------- | ------------------------------------ | ------- |
 | `nodeSelector` | Node labels for pod assignment       | `{}`    |
 | `tolerations`  | Toleration labels for pod assignment | `[]`    |
 | `affinity`     | Affinity settings for pod assignment | `{}`    |
@@ -228,7 +243,7 @@ The following table lists the configurable parameters of the MinIO chart and the
 ### Extra Configuration Parameters
 
 | Parameter      | Description                                                             | Default |
-|----------------|-------------------------------------------------------------------------|---------|
+| -------------- | ----------------------------------------------------------------------- | ------- |
 | `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects
@@ -506,4 +521,4 @@ For issues related to this Helm chart, please check:
 
 - [MinIO Documentation](https://docs.min.io/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-- Chart repository issues
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

@@ -12,7 +12,7 @@ metadata:
     {{- end }}
   {{- with .Values.metrics.serviceMonitor.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.metrics.serviceMonitor.annotations "context" .) | indent 4 }}
   {{- end }}
 spec:
   jobLabel: {{ include "redis.fullname" . }}
@@ -39,6 +39,30 @@ spec:
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
       metricRelabelings:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+    - port: metrics
+      {{- with .Values.metrics.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+      {{- end }}
+      path: /scrape
+      {{- with .Values.metrics.serviceMonitor.honorLabels }}
+      honorLabels: {{ . }}
+      {{- end }}
+      {{- with .Values.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      params:
+        target:
+        - localhost:26379
       {{- end }}
   {{- with .Values.metrics.serviceMonitor.namespaceSelector }}
   namespaceSelector:

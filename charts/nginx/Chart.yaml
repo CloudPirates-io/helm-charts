@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.4.1
-appVersion: "1.29.3"
+version: 0.5.4
+appVersion: "1.29.4"
 keywords:
   - nginx
   - web server
@@ -42,7 +42,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[nginx]: Add podLabels"
-          links:
-            - name: "Commit b8d8410"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/b8d8410"
+          description: "Chart updated"

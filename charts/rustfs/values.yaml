@@ -105,6 +105,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the rustfs instance
+priorityClassName: ""
+
 ## @section Service configuration
 service:
   ## @param service.type RustFS service type
@@ -207,6 +210,8 @@ dataPersistence:
   storageClass: ""
   ## @param dataPersistence.annotations Persistent Volume Claim annotations for data
   annotations: {}
+  ## @param dataPersistence.labels Labels for the data persistent volume claim
+  labels: {}
   ## @param dataPersistence.size Persistent Volume size for data
   size: 10Gi
   ## @param dataPersistence.accessModes Persistent Volume access modes for data
@@ -225,6 +230,8 @@ logsPersistence:
   storageClass: ""
   ## @param logsPersistence.annotations Persistent Volume Claim annotations for logs
   annotations: {}
+  ## @param logsPersistence.labels Labels for the logs persistent volume claim
+  labels: {}
   ## @param logsPersistence.size Persistent Volume size for logs
   size: 1Gi
   ## @param logsPersistence.accessModes Persistent Volume access modes for logs

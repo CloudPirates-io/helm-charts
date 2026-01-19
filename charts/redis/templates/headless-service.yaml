@@ -8,15 +8,18 @@ metadata:
   {{- if or (include "redis.annotations" .) .Values.service.headless.annotations }}
   annotations:
     {{- with (include "redis.annotations" .) }}
-    {{- . | nindent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
     {{- end }}
     {{- with .Values.service.headless.annotations }}
-    {{- toYaml . | nindent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
   type: ClusterIP
   clusterIP: None
+  {{- if .Values.sentinel.enabled }}
+  publishNotReadyAddresses: true
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: redis

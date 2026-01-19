@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-nginx"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-nginx" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-nginx/nginx"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-nginx" /></a>
 </p>
 
 # Nginx
@@ -118,35 +118,35 @@ The following table lists the configurable parameters of the Nginx chart and the
 
 ### Common Parameters
 
-| Parameter           | Description                                     | Default |
-| ------------------- | ----------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override nginx.fullname     | `""`    |
-| `fullnameOverride`  | String to fully override nginx.fullname         | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects           | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects      | `{}`    |
+| Parameter           | Description                                 | Default |
+| ------------------- | ------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override nginx.fullname | `""`    |
+| `fullnameOverride`  | String to fully override nginx.fullname     | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
 
 
 ### Nginx Image Parameters
 
-| Parameter           | Description                                          | Default                                                                            |
-| ------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `image.registry`    | Nginx image registry                                 | `docker.io`                                                                        |
-| `image.repository`  | Nginx image repository                               | `nginx`                                                                            |
-| `image.tag`         | Nginx image tag                                      | `"1.28.0@sha256:24ccf9a6192d2c6c5c4a6e9d2fdfa2a8e382b15f8dd7d0e05a1579f6a46f7776"` |
-| `image.pullPolicy`  | Nginx image pull policy                              | `Always`                                                                           |
+| Parameter          | Description             | Default                                                                                   |
+| ------------------ | ----------------------- | ----------------------------------------------------------------------------------------- |
+| `image.registry`   | Nginx image registry    | `docker.io`                                                                               |
+| `image.repository` | Nginx image repository  | `nginx`                                                                                   |
+| `image.tag`        | Nginx image tag         | `"1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e"` |
+| `image.pullPolicy` | Nginx image pull policy | `Always`                                                                                  |
 
 
 ### Nginx Configuration Parameters
 
 Existing Configmaps are prioritized over inline configuration. Inline configuration will trigger a pod restart if changed.
 
-| Parameter                             | Description                                                 | Default |
-| ------------------------------------- | ----------------------------------------------------------- | ------- |
-| `config`                              | Custom NGINX configuration file (nginx.conf)                | `""`    |
-| `existingConfigConfigmap`             | Name of an existing ConfigMap containing nginx.conf         | `""`    |
-| `serverConfig`                        | Custom server block to be added to NGINX configuration      | `""`    |
-| `existingServerConfigConfigmap`       | Name of an existing ConfigMap containing server-config.conf | `""`    |
-| `streamServerConfig`                  | Custom stream server block to be added to NGINX config      | `""`    |
+| Parameter                             | Description                                                        | Default |
+| ------------------------------------- | ------------------------------------------------------------------ | ------- |
+| `config`                              | Custom NGINX configuration file (nginx.conf)                       | `""`    |
+| `existingConfigConfigmap`             | Name of an existing ConfigMap containing nginx.conf                | `""`    |
+| `serverConfig`                        | Custom server block to be added to NGINX configuration             | `""`    |
+| `existingServerConfigConfigmap`       | Name of an existing ConfigMap containing server-config.conf        | `""`    |
+| `streamServerConfig`                  | Custom stream server block to be added to NGINX config             | `""`    |
 | `existingStreamServerConfigConfigmap` | Name of an existing ConfigMap containing stream-server-config.conf | `""`    |
 
 Example of an existing external `config`:
@@ -180,9 +180,9 @@ data:
 
 ### Container Port Parameters
 
-| Parameter         | Description                                                       | Default |
-| ----------------- | ----------------------------------------------------------------- | ------- |
-| `containerPorts`  | Array of container ports (advanced configuration) - see examples | `[]`    |
+| Parameter        | Description                                                      | Default |
+| ---------------- | ---------------------------------------------------------------- | ------- |
+| `containerPorts` | Array of container ports (advanced configuration) - see examples | `[]`    |
 
 #### Container Ports Examples
 
@@ -200,11 +200,11 @@ containerPorts:
 
 ### Service Parameters
 
-| Parameter        | Description                                                | Default     |
-| ---------------- | ---------------------------------------------------------- | ----------- |
-| `service.type`   | Nginx service type                                         | `ClusterIP` |
-| `service.ports`  | Array of service ports (advanced configuration) - see examples | `[]`    |
-| `service.annotations`  | Additional annotations to add to the service | `{}`    |
+| Parameter             | Description                                                    | Default     |
+| --------------------- | -------------------------------------------------------------- | ----------- |
+| `service.type`        | Nginx service type                                             | `ClusterIP` |
+| `service.ports`       | Array of service ports (advanced configuration) - see examples | `[]`        |
+| `service.annotations` | Additional annotations to add to the service                   | `{}`        |
 
 #### Service Ports Examples
 
@@ -225,41 +225,41 @@ service:
 
 ### Security Context Parameters
 
-| Parameter                                           | Description                                             | Default |
-| --------------------------------------------------- | ------------------------------------------------------- | ------- |
-| `podSecurityContext.fsGroup`                        | Set Nginx pod's Security Context fsGroup                | `101`   |
-| `containerSecurityContext.runAsUser`                | Set Nginx container's Security Context runAsUser        | `101`   |
-| `containerSecurityContext.runAsNonRoot`             | Set Nginx container's Security Context runAsNonRoot     | `true`  |
-| `containerSecurityContext.allowPrivilegeEscalation` | Set Nginx container's privilege escalation              | `false` |
+| Parameter                                           | Description                                         | Default |
+| --------------------------------------------------- | --------------------------------------------------- | ------- |
+| `podSecurityContext.fsGroup`                        | Set Nginx pod's Security Context fsGroup            | `101`   |
+| `containerSecurityContext.runAsUser`                | Set Nginx container's Security Context runAsUser    | `101`   |
+| `containerSecurityContext.runAsNonRoot`             | Set Nginx container's Security Context runAsNonRoot | `true`  |
+| `containerSecurityContext.allowPrivilegeEscalation` | Set Nginx container's privilege escalation          | `false` |
 
 
 ### Resources Parameters
 
-| Parameter   | Description                              | Default |
-| ----------- | ---------------------------------------- | ------- |
-| `resources` | Resource limits and requests for Nginx pod| `{}`    |
+| Parameter   | Description                                | Default |
+| ----------- | ------------------------------------------ | ------- |
+| `resources` | Resource limits and requests for Nginx pod | `{}`    |
 
 
 ### Health Check Parameters
 
-| Parameter                            | Description                                   | Default     |
-| ------------------------------------ | --------------------------------------------- | ----------- |
-| `livenessProbe.enabled`              | Enable liveness probe                         | `true`      |
-| `livenessProbe.type`                 | Probe type (tcpSocket or httpGet)             | `tcpSocket` |
-| `livenessProbe.path`                 | Path for HTTP probe (only used when type is httpGet) | `/`     |
-| `livenessProbe.initialDelaySeconds`  | Initial delay before starting probes          | `30`        |
-| `livenessProbe.periodSeconds`        | How often to perform the probe                | `10`        |
-| `livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                | `5`         |
-| `livenessProbe.failureThreshold`     | Number of failures before pod is restarted    | `3`         |
-| `livenessProbe.successThreshold`     | Number of successes to mark probe as successful| `1`        |
-| `readinessProbe.enabled`             | Enable readiness probe                        | `true`      |
-| `readinessProbe.type`                | Probe type (tcpSocket or httpGet)             | `tcpSocket` |
-| `readinessProbe.path`                | Path for HTTP probe (only used when type is httpGet) | `/`     |
-| `readinessProbe.initialDelaySeconds` | Initial delay before starting probes          | `5`         |
-| `readinessProbe.periodSeconds`       | How often to perform the probe                | `5`         |
-| `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                | `5`         |
-| `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready| `3`        |
-| `readinessProbe.successThreshold`    | Number of successes to mark probe as successful| `1`        |
+| Parameter                            | Description                                          | Default     |
+| ------------------------------------ | ---------------------------------------------------- | ----------- |
+| `livenessProbe.enabled`              | Enable liveness probe                                | `true`      |
+| `livenessProbe.type`                 | Probe type (tcpSocket or httpGet)                    | `tcpSocket` |
+| `livenessProbe.path`                 | Path for HTTP probe (only used when type is httpGet) | `/`         |
+| `livenessProbe.initialDelaySeconds`  | Initial delay before starting probes                 | `30`        |
+| `livenessProbe.periodSeconds`        | How often to perform the probe                       | `10`        |
+| `livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                       | `5`         |
+| `livenessProbe.failureThreshold`     | Number of failures before pod is restarted           | `3`         |
+| `livenessProbe.successThreshold`     | Number of successes to mark probe as successful      | `1`         |
+| `readinessProbe.enabled`             | Enable readiness probe                               | `true`      |
+| `readinessProbe.type`                | Probe type (tcpSocket or httpGet)                    | `tcpSocket` |
+| `readinessProbe.path`                | Path for HTTP probe (only used when type is httpGet) | `/`         |
+| `readinessProbe.initialDelaySeconds` | Initial delay before starting probes                 | `5`         |
+| `readinessProbe.periodSeconds`       | How often to perform the probe                       | `5`         |
+| `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                       | `5`         |
+| `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready      | `3`         |
+| `readinessProbe.successThreshold`    | Number of successes to mark probe as successful      | `1`         |
 
 #### Health Check Examples
 
@@ -298,45 +298,45 @@ readinessProbe:
 
 ### Ingress Parameters
 
-| Parameter             | Description                                                                   | Default                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ingress.enabled`     | Enable ingress record generation                                              | `false`                                                                                         |
-| `ingress.className`   | IngressClass that will be be used to implement the Ingress                    | `""`                                                                                            |
-| `ingress.annotations` | Additional annotations for the Ingress resource                               | `{}`                                                                                            |
-| `ingress.hosts`       | An array with hosts and paths                                                 | `[{{host: "nginx.local", paths: [{{path: "/", pathType: "ImplementationSpecific"}}]}}]`      |
-| `ingress.tls`         | TLS configuration for the Ingress                                             | `[]`                                                                                            |
+| Parameter             | Description                                                | Default                                                                                 |
+| --------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ingress.enabled`     | Enable ingress record generation                           | `false`                                                                                 |
+| `ingress.className`   | IngressClass that will be be used to implement the Ingress | `""`                                                                                    |
+| `ingress.annotations` | Additional annotations for the Ingress resource            | `{}`                                                                                    |
+| `ingress.hosts`       | An array with hosts and paths                              | `[{{host: "nginx.local", paths: [{{path: "/", pathType: "ImplementationSpecific"}}]}}]` |
+| `ingress.tls`         | TLS configuration for the Ingress                          | `[]`                                                                                    |
 
 
 ### Metrics Parameters
 
-| Parameter                       | Description                                                        | Default   |
-|----------------------------------|--------------------------------------------------------------------|-----------|
-| `metrics.enabled`                | Start a sidecar Prometheus exporter to expose Nginx metrics        | `false`   |
-| `metrics.image.registry`         | Nginx exporter image registry                                      | `docker.io` |
-| `metrics.image.repository`       | Nginx exporter image repository                                    | `nginx/nginx-prometheus-exporter` |
-| `metrics.image.tag`              | Nginx exporter image tag                                           | `"1.4@sha256:..."` |
-| `metrics.image.pullPolicy`       | Nginx exporter image pull policy                                   | `Always`  |
-| `metrics.resources.limits.memory`| Memory limit for metrics container                                 | `64Mi`    |
-| `metrics.resources.requests.cpu` | CPU request for metrics container                                  | `50m`     |
-| `metrics.resources.requests.memory`| Memory request for metrics container                              | `64Mi`    |
-| `metrics.extraArgs`              | Extra arguments for nginx exporter                                 | `[]`      |
-| `metrics.service.type`           | Metrics service type                                               | `ClusterIP` |
-| `metrics.service.port`           | Metrics service port                                               | `9113`    |
-| `metrics.service.annotations`    | Additional custom annotations for Metrics service                  | `{}`      |
-| `metrics.service.loadBalancerIP` | Load balancer IP if metrics service type is `LoadBalancer`         | `""`      |
-| `metrics.service.loadBalancerSourceRanges` | Allowed addresses for LoadBalancer metrics service         | `[]`      |
-| `metrics.service.clusterIP`      | Static clusterIP or None for headless metrics service              | `""`      |
-| `metrics.service.nodePort`       | NodePort value for LoadBalancer/NodePort metrics service types     | `""`      |
-| `metrics.serviceMonitor.enabled` | Create ServiceMonitor resource(s) for PrometheusOperator           | `false`   |
-| `metrics.serviceMonitor.namespace`| Namespace for ServiceMonitor resource(s)                          | `""`      |
-| `metrics.serviceMonitor.interval`| Interval for scraping metrics                                      | `30s`     |
-| `metrics.serviceMonitor.scrapeTimeout`| Timeout for scraping metrics                                 | `""`      |
-| `metrics.serviceMonitor.relabelings`| Additional relabeling of metrics                              | `[]`      |
-| `metrics.serviceMonitor.metricRelabelings`| Additional metric relabeling of metrics                    | `[]`      |
-| `metrics.serviceMonitor.honorLabels`| Honor metrics labels                                         | `false`   |
-| `metrics.serviceMonitor.selector`| Prometheus instance selector labels                               | `{}`      |
-| `metrics.serviceMonitor.annotations`| Additional annotations for ServiceMonitor                     | `{}`      |
-| `metrics.serviceMonitor.namespaceSelector`| Namespace selector for ServiceMonitor                      | `{}`      |
+| Parameter                                  | Description                                                    | Default                           |
+| ------------------------------------------ | -------------------------------------------------------------- | --------------------------------- |
+| `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Nginx metrics    | `false`                           |
+| `metrics.image.registry`                   | Nginx exporter image registry                                  | `docker.io`                       |
+| `metrics.image.repository`                 | Nginx exporter image repository                                | `nginx/nginx-prometheus-exporter` |
+| `metrics.image.tag`                        | Nginx exporter image tag                                       | `"1.5@sha256:..."`                |
+| `metrics.image.pullPolicy`                 | Nginx exporter image pull policy                               | `Always`                          |
+| `metrics.resources.limits.memory`          | Memory limit for metrics container                             | `64Mi`                            |
+| `metrics.resources.requests.cpu`           | CPU request for metrics container                              | `50m`                             |
+| `metrics.resources.requests.memory`        | Memory request for metrics container                           | `64Mi`                            |
+| `metrics.extraArgs`                        | Extra arguments for nginx exporter                             | `[]`                              |
+| `metrics.service.type`                     | Metrics service type                                           | `ClusterIP`                       |
+| `metrics.service.port`                     | Metrics service port                                           | `9113`                            |
+| `metrics.service.annotations`              | Additional custom annotations for Metrics service              | `{}`                              |
+| `metrics.service.loadBalancerIP`           | Load balancer IP if metrics service type is `LoadBalancer`     | `""`                              |
+| `metrics.service.loadBalancerSourceRanges` | Allowed addresses for LoadBalancer metrics service             | `[]`                              |
+| `metrics.service.clusterIP`                | Static clusterIP or None for headless metrics service          | `""`                              |
+| `metrics.service.nodePort`                 | NodePort value for LoadBalancer/NodePort metrics service types | `""`                              |
+| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for PrometheusOperator       | `false`                           |
+| `metrics.serviceMonitor.namespace`         | Namespace for ServiceMonitor resource(s)                       | `""`                              |
+| `metrics.serviceMonitor.interval`          | Interval for scraping metrics                                  | `30s`                             |
+| `metrics.serviceMonitor.scrapeTimeout`     | Timeout for scraping metrics                                   | `""`                              |
+| `metrics.serviceMonitor.relabelings`       | Additional relabeling of metrics                               | `[]`                              |
+| `metrics.serviceMonitor.metricRelabelings` | Additional metric relabeling of metrics                        | `[]`                              |
+| `metrics.serviceMonitor.honorLabels`       | Honor metrics labels                                           | `false`                           |
+| `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                            | `{}`                              |
+| `metrics.serviceMonitor.annotations`       | Additional annotations for ServiceMonitor                      | `{}`                              |
+| `metrics.serviceMonitor.namespaceSelector` | Namespace selector for ServiceMonitor                          | `{}`                              |
 
 **Note:**  
 To enable metrics, set `metrics.enabled: true` and ensure your Nginx configuration includes a stub status endpoint, e.g.:
@@ -349,13 +349,14 @@ location /stub_status {
 
 ### Extra Configuration Parameters
 
-| Parameter                  | Description                                                                         | Default |
-| ---------------------------| ----------------------------------------------------------------------------------- | ------- |
-| `extraEnvVars`             | Additional environment variables to set                                             | `[]`    |
-| `extraVolumes`             | Additional volumes to add to the pod                                                | `[]`    |
-| `extraVolumeMounts`        | Additional volume mounts to add to the Nginx container                              | `[]`    |
-| `extraObjects`             | Array of extra objects to deploy with the release                                   | `[]`    |
-| `extrainitContainers`      | Array of extra objects to deploy with the release                                   | `[]`    |
+| Parameter             | Description                                            | Default |
+| --------------------- | ------------------------------------------------------ | ------- |
+| `extraEnvVars`        | Additional environment variables to set                | `[]`    |
+| `extraVolumes`        | Additional volumes to add to the pod                   | `[]`    |
+| `extraVolumeMounts`   | Additional volume mounts to add to the Nginx container | `[]`    |
+| `extraObjects`        | Array of extra objects to deploy with the release      | `[]`    |
+| `extrainitContainers` | Array of extra objects to deploy with the release      | `[]`    |
+| `sidecars`            | Additional sidecar containers to add to the pod        | `[]`    |
 
 #### Extra Objects
 
@@ -393,11 +394,63 @@ extraObjects:
 
 All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
 
+#### Sidecars
+
+You can use the `sidecars` array to add additional sidecar containers to the Nginx pod. This is useful for adding authentication proxies, log collectors, or other supporting containers.
+
+**Example: Add oauth2-proxy sidecar for authentication**
+
+```yaml
+sidecars:
+  - name: oauth2-proxy
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+      - name: oauth2-proxy
+        containerPort: 4180
+        protocol: TCP
+    args:
+      - --provider=github
+      - --upstream=http://localhost:80
+      - --http-address=0.0.0.0:4180
+    env:
+      - name: OAUTH2_PROXY_CLIENT_ID
+        value: "your-client-id"
+      - name: OAUTH2_PROXY_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: oauth2-proxy-secret
+            key: client-secret
+```
+
+**Example: Add Fluent Bit log collector**
+
+```yaml
+sidecars:
+  - name: fluent-bit
+    image: fluent/fluent-bit:2.0
+    volumeMounts:
+      - name: varlog
+        mountPath: /var/log
+      - name: config
+        mountPath: /fluent-bit/etc/
+
+# Don't forget to add corresponding volumes
+extraVolumes:
+  - name: varlog
+    emptyDir: {}
+  - name: config
+    configMap:
+      name: fluent-bit-config
+```
+
+All containers in `sidecars` will be added to the pod and run alongside the main Nginx container.
+
 
 ### Pod Configuration Parameters
 
 | Parameter           | Description                       | Default |
-| ----------------    | ------------------------------    | ------- |
+| ------------------- | --------------------------------- | ------- |
 | `nodeSelector`      | Node selector for pod assignment  | `{}`    |
 | `priorityClassName` | Priority class for pod eviction   | `""`    |
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
@@ -487,7 +540,6 @@ autoscaling:
 
 ## Troubleshooting
 
-
 ### Connection Issues
 
 1. **Check deployment and service status**:
@@ -517,3 +569,4 @@ For production workloads, consider:
 - [Nginx Official Documentation](https://nginx.org/)
 - [Nginx Docker Hub](https://hub.docker.com/_/nginx)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

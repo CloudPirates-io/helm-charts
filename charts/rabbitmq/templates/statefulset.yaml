@@ -12,6 +12,7 @@ metadata:
 spec:
   serviceName: {{ include "rabbitmq.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   selector:
     matchLabels:
@@ -31,8 +32,12 @@ spec:
       {{- with (include "rabbitmq.imagePullSecrets" .) }}
       {{ . | nindent 6 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       initContainers:
         - name: init-erlang-cookie
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
@@ -110,13 +115,58 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rabbitmq.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          {{- if or .Values.customScripts.postStart.enabled .Values.customScripts.preStop.enabled }}
+          {{- if or .Values.customScripts.postStart.enabled .Values.customScripts.preStop.enabled .Values.queueBalancing.autoRebalance.enabled }}
           lifecycle:
-            {{- if .Values.customScripts.postStart.enabled }}
+            {{- if or .Values.customScripts.postStart.enabled .Values.queueBalancing.autoRebalance.enabled }}
             postStart:
               exec:
                 command:
+                  {{- if .Values.customScripts.postStart.enabled }}
                   {{- toYaml .Values.customScripts.postStart.command | nindent 18 }}
+                  {{- else if .Values.queueBalancing.autoRebalance.enabled }}
+                  - /bin/bash
+                  - -c
+                  - |
+                    log() {
+                      echo "$(date '+%Y-%m-%d %H:%M:%S') [QUEUE-REBALANCE] $1" >> /proc/1/fd/1
+                    }
+
+                    log "Starting automatic queue rebalancing..."
+                    log "Waiting {{ .Values.queueBalancing.autoRebalance.delay }}s for cluster to stabilize..."
+                    sleep {{ .Values.queueBalancing.autoRebalance.delay }}
+
+                    log "Checking RabbitMQ cluster status..."
+                    until rabbitmqctl node_health_check >/dev/null 2>&1; do
+                      log "RabbitMQ not ready yet, retrying in 5s..."
+                      sleep 5
+                    done
+
+                    log "RabbitMQ is ready. Starting queue rebalancing..."
+
+                    {{- if .Values.queueBalancing.autoRebalance.vhosts }}
+                    # Rebalance specific vhosts
+                    {{- range .Values.queueBalancing.autoRebalance.vhosts }}
+                    log "Rebalancing vhost: {{ . }}"
+                    if rabbitmqctl list_vhosts -q | grep -q "^{{ . }}$"; then
+                      rabbitmq-queues rebalance all -p "{{ . }}" 2>&1 | while read line; do
+                        log "  $line"
+                      done
+                    else
+                      log "  Vhost {{ . }} not found, skipping"
+                    fi
+                    {{- end }}
+                    {{- else }}
+                    # Rebalance all vhosts
+                    for vhost in $(rabbitmqctl list_vhosts -q); do
+                      log "Rebalancing vhost: $vhost"
+                      rabbitmq-queues rebalance all -p "$vhost" 2>&1 | while read line; do
+                        log "  $line"
+                      done || log "  Failed to rebalance vhost: $vhost"
+                    done
+                    {{- end }}
+
+                    log "Queue rebalancing completed successfully"
+                  {{- end }}
             {{- end }}
             {{- if .Values.customScripts.preStop.enabled }}
             preStop:
@@ -284,9 +334,9 @@ spec:
       kind: PersistentVolumeClaim
       metadata:
         name: data
-        {{- with .Values.persistence.labels }}
+        {{- with $labels := merge (include "rabbitmq.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
         labels:
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml $labels | nindent 10 }}
         {{- end }}
         {{- with .Values.persistence.annotations }}
         annotations:

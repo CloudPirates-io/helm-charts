@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://artifacthub.io/packages/search?repo=cloudpirates-mariadb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mariadb" /></a>
+    <a href="https://artifacthub.io/packages/helm/cloudpirates-mariadb/mariadb"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-mariadb" /></a>
 </p>
 
 # MariaDB
@@ -20,6 +20,12 @@ To install with custom values:
 
 ```bash
 helm install my-mariadb oci://registry-1.docker.io/cloudpirates/mariadb -f my-values.yaml
+```
+
+Or install directly from the local chart:
+
+```bash
+helm install my-valkey ./charts/valkey
 ```
 
 ## Uninstalling the Chart
@@ -99,14 +105,13 @@ The following table lists the configurable parameters of the MariaDB chart and t
 
 ### MariaDB Image Parameters
 
-| Parameter           | Description                                        | Default        |
-| ------------------- | -------------------------------------------------- | -------------- |
-| `image.registry`    | MariaDB image registry                             | `docker.io`    |
-| `image.repository`  | MariaDB image repository                           | `mariadb`      |
-| `image.tag`         | MariaDB image tag (immutable tags are recommended) | `"11.8.2"`     |
-| `image.digest`      | MariaDB image digest                               | `""`           |
-| `image.pullPolicy`  | MariaDB image pull policy                          | `IfNotPresent` |
-| `image.pullSecrets` | MariaDB image pull secrets                         | `[]`           |
+| Parameter          | Description                                        | Default                                                                            |
+| ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `image.registry`   | MariaDB image registry                             | `docker.io`                                                                        |
+| `image.repository` | MariaDB image repository                           | `mariadb`                                                                          |
+| `image.tag`        | MariaDB image tag (immutable tags are recommended) | `"12.1.2@sha256:e1bcd6f85781f4a875abefb11c4166c1d79e4237c23de597bf0df81fec225b40"` |
+| `image.pullPolicy` | MariaDB image pull policy                          | `IfNotPresent`                                                                     |
+
 
 ### MariaDB Authentication Parameters
 
@@ -176,14 +181,16 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 
 ### Persistence Parameters
 
-| Parameter                  | Description                                 | Default             |
-| -------------------------- | ------------------------------------------- | ------------------- |
-| `persistence.enabled`      | Enable MariaDB data persistence using PVC   | `true`              |
-| `persistence.storageClass` | PVC Storage Class for MariaDB data volume   | `""`                |
-| `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
-| `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
-| `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
-| `persistence.selector`     | Additional labels for the PVC               | `{}`                |
+| Parameter                   | Description                                                | Default             |
+| --------------------------- | ---------------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable MariaDB data persistence using PVC                  | `true`              |
+| `persistence.existingClaim` | Name of an existing PVC to use for MariaDB data volume     | `""`                |
+| `persistence.storageClass`  | PVC Storage Class for MariaDB data volume                  | `""`                |
+| `persistence.accessModes`   | PVC Access modes                                           | `["ReadWriteOnce"]` |
+| `persistence.size`          | PVC Storage Request for MariaDB data volume                | `8Gi`               |
+| `persistence.annotations`   | Additional custom annotations for the PVC                  | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                        | `{}`                |
+| `persistence.selector`      | Additional labels for the PVC                              | `{}`                |
 
 ### Security Context Parameters
 
@@ -194,6 +201,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
+| `priorityClassName`                                 | Priority class for the MariaDB instance                         | `""`    |
 
 ### Resources Parameters
 
@@ -201,6 +209,15 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | -------------------- | -------------------------------------------------- | ------- |
 | `resources.limits`   | The resources limits for the MariaDB containers    | `{}`    |
 | `resources.requests` | The requested resources for the MariaDB containers | `{}`    |
+
+### Service Account
+
+| Parameter                                     | Description                                                                                                               | Default |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Specifies whether a service account should be created                                                                     | `false` |
+| `serviceAccount.annotations`                  | Annotations to add to the service account                                                                                 | `{}`    |
+| `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
 
 ### Extra Configuration Parameters
 
@@ -308,6 +325,22 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `tolerations`    | Tolerations for pod assignment | `[]`    |
 | `affinity`       | Affinity for pod assignment    | `{}`    |
 
+### Metrics
+
+| Parameter                          | Description                                                 | Default                                         |
+| ---------------------------------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| `metrics.enabled`                  | Enable metrics exporter sidecar                             | `false`                                         |
+| `metrics.image.registry`           | Metrics exporter image registry                             | `docker.io`                                     |
+| `metrics.image.repository`         | Metrics exporter image repository                           | `prom/mysqld-exporter`                          |
+| `metrics.image.tag`                | Metrics exporter image tag (immutable tags are recommended) | `v0.18.0@sha256:[...]`                          |
+| `metrics.image.pullPolicy`         | Metrics exporter image pull policy                          | `Always`                                        |
+| `metrics.port`                     | Metrics exporter port                                       | `9104`                                          |
+| `metrics.containerSecurityContext` | Security context for metrics container                      | `{runAsUser: 65534, runAsNonRoot: true, ...}`   |
+| `metrics.resources`                | Resource limits and requests for metrics container          | `{}`                                            |
+| `metrics.extraEnvVars`             | Additional environment variables for metrics exporter       | `[]`                                            |
+| `metrics.livenessProbe`            | LivenessProbe for metrics container                         | `{enabled: true, initialDelaySeconds: 30, ...}` |
+| `metrics.readinessProbe`           | ReadinessProbe for metrics container                        | `{enabled: true, initialDelaySeconds: 30, ...}` |
+
 ## Examples
 
 ### Basic Installation
@@ -370,6 +403,16 @@ auth:
     rootPasswordKey: "root-password"
     userPasswordKey: "user-password"
 ```
+
+### Using Existing PersistentVolumeClaim
+
+```yaml
+persistence:
+  enabled: true
+  existingClaim: "my-existing-pvc"
+```
+
+> **Note:** When using an existing PVC, the `storageClass`, `accessModes`, `size`, and `selector` parameters are ignored, as these properties are already defined in the existing PVC.
 
 ### Custom Configuration
 
@@ -484,3 +527,4 @@ For production workloads, consider:
 - [MariaDB Official Documentation](https://mariadb.org/documentation/)
 - [MariaDB Docker Hub](https://hub.docker.com/_/mariadb)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Create an issue](https://github.com/CloudPirates-io/helm-charts/issues)

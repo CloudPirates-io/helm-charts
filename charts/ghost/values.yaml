@@ -14,6 +14,8 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param replicaCount Number of Nginx replicas to deploy
+replicaCount: 1
 
 ## @section Nginx image parameters
 image:
@@ -22,12 +24,10 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.6.0@sha256:d49be5129610c38e9c785478344943d910c141866bb91cbe17b6d451370f03e1"
+  tag: "6.13.2@sha256:86090f3ee57af8d8e3fa11875b5787068a1c17b8aebd4b88d932efe11097f578"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
-## @param replicaCount Number of Nginx replicas to deploy
-replicaCount: 1
 
 ## @section Container port configuration
 ## @param containerPorts Array of container ports
@@ -133,6 +133,9 @@ containerSecurityContext:
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Nginx container's privilege escalation
   allowPrivilegeEscalation: false
+
+## @param priorityClassName Priority class for the ghost instance
+priorityClassName: ""
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

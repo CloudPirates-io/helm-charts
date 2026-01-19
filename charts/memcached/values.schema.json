@@ -53,6 +53,9 @@
                 }
             }
         },
+        "deploymentType": {
+            "type": "string"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -240,6 +243,9 @@
                         "interval": {
                             "type": "string"
                         },
+                        "jobLabel": {
+                            "type": "string"
+                        },
                         "labels": {
                             "type": "object"
                         },
@@ -292,6 +298,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

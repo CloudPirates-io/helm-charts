@@ -1,0 +1,169 @@
+{{- if .Values.msgTopologyOperator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "rmqco.msgTopologyOperator.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.msgTopologyOperator.replicaCount }}
+  revisionHistoryLimit: {{ .Values.msgTopologyOperator.revisionHistoryLimit }}
+  {{- if .Values.msgTopologyOperator.updateStrategy }}
+  strategy: {{- toYaml .Values.msgTopologyOperator.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rmqco.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: messaging-topology-operator
+  template:
+    metadata:
+      {{- if .Values.msgTopologyOperator.podAnnotations }}
+      annotations: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rmqmto.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ template "rmqco.msgTopologyOperator.serviceAccountName" . }}
+      {{- include "rmqmto.imagePullSecrets" . | indent 6 }}
+      automountServiceAccountToken: {{ .Values.msgTopologyOperator.automountServiceAccountToken }}
+      {{- if .Values.msgTopologyOperator.hostAliases }}
+      hostAliases: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.schedulerName }}
+      schedulerName: {{ .Values.msgTopologyOperator.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.affinity }}
+      affinity: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.msgTopologyOperator.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.nodeSelector }}
+      nodeSelector: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.msgTopologyOperator.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.tolerations }}
+      tolerations: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.priorityClassName }}
+      priorityClassName: {{ .Values.msgTopologyOperator.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.podSecurityContext.enabled }}
+      securityContext:
+        {{- include "rmqco.renderPodSecurityContext" (dict "securityContext" .Values.msgTopologyOperator.podSecurityContext "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.msgTopologyOperator.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.hostNetwork }}
+      hostNetwork: {{ .Values.msgTopologyOperator.hostNetwork }}
+      {{- end }}
+      {{- if .Values.msgTopologyOperator.dnsPolicy }}
+      dnsPolicy: {{ .Values.msgTopologyOperator.dnsPolicy }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.msgTopologyOperator.initContainers }}
+        {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: rabbitmq-cluster-operator
+          image: {{ template "rmqco.msgTopologyOperator.image" . }}
+          imagePullPolicy: {{ .Values.msgTopologyOperator.image.pullPolicy }}
+          {{- if .Values.msgTopologyOperator.containerSecurityContext.enabled }}
+          securityContext:
+            {{- include "rmqco.renderContainerSecurityContext" (dict "securityContext" .Values.msgTopologyOperator.containerSecurityContext "context" .) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.msgTopologyOperator.command }}
+          command: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.command "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - /manager
+          {{- end }}
+          {{- if .Values.msgTopologyOperator.args }}
+          args: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.args "context" $) | nindent 12 }}
+          {{- else }}
+          args:
+            - --metrics-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.metrics }}
+          {{- end }}
+          env:
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if not .Values.msgTopologyOperator.watchAllNamespaces }}
+            {{- $watchNamespaces := default (list (include "cloudpirates.namespace" .)) .Values.msgTopologyOperator.watchNamespaces }}
+            - name: OPERATOR_SCOPE_NAMESPACE
+              value: {{ join "," $watchNamespaces | quote }}
+            {{- end }}
+            {{- if .Values.msgTopologyOperator.extraEnvVars }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.msgTopologyOperator.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.msgTopologyOperator.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.msgTopologyOperator.resources }}
+          resources: {{- toYaml .Values.msgTopologyOperator.resources | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: https-webhook
+              containerPort: 9443
+              protocol: TCP
+            - name: http-metrics
+              containerPort: {{ .Values.msgTopologyOperator.containerPorts.metrics }}
+              protocol: TCP
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.msgTopologyOperator.customLivenessProbe }}
+          livenessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.msgTopologyOperator.livenessProbe.enabled }}
+          livenessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.msgTopologyOperator.livenessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: http-metrics
+          {{- end }}
+          {{- if .Values.msgTopologyOperator.customReadinessProbe }}
+          readinessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.msgTopologyOperator.readinessProbe.enabled }}
+          readinessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.msgTopologyOperator.readinessProbe "enabled") "context" $) | nindent 12 }}
+            httpGet:
+              path: /metrics
+              port: http-metrics
+          {{- end }}
+          {{- if .Values.msgTopologyOperator.customStartupProbe }}
+          startupProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.msgTopologyOperator.startupProbe.enabled }}
+          startupProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.msgTopologyOperator.startupProbe "enabled") "context" $) | nindent 12 }}
+            httpGet:
+              path: /metrics
+              port: http-metrics
+          {{- end }}
+          {{- end }}
+          {{- if .Values.msgTopologyOperator.lifecycleHooks }}
+          lifecycle: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+            {{- if .Values.msgTopologyOperator.extraVolumeMounts }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+        {{- if .Values.msgTopologyOperator.sidecars }}
+        {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.msgTopologyOperator.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: {{ template "rmqco.msgTopologyOperator.webhook.secretName" . }}
+        {{- if .Values.msgTopologyOperator.extraVolumes }}
+        {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+{{- end }}

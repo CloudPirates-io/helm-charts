@@ -6,9 +6,9 @@ metadata:
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "redis.labels" . | nindent 4 }}
-  {{- with (include "redis.annotations" .) }}
+  {{- if (include "redis.annotations" .) }}
   annotations:
-    {{- . | nindent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
   {{- end }}
 spec:
   podSelector:
@@ -16,7 +16,9 @@ spec:
       {{- include "redis.selectorLabels" . | nindent 6 }}
   policyTypes:
     - Ingress
+    {{- if .Values.networkPolicy.egressEnabled }}
     - Egress
+    {{- end }}
   ingress:
     # Allow Redis client connections
     - ports:
@@ -91,6 +93,7 @@ spec:
     {{- with .Values.networkPolicy.extraIngress }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- if .Values.networkPolicy.egressEnabled }}
   egress:
     # Allow DNS resolution
     - ports:
@@ -148,4 +151,5 @@ spec:
     {{- with .Values.networkPolicy.extraEgress }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- end }}
 {{- end }}

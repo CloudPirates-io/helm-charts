@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.3-alpine@sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14"
+  tag: "1.29.4-alpine@sha256:b0f7830b6bfaa1258f45d94c240ab668ced1b3651c8a222aefe6683447c7bf55"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -115,7 +115,7 @@ cloneStaticSiteFromGit:
   image:
     registry: docker.io
     repository: alpine/git
-    tag: v2.49.1
+    tag: v2.52.0
     digest: "sha256:9c9c6debba3eac25c9230db4bbd1e17d0c27efffdb93e502a47f6f447ab90ac4"
     pullPolicy: IfNotPresent
     pullSecrets: []
@@ -197,6 +197,16 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
+
+## @param initContainerSecurityContext Security context for init containers (useful for Istio sidecar scenarios)
+## When using Istio, init containers may need to run as the Istio proxy user (1337) to access external network
+## Example for Istio:
+## initContainerSecurityContext:
+##   runAsUser: 1337
+##   runAsGroup: 1337
+##   runAsNonRoot: true
+##   allowPrivilegeEscalation: false
+initContainerSecurityContext: {}
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
@@ -381,3 +391,27 @@ existingStreamServerConfigConfigmap: ""
 
 ## @param extraInitContainers Additional init containers to add to the pod
 extraInitContainers: []
+
+## @param sidecars Additional sidecar containers to add to the pod
+## Example for oauth2-proxy:
+## sidecars:
+##   - name: oauth2-proxy
+##     image: quay.io/oauth2-proxy/oauth2-proxy:latest
+##     imagePullPolicy: IfNotPresent
+##     ports:
+##       - name: oauth2-proxy
+##         containerPort: 4180
+##         protocol: TCP
+##     args:
+##       - --provider=github
+##       - --upstream=http://localhost:80
+##       - --http-address=0.0.0.0:4180
+##     env:
+##       - name: OAUTH2_PROXY_CLIENT_ID
+##         value: "your-client-id"
+##       - name: OAUTH2_PROXY_CLIENT_SECRET
+##         valueFrom:
+##           secretKeyRef:
+##             name: oauth2-proxy-secret
+##             key: client-secret
+sidecars: []
