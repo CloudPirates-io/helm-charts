@@ -73,7 +73,6 @@ To verify the helm chart before installation, copy the public key to the file `c
 cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 ```
 
-
 ## Configuration
 
 ### Global parameters
@@ -94,17 +93,18 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 ### Common Parameters
 
-| Parameter             | Description                                                                                                                                                                             | Default         |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `nameOverride`        | String to partially override redis.fullname                                                                                                                                             | `""`            |
-| `fullnameOverride`    | String to fully override redis.fullname                                                                                                                                                 | `""`            |
-| `namespaceOverride`   | String to override the namespace for all resources                                                                                                                                      | `""`            |
-| `clusterDomain`       | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
-| `commonLabels`        | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
-| `commonAnnotations`   | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
-| `architecture`        | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
-| `replicaCount`        | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
-| `clusterReplicaCount` | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
+| Parameter              | Description                                                                                                                                                                             | Default         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `nameOverride`         | String to partially override redis.fullname                                                                                                                                             | `""`            |
+| `fullnameOverride`     | String to fully override redis.fullname                                                                                                                                                 | `""`            |
+| `namespaceOverride`    | String to override the namespace for all resources                                                                                                                                      | `""`            |
+| `clusterDomain`        | Kubernetes cluster domain                                                                                                                                                               | `cluster.local` |
+| `commonLabels`         | Labels to add to all deployed objects                                                                                                                                                   | `{}`            |
+| `commonAnnotations`    | Annotations to add to all deployed objects                                                                                                                                              | `{}`            |
+| `architecture`         | Redis architecture. `standalone`: Single instance, `cluster`: Multi-master cluster, `replication`: Master-replica (use `sentinel.enabled` to control automatic failover)                | `standalone`    |
+| `replicaCount`         | Number of Redis instances (when `architecture=replication\|cluster`). As cluster or replication with Sentinel: total instances. Replication without Sentinel: 1 master + (n-1) replicas | `3`             |
+| `clusterReplicaCount`  | Number of replicas to be created for each master when `architecture=cluster`.                                                                                                           | `0`             |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                                                                                                            | `10`            |
 
 ### Pod labels and annotations
 
@@ -112,7 +112,6 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | ---------------- | ------------------------------------- | ------- |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
-
 
 ### Service Configuration
 
@@ -132,6 +131,9 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing Redis password             | `""`    |
+| `auth.acl.enabled`               | Enable custom ACL rules from a secret file                   | `false` |
+| `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
+| `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 
 ### Redis Configuration
 
@@ -149,7 +151,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `metrics.enabled`                          | Start a sidecar Prometheus exporter to expose Redis metrics                             | `false`                    |
 | `metrics.image.registry`                   | Redis exporter image registry                                                           | `docker.io`                |
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter` |
-| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1`                  |
+| `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
 | `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                      |
 | `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                     |
@@ -218,8 +220,9 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `nodeSelector`              | Node selector for pod assignment               | `{}`    |
 | `priorityClassName`         | Priority class for pod eviction                | `""`    |
 | `tolerations`               | Tolerations for pod assignment                 | `[]`    |
-| `affinity`                  | Affinity rules for pod assignment              | `{}`    |
-| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
+| `affinity`                       | Affinity rules for pod assignment                                                          | `{}`    |
+| `terminationGracePeriodSeconds`  | Seconds Kubernetes waits for pod to terminate gracefully (recommended: 60 for Sentinel)   | `30`    |
+| `topologySpreadConstraints`      | Topology spread constraints for pod assignment                                             | `[]`    |
 
 ### Security Context
 
@@ -263,25 +266,40 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 
 Redis Sentinel provides high availability for Redis through automatic failover. When enabled in `replication` mode, Sentinel monitors the master and replicas, and promotes a replica to master if the current master becomes unavailable. When disabled with `replication` mode, pod-0 is always the master.
 
-| Parameter                            | Description                                                                                   | Default     |
-| ------------------------------------ | --------------------------------------------------------------------------------------------- | ----------- |
-| `sentinel.enabled`                   | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
-| `sentinel.image.repository`          | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                 | Redis Sentinel image tag                                                                      | `8.4.0`     |
-| `sentinel.image.pullPolicy`          | Sentinel image pull policy                                                                    | `Always`    |
-| `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
-| `sentinel.masterName`                | Name of the master server                                                                     | `mymaster`  |
-| `sentinel.quorum`                    | Number of Sentinels needed to agree on master failure                                         | `2`         |
-| `sentinel.downAfterMilliseconds`     | Time in ms after master is declared down                                                      | `30000`     |
-| `sentinel.failoverTimeout`           | Timeout for failover in ms                                                                    | `180000`    |
-| `sentinel.parallelSyncs`             | Number of replicas to reconfigure during failover                                             | `1`         |
-| `sentinel.port`                      | Sentinel port                                                                                 | `26379`     |
-| `sentinel.service.type`              | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
-| `sentinel.service.port`              | Sentinel service port                                                                         | `26379`     |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel pods                                                                | `128Mi`     |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel pods                                                                 | `25m`       |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel pods                                                              | `64Mi`      |
-| `sentinel.extraVolumeMounts`         | Additional volume mounts for Sentinel container                                               | `[]`        |
+| Parameter                                     | Description                                                                                   | Default     |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------- |
+| `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
+| `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
+| `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
+| `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
+| `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
+| `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
+| `sentinel.parallelSyncs`                      | Number of replicas to reconfigure during failover                                             | `1`         |
+| `sentinel.loglevel`                           | Sentinel log level (debug, verbose, notice, warning). When 'debug', full config is logged     | `notice`    |
+| `sentinel.port`                               | Sentinel port                                                                                 | `26379`     |
+| `sentinel.service.type`                       | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
+| `sentinel.service.port`                       | Sentinel service port                                                                         | `26379`     |
+| `sentinel.resources.limits.memory`            | Memory limit for Sentinel pods                                                                | `128Mi`     |
+| `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
+| `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
+| `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
+| `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
+| `sentinel.preStop.enabled`                    | Enable preStop hook for Sentinel container (waits for failover before terminating)            | `true`      |
+| `sentinel.livenessProbe.enabled`              | Enable liveness probe                                                                         | `true`      |
+| `sentinel.livenessProbe.initialDelaySeconds`  | Initial delay before starting probes                                                          | `30`        |
+| `sentinel.livenessProbe.periodSeconds`        | How often to perform the probe                                                                | `10`        |
+| `sentinel.livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                                                                | `5`         |
+| `sentinel.livenessProbe.failureThreshold`     | Number of failures before pod is restarted                                                    | `6`         |
+| `sentinel.livenessProbe.successThreshold`     | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.readinessProbe.enabled`             | Enable readiness probe                                                                        | `true`      |
+| `sentinel.readinessProbe.initialDelaySeconds` | Initial delay before starting probes                                                          | `5`         |
+| `sentinel.readinessProbe.periodSeconds`       | How often to perform the probe                                                                | `10`        |
+| `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
+| `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
+| `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
 
 ### ServiceAccount
 
@@ -302,6 +320,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 | `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
 
+### Custom Scripts and Hooks
+
+| Parameter                        | Description                                                                  | Default |
+| -------------------------------- | ---------------------------------------------------------------------------- | ------- |
+| `customScripts.postStart.enabled` | Enable postStart lifecycle hook                                             | `false` |
+| `customScripts.postStart.command` | Command to execute in postStart hook                                        | `[]`    |
+| `customScripts.preStop.enabled`   | Enable preStop lifecycle hook (overrides default Sentinel preStop hook)     | `false` |
+| `customScripts.preStop.command`   | Command to execute in preStop hook                                          | `[]`    |
+
 ### Configurations for the Job-Template
 
 | Parameter                                  | Description                                      | Default |
@@ -310,7 +337,6 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `clusterInitJob.resources.limits.memory`   | Memory limit for clusterInit Job                 | `128Mi` |
 | `clusterInitJob.resources.requests.cpu`    | CPU request for clusterInit Job                  | `10m`   |
 | `clusterInitJob.resources.requests.memory` | Memory request for clusterInit Job               | `64Mi`  |
-
 
 #### Extra Objects
 
@@ -380,6 +406,12 @@ sentinel:
   quorum: 2
   downAfterMilliseconds: 30000
   failoverTimeout: 180000
+  redisShutdownWaitFailover: true  # Redis waits for failover before shutdown
+  preStop:
+    enabled: true  # Sentinel waits for failover before terminating
+
+# Required for graceful failover during helm upgrades
+terminationGracePeriodSeconds: 60
 
 auth:
   enabled: true
@@ -418,7 +450,7 @@ Deploy Redis with replication but without Sentinel for scenarios where automatic
 
 ```yaml
 architecture: replication
-replicaCount: 3  # 1 master + 2 replicas
+replicaCount: 3 # 1 master + 2 replicas
 sentinel:
   enabled: false
 
@@ -438,7 +470,6 @@ After deployment, you'll have:
 - No automatic failover - if the master fails, manual intervention is required
 - Simpler setup with fewer components
 - Lower resource usage (no Sentinel containers)
-
 
 ### Cluster mode
 
