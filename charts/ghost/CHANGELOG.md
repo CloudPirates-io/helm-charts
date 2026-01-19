@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.8.0 (2026-01-19)
+
+* Update charts/ghost/values.yaml ghost to v6.13.2 (minor) (#824) ([bd36f8f](https://github.com/CloudPirates-io/helm-charts/commit/bd36f8f))
+
+## 0.7.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([9a175fa](https://github.com/CloudPirates-io/helm-charts/commit/9a175fa))
+* chore: update CHANGELOG.md for merged changes ([81fa697](https://github.com/CloudPirates-io/helm-charts/commit/81fa697))
+* chore: update CHANGELOG.md for merged changes ([d4017f9](https://github.com/CloudPirates-io/helm-charts/commit/d4017f9))
+
 ## 0.6.5 (2026-01-08)
 
 * Update charts/ghost/values.yaml ghost (#819) ([888e117](https://github.com/CloudPirates-io/helm-charts/commit/888e117))
