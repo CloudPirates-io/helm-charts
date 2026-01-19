@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.20.9 (2026-01-19)
+
+* [redis] Update charts/redis/values.yaml redis ([#857](https://github.com/CloudPirates-io/helm-charts/pull/857))
+
+## 0.20.8 (2026-01-19)
+
+* don't create secret when acl is enabled (#851) ([21cb78c](https://github.com/CloudPirates-io/helm-charts/commit/21cb78c))
+* chore: update CHANGELOG.md for merged changes ([604ee92](https://github.com/CloudPirates-io/helm-charts/commit/604ee92))
+* chore: auto-generate values.schema.json (#850) ([3de3115](https://github.com/CloudPirates-io/helm-charts/commit/3de3115))
+* chore: update CHANGELOG.md for merged changes ([8cfc620](https://github.com/CloudPirates-io/helm-charts/commit/8cfc620))
 
 ## 0.20.7 (2026-01-17)
 
