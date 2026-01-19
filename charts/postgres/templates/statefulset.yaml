@@ -76,7 +76,7 @@ spec:
             {{- end }}
             {{- if .Values.auth.database }}
             - name: POSTGRES_DB
-              value: {{ .Values.auth.database | quote }}
+              value: {{ include "postgres.database" .}}
             {{- end }}
             - name: POSTGRES_PASSWORD
               valueFrom:
