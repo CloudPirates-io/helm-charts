@@ -28,6 +28,13 @@ $ helm install my-rabbitmq ./charts/rabbitmq
 
 The command deploys RabbitMQ on the Kubernetes cluster in the default configuration. The [Configuration](#configuration) section lists the parameters that can be configured during installation.
 
+## Upgrading the Chart
+
+For HA setups the erlang-cookie is used to join nodes to the cluster. If no erlang-cookie is set, a random one is generated with each chart update and restarted pods wont be able to rejoin the cluster with the new erlang-cookie.
+
+For existing installations this can be fixed after an update by getting the current erlang-cookie from the ENV-Vars, inside the still running old pods and replacing the newly generated erlang-cookie in the k8s secret with the old one.
+
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `my-rabbitmq` deployment:
@@ -110,10 +117,11 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Deployment configuration
 
-| Parameter             | Description                                                                                        | Default        |
-| --------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
-| `replicaCount`        | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
-| `podManagementPolicy` | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| Parameter              | Description                                                                                        | Default        |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
+| `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
+| `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
 
 ### StatefulSet & Pod metadata
 
@@ -146,16 +154,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Service configuration
 
-| Parameter                     | Description                                 | Default     |
-| ----------------------------- | ------------------------------------------- | ----------- |
-| `service.type`                | Kubernetes service type                     | `ClusterIP` |
-| `service.amqpPort`            | RabbitMQ AMQP service port                  | `5672`      |
-| `service.managementPort`      | RabbitMQ management UI port                 | `15672`     |
-| `service.epmdPort`            | RabbitMQ EPMD port                          | `4369`      |
-| `service.distPort`            | RabbitMQ distribution port                  | `25672`     |
-| `service.annotations`         | Kubernetes service annotations              | `{}`        |
-| `service.annotationsHeadless` | Kubernetes service annotationsHeadless      | `25672`     |
-| `service.trafficDistribution` | Traffic distribution policy for the service | `""`        |
+| Parameter                               | Description                                                 | Default     |
+| --------------------------------------- | ----------------------------------------------------------- | ----------- |
+| `service.type`                          | Kubernetes service type                                     | `ClusterIP` |
+| `service.amqpPort`                      | RabbitMQ AMQP service port                                  | `5672`      |
+| `service.managementPort`                | RabbitMQ management UI port                                 | `15672`     |
+| `service.epmdPort`                      | RabbitMQ EPMD port                                          | `4369`      |
+| `service.distPort`                      | RabbitMQ distribution port                                  | `25672`     |
+| `service.annotations`                   | Kubernetes service annotations                              | `{}`        |
+| `service.annotationsHeadless`           | Kubernetes service annotationsHeadless                      | `25672`     |
+| `service.trafficDistribution`           | Traffic distribution policy for the service                 | `""`        |
+| `service.externalTrafficPolicy`         | External Traffic Policy for the service                     | `Cluster`   |
+| `service.allocateLoadBalancerNodePorts` | Whether to allocate NodePorts for service type LoadBalancer | `true`      |
 
 ### RabbitMQ Authentication
 
@@ -261,6 +271,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`      |
 
 ### Liveness and readiness probes
 
@@ -304,11 +315,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### ServiceAccount
 
-| Parameter                    | Description                       | Default |
-| ---------------------------- | --------------------------------- | ------- |
-| `serviceAccount.create`      | Enable creation of ServiceAccount | `true`  |
-| `serviceAccount.name`        | Name of serviceAccount            | `""`    |
-| `serviceAccount.annotations` | Annotations for service account   | `{}`    |
+| Parameter                                     | Description                                              | Default |
+| --------------------------------------------- | -------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Enable creation of ServiceAccount                        | `true`  |
+| `serviceAccount.name`                         | Name of serviceAccount                                   | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the RabbitMQ pods | `false` |
+| `serviceAccount.annotations`                  | Annotations for service account                          | `{}`    |
 
 ### RBAC parameters
 
@@ -425,6 +437,8 @@ helm install my-rabbitmq ./charts/rabbitmq -f values-production.yaml
 # values-cluster.yaml
 replicaCount: 3
 
+auth:
+  erlangCookie: "somerandomstring" # chart updates will fail in ha cluster setups without this or existingErlangCookieKey
 peerDiscoveryK8sPlugin:
   enabled: true
   useLongname: true

@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.16.7
+version: 0.20.8
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Fix Redis issue with immutableFields cause by the label addition on volumeClaimTemplate (#695)"
+          description: "Allow disabling egress in network policy, headless service should publish not ready addresses when sentinel is enabled (#843)"
           links:
-            - name: "Commit f5ce66f"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f5ce66f"
+            - name: "Commit 3211908"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/3211908"

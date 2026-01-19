@@ -5,6 +5,12 @@
         "affinity": {
             "type": "object"
         },
+        "args": {
+            "type": [
+                "array",
+                "null"
+            ]
+        },
         "auth": {
             "type": "object",
             "properties": {
@@ -29,6 +35,9 @@
                     "type": "string"
                 }
             }
+        },
+        "command": {
+            "type": "array"
         },
         "commonAnnotations": {
             "type": "object"
@@ -118,7 +127,35 @@
             }
         },
         "customUser": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "secretKeys": {
+                    "type": "object",
+                    "properties": {
+                        "database": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         },
         "extraEnvVars": {
             "type": "array"
@@ -163,6 +200,9 @@
                 },
                 "tag": {
                     "type": "string"
+                },
+                "useHardenedImage": {
+                    "type": "boolean"
                 }
             }
         },
@@ -352,6 +392,9 @@
                 "existingClaim": {
                     "type": "string"
                 },
+                "labels": {
+                    "type": "object"
+                },
                 "size": {
                     "type": "string"
                 },
@@ -482,6 +525,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tolerations": {
             "type": "array"
