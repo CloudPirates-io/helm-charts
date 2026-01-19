@@ -46,6 +46,9 @@ spec:
       {{- end }}
       {{- if .Values.cloneStaticSiteFromGit.enabled }}
         - name: git-clone-repository
+          {{- if .Values.initContainerSecurityContext }}
+          securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.command }}

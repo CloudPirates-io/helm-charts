@@ -31,7 +31,7 @@ tests:
         template: templates/messaging-topology-operator/deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/rabbitmqoperator/messaging-topology-operator:1.18.1
+          value: docker.io/rabbitmqoperator/messaging-topology-operator:1.18.2
         template: templates/messaging-topology-operator/deployment.yaml
       - equal:
           path: spec.template.spec.serviceAccountName
@@ -275,3 +275,94 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-rabbitmq-messaging-topology-operator-webhook
         template: templates/messaging-topology-operator/certificate.yaml
+
+  - it: should render messaging topology operator deployment with nodeSelector
+    set:
+      msgTopologyOperator.nodeSelector:
+        disktype: ssd
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should render messaging topology operator deployment with affinity
+    set:
+      msgTopologyOperator.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/e2e-az-name
+                operator: In
+                values:
+                - e2e-az1
+                - e2e-az2
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: kubernetes.io/e2e-az-name
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should render messaging topology operator deployment with podSecurityContext
+    set:
+      msgTopologyOperator.podSecurityContext.enabled: true
+      msgTopologyOperator.podSecurityContext.fsGroup: 1001
+      msgTopologyOperator.podSecurityContext.fsGroupChangePolicy: Always
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1001
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: Always
+        template: templates/messaging-topology-operator/deployment.yaml
+      - isNull:
+          path: spec.template.spec.securityContext.enabled
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should render messaging topology operator deployment with containerSecurityContext
+    set:
+      msgTopologyOperator.containerSecurityContext.enabled: true
+      msgTopologyOperator.containerSecurityContext.runAsUser: 1001
+      msgTopologyOperator.containerSecurityContext.runAsGroup: 1001
+      msgTopologyOperator.containerSecurityContext.runAsNonRoot: true
+      msgTopologyOperator.containerSecurityContext.readOnlyRootFilesystem: true
+      msgTopologyOperator.containerSecurityContext.allowPrivilegeEscalation: false
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1001
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 1001
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+        template: templates/messaging-topology-operator/deployment.yaml
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.enabled
+        template: templates/messaging-topology-operator/deployment.yaml

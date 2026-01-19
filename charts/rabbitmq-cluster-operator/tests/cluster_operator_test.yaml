@@ -28,7 +28,7 @@ tests:
         template: templates/cluster-operator/deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/rabbitmqoperator/cluster-operator:2.17.2
+          value: docker.io/rabbitmqoperator/cluster-operator:2.18.0
         template: templates/cluster-operator/deployment.yaml
       - equal:
           path: spec.template.spec.serviceAccountName
@@ -231,3 +231,94 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-rabbitmq-cluster-operator
         template: templates/cluster-operator/servicemonitor.yaml
+
+  - it: should render cluster operator deployment with nodeSelector
+    set:
+      clusterOperator.nodeSelector:
+        disktype: ssd
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: should render cluster operator deployment with affinity
+    set:
+      clusterOperator.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/e2e-az-name
+                operator: In
+                values:
+                - e2e-az1
+                - e2e-az2
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: kubernetes.io/e2e-az-name
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: should render cluster operator deployment with podSecurityContext
+    set:
+      clusterOperator.podSecurityContext.enabled: true
+      clusterOperator.podSecurityContext.fsGroup: 1001
+      clusterOperator.podSecurityContext.fsGroupChangePolicy: Always
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1001
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: Always
+        template: templates/cluster-operator/deployment.yaml
+      - isNull:
+          path: spec.template.spec.securityContext.enabled
+        template: templates/cluster-operator/deployment.yaml
+
+  - it: should render cluster operator deployment with containerSecurityContext
+    set:
+      clusterOperator.containerSecurityContext.enabled: true
+      clusterOperator.containerSecurityContext.runAsUser: 1001
+      clusterOperator.containerSecurityContext.runAsGroup: 1001
+      clusterOperator.containerSecurityContext.runAsNonRoot: true
+      clusterOperator.containerSecurityContext.readOnlyRootFilesystem: true
+      clusterOperator.containerSecurityContext.allowPrivilegeEscalation: false
+    asserts:
+      - isKind:
+          of: Deployment
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1001
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 1001
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+        template: templates/cluster-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+        template: templates/cluster-operator/deployment.yaml
+      - isNull:
+          path: spec.template.spec.containers[0].securityContext.enabled
+        template: templates/cluster-operator/deployment.yaml

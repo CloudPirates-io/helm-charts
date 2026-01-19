@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.16.7
+version: 0.20.6
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "return fqdn for sentinel replicas lookup (#700) (#701)"
+          description: "[alpine/kubectl] Update image to v1.35.0 (#775)"
           links:
-            - name: "Commit 76a4a10"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/76a4a10"
+            - name: "Commit 4f78b86"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/4f78b86"

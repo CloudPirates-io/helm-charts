@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.7.0
-appVersion: "8.2.2"
+version: 0.9.0
+appVersion: "8.2.3"
 keywords:
   - mongodb
   - database
@@ -39,4 +39,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "add replication architecture (#829)"
+          links:
+            - name: "Commit 7845f5f"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/7845f5f"

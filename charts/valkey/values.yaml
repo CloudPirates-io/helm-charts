@@ -42,6 +42,9 @@ architecture: standalone
 ##   For example: replicaCount: 3 creates 1 master + 2 replicas
 replicaCount: 3
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
 ## auto: Uses the first IP returned by hostname -i (default)
 ## ipv4: Forces IPv4 address selection
@@ -75,6 +78,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the valkey instance
+priorityClassName: ""
+
 ## @section Valkey Authentication
 auth:
   ## @param auth.enabled Enable password authentication
@@ -106,6 +112,8 @@ tls:
 
 ## @section Valkey Configuration
 config:
+  ## @param config.mountPath Redis configuration options
+  mountPath: /etc/valkey
   ## @param config.maxMemory Maximum memory usage for Valkey (e.g., 256mb, 1gb)
   maxMemory: ""
   ## @param config.maxMemoryPolicy Memory eviction policy when maxmemory is reached
@@ -146,8 +154,7 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts[0].host Hostname for Valkey ingress
@@ -176,6 +183,8 @@ resources:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for Valkey data volume
+  existingClaim: ""
   ## @param persistence.storageClass Persistent Volume storage class
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
@@ -323,6 +332,9 @@ sentinel:
     tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
+  ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  config:
+    announceHostnames: true
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
