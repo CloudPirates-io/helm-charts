@@ -20,7 +20,8 @@ spec:
       targetPort: {{ .Values.service.httpTargetPort }}
       protocol: TCP
       name: http
-    {{- else }}
+    {{- end }}
+    {{- if .Values.keycloak.httpsEnabled }}
     - port: {{ .Values.service.httpsPort }}
       targetPort: {{ .Values.service.httpsTargetPort }}
       protocol: TCP
