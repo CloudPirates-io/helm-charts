@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.11.4
+version: 0.12.0
 appVersion: "26.5.0"
 keywords:
   - keycloak
@@ -51,6 +51,11 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
+        - kind: changed
+          description: "BREAKING: Migrate from Deployment to StatefulSet to fix High Availability database migration issues"
+          links:
+            - name: "Issue #39866"
+              url: "https://github.com/keycloak/keycloak/issues/39866"
         - kind: changed
           description: "[keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.0 (minor) (#823)"
           links:
