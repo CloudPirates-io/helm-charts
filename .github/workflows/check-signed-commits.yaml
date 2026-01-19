@@ -20,36 +20,121 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Check for bot commits
-        id: check-bots
+      - name: Get commit information
+        id: get-commits
         run: |
-          # Get all commits in the PR
+          # Fetch base branch for comparison
           git fetch origin ${{ github.event.pull_request.base.ref }}
-          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --format="%an")
 
-          echo "Commits in PR:"
-          echo "$COMMITS"
+          # Get all commits with hash, author name, and signature status
+          # Format: HASH|AUTHOR|SIGNATURE_STATUS
+          # Signature status: G=good, B=bad, U=untrusted, X=expired, Y=good from expired key, R=good from revoked key, E=cannot be checked, N=no signature
+          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --format="%H|%an|%G?")
 
-          # Check if any commits are NOT from bots
-          # grep -v returns 0 (true) if it finds lines NOT matching the pattern
-          # grep -v returns 1 (false) if all lines match the pattern (all are bots)
-          if echo "$COMMITS" | grep -qv '\[bot\]'; then
-            echo "Found human commits"
-            echo "has_human_commits=true" >> $GITHUB_OUTPUT
-          else
-            echo "All commits are from bots"
-            echo "has_human_commits=false" >> $GITHUB_OUTPUT
-          fi
+          {
+            echo 'commits<<EOF'
+            echo "$COMMITS"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
 
-      - name: Check signed commits in PR
-        if: steps.check-bots.outputs.has_human_commits == 'true'
+      - name: Check signed commits (excluding verified bots)
+        id: check-signed
         continue-on-error: true
-        uses: 1Password/check-signed-commits-action@ed2885f3ed2577a4f5d3c3fe895432a557d23d52 # v1.2.0
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          comment: |
-            ## ⚠️ Unsigned Commits Detected
+          script: |
+            const commitsData = `${{ steps.get-commits.outputs.commits }}`;
 
-            This pull request contains unsigned commits.
+            const commits = commitsData.trim().split('\n')
+              .filter(line => line.length > 0)
+              .map(line => {
+                const [hash, author, sigStatus] = line.split('|');
+                return { hash, author, sigStatus };
+              });
+
+            // Get unique authors to minimize API calls
+            const uniqueAuthors = [...new Set(commits.map(c => c.author))];
+
+            // Check which authors are bots via GitHub API
+            const botAuthors = new Set();
+            const humanAuthors = new Set();
+
+            for (const author of uniqueAuthors) {
+              try {
+                // GitHub API requires the full username including [bot] suffix
+                const { data: user } = await github.rest.users.getByUsername({
+                  username: author
+                });
+
+                if (user.type === 'Bot') {
+                  botAuthors.add(author);
+                } else {
+                  humanAuthors.add(author);
+                }
+              } catch (error) {
+                // If user not found or API error, treat as human (fail-safe)
+                humanAuthors.add(author);
+              }
+            }
+
+            const unsignedCommits = [];
+            let humanCommitCount = 0;
+            let botCommitCount = 0;
+            let signedHumanCount = 0;
+
+            for (const commit of commits) {
+              const isBot = botAuthors.has(commit.author);
+
+              if (isBot) {
+                botCommitCount++;
+                continue;
+              }
+
+              humanCommitCount++;
+              const isSigned = commit.sigStatus === 'G' || commit.sigStatus === 'U';
+
+              if (isSigned) {
+                signedHumanCount++;
+              } else {
+                unsignedCommits.push(commit);
+              }
+            }
+
+            // Set outputs
+            core.setOutput('has_unsigned_commits', unsignedCommits.length > 0 ? 'true' : 'false');
+            core.setOutput('unsigned_count', unsignedCommits.length.toString());
+
+            if (unsignedCommits.length > 0) {
+              core.setOutput('unsigned_commits', JSON.stringify(unsignedCommits));
+            }
+
+            // Fail the step if there are unsigned human commits (but continue-on-error is set)
+            if (unsignedCommits.length > 0) {
+              core.setFailed(`Found ${unsignedCommits.length} unsigned commit(s) from human contributors`);
+            }
+
+      - name: Comment on unsigned commits
+        if: steps.check-signed.outputs.has_unsigned_commits == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const unsignedCommits = JSON.parse(`${{ steps.check-signed.outputs.unsigned_commits }}`);
+            const unsignedCount = '${{ steps.check-signed.outputs.unsigned_count }}';
+
+            // Build commit list for comment
+            const commitList = unsignedCommits.map(c =>
+              `- \`${c.hash.substring(0, 7)}\` by **${c.author}**`
+            ).join('\n');
+
+            const comment = `## ⚠️ Unsigned Commits Detected
+
+            This pull request contains **${unsignedCount}** unsigned human commit(s).
+
+            **Note:** Bot commits are automatically verified via GitHub API and excluded from this check.
+
+            ### Unsigned Commits
+
+            ${commitList}
 
             ### What does this mean?
 
@@ -72,4 +157,12 @@ jobs:
 
             ---
 
-            _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._
+            _This check will become mandatory in the future. Please start signing your commits now to avoid issues later._`;
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
