@@ -1,6 +1,22 @@
 # Changelog
 
 
+## 0.20.7 (2026-01-17)
+
+* chore: update CHANGELOG.md for merged changes ([70a510d](https://github.com/CloudPirates-io/helm-charts/commit/70a510d))
+* Allow disabling egress in network policy, headless service should publish not ready addresses when sentinel is enabled (#843) ([3211908](https://github.com/CloudPirates-io/helm-charts/commit/3211908))
+
+## 0.20.6 (2026-01-09)
+
+* chore: update CHANGELOG.md for merged changes ([a971b23](https://github.com/CloudPirates-io/helm-charts/commit/a971b23))
+* chore: update CHANGELOG.md for merged changes ([f13c915](https://github.com/CloudPirates-io/helm-charts/commit/f13c915))
+* Include Sentinel port in default service when enabled (#811) ([32afbf1](https://github.com/CloudPirates-io/helm-charts/commit/32afbf1))
+* chore: update CHANGELOG.md for merged changes ([ae6e4cc](https://github.com/CloudPirates-io/helm-charts/commit/ae6e4cc))
+* chore: update CHANGELOG.md for merged changes ([4a96127](https://github.com/CloudPirates-io/helm-charts/commit/4a96127))
+* Update charts/redis/values.yaml redis (#820) ([8bac28e](https://github.com/CloudPirates-io/helm-charts/commit/8bac28e))
+* chore: update CHANGELOG.md for merged changes ([f2fe777](https://github.com/CloudPirates-io/helm-charts/commit/f2fe777))
+* chore: update CHANGELOG.md for merged changes ([7b27905](https://github.com/CloudPirates-io/helm-charts/commit/7b27905))
+
 ## 0.20.5 (2026-01-08)
 
 * [alpine/kubectl] Update image to v1.35.0 (#775) ([4f78b86](https://github.com/CloudPirates-io/helm-charts/commit/4f78b86))

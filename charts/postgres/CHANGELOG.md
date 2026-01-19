@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.14.0 (2026-01-14)
+
+* Add support for docker hardened images (#837) ([8a5b21a](https://github.com/CloudPirates-io/helm-charts/commit/8a5b21a))
+* chore: update CHANGELOG.md for merged changes ([8663881](https://github.com/CloudPirates-io/helm-charts/commit/8663881))
+* chore: update CHANGELOG.md for merged changes ([83091f9](https://github.com/CloudPirates-io/helm-charts/commit/83091f9))
+* chore: update CHANGELOG.md for merged changes ([ce7b261](https://github.com/CloudPirates-io/helm-charts/commit/ce7b261))
+
 ## 0.13.8 (2026-01-08)
 
 * Update image digest to bfe50b2 (#817) ([3f1807b](https://github.com/CloudPirates-io/helm-charts/commit/3f1807b))

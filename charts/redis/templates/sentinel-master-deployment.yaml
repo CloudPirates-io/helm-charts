@@ -47,7 +47,7 @@ spec:
           {{- toYaml .Values.containerSecurityContext | nindent 10 }}
         resources:
           {{- toYaml .Values.sentinel.masterService.resources | nindent 10 }}
-        {{- if .Values.auth.enabled }}
+        {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
         env:
           - name: REDIS_PASSWORD
             valueFrom:

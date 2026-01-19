@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.12.1 (2026-01-19)
+
+* Update charts/mariadb/values.yaml mariadb (#853) ([238c925](https://github.com/CloudPirates-io/helm-charts/commit/238c925))
+* chore: update CHANGELOG.md for merged changes ([2ea9011](https://github.com/CloudPirates-io/helm-charts/commit/2ea9011))
+* chore: update CHANGELOG.md for merged changes ([4704279](https://github.com/CloudPirates-io/helm-charts/commit/4704279))
+* chore: update CHANGELOG.md for merged changes ([93d6d29](https://github.com/CloudPirates-io/helm-charts/commit/93d6d29))
+
 ## 0.12.0 (2026-01-15)
 
 * [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
