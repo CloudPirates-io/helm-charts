@@ -35,7 +35,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.3@sha256:7f5bbdafebde7c42e42e33396d01c0eda3eb753da8dae99071a30e350568a0a4"
+  tag: "8.2.3@sha256:d6b569590880bca35e43318418133a426b024bcb649eeb63bb071bc1490bee41"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -146,6 +146,9 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set MongoDB pod's Security Context fsGroup
   fsGroup: 999
+
+## @param priorityClassName Priority class for the mongodb instance
+priorityClassName: ""
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe

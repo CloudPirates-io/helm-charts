@@ -1,6 +1,24 @@
 # Changelog
 
 
+## 0.14.2 (2026-01-19)
+
+* Update charts/postgres/values.yaml postgres (#835) ([6ec9835](https://github.com/CloudPirates-io/helm-charts/commit/6ec9835))
+* chore: update CHANGELOG.md for merged changes ([c697460](https://github.com/CloudPirates-io/helm-charts/commit/c697460))
+
+## 0.14.1 (2026-01-17)
+
+* fix schema-typing for args in values (#848) ([3b2a813](https://github.com/CloudPirates-io/helm-charts/commit/3b2a813))
+* chore: update CHANGELOG.md for merged changes ([2548751](https://github.com/CloudPirates-io/helm-charts/commit/2548751))
+* chore: update CHANGELOG.md for merged changes ([c1a174a](https://github.com/CloudPirates-io/helm-charts/commit/c1a174a))
+
+## 0.14.0 (2026-01-14)
+
+* Add support for docker hardened images (#837) ([8a5b21a](https://github.com/CloudPirates-io/helm-charts/commit/8a5b21a))
+* chore: update CHANGELOG.md for merged changes ([8663881](https://github.com/CloudPirates-io/helm-charts/commit/8663881))
+* chore: update CHANGELOG.md for merged changes ([83091f9](https://github.com/CloudPirates-io/helm-charts/commit/83091f9))
+* chore: update CHANGELOG.md for merged changes ([ce7b261](https://github.com/CloudPirates-io/helm-charts/commit/ce7b261))
+
 ## 0.13.8 (2026-01-08)
 
 * Update image digest to bfe50b2 (#817) ([3f1807b](https://github.com/CloudPirates-io/helm-charts/commit/3f1807b))

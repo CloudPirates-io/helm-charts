@@ -25,7 +25,7 @@ spec:
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           resources: {{- toYaml .Values.clusterInitJob.resources | nindent 12 }}
           env:
-          {{- if .Values.auth.enabled }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:

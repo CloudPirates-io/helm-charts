@@ -2,8 +2,8 @@ apiVersion: v2
 name: rabbitmq-cluster-operator
 description: Kubernetes operator to deploy and manage RabbitMQ clusters.
 type: application
-version: 0.1.3
-appVersion: "2.18.0"
+version: 0.1.4
+appVersion: "2.19.0"
 keywords:
   - rabbitmq-cluster-operator
   - rabbitmq
@@ -45,7 +45,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Fix securityContext rendering for operators (#793)"
+          description: "Add issuer and extra-list templates that were missing (#825)"
           links:
-            - name: "Commit c513db8"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/c513db8"
+            - name: "Commit 219ab17"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/219ab17"

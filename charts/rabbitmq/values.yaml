@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.2-management@sha256:5b38b93d6f8cecc6263c0b774b31acd60849bf4d06b2e61169f0c28c1c55c232"
+  tag: "4.2.2-management@sha256:de1b5b16bc8d425ab8db9df9ccf74ebb78e83771dc2fd80398616ada4645c4ad"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -372,6 +372,9 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+
+## @param priorityClassName Priority class for the rabbitmq instance
+priorityClassName: ""
 
 ## @section Liveness and readiness probes
 livenessProbe:
