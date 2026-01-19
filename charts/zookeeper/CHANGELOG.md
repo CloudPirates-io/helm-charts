@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 0.5.2 (2026-01-19)
+
+* Update charts/zookeeper/values.yaml zookeeper (#858) ([7dceb5c](https://github.com/CloudPirates-io/helm-charts/commit/7dceb5c))
+
 ## 0.5.1 (2026-01-08)
 
 * chore: update CHANGELOG.md for merged changes ([f603113](https://github.com/CloudPirates-io/helm-charts/commit/f603113))
