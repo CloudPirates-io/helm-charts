@@ -23,7 +23,7 @@ jobs:
       - name: Check signed commits (excluding verified bots)
         id: check-signed
         continue-on-error: true
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             // Get all commits in the PR
@@ -82,7 +82,7 @@ jobs:
 
       - name: Comment on unsigned commits
         if: steps.check-signed.outputs.has_unsigned_commits == 'true'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const unsignedCommits = JSON.parse(`${{ steps.check-signed.outputs.unsigned_commits }}`);
