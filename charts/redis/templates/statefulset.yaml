@@ -565,7 +565,7 @@ spec:
               {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
-              loglevel {{ .Values.sentinel.loglevel }}
+              loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
               # Add known sentinels to help with discovery (using hostnames for resilience)
@@ -582,7 +582,7 @@ spec:
                 fi
               done
 
-              {{- if eq .Values.sentinel.loglevel "debug" }}
+              {{- if eq .Values.sentinel.config.loglevel "debug" }}
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
               {{- else }}
