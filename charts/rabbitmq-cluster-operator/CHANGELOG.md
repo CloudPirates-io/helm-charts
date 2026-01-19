@@ -1,8 +1,5 @@
 # Changelog
 
-## 0.1.4 (2026-01-19)
-
-* [rabbitmq-cluster-operator] update to latest version ([#852](https://github.com/CloudPirates-io/helm-charts/pull/852))
 
 ## 0.1.3 (2026-01-09)
 
