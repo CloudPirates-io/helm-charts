@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.20.6
+version: 0.20.9
 appVersion: "8.4.0"
 keywords:
   - redis
@@ -42,7 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[alpine/kubectl] Update image to v1.35.0 (#775)"
+          description: "Update charts/redis/values.yaml redis (#857)"
           links:
-            - name: "Commit 4f78b86"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/4f78b86"
+            - name: "Commit 625d9f5"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/625d9f5"

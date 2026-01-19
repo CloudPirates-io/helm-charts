@@ -2,7 +2,7 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.5.3
+version: 0.5.4
 appVersion: "1.29.4"
 keywords:
   - nginx
@@ -41,5 +41,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+        - kind: added
+          description: "[nginx] Update charts/nginx/values.yaml nginx"
+          links:
+            - name: "PR #827"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/827"
