@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.10.0@sha256:7e3a906905a7893c20d60d5e1dd04f57fb8666972dcb8e2f817725dfc1814208"
+  tag: "6.10.3@sha256:808ad1a4aac2eba4177ba3a17aa3cc3cd11c3fbe700f3173ca126474362d084c"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -133,6 +133,9 @@ containerSecurityContext:
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Nginx container's privilege escalation
   allowPrivilegeEscalation: false
+
+## @param priorityClassName Priority class for the ghost instance
+priorityClassName: ""
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

@@ -28,7 +28,7 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.39@sha256:462fa779babc9b64a235a69dd843cb79fb3591f229ee1f3ff6cb2ca058d8a759"
+  tag: "1.6.40@sha256:e4e5eca37e4334f9579f10fcdd88a58c4eb9d0a8eacedde6ec49d4ea4391637a"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
@@ -36,7 +36,7 @@ image:
 replicaCount: 1
 
 ## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
-deploymentType: StatefulSet
+deploymentType: Deployment
 
 service:
   ## @param service.type Kubernetes service type
@@ -128,6 +128,9 @@ containerSecurityContext:
   runAsNonRoot: true
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Memcached container's privilege escalation
   allowPrivilegeEscalation: false
+
+## @param priorityClassName Priority class for the memcached instance
+priorityClassName: ""
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

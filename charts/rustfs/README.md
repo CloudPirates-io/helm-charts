@@ -166,6 +166,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `containerSecurityContext.runAsGroup`               | Group ID for the RustFS container                 | `1001`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the rustfs instance            | `""`      |
 
 ### Service configuration
 

@@ -195,6 +195,9 @@
                 "existingClaim": {
                     "type": "string"
                 },
+                "labels": {
+                    "type": "object"
+                },
                 "size": {
                     "type": "string"
                 },
@@ -203,6 +206,9 @@
                 }
             }
         },
+        "podLabels": {
+            "type": "object"
+        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -210,6 +216,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",
