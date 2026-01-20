@@ -22338,6 +22338,61 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |2
             - kind: changed
+              description: "[etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846)"
+              links:
+                - name: "Commit 17e0af0"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/17e0af0"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Valkey
+          url: https://valkey.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+        - name: Application
+          url: https://github.com/valkey-io/valkey
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 9.0.0
+    created: "2026-01-20T14:01:45.347395852Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: High performance in-memory data structure store, fork of Redis. Valkey
+      is an open-source, high-performance key/value datastore that supports a variety
+      of workloads such as caching, message queues, and can act as a primary database.
+    digest: 8d035ca5c0e44ba5f303b776b92ad6ce1c2afe1a50ef4a1afed058193156ffd8
+    home: https://www.valkey.io
+    icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
+    keywords:
+    - valkey
+    - redis
+    - cache
+    - database
+    - key-value
+    - in-memory
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: valkey
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+    - https://github.com/valkey-io/valkey
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/valkey-0.15.1/valkey-0.15.1.tgz
+    version: 0.15.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
               description: "[redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725)"
               links:
                 - name: "Commit ac9e1ba"
@@ -24836,4 +24891,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-19T12:29:35.455760209Z"
+generated: "2026-01-20T14:01:45.34824994Z"
