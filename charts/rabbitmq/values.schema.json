@@ -159,6 +159,34 @@
         "definitions": {
             "type": "object",
             "properties": {
+                "autoReload": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                },
+                                "pullPolicy": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object"
+                        }
+                    }
+                },
                 "bindings": {
                     "type": "array"
                 },
@@ -205,9 +233,6 @@
                     "type": "array"
                 }
             }
-        },
-        "extraContainers": {
-            "type": "array"
         },
         "extraEnvVars": {
             "type": "array"
