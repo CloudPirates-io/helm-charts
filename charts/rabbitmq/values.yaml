@@ -421,6 +421,9 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the RabbitMQ container
 extraVolumeMounts: []
 
+## @param extraContainers Additional sidecar containers to add to the pod
+extraContainers: []
+
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
 
