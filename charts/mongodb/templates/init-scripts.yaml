@@ -389,6 +389,9 @@ data:
       local mongoshell=$(which mongosh)
       if [ ! -z "$mongoshell" ]; then
         log "Using mongosh as default shell"
+        {{- if .Values.replicaSet.extraInit.disableTelemetry }}
+        mongosh --nodb --eval "disableTelemetry()"
+        {{- end }}
         export IS_MONGODB_4="false"
       else
         log "Using mongo as default shell"

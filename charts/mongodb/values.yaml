@@ -458,6 +458,8 @@ replicaSet:
     delay: 3
     ## @param replicaSet.extraInit.initDelay Seconds to wait after mongod is running to give it time for internal initialization
     initDelay: 5
+    ## @param replicaSet.disableTelemetry If true, mongosh telemetry is disabled (see https://www.mongodb.com/docs/mongodb-shell/telemetry)
+    disableTelemetry: false
   ## @param replicaSet.shutdown Internal shutdown configuration
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
