@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.14.4 (2026-01-20)
+
+* POSTGRES_DB is empty if auth.database is not overridden (#869) ([8fbbdc4](https://github.com/CloudPirates-io/helm-charts/commit/8fbbdc4))
+* chore: update CHANGELOG.md for merged changes ([ca0346b](https://github.com/CloudPirates-io/helm-charts/commit/ca0346b))
+* chore: update CHANGELOG.md for merged changes ([2b8c32b](https://github.com/CloudPirates-io/helm-charts/commit/2b8c32b))
+* chore: update CHANGELOG.md for merged changes ([c21ab5c](https://github.com/CloudPirates-io/helm-charts/commit/c21ab5c))
+
 ## 0.14.3 (2026-01-20)
 
 * Explicitly set database name when creating custom user (#868) ([5f9a708](https://github.com/CloudPirates-io/helm-charts/commit/5f9a708))
