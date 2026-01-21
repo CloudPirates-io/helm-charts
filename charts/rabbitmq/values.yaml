@@ -637,3 +637,23 @@ definitions:
   #   configure: ".*"
   #   write: ".*"
   #   read: ".*"
+  ## @param definitions.autoReload.enabled Enable sidecar container to watch for ConfigMap/Secret changes and reload definitions automatically
+  autoReload:
+    enabled: false
+    ## @param definitions.autoReload.image.registry Container image registry for the config watcher sidecar
+    ## @param definitions.autoReload.image.repository Container image repository for the config watcher sidecar
+    ## @param definitions.autoReload.image.tag Container image tag for the config watcher sidecar
+    ## @param definitions.autoReload.image.pullPolicy Container image pull policy for the config watcher sidecar
+    image:
+      registry: docker.io
+      repository: curlimages/curl
+      tag: "8.11.1"
+      pullPolicy: IfNotPresent
+    ## @param definitions.autoReload.resources Resource limits and requests for the config watcher sidecar
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 50m
+        memory: 32Mi
