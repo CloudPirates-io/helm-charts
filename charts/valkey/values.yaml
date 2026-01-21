@@ -326,6 +326,8 @@ sentinel:
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   image:
+    ## @param sentinel.image.registry Valkey Sentinel image registry
+    registry: docker.io
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag

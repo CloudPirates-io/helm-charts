@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.4.0@sha256:47200b04138293fae39737e50878a238b13ec0781083126b1b0c63cf5d992e8d"
+  tag: "8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -343,20 +343,20 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.4.0@sha256:47200b04138293fae39737e50878a238b13ec0781083126b1b0c63cf5d992e8d"
+    tag: "8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
+  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
   config:
     announceHostnames: true
+    loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
   downAfterMilliseconds: 1500
-  ## @param sentinel.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
-  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
-  loglevel: notice
   ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
   failoverTimeout: 15000
   ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover

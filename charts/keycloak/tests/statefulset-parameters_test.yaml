@@ -1,6 +1,6 @@
 suite: test service account
 templates:
-  - templates/deployment.yaml
+  - templates/statefulset.yaml
 tests:
   - it: readiness probe should be original
     asserts:

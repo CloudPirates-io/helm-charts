@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "keycloak.fullname" . }}
+  name: {{ include "keycloak.fullname" . }}-headless
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
@@ -11,7 +11,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
   ports:
     {{- if .Values.keycloak.httpEnabled }}
     - port: {{ .Values.service.httpPort }}
@@ -27,6 +29,3 @@ spec:
     {{- end }}
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}
-  {{- if .Values.service.trafficDistribution }}
-  trafficDistribution: {{ .Values.service.trafficDistribution }}
-  {{- end }}
