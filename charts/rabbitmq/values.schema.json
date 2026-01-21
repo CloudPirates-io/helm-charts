@@ -168,6 +168,9 @@
                         "image": {
                             "type": "object",
                             "properties": {
+                                "pullPolicy": {
+                                    "type": "string"
+                                },
                                 "registry": {
                                     "type": "string"
                                 },
@@ -176,14 +179,35 @@
                                 },
                                 "tag": {
                                     "type": "string"
-                                },
-                                "pullPolicy": {
-                                    "type": "string"
                                 }
                             }
                         },
                         "resources": {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
