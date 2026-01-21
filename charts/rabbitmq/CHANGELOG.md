@@ -60,6 +60,16 @@
 
 * No changes recorded
 
+## 0.12.2 (2026-01-21)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#872) ([ce33816](https://github.com/CloudPirates-io/helm-charts/commit/ce33816))
+* chore: update CHANGELOG.md for merged changes ([0d868a2](https://github.com/CloudPirates-io/helm-charts/commit/0d868a2))
+* chore: update CHANGELOG.md for merged changes ([6588cad](https://github.com/CloudPirates-io/helm-charts/commit/6588cad))
+
+## 0.12.1 (2026-01-19)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#856) ([2712d85](https://github.com/CloudPirates-io/helm-charts/commit/2712d85))
+
 ## 0.12.0 (2026-01-15)
 
 *  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))

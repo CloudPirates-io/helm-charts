@@ -25,7 +25,7 @@ data:
     set -e
     echo "Creating custom user: $CUSTOM_USER and database: $CUSTOM_DB"
 
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -v DATABASENAME="$CUSTOM_DB" -v USERNAME="$CUSTOM_USER" -v PASSWORD="$CUSTOM_PASSWORD" <<-EOSQL
+    psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DB" --username "$POSTGRES_USER" -v DATABASENAME="$CUSTOM_DB" -v USERNAME="$CUSTOM_USER" -v PASSWORD="$CUSTOM_PASSWORD" <<-EOSQL
       SELECT quote_ident(:'USERNAME') AS uname \gset
       SELECT quote_ident(:'DATABASENAME') AS udb \gset
       SELECT quote_literal(:'PASSWORD') AS upass \gset
