@@ -317,13 +317,14 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 
 ### Pod Configuration Parameters
 
-| Parameter        | Description                    | Default |
-| ---------------- | ------------------------------ | ------- |
-| `podAnnotations` | Additional pod annotations     | `{}`    |
-| `podLabels`      | Additional pod labels          | `{}`    |
-| `nodeSelector`   | Node labels for pod assignment | `{}`    |
-| `tolerations`    | Tolerations for pod assignment | `[]`    |
-| `affinity`       | Affinity for pod assignment    | `{}`    |
+  | Parameter                   | Description                                     | Default |
+  | ----------------            | ------------------------------                  | ------- |
+  | `podAnnotations`            | Additional pod annotations                      | `{}`    |
+  | `podLabels`                 | Additional pod labels                           | `{}`    |
+  | `nodeSelector`              | Node labels for pod assignment                  | `{}`    |
+  | `tolerations`               | Tolerations for pod assignment                  | `[]`    |
+  | `affinity`                  | Affinity for pod assignment                     | `{}`    |
+  | `topologySpreadConstraints` | topologySpreadConstraints for pod assignment    | `{}`    |
 
 ### Metrics
 
