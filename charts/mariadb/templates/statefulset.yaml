@@ -38,10 +38,6 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- with .Values.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
@@ -372,6 +368,10 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
