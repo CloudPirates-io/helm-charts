@@ -210,6 +210,8 @@ persistence:
   subPath: ""
   ## @param persistence.labels Labels for persistent volume claims
   labels: {}
+  ## @param persistence.volumeName Container volume name and volume claim prefix
+  volumeName: "data"
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -309,7 +311,7 @@ initContainers: []
 # - name: pgautoupgrade
 #   image: tianon/pgautoupgrade:17-to-18
 #   volumeMounts:
-#     - name: data
+#     - name: data  # must match persistence.volumeName
 #       mountPath: /var/lib/postgresql/data
 
 ## @section Container command/args override
