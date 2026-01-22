@@ -466,7 +466,7 @@ data:
       cp /keyfile-secret/keyfile /replicaset/keyfile
     else
       echo "Using configured key"
-      echo "{{ .Values.replicaSet.key }}" > /replicaset/keyfile
+      echo {{ .Values.replicaSet.key | quote }} > /replicaset/keyfile
     fi
     chmod 400 /replicaset/keyfile
     {{- end }}    

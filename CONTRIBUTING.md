@@ -214,6 +214,8 @@ kubectl get all -n test
 
 ## Pull Request Process
 
+> **⚠️ IMPORTANT**: As of **January 22, 2026**, all commits **must** be signed and verified. PRs with unsigned commits will not be merged. See [Setting Up Your Development Environment](#setting-up-your-development-environment) for instructions.
+
 1. **Branch**: Create a feature branch from `main`
 
    ```bash
@@ -253,3 +255,4 @@ Before submitting your pull request, ensure:
 - Chart passes `helm lint`
 - Documentation is updated
 - Changes are backwards compatible (or breaking changes are clearly documented)
+- All commits are signed and verified with GPG/SSH signatures (required as of January 22, 2026)
