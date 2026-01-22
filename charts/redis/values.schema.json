@@ -2,11 +2,11 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "affinity": {
-            "type": "object"
-        },
         "architecture": {
             "type": "string"
+        },
+        "affinity": {
+            "type": "object"
         },
         "auth": {
             "type": "object",
@@ -865,6 +865,20 @@
                 },
                 "certKeyFilename": {
                     "type": "string"
+                },
+                "client": {
+                    "type": "object",
+                    "properties": {
+                        "certFilename": {
+                            "type": "string"
+                        },
+                        "certKeyFilename": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "enabled": {
                     "type": "boolean"
