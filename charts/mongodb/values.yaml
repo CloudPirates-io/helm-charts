@@ -354,9 +354,9 @@ replicaSet:
   ## @param replicaSet.name Replica set name
   name: "repl"
   ## @param replicaSet.key Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
-  key:
+  key: ""
   ## @param replicaSet.keySecretName Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
-  keySecretName:
+  keySecretName: ""
   ## @param replicaSet.clusterDomain Default Kubernetes cluster domain
   clusterDomain: cluster.local
   ## @param replicaSet.secondaries Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)
@@ -458,6 +458,8 @@ replicaSet:
     delay: 3
     ## @param replicaSet.extraInit.initDelay Seconds to wait after mongod is running to give it time for internal initialization
     initDelay: 5
+    ## @param replicaSet.disableTelemetry If true, mongosh telemetry is disabled (see https://www.mongodb.com/docs/mongodb-shell/telemetry)
+    disableTelemetry: false
   ## @param replicaSet.shutdown Internal shutdown configuration
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
