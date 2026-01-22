@@ -152,6 +152,42 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `definitions.topic_permissions`    | Array of RabbitMQ topic permissions to create.                                                                                               | `[]`        |
 | `definitions.policies`             | Array of RabbitMQ policies to create.                                                                                                        | `[]`        |
 
+#### Automatic Configuration Reloading
+
+The chart supports automatic reloading of definitions when the ConfigMap or Secret changes, without requiring a pod restart or Helm upgrade.
+
+| Parameter                                  | Description                                                            | Default           |
+| ------------------------------------------ | ---------------------------------------------------------------------- | ----------------- |
+| `definitions.autoReload.enabled`           | Enable sidecar container to watch for ConfigMap/Secret changes        | `false`           |
+| `definitions.autoReload.image.registry`    | Container image registry for the config watcher sidecar               | `docker.io`       |
+| `definitions.autoReload.image.repository`  | Container image repository for the config watcher sidecar             | `curlimages/curl` |
+| `definitions.autoReload.image.tag`         | Container image tag for the config watcher sidecar                    | `8.11.1`          |
+| `definitions.autoReload.image.pullPolicy`  | Container image pull policy for the config watcher sidecar            | `IfNotPresent`    |
+| `definitions.autoReload.resources`         | Resource limits and requests for the config watcher sidecar           | See values.yaml   |
+
+**How it works:**
+
+When enabled, a lightweight sidecar container runs alongside RabbitMQ and:
+1. Monitors the definitions file for changes (using checksum comparison)
+2. Automatically reloads definitions via RabbitMQ Management API when changes are detected
+3. Checks for changes every 10 seconds
+
+**Example:**
+
+```yaml
+definitions:
+  enabled: true
+  existingConfigMap: my-rabbitmq-definitions
+  autoReload:
+    enabled: true
+```
+
+After deployment, you can update your ConfigMap:
+```bash
+kubectl edit configmap my-rabbitmq-definitions -n <namespace>
+# The sidecar will automatically detect and reload the new configuration
+```
+
 ### Service configuration
 
 | Parameter                               | Description                                                 | Default     |
