@@ -233,8 +233,8 @@ jobs:
           trap "rm -f $SIGN_KEY_FILE" EXIT
 
           # Configure git with SSH signing
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
           git config gpg.format ssh
           git config user.signingkey "$SIGN_KEY_FILE"
           git config commit.gpgsign true
@@ -248,7 +248,7 @@ jobs:
           git commit -m "chore: auto-generate values.schema.json for updated charts" \
             -m "Automatically generated JSON schemas for Helm values files." \
             -m "" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
@@ -285,8 +285,8 @@ jobs:
           trap "rm -f $SIGN_KEY_FILE" EXIT
 
           # Configure git with SSH signing
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
           git config gpg.format ssh
           git config user.signingkey "$SIGN_KEY_FILE"
           git config commit.gpgsign true
@@ -294,7 +294,7 @@ jobs:
           git add charts/*/values.schema.json
 
           git commit -m "chore: auto-generate values.schema.json" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>" || echo "No changes to commit"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>" || echo "No changes to commit"
 
           # Push to PR branch
           git push origin HEAD:${{ github.head_ref }}
@@ -314,8 +314,8 @@ jobs:
           trap "rm -f $SIGN_KEY_FILE" EXIT
 
           # Configure git with SSH signing
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
           git config gpg.format ssh
           git config user.signingkey "$SIGN_KEY_FILE"
           git config commit.gpgsign true
@@ -323,7 +323,7 @@ jobs:
           git add charts/*/values.schema.json
 
           git commit -m "chore: auto-generate values.schema.json" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Push to current branch
           git push origin HEAD:${{ github.ref }}

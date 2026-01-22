@@ -53,8 +53,8 @@ jobs:
           echo "SIGN_KEY_FILE=$SIGN_KEY_FILE" >> $GITHUB_ENV
 
           # Configure git with SSH signing
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
           git config gpg.format ssh
           git config user.signingkey "$SIGN_KEY_FILE"
           git config commit.gpgsign true
@@ -154,7 +154,7 @@ jobs:
             echo "CHANGELOG.md files deleted successfully"
             git add charts/*/CHANGELOG.md
             git commit -m "chore: remove existing CHANGELOG.md files for clean start" \
-              -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+              -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
             echo "clean_start_completed=true" >> $GITHUB_ENV
           else
             echo "No CHANGELOG.md files to delete"
@@ -285,7 +285,7 @@ jobs:
           fi
           
           git commit -m "$COMMIT_MSG" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Pull latest changes and rebase our commit on top
           git pull --rebase origin main
