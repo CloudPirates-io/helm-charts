@@ -28,7 +28,7 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.39@sha256:4737e17016e4d65ad8007408ec1816096c4ebec04cfa89a5265a3edd3f4ca552"
+  tag: "1.6.40@sha256:e4e5eca37e4334f9579f10fcdd88a58c4eb9d0a8eacedde6ec49d4ea4391637a"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
@@ -36,7 +36,7 @@ image:
 replicaCount: 1
 
 ## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
-deploymentType: StatefulSet
+deploymentType: Deployment
 
 service:
   ## @param service.type Kubernetes service type
@@ -129,6 +129,9 @@ containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Set Memcached container's privilege escalation
   allowPrivilegeEscalation: false
 
+## @param priorityClassName Priority class for the memcached instance
+priorityClassName: ""
+
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Memcached pod's Security Context fsGroup
@@ -194,7 +197,7 @@ metrics:
   image:
     registry: docker.io
     repository: prom/memcached-exporter
-    tag: "v0.15.4@sha256:b6763ecb3c47f2408e0398518851b7f8c5fc46232b2649f8c78a321130c54266"
+    tag: "v0.15.5@sha256:92a6ad5a3d3e2dffc75efd4e18d1470fa5703dd79b6bace53fe11312b634578e"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:

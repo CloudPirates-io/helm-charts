@@ -1,9 +1,151 @@
 # Changelog
 
 
+## cluster-operator-0.1.4 (2026-01-19)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([e23b802](https://github.com/CloudPirates-io/helm-charts/commit/e23b802))
+* chore: update CHANGELOG.md for merged changes ([bfcd147](https://github.com/CloudPirates-io/helm-charts/commit/bfcd147))
+* chore: auto-generate values.schema.json (#832) ([16e54d2](https://github.com/CloudPirates-io/helm-charts/commit/16e54d2))
+* chore: update CHANGELOG.md for merged changes ([f867495](https://github.com/CloudPirates-io/helm-charts/commit/f867495))
+* chore: update CHANGELOG.md for merged changes ([bd29fbc](https://github.com/CloudPirates-io/helm-charts/commit/bd29fbc))
+* chore: update CHANGELOG.md for merged changes ([b37e0c7](https://github.com/CloudPirates-io/helm-charts/commit/b37e0c7))
+* queuebalancing schema types (#831) ([f1f1fbf](https://github.com/CloudPirates-io/helm-charts/commit/f1f1fbf))
+* chore: update CHANGELOG.md for merged changes ([e40975d](https://github.com/CloudPirates-io/helm-charts/commit/e40975d))
+* chore: update CHANGELOG.md for merged changes ([85eca5b](https://github.com/CloudPirates-io/helm-charts/commit/85eca5b))
+* chore: auto-generate values.schema.json (#828) ([ecbf971](https://github.com/CloudPirates-io/helm-charts/commit/ecbf971))
+* chore: update CHANGELOG.md for merged changes ([a1f6adc](https://github.com/CloudPirates-io/helm-charts/commit/a1f6adc))
+* queues not balanced #653 ([a9f6a5d](https://github.com/CloudPirates-io/helm-charts/commit/a9f6a5d))
+
+## cluster-operator-0.1.3 (2026-01-09)
+
+* chore: update CHANGELOG.md for merged changes ([96d70b8](https://github.com/CloudPirates-io/helm-charts/commit/96d70b8))
+* chore: update CHANGELOG.md for merged changes ([4ec69b0](https://github.com/CloudPirates-io/helm-charts/commit/4ec69b0))
+* Update README.md : ha cluster config and chart update infos (#826) ([54caf60](https://github.com/CloudPirates-io/helm-charts/commit/54caf60))
+* Update charts/rabbitmq/values.yaml rabbitmq (#821) ([11cd6b1](https://github.com/CloudPirates-io/helm-charts/commit/11cd6b1))
+* chore: update CHANGELOG.md for merged changes ([785e8d4](https://github.com/CloudPirates-io/helm-charts/commit/785e8d4))
+* chore: update CHANGELOG.md for merged changes ([1f381f5](https://github.com/CloudPirates-io/helm-charts/commit/1f381f5))
+* chore: update CHANGELOG.md for merged changes ([ae1c410](https://github.com/CloudPirates-io/helm-charts/commit/ae1c410))
+* chore: update CHANGELOG.md for merged changes ([c37cd64](https://github.com/CloudPirates-io/helm-charts/commit/c37cd64))
+* chore: update CHANGELOG.md for merged changes ([8221fb3](https://github.com/CloudPirates-io/helm-charts/commit/8221fb3))
+* chore: auto-generate values.schema.json (#816) ([3602636](https://github.com/CloudPirates-io/helm-charts/commit/3602636))
+* chore: update CHANGELOG.md for merged changes ([135a999](https://github.com/CloudPirates-io/helm-charts/commit/135a999))
+* queues not balanced #653 ([b3e74ad](https://github.com/CloudPirates-io/helm-charts/commit/b3e74ad))
+
+## cluster-operator-0.1.2 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([5495451](https://github.com/CloudPirates-io/helm-charts/commit/5495451))
+* chore: update CHANGELOG.md for merged changes ([b2973f3](https://github.com/CloudPirates-io/helm-charts/commit/b2973f3))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.2.2 (patch) (#760) ([3ddf1ed](https://github.com/CloudPirates-io/helm-charts/commit/3ddf1ed))
+
+## cluster-operator-0.1.1 (2025-12-16)
+
+* chore: update CHANGELOG.md for merged changes ([1f90423](https://github.com/CloudPirates-io/helm-charts/commit/1f90423))
+* Add externalTrafficPolicy and allocateLoadBalancerNodePorts to service spec (#730) ([22ec7fe](https://github.com/CloudPirates-io/helm-charts/commit/22ec7fe))
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+* chore: update CHANGELOG.md for merged changes ([df97204](https://github.com/CloudPirates-io/helm-charts/commit/df97204))
+* chore: update CHANGELOG.md for merged changes ([0b1d21c](https://github.com/CloudPirates-io/helm-charts/commit/0b1d21c))
+* Add ServiceAccount automountServiceAccountToken configuration (#673) ([c9f8f24](https://github.com/CloudPirates-io/helm-charts/commit/c9f8f24))
+* chore: update CHANGELOG.md for merged changes ([dc84b5c](https://github.com/CloudPirates-io/helm-charts/commit/dc84b5c))
+* chore: update CHANGELOG.md for merged changes ([bcf6608](https://github.com/CloudPirates-io/helm-charts/commit/bcf6608))
+* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+
 ## cluster-operator-0.1.0 (2025-12-01)
 
 * No changes recorded
+
+## 0.12.2 (2026-01-21)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#872) ([ce33816](https://github.com/CloudPirates-io/helm-charts/commit/ce33816))
+* chore: update CHANGELOG.md for merged changes ([0d868a2](https://github.com/CloudPirates-io/helm-charts/commit/0d868a2))
+* chore: update CHANGELOG.md for merged changes ([6588cad](https://github.com/CloudPirates-io/helm-charts/commit/6588cad))
+
+## 0.12.1 (2026-01-19)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#856) ([2712d85](https://github.com/CloudPirates-io/helm-charts/commit/2712d85))
+
+## 0.12.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([e23b802](https://github.com/CloudPirates-io/helm-charts/commit/e23b802))
+* chore: update CHANGELOG.md for merged changes ([bfcd147](https://github.com/CloudPirates-io/helm-charts/commit/bfcd147))
+* chore: auto-generate values.schema.json (#832) ([16e54d2](https://github.com/CloudPirates-io/helm-charts/commit/16e54d2))
+* chore: update CHANGELOG.md for merged changes ([f867495](https://github.com/CloudPirates-io/helm-charts/commit/f867495))
+* chore: update CHANGELOG.md for merged changes ([bd29fbc](https://github.com/CloudPirates-io/helm-charts/commit/bd29fbc))
+* chore: update CHANGELOG.md for merged changes ([b37e0c7](https://github.com/CloudPirates-io/helm-charts/commit/b37e0c7))
+
+## 0.11.5 (2026-01-12)
+
+* queuebalancing schema types (#831) ([f1f1fbf](https://github.com/CloudPirates-io/helm-charts/commit/f1f1fbf))
+* chore: update CHANGELOG.md for merged changes ([e40975d](https://github.com/CloudPirates-io/helm-charts/commit/e40975d))
+* chore: update CHANGELOG.md for merged changes ([85eca5b](https://github.com/CloudPirates-io/helm-charts/commit/85eca5b))
+* chore: auto-generate values.schema.json (#828) ([ecbf971](https://github.com/CloudPirates-io/helm-charts/commit/ecbf971))
+* chore: update CHANGELOG.md for merged changes ([a1f6adc](https://github.com/CloudPirates-io/helm-charts/commit/a1f6adc))
+
+## 0.11.4 (2026-01-10)
+
+* queues not balanced #653 ([a9f6a5d](https://github.com/CloudPirates-io/helm-charts/commit/a9f6a5d))
+* chore: update CHANGELOG.md for merged changes ([96d70b8](https://github.com/CloudPirates-io/helm-charts/commit/96d70b8))
+* chore: update CHANGELOG.md for merged changes ([4ec69b0](https://github.com/CloudPirates-io/helm-charts/commit/4ec69b0))
+
+## 0.11.3 (2026-01-09)
+
+* Update README.md : ha cluster config and chart update infos (#826) ([54caf60](https://github.com/CloudPirates-io/helm-charts/commit/54caf60))
+
+## 0.11.2 (2026-01-08)
+
+* Update charts/rabbitmq/values.yaml rabbitmq (#821) ([11cd6b1](https://github.com/CloudPirates-io/helm-charts/commit/11cd6b1))
+* chore: update CHANGELOG.md for merged changes ([785e8d4](https://github.com/CloudPirates-io/helm-charts/commit/785e8d4))
+* chore: update CHANGELOG.md for merged changes ([1f381f5](https://github.com/CloudPirates-io/helm-charts/commit/1f381f5))
+* chore: update CHANGELOG.md for merged changes ([ae1c410](https://github.com/CloudPirates-io/helm-charts/commit/ae1c410))
+
+## 0.11.1 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([c37cd64](https://github.com/CloudPirates-io/helm-charts/commit/c37cd64))
+* chore: update CHANGELOG.md for merged changes ([8221fb3](https://github.com/CloudPirates-io/helm-charts/commit/8221fb3))
+* chore: auto-generate values.schema.json (#816) ([3602636](https://github.com/CloudPirates-io/helm-charts/commit/3602636))
+* chore: update CHANGELOG.md for merged changes ([135a999](https://github.com/CloudPirates-io/helm-charts/commit/135a999))
+
+## 0.11.0 (2026-01-08)
+
+* queues not balanced #653 ([b3e74ad](https://github.com/CloudPirates-io/helm-charts/commit/b3e74ad))
+
+## 0.10.2 (2025-12-22)
+
+* chore: update CHANGELOG.md for merged changes ([5495451](https://github.com/CloudPirates-io/helm-charts/commit/5495451))
+* chore: update CHANGELOG.md for merged changes ([b2973f3](https://github.com/CloudPirates-io/helm-charts/commit/b2973f3))
+* Update charts/rabbitmq/values.yaml rabbitmq to v4.2.2 (patch) (#760) ([3ddf1ed](https://github.com/CloudPirates-io/helm-charts/commit/3ddf1ed))
+
+## 0.10.1 (2025-12-12)
+
+* chore: update CHANGELOG.md for merged changes ([1f90423](https://github.com/CloudPirates-io/helm-charts/commit/1f90423))
+* Add externalTrafficPolicy and allocateLoadBalancerNodePorts to service spec (#730) ([22ec7fe](https://github.com/CloudPirates-io/helm-charts/commit/22ec7fe))
+
+## 0.10.0 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+
+## 0.9.0 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([df97204](https://github.com/CloudPirates-io/helm-charts/commit/df97204))
+* chore: update CHANGELOG.md for merged changes ([0b1d21c](https://github.com/CloudPirates-io/helm-charts/commit/0b1d21c))
+* Add ServiceAccount automountServiceAccountToken configuration (#673) ([c9f8f24](https://github.com/CloudPirates-io/helm-charts/commit/c9f8f24))
+
+## 0.8.1 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([dc84b5c](https://github.com/CloudPirates-io/helm-charts/commit/dc84b5c))
+* chore: update CHANGELOG.md for merged changes ([bcf6608](https://github.com/CloudPirates-io/helm-charts/commit/bcf6608))
+* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
 
 ## 0.8.0 (2025-12-06)
 

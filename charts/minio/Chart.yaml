@@ -2,8 +2,8 @@ apiVersion: v2
 name: minio
 description: High Performance Object Storage compatible with Amazon S3 APIs
 type: application
-version: 0.5.6
-appVersion: "2025.09.07"
+version: 0.8.0
+appVersion: "2025.10.15"
 keywords:
   - minio
   - object-storage
@@ -41,4 +41,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "use cloudpirates image (#870)"
+          links:
+            - name: "Commit bf069f6"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/bf069f6"

@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.0-management@sha256:b1b34ba023e4e7d151425fac47017681578a35b6f66c0dfc0c5f9ed529008e30"
+  tag: "4.2.2-management@sha256:e96344e767085fedcdc74cce176c72414938f28502ee238bcc0a8db6d1a402b0"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -34,12 +34,19 @@ clusterDomain: cluster.local
 ## @param replicaCount Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas)
 replicaCount: 1
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
 ## @section Service configuration
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
   ## @param service.trafficDistribution Traffic distribution policy for the service
   trafficDistribution: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: Cluster
+  ## @param service.allocateLoadBalancerNodePorts Allocate node ports for LoadBalancer service type
+  allocateLoadBalancerNodePorts: true
   ## @param service.amqpPort RabbitMQ AMQP service port
   amqpPort: 5672
   ## @param service.managementPort RabbitMQ management UI port
@@ -116,6 +123,120 @@ config:
   ## @param config.advancedConfiguration Advanced RabbitMQ configuration
   advancedConfiguration: ""
 
+## @section Queue Balancing and Distribution Configuration
+## Addresses GitHub issue #653: Unbalanced queue distribution in multi-node RabbitMQ clusters
+##
+## Example configuration for a 3-node RabbitMQ cluster with balanced queues:
+##
+## queueBalancing:
+##   enabled: true
+##   queueLeaderLocator: "balanced"
+##   clusterFormation:
+##     targetClusterSizeHint: 3
+##   quorumQueues:
+##     continuousMembershipReconciliation:
+##       enabled: true
+##       targetGroupSize: 3
+##   autoRebalance:
+##     enabled: true
+##     delay: 30
+##     vhosts: ["/", "app"]
+##
+queueBalancing:
+  ## @param queueBalancing.enabled Enable queue balancing and distribution features
+  ## When enabled, configures RabbitMQ for better queue distribution across cluster nodes
+  enabled: false
+
+  ## Queue leader locator strategy for new queues
+  ## @param queueBalancing.queueLeaderLocator Strategy for placing queue leaders across cluster nodes
+  ## Options: "client-local" (default), "balanced", "min-masters" (deprecated)
+  ## - "client-local": Place queue leader on the node the creating client is connected to (default RabbitMQ behavior)
+  ## - "balanced": Distribute queue leaders evenly across all cluster nodes (recommended for multi-node clusters)
+  ## - "min-masters": Legacy option, use "balanced" instead
+  queueLeaderLocator: "balanced"
+
+  ## Cluster formation hints
+  ## @param queueBalancing.clusterFormation.targetClusterSizeHint Hint about expected cluster size (integer)
+  ## Helps RabbitMQ make better decisions during cluster formation and queue placement
+  ## Leave empty/null to use RabbitMQ's default
+  clusterFormation:
+    targetClusterSizeHint: null  # @schema type:[integer,null]
+
+  ## Quorum queue reconciliation settings (for RabbitMQ 3.10+)
+  ## Helps ensure quorum queues have the correct number of replicas across cluster nodes
+  quorumQueues:
+    ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.enabled Enable continuous membership reconciliation for quorum queues
+    ## Automatically adds/removes quorum queue members to match cluster size
+    continuousMembershipReconciliation:
+      enabled: false
+      ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize Target number of members per quorum queue (integer)
+      ## Set to cluster size for full replication, or leave empty/null to use cluster_formation.target_cluster_size_hint
+      targetGroupSize: null  # @schema type:[integer,null]
+      ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.interval Reconciliation check interval in milliseconds
+      ## Default: 3600000 (1 hour) to match RabbitMQ's default
+      interval: 3600000
+      ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval How often to trigger reconciliation in milliseconds (integer)
+      ## Leave empty/null to use RabbitMQ's default
+      triggerInterval: null  # @schema type:[integer,null]
+
+  ## Automatic queue rebalancing
+  ## @param queueBalancing.autoRebalance.enabled Enable automatic queue rebalancing on pod startup
+  ## Uses a postStart hook to rebalance queues across cluster nodes when pods start
+  autoRebalance:
+    enabled: false
+    ## @param queueBalancing.autoRebalance.delay Delay in seconds before starting rebalancing
+    ## Allows time for the cluster to stabilize before rebalancing
+    delay: 30
+    ## @param queueBalancing.autoRebalance.vhosts List of vhosts to rebalance (empty = all vhosts)
+    ## Example: ["/", "app", "staging"]
+    vhosts: []
+
+## Usage Examples:
+##
+## 1. Basic queue balancing (recommended for most multi-node clusters):
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##
+## 2. Full configuration for 3-node cluster with quorum queues:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      clusterFormation:
+##        targetClusterSizeHint: 3
+##      quorumQueues:
+##        continuousMembershipReconciliation:
+##          enabled: true
+##          targetGroupSize: 3
+##
+## 3. With automatic rebalancing for existing deployments:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      autoRebalance:
+##        enabled: true
+##        delay: 60  # Wait longer for large clusters
+##
+## 4. Production setup with specific vhosts:
+##    queueBalancing:
+##      enabled: true
+##      queueLeaderLocator: "balanced"
+##      clusterFormation:
+##        targetClusterSizeHint: 5
+##      autoRebalance:
+##        enabled: true
+##        delay: 45
+##        vhosts: ["/", "production", "staging"]
+##      quorumQueues:
+##        continuousMembershipReconciliation:
+##          enabled: true
+##          targetGroupSize: 3  # 3 replicas even in 5-node cluster
+##          interval: 1800000  # 30 minutes in milliseconds
+##
+## Note: When upgrading existing RabbitMQ deployments, enable autoRebalance
+##       to redistribute existing queues. For new deployments, queueLeaderLocator
+##       alone is usually sufficient.
+
 ## @section PeerDiscoveryK8sPlugin configuration
 peerDiscoveryK8sPlugin:
   ## @param peerDiscoveryK8sPlugin.enabled Enable K8s peer discovery plugin for a RabbitMQ HA-cluster
@@ -138,7 +259,7 @@ initContainer:
     ## @param initContainer.image.registry Init container image repository
     repository: busybox
     ## @param initContainer.image.tag Init container image tag
-    tag: "1.37.0@sha256:d80cd694d3e9467884fcb94b8ca1e20437d8a501096cdf367a5a1918a34fc2fd"
+    tag: "1.37.0@sha256:b86c79d6d337dcaa4cad3cfc704d5e6ae5ba725f3e0674d96f65af7a8f5e2761"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
 
@@ -193,8 +314,7 @@ ingress:
   ## @param ingress.className Ingress class name
   className: ""
   ## @param ingress.annotations Ingress annotations
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts Ingress hosts configuration
@@ -208,8 +328,7 @@ ingress:
 
 ## @section Resources
 ## @param resources Resource limits and requests for RabbitMQ pods
-resources:
-  {}
+resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -253,6 +372,9 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+
+## @param priorityClassName Priority class for the rabbitmq instance
+priorityClassName: ""
 
 ## @section Liveness and readiness probes
 livenessProbe:
@@ -382,6 +504,8 @@ serviceAccount:
   create: true
   ## @param serviceAccount.name Name of serviceAccount
   name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the RabbitMQ pods
+  automountServiceAccountToken: false
   ## @param serviceAccount.annotations Annotations for service account.
   annotations: {}
 

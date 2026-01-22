@@ -169,24 +169,36 @@ Create the name of the service account to use
 Extract PostgreSQL major version from image tag
 */}}
 {{- define "postgres.majorVersion" -}}
-{{- $tag := .Values.image.tag -}}
-{{- if contains "@" $tag -}}
-  {{- $tag = (split "@" $tag)._0 -}}
-{{- end -}}
-{{- if contains "." $tag -}}
-  {{- (split "." $tag)._0 -}}
-{{- else -}}
-  {{- $tag -}}
-{{- end -}}
+  {{- $tag := .Values.image.tag -}}
+  {{- if contains "@" $tag -}}
+    {{- $tag = (split "@" $tag)._0 -}}
+  {{- end -}}
+
+  {{- if regexMatch "pg[0-9]+" $tag -}}
+    {{- regexReplaceAll ".*pg([0-9]+).*" $tag "${1}" -}}
+  {{- else -}}
+    {{- if contains "-" $tag -}}
+      {{- $tag = (regexReplaceAll "-.*" $tag "") -}}
+    {{- end -}}
+    {{- if contains "." $tag -}}
+      {{- (split "." $tag)._0 -}}
+    {{- else -}}
+      {{- $tag -}}
+    {{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{/*
-Return PostgreSQL data directory based on major version
-For PostgreSQL 18+, use version-specific path; for older versions use traditional path
+Return PostgreSQL data directory based on major version and image type
+For PostgreSQL 18+, use version-specific path
+For hardened images <18, use version-specific path like 18+
+For standard images <18, use traditional path
 */}}
 {{- define "postgres.dataDir" -}}
 {{- $majorVersion := include "postgres.majorVersion" . | int -}}
 {{- if ge $majorVersion 18 -}}
+{{- printf "/var/lib/postgresql" -}}
+{{- else if .Values.image.useHardenedImage -}}
 {{- printf "/var/lib/postgresql" -}}
 {{- else -}}
 {{- printf "/var/lib/postgresql/data" -}}
@@ -194,13 +206,17 @@ For PostgreSQL 18+, use version-specific path; for older versions use traditiona
 {{- end }}
 
 {{/*
-Return PGDATA path based on major version
-For PostgreSQL 18+, use version-specific PGDATA; for older versions use traditional PGDATA
+Return PGDATA path based on major version and image type
+For PostgreSQL 18+, use version-specific PGDATA
+For hardened images <18, use /var/lib/postgresql/<version>/data
+For standard images <18, use traditional PGDATA
 */}}
 {{- define "postgres.pgdataPath" -}}
 {{- $majorVersion := include "postgres.majorVersion" . | int -}}
 {{- if ge $majorVersion 18 -}}
 {{- printf "/var/lib/postgresql/%d/docker" $majorVersion -}}
+{{- else if .Values.image.useHardenedImage -}}
+{{- printf "/var/lib/postgresql/%d/data" $majorVersion -}}
 {{- else -}}
 {{- printf "/var/lib/postgresql/data/pgdata" -}}
 {{- end -}}

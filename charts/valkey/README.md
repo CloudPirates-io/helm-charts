@@ -85,16 +85,17 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 ### Common configuration
 
-| Parameter           | Description                                                                                    | Default         |
-| ------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
-| `architecture`      | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`    |
-| `replicaCount`      | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`             |
-| `ipFamily`          | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`          |
-| `clusterDomain`     | Kubernetes cluster domain                                                                      | `cluster.local` |
-| `nameOverride`      | String to partially override valkey.fullname                                                   | `""`            |
-| `fullnameOverride`  | String to fully override valkey.fullname                                                       | `""`            |
-| `commonLabels`      | Labels to add to all deployed objects                                                          | `{}`            |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                     | `{}`            |
+| Parameter              | Description                                                                                    | Default         |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | --------------- |
+| `architecture`         | Valkey architecture. Allowed values: `standalone`, `replication`                               | `standalone`    |
+| `replicaCount`         | Number of Valkey replicas to deploy (only when architecture=replication)                       | `3`             |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                   | `10`            |
+| `ipFamily`             | IP family to use for replica and sentinel announce IPs. Allowed values: `auto`, `ipv4`, `ipv6` | `auto`          |
+| `clusterDomain`        | Kubernetes cluster domain                                                                      | `cluster.local` |
+| `nameOverride`         | String to partially override valkey.fullname                                                   | `""`            |
+| `fullnameOverride`     | String to fully override valkey.fullname                                                       | `""`            |
+| `commonLabels`         | Labels to add to all deployed objects                                                          | `{}`            |
+| `commonAnnotations`    | Annotations to add to all deployed objects                                                     | `{}`            |
 
 ### Pod annotations and labels
 
@@ -114,6 +115,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `containerSecurityContext.runAsGroup`               | Group ID for the Valkey container                 | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the valkey instance            | `""`      |
 
 ### Valkey Authentication
 
@@ -128,6 +130,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 
 | Parameter                  | Description                                               | Default                   |
 | -------------------------- | --------------------------------------------------------- | ------------------------- |
+| `config.mountPath`         | Redis configuration mount path                            | `/etc/valkey`             |
 | `config.maxMemory`         | Maximum memory usage for Valkey (e.g., 256mb, 1gb)        | `""`                      |
 | `config.maxMemoryPolicy`   | Memory eviction policy when maxmemory is reached          | `"allkeys-lru"`           |
 | `config.save`              | Valkey save configuration (e.g., "900 1 300 10 60 10000") | `"900 1 300 10 60 10000"` |
@@ -244,9 +247,11 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | Parameter                            | Description                                                                         | Default                                                                                      |
 | ------------------------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
+| `sentinel.image.registry`            | Valkey Sentinel image registry                                                      | `docker.io`                                                                                  |
 | `sentinel.image.repository`          | Valkey Sentinel image repository                                                    | `valkey/valkey`                                                                              |
 | `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
 | `sentinel.image.pullPolicy`          | Valkey Sentinel image pull policy                                                   | `Always`                                                                                     |
+| `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                       | `true`                                                                                       |
 | `sentinel.masterName`                | Name of the master server                                                           | `mymaster`                                                                                   |
 | `sentinel.quorum`                    | Number of Sentinels that need to agree about the fact the master is not reachable   | `2`                                                                                          |
 | `sentinel.downAfterMilliseconds`     | Time in milliseconds after the master is declared down                              | `1500`                                                                                       |

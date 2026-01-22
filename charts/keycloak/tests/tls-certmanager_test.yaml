@@ -1,7 +1,7 @@
 suite: test cert-manager integration
 templates:
   - certificate.yaml
-  - deployment.yaml
+  - statefulset.yaml
 tests:
   - it: should create Certificate when cert-manager is enabled
     set:
@@ -227,7 +227,7 @@ tests:
             kind: ClusterIssuer
           dnsNames:
             - auth.example.com
-    template: deployment.yaml
+    template: statefulset.yaml
     asserts:
       - equal:
           path: spec.template.spec.volumes[?(@.name=="tls-certs")].secret.secretName
@@ -245,7 +245,7 @@ tests:
           secretName: my-custom-secret
           dnsNames:
             - auth.example.com
-    template: deployment.yaml
+    template: statefulset.yaml
     asserts:
       - equal:
           path: spec.template.spec.volumes[?(@.name=="tls-certs")].secret.secretName

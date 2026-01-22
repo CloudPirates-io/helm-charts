@@ -181,15 +181,16 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 
 ### Persistence Parameters
 
-| Parameter                  | Description                                 | Default             |
-| -------------------------- | ------------------------------------------- | ------------------- |
-| `persistence.enabled`      | Enable MariaDB data persistence using PVC   | `true`              |
-| `persistence.storageClass` | PVC Storage Class for MariaDB data volume   | `""`                |
-| `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
-| `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
-| `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
-| `persistence.labels`       | Labels for persistent volume claims         | `{}`                |
-| `persistence.selector`     | Additional labels for the PVC               | `{}`                |
+| Parameter                   | Description                                                | Default             |
+| --------------------------- | ---------------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable MariaDB data persistence using PVC                  | `true`              |
+| `persistence.existingClaim` | Name of an existing PVC to use for MariaDB data volume     | `""`                |
+| `persistence.storageClass`  | PVC Storage Class for MariaDB data volume                  | `""`                |
+| `persistence.accessModes`   | PVC Access modes                                           | `["ReadWriteOnce"]` |
+| `persistence.size`          | PVC Storage Request for MariaDB data volume                | `8Gi`               |
+| `persistence.annotations`   | Additional custom annotations for the PVC                  | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                        | `{}`                |
+| `persistence.selector`      | Additional labels for the PVC                              | `{}`                |
 
 ### Security Context Parameters
 
@@ -200,6 +201,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
+| `priorityClassName`                                 | Priority class for the MariaDB instance                         | `""`    |
 
 ### Resources Parameters
 
@@ -315,13 +317,30 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 
 ### Pod Configuration Parameters
 
-| Parameter        | Description                    | Default |
-| ---------------- | ------------------------------ | ------- |
-| `podAnnotations` | Additional pod annotations     | `{}`    |
-| `podLabels`      | Additional pod labels          | `{}`    |
-| `nodeSelector`   | Node labels for pod assignment | `{}`    |
-| `tolerations`    | Tolerations for pod assignment | `[]`    |
-| `affinity`       | Affinity for pod assignment    | `{}`    |
+  | Parameter                   | Description                                     | Default |
+  | ----------------            | ------------------------------                  | ------- |
+  | `podAnnotations`            | Additional pod annotations                      | `{}`    |
+  | `podLabels`                 | Additional pod labels                           | `{}`    |
+  | `nodeSelector`              | Node labels for pod assignment                  | `{}`    |
+  | `tolerations`               | Tolerations for pod assignment                  | `[]`    |
+  | `affinity`                  | Affinity for pod assignment                     | `{}`    |
+  | `topologySpreadConstraints` | TopologySpreadConstraints for pod assignment    | `{}`    |
+
+### Metrics
+
+| Parameter                          | Description                                                 | Default                                         |
+| ---------------------------------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| `metrics.enabled`                  | Enable metrics exporter sidecar                             | `false`                                         |
+| `metrics.image.registry`           | Metrics exporter image registry                             | `docker.io`                                     |
+| `metrics.image.repository`         | Metrics exporter image repository                           | `prom/mysqld-exporter`                          |
+| `metrics.image.tag`                | Metrics exporter image tag (immutable tags are recommended) | `v0.18.0@sha256:[...]`                          |
+| `metrics.image.pullPolicy`         | Metrics exporter image pull policy                          | `Always`                                        |
+| `metrics.port`                     | Metrics exporter port                                       | `9104`                                          |
+| `metrics.containerSecurityContext` | Security context for metrics container                      | `{runAsUser: 65534, runAsNonRoot: true, ...}`   |
+| `metrics.resources`                | Resource limits and requests for metrics container          | `{}`                                            |
+| `metrics.extraEnvVars`             | Additional environment variables for metrics exporter       | `[]`                                            |
+| `metrics.livenessProbe`            | LivenessProbe for metrics container                         | `{enabled: true, initialDelaySeconds: 30, ...}` |
+| `metrics.readinessProbe`           | ReadinessProbe for metrics container                        | `{enabled: true, initialDelaySeconds: 30, ...}` |
 
 ## Examples
 
@@ -385,6 +404,16 @@ auth:
     rootPasswordKey: "root-password"
     userPasswordKey: "user-password"
 ```
+
+### Using Existing PersistentVolumeClaim
+
+```yaml
+persistence:
+  enabled: true
+  existingClaim: "my-existing-pvc"
+```
+
+> **Note:** When using an existing PVC, the `storageClass`, `accessModes`, `size`, and `selector` parameters are ignored, as these properties are already defined in the existing PVC.
 
 ### Custom Configuration
 

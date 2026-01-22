@@ -1,6 +1,30 @@
 # Changelog
 
 
+## 1.2.12 (2026-01-19)
+
+* chore: update CHANGELOG.md for merged changes ([6bfc11c](https://github.com/CloudPirates-io/helm-charts/commit/6bfc11c))
+* chore: update CHANGELOG.md for merged changes ([2787106](https://github.com/CloudPirates-io/helm-charts/commit/2787106))
+* chore: update CHANGELOG.md for merged changes ([33acaf1](https://github.com/CloudPirates-io/helm-charts/commit/33acaf1))
+
+## 1.2.11 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([0bbe33d](https://github.com/CloudPirates-io/helm-charts/commit/0bbe33d))
+* chore: update CHANGELOG.md for merged changes ([dbdc740](https://github.com/CloudPirates-io/helm-charts/commit/dbdc740))
+
+## 1.2.10 (2025-12-09)
+
+* chore: update CHANGELOG.md for merged changes ([0573d71](https://github.com/CloudPirates-io/helm-charts/commit/0573d71))
+* chore: update CHANGELOG.md for merged changes ([ae4a6dc](https://github.com/CloudPirates-io/helm-charts/commit/ae4a6dc))
+* chore: update CHANGELOG.md for merged changes ([8abecae](https://github.com/CloudPirates-io/helm-charts/commit/8abecae))
+* chore: update CHANGELOG.md for merged changes ([f3c8aca](https://github.com/CloudPirates-io/helm-charts/commit/f3c8aca))
+* chore: update CHANGELOG.md for merged changes ([3c62725](https://github.com/CloudPirates-io/helm-charts/commit/3c62725))
+* chore: update CHANGELOG.md for merged changes ([9b4245e](https://github.com/CloudPirates-io/helm-charts/commit/9b4245e))
+* chore: update CHANGELOG.md for merged changes ([ec443ff](https://github.com/CloudPirates-io/helm-charts/commit/ec443ff))
+* chore: update CHANGELOG.md for merged changes ([a23c122](https://github.com/CloudPirates-io/helm-charts/commit/a23c122))
+* chore: update CHANGELOG.md for merged changes ([7b7993f](https://github.com/CloudPirates-io/helm-charts/commit/7b7993f))
+* chore: update CHANGELOG.md for merged changes ([ba9b47c](https://github.com/CloudPirates-io/helm-charts/commit/ba9b47c))
+
 ## 1.2.9 (2025-11-04)
 
 * chore: update CHANGELOG.md for merged changes ([5cc4e82](https://github.com/CloudPirates-io/helm-charts/commit/5cc4e82))

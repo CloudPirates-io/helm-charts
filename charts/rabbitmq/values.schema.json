@@ -478,6 +478,73 @@
                 }
             }
         },
+        "priorityClassName": {
+            "type": "string"
+        },
+        "queueBalancing": {
+            "type": "object",
+            "properties": {
+                "autoRebalance": {
+                    "type": "object",
+                    "properties": {
+                        "delay": {
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "vhosts": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "clusterFormation": {
+                    "type": "object",
+                    "properties": {
+                        "targetClusterSizeHint": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "queueLeaderLocator": {
+                    "type": "string"
+                },
+                "quorumQueues": {
+                    "type": "object",
+                    "properties": {
+                        "continuousMembershipReconciliation": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "interval": {
+                                    "type": "integer"
+                                },
+                                "targetGroupSize": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "triggerInterval": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "rbac": {
             "type": "object",
             "properties": {
@@ -518,9 +585,15 @@
         "resources": {
             "type": "object"
         },
+        "revisionHistoryLimit": {
+            "type": "integer"
+        },
         "service": {
             "type": "object",
             "properties": {
+                "allocateLoadBalancerNodePorts": {
+                    "type": "boolean"
+                },
                 "amqpPort": {
                     "type": "integer"
                 },
@@ -535,6 +608,9 @@
                 },
                 "epmdPort": {
                     "type": "integer"
+                },
+                "externalTrafficPolicy": {
+                    "type": "string"
                 },
                 "managementPort": {
                     "type": "integer"
@@ -552,6 +628,9 @@
             "properties": {
                 "annotations": {
                     "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
                 },
                 "create": {
                     "type": "boolean"

@@ -25,7 +25,7 @@ spec:
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           resources: {{- toYaml .Values.clusterInitJob.resources | nindent 12 }}
           env:
-          {{- if .Values.auth.enabled }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -40,11 +40,21 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+          {{- if .Values.auth.acl.enabled }}
+          volumeMounts:
+            - name: acl-file
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
+              readOnly: true
+          {{- end }}
           command:
             - /bin/sh
             - -c
             - |
               set -e
+
+              {{- include "redis.auth.acl.setupScript" (dict "type" "job" "context" .) | nindent 14 }}
+
               echo "Building list of Redis nodes..."
               NODES=""
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
@@ -69,4 +79,10 @@ spec:
                 --cluster-replicas {{ .Values.clusterReplicaCount }} \
                 {{- end }}
                 --cluster-yes
+      {{- if .Values.auth.acl.enabled }}
+      volumes:
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+      {{- end }}
 {{- end }}
