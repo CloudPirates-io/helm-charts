@@ -224,8 +224,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CHANGELOG_PAT }}
         run: |
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          # Trap to ensure cleanup even on error
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           # Create a new branch for the schema updates
           BRANCH_NAME="auto/schema-update-$(date +%s)"
@@ -240,6 +252,8 @@ jobs:
 
           # Push the branch
           git push origin "$BRANCH_NAME"
+
+          rm -f "$SIGN_KEY_FILE"
 
           # Create a pull request
           gh pr create \
@@ -264,8 +278,18 @@ jobs:
           github.event_name == 'pull_request' &&
           steps.check-changes.outputs.has_changes == 'true'
         run: |
+          # Setup SSH key for signing
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           git add charts/*/values.schema.json
 
@@ -275,14 +299,26 @@ jobs:
           # Push to PR branch
           git push origin HEAD:${{ github.head_ref }}
 
+          rm -f "$SIGN_KEY_FILE"
+
       - name: Commit schema updates to current branch (workflow_dispatch on non-main)
         if: |
           github.event_name == 'workflow_dispatch' &&
           github.ref != 'refs/heads/main' &&
           steps.check-changes.outputs.has_changes == 'true'
         run: |
+          # Setup SSH key for signing
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           git add charts/*/values.schema.json
 
@@ -291,6 +327,8 @@ jobs:
 
           # Push to current branch
           git push origin HEAD:${{ github.ref }}
+
+          rm -f "$SIGN_KEY_FILE"
 
       - name: Generate job summary
         if: steps.determine-charts.outputs.charts != ''

@@ -42,8 +42,22 @@ jobs:
 
       - name: Configure Git
         run: |
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Store the key file path for later steps
+          echo "SIGN_KEY_FILE=$SIGN_KEY_FILE" >> $GITHUB_ENV
+
+          # Configure git with SSH signing
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
       - name: Fetch all tags
         run: |
@@ -278,3 +292,6 @@ jobs:
 
           # Push the changes
           git push origin main
+
+          # Clean up the signing key
+          rm -f "$SIGN_KEY_FILE"
