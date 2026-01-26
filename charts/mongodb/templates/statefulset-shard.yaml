@@ -74,7 +74,7 @@ spec:
       initContainers:
         - name: init-shard-{{ $shardIndex }}
           image: {{ include "mongodb.image" $ }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" $ }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" $.Values.image) }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
           command:
             - /bin/sh
@@ -116,7 +116,7 @@ spec:
       containers:
         - name: mongodb-shard-{{ $shardIndex }}
           image: {{ include "mongodb.image" $ }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" $ }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" $.Values.image) }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
           command:
             - mongod
@@ -400,7 +400,7 @@ spec:
       containers:
         - name: mongodb-shard-{{ $shardIndex }}-arbiter
           image: {{ include "mongodb.image" $ }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" $ }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" $.Values.image) }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
           command:
             - mongod

@@ -49,8 +49,9 @@ data:
       }
     "
 {{- end }}
+{{- if not .Values.shardedCluster.enabled }}
   extra-init.sh: |
-    #!/bin/sh    
+    #!/bin/sh
     # Source: https://github.com/groundhog2k/helm-charts/tree/master/charts/mongodb
     
     # Log a message in extra initialization phase
@@ -786,3 +787,4 @@ data:
     else
       log_shard "Secondary instance, skipping main initialization"
     fi
+{{- end }}

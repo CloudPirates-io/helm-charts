@@ -65,7 +65,7 @@ spec:
       initContainers:
         - name: init-mongos
           image: {{ include "mongodb.image" . }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - /bin/sh
@@ -111,7 +111,7 @@ spec:
       containers:
         - name: mongos
           image: {{ include "mongodb.image" . }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - mongos
