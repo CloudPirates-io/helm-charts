@@ -465,41 +465,54 @@ replicaSet:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
 
+## @section Common MongoDB parameters (applies to all sharded cluster components)
+common:
+  ## @param common.mongodbDirectoryPerDB Enable MongoDB directoryPerDB option
+  mongodbDirectoryPerDB: true
+  ## @param common.mongodbDisableSystemLog Disable MongoDB system log
+  mongodbDisableSystemLog: false
+  ## @param common.mongodbExtraFlags Additional MongoDB command line flags
+  mongodbExtraFlags: []
+
 ## @section Sharded Cluster parameters
 shardedCluster:
   ## @param shardedCluster.enabled Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)
   enabled: false
 
   ## @section Config Servers configuration
-  configServers:
-    ## @param shardedCluster.configServers.replicas Number of config server replicas (minimum 1, recommended 3 for production)
-    replicas: 3
-    ## @param shardedCluster.configServers.resources Resource limits and requests for config server pods
+  configsvr:
+    ## @param shardedCluster.configsvr.replicaCount Number of config server replicas (minimum 1, recommended 3 for production)
+    replicaCount: 3
+    ## @param shardedCluster.configsvr.priorityClassName Priority class name for config server pods
+    priorityClassName: ""
+    ## @param shardedCluster.configsvr.resources Resource limits and requests for config server pods
     resources:
       limits:
         memory: 512Mi
       requests:
         cpu: 100m
         memory: 512Mi
-    ## @param shardedCluster.configServers.nodeSelector Node selector for config server pods
+    ## @param shardedCluster.configsvr.nodeSelector Node selector for config server pods
     nodeSelector: {}
-    ## @param shardedCluster.configServers.tolerations Tolerations for config server pods
+    ## @param shardedCluster.configsvr.tolerations Tolerations for config server pods
     tolerations: []
-    ## @param shardedCluster.configServers.affinity Affinity rules for config server pods
+    ## @param shardedCluster.configsvr.affinity Affinity rules for config server pods
     affinity: {}
-    ## @param shardedCluster.configServers.storage Storage configuration for config servers
-    storage:
-      ## @param shardedCluster.configServers.storage.size Size of persistent volume for config servers
+    ## @param shardedCluster.configsvr.persistence Storage configuration for config servers
+    persistence:
+      ## @param shardedCluster.configsvr.persistence.size Size of persistent volume for config servers
       size: 4Gi
-      ## @param shardedCluster.configServers.storage.storageClass Storage class for config servers
+      ## @param shardedCluster.configsvr.persistence.storageClass Storage class for config servers
       storageClass: ""
-      ## @param shardedCluster.configServers.storage.accessMode Access mode for config server persistent volumes
+      ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
 
   ## @section Mongos router configuration
   mongos:
-    ## @param shardedCluster.mongos.replicas Number of mongos router instances (minimum 1, recommended 2+ for production)
-    replicas: 2
+    ## @param shardedCluster.mongos.replicaCount Number of mongos router instances (minimum 1, recommended 2+ for production)
+    replicaCount: 2
+    ## @param shardedCluster.mongos.priorityClassName Priority class name for mongos router pods
+    priorityClassName: ""
     ## @param shardedCluster.mongos.resources Resource limits and requests for mongos router pods
     resources:
       limits:
@@ -522,33 +535,69 @@ shardedCluster:
       ## @param shardedCluster.mongos.service.annotations Additional annotations for mongos service
       annotations: {}
 
-  ## @section Shard configuration
-  shards:
-    ## @param shardedCluster.shards.count Number of shards (minimum 2 for meaningful sharding)
-    count: 2
-    ## @param shardedCluster.shards.replicas Number of replicas per shard (minimum 1, recommended 3 for production)
-    replicas: 3
-    ## @param shardedCluster.shards.resources Resource limits and requests for shard member pods
-    resources:
-      limits:
-        memory: 1Gi
-      requests:
-        cpu: 100m
-        memory: 1Gi
-    ## @param shardedCluster.shards.nodeSelector Node selector for shard pods
+  ## @param shardedCluster.shards Number of shards (minimum 2 for meaningful sharding)
+  shards: 2
+
+  ## @section Shard servers configuration
+  shardsvr:
+    ## @param shardedCluster.shardsvr.nodeSelector Node selector for shard server pods (applies to all shard components)
     nodeSelector: {}
-    ## @param shardedCluster.shards.tolerations Tolerations for shard pods
+    ## @param shardedCluster.shardsvr.tolerations Tolerations for shard server pods (applies to all shard components)
     tolerations: []
-    ## @param shardedCluster.shards.affinity Affinity rules for shard pods
+    ## @param shardedCluster.shardsvr.affinity Affinity rules for shard server pods (applies to all shard components)
     affinity: {}
-    ## @param shardedCluster.shards.storage Storage configuration for shards
-    storage:
-      ## @param shardedCluster.shards.storage.size Size of persistent volume for each shard member
+    ## @param shardedCluster.shardsvr.persistence Storage configuration for shard servers
+    persistence:
+      ## @param shardedCluster.shardsvr.persistence.size Size of persistent volume for each shard member
       size: 20Gi
-      ## @param shardedCluster.shards.storage.storageClass Storage class for shards
+      ## @param shardedCluster.shardsvr.persistence.storageClass Storage class for shards
       storageClass: ""
-      ## @param shardedCluster.shards.storage.accessMode Access mode for shard persistent volumes
+      ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
+
+    ## @section Shard data node configuration
+    dataNode:
+      ## @param shardedCluster.shardsvr.dataNode.replicaCount Number of data node replicas per shard (minimum 1, recommended 3 for production)
+      replicaCount: 3
+      ## @param shardedCluster.shardsvr.dataNode.priorityClassName Priority class name for shard data node pods
+      priorityClassName: ""
+      ## @param shardedCluster.shardsvr.dataNode.resources Resource limits and requests for shard data node pods
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 1Gi
+      ## @param shardedCluster.shardsvr.dataNode.nodeSelector Node selector for shard data node pods (overrides shardsvr.nodeSelector)
+      nodeSelector: {}
+      ## @param shardedCluster.shardsvr.dataNode.tolerations Tolerations for shard data node pods (overrides shardsvr.tolerations)
+      tolerations: []
+      ## @param shardedCluster.shardsvr.dataNode.affinity Affinity rules for shard data node pods (overrides shardsvr.affinity)
+      affinity: {}
+
+    ## @section Shard arbiter configuration
+    arbiter:
+      ## @param shardedCluster.shardsvr.arbiter.replicaCount Number of arbiter replicas per shard (0 to disable, recommended 0 for sharded clusters)
+      replicaCount: 0
+      ## @param shardedCluster.shardsvr.arbiter.priorityClassName Priority class name for arbiter pods
+      priorityClassName: ""
+      ## @param shardedCluster.shardsvr.arbiter.resources Resource limits and requests for arbiter pods
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      ## @param shardedCluster.shardsvr.arbiter.nodeSelector Node selector for arbiter pods (overrides shardsvr.nodeSelector)
+      nodeSelector: {}
+      ## @param shardedCluster.shardsvr.arbiter.tolerations Tolerations for arbiter pods (overrides shardsvr.tolerations)
+      tolerations: []
+      ## @param shardedCluster.shardsvr.arbiter.affinity Affinity rules for arbiter pods (overrides shardsvr.affinity)
+      affinity: {}
+      ## @param shardedCluster.shardsvr.arbiter.extraVolumeMounts Additional volume mounts for arbiter pods
+      extraVolumeMounts: []
+      ## @param shardedCluster.shardsvr.arbiter.extraVolumes Additional volumes for arbiter pods
+      extraVolumes: []
 
   ## @section Sharding initialization configuration
   initialization:

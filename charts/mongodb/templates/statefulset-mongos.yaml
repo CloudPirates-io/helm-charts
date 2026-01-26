@@ -16,7 +16,7 @@ spec:
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   updateStrategy:
     type: {{ .Values.updateStrategyType }}
-  replicas: {{ .Values.shardedCluster.mongos.replicas }}
+  replicas: {{ .Values.shardedCluster.mongos.replicaCount }}
   {{- if .Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- end }}
@@ -44,8 +44,8 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName }}
+      {{- if or .Values.shardedCluster.mongos.priorityClassName .Values.priorityClassName }}
+      priorityClassName: {{ .Values.shardedCluster.mongos.priorityClassName | default .Values.priorityClassName }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
@@ -115,7 +115,7 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - mongos
-            - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configServers.replicas) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
+            - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
             - --port=27017
             {{- if .Values.auth.enabled }}
             {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName }}
@@ -123,6 +123,12 @@ spec:
             {{- end }}
             {{- end }}
             - --bind_ip_all
+            {{- if .Values.common.mongodbDisableSystemLog }}
+            - --quiet
+            {{- end }}
+            {{- range .Values.common.mongodbExtraFlags }}
+            - {{ . | quote }}
+            {{- end }}
             {{- range .Values.image.extraArgs }}
             - {{ . | quote }}
             {{- end }}

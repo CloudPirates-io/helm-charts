@@ -1,5 +1,6 @@
 {{- if .Values.shardedCluster.enabled }}
-{{- range $shardIndex := until (int .Values.shardedCluster.shards.count) }}
+{{/* Data Node StatefulSets for each shard */}}
+{{- range $shardIndex := until (int .Values.shardedCluster.shards) }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -19,7 +20,7 @@ spec:
   podManagementPolicy: {{ $.Values.podManagementPolicy }}
   updateStrategy:
     type: {{ $.Values.updateStrategyType }}
-  replicas: {{ $.Values.shardedCluster.shards.replicas }}
+  replicas: {{ $.Values.shardedCluster.shardsvr.dataNode.replicaCount }}
   {{- if $.Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
   {{- end }}
@@ -49,21 +50,24 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" $ | nindent 8 }}
-      {{- if $.Values.priorityClassName }}
-      priorityClassName: {{ $.Values.priorityClassName }}
+      {{- if or $.Values.shardedCluster.shardsvr.dataNode.priorityClassName $.Values.priorityClassName }}
+      priorityClassName: {{ $.Values.shardedCluster.shardsvr.dataNode.priorityClassName | default $.Values.priorityClassName }}
       {{- end }}
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
       {{- end }}
-      {{- with (coalesce $.Values.shardedCluster.shards.nodeSelector $.Values.nodeSelector) }}
+      {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.dataNode.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
+      {{- with $nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (coalesce $.Values.shardedCluster.shards.affinity $.Values.affinity) }}
+      {{- $affinity := coalesce $.Values.shardedCluster.shardsvr.dataNode.affinity $.Values.shardedCluster.shardsvr.affinity $.Values.affinity }}
+      {{- with $affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (coalesce $.Values.shardedCluster.shards.tolerations $.Values.tolerations) }}
+      {{- $tolerations := coalesce $.Values.shardedCluster.shardsvr.dataNode.tolerations $.Values.shardedCluster.shardsvr.tolerations $.Values.tolerations }}
+      {{- with $tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -108,7 +112,7 @@ spec:
               subPath: keyfile
               readOnly: true
             {{- end }}
-          resources: {{ toYaml (coalesce $.Values.shardedCluster.shards.resources $.Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce $.Values.shardedCluster.shardsvr.dataNode.resources $.Values.initContainer.resources) | nindent 12 }}
       containers:
         - name: mongodb-shard-{{ $shardIndex }}
           image: {{ include "mongodb.image" $ }}
@@ -128,6 +132,15 @@ spec:
             {{- end }}
             {{- end }}
             - --bind_ip_all
+            {{- if $.Values.common.mongodbDirectoryPerDB }}
+            - --directoryperdb
+            {{- end }}
+            {{- if $.Values.common.mongodbDisableSystemLog }}
+            - --quiet
+            {{- end }}
+            {{- range $.Values.common.mongodbExtraFlags }}
+            - {{ . | quote }}
+            {{- end }}
             {{- range $.Values.image.extraArgs }}
             - {{ . | quote }}
             {{- end }}
@@ -213,7 +226,7 @@ spec:
             {{- with $.Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          resources: {{ toYaml $.Values.shardedCluster.shards.resources | nindent 12 }}
+          resources: {{ toYaml $.Values.shardedCluster.shardsvr.dataNode.resources | nindent 12 }}
         {{- if $.Values.metrics.enabled }}
         - name: mongodb-exporter
           image: {{ include "mongodb.metrics.image" $ }}
@@ -300,14 +313,223 @@ spec:
         {{- end }}
       spec:
         accessModes:
-          - {{ $.Values.shardedCluster.shards.storage.accessMode | default $.Values.persistence.accessMode }}
-        {{- if $.Values.shardedCluster.shards.storage.storageClass }}
-        storageClassName: {{ $.Values.shardedCluster.shards.storage.storageClass | quote }}
+          - {{ $.Values.shardedCluster.shardsvr.persistence.accessMode | default $.Values.persistence.accessMode }}
+        {{- if $.Values.shardedCluster.shardsvr.persistence.storageClass }}
+        storageClassName: {{ $.Values.shardedCluster.shardsvr.persistence.storageClass | quote }}
         {{- else if $.Values.persistence.storageClass }}
         storageClassName: {{ $.Values.persistence.storageClass | quote }}
         {{- end }}
         resources:
           requests:
-            storage: {{ $.Values.shardedCluster.shards.storage.size }}
+            storage: {{ $.Values.shardedCluster.shardsvr.persistence.size }}
+{{- end }}
+
+{{/* Arbiter StatefulSets for each shard (if enabled) */}}
+{{- if gt (int $.Values.shardedCluster.shardsvr.arbiter.replicaCount) 0 }}
+{{- range $shardIndex := until (int $.Values.shardedCluster.shards) }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-arbiter
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" $ | nindent 4 }}
+    service-type: shard-arbiter
+    shard-index: "{{ $shardIndex }}"
+  {{- with (include "mongodb.annotations" $) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-arbiter-headless
+  podManagementPolicy: {{ $.Values.podManagementPolicy }}
+  updateStrategy:
+    type: {{ $.Values.updateStrategyType }}
+  replicas: {{ $.Values.shardedCluster.shardsvr.arbiter.replicaCount }}
+  {{- if $.Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mongodb.selectorLabels" $ | nindent 6 }}
+      service-type: shard-arbiter
+      shard-index: "{{ $shardIndex }}"
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" $ | nindent 8 }}
+        service-type: shard-arbiter
+        shard-index: "{{ $shardIndex }}"
+        {{- if $.Values.podLabels }}
+{{ toYaml $.Values.podLabels | indent 8 }}
+        {{- end }}
+      {{- if or (include "mongodb.annotations" $) $.Values.podAnnotations }}
+      annotations:
+{{- include "mongodb.annotations" $ | indent 8 }}
+      {{- if $.Values.podAnnotations }}
+{{ toYaml $.Values.podAnnotations | indent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+{{- with (include "mongodb.imagePullSecrets" $) }}
+{{ . | nindent 6 }}
+{{- end }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" $ | nindent 8 }}
+      {{- if or $.Values.shardedCluster.shardsvr.arbiter.priorityClassName $.Values.priorityClassName }}
+      priorityClassName: {{ $.Values.shardedCluster.shardsvr.arbiter.priorityClassName | default $.Values.priorityClassName }}
+      {{- end }}
+      {{- if $.Values.serviceAccount.create }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
+      {{- end }}
+      {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.arbiter.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
+      {{- with $nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- $affinity := coalesce $.Values.shardedCluster.shardsvr.arbiter.affinity $.Values.shardedCluster.shardsvr.affinity $.Values.affinity }}
+      {{- with $affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- $tolerations := coalesce $.Values.shardedCluster.shardsvr.arbiter.tolerations $.Values.shardedCluster.shardsvr.tolerations $.Values.tolerations }}
+      {{- with $tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: mongodb-shard-{{ $shardIndex }}-arbiter
+          image: {{ include "mongodb.image" $ }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" $ }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
+          command:
+            - mongod
+            - --config={{ include "mongodb.configFullName" $ | quote }}
+            - --shardsvr
+            - --replSet={{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-rs
+            - --port=27017
+            {{- if $.Values.auth.enabled }}
+            - --auth
+            {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            - --keyFile=/opt/mongodb/keyfile
+            {{- end }}
+            {{- end }}
+            - --bind_ip_all
+            {{- if $.Values.common.mongodbDisableSystemLog }}
+            - --quiet
+            {{- end }}
+            {{- range $.Values.common.mongodbExtraFlags }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range $.Values.image.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SHARD_INDEX
+              value: "{{ $shardIndex }}"
+            {{- if $.Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ $.Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" $ }}
+                  key: {{ include "mongodb.secretPasswordKey" $ }}
+            {{- end }}
+            {{- with $.Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          {{- if $.Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ $.Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ $.Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ $.Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ $.Values.livenessProbe.failureThreshold }}
+            periodSeconds: {{ $.Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          {{- if $.Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ $.Values.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ $.Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ $.Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ $.Values.readinessProbe.failureThreshold }}
+            periodSeconds: {{ $.Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if $.Values.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ $.Values.startupProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ $.Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ $.Values.startupProbe.successThreshold }}
+            failureThreshold: {{ $.Values.startupProbe.failureThreshold }}
+            periodSeconds: {{ $.Values.startupProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            {{- if $.Values.config.content }}
+            - name: mongodb-config
+              mountPath: {{ $.Values.config.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            - name: mongodb-keyfile
+              mountPath: /opt/mongodb/keyfile
+              subPath: keyfile
+              readOnly: true
+            {{- end }}
+            - name: mongodb-init-scripts
+              mountPath: /opt/mongodb/init-scripts
+              readOnly: true
+            {{- with $.Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with $.Values.shardedCluster.shardsvr.arbiter.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources: {{ toYaml $.Values.shardedCluster.shardsvr.arbiter.resources | nindent 12 }}
+      volumes:
+        {{- if $.Values.config.content }}
+        - name: mongodb-config
+          configMap:
+            name: {{ include "mongodb.configMapName" $ }}
+        {{- end }}
+        {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+        - name: mongodb-keyfile
+          secret:
+            secretName: {{ include "mongodb.keyfileSecretName" $ }}
+            defaultMode: 0400
+        {{- end }}
+        - name: mongodb-init-scripts
+          configMap:
+            name: {{ include "mongodb.fullname" $ }}-init-scripts
+            defaultMode: 0755
+        {{- with $.Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $.Values.shardedCluster.shardsvr.arbiter.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

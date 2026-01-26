@@ -16,7 +16,7 @@ spec:
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   updateStrategy:
     type: {{ .Values.updateStrategyType }}
-  replicas: {{ .Values.shardedCluster.configServers.replicas }}
+  replicas: {{ .Values.shardedCluster.configsvr.replicaCount }}
   {{- if .Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- end }}
@@ -44,21 +44,21 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName }}
+      {{- if or .Values.shardedCluster.configsvr.priorityClassName .Values.priorityClassName }}
+      priorityClassName: {{ .Values.shardedCluster.configsvr.priorityClassName | default .Values.priorityClassName }}
       {{- end }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
       {{- end }}
-      {{- with (coalesce .Values.shardedCluster.configServers.nodeSelector .Values.nodeSelector) }}
+      {{- with (coalesce .Values.shardedCluster.configsvr.nodeSelector .Values.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (coalesce .Values.shardedCluster.configServers.affinity .Values.affinity) }}
+      {{- with (coalesce .Values.shardedCluster.configsvr.affinity .Values.affinity) }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (coalesce .Values.shardedCluster.configServers.tolerations .Values.tolerations) }}
+      {{- with (coalesce .Values.shardedCluster.configsvr.tolerations .Values.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -101,7 +101,7 @@ spec:
               subPath: keyfile
               readOnly: true
             {{- end }}
-          resources: {{ toYaml (coalesce .Values.shardedCluster.configServers.resources .Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce .Values.shardedCluster.configsvr.resources .Values.initContainer.resources) | nindent 12 }}
       containers:
         - name: mongodb-configserver
           image: {{ include "mongodb.image" . }}
@@ -121,6 +121,15 @@ spec:
             {{- end }}
             {{- end }}
             - --bind_ip_all
+            {{- if .Values.common.mongodbDirectoryPerDB }}
+            - --directoryperdb
+            {{- end }}
+            {{- if .Values.common.mongodbDisableSystemLog }}
+            - --quiet
+            {{- end }}
+            {{- range .Values.common.mongodbExtraFlags }}
+            - {{ . | quote }}
+            {{- end }}
             {{- range .Values.image.extraArgs }}
             - {{ . | quote }}
             {{- end }}
@@ -204,7 +213,7 @@ spec:
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          resources: {{ toYaml .Values.shardedCluster.configServers.resources | nindent 12 }}
+          resources: {{ toYaml .Values.shardedCluster.configsvr.resources | nindent 12 }}
         {{- if .Values.metrics.enabled }}
         - name: mongodb-exporter
           image: {{ include "mongodb.metrics.image" . }}
@@ -291,13 +300,13 @@ spec:
         {{- end }}
       spec:
         accessModes:
-          - {{ .Values.shardedCluster.configServers.storage.accessMode | default .Values.persistence.accessMode }}
-        {{- if .Values.shardedCluster.configServers.storage.storageClass }}
-        storageClassName: {{ .Values.shardedCluster.configServers.storage.storageClass | quote }}
+          - {{ .Values.shardedCluster.configsvr.persistence.accessMode | default .Values.persistence.accessMode }}
+        {{- if .Values.shardedCluster.configsvr.persistence.storageClass }}
+        storageClassName: {{ .Values.shardedCluster.configsvr.persistence.storageClass | quote }}
         {{- else if .Values.persistence.storageClass }}
         storageClassName: {{ .Values.persistence.storageClass | quote }}
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.shardedCluster.configServers.storage.size }}
+            storage: {{ .Values.shardedCluster.configsvr.persistence.size }}
 {{- end }}

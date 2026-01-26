@@ -10,13 +10,14 @@ templates:
 set:
   shardedCluster:
     enabled: true
-    configServers:
-      replicas: 3
+    shards: 2
+    configsvr:
+      replicaCount: 3
     mongos:
-      replicas: 2
-    shards:
-      count: 2
-      replicas: 3
+      replicaCount: 2
+    shardsvr:
+      dataNode:
+        replicaCount: 3
   image:
     tag: 8.2.3@sha256:d6b569590880bca35e43318418133a426b024bcb649eeb63bb071bc1490bee41
 tests:
@@ -200,7 +201,7 @@ tests:
     set:
       shardedCluster:
         enabled: true
-        configServers:
+        configsvr:
           resources:
             limits:
               memory: 1Gi
@@ -220,8 +221,8 @@ tests:
     set:
       shardedCluster:
         enabled: true
-        shards:
-          storage:
+        shardsvr:
+          persistence:
             size: 50Gi
             storageClass: fast-ssd
     asserts:
@@ -307,5 +308,118 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].command
           content: --auth
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
+  - it: should support per-component priorityClassName
+    set:
+      shardedCluster:
+        enabled: true
+        configsvr:
+          priorityClassName: config-priority
+        mongos:
+          priorityClassName: mongos-priority
+        shardsvr:
+          dataNode:
+            priorityClassName: shard-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: config-priority
+        template: statefulset-configserver.yaml
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: mongos-priority
+        template: statefulset-mongos.yaml
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: shard-priority
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
+  - it: should support common MongoDB configuration flags
+    set:
+      shardedCluster:
+        enabled: true
+      common:
+        mongodbDirectoryPerDB: true
+        mongodbDisableSystemLog: true
+        mongodbExtraFlags:
+          - --wiredTigerCacheSizeGB=1
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --directoryperdb
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --quiet
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --wiredTigerCacheSizeGB=1
+        template: statefulset-configserver.yaml
+
+  - it: should support arbiter configuration
+    set:
+      shardedCluster:
+        enabled: true
+        shards: 1
+        shardsvr:
+          arbiter:
+            replicaCount: 1
+            priorityClassName: arbiter-priority
+            resources:
+              limits:
+                memory: 512Mi
+    asserts:
+      - hasDocuments:
+          count: 2  # 1 data node + 1 arbiter
+        template: statefulset-shard.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-0-arbiter
+        template: statefulset-shard.yaml
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: arbiter-priority
+        template: statefulset-shard.yaml
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 512Mi
+        template: statefulset-shard.yaml
+        documentIndex: 1
+
+  - it: should support hierarchical nodeSelector and tolerations
+    set:
+      shardedCluster:
+        enabled: true
+        shardsvr:
+          nodeSelector:
+            shared-constraint: "true"
+          tolerations:
+            - key: shared-taint
+              operator: Equal
+              value: "true"
+              effect: NoSchedule
+          dataNode:
+            nodeSelector:
+              data-node-constraint: "true"
+            tolerations:
+              - key: data-node-taint
+                operator: Equal
+                value: "true"
+                effect: NoSchedule
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector["data-node-constraint"]
+          value: "true"
+        template: statefulset-shard.yaml
+        documentIndex: 0
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: data-node-taint
         template: statefulset-shard.yaml
         documentIndex: 0

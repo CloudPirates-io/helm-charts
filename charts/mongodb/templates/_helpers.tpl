@@ -183,17 +183,17 @@ Validate sharded cluster configuration
 {{- if and .Values.shardedCluster.enabled .Values.replicaSet.enabled }}
 {{- fail "Cannot enable both shardedCluster and replicaSet modes simultaneously" }}
 {{- end }}
-{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shards.count) 2) }}
-{{- fail "Sharded cluster requires at least 2 shards (shardedCluster.shards.count >= 2)" }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shards) 2) }}
+{{- fail "Sharded cluster requires at least 2 shards (shardedCluster.shards >= 2)" }}
 {{- end }}
-{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.configServers.replicas) 1) }}
-{{- fail "Sharded cluster requires at least 1 config server (shardedCluster.configServers.replicas >= 1)" }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.configsvr.replicaCount) 1) }}
+{{- fail "Sharded cluster requires at least 1 config server (shardedCluster.configsvr.replicaCount >= 1)" }}
 {{- end }}
-{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.mongos.replicas) 1) }}
-{{- fail "Sharded cluster requires at least 1 mongos router (shardedCluster.mongos.replicas >= 1)" }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.mongos.replicaCount) 1) }}
+{{- fail "Sharded cluster requires at least 1 mongos router (shardedCluster.mongos.replicaCount >= 1)" }}
 {{- end }}
-{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shards.replicas) 1) }}
-{{- fail "Each shard requires at least 1 replica (shardedCluster.shards.replicas >= 1)" }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) 1) }}
+{{- fail "Each shard requires at least 1 data node replica (shardedCluster.shardsvr.dataNode.replicaCount >= 1)" }}
 {{- end }}
 {{- end -}}
 
@@ -204,7 +204,7 @@ Return config server connection string for mongos
 {{- $configRsName := printf "%s-configserver-rs" (include "mongodb.fullname" .) -}}
 {{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) .Release.Namespace (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $configServers := list -}}
-{{- range $i := until (int .Values.shardedCluster.configServers.replicas) -}}
+{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) -}}
 {{- $host := printf "%s-configserver-%d.%s:27017" (include "mongodb.fullname" $) $i $configService -}}
 {{- $configServers = append $configServers $host -}}
 {{- end -}}
@@ -220,7 +220,7 @@ Return shard replica set connection string
 {{- $shardRsName := printf "%s-shard-%d-rs" (include "mongodb.fullname" $context) $shardIndex -}}
 {{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex $context.Release.Namespace ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $shardMembers := list -}}
-{{- range $i := until (int $context.Values.shardedCluster.shards.replicas) -}}
+{{- range $i := until (int $context.Values.shardedCluster.shardsvr.dataNode.replicaCount) -}}
 {{- $host := printf "%s-shard-%d-%d.%s:27017" (include "mongodb.fullname" $context) $shardIndex $i $shardService -}}
 {{- $shardMembers = append $shardMembers $host -}}
 {{- end -}}
