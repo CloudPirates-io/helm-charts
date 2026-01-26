@@ -262,3 +262,19 @@ REDIS_PASSWORD="$ACL_PASSWORD"
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Generate TLS certificate arguments for redis-cli probes
+When client certificates are available, use them for client authentication
+Otherwise fall back to server certificates (for backwards compatibility)
+Usage: {{ include "redis.tls.probeArgs" . }}
+*/}}
+{{- define "redis.tls.probeArgs" -}}
+{{- if .Values.tls.enabled -}}
+{{- if .Values.tls.client.existingSecret -}}
+--tls --cert /etc/redis/tls-client/{{ .Values.tls.client.certFilename }} --key /etc/redis/tls-client/{{ .Values.tls.client.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+{{- else -}}
+--tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

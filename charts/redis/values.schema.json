@@ -866,6 +866,20 @@
                 "certKeyFilename": {
                     "type": "string"
                 },
+                "client": {
+                    "type": "object",
+                    "properties": {
+                        "certFilename": {
+                            "type": "string"
+                        },
+                        "certKeyFilename": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "enabled": {
                     "type": "boolean"
                 },
