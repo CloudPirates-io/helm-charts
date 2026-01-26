@@ -1,0 +1,107 @@
+{{- if .Values.shardedCluster.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mongodb.fullname" . }}-add-shards
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    job-type: add-shards
+  {{- with (include "mongodb.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        job-type: add-shards
+    spec:
+{{- with (include "mongodb.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      restartPolicy: OnFailure
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
+      {{- end }}
+      initContainers:
+        - name: download-kubectl
+          image: curlimages/curl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              # Download kubectl to shared volume
+              KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+              curl -L "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" -o /kubectl/kubectl
+              chmod +x /kubectl/kubectl
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl
+      containers:
+        - name: add-shards
+          image: {{ include "mongodb.image" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Add kubectl to PATH
+              export PATH=/kubectl:$PATH
+
+              echo "***** Waiting for all MongoDB pods to be ready before adding shards..."
+
+              # Wait for all config servers to be ready
+              {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}
+              echo "Waiting for {{ include "mongodb.fullname" $ }}-configserver-{{ $i }} to be ready..."
+              kubectl wait --for=condition=ready pod/{{ include "mongodb.fullname" $ }}-configserver-{{ $i }} -n {{ $.Release.Namespace }} --timeout=600s
+              {{- end }}
+
+              # Wait for all shard pods to be ready
+              {{- range $shardIdx := until (int .Values.shardedCluster.shards) }}
+              {{- range $nodeIdx := until (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) }}
+              echo "Waiting for {{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-{{ $nodeIdx }} to be ready..."
+              kubectl wait --for=condition=ready pod/{{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-{{ $nodeIdx }} -n {{ $.Release.Namespace }} --timeout=600s
+              {{- end }}
+              {{- end }}
+
+              # Wait for at least one mongos to be ready
+              echo "Waiting for {{ include "mongodb.fullname" . }}-mongos-0 to be ready..."
+              kubectl wait --for=condition=ready pod/{{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} --timeout=600s
+
+              echo "***** All pods are ready, proceeding with shard addition..."
+
+              # Set environment for shard addition only
+              export SKIP_REPLICA_INIT=true
+
+              # Run shard addition script
+              /opt/mongodb/init-scripts/extra-init-sharded.sh
+          env:
+            - name: HOSTNAME
+              value: {{ include "mongodb.fullname" . }}-mongos-0
+            {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl
+            - name: mongodb-init-scripts
+              mountPath: /opt/mongodb/init-scripts
+              readOnly: true
+      volumes:
+        - name: kubectl-bin
+          emptyDir: {}
+        - name: mongodb-init-scripts
+          configMap:
+            name: {{ include "mongodb.fullname" . }}-init-scripts
+            defaultMode: 0755
+{{- end }}

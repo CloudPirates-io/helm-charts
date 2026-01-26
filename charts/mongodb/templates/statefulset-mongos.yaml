@@ -63,6 +63,62 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
+        {{- if eq (include "mongodb.fullname" .) "mongodb" }}
+        {{- if .Values.shardedCluster.enabled }}
+        - name: download-kubectl
+          image: curlimages/curl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              # Download kubectl to shared volume
+              KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+              curl -L "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" -o /kubectl/kubectl
+              chmod +x /kubectl/kubectl
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl
+        - name: init-sharded-cluster
+          image: {{ include "mongodb.image" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Only run on mongos-0
+              if [ "${HOSTNAME}" = "{{ include "mongodb.fullname" . }}-mongos-0" ]; then
+                # Add kubectl to PATH
+                export PATH=/kubectl:$PATH
+
+                # Run initialization script
+                /opt/mongodb/init-scripts/extra-init-sharded.sh
+              fi
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SKIP_ADD_SHARDS
+              value: "true"
+            {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl
+            - name: mongodb-init-scripts
+              mountPath: /opt/mongodb/init-scripts
+              readOnly: true
+        {{- end }}
+        {{- end }}
         - name: init-mongos
           image: {{ include "mongodb.image" . }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
@@ -84,9 +140,10 @@ spec:
 
               # Check if keyfile authentication is enabled
               if [ -f /opt/mongodb/keyfile ]; then
-                echo "Found keyfile, setting permissions"
-                chmod 400 /opt/mongodb/keyfile
-                chown mongodb:mongodb /opt/mongodb/keyfile
+                echo "Found keyfile, copying to writable location"
+                cp /opt/mongodb/keyfile /keyfile-data/keyfile
+                chmod 400 /keyfile-data/keyfile
+                chown mongodb:mongodb /keyfile-data/keyfile
               fi
 
               echo "Mongos router initialization completed"
@@ -106,6 +163,8 @@ spec:
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
               readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
             {{- end }}
           resources: {{ toYaml (coalesce .Values.shardedCluster.mongos.resources .Values.initContainer.resources) | nindent 12 }}
       containers:
@@ -119,7 +178,7 @@ spec:
             - --port=27017
             {{- if .Values.auth.enabled }}
             {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName }}
-            - --keyFile=/opt/mongodb/keyfile
+            - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
             - --bind_ip_all
@@ -137,6 +196,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
             {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -190,10 +258,8 @@ spec:
               readOnly: true
             {{- end }}
             {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName }}
-            - name: mongodb-keyfile
-              mountPath: /opt/mongodb/keyfile
-              subPath: keyfile
-              readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
             {{- end }}
             - name: mongodb-init-scripts
               mountPath: /opt/mongodb/init-scripts
@@ -267,6 +333,14 @@ spec:
           secret:
             secretName: {{ include "mongodb.keyfileSecretName" . }}
             defaultMode: 0400
+        - name: mongodb-keyfile-data
+          emptyDir: {}
+        {{- end }}
+        {{- if eq (include "mongodb.fullname" .) "mongodb" }}
+        {{- if .Values.shardedCluster.enabled }}
+        - name: kubectl-bin
+          emptyDir: {}
+        {{- end }}
         {{- end }}
         - name: mongodb-init-scripts
           configMap:

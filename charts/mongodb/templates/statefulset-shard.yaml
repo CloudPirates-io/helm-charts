@@ -85,9 +85,10 @@ spec:
 
               # Check if keyfile authentication is enabled
               if [ -f /opt/mongodb/keyfile ]; then
-                echo "Found keyfile, setting permissions"
-                chmod 400 /opt/mongodb/keyfile
-                chown mongodb:mongodb /opt/mongodb/keyfile
+                echo "Found keyfile, copying to writable location"
+                cp /opt/mongodb/keyfile /keyfile-data/keyfile
+                chmod 400 /keyfile-data/keyfile
+                chown mongodb:mongodb /keyfile-data/keyfile
               fi
 
               echo "Shard {{ $shardIndex }} initialization completed"
@@ -111,6 +112,8 @@ spec:
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
               readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
             {{- end }}
           resources: {{ toYaml (coalesce $.Values.shardedCluster.shardsvr.dataNode.resources $.Values.initContainer.resources) | nindent 12 }}
       containers:
@@ -120,7 +123,7 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
           command:
             - mongod
-            - --config={{ include "mongodb.configFullName" $ | quote }}
+            - --config={{ include "mongodb.configFullName" $ }}
             - --shardsvr
             - --replSet={{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-rs
             - --port=27017
@@ -128,7 +131,7 @@ spec:
             {{- if $.Values.auth.enabled }}
             - --auth
             {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
-            - --keyFile=/opt/mongodb/keyfile
+            - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
             - --bind_ip_all
@@ -219,6 +222,8 @@ spec:
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
               readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
             {{- end }}
             - name: mongodb-init-scripts
               mountPath: /opt/mongodb/init-scripts
@@ -292,6 +297,8 @@ spec:
           secret:
             secretName: {{ include "mongodb.keyfileSecretName" $ }}
             defaultMode: 0400
+        - name: mongodb-keyfile-data
+          emptyDir: {}
         {{- end }}
         - name: mongodb-init-scripts
           configMap:
@@ -404,14 +411,14 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
           command:
             - mongod
-            - --config={{ include "mongodb.configFullName" $ | quote }}
+            - --config={{ include "mongodb.configFullName" $ }}
             - --shardsvr
             - --replSet={{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-rs
             - --port=27017
             {{- if $.Values.auth.enabled }}
             - --auth
             {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
-            - --keyFile=/opt/mongodb/keyfile
+            - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
             - --bind_ip_all
@@ -497,6 +504,8 @@ spec:
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
               readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
             {{- end }}
             - name: mongodb-init-scripts
               mountPath: /opt/mongodb/init-scripts
@@ -519,6 +528,8 @@ spec:
           secret:
             secretName: {{ include "mongodb.keyfileSecretName" $ }}
             defaultMode: 0400
+        - name: mongodb-keyfile-data
+          emptyDir: {}
         {{- end }}
         - name: mongodb-init-scripts
           configMap:

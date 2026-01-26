@@ -506,6 +506,11 @@ shardedCluster:
       storageClass: ""
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
+    ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
+    ## Example: customInit: |
+    ##   echo "Custom config server initialization"
+    ##   # Add your custom commands here
+    customInit: ""
 
   ## @section Mongos router configuration
   mongos:
@@ -534,6 +539,11 @@ shardedCluster:
       port: 27017
       ## @param shardedCluster.mongos.service.annotations Additional annotations for mongos service
       annotations: {}
+    ## @param shardedCluster.mongos.customInit Custom shell commands to run during mongos router initialization (executed on each mongos pod)
+    ## Example: customInit: |
+    ##   echo "Custom mongos initialization"
+    ##   # Add your custom commands here
+    customInit: ""
 
   ## @param shardedCluster.shards Number of shards (minimum 2 for meaningful sharding)
   shards: 2
@@ -554,6 +564,11 @@ shardedCluster:
       storageClass: ""
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
+    ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
+    ## Example: customInit: |
+    ##   echo "Custom shard initialization"
+    ##   # Add your custom commands here
+    customInit: ""
 
     ## @section Shard data node configuration
     dataNode:

@@ -534,27 +534,23 @@ data:
       log_shard "Initializing config server replica set: $configRsName"
 
       # Check if config server replica set is already initialized
-      result=$($MONGOSHELL --host $configService --eval "rs.status().ok" 2>/dev/null || echo "0")
+      result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Config server replica set already initialized"
         return 0
       fi
 
       # Build config server members array
-      local members="["
-      {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}
-      {{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:"{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"}
-      {{- end }}
-      ]
+      local members="[{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:\"{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\"}{{- end }}]"
 
-      # Initialize config server replica set
-      $MONGOSHELL --host {{ include "mongodb.fullname" . }}-configserver-0.$configService:27017 --eval "
+      # Initialize config server replica set using kubectl exec (localhost exception)
+      kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --eval "
         rs.initiate({
           _id: '$configRsName',
           configsvr: true,
           members: $members
         })
-      "
+      " > /dev/null 2>&1
       result=$?
       logErrorAndExitShard "Failed to initialize config server replica set" $result
 
@@ -562,7 +558,7 @@ data:
       log_shard "Waiting for config server replica set to be ready..."
       local retries=60
       while [ $retries -gt 0 ]; do
-        result=$($MONGOSHELL --host $configService --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
+        result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Config server replica set is ready"
           break
@@ -587,31 +583,22 @@ data:
       log_shard "Initializing shard $shardIndex replica set: $shardRsName"
 
       # Check if shard replica set is already initialized
-      result=$($MONGOSHELL --host $shardService --eval "rs.status().ok" 2>/dev/null || echo "0")
+      result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Shard $shardIndex replica set already initialized"
         return 0
       fi
 
       # Build shard members array (data nodes + arbiters)
-      local members="["
-      {{- range $i := until (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) }}
-      {{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"}
-      {{- end }}
-      {{- if gt (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) 0 }}
-      {{- range $i := until (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) }}
-      , {_id:{{ add (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) $i }}, host:"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017", arbiterOnly:true}
-      {{- end }}
-      {{- end }}
-      ]
+      local members="[{{- range $i := until (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) }}{{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\"}{{- end }}{{- if gt (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) 0 }}{{- range $i := until (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) }}, {_id:{{ add (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\", arbiterOnly:true}{{- end }}{{- end }}]"
 
-      # Initialize shard replica set
-      $MONGOSHELL --host {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0.$shardService:27017 --eval "
+      # Initialize shard replica set using kubectl exec (localhost exception)
+      kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --eval "
         rs.initiate({
           _id: '$shardRsName',
           members: $members
         })
-      "
+      " > /dev/null 2>&1
       result=$?
       logErrorAndExitShard "Failed to initialize shard $shardIndex replica set" $result
 
@@ -619,7 +606,7 @@ data:
       log_shard "Waiting for shard $shardIndex replica set to be ready..."
       local retries=60
       while [ $retries -gt 0 ]; do
-        result=$($MONGOSHELL --host $shardService --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
+        result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Shard $shardIndex replica set is ready"
           break
@@ -639,11 +626,11 @@ data:
 
       log_shard "Adding shards to cluster via mongos"
 
-      # Wait for mongos to be ready
+      # Wait for mongos to be ready (without authentication)
       log_shard "Waiting for mongos to be ready..."
       local retries=60
       while [ $retries -gt 0 ]; do
-        result=$($MONGOSHELL --host $mongosHost --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
+        result=$(mongosh --host $mongosHost --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Mongos is ready"
           break
@@ -656,10 +643,52 @@ data:
         logErrorAndExitShard "Mongos failed to become ready" 1
       fi
 
+      {{- if .Values.auth.enabled }}
+      # Create admin user using localhost exception (must be done from inside the mongos pod)
+      log_shard "Creating admin user if needed..."
+      result=$(kubectl exec {{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} -- mongosh --eval "
+        try {
+          db.getSiblingDB('admin').createUser({
+            user: '$MONGO_INITDB_ROOT_USERNAME',
+            pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+            roles: [
+              { role: 'root', db: 'admin' },
+              { role: 'clusterAdmin', db: 'admin' },
+              { role: 'userAdminAnyDatabase', db: 'admin' }
+            ]
+          });
+          print('USER_CREATED');
+        } catch (e) {
+          if (e.code === 51003) {
+            print('USER_EXISTS');
+          } else {
+            print('ERROR: ' + e.message);
+            throw e;
+          }
+        }
+      " 2>&1)
+
+      case "$result" in
+        *USER_CREATED*)
+          log_shard "Admin user created successfully"
+          ;;
+        *USER_EXISTS*)
+          log_shard "Admin user already exists"
+          ;;
+        *)
+          log_shard "Warning: User creation result: $result"
+          ;;
+      esac
+      {{- end }}
+
       # Add each shard to the cluster
       {{- range $i := until (int .Values.shardedCluster.shards) }}
       log_shard "Adding shard {{ $i }} to cluster"
-      result=$($MONGOSHELL --host $mongosHost --eval "
+      {{- if $.Values.auth.enabled }}
+      result=$(mongosh --host $mongosHost --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --eval "
+      {{- else }}
+      result=$(mongosh --host $mongosHost --eval "
+      {{- end }}
         try {
           sh.addShard('{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs/{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-0.{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017');
           print('SUCCESS');
@@ -671,13 +700,16 @@ data:
             throw e;
           }
         }
-      " 2>/dev/null)
+      " 2>&1)
 
-      if [[ "$result" == *"SUCCESS"* ]] || [[ "$result" == *"ALREADY_EXISTS"* ]]; then
-        log_shard "Shard {{ $i }} added successfully or already exists"
-      else
-        logErrorAndExitShard "Failed to add shard {{ $i }}: $result" 1
-      fi
+      case "$result" in
+        *SUCCESS*|*ALREADY_EXISTS*)
+          log_shard "Shard {{ $i }} added successfully or already exists"
+          ;;
+        *)
+          logErrorAndExitShard "Failed to add shard {{ $i }}: $result" 1
+          ;;
+      esac
       {{- end }}
 
       log_shard "All shards added to cluster successfully"
@@ -732,53 +764,113 @@ data:
     init_sharded_cluster() {
       log_shard "Starting MongoDB sharded cluster initialization"
 
-      # Initialize config server replica set
-      init_configserver_replicaset "{{ include "mongodb.fullname" . }}-configserver-rs"
-
-      # Initialize all shard replica sets
-      {{- range $i := until (int .Values.shardedCluster.shards) }}
-      init_shard_replicaset {{ $i }} "{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs"
+      # Wait for all config servers to be reachable
+      log_shard "Waiting for all config server pods to be reachable..."
+      {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}
+      local retries=60
+      while [ $retries -gt 0 ]; do
+        if mongosh --host {{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; then
+          log_shard "Config server {{ $i }} is reachable"
+          break
+        fi
+        sleep 2
+        retries=$((retries-1))
+      done
+      if [ $retries -eq 0 ]; then
+        logErrorAndExitShard "Config server {{ $i }} failed to become reachable" 1
+      fi
       {{- end }}
 
-      # Add shards to cluster
-      add_shards_to_cluster
+      # Wait for all shard pods to be reachable
+      log_shard "Waiting for all shard pods to be reachable..."
+      {{- range $shardIdx := until (int .Values.shardedCluster.shards) }}
+      {{- range $nodeIdx := until (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) }}
+      local retries=60
+      while [ $retries -gt 0 ]; do
+        if mongosh --host {{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-{{ $nodeIdx }}.{{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; then
+          log_shard "Shard {{ $shardIdx }} node {{ $nodeIdx }} is reachable"
+          break
+        fi
+        sleep 2
+        retries=$((retries-1))
+      done
+      if [ $retries -eq 0 ]; then
+        logErrorAndExitShard "Shard {{ $shardIdx }} node {{ $nodeIdx }} failed to become reachable" 1
+      fi
+      {{- end }}
+      {{- end }}
 
-      # Enable sharding on databases and collections
-      enable_sharding
+      log_shard "All pods are reachable, starting cluster initialization"
+
+      # Initialize replica sets (skip in postStart hook)
+      if [ "${SKIP_REPLICA_INIT}" != "true" ]; then
+        # Initialize config server replica set
+        init_configserver_replicaset "{{ include "mongodb.fullname" . }}-configserver-rs"
+
+        # Initialize all shard replica sets
+        {{- range $i := until (int .Values.shardedCluster.shards) }}
+        init_shard_replicaset {{ $i }} "{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs"
+        {{- end }}
+      else
+        log_shard "Skipping replica set initialization"
+      fi
+
+      # Add shards to cluster (skip in init container)
+      if [ "${SKIP_ADD_SHARDS}" != "true" ]; then
+        # Add shards to cluster
+        add_shards_to_cluster
+
+        # Enable sharding on databases and collections
+        enable_sharding
+      else
+        log_shard "Skipping shard addition - will be done after mongos starts"
+      fi
 
       log_shard "MongoDB sharded cluster initialization completed successfully"
     }
 
-    # Detect service type and run appropriate initialization
-    detect_service_and_init() {
-      if [ "${HOSTNAME}" = *"configserver"* ]; then
-        log_shard "Detected config server instance"
-        # Config server specific initialization if needed
-      elif [ "${HOSTNAME}" = *"mongos"* ]; then
-        log_shard "Detected mongos router instance"
-        # Mongos router specific initialization if needed
-      elif [ "${HOSTNAME}" = *"shard"* ]; then
-        log_shard "Detected shard instance"
-        # Shard specific initialization if needed
-      else
-        log_shard "Unknown service type, skipping sharded cluster initialization"
-        exit 0
-      fi
-    }
-
     # Environment variables and helper definitions
+    {{- if .Values.auth.enabled }}
+    MONGOSHELL="mongosh --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD"
+    {{- else }}
     MONGOSHELL="mongosh"
+    {{- end }}
 
     # Set MongoDB version detection for compatibility
     MONGODB_VERSION=$($MONGOSHELL --eval "db.version()" --quiet 2>/dev/null || echo "unknown")
-    if [[ "$MONGODB_VERSION" =~ ^4\. ]]; then
-      export IS_MONGODB_4="true"
-    else
-      export IS_MONGODB_4="false"
-    fi
+    case "$MONGODB_VERSION" in
+      4.*)
+        export IS_MONGODB_4="true"
+        ;;
+      *)
+        export IS_MONGODB_4="false"
+        ;;
+    esac
 
-    # Detect service type and run initialization
-    detect_service_and_init
+    # Run component-specific custom initialization based on hostname
+    case "${HOSTNAME}" in
+      *configserver*)
+        log_shard "Detected config server instance"
+        {{- if .Values.shardedCluster.configsvr.customInit }}
+        log_shard "Running custom config server initialization"
+        {{ .Values.shardedCluster.configsvr.customInit | nindent 8 }}
+        {{- end }}
+        ;;
+      *mongos*)
+        log_shard "Detected mongos router instance"
+        {{- if .Values.shardedCluster.mongos.customInit }}
+        log_shard "Running custom mongos initialization"
+        {{ .Values.shardedCluster.mongos.customInit | nindent 8 }}
+        {{- end }}
+        ;;
+      *shard*)
+        log_shard "Detected shard instance"
+        {{- if .Values.shardedCluster.shardsvr.customInit }}
+        log_shard "Running custom shard initialization"
+        {{ .Values.shardedCluster.shardsvr.customInit | nindent 8 }}
+        {{- end }}
+        ;;
+    esac
 
     # Run main initialization only from one mongos instance
     if [ "${HOSTNAME}" = "{{ include "mongodb.fullname" . }}-mongos-0" ]; then
