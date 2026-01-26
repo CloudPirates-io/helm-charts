@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.2-management@sha256:e96344e767085fedcdc74cce176c72414938f28502ee238bcc0a8db6d1a402b0"
+  tag: "4.2.3-management@sha256:b4377a3de1a4132f638e567881fa507eb166cf380df2ccdbe5e9197e952af52a"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -282,6 +282,8 @@ metrics:
     interval: 30s
     ## @param metrics.serviceMonitor.scrapeTimeout Scrape timeout
     scrapeTimeout: 10s
+    ## @param metrics.serviceMonitor.path Select detail of metrics (/metrics, /metrics/detailed, /metrics/per-object)
+    path: /metrics
 
 ## @param additionalPlugins Additional default RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added)
 additionalPlugins: []
@@ -647,7 +649,7 @@ definitions:
     image:
       registry: docker.io
       repository: curlimages/curl
-      tag: "8.11.1"
+      tag: "8.18.0"
       pullPolicy: IfNotPresent
     ## @param definitions.autoReload.resources Resource limits and requests for the config watcher sidecar
     resources:
