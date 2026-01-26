@@ -157,7 +157,7 @@ mongodb-metrics-password
 {{- if .Values.config.existingConfigmap }}
 {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.existingConfigmap "context" .) }}
 {{- else }}
-{{- include "mongodb.fullname" . }}
+{{- printf "%s-config" (include "mongodb.fullname" .) }}
 {{- end }}
 {{- end -}}
 
