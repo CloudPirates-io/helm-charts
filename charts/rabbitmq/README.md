@@ -247,17 +247,18 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 
 ### Metrics configuration
 
-| Parameter                              | Description                                                                                                                 | Default |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false` |
-| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692` |
-| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false` |
-| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`    |
-| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`    |
-| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`    |
-| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`   |
-| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`   |
-| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`    |
+| Parameter                              | Description                                                                                                                 | Default    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false`    |
+| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692`    |
+| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false`    |
+| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`       |
+| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`       |
+| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`       |
+| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`      |
+| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`      |
+| `metrics.serviceMonitor.path`          | Select detail of metrics (`/metrics`, `/metrics/detailed` or `/metrics/per-object`)                                         | `/metrics` |
+| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`       |
 
 ### Persistence
 
