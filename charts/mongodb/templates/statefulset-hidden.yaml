@@ -1,4 +1,4 @@
-{{- if and .Values.replicaSet.enabled (gt (int .Values.replicaSet.hiddenSecondaries.instances | default 0) 0) }}
+{{- if and .Values.replicaSet.enabled (gt (int .Values.replicaSet.hiddenSecondaries.instances | default 0) 0) (not .Values.shardedCluster.enabled) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

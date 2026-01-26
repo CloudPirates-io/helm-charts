@@ -1,3 +1,6 @@
+{{/* Render validation for deployment mode conflicts */}}
+{{- include "mongodb.validateShardedCluster" . -}}
+{{- if not .Values.shardedCluster.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -342,3 +345,4 @@ spec:
             storage: {{ .Values.persistence.size | quote }}
     {{- end }}
   {{- end }}
+{{- end }}

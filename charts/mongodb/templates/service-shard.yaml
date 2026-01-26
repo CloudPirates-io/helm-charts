@@ -1,0 +1,37 @@
+{{- if .Values.shardedCluster.enabled }}
+{{- range $shardIndex := until (int .Values.shardedCluster.shards.count) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-headless
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" $ | nindent 4 }}
+    service-type: shard
+    shard-index: "{{ $shardIndex }}"
+  {{- with (include "mongodb.annotations" $) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+      protocol: TCP
+    {{- if $.Values.metrics.enabled }}
+    - name: http-metrics
+      port: 9216
+      targetPort: http-metrics
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "mongodb.selectorLabels" $ | nindent 4 }}
+    service-type: shard
+    shard-index: "{{ $shardIndex }}"
+{{- end }}
+{{- end }}

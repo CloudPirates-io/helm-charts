@@ -1,4 +1,4 @@
-{{- if and .Values.replicaSet.enabled .Values.replicaSet.arbiter.enabled }}
+{{- if and .Values.replicaSet.enabled .Values.replicaSet.arbiter.enabled (not .Values.shardedCluster.enabled) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

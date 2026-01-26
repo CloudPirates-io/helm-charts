@@ -471,3 +471,313 @@ data:
     chmod 400 /replicaset/keyfile
     {{- end }}    
     echo "Initialization done."
+{{- end }}
+{{- if .Values.shardedCluster.enabled }}
+  extra-init-sharded.sh: |
+    #!/bin/sh
+    # Source: https://github.com/groundhog2k/helm-charts/tree/master/charts/mongodb
+    # Extended for MongoDB Sharded Cluster Support
+
+    # Log a message in sharded cluster initialization phase
+    # $1 - the log message
+    log_shard() {
+      echo "***** SHARD-INIT: $1"
+      echo "$(date) ***** SHARD-INIT: $1" >>/tmp/shard-init.log
+    }
+
+    # Log error message and exit when errorcode is not 0
+    # $1 - Message to log in case of error
+    # $2 - Exit/Error code
+    logErrorAndExitShard() {
+      local message=$1
+      local errorcode=$2
+      if [ $errorcode -ne 0 ]; then
+        log_shard "[ERROR] - $message"
+        exit $errorcode
+      fi
+    }
+
+    # Wait until final mongod is fully up and running in background for sharded components
+    # $1 - Number of retries
+    # $2 - Delay between retries
+    # $3 - Time to wait until mongod is initialized
+    wait_ready_shard() {
+      log_shard "Waiting until mongod is fully up and running"
+      local retries=$1
+      local delay=$2
+      local initdelay=$3
+      while true; do
+        mp=$(ps aux | grep "mongod --config {{ include "mongodb.configFullName" . | quote }}" | grep -v grep)
+        if [ ! -z "$mp" ]; then
+          log_shard "mongod is running giving it time to initialize"
+          sleep $initdelay
+          break;
+        fi
+        retries=$((retries-1))
+        if [ "$retries" -le 0 ]; then
+          log_shard "mongod is not running.. Stopping hard"
+          exit 1
+        fi
+        sleep $delay
+        log_shard "Waiting for mongod..."
+      done
+      log_shard "Done with waiting for mongod"
+    }
+
+    # Initialize Config Server Replica Set
+    # $1 - Config server replica set name
+    init_configserver_replicaset() {
+      local configRsName=$1
+      local configService="{{ include "mongodb.fullname" . }}-configserver-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}"
+
+      log_shard "Initializing config server replica set: $configRsName"
+
+      # Check if config server replica set is already initialized
+      result=$($MONGOSHELL --host $configService --eval "rs.status().ok" 2>/dev/null || echo "0")
+      if [ "$result" = "1" ]; then
+        log_shard "Config server replica set already initialized"
+        return 0
+      fi
+
+      # Build config server members array
+      local members="["
+      {{- range $i := until (int .Values.shardedCluster.configServers.replicas) }}
+      {{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:"{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"}
+      {{- end }}
+      ]
+
+      # Initialize config server replica set
+      $MONGOSHELL --host {{ include "mongodb.fullname" . }}-configserver-0.$configService:27017 --eval "
+        rs.initiate({
+          _id: '$configRsName',
+          configsvr: true,
+          members: $members
+        })
+      "
+      result=$?
+      logErrorAndExitShard "Failed to initialize config server replica set" $result
+
+      # Wait for config server replica set to be ready
+      log_shard "Waiting for config server replica set to be ready..."
+      local retries=60
+      while [ $retries -gt 0 ]; do
+        result=$($MONGOSHELL --host $configService --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
+        if [ "$result" = "1" ]; then
+          log_shard "Config server replica set is ready"
+          break
+        fi
+        sleep 2
+        retries=$((retries-1))
+      done
+
+      if [ $retries -eq 0 ]; then
+        logErrorAndExitShard "Config server replica set failed to become ready" 1
+      fi
+    }
+
+    # Initialize a single shard replica set
+    # $1 - Shard index
+    # $2 - Shard replica set name
+    init_shard_replicaset() {
+      local shardIndex=$1
+      local shardRsName=$2
+      local shardService="{{ include "mongodb.fullname" . }}-shard-${shardIndex}-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}"
+
+      log_shard "Initializing shard $shardIndex replica set: $shardRsName"
+
+      # Check if shard replica set is already initialized
+      result=$($MONGOSHELL --host $shardService --eval "rs.status().ok" 2>/dev/null || echo "0")
+      if [ "$result" = "1" ]; then
+        log_shard "Shard $shardIndex replica set already initialized"
+        return 0
+      fi
+
+      # Build shard members array
+      local members="["
+      {{- range $i := until (int .Values.shardedCluster.shards.replicas) }}
+      {{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"}
+      {{- end }}
+      ]
+
+      # Initialize shard replica set
+      $MONGOSHELL --host {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0.$shardService:27017 --eval "
+        rs.initiate({
+          _id: '$shardRsName',
+          members: $members
+        })
+      "
+      result=$?
+      logErrorAndExitShard "Failed to initialize shard $shardIndex replica set" $result
+
+      # Wait for shard replica set to be ready
+      log_shard "Waiting for shard $shardIndex replica set to be ready..."
+      local retries=60
+      while [ $retries -gt 0 ]; do
+        result=$($MONGOSHELL --host $shardService --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
+        if [ "$result" = "1" ]; then
+          log_shard "Shard $shardIndex replica set is ready"
+          break
+        fi
+        sleep 2
+        retries=$((retries-1))
+      done
+
+      if [ $retries -eq 0 ]; then
+        logErrorAndExitShard "Shard $shardIndex replica set failed to become ready" 1
+      fi
+    }
+
+    # Add shards to the cluster via mongos
+    add_shards_to_cluster() {
+      local mongosHost="{{ include "mongodb.fullname" . }}-mongos-0.{{ include "mongodb.fullname" . }}-mongos-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"
+
+      log_shard "Adding shards to cluster via mongos"
+
+      # Wait for mongos to be ready
+      log_shard "Waiting for mongos to be ready..."
+      local retries=60
+      while [ $retries -gt 0 ]; do
+        result=$($MONGOSHELL --host $mongosHost --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
+        if [ "$result" = "1" ]; then
+          log_shard "Mongos is ready"
+          break
+        fi
+        sleep 2
+        retries=$((retries-1))
+      done
+
+      if [ $retries -eq 0 ]; then
+        logErrorAndExitShard "Mongos failed to become ready" 1
+      fi
+
+      # Add each shard to the cluster
+      {{- range $i := until (int .Values.shardedCluster.shards.count) }}
+      log_shard "Adding shard {{ $i }} to cluster"
+      result=$($MONGOSHELL --host $mongosHost --eval "
+        try {
+          sh.addShard('{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs/{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-0.{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017');
+          print('SUCCESS');
+        } catch (e) {
+          if (e.code === 20) {
+            print('ALREADY_EXISTS');
+          } else {
+            print('ERROR: ' + e.message);
+            throw e;
+          }
+        }
+      " 2>/dev/null)
+
+      if [[ "$result" == *"SUCCESS"* ]] || [[ "$result" == *"ALREADY_EXISTS"* ]]; then
+        log_shard "Shard {{ $i }} added successfully or already exists"
+      else
+        logErrorAndExitShard "Failed to add shard {{ $i }}: $result" 1
+      fi
+      {{- end }}
+
+      log_shard "All shards added to cluster successfully"
+    }
+
+    # Enable sharding on databases and collections
+    enable_sharding() {
+      local mongosHost="{{ include "mongodb.fullname" . }}-mongos-0.{{ include "mongodb.fullname" . }}-mongos-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"
+
+      log_shard "Enabling sharding on databases and collections"
+
+      {{- range .Values.shardedCluster.initialization.enableShardingDatabases }}
+      log_shard "Enabling sharding on database: {{ . }}"
+      $MONGOSHELL --host $mongosHost --eval "
+        try {
+          sh.enableSharding('{{ . }}');
+          print('Database {{ . }} sharding enabled');
+        } catch (e) {
+          if (e.code === 23) {
+            print('Database {{ . }} sharding already enabled');
+          } else {
+            throw e;
+          }
+        }
+      "
+      result=$?
+      logErrorAndExitShard "Failed to enable sharding on database {{ . }}" $result
+      {{- end }}
+
+      {{- range .Values.shardedCluster.initialization.shardCollections }}
+      log_shard "Sharding collection: {{ .database }}.{{ .collection }}"
+      $MONGOSHELL --host $mongosHost --eval "
+        try {
+          sh.shardCollection('{{ .database }}.{{ .collection }}', {{ .key }});
+          print('Collection {{ .database }}.{{ .collection }} sharded');
+        } catch (e) {
+          if (e.code === 20 || e.code === 23) {
+            print('Collection {{ .database }}.{{ .collection }} already sharded');
+          } else {
+            throw e;
+          }
+        }
+      "
+      result=$?
+      logErrorAndExitShard "Failed to shard collection {{ .database }}.{{ .collection }}" $result
+      {{- end }}
+
+      log_shard "Sharding configuration completed"
+    }
+
+    # Main sharded cluster initialization function
+    init_sharded_cluster() {
+      log_shard "Starting MongoDB sharded cluster initialization"
+
+      # Initialize config server replica set
+      init_configserver_replicaset "{{ include "mongodb.fullname" . }}-configserver-rs"
+
+      # Initialize all shard replica sets
+      {{- range $i := until (int .Values.shardedCluster.shards.count) }}
+      init_shard_replicaset {{ $i }} "{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs"
+      {{- end }}
+
+      # Add shards to cluster
+      add_shards_to_cluster
+
+      # Enable sharding on databases and collections
+      enable_sharding
+
+      log_shard "MongoDB sharded cluster initialization completed successfully"
+    }
+
+    # Detect service type and run appropriate initialization
+    detect_service_and_init() {
+      if [ "${HOSTNAME}" = *"configserver"* ]; then
+        log_shard "Detected config server instance"
+        # Config server specific initialization if needed
+      elif [ "${HOSTNAME}" = *"mongos"* ]; then
+        log_shard "Detected mongos router instance"
+        # Mongos router specific initialization if needed
+      elif [ "${HOSTNAME}" = *"shard"* ]; then
+        log_shard "Detected shard instance"
+        # Shard specific initialization if needed
+      else
+        log_shard "Unknown service type, skipping sharded cluster initialization"
+        exit 0
+      fi
+    }
+
+    # Environment variables and helper definitions
+    MONGOSHELL="mongosh"
+
+    # Set MongoDB version detection for compatibility
+    MONGODB_VERSION=$($MONGOSHELL --eval "db.version()" --quiet 2>/dev/null || echo "unknown")
+    if [[ "$MONGODB_VERSION" =~ ^4\. ]]; then
+      export IS_MONGODB_4="true"
+    else
+      export IS_MONGODB_4="false"
+    fi
+
+    # Detect service type and run initialization
+    detect_service_and_init
+
+    # Run main initialization only from one mongos instance
+    if [ "${HOSTNAME}" = "{{ include "mongodb.fullname" . }}-mongos-0" ]; then
+      log_shard "Running main sharded cluster initialization from primary mongos"
+      init_sharded_cluster
+    else
+      log_shard "Secondary instance, skipping main initialization"
+    fi

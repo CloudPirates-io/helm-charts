@@ -464,3 +464,100 @@ replicaSet:
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
+
+## @section Sharded Cluster parameters
+shardedCluster:
+  ## @param shardedCluster.enabled Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)
+  enabled: false
+
+  ## @section Config Servers configuration
+  configServers:
+    ## @param shardedCluster.configServers.replicas Number of config server replicas (minimum 1, recommended 3 for production)
+    replicas: 3
+    ## @param shardedCluster.configServers.resources Resource limits and requests for config server pods
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+    ## @param shardedCluster.configServers.nodeSelector Node selector for config server pods
+    nodeSelector: {}
+    ## @param shardedCluster.configServers.tolerations Tolerations for config server pods
+    tolerations: []
+    ## @param shardedCluster.configServers.affinity Affinity rules for config server pods
+    affinity: {}
+    ## @param shardedCluster.configServers.storage Storage configuration for config servers
+    storage:
+      ## @param shardedCluster.configServers.storage.size Size of persistent volume for config servers
+      size: 4Gi
+      ## @param shardedCluster.configServers.storage.storageClass Storage class for config servers
+      storageClass: ""
+      ## @param shardedCluster.configServers.storage.accessMode Access mode for config server persistent volumes
+      accessMode: ReadWriteOnce
+
+  ## @section Mongos router configuration
+  mongos:
+    ## @param shardedCluster.mongos.replicas Number of mongos router instances (minimum 1, recommended 2+ for production)
+    replicas: 2
+    ## @param shardedCluster.mongos.resources Resource limits and requests for mongos router pods
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    ## @param shardedCluster.mongos.nodeSelector Node selector for mongos router pods
+    nodeSelector: {}
+    ## @param shardedCluster.mongos.tolerations Tolerations for mongos router pods
+    tolerations: []
+    ## @param shardedCluster.mongos.affinity Affinity rules for mongos router pods
+    affinity: {}
+    ## @param shardedCluster.mongos.service Service configuration for mongos routers
+    service:
+      ## @param shardedCluster.mongos.service.type Service type for mongos routers
+      type: ClusterIP
+      ## @param shardedCluster.mongos.service.port Service port for mongos routers
+      port: 27017
+      ## @param shardedCluster.mongos.service.annotations Additional annotations for mongos service
+      annotations: {}
+
+  ## @section Shard configuration
+  shards:
+    ## @param shardedCluster.shards.count Number of shards (minimum 2 for meaningful sharding)
+    count: 2
+    ## @param shardedCluster.shards.replicas Number of replicas per shard (minimum 1, recommended 3 for production)
+    replicas: 3
+    ## @param shardedCluster.shards.resources Resource limits and requests for shard member pods
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
+    ## @param shardedCluster.shards.nodeSelector Node selector for shard pods
+    nodeSelector: {}
+    ## @param shardedCluster.shards.tolerations Tolerations for shard pods
+    tolerations: []
+    ## @param shardedCluster.shards.affinity Affinity rules for shard pods
+    affinity: {}
+    ## @param shardedCluster.shards.storage Storage configuration for shards
+    storage:
+      ## @param shardedCluster.shards.storage.size Size of persistent volume for each shard member
+      size: 20Gi
+      ## @param shardedCluster.shards.storage.storageClass Storage class for shards
+      storageClass: ""
+      ## @param shardedCluster.shards.storage.accessMode Access mode for shard persistent volumes
+      accessMode: ReadWriteOnce
+
+  ## @section Sharding initialization configuration
+  initialization:
+    ## @param shardedCluster.initialization.enableShardingDatabases List of databases to enable sharding on during initialization
+    enableShardingDatabases: []
+    ## @param shardedCluster.initialization.shardCollections List of collections to shard during initialization
+    ## Example: [{"database": "mydb", "collection": "mycollection", "key": "{userId: 1}"}]
+    shardCollections: []
+    ## @param shardedCluster.initialization.retries Number of retries during cluster initialization
+    retries: 30
+    ## @param shardedCluster.initialization.delay Seconds to wait between initialization retries
+    delay: 5
