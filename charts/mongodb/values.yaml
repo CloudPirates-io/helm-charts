@@ -22,8 +22,8 @@ podLabels: {}
 
 ## @param revisionHistoryLimit Maximum number of revisions maintained in revision history
 revisionHistoryLimit: 10
-## @param podManagementPolicy Pod management policy
-podManagementPolicy: OrderedReady
+## @param podManagementPolicy Pod management policy (Parallel for faster startup, OrderedReady for ordered initialization)
+podManagementPolicy: Parallel
 ## param updateStrategyType Pod update strategy
 updateStrategyType: RollingUpdate
 
@@ -182,15 +182,15 @@ startupProbe:
   ## @param startupProbe.enabled Enable startup probe
   enabled: true
   ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
-  initialDelaySeconds: 10
+  initialDelaySeconds: 5
   ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
   timeoutSeconds: 5
   ## @param startupProbe.failureThreshold Number of failures before pod is marked unready
-  failureThreshold: 30
+  failureThreshold: 60
   ## @param startupProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
   ## @param startupProbe.periodSeconds How often to perform the probe
-  periodSeconds: 10
+  periodSeconds: 5
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -625,3 +625,17 @@ shardedCluster:
     retries: 30
     ## @param shardedCluster.initialization.delay Seconds to wait between initialization retries
     delay: 5
+
+  ## @section Balancer configuration
+  balancer:
+    ## @param shardedCluster.balancer.enabled Enable or disable the balancer
+    enabled: true
+    ## @param shardedCluster.balancer.chunkSize Chunk size in MB (default: 64MB)
+    chunkSize: 64
+    ## @param shardedCluster.balancer.window.start Start time for balancer window (format: HH:MM, empty = always on)
+    ## @param shardedCluster.balancer.window.stop Stop time for balancer window (format: HH:MM, empty = always on)
+    window:
+      start: ""
+      stop: ""
+    ## @param shardedCluster.balancer.autoSplitEnabled Enable automatic chunk splitting (MongoDB 6.0+)
+    autoSplitEnabled: true

@@ -554,16 +554,19 @@ data:
       result=$?
       logErrorAndExitShard "Failed to initialize config server replica set" $result
 
-      # Wait for config server replica set to be ready
+      # Wait for config server replica set to be ready with exponential backoff
       log_shard "Waiting for config server replica set to be ready..."
-      local retries=60
+      local retries=30
+      local delay=1
       while [ $retries -gt 0 ]; do
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Config server replica set is ready"
           break
         fi
-        sleep 2
+        sleep $delay
+        delay=$((delay * 2))
+        [ $delay -gt 30 ] && delay=30  # Cap at 30s
         retries=$((retries-1))
       done
 
@@ -602,16 +605,19 @@ data:
       result=$?
       logErrorAndExitShard "Failed to initialize shard $shardIndex replica set" $result
 
-      # Wait for shard replica set to be ready
+      # Wait for shard replica set to be ready with exponential backoff
       log_shard "Waiting for shard $shardIndex replica set to be ready..."
-      local retries=60
+      local retries=30
+      local delay=1
       while [ $retries -gt 0 ]; do
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Shard $shardIndex replica set is ready"
           break
         fi
-        sleep 2
+        sleep $delay
+        delay=$((delay * 2))
+        [ $delay -gt 30 ] && delay=30  # Cap at 30s
         retries=$((retries-1))
       done
 
@@ -626,16 +632,19 @@ data:
 
       log_shard "Adding shards to cluster via mongos"
 
-      # Wait for mongos to be ready (without authentication)
+      # Wait for mongos to be ready with exponential backoff
       log_shard "Waiting for mongos to be ready..."
-      local retries=60
+      local retries=30
+      local delay=1
       while [ $retries -gt 0 ]; do
         result=$(mongosh --host $mongosHost --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Mongos is ready"
           break
         fi
-        sleep 2
+        sleep $delay
+        delay=$((delay * 2))
+        [ $delay -gt 30 ] && delay=30  # Cap at 30s
         retries=$((retries-1))
       done
 
@@ -760,20 +769,77 @@ data:
       log_shard "Sharding configuration completed"
     }
 
+    # Configure balancer settings
+    configure_balancer() {
+      local mongosHost="{{ include "mongodb.fullname" . }}-mongos-0.{{ include "mongodb.fullname" . }}-mongos-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"
+
+      log_shard "Configuring balancer settings"
+
+      {{- if .Values.shardedCluster.balancer.enabled }}
+      # Enable balancer
+      $MONGOSHELL --host $mongosHost --eval "sh.startBalancer()" > /dev/null 2>&1
+      log_shard "Balancer enabled"
+      {{- else }}
+      # Disable balancer
+      $MONGOSHELL --host $mongosHost --eval "sh.stopBalancer()" > /dev/null 2>&1
+      log_shard "Balancer disabled"
+      {{- end }}
+
+      {{- if .Values.shardedCluster.balancer.chunkSize }}
+      # Set chunk size (in MB)
+      $MONGOSHELL --host $mongosHost --eval "
+        db.getSiblingDB('config').settings.updateOne(
+          { _id: 'chunksize' },
+          { \$set: { value: {{ .Values.shardedCluster.balancer.chunkSize }} } },
+          { upsert: true }
+        );
+      " > /dev/null 2>&1
+      log_shard "Chunk size set to {{ .Values.shardedCluster.balancer.chunkSize }}MB"
+      {{- end }}
+
+      {{- if and .Values.shardedCluster.balancer.window.start .Values.shardedCluster.balancer.window.stop }}
+      # Configure balancer window
+      $MONGOSHELL --host $mongosHost --eval "
+        db.getSiblingDB('config').settings.updateOne(
+          { _id: 'balancer' },
+          { \$set: {
+            activeWindow: {
+              start: '{{ .Values.shardedCluster.balancer.window.start }}',
+              stop: '{{ .Values.shardedCluster.balancer.window.stop }}'
+            }
+          }},
+          { upsert: true }
+        );
+      " > /dev/null 2>&1
+      log_shard "Balancer window configured: {{ .Values.shardedCluster.balancer.window.start }} - {{ .Values.shardedCluster.balancer.window.stop }}"
+      {{- end }}
+
+      {{- if not .Values.shardedCluster.balancer.autoSplitEnabled }}
+      # Disable autosplit if configured
+      $MONGOSHELL --host $mongosHost --eval "sh.disableAutoSplit()" > /dev/null 2>&1
+      log_shard "Auto-split disabled"
+      {{- end }}
+
+      log_shard "Balancer configuration completed"
+    }
+
     # Main sharded cluster initialization function
     init_sharded_cluster() {
       log_shard "Starting MongoDB sharded cluster initialization"
 
-      # Wait for all config servers to be reachable
+      # Wait for all config servers to be reachable with exponential backoff
       log_shard "Waiting for all config server pods to be reachable..."
       {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}
-      local retries=60
+      local retries=30
+      local delay=1
       while [ $retries -gt 0 ]; do
         if mongosh --host {{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; then
           log_shard "Config server {{ $i }} is reachable"
           break
         fi
-        sleep 2
+        sleep $delay
+        delay=$((delay * 2))
+        [ $delay -gt 30 ] && delay=30  # Cap at 30s
         retries=$((retries-1))
       done
       if [ $retries -eq 0 ]; then
@@ -781,17 +847,20 @@ data:
       fi
       {{- end }}
 
-      # Wait for all shard pods to be reachable
+      # Wait for all shard pods to be reachable with exponential backoff
       log_shard "Waiting for all shard pods to be reachable..."
       {{- range $shardIdx := until (int .Values.shardedCluster.shards) }}
       {{- range $nodeIdx := until (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) }}
-      local retries=60
+      local retries=30
+      local delay=1
       while [ $retries -gt 0 ]; do
         if mongosh --host {{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-{{ $nodeIdx }}.{{ include "mongodb.fullname" $ }}-shard-{{ $shardIdx }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; then
           log_shard "Shard {{ $shardIdx }} node {{ $nodeIdx }} is reachable"
           break
         fi
-        sleep 2
+        sleep $delay
+        delay=$((delay * 2))
+        [ $delay -gt 30 ] && delay=30  # Cap at 30s
         retries=$((retries-1))
       done
       if [ $retries -eq 0 ]; then
@@ -802,15 +871,43 @@ data:
 
       log_shard "All pods are reachable, starting cluster initialization"
 
-      # Initialize replica sets (skip in postStart hook)
+      # Initialize replica sets in parallel (skip in postStart hook)
       if [ "${SKIP_REPLICA_INIT}" != "true" ]; then
-        # Initialize config server replica set
-        init_configserver_replicaset "{{ include "mongodb.fullname" . }}-configserver-rs"
+        log_shard "Initializing replica sets in parallel for faster startup"
 
-        # Initialize all shard replica sets
+        # Initialize config server replica set in background
+        init_configserver_replicaset "{{ include "mongodb.fullname" . }}-configserver-rs" &
+        CONFIG_PID=$!
+        log_shard "Config server replica set initialization started (PID: $CONFIG_PID)"
+
+        # Initialize all shard replica sets in parallel
         {{- range $i := until (int .Values.shardedCluster.shards) }}
-        init_shard_replicaset {{ $i }} "{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs"
+        init_shard_replicaset {{ $i }} "{{ include "mongodb.fullname" $ }}-shard-{{ $i }}-rs" &
+        SHARD_{{ $i }}_PID=$!
+        log_shard "Shard {{ $i }} replica set initialization started (PID: $SHARD_{{ $i }}_PID)"
         {{- end }}
+
+        # Wait for config server initialization to complete
+        log_shard "Waiting for config server initialization to complete..."
+        wait $CONFIG_PID
+        CONFIG_RESULT=$?
+        if [ $CONFIG_RESULT -ne 0 ]; then
+          logErrorAndExitShard "Config server initialization failed" $CONFIG_RESULT
+        fi
+        log_shard "Config server initialization completed successfully"
+
+        # Wait for all shard initializations to complete
+        log_shard "Waiting for all shard initializations to complete..."
+        {{- range $i := until (int .Values.shardedCluster.shards) }}
+        wait $SHARD_{{ $i }}_PID
+        SHARD_{{ $i }}_RESULT=$?
+        if [ $SHARD_{{ $i }}_RESULT -ne 0 ]; then
+          logErrorAndExitShard "Shard {{ $i }} initialization failed" $SHARD_{{ $i }}_RESULT
+        fi
+        log_shard "Shard {{ $i }} initialization completed successfully"
+        {{- end }}
+
+        log_shard "All replica sets initialized successfully in parallel"
       else
         log_shard "Skipping replica set initialization"
       fi
@@ -822,6 +919,9 @@ data:
 
         # Enable sharding on databases and collections
         enable_sharding
+
+        # Configure balancer settings
+        configure_balancer
       else
         log_shard "Skipping shard addition - will be done after mongos starts"
       fi

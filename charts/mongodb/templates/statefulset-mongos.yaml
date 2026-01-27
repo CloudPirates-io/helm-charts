@@ -63,62 +63,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
-        {{- if eq (include "mongodb.fullname" .) "mongodb" }}
-        {{- if .Values.shardedCluster.enabled }}
-        - name: download-kubectl
-          image: curlimages/curl:latest
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              # Download kubectl to shared volume
-              KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
-              curl -L "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" -o /kubectl/kubectl
-              chmod +x /kubectl/kubectl
-          volumeMounts:
-            - name: kubectl-bin
-              mountPath: /kubectl
-        - name: init-sharded-cluster
-          image: {{ include "mongodb.image" . }}
-          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
-          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
-          command:
-            - /bin/bash
-            - -c
-            - |
-              # Only run on mongos-0
-              if [ "${HOSTNAME}" = "{{ include "mongodb.fullname" . }}-mongos-0" ]; then
-                # Add kubectl to PATH
-                export PATH=/kubectl:$PATH
-
-                # Run initialization script
-                /opt/mongodb/init-scripts/extra-init-sharded.sh
-              fi
-          env:
-            - name: HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: SKIP_ADD_SHARDS
-              value: "true"
-            {{- if .Values.auth.enabled }}
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: {{ .Values.auth.rootUsername | quote }}
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mongodb.secretName" . }}
-                  key: {{ include "mongodb.secretPasswordKey" . }}
-            {{- end }}
-          volumeMounts:
-            - name: kubectl-bin
-              mountPath: /kubectl
-            - name: mongodb-init-scripts
-              mountPath: /opt/mongodb/init-scripts
-              readOnly: true
-        {{- end }}
-        {{- end }}
         - name: init-mongos
           image: {{ include "mongodb.image" . }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
@@ -130,13 +74,18 @@ spec:
               set -e
               echo "Initializing mongos router..."
 
-              # Wait for config server replica set to be ready
-              echo "Waiting for config servers to be ready..."
-              while ! mongosh --host {{ include "mongodb.fullname" . }}-configserver-0.{{ include "mongodb.fullname" . }}-configserver-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
-                echo "Config server not ready, waiting..."
+              # Wait for config server replica set to be initialized (by Job)
+              # Use isMaster which works without authentication
+              echo "Waiting for config server replica set to be initialized..."
+              while true; do
+                ISMASTER=$(mongosh --host {{ include "mongodb.fullname" . }}-configserver-0.{{ include "mongodb.fullname" . }}-configserver-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('isMaster').setName" --quiet 2>&1 | grep -v "Defaulted" | grep -v "^$")
+                if [ ! -z "$ISMASTER" ] && [ "$ISMASTER" != "null" ]; then
+                  echo "Config server replica set is initialized: $ISMASTER"
+                  break
+                fi
+                echo "Config server replica set not initialized yet, waiting..."
                 sleep 5
               done
-              echo "Config server is ready"
 
               # Check if keyfile authentication is enabled
               if [ -f /opt/mongodb/keyfile ]; then
@@ -261,9 +210,6 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-            - name: mongodb-init-scripts
-              mountPath: /opt/mongodb/init-scripts
-              readOnly: true
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -336,16 +282,6 @@ spec:
         - name: mongodb-keyfile-data
           emptyDir: {}
         {{- end }}
-        {{- if eq (include "mongodb.fullname" .) "mongodb" }}
-        {{- if .Values.shardedCluster.enabled }}
-        - name: kubectl-bin
-          emptyDir: {}
-        {{- end }}
-        {{- end }}
-        - name: mongodb-init-scripts
-          configMap:
-            name: {{ include "mongodb.fullname" . }}-init-scripts
-            defaultMode: 0755
         {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

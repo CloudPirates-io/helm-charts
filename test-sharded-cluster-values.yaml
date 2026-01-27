@@ -1,0 +1,89 @@
+# Test values for MongoDB Sharded Cluster in local kind cluster
+# Optimized for local development with minimal resources
+
+## Enable sharded cluster mode
+shardedCluster:
+  enabled: true
+
+  ## Config Servers - production-like setup
+  configsvr:
+    replicaCount: 3  # 3 for production testing
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    persistence:
+      size: 500Mi
+
+  ## Mongos Routers - production-like setup
+  mongos:
+    replicaCount: 3  # 3 for full production testing
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+
+  ## Number of shards - testing with 3
+  shards: 3  # Testing with 3 shards
+
+  ## Shard Servers
+  shardsvr:
+    dataNode:
+      replicaCount: 2  # 2 nodes per shard for testing
+      resources:
+        limits:
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+    persistence:
+      size: 500Mi
+
+    ## No arbiters for testing
+    arbiter:
+      replicaCount: 0
+
+  ## Test initialization with a sample database
+  initialization:
+    enableShardingDatabases:
+      - testdb
+    shardCollections:
+      - database: testdb
+        collection: users
+        key: "{userId: 1}"
+
+## Authentication
+auth:
+  enabled: true
+  rootUsername: admin
+  rootPassword: testpassword123
+
+## Replica Set Configuration (required for sharded cluster auth)
+replicaSet:
+  enabled: false  # Not using standard replica set mode, but need key for sharded cluster
+  key: "XtH1lFsJ7dWLs6g505vm58ragksPl6OZ6x0i3lkrUNchb8YXNTwxMvVyxmoizawLUYn78RlKr83Rmg9UK4HeAg2yFSEqshC+appk3TpcSRkQq8gIByt4/yuic9b7Z3OnsczOOcK7QbXSQtCR3F5RS721C6FnGGzdkJHs8MFxt7k2PMNKDZ81l6cx/XJ99WvpFhXqIRVWYQJZKGnIIclLPGrksFVpfOfKRAPv9Ph4bgL1VMLthG9WeLr+4BBjOrCd4FP3CXfS+DxXLI0Y7obo/fbyvZpdwWhqGVTCZZXnuy5X/r3hGm2KOyOBGZg0qNzQEP/fsyhX7Qg8u09dC9BpXCjOr2mPpLOauHc8uTzBLTusCOqUfnW663VT0/P2O3khFlcd97rxhJkAa7+CNvqvxvVvErpzqqdBFfLqOuxbnBO3dKCV0niD8HzrNqfqdA7g0z3IKt1eVRxN++Tjcbi98ubo6lPPGNCvU2zQZWNxDqMjZLN3g66CL1liriZNSYoGGJRO5voO0hY0IUwL3WOKM5SOLg7dVVCoCjPH9IaKcK9OI3egDQp+0wCHi2OaGHyVPyB4Kcve4sy+5N783sAhxHV+c4jhV5eSEteELCzstV5+krVJXwgZAQ+aRPirIQ326xaOaz9hEgTPjiVShfOXu46ncBP0mGSIuS/FG9VumAWIInPw37IxqfKaVXF0H9lcRUJ7LqKB7OnwW6jamGW56Sn4MWwnQbrZ1IDJ4IENzP0cpasZsjfY+dvV+zp7R+mpXBLNPZgOb1pa03vX9mYndtGLCTEPiplNe01LkadP/Nkfk2cfpPcs6h8trPyMV868r2o5/qAgFaNFL4x3Ye82zYv/jH2paWFZYd9b8d5H5Rrxgm/z0Nx1dAQvQUx0dOotmsCRSdg1tIbK8JkTkbjh4y8Zrg/fE/pl6u3uOWJiBF9RUtySwiBMIhUhggRwpoPEU07UX2nLvXHL24dH1tRj+qTT0VjCv/gos+HQ1V+5mvK5LT7f"
+
+## Service Account for kubectl access
+serviceAccount:
+  create: true
+
+## Resource limits for standard components (if not using sharded cluster)
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 50m
+    memory: 256Mi
+
+## Persistence for local testing
+persistence:
+  enabled: true
+  storageClass: "standard"  # kind default storage class
+  size: 2Gi
+
+## Probes - already optimized in values.yaml
+# Using defaults which have been optimized for faster startup
