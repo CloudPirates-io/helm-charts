@@ -404,6 +404,49 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: init-shard-{{ $shardIndex }}-arbiter
+          image: {{ include "mongodb.image" $ }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" $.Values.image) }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" $ | nindent 12 }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Initializing arbiter for shard {{ $shardIndex }}..."
+
+              # Check if keyfile authentication is enabled
+              if [ -f /opt/mongodb/keyfile ]; then
+                echo "Found keyfile, copying to writable location"
+                cp /opt/mongodb/keyfile /keyfile-data/keyfile
+                chmod 400 /keyfile-data/keyfile
+                chown mongodb:mongodb /keyfile-data/keyfile
+              fi
+
+              echo "Arbiter for shard {{ $shardIndex }} initialization completed"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SHARD_INDEX
+              value: "{{ $shardIndex }}"
+          volumeMounts:
+            {{- if $.Values.config.content }}
+            - name: mongodb-config
+              mountPath: {{ $.Values.config.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            - name: mongodb-keyfile
+              mountPath: /opt/mongodb/keyfile
+              subPath: keyfile
+              readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
+            {{- end }}
+          resources: {{ toYaml (coalesce $.Values.shardedCluster.shardsvr.arbiter.resources $.Values.initContainer.resources) | nindent 12 }}
       containers:
         - name: mongodb-shard-{{ $shardIndex }}-arbiter
           image: {{ include "mongodb.image" $ }}
@@ -415,6 +458,7 @@ spec:
             - --shardsvr
             - --replSet={{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-rs
             - --port=27017
+            - --dbpath={{ $.Values.persistence.mountPath }}
             {{- if $.Values.auth.enabled }}
             - --auth
             {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
@@ -458,9 +502,14 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - sh
+                - -c
+                - |
+                  {{- if $.Values.auth.enabled }}
+                  mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand('ping')"
+                  {{- else }}
+                  mongosh --eval "db.adminCommand('ping')"
+                  {{- end }}
             initialDelaySeconds: {{ $.Values.livenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ $.Values.livenessProbe.timeoutSeconds }}
             successThreshold: {{ $.Values.livenessProbe.successThreshold }}
@@ -471,9 +520,14 @@ spec:
           readinessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - sh
+                - -c
+                - |
+                  {{- if $.Values.auth.enabled }}
+                  mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand('ping')"
+                  {{- else }}
+                  mongosh --eval "db.adminCommand('ping')"
+                  {{- end }}
             initialDelaySeconds: {{ $.Values.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ $.Values.readinessProbe.timeoutSeconds }}
             successThreshold: {{ $.Values.readinessProbe.successThreshold }}
@@ -484,9 +538,14 @@ spec:
           startupProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - sh
+                - -c
+                - |
+                  {{- if $.Values.auth.enabled }}
+                  mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand('ping')"
+                  {{- else }}
+                  mongosh --eval "db.adminCommand('ping')"
+                  {{- end }}
             initialDelaySeconds: {{ $.Values.startupProbe.initialDelaySeconds }}
             timeoutSeconds: {{ $.Values.startupProbe.timeoutSeconds }}
             successThreshold: {{ $.Values.startupProbe.successThreshold }}
@@ -494,6 +553,8 @@ spec:
             periodSeconds: {{ $.Values.startupProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
+            - name: mongodb-arbiter-data
+              mountPath: {{ $.Values.persistence.mountPath }}
             {{- if $.Values.config.content }}
             - name: mongodb-config
               mountPath: {{ $.Values.config.mountPath }}
@@ -541,6 +602,8 @@ spec:
         {{- with $.Values.shardedCluster.shardsvr.arbiter.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        - name: mongodb-arbiter-data
+          emptyDir: {}
 {{- end }}
 {{- end }}
 {{- end }}

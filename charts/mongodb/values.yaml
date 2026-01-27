@@ -27,7 +27,6 @@ podManagementPolicy: Parallel
 ## param updateStrategyType Pod update strategy
 updateStrategyType: RollingUpdate
 
-
 ## @section MongoDB image parameters
 image:
   ## @param image.registry MongoDB image registry
@@ -625,6 +624,8 @@ shardedCluster:
     retries: 30
     ## @param shardedCluster.initialization.delay Seconds to wait between initialization retries
     delay: 5
+    ## @param shardedCluster.initialization.defaultWriteConcern Cluster-wide default write concern (default: "majority")
+    defaultWriteConcern: "majority"
 
   ## @section Balancer configuration
   balancer:

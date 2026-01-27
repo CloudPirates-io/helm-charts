@@ -534,11 +534,20 @@ data:
       log_shard "Initializing config server replica set: $configRsName"
 
       # Check if config server replica set is already initialized
+      # Try without auth first (works for localhost exception or when RS is initialized without users)
       result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Config server replica set already initialized"
         return 0
       fi
+      # Try with auth (works when users already exist)
+      {{- if .Values.auth.enabled }}
+      result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
+      if [ "$result" = "1" ]; then
+        log_shard "Config server replica set already initialized"
+        return 0
+      fi
+      {{- end }}
 
       # Build config server members array
       local members="[{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:\"{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\"}{{- end }}]"
@@ -559,6 +568,7 @@ data:
       local retries=30
       local delay=1
       while [ $retries -gt 0 ]; do
+        # Try without auth (works after rs.initiate via localhost exception)
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-configserver-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Config server replica set is ready"
@@ -586,6 +596,7 @@ data:
       log_shard "Initializing shard $shardIndex replica set: $shardRsName"
 
       # Check if shard replica set is already initialized
+      # Try without auth first (works for localhost exception or when RS is initialized without users)
       result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Shard $shardIndex replica set already initialized"
@@ -610,6 +621,7 @@ data:
       local retries=30
       local delay=1
       while [ $retries -gt 0 ]; do
+        # Try without auth (works after rs.initiate via localhost exception)
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ .Release.Namespace }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Shard $shardIndex replica set is ready"
@@ -688,6 +700,49 @@ data:
           log_shard "Warning: User creation result: $result"
           ;;
       esac
+      {{- end }}
+
+      # Check arbiter configuration and log warnings
+      {{- $dataNodes := int .Values.shardedCluster.shardsvr.dataNode.replicaCount }}
+      {{- $arbiters := int .Values.shardedCluster.shardsvr.arbiter.replicaCount }}
+      {{- if gt $arbiters 0 }}
+      {{- $totalVoting := add $dataNodes $arbiters }}
+      {{- $votingMajority := add (div $totalVoting 2) 1 }}
+      {{- if not (gt $dataNodes $votingMajority) }}
+      log_shard "========================================================================================================="
+      log_shard "WARNING: Arbiter configuration may cause issues!"
+      log_shard "  Data nodes: {{ $dataNodes }}, Arbiters: {{ $arbiters }}, Total voting: {{ $totalVoting }}"
+      log_shard "  Voting majority: {{ $votingMajority }}, Writable members: {{ $dataNodes }}"
+      log_shard "  MongoDB requires: writable members ({{ $dataNodes }}) > voting majority ({{ $votingMajority }})"
+      log_shard "  Current: {{ $dataNodes }} is NOT > {{ $votingMajority }} - WILL FAIL unless write concern is set to w:1"
+      log_shard "========================================================================================================="
+      {{- end }}
+      {{- end }}
+
+      # Set cluster-wide write concern if configured
+      {{- $writeConcern := .Values.shardedCluster.initialization.defaultWriteConcern }}
+      {{- if ne $writeConcern "majority" }}
+      log_shard "Setting cluster-wide write concern to w:{{ $writeConcern }} (configured value)"
+      {{- if $.Values.auth.enabled }}
+      result=$(mongosh --host $mongosHost --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --quiet --eval "
+      {{- else }}
+      result=$(mongosh --host $mongosHost --quiet --eval "
+      {{- end }}
+        db.adminCommand({
+          setDefaultRWConcern: 1,
+          defaultWriteConcern: { w: {{ $writeConcern }} }
+        });
+      " 2>&1 || echo "ERROR")
+
+      if echo "$result" | grep -q "ERROR"; then
+        log_shard "ERROR: Failed to set write concern to w:{{ $writeConcern }}: $result"
+        log_shard "Cannot proceed with adding shards - see warning above for solutions"
+        exit 1
+      else
+        log_shard "Cluster-wide write concern set to w:{{ $writeConcern }} successfully"
+      fi
+      {{- else }}
+      log_shard "Using default write concern: majority (no custom write concern configured)"
       {{- end }}
 
       # Add each shard to the cluster
