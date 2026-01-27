@@ -196,7 +196,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: data
+            - name: {{ .Values.persistence.volumeName }}
               mountPath: {{ include "postgres.dataDir" . }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
@@ -315,7 +315,7 @@ spec:
   {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
   - metadata:
-      name: data
+      name: {{ .Values.persistence.volumeName }}
       {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
       labels:
         {{- toYaml $labels | nindent 8 }}

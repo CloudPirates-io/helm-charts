@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 0.8.0 (2026-01-21)
+
+* use cloudpirates image (#870) ([bf069f6](https://github.com/CloudPirates-io/helm-charts/commit/bf069f6))
+* chore: update CHANGELOG.md for merged changes ([b3cbfb0](https://github.com/CloudPirates-io/helm-charts/commit/b3cbfb0))
+
+## 0.7.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+
 ## 0.6.1 (2026-01-01)
 
 * chore: update CHANGELOG.md for merged changes ([c0bc9a4](https://github.com/CloudPirates-io/helm-charts/commit/c0bc9a4))

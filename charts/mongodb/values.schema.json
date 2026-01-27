@@ -497,6 +497,9 @@
                         "delay": {
                             "type": "integer"
                         },
+                        "disableTelemetry": {
+                            "type": "boolean"
+                        },
                         "initDelay": {
                             "type": "integer"
                         },
@@ -567,10 +570,10 @@
                     }
                 },
                 "key": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "keySecretName": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
