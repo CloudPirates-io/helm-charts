@@ -107,7 +107,7 @@ spec:
             {{- if .Values.keycloak.httpsPort }}
             - --https-port={{ .Values.keycloak.httpsPort }}
             {{- end }}
-            {{- if not (has .Values.database.type (list "h2-file" "h2-mem" "dev-mem")) }}
+            {{- if and .Values.database.type (not (has .Values.database.type (list "h2-file" "h2-mem" "dev-mem"))) }}
             - --db={{ .Values.database.type }}
             - --db-url={{ include "keycloak.databaseUrl" . }}
             {{- end }}
