@@ -65,8 +65,16 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "cloudpirates.selectorLabels" -}}
+{{- if and .Values.selectorLabels .Values.selectorLabels.name }}
+app.kubernetes.io/name: {{ .Values.selectorLabels.name }}
+{{- else }}
 app.kubernetes.io/name: {{ include "cloudpirates.name" . }}
+{{- end }}
+{{- if and .Values.selectorLabels .Values.selectorLabels.instance }}
+app.kubernetes.io/instance: {{ .Values.selectorLabels.instance }}
+{{- else }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
 {{- end }}
 
 {{/*
