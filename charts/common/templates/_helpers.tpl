@@ -51,7 +51,7 @@ Common labels
 */}}
 {{- define "cloudpirates.labels" -}}
 helm.sh/chart: {{ include "cloudpirates.chart" . }}
-{{- include "cloudpirates.selectorLabels" . }}
+{{ include "cloudpirates.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -69,7 +69,7 @@ Selector labels
 app.kubernetes.io/name: {{ .Values.selectorLabels.name }}
 {{- else -}}
 app.kubernetes.io/name: {{ include "cloudpirates.name" . }}
-{{- end -}}
+{{ end -}}
 {{- if and .Values.selectorLabels .Values.selectorLabels.instance }}
 app.kubernetes.io/instance: {{ .Values.selectorLabels.instance }}
 {{- else -}}
