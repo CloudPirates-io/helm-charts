@@ -24,11 +24,13 @@ data:
     host    all             all             127.0.0.1/32            trust
     # IPv6 local connections:
     host    all             all             ::1/128                 trust
-    # Allow replication connections from localhost, by a user with the
-    # replication privilege.
-    local   replication     all                                     trust
-    host    replication     all             127.0.0.1/32            trust
-    host    replication     all             ::1/128                 trust
+
+    {{- if .Values.replication.enabled }}
+
+    # Replication primary
+    host   replication     {{ .Values.replication.auth.username }}  {{ .Values.replication.allowFrom.ipv4 }} md5
+    host   replication     {{ .Values.replication.auth.username }}  {{ .Values.replication.allowFrom.ipv6 }} md5
+    {{- end }}
 
     # Allow connections from any host with password authentication
     host    all             all             all                     md5
@@ -115,17 +117,31 @@ data:
     
     # Locale and Formatting
     datestyle = 'iso, mdy'
-    timezone = 'UTC'
-    lc_messages = 'en_US.utf8'
-    lc_monetary = 'en_US.utf8'
-    lc_numeric = 'en_US.utf8'
-    lc_time = 'en_US.utf8'
+    timezone = '{{ .Values.config.postgresqlTimezone }}'
+    lc_messages = '{{ .Values.config.postgresqlLocale }}'
+    lc_monetary = '{{ .Values.config.postgresqlLocale }}'
+    lc_numeric = '{{ .Values.config.postgresqlLocale }}'
+    lc_time = '{{ .Values.config.postgresqlLocale }}'
     default_text_search_config = 'pg_catalog.english'
     
     # Set pg_hba.conf file to use
     hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
 
-    # Additional Configuration
+    {{- if .Values.replication.enabled }}
+      {{- if not .Values.replication.primary.host }}
+
+    # Replication primary configuration
+    wal_level = {{ .Values.replication.wal.level }}
+    max_wal_senders = {{ .Values.replication.wal.maxSenders }}
+    wal_keep_size = {{ .Values.replication.wal.keepSize }}
+      {{- else }}
+
+    # Replication standby configuration
+    primary_conninfo = 'host={{ tpl .Values.replication.primary.host }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile=/etc/postgresql/replication-pgpass'
+      {{- end }}
+    {{- end }}
+
+# Additional Configuration
     {{- range .Values.config.extraConfig }}
     {{ . }}
     {{- end }}

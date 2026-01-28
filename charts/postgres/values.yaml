@@ -110,6 +110,8 @@ config:
   existingConfigmap: ""
   ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
   pgHbaConfig: ""
+  postgresqlTimezone: "UTC"
+  postgresqlLocale: "en_US.utf"
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser:
@@ -369,3 +371,22 @@ metrics:
     metricRelabelings: []
     ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
     namespaceSelector: {}
+
+replication:
+  enabled: false
+  wal:
+    level: replica
+    maxSenders: 5
+    keepSize: 1024
+  primary:
+    host: ""
+    port: 5432
+  auth:
+    username: "replication"
+    password: "secret"
+    existingSecret: ""
+    secretKeys:
+      password: "replication-password"
+  allowFrom:
+    ipv4: "0.0.0.0/0"
+    ipv6: "::/0"

@@ -1,6 +1,6 @@
 {{- $createCustomUser := and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
 {{- $appendInitdbScripts := and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
-{{- if or $createCustomUser $appendInitdbScripts }}
+{{- if or $createCustomUser $appendInitdbScripts .Values.replication.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -37,6 +37,25 @@ data:
     EOSQL
 
     echo "✅ Custom user and database created successfully!"
+  {{- end }}
+  {{- if and .Values.replication.enabled }}
+    {{- if not .Values.replication.primary.host }}
+  01-init-replication-primary.sh: |
+    PGUSER="${POSTGRES_USER}" psql -v ON_ERROR_STOP=1 <<EOSQL
+      SELECT quote_ident(:'REPLICATION_USERNAME') AS repl_user \gset
+      SELECT quote_literal(:'REPLICATION_PASSWORD') AS repl_pass \gset
+
+      CREATE ROLE :repl_user WITH REPLICATION LOGIN PASSWORD :repl_pass;
+    EOSQL
+    echo "✅ Replication user created!"
+    {{- else }}
+  01-init-replication-standby.sh: |
+    echo "Initialize standby replication"
+    touch "${PGDATA}/standby.signal"
+    echo "{{ .Values.replication.primary.host}}:{{ .Values.replication.primary.port }}:replication:${REPLICATION_USER}:${REPLICATION_PASSWORD}"
+    PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${PRIMARY_HOST}" -D "${PGDATA}" -P --wal-method=stream
+    echo "✅ Standby replication initialized!"
+    {{- end }}
   {{- end }}
   {{- if $appendInitdbScripts }}
   {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
