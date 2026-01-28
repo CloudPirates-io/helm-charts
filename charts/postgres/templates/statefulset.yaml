@@ -38,11 +38,71 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.initContainers }}
       initContainers:
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication-standby-init
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "postgres.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          env:
+            - name: PGDATA
+              value: {{ include "postgres.pgdataPath" . }}
+            - name: REPLICATION_USER
+              {{- if .Values.replication.auth.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  {{ if .Values.replication.auth.secretKeys.name }}
+                  name: {{ tpl .Values.replication.auth.existingSecret | quote }}
+                  key: {{ tpl .Values.customUser.secretKeys.name | quote }}
+                  {{- end }}
+              {{- else }}
+              value: {{ .Values.replication.auth.username | quote }}
+              {{- end }}
+            - name: REPLICATION_PASSWORD
+              {{- if .Values.replication.auth.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  {{ if .Values.replication.auth.secretKeys.password }}
+                  name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
+                  key: {{ .Values.customUser.secretKeys.password | quote }}
+                  {{- end }}
+              {{- else }}
+              value: {{ .Values.replication.auth.password | quote }}
+              {{- end }}
+          volumeMounts:
+            - name: {{ .Values.persistence.volumeName }}
+              mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+          command:
+            - /bin/bash
+            - -ce
+            - |
+              if [ -d "${PGDATA}" ]; then
+                echo "${PGDATA} already exists, skipping standby initialization..."
+                exit 0
+              fi
+
+              pgpass_file="{{ include "postgres.dataDir" . }}/replication.pgpass"
+              primary_host="{{ tpl .Values.replication.primary.host . }}"
+              primary_port="{{ .Values.replication.primary.port }}"
+
+              echo "Initialize standby replication"
+              echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER}:${REPLICATION_PASSWORD}" > "${pgpass_file}"
+              chmod 600 "${pgpass_file}"
+              echo "✅ ${pgpass_file} created"
+
+              echo "Initialize database from primary..."
+              PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" --wal-method=stream
+              touch "${PGDATA}/standby.signal"
+              echo "✅ Standby replication initialized"
+        {{- end }}
+        {{- if .Values.initContainers }}
         {{- toYaml .Values.initContainers | nindent 8 }}
-      {{- end }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      enableServiceLinks: {{ .Values.global.enableServiceLinks }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -159,7 +219,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{ if .Values.replication.auth.secretKeys.password }}
-                  name: {{ tpl .Values.replication.auth.existingSecret | quote }}
+                  name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
                   key: {{ tpl .Values.customUser.secretKeys.password | quote }}
                   {{- end }}
               {{- else }}

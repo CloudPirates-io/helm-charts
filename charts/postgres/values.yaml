@@ -4,6 +4,7 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  enableServiceLinks: true
 
 ## @section Common parameters
 ## @param nameOverride String to partially override postgres.fullname
@@ -111,7 +112,7 @@ config:
   ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
   pgHbaConfig: ""
   postgresqlTimezone: "UTC"
-  postgresqlLocale: "en_US.utf"
+  postgresqlLocale: "en_US.utf8"
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser:

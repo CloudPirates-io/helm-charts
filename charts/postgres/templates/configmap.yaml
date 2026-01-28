@@ -127,19 +127,19 @@ data:
     # Set pg_hba.conf file to use
     hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
 
-    {{- if .Values.replication.enabled }}
-      {{- if not .Values.replication.primary.host }}
+  {{- if .Values.replication.enabled }}
+    {{- if not .Values.replication.primary.host }}
 
     # Replication primary configuration
     wal_level = {{ .Values.replication.wal.level }}
     max_wal_senders = {{ .Values.replication.wal.maxSenders }}
     wal_keep_size = {{ .Values.replication.wal.keepSize }}
-      {{- else }}
+    {{- else }}
 
     # Replication standby configuration
-    primary_conninfo = 'host={{ tpl .Values.replication.primary.host }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile=/etc/postgresql/replication-pgpass'
-      {{- end }}
+    primary_conninfo = 'host={{ tpl .Values.replication.primary.host . }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile={{ include "postgres.dataDir" . }}/replication.pgpass'
     {{- end }}
+  {{- end }}
 
 # Additional Configuration
     {{- range .Values.config.extraConfig }}
