@@ -521,7 +521,7 @@ As soon as a primary host is configured, this instance is considered to be a sta
 
 This will also create an `initContainer` name `replication-standby-init`, which:
 - Creates/updates the `replication.pgpass` credentials file in the transient run directory
-- I will initialize the database using `pg_basebackup`  if not already done using the credentials file above
+- Initializes the database using `pg_basebackup` if not already done using the credentials file above
 
 ```yaml
 replication:
