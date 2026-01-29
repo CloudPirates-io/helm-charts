@@ -473,10 +473,26 @@ common:
   ## @param common.mongodbExtraFlags Additional MongoDB command line flags
   mongodbExtraFlags: []
 
+## @section Performance tuning parameters (optional performance optimizations)
+performance:
+  ## @param performance.wiredTigerCacheSizeGB WiredTiger cache size in GB (empty = MongoDB default: 50% of RAM - 1GB)
+  wiredTigerCacheSizeGB: ""
+  ## @param performance.oplogSizeMB Oplog size in MB for replica sets (empty = MongoDB default based on disk size)
+  oplogSizeMB: ""
+  ## @param performance.maxIncomingConnections Maximum number of simultaneous connections (empty = MongoDB default: 65536)
+  maxIncomingConnections: ""
+  ## @param performance.readConcern Default read concern level (empty = MongoDB default: local)
+  ## Options: local, available, majority, linearizable, snapshot
+  readConcern: ""
+
 ## @section Sharded Cluster parameters
 shardedCluster:
   ## @param shardedCluster.enabled Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)
   enabled: false
+  ## @param shardedCluster.keyFile Key for internal cluster authentication (base64 encoded string 6-1024 chars)
+  keyFile: ""
+  ## @param shardedCluster.keySecretName Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
+  keySecretName: ""
 
   ## @section Config Servers configuration
   configsvr:
@@ -505,6 +521,8 @@ shardedCluster:
       storageClass: ""
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
+      ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
     ## Example: customInit: |
     ##   echo "Custom config server initialization"
@@ -563,6 +581,8 @@ shardedCluster:
       storageClass: ""
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
+      ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
     ## Example: customInit: |
     ##   echo "Custom shard initialization"

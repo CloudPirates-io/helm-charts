@@ -98,6 +98,15 @@ spec:
             - {{ .Values.replicaSet.name | quote }}
             - --keyFile
             - "/replicaset/keyfile"
+            {{- if .Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ .Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if .Values.performance.oplogSizeMB }}
+            - --oplogSize={{ .Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if .Values.performance.maxIncomingConnections }}
+            - --maxConns={{ .Values.performance.maxIncomingConnections }}
+            {{- end }}
           ports:
             - name: mongodb
               containerPort: 27017

@@ -16,6 +16,10 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
+  {{- if $.Values.shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- toYaml $.Values.shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy | nindent 4 }}
+  {{- end }}
   serviceName: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-headless
   podManagementPolicy: {{ $.Values.podManagementPolicy }}
   updateStrategy:
@@ -107,7 +111,7 @@ spec:
               mountPath: {{ $.Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
@@ -130,7 +134,7 @@ spec:
             - --dbpath={{ $.Values.persistence.mountPath }}
             {{- if $.Values.auth.enabled }}
             - --auth
-            {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
@@ -143,6 +147,15 @@ spec:
             {{- end }}
             {{- range $.Values.common.mongodbExtraFlags }}
             - {{ . | quote }}
+            {{- end }}
+            {{- if $.Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ $.Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if $.Values.performance.oplogSizeMB }}
+            - --oplogSize={{ $.Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if $.Values.performance.maxIncomingConnections }}
+            - --maxConns={{ $.Values.performance.maxIncomingConnections }}
             {{- end }}
             {{- range $.Values.image.extraArgs }}
             - {{ . | quote }}
@@ -217,7 +230,7 @@ spec:
               mountPath: {{ $.Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
@@ -438,7 +451,7 @@ spec:
               mountPath: {{ $.Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
@@ -461,7 +474,7 @@ spec:
             - --dbpath={{ $.Values.persistence.mountPath }}
             {{- if $.Values.auth.enabled }}
             - --auth
-            {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
@@ -471,6 +484,15 @@ spec:
             {{- end }}
             {{- range $.Values.common.mongodbExtraFlags }}
             - {{ . | quote }}
+            {{- end }}
+            {{- if $.Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ $.Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if $.Values.performance.oplogSizeMB }}
+            - --oplogSize={{ $.Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if $.Values.performance.maxIncomingConnections }}
+            - --maxConns={{ $.Values.performance.maxIncomingConnections }}
             {{- end }}
             {{- range $.Values.image.extraArgs }}
             - {{ . | quote }}
@@ -560,7 +582,7 @@ spec:
               mountPath: {{ $.Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+            {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile

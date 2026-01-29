@@ -84,7 +84,7 @@ spec:
                   break
                 fi
                 echo "Config server replica set not initialized yet, waiting..."
-                sleep 5
+                sleep 2.5
               done
 
               # Check if keyfile authentication is enabled
@@ -107,7 +107,7 @@ spec:
               mountPath: {{ .Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName }}
+            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile
               mountPath: /opt/mongodb/keyfile
               subPath: keyfile
@@ -126,7 +126,7 @@ spec:
             - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
             - --port=27017
             {{- if .Values.auth.enabled }}
-            {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName }}
+            {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
             - --keyFile=/keyfile-data/keyfile
             {{- end }}
             {{- end }}
@@ -206,7 +206,7 @@ spec:
               mountPath: {{ .Values.config.mountPath }}
               readOnly: true
             {{- end }}
-            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName }}
+            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}

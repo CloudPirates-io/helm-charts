@@ -166,10 +166,12 @@ Helper functions for sharded cluster configuration
 */}}
 
 {{/*
-Return the keyfile secret name for replica set authentication
+Return the keyfile secret name for replica set and sharded cluster authentication
 */}}
 {{- define "mongodb.keyfileSecretName" -}}
-{{- if .Values.replicaSet.keySecretName }}
+{{- if .Values.shardedCluster.keySecretName }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.shardedCluster.keySecretName "context" .) }}
+{{- else if .Values.replicaSet.keySecretName }}
 {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.replicaSet.keySecretName "context" .) }}
 {{- else }}
 {{- printf "%s-keyfile" (include "mongodb.fullname" .) }}
