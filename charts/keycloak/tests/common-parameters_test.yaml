@@ -1,29 +1,32 @@
 suite: test common parameters
 templates:
-  - templates/deployment.yaml
+  - templates/statefulset.yaml
   - templates/service.yaml
   - templates/ingress.yaml
   - templates/secret.yaml
   - templates/serviceaccount.yaml
-  - templates/pvc.yaml
+set:
+  image:
+    tag: 26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
+
 tests:
   - it: should render default values correctly
     asserts:
       - isKind:
-          of: Deployment
-        template: templates/deployment.yaml
+          of: StatefulSet
+        template: templates/statefulset.yaml
       - equal:
           path: metadata.name
           value: RELEASE-NAME-keycloak
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
       - equal:
           path: spec.replicas
           value: 1
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
       - equal:
           path: spec.template.spec.containers[0].image
           value: docker.io/keycloak/keycloak:26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
 
   - it: should render custom name and fullname overrides
     set:
@@ -33,7 +36,7 @@ tests:
       - equal:
           path: metadata.name
           value: custom-fullname
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
       - equal:
           path: metadata.name
           value: custom-fullname
@@ -49,11 +52,11 @@ tests:
       - equal:
           path: metadata.labels['custom-label']
           value: custom-value
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
       - equal:
           path: metadata.annotations['custom-annotation']
           value: custom-value
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
 
   - it: should render custom image registry
     set:
@@ -63,7 +66,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: custom-registry.io/keycloak/keycloak:26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
 
   - it: should render custom replica count
     set:
@@ -72,7 +75,7 @@ tests:
       - equal:
           path: spec.replicas
           value: 3
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
 
   - it: should render service configuration
     asserts:
@@ -92,28 +95,28 @@ tests:
           value: 8080
         template: templates/service.yaml
 
-  - it: should render persistence when enabled
+  - it: should render volumeClaimTemplates when persistence is enabled
     set:
       persistence:
         enabled: true
         size: 10Gi
     asserts:
-      - isKind:
-          of: PersistentVolumeClaim
-        template: templates/pvc.yaml
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+        template: templates/statefulset.yaml
       - equal:
-          path: spec.resources.requests.storage
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 10Gi
-        template: templates/pvc.yaml
+        template: templates/statefulset.yaml
 
-  - it: should not render PVC when persistence is disabled
+  - it: should not render volumeClaimTemplates when persistence is disabled
     set:
       persistence:
         enabled: false
     asserts:
-      - hasDocuments:
-          count: 0
-        template: templates/pvc.yaml
+      - isNull:
+          path: spec.volumeClaimTemplates
+        template: templates/statefulset.yaml
 
   - it: should render ingress when enabled
     set:
@@ -161,17 +164,6 @@ tests:
         template: templates/secret.yaml
         documentIndex: 0
 
-  - it: should render database secret for external database
-    set:
-      database:
-        type: postgres
-        username: keycloak
-        password: db-password
-    asserts:
-      - hasDocuments:
-          count: 2
-        template: templates/secret.yaml
-
   - it: should configure Keycloak environment for development mode
     set:
       keycloak:
@@ -180,7 +172,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "start-dev"
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml
 
   - it: should configure Keycloak environment for production mode
     set:
@@ -190,4 +182,4 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "start"
-        template: templates/deployment.yaml
+        template: templates/statefulset.yaml

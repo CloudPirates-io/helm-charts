@@ -14,6 +14,11 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param priorityClassName Priority class name to be used for the pods
+priorityClassName: ""
+
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
 
 ## @section PostgreSQL image configuration
 image:
@@ -22,9 +27,11 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.1@sha256:41bfa2e5b168fff0847a5286694a86cff102bdc4d59719869f6b117bb30b3a24"
+  tag: "18.1@sha256:5773fe724c49c42a7a9ca70202e11e1dff21fb7235b335a73f39297d200b73a2"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
+  ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
+  useHardenedImage: false
 
 ## @section Deployment configuration
 ## @param replicaCount Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default)
@@ -105,20 +112,22 @@ config:
   pgHbaConfig: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
-customUser: {}
+customUser:
   ## @param customUser.name Name of the custom user to be created
-  # name: ""
+  name: ""
   ## @param customUser.database Name of the database to be created
-  # database: ""
+  database: ""
   ## @param customUser.password Password to be used for the custom user
-  # password: ""
+  password: ""
   ## @param customUser.existingSecret Existing secret, in which username, password and database name are saved
-  # existingSecret: ""
+  existingSecret: ""
   ## @param customUser.secretKeys Name of keys in existing secret to use the custom user name, password and database
-  # secretKeys:
-  #   name: ""
-  #   password: ""
-  #   database: ""
+  secretKeys:
+    ## @param customUser.secretKeys.name Custom user name secret reference (set empty to fallback to customUser.name)
+    name: "CUSTOM_USER"
+    ## @param customUser.secretKeys.database Custom user database secret reference (set empty to fallback to customUser.database)
+    database: "CUSTOM_DB"
+    password: "CUSTOM_PASSWORD"
 
 ## @section PostgreSQL Initdb configuration
 initdb:
@@ -151,8 +160,7 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts[0].host Hostname for PostgreSQL ingress
@@ -170,8 +178,7 @@ ingress:
   #      - postgres.local
 
 ## @section Resources
-resources:
-  {}
+resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -201,6 +208,10 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
+  ## @param persistence.volumeName Container volume name and volume claim prefix
+  volumeName: "data"
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -300,8 +311,15 @@ initContainers: []
 # - name: pgautoupgrade
 #   image: tianon/pgautoupgrade:17-to-18
 #   volumeMounts:
-#     - name: data
+#     - name: data  # must match persistence.volumeName
 #       mountPath: /var/lib/postgresql/data
+
+## @section Container command/args override
+## @param command Override default container command (useful for hardened images)
+command: []
+## @param args Override default container args (useful for hardened images that handle startup differently)
+## Leave unset or null to use default args, set to empty array [] to disable default args for hardened images like DHI
+args: null  # @schema type:[array, null]
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []

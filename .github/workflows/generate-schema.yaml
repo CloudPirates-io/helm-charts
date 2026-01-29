@@ -36,20 +36,20 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.CHANGELOG_PAT }}
 
       - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: '3.11'
 
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: 'latest'
+          version: 'v3.19.2'
 
       - name: Install helm-schema plugin
         run: |
@@ -60,7 +60,7 @@ jobs:
             helm plugin list | grep "schema"
           else
             echo "Installing helm-values-schema-json plugin..."
-            helm plugin install https://github.com/losisin/helm-values-schema-json.git --version v1.9.2
+            helm plugin install https://github.com/losisin/helm-values-schema-json.git --version v2.3.1
           fi
 
           # Verify plugin installation
@@ -172,7 +172,7 @@ jobs:
             fi
 
             echo "Generating schema for $chart..."
-            if helm schema -input "$CHART_DIR/values.yaml" -output "$CHART_DIR/values.schema.json" -draft 7; then
+            if helm schema --values "$CHART_DIR/values.yaml" --output "$CHART_DIR/values.schema.json" --draft 7; then
               echo "Successfully generated schema for $chart"
               SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
             else
@@ -224,8 +224,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CHANGELOG_PAT }}
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          # Trap to ensure cleanup even on error
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           # Create a new branch for the schema updates
           BRANCH_NAME="auto/schema-update-$(date +%s)"
@@ -236,10 +248,12 @@ jobs:
           git commit -m "chore: auto-generate values.schema.json for updated charts" \
             -m "Automatically generated JSON schemas for Helm values files." \
             -m "" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Push the branch
           git push origin "$BRANCH_NAME"
+
+          rm -f "$SIGN_KEY_FILE"
 
           # Create a pull request
           gh pr create \
@@ -264,16 +278,28 @@ jobs:
           github.event_name == 'pull_request' &&
           steps.check-changes.outputs.has_changes == 'true'
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          # Setup SSH key for signing
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           git add charts/*/values.schema.json
 
           git commit -m "chore: auto-generate values.schema.json" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>" || echo "No changes to commit"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>" || echo "No changes to commit"
 
           # Push to PR branch
           git push origin HEAD:${{ github.head_ref }}
+
+          rm -f "$SIGN_KEY_FILE"
 
       - name: Commit schema updates to current branch (workflow_dispatch on non-main)
         if: |
@@ -281,16 +307,28 @@ jobs:
           github.ref != 'refs/heads/main' &&
           steps.check-changes.outputs.has_changes == 'true'
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          # Setup SSH key for signing
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
           git add charts/*/values.schema.json
 
           git commit -m "chore: auto-generate values.schema.json" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Push to current branch
           git push origin HEAD:${{ github.ref }}
+
+          rm -f "$SIGN_KEY_FILE"
 
       - name: Generate job summary
         if: steps.determine-charts.outputs.charts != ''

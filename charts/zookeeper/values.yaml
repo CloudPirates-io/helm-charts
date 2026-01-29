@@ -8,14 +8,31 @@ global:
   #  - my-secret-2
 
 ## @section Common parameters
-## @param nameOverride String to partially override redis.fullname
+## @param nameOverride String to partially override zookeeper.fullname
 nameOverride: ""
-## @param fullnameOverride String to fully override redis.fullname
+## @param fullnameOverride String to fully override zookeeper.fullname
 fullnameOverride: ""
+## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
+## When migrating from Bitnami Zookeeper:
+##   1. Set serverIdOffset: 1 (Bitnami uses 1-based myid: 1,2,3 vs default 0-based: 0,1,2)
+##   2. Set persistence.mountPath to match Bitnami data location (e.g., /bitnami/zookeeper)
+##   3. Set persistence.dataDir to the actual data directory (e.g., /bitnami/zookeeper/data)
+##   4. Add ZOO_DATA_DIR env var via extraEnvVars to point to the data directory
+## Example extraEnvVars for Bitnami migration:
+##   extraEnvVars:
+##     - name: ZOO_DATA_DIR
+##       value: "/bitnami/zookeeper/data"
+serverIdOffset: 0
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param selectorLabels Override selector labels (app.kubernetes.io/name and app.kubernetes.io/instance)
+selectorLabels:
+  ## @param selectorLabels.name Override app.kubernetes.io/name selector label
+  name: ""
+  ## @param selectorLabels.instance Override app.kubernetes.io/instance selector label
+  instance: ""
 
 ## @section Zookeeper image parameters
 image:
@@ -24,7 +41,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.4@sha256:b87f5ea0cdc73d71c74875277ca2e862f7abb3c0bfa365bd818db71eef870917"
+  tag: "3.9.4@sha256:98be0d025355dd2f1659af615def34f04eabb233c80f4a9a1cc5ab121831c413"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -36,10 +53,14 @@ revisionHistoryLimit: 10
 podDisruptionBudget:
   ## @param podDisruptionBudget.enabled Create a Pod Disruption Budget to ensure high availability during voluntary disruptions
   enabled: true
+  ## @param podDisruptionBudget.minAvailable minAvailable for Pod Disruption Budget. Value is not mandatory.
+  minAvailable: "51%"
+  ## @param podDisruptionBudget.maxUnavailable maxUnavailable for Pod Disruption Budget. Value is not mandatory.
+  maxUnavailable: ""
 
 networkPolicy:
   ## @param networkPolicy.enabled Enable network policies
-  enabled: true
+  enabled: false
 
 ## @section Zookeeper configuration parameters
 ## @see https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_configuration
@@ -89,19 +110,44 @@ metrics:
     type: ClusterIP
     ## @param metrics.service.ports.port Zookeeper metrics service port
     port: 7000
+    ## @param metrics.service.annotations Additional annotations for metrics service
+    annotations: {}
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 10s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
+
 
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-## @section MariaDB Container Security Context
+## @section Zookeeper Container Security Context
 containerSecurityContext:
-  ## @param containerSecurityContext.runAsUser Set MariaDB container's Security Context runAsUser
+  ## @param containerSecurityContext.runAsUser Set Zookeeper container's Security Context runAsUser
   runAsUser: 1000
-  ## @param containerSecurityContext.runAsGroup Set MariaDB container's Security Context runAsGroup
+  ## @param containerSecurityContext.runAsGroup Set Zookeeper container's Security Context runAsGroup
   runAsGroup: 1000
   ## @param containerSecurityContext.seLinuxOptions Set container's Security Context seLinuxOptions
   seLinuxOptions: {}
-  ## @param containerSecurityContext.runAsNonRoot Set MariaDB container's Security Context runAsNonRoot
+  ## @param containerSecurityContext.runAsNonRoot Set Zookeeper container's Security Context runAsNonRoot
   runAsNonRoot: true
-  ## @param containerSecurityContext.allowPrivilegeEscalation Set MariaDB container's privilege escalation
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set Zookeeper container's privilege escalation
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.privileged Set container's privileged mode
   privileged: false
@@ -178,10 +224,12 @@ persistence:
   existingClaim: ""
   ## @param mountPath The path where to mount the data volume
   mountPath: /data
+  ## @param persistance.dataDir The directory where to store the data
+  dataDir: /data
 
 ## @section Liveness and readiness probes
 livenessProbe:
-  ## @param livenessProbe.enabled Enable livenessProbe on MinIO containers
+  ## @param livenessProbe.enabled Enable livenessProbe on zookeeper containers
   enabled: true
   ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   initialDelaySeconds: 30
@@ -195,7 +243,7 @@ livenessProbe:
   successThreshold: 1
 
 readinessProbe:
-  ## @param readinessProbe.enabled Enable readinessProbe on MinIO containers
+  ## @param readinessProbe.enabled Enable readinessProbe on zookeeper containers
   enabled: true
   ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   initialDelaySeconds: 5
@@ -210,7 +258,7 @@ readinessProbe:
 
 
 startupProbe:
-  ## @param startupProbe.enabled Enable startupProbe on MinIO containers
+  ## @param startupProbe.enabled Enable startupProbe on zookeeper containers
   enabled: false
   ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   initialDelaySeconds: 10
@@ -237,7 +285,7 @@ extraEnvVars: []
 ## @param extraVolumes Additional volumes to add to the pod
 extraVolumes: []
 
-## @param extraVolumeMounts Additional volume mounts to add to the Redis container
+## @param extraVolumeMounts Additional volume mounts to add to the zookeeper container
 extraVolumeMounts: []
 
 ## @param extraObjects Array of extra objects to deploy with the release

@@ -53,7 +53,7 @@ data:
     # Memory configuration
     # Note: Large absolute values should be specified as strings (e.g., "8GB" or "8590000000")
     # to avoid scientific notation conversion by YAML (e.g., 8e+9)
-    {{- if and (eq .Values.config.memoryHighWatermark.type "relative") .Values.resources.limits.memory }}
+    {{- if and (eq .Values.config.memoryHighWatermark.type "relative") .Values.resources.limits .Values.resources.limits.memory }}
     # Override available memory calculation to use container memory limit instead of node memory
     # This ensures relative memory watermark is calculated based on container limits
     total_memory_available_override_value = {{ .Values.resources.limits.memory }}
@@ -67,7 +67,31 @@ data:
     {{- end }}
 
     {{- if .Values.definitions.enabled }}
+    {{- if .Values.definitions.autoReload.enabled }}
+    management.load_definitions = /etc/rabbitmq-definitions/{{- if .Values.definitions.existingConfigMap }}{{ .Values.definitions.existingConfigMapKey | default "defs.json" }}{{- else if .Values.definitions.existingSecret }}{{ .Values.definitions.existingSecretKey | default "defs.json" }}{{- else }}defs.json{{- end }}
+    {{- else }}
     management.load_definitions = /etc/rabbitmq-definitions/defs.json
+    {{- end }}
+    {{- end }}
+
+    {{- if .Values.queueBalancing.enabled }}
+    # Queue Balancing and Distribution Configuration
+    {{- if .Values.queueBalancing.queueLeaderLocator }}
+    queue_leader_locator = {{ .Values.queueBalancing.queueLeaderLocator }}
+    {{- end }}
+    {{- if .Values.queueBalancing.clusterFormation.targetClusterSizeHint }}
+    cluster_formation.target_cluster_size_hint = {{ .Values.queueBalancing.clusterFormation.targetClusterSizeHint }}
+    {{- end }}
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.enabled }}
+    quorum_queue.continuous_membership_reconciliation.enabled = true
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
+    quorum_queue.continuous_membership_reconciliation.target_group_size = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize }}
+    {{- end }}
+    quorum_queue.continuous_membership_reconciliation.interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.interval | int }}
+    {{- if .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval }}
+    quorum_queue.continuous_membership_reconciliation.trigger_interval = {{ .Values.queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval | int }}
+    {{- end }}
+    {{- end }}
     {{- end }}
 
     # Logging configuration

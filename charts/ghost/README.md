@@ -115,7 +115,7 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | ------------------ | ----------------------- | ------------------------------------------------------------------------------- |
 | `image.registry`   | Ghost image registry    | `docker.io`                                                                     |
 | `image.repository` | Ghost image repository  | `ghost`                                                                         |
-| `image.tag`        | Ghost image tag         | `6.8.0@sha256:85e15524ac7e437720fa4ac3cd4633daaae3f95786a25633415d8d4f7382b4c4` |
+| `image.tag`        | Ghost image tag         | `6.9.1@sha256:8a30cacb126262887f4db101e438271ade0b51437917b8165d26b0fede72ccf2` |
 | `image.pullPolicy` | Ghost image pull policy | `Always`                                                                        |
 
 ### Network Parameters
@@ -165,6 +165,7 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | `containerSecurityContext.runAsUser`                | Set container's Security Context runAsUser | `1000`  |
 | `containerSecurityContext.runAsNonRoot`             | Run as non-root user                       | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Allow privilege escalation                 | `false` |
+| `priorityClassName`                                 | Priority class for the ghost instance      | `""`    |
 
 ### Health Check Parameters
 

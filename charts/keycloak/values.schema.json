@@ -261,6 +261,9 @@
                 "httpRelativePath": {
                     "type": "string"
                 },
+                "httpsEnabled": {
+                    "type": "boolean"
+                },
                 "httpsPort": {
                     "type": "integer"
                 },
@@ -464,6 +467,15 @@
                     "type": "boolean"
                 }
             }
+        },
+        "preserveProviders": {
+            "type": "boolean"
+        },
+        "preserveThemes": {
+            "type": "boolean"
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

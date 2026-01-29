@@ -35,15 +35,29 @@ jobs:
       contents: write
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.CHANGELOG_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          trap "rm -f $SIGN_KEY_FILE" EXIT
+
+          # Store the key file path for later steps
+          echo "SIGN_KEY_FILE=$SIGN_KEY_FILE" >> $GITHUB_ENV
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
       - name: Fetch all tags
         run: |
@@ -140,7 +154,7 @@ jobs:
             echo "CHANGELOG.md files deleted successfully"
             git add charts/*/CHANGELOG.md
             git commit -m "chore: remove existing CHANGELOG.md files for clean start" \
-              -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+              -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
             echo "clean_start_completed=true" >> $GITHUB_ENV
           else
             echo "No CHANGELOG.md files to delete"
@@ -242,7 +256,15 @@ jobs:
 
       - name: Update appVersion in Chart.yaml files
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
-        run: ./update-appversion.sh --all
+        run: |
+          CHANGED_CHARTS="${{ steps.charts-to-update.outputs.changedCharts }}"
+          echo "Updating appVersion for changed charts: $CHANGED_CHARTS"
+
+          for chart_directory in $CHANGED_CHARTS; do
+            CHART_NAME=${chart_directory#charts/}
+            echo "Updating appVersion for chart: $CHART_NAME"
+            ./update-appversion.sh --chart "$CHART_NAME"
+          done
 
       - name: Commit and push changelog and chart updates
         if: steps.generate-changelog.outputs.has_changes == 'true' && env.clean_start_completed != 'true'
@@ -263,10 +285,13 @@ jobs:
           fi
           
           git commit -m "$COMMIT_MSG" \
-            -m "Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
 
           # Pull latest changes and rebase our commit on top
           git pull --rebase origin main
 
           # Push the changes
           git push origin main
+
+          # Clean up the signing key
+          rm -f "$SIGN_KEY_FILE"

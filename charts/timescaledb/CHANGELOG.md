@@ -1,6 +1,47 @@
 # Changelog
 
 
+## 0.8.0 (2026-01-15)
+
+* [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
+* chore: update CHANGELOG.md for merged changes ([b3cbfb0](https://github.com/CloudPirates-io/helm-charts/commit/b3cbfb0))
+
+## 0.7.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+* chore: update CHANGELOG.md for merged changes ([dd1836f](https://github.com/CloudPirates-io/helm-charts/commit/dd1836f))
+* chore: update CHANGELOG.md for merged changes ([8d57200](https://github.com/CloudPirates-io/helm-charts/commit/8d57200))
+
+## 0.6.2 (2026-01-08)
+
+* [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb (#822) ([adc651a](https://github.com/CloudPirates-io/helm-charts/commit/adc651a))
+
+## 0.6.1 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([d62c089](https://github.com/CloudPirates-io/helm-charts/commit/d62c089))
+* chore: update CHANGELOG.md for merged changes ([d9b16c6](https://github.com/CloudPirates-io/helm-charts/commit/d9b16c6))
+* [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.24.0 (minor) (#686) ([98bfa73](https://github.com/CloudPirates-io/helm-charts/commit/98bfa73))
+* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+
+## 0.6.0 (2025-12-06)
+
+
+## 0.5.4 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+
+## 0.5.3 (2025-11-14)
+
+* chore: update CHANGELOG.md for merged changes ([18dd9e0](https://github.com/CloudPirates-io/helm-charts/commit/18dd9e0))
+* chore: update CHANGELOG.md for merged changes ([644e09c](https://github.com/CloudPirates-io/helm-charts/commit/644e09c))
+* [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.23.1 (patch) (#596) ([7c36cd1](https://github.com/CloudPirates-io/helm-charts/commit/7c36cd1))
+* chore: update CHANGELOG.md for merged changes ([f3e1ad1](https://github.com/CloudPirates-io/helm-charts/commit/f3e1ad1))
+* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
+* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+
 ## 0.5.2 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([8455aca](https://github.com/CloudPirates-io/helm-charts/commit/8455aca))

@@ -67,6 +67,18 @@ Validate values of MariaDB - Authentication
 {{- end }}
 
 {{/*
+Return the MariaDB initdb scripts ConfigMap Name
+*/}}
+{{- define "mariadb.initdbScriptsConfigMap" -}}
+{{- if .Values.initdbScriptsConfigMap }}
+{{- printf "%s" (tpl .Values.initdbScriptsConfigMap $) -}}
+{{- else }}
+{{- printf "" }}
+{{- end }}
+{{- end }}
+
+
+{{/*
 Return the MariaDB ConfigMap Name
 */}}
 {{- define "mariadb.configMapName" -}}

@@ -1,0 +1,17 @@
+{{- if .Values.metrics.enabled }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "mariadb.fullname" . }}-init-exporter-user
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mariadb.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  initMetricsUser.sql: |
+    CREATE USER 'exporter'@'localhost' IDENTIFIED BY '$MYSQLD_EXPORTER_PASSWORD' WITH MAX_USER_CONNECTIONS 3;
+    GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'localhost';
+{{- end }}

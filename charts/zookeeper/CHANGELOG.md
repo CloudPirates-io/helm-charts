@@ -1,6 +1,86 @@
 # Changelog
 
 
+## 0.5.2 (2026-01-19)
+
+* Update charts/zookeeper/values.yaml zookeeper (#858) ([7dceb5c](https://github.com/CloudPirates-io/helm-charts/commit/7dceb5c))
+
+## 0.5.1 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([f603113](https://github.com/CloudPirates-io/helm-charts/commit/f603113))
+* chore: update CHANGELOG.md for merged changes ([9c34b5d](https://github.com/CloudPirates-io/helm-charts/commit/9c34b5d))
+* [zookeeper]: fix NetPol and PDB to use correct selectorLabels template (#802) ([7e578e3](https://github.com/CloudPirates-io/helm-charts/commit/7e578e3))
+* chore: update CHANGELOG.md for merged changes ([d3d8715](https://github.com/CloudPirates-io/helm-charts/commit/d3d8715))
+* chore: auto-generate values.schema.json (#797) ([d9b4adf](https://github.com/CloudPirates-io/helm-charts/commit/d9b4adf))
+
+## 0.5.0 (2026-01-05)
+
+* chore: update CHANGELOG.md for merged changes ([4309c14](https://github.com/CloudPirates-io/helm-charts/commit/4309c14))
+* chore: update CHANGELOG.md for merged changes ([78ae03c](https://github.com/CloudPirates-io/helm-charts/commit/78ae03c))
+* [zookeeper]: add ServiceMonitor (#792) ([3831796](https://github.com/CloudPirates-io/helm-charts/commit/3831796))
+* chore: update CHANGELOG.md for merged changes ([02c5d47](https://github.com/CloudPirates-io/helm-charts/commit/02c5d47))
+* chore: update CHANGELOG.md for merged changes ([2c04385](https://github.com/CloudPirates-io/helm-charts/commit/2c04385))
+* chore: auto-generate values.schema.json (#790) ([39d877a](https://github.com/CloudPirates-io/helm-charts/commit/39d877a))
+
+## 0.4.1 (2026-01-01)
+
+* chore: update CHANGELOG.md for merged changes ([be92c3a](https://github.com/CloudPirates-io/helm-charts/commit/be92c3a))
+* chore: update CHANGELOG.md for merged changes ([655b893](https://github.com/CloudPirates-io/helm-charts/commit/655b893))
+* [zookeeper]: fix typos and set automountServiceAccountToken to false (#789) ([343fb3d](https://github.com/CloudPirates-io/helm-charts/commit/343fb3d))
+
+## 0.3.10 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([f4e9ecf](https://github.com/CloudPirates-io/helm-charts/commit/f4e9ecf))
+* chore: update CHANGELOG.md for merged changes ([1935e6a](https://github.com/CloudPirates-io/helm-charts/commit/1935e6a))
+* Final fix for supporting migration from bitnami zookeeper (#778) ([474ab06](https://github.com/CloudPirates-io/helm-charts/commit/474ab06))
+
+## 0.3.9 (2025-12-23)
+
+* chore: update CHANGELOG.md for merged changes ([16be02d](https://github.com/CloudPirates-io/helm-charts/commit/16be02d))
+* chore: update CHANGELOG.md for merged changes ([9dc8772](https://github.com/CloudPirates-io/helm-charts/commit/9dc8772))
+* fix(zookeeper): add apiVersion and kind to volumeClaimTemplates to prevent OutOfSync on Server-Side-Apply with ArgoCD (#777) ([6800e29](https://github.com/CloudPirates-io/helm-charts/commit/6800e29))
+* chore: update CHANGELOG.md for merged changes ([b8318da](https://github.com/CloudPirates-io/helm-charts/commit/b8318da))
+* chore: auto-generate values.schema.json (#769) ([ac71b04](https://github.com/CloudPirates-io/helm-charts/commit/ac71b04))
+
+## 0.3.8 (2025-12-21)
+
+* Add support for Bitnami Zookeeper migration with multiple replicas (#768) ([65c0764](https://github.com/CloudPirates-io/helm-charts/commit/65c0764))
+* chore: update CHANGELOG.md for merged changes ([525494a](https://github.com/CloudPirates-io/helm-charts/commit/525494a))
+* chore: update CHANGELOG.md for merged changes ([cd5cb04](https://github.com/CloudPirates-io/helm-charts/commit/cd5cb04))
+* chore: auto-generate values.schema.json (#764) ([5a39be4](https://github.com/CloudPirates-io/helm-charts/commit/5a39be4))
+
+## 0.3.7 (2025-12-17)
+
+* chore: update CHANGELOG.md for merged changes ([ee986d5](https://github.com/CloudPirates-io/helm-charts/commit/ee986d5))
+* chore: update CHANGELOG.md for merged changes ([ee8d729](https://github.com/CloudPirates-io/helm-charts/commit/ee8d729))
+* Add dataDir option to override path to data folder (#763) ([092def6](https://github.com/CloudPirates-io/helm-charts/commit/092def6))
+
+## 0.3.6 (2025-12-11)
+
+* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
+* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
+* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+
+## 0.3.5 (2025-12-06)
+
+* chore: update CHANGELOG.md for merged changes ([d0daaa6](https://github.com/CloudPirates-io/helm-charts/commit/d0daaa6))
+* chore: update CHANGELOG.md for merged changes ([c9c2ccd](https://github.com/CloudPirates-io/helm-charts/commit/c9c2ccd))
+* Update zookeeper statefulset to use existing peristent volume claim if set (#698) ([1bf1992](https://github.com/CloudPirates-io/helm-charts/commit/1bf1992))
+
+## 0.3.4 (2025-12-04)
+
+* chore: update CHANGELOG.md for merged changes ([f13ea15](https://github.com/CloudPirates-io/helm-charts/commit/f13ea15))
+* chore: update CHANGELOG.md for merged changes ([3c33f3e](https://github.com/CloudPirates-io/helm-charts/commit/3c33f3e))
+* fix network policy switch (#690) ([f7b8ae2](https://github.com/CloudPirates-io/helm-charts/commit/f7b8ae2))
+
+## 0.3.3 (2025-12-01)
+
+* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+* chore: update CHANGELOG.md for merged changes ([b8d24f9](https://github.com/CloudPirates-io/helm-charts/commit/b8d24f9))
+* chore: update CHANGELOG.md for merged changes ([80d4036](https://github.com/CloudPirates-io/helm-charts/commit/80d4036))
+* Update charts/zookeeper/values.yaml zookeeper (#604) ([2586190](https://github.com/CloudPirates-io/helm-charts/commit/2586190))
+
 ## 0.3.2 (2025-11-13)
 
 * chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))

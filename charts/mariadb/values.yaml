@@ -22,7 +22,7 @@ image:
   ## @param image.repository MariaDB image repository
   repository: mariadb
   ## @param image.tag MariaDB image tag (immutable tags are recommended)
-  tag: "12.0.2@sha256:607835cd628b78e2876f6a586d0ec37b296c47683b31ef750002d3d17d3d8f7a"
+  tag: "12.1.2@sha256:f54db0cb3ccfe9431aba6d08c65a1763c499789b116b4cb651dd7fcf325965b3"
   ## @param image.pullPolicy MariaDB image pull policy
   imagePullPolicy: Always
 
@@ -133,6 +133,8 @@ service:
 persistence:
   ## @param persistence.enabled Enable MariaDB data persistence using PVC
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for MariaDB data volume
+  existingClaim: ""
   ## @param persistence.storageClass PVC Storage Class for MariaDB data volume
   storageClass: ""
   ## @param persistence.accessModes PVC Access modes
@@ -142,6 +144,8 @@ persistence:
   size: 8Gi
   ## @param persistence.annotations Additional custom annotations for the PVC
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.selector Additional labels for the PVC
   selector: {}
 
@@ -160,6 +164,9 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.readOnlyRootFilesystem Set MariaDB container's Security Context readOnlyRootFilesystem
   readOnlyRootFilesystem: false
+
+## @param priorityClassName Priority class for the MariaDB instance
+priorityClassName: ""
 
 ## @section Resources parameters
 resources:
@@ -313,6 +320,66 @@ podLabels: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+topologySpreadConstraints: {}
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []
+
+## @section Metrics
+metrics:
+  ## @param metrics.enabled Enable metrics exporter sidecar
+  enabled: false
+  ## @param metrics.image.registry Metrics exporter image registry
+  ## @param metrics.image.repository Metrics exporter image repository
+  ## @param metrics.image.tag Metrics exporter image tag (immutable tags are recommended)
+  ## @param metrics.image.pullPolicy Metrics exporter image pull policy
+  image:
+    registry: docker.io
+    repository: prom/mysqld-exporter
+    tag: "v0.18.0@sha256:2598c0571f383708e19016d119bb45c06128a9ebc962c9f49483278ac5a94c41"
+    pullPolicy: Always
+  ## @param metrics.port Metrics exporter port
+  port: 9104
+  ## @param metrics.containerSecurityContext Security context for metrics container
+  containerSecurityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   memory: 64Mi
+    #   cpu: 10m
+  ## @param metrics.extraEnvVars Additional environment variables for metrics exporter
+  extraEnvVars: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+  ## @param metrics.livenessProbe.enabled Enable livenessProbe for metrics container
+  ## @param metrics.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param metrics.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param metrics.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param metrics.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param metrics.livenessProbe.successThreshold Success threshold for livenessProbe
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  ## @param metrics.readinessProbe.enabled Enable readinessProbe for metrics container
+  ## @param metrics.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param metrics.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param metrics.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param metrics.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param metrics.readinessProbe.successThreshold Success threshold for readinessProbe
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1

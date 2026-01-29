@@ -82,9 +82,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 | ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `image.registry`        | MinIO image registry                                                                                            | `docker.io`                                                                                                  |
 | `image.repository`      | MinIO image repository                                                                                          | `minio/minio`                                                                                                |
-| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e"`     |
+| `image.tag`             | MinIO image tag (immutable tags are recommended)                                                                | `"RELEASE.2025-10-15T17-29-55Z@sha256:49f5294492e7b2b9a308519457b8a257f2fc5766ffcbdd20536443602e45b1e3"`     |
 | `image.useCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `false`                                                                                                      |
-| `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883` |
+| `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-10-15T17-29-55Z-cpuv1@sha256:830d7d8c5cf42c02a6e4d575ec0b6a21c285794203d749fcd82251ac815fab36` |
 | `image.imagePullPolicy` | MinIO image pull policy                                                                                         | `IfNotPresent`                                                                                               |
 
 ### MinIO Authentication
@@ -141,6 +141,9 @@ The following table lists the configurable parameters of the MinIO chart and the
 | `containerSecurityContext.runAsGroup`               | Group ID for the MinIO container                  | `1000`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the minio instance             | `""`      |
+
+
 
 ### Service configuration
 
@@ -182,6 +185,18 @@ The following table lists the configurable parameters of the MinIO chart and the
 | Parameter   | Description                                 | Default |
 | ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
+
+### Bucket provisioning
+
+| Parameter        | Description                                                                    | Default |
+| ---------------- | ------------------------------------------------------------------------------ | ------- |
+| `defaultBuckets` | Comma, semi-colon or space separated list of buckets to create at installation | `""`    |
+
+### Configuration for the Job '{{ .Release.Name }}-post-job'
+
+| Parameter             | Description                        | Default                                   |
+| --------------------- | ---------------------------------- | ----------------------------------------- |
+| `postJob.annotations` | Additional annotations for the Job | `helm.sh/hook: post-install,post-upgrade` |
 
 ### Persistence
 

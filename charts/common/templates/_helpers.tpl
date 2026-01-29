@@ -33,6 +33,13 @@ Useful for multi-namespace deployments in combined charts.
 {{- end }}
 
 {{/*
+Create a fully qualified app name adding the installation's namespace.
+*/}}
+{{- define "cloudpirates.fullname.namespace" -}}
+{{- printf "%s-%s" (include "cloudpirates.fullname" .) (include "cloudpirates.namespace" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "cloudpirates.chart" -}}
@@ -58,8 +65,16 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "cloudpirates.selectorLabels" -}}
+{{- if and .Values.selectorLabels .Values.selectorLabels.name }}
+app.kubernetes.io/name: {{ .Values.selectorLabels.name }}
+{{- else -}}
 app.kubernetes.io/name: {{ include "cloudpirates.name" . }}
+{{ end -}}
+{{- if and .Values.selectorLabels .Values.selectorLabels.instance }}
+app.kubernetes.io/instance: {{ .Values.selectorLabels.instance }}
+{{- else -}}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -222,6 +237,20 @@ Render a value that contains template perhaps
   {{- else }}
     {{- $value }}
   {{- end }}
+{{- end -}}
+
+{{/*
+Merge a list of values that contains template after rendering them.
+Merge precedence is consistent with http://masterminds.github.io/sprig/dicts.html#merge-mustmerge
+Usage:
+{{ include "cloudpirates.tplvalues.merge" ( dict "values" (list .Values.path.to.the.Value1 .Values.path.to.the.Value2) "context" $ ) }}
+*/}}
+{{- define "cloudpirates.tplvalues.merge" -}}
+{{- $dst := dict -}}
+{{- range .values -}}
+{{- $dst = include "cloudpirates.tplvalues.render" (dict "value" . "context" $.context "scope" $.scope) | fromYaml | merge $dst -}}
+{{- end -}}
+{{ $dst | toYaml }}
 {{- end -}}
 
 {{/*

@@ -76,12 +76,12 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Image configuration
 
-| Parameter          | Description                                            | Default                 |
-| ------------------ | ------------------------------------------------------ | ----------------------- |
-| `image.registry`   | TimescaleDB image registry                             | `docker.io`             |
-| `image.repository` | TimescaleDB image repository                           | `timescale/timescaledb` |
-| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.23.1-pg17@sha256:a6581100f2f1cd1e03a29a94a49c488a174de65e57301c04de255804645e5a31"`         |
-| `image.pullPolicy` | TimescaleDB image pull policy                          | `Always`                |
+| Parameter          | Description                                            | Default                                                                                 |
+| ------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `image.registry`   | TimescaleDB image registry                             | `docker.io`                                                                             |
+| `image.repository` | TimescaleDB image repository                           | `timescale/timescaledb`                                                                 |
+| `image.tag`        | TimescaleDB image tag (immutable tags are recommended) | `"2.23.1-pg17@sha256:a6581100f2f1cd1e03a29a94a49c488a174de65e57301c04de255804645e5a31"` |
+| `image.pullPolicy` | TimescaleDB image pull policy                          | `Always`                                                                                |
 
 ### Common configuration
 
@@ -92,6 +92,12 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `fullnameOverride`  | String to fully override timescaledb.fullname                                                                    | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`    |
+
+### Pod labels
+
+| Parameter   | Description | Default |
+| ----------- | ----------- | ------- |
+| `podLabels` | Pod labels  | `{}`    |
 
 ### Security Context
 
@@ -104,6 +110,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `containerSecurityContext.runAsGroup`               | Group ID for the TimescaleDB container            | `999`     |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the timescaledb instance       | `""`      |
 
 ### TimescaleDB Authentication
 
@@ -167,6 +174,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
 | `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
 | `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
@@ -204,10 +212,10 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| Parameter      | Description                                                             | Default |
+| -------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars` | Additional environment variables to set                                 | `[]`    |
+| `extraObjects` | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
 
 #### Extra Objects
 

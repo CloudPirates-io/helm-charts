@@ -1,0 +1,300 @@
+{{- if and .Values.replicaSet.enabled .Values.replicaSet.arbiter.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" . }}-arbiter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: arbiter
+  {{- with (include "mongodb.annotations" .) }}
+  annotations: 
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- toYaml .Values.replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mongodb.selectorLabels" . | nindent 6 }}
+      service-type: arbiter
+  serviceName: {{ include "mongodb.fullname" . }}-{{ .Values.replicaSet.arbiter.headlessServiceSuffix }}
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  replicas: 1
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
+  updateStrategy:
+    type: {{ .Values.updateStrategyType }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        service-type: arbiter
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "mongodb.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /extrainitscripts
+              name: extrainitscripts
+            - mountPath: /scripts
+              name: scripts
+            - mountPath: /configs
+              name: configs
+            - mountPath: /replicaset
+              name: keyfile
+            {{- if .Values.replicaSet.keySecretName }}
+            - mountPath: /keyfile-secret
+              name: keyfile-secret
+            {{- end }}
+          command: [ "/scripts/init.sh" ]
+          {{- with .Values.initContainer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "mongodb.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/extrainitscripts/extra-init.sh" ]
+          args:
+            {{- range .Values.replicaSet.arbiter.extraArgs }}
+            - {{ . }}
+            {{- end }}
+            - --config
+            - {{ include "mongodb.configFullName" . | quote }}
+            - --replSet
+            - {{ .Values.replicaSet.name | quote }}
+            - --keyFile
+            - "/replicaset/keyfile"
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /extrainitscripts/mongoshell --eval "db.adminCommand('ping')"
+          {{- with .Values.startupProbe }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            successThreshold: {{ .successThreshold }}
+            periodSeconds: {{ .periodSeconds }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /extrainitscripts/mongoshell --eval "db.adminCommand('ping')"
+          {{- with .Values.livenessProbe }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            successThreshold: {{ .successThreshold }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /extrainitscripts/mongoshell --eval "db.adminCommand('ping')"
+          {{- with .Values.readinessProbe }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            successThreshold: {{ .successThreshold }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.replicaSet.arbiter.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: "MONGOTYPE"
+              value: "ARBITER"
+          {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+            - name: MONGO_CUSTOM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.name }}
+                  key: {{ .Values.customUser.secretKeys.name }}
+                  {{- else }}
+                  key: CUSTOM_USER
+                  {{- end }}
+            - name: MONGO_CUSTOM_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.password }}
+                  key: {{ .Values.customUser.secretKeys.password }}
+                  {{- else }}
+                  key: CUSTOM_PASSWORD
+                  {{- end }}
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.customUser.existingSecret }}
+                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
+                  {{- else }}
+                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
+                  {{- end }}
+                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.database }}
+                  key: {{ .Values.customUser.secretKeys.database }}
+                  {{- else }}
+                  key: CUSTOM_DB
+                  {{- end }}
+            {{- end }}
+            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+          {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: extrainitscripts
+              mountPath: /extrainitscripts
+            - name: {{ .Values.replicaSet.arbiter.storage.volumeName }}
+              mountPath: /data/db
+            - mountPath: {{ .Values.config.mountPath }}
+              name: configs
+            - mountPath: /replicaset
+              name: keyfile
+      {{- with .Values.replicaSet.arbiter.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.replicaSet.arbiter.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.replicaSet.arbiter.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.replicaSet.arbiter.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: extrainitscripts
+          emptyDir: {}
+        - name: configs
+          emptyDir: {}
+        - name: keyfile
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: {{ include "mongodb.fullname" . }}-init-scripts
+            defaultMode: 0555
+        {{- if and .Values.replicaSet.enabled .Values.replicaSet.keySecretName }}
+        - name: keyfile-secret
+          secret:
+            secretName: {{ .Values.replicaSet.keySecretName }}
+            defaultMode: 0400
+        {{- end }}
+{{- with .Values.replicaSet.arbiter.storage }}
+  {{- $createPvc := and (empty .persistentVolumeClaimName) .requestedSize }}
+  {{- if not $createPvc }}
+        - name: {{ .volumeName }}
+        {{- if .persistentVolumeClaimName }}
+          persistentVolumeClaim:
+            claimName: {{ .persistentVolumeClaimName }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+  {{- else }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .volumeName }}
+      {{- with .labels }}
+        labels:
+        {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .annotations }}
+        annotations:
+        {{- toYaml . | nindent 10 }}
+      {{- end }}
+      spec:
+        {{- with .accessModes }}
+        accessModes:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .className }}
+        storageClassName: {{ .className }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .requestedSize }}
+  {{- end }}
+{{- end }}
+{{- end }}

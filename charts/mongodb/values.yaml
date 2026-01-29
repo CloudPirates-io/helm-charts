@@ -20,6 +20,14 @@ podAnnotations: {}
 ## @param podLabels Labels to add to the pod created by the statefulset
 podLabels: {}
 
+## @param revisionHistoryLimit Maximum number of revisions maintained in revision history
+revisionHistoryLimit: 10
+## @param podManagementPolicy Pod management policy
+podManagementPolicy: OrderedReady
+## param updateStrategyType Pod update strategy
+updateStrategyType: RollingUpdate
+
+
 ## @section MongoDB image parameters
 image:
   ## @param image.registry MongoDB image registry
@@ -27,13 +35,11 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.2@sha256:7245ffb851d149dbfac67397caf91bae4974d899972f9fd1d8985fc6eea3c13d"
+  tag: "8.2.4@sha256:6f55a078e025aa29fea2826c82f67ff2f774b82efd816c4c30bbfe67904f0bb8"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
-  ## @param image.command Override default container command (useful when using custom images)
-  command: []
   ## @param image.args Override default container args (useful when using custom images)
-  args: []
+  extraArgs: []
 
 ## @param replicaCount Number of MongoDB replicas to deploy
 replicaCount: 1
@@ -43,8 +49,10 @@ service:
   type: ClusterIP
   ## @param service.port MongoDB service port
   port: 27017
-  ## @param serivce.annotations Annotations to add to the mongodb service
+  ## @param service.annotations Annotations to add to the mongodb service
   annotations: {}
+  ## @param service.headlessServiceSuffix
+  headlessServiceSuffix: headless
 
 auth:
   ## @param auth.enabled Enable MongoDB authentication
@@ -71,8 +79,6 @@ config:
       bindIpAll: true
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
-  ## param config.existingConfigmapKey Name of the key in the Configmap that should be used
-  existingConfigmapKey: ""
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser: {}
@@ -103,6 +109,8 @@ persistence:
   mountPath: /data/db
   ## @param persistence.annotations Annotations for persistent volume claims
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claim
+  labels: {}
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   existingClaim: ""
   ## @param persistence.subPath The subdirectory of the volume to mount to
@@ -139,6 +147,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set MongoDB pod's Security Context fsGroup
   fsGroup: 999
 
+## @param priorityClassName Priority class for the mongodb instance
+priorityClassName: ""
+
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
@@ -166,6 +177,20 @@ readinessProbe:
   failureThreshold: 6
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startup probe
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+  ## @param startupProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -212,7 +237,7 @@ metrics:
   image:
     registry: docker.io
     repository: percona/mongodb_exporter
-    tag: "0.47.1"
+    tag: "0.47.2"
     pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -301,3 +326,141 @@ metrics:
   #       key: secret-key
   ## @param metrics.extraArgs Additional command line arguments for MongoDB Exporter
   extraArgs: []
+
+## @section serviceAccount Optional service account
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+initContainer:
+  ## @param initContainer.resources Resource limits and requests for the arbiter
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+## @section replicaSet Parameters to build a MongoDB replica set (HA mode)
+replicaSet:
+  ## @param replicaSet.enabled Enables replica set deployment mode
+  enabled: false
+  ## @param replicaSet.name Replica set name
+  name: "repl"
+  ## @param replicaSet.key Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
+  key: ""
+  ## @param replicaSet.keySecretName Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
+  keySecretName: ""
+  ## @param replicaSet.clusterDomain Default Kubernetes cluster domain
+  clusterDomain: cluster.local
+  ## @param replicaSet.secondaries Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)
+  secondaries: 2
+  ## @param replicaSet.hiddenSecondaries Creates hidden secondary instances when configured
+  hiddenSecondaries:
+    ## @param replicaSet.hiddenSecondaries.instances Number of hidden secondary instances
+    instances: 0
+    ## @param replicaSet.hiddenSecondaries.headlessServiceSuffix Suffix of the headless service name for hidden secondary instances
+    headlessServiceSuffix: hidden
+    ## @param replicaSet.hiddenSecondaries.nodeSelector Additional node selector
+    nodeSelector: {}
+    ## @param replicaSet.hiddenSecondaries.resources Resource limits and requests for the hidden secondary instance
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    ## @param replicaSet.hiddenSecondaries.tolerations Pod tolerations
+    tolerations: []
+    ## @param replicaSet.hiddenSecondaries.affinity Pod affinity
+    affinity: {}
+    ## @param replicaSet.hiddenSecondaries.topologySpreadContraints Topology spread constraints for pods
+    topologySpreadConstraints: {}
+    ## @param replicaSet.hiddenSecondaries.storage Storage of the hidden secondary
+    storage:
+      ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
+      persistentVolumeClaimName:
+      ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      persistentVolumeClaimRetentionPolicy:
+      ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-hidden-volume"
+      ## @param replicaSet.hiddenSecondaries.storage.requestedSize Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize: 8Gi
+      ## @param replicaSet.hiddenSecondaries.storage.className the storage class name
+      className:
+      ## @param replicaSet.hiddenSecondaries.storage.accessModes Default access mode (ReadWriteOnce)
+      accessModes:
+        - ReadWriteOnce
+      ## @param replicaSet.hiddenSecondaries.storage.annotations Additional storage annotations
+      annotations: {}
+      ## @param replicaSet.hiddenSecondaries.storage.labels Additional storage labels
+      labels: {}
+    ## @param replicaSet.hiddenSecondaries.extraArgs Additional arguments for the hiddenSecondarie container
+    extraArgs: []
+  ## @param replicaSet.arbiter Creates an additional arbiter when enabled
+  arbiter:
+    ## @param replicaSet.arbiter.enabled Enable arbiter deployment
+    enabled: false
+    ## @param replicaSet.arbiter.headlessServiceSuffix Suffix of the arbiters headless service name
+    headlessServiceSuffix: arbiter
+    ## @param replicaSet.arbiter.resources Resource limits and requests for the arbiter
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+    ## @param replicaSet.arbiter.nodeSelector Additional node selector
+    nodeSelector: {}
+    ## @param replicaSet.arbiter.tolerations Pod tolerations
+    tolerations: []
+    ## @param replicaSet.arbiter.affinity Pod affinity
+    affinity: {}
+    ## @param replicaSet.arbiter.topologySpreadConstraints Topology spread constraints for pods
+    topologySpreadConstraints: {}
+    ## @param replicaSet.arbiter.storage Storage of the arbiter
+    storage:
+      ## @param replicaSet.arbiter.storage.persistenVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
+      persistentVolumeClaimName:
+      ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
+      ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      persistentVolumeClaimRetentionPolicy:
+      ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
+      volumeName: "mongodb-arbiter-volume"
+      ## @param replicaSet.arbiter.storage.requestedSize Alternative set requestedSize to define a size for a dynamically created PVC
+      requestedSize:
+      ## @param replicaSet.arbiter.storage.className the storage class name
+      className:
+      ## @param replicaSet.arbiter.storage.accessModes Default access mode (ReadWriteOnce)
+      accessModes:
+        - ReadWriteOnce
+      ## @param replicaSet.arbiter.storage.annotations Additional storage annotations
+      annotations: {}
+      ## @param replicaSet.arbiter.storage.labels Additional storage labels
+      labels: {}
+    ## @param replicaSet.arbiter.extraArgs Additional arguments for the arbiter container
+    extraArgs: []
+
+  ## @param replicaSet.extraInit Internal configuration for extra initialization phase which is used during replicaset configuration
+  extraInit:
+    ## @param replicaSet.extraInit.retries Number of retries to detect whether mongod is fully up and running in background
+    retries: 10
+    ## @param replicaSet.extraInit.delay Seconds to wait between retries
+    delay: 3
+    ## @param replicaSet.extraInit.initDelay Seconds to wait after mongod is running to give it time for internal initialization
+    initDelay: 5
+    ## @param replicaSet.disableTelemetry If true, mongosh telemetry is disabled (see https://www.mongodb.com/docs/mongodb-shell/telemetry)
+    disableTelemetry: false
+  ## @param replicaSet.shutdown Internal shutdown configuration
+  shutdown:
+    ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
+    delay: 10

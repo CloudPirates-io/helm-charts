@@ -1,4 +1,3 @@
-{{- if or (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) (and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,13 +11,13 @@ metadata:
     {{- include "mongodb.labels" . | nindent 4 }}
 data:
 {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-  custom-user.sh: |
+  init-custom-user.sh: |
     #!/bin/sh
     set -e
     mongosh --eval "db.getSiblingDB(\"$MONGO_INITDB_DATABASE\").createUser({user: \"$MONGO_CUSTOM_USERNAME\", pwd: \"$MONGO_CUSTOM_USER_PASSWORD\", roles: [ \"readWrite\", \"dbAdmin\" ]})"
 {{- end }}
 {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
-  metrics-user.sh: |
+  init-metrics-user.sh: |
     #!/bin/sh
     set -e
 
@@ -50,4 +49,425 @@ data:
       }
     "
 {{- end }}
-{{- end }}
+  extra-init.sh: |
+    #!/bin/sh    
+    # Source: https://github.com/groundhog2k/helm-charts/tree/master/charts/mongodb
+    
+    # Log a message in extra initialization phase
+    # $1 - the log message
+    log() {
+      echo "***** EXTRA-INIT: $1"
+      echo "$(date) ***** EXTRA-INIT: $1" >>/tmp/extra-init.log
+    }
+
+    # Log error message and exit when errorcode is not 0
+    # $1 - Message to log in case of error
+    # $2 - Exit/Error code
+    logErrorAndExit() {
+      local message=$1
+      local errorcode=$2
+      if [ $errorcode -ne 0 ]; then
+        log "[ERROR] - $message"
+        exit $errorcode
+      fi
+    }
+
+    # Wait until final mongod is fully up and running in background
+    # see "replicaSet.extraInit" in values.yaml
+    # $1 - Number of retries
+    # $2 - Delay between retries
+    # $3 - Time to wait until mongod is initialized
+    wait_ready() {
+      log "Waiting until mongod is fully up and running"
+      local retries=$1
+      local delay=$2
+      local initdelay=$3
+      while true; do
+        mp=$(ps aux | grep "mongod --config {{ include "mongodb.configFullName" . | quote }}" | grep -v grep)
+        if [ ! -z "$mp" ]; then
+          log "mongod is running giving it time to initialize"
+          sleep $initdelay
+          break;
+        fi
+        retries=$((retries-1))
+        if [ "$retries" -le 0 ]; then
+          log "mongod is not running.. Stopping hard"
+          exit 1
+        fi
+        sleep $delay
+        log "Waiting for mongod..."
+      done
+      log "Done with waiting for mongod"
+    }
+
+    # Try to detect if there are other instances of this ReplicaSet cluster running
+    # $1 - FQDN of the headless service for this MongoDB cluster
+    # returns - 0 when cluster exists otherwise errorcode
+    detect_cluster() {
+      local service=$1
+      $MONGOSHELL --host $service --eval "db.version()"
+      result=$?
+      if [ $result -eq 0 ]; then
+        log "ReplicaSet cluster found"
+      else
+        log "No ReplicaSet cluster detected"
+      fi
+      return $result
+    }
+
+    # Try to find primary instance of ReplicaSet
+    # $1 - FQDN of the headless service for this MongoDB cluster
+    # returns - FQDN of primary instance or empty
+    find_primary() {
+      local service=$1
+      result=$($MONGOSHELL --host $service --eval "rs.status().members.filter(function(rs) { return rs.state==1;})[0].name")
+      returncode=$?
+      if [ $returncode -eq 0 ]; then
+        echo $result
+      else
+        echo
+      fi
+    }
+
+    # Init ReplicaSet primary instance
+    # $1 - FQDN of the new primary instance
+    # $2 - Name of the ReplicaSet
+    init_primary() {
+      local primary=$1
+      local replicaset=$2
+      # Try to find out if there was an initialized replicaset before (using local instance)
+      result=$($MONGOSHELL --eval "rs.status().members.filter(function(rs) { return rs.name===\"$primary\";}).length")
+      if [ "$result" = "1" ]; then
+        log "Instance $primary was in ReplicaSet before - doing nothing"
+      else
+        # Initialize local instance as primary
+        $MONGOSHELL --eval "rs.initiate({_id:\"$replicaset\",members:[{_id:0, host:\"$primary\"}]})"
+        result=$?
+        if [ $result -ne 0 ]; then
+          log "Failed to init PRIMARY - Exiting with errorcode: $result"
+          exit $result
+        else
+          # Wait until instance reaches PRIMARY state
+          wait_for_state $primary $primary 1
+          log "$primary initialized as PRIMARY instance"
+        fi
+      fi
+    }
+
+    # Detects if an instance with given name exists
+    # $1 - FQDN of primary instance for script execution
+    # $2 - FQDN of the instance instance to find
+    # returns - "0" if no instance was found - otherwise "1"
+    detect_instance() {
+      local primary=$1
+      local instance=$2
+      result=$($MONGOSHELL --host $primary --eval "rs.status().members.filter(function(rs) { return rs.name===\"$instance\";}).length")
+      returncode=$?
+      if [ $returncode -eq 0 ]; then
+        echo $result
+      else
+        log "Failed to query for instance $instance in ReplicaSet - PRIMARY not ready? - Exiting with errorcode: $returncode"
+        exit $returncode
+      fi      
+    }
+
+    # Waits until an instance has expected state
+    # $1 - FQDN of primary instance for script execution
+    # $2 - FQDN of the instance to find
+    # $3 - Expected state
+    wait_for_state() {
+      local primary=$1
+      local instance=$2
+      local state=$3
+      local delay=1
+      log "Waiting until $instance reaches state $3"
+      while true; do
+        result=$($MONGOSHELL --host $primary --eval "rs.status().members.filter(function(rs) { return rs.name===\"$instance\" && rs.state==$state;}).length")
+        returncode=$?
+        if [ $returncode -ne 0 ]; then
+          log "Failed to get state of instance $instance in ReplicaSet - PRIMARY not ready? - Exiting with errorcode: $returncode"
+          exit $returncode
+        else
+          if [ "$result" = "1" ]; then
+            break;
+          else
+            sleep $delay
+            log "Waiting..."
+          fi
+        fi
+      done
+      log "Ready - $instance reached state $state"
+    }
+
+    # Adds a secondary instance to the ReplicaSet
+    # $1 - FQDN of primary instance for script execution
+    # $2 - FQDN of the secondary instance which should be added to the ReplicaSet
+    add_secondary() {
+      local primary=$1
+      local secondary=$2
+      local result=$(detect_instance $primary $secondary)
+      if [ "$result" = "0" ]; then
+        log "Add $secondary as SECONDARY instance"
+        if [ "$IS_MONGODB_4" = "true" ]; then
+          log "Using MongoDB 4.x fallback - Add secondary with votes=0 and priority=0"
+          $MONGOSHELL --host $primary --eval "rs.add({host:\"$secondary\", priority:0, votes:0})"
+          result=$?
+          if [ $result -ne 0 ]; then
+            log "Failed to add secondary to ReplicaSet - PRIMARY not ready? - Exiting with errorcode: $result"
+            exit $result
+          fi
+          # Wait until instance reaches SECONDARY state
+          wait_for_state $primary $secondary 2
+          log "Reconfiguring priority and votes for $secondary"
+          $MONGOSHELL --host $primary --eval "var config=rs.config(); var i=config.members.findIndex(m=>{return m.host===\"$secondary\"}); config.members[i].votes=1; config.members[i].priority=1; rs.reconfig(config);"
+          result=$?
+          if [ $result -ne 0 ]; then
+            log "Failed to reconfigure secondary - Please investigate logs and fix manually! - Exiting with errorcode: $result"
+            exit $result
+          fi
+        else
+          $MONGOSHELL --host $primary --eval "rs.add({host:\"$secondary\"})"
+          result=$?
+          if [ $result -ne 0 ]; then
+            log "Failed to add secondary to ReplicaSet - PRIMARY not ready? - Exiting with errorcode: $result"
+            exit $result
+          fi
+          # Wait until instance reaches SECONDARY state
+          wait_for_state $primary $secondary 2
+        fi
+        log "$secondary added to ReplicaSet"
+      else
+        log "SECONDARY instance $secondary already in ReplicaSet - doing nothing"
+      fi
+    }
+
+    # Adds an arbiter instance to the ReplicaSet
+    # $1 - FQDN of primary instance for script execution
+    # $2 - FQDN of the arbiter instance which should be added to the ReplicaSet
+    add_arbiter() {
+      local primary=$1
+      local arbiter=$2
+      local result=$(detect_instance $primary $arbiter)
+      if [ "$result" = "0" ]; then
+        log "Add $arbiter as ARBITER instance"
+        if [ "$IS_MONGODB_4" = "false" ]; then
+          log "Setting default write concern to 1"
+          $MONGOSHELL --host $primary --eval "db.adminCommand({\"setDefaultRWConcern\" : 1,\"defaultWriteConcern\" : {\"w\" : 1}})"
+          result=$?
+          if [ $result -ne 0 ]; then
+            log "Failed to configure write concern - PRIMARY not ready? - Exiting with errorcode: $result"
+            exit $result
+          fi
+        fi
+        result=$($MONGOSHELL --host $primary --eval "rs.addArb(\"$arbiter\").ok")
+        returncode=$?
+        if [ $returncode -ne 0 ]; then
+          log "Failed to add ARBITER - PRIMARY not ready? - Exiting with errorcode: $returncode"
+          exit $returncode
+        else
+          if [ "$result" = "1" ]; then
+            # Wait until instance reaches ARBITER state
+            wait_for_state $primary $arbiter 7
+          else
+            log "Failed to add ARBITER - Quorum check failed? - Exiting for retry"
+            exit 1
+          fi
+        fi
+        log "$arbiter added to ReplicaSet as ARBITER"
+      else
+        log "Arbiter instance $arbiter already in ReplicaSet - doing nothing"
+      fi
+    }
+
+    # Try to initialize a hidden secondary
+    # $1 - FQDN of the headless service for this MongoDB cluster
+    # $2 - FQDN of the headless hidden service for this MongoDB cluster
+    init_hidden() {
+      local service=$1
+      local hidden_service=$2
+      log "Start hidden secondary initialization"
+      detect_cluster $service
+      if [ $? -eq 0 ]; then
+        local primary=$(find_primary $service)
+        if [ ! -z "$primary" ]; then
+          log "Primary $primary found - Adding this instance as HIDDEN SECONDARY"
+          add_secondary $primary "$HOSTNAME.$hidden_service"
+          log "Reconfiguring priority and hidden state for $HOSTNAME.$hidden_service"
+          $MONGOSHELL --host $primary --eval "var config=rs.config(); var i=config.members.findIndex(m=>{return m.host===\"$HOSTNAME.$hidden_service\"}); config.members[i].hidden=true; config.members[i].priority=0; rs.reconfig(config);"
+          result=$?
+          if [ $result -ne 0 ]; then
+            log "Failed to reconfigure HIDDEN SECONDARY - Please investigate logs and fix manually! - Exiting with errorcode: $result"
+            exit $result
+          fi
+        else
+          log "ERROR: Primary not found - Exiting"
+          exit 1
+        fi
+      else
+          log "ERROR: ReplicaSet cluster not running - Exiting"
+          exit 1
+      fi      
+      log "Done with hidden secondary initialization\n-----"
+    }
+
+    # Try to initialize an arbiter for the ReplicaSet
+    # $1 - FQDN of the headless service for this MongoDB cluster
+    # $2 - FQDN of the headless arbiter service for this MongoDB cluster
+    init_arbiter() {
+      local service=$1
+      local arbiter_service=$2
+      log "Start arbiter initialization"
+      detect_cluster $service
+      if [ $? -eq 0 ]; then
+        local primary=$(find_primary $service)
+        if [ ! -z "$primary" ]; then
+          log "Primary $primary found - Adding this instance as ARBITER"
+          add_arbiter $primary "$HOSTNAME.$arbiter_service"
+        else
+          log "ERROR: Primary not found - Exiting"
+          exit 1
+        fi
+      else
+          log "ERROR: ReplicaSet cluster not running - Exiting"
+          exit 1
+      fi
+      log "Done with Arbiter initialization\n-----"
+    }
+
+    # Try to initialize a ReplicaSet
+    # $1 - FQDN of the headless service for this MongoDB cluster
+    # $2 - Name of the ReplicaSet
+    init_replicaset() {
+      local service=$1
+      local replicaset=$2
+      log "Start ReplicaSet initialization"
+      # First try to detect if other instance of this ReplicSet cluster are available
+      detect_cluster $service
+      if [ $? -eq 0 ]; then
+        # Try to find the primary instance
+        local primary=$(find_primary $service)
+        if [ -z "$primary" ]; then
+          log "Primary not found - Trying to detect if this instance was PRIMARY before"
+          result=$(detect_instance $service "$HOSTNAME.$service")
+          # Find out whether the actual instance was the primary before
+          if [ "$result" = "0" ]; then
+            log "Not the PRIMARY - Can't add this instance $HOSTNAME.$service without a running PRIMARY - Exiting"
+            exit 1
+          else
+            log "This instance $HOSTNAME.$service was the PRIMARY before - Continue starting..."
+          fi
+        else
+          log "Primary $primary found"
+          add_secondary $primary "$HOSTNAME.$service"
+        fi
+      else
+        # Assume that this is the first instance in the cluster - initialize it as primary 
+        init_primary "$HOSTNAME.$service" $replicaset
+      fi
+      log "Done with ReplicaSet initialization\n-----"
+    }
+
+    # Terminates a child process
+    # $1 - PID of child process
+    # $2 - Kill signal number
+    # $3 - Delay before terminate (leave empty if no delay desired)
+    _terminate() {
+      local childproc=$1
+      local signal=$2
+      local delay=$3
+      log "Terminating entrypoint"
+      kill -s $signal $childproc
+      if [ ! -z "$delay" ]; then
+        log "Waiting $delay seconds before termination..."
+        sleep $delay
+      fi
+      log "Bye bye"
+    }
+
+    init() {
+      log "Try to detect default mongo shell executable"
+      local mongoshell=$(which mongosh)
+      if [ ! -z "$mongoshell" ]; then
+        log "Using mongosh as default shell"
+        {{- if .Values.replicaSet.extraInit.disableTelemetry }}
+        mongosh --nodb --eval "disableTelemetry()"
+        {{- end }}
+        export IS_MONGODB_4="false"
+      else
+        log "Using mongo as default shell"
+        mongoshell=$(which mongo)
+        export IS_MONGODB_4="true"
+      fi
+      if [ ! -f /extrainitscripts/mongoshell ]; then
+        ln -s $mongoshell /extrainitscripts/mongoshell
+      else
+        log "Symbolic link for mongoshell already exists"
+      fi
+      export MONGOSHELL="/extrainitscripts/mongoshell --quiet --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD"
+    }
+
+    main() {
+      log "Starting original entrypoint in background"
+      docker-entrypoint.sh $@ &
+      mongoproc=$!
+      log "Entrypoint pid: $mongoproc"
+      {{- if .Values.replicaSet.enabled }}
+      wait_ready {{ .Values.replicaSet.extraInit.retries }} {{ .Values.replicaSet.extraInit.delay }} {{ .Values.replicaSet.extraInit.initDelay }}
+      if [ "$MONGOTYPE" = "ARBITER" ]; then
+        init_arbiter "{{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain }}:{{ .Values.service.port }}" "{{ include "mongodb.fullname" . }}-{{ .Values.replicaSet.arbiter.headlessServiceSuffix }}.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain }}:{{ .Values.service.port }}"
+      else
+        if [ "$MONGOTYPE" = "HIDDEN" ]; then
+          init_hidden "{{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain }}:{{ .Values.service.port }}" "{{ include "mongodb.fullname" . }}-{{ .Values.replicaSet.hiddenSecondaries.headlessServiceSuffix }}.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain }}:{{ .Values.service.port }}"
+        else
+          init_replicaset "{{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain }}:{{ .Values.service.port }}" "{{ .Values.replicaSet.name }}"
+        fi
+      fi
+      terminatedelay={{ .Values.replicaSet.shutdown.delay }}
+      {{- end }}
+      trap "_terminate $mongoproc 15 $terminatedelay" 15
+      trap "_terminate $mongoproc 9 $terminatedelay" 9
+      wait $mongoproc
+    }
+
+    init
+    main $@
+  init.sh: |
+    #!/bin/sh
+    echo "Start initialization"
+    echo "Copy init scripts"
+    # Copy optional initialization scripts only to first cluster instance (initial primary on a new replicaset)
+    if [ "$HOSTNAME" = "{{ include "mongodb.fullname" . }}-0" ]; then
+      cp /scripts/init-*.sh /initscripts
+      if [ -d /extrascripts ]; then
+        echo "Copy extra scripts"
+        cp /extrascripts/* /initscripts
+      fi
+      if [ -d /customscripts ]; then
+        echo "Copy custom scripts"
+        cp /customscripts/* /initscripts
+      fi
+    fi
+    # Copy extra initialization scripts for ReplicaSet cluster
+    cp /scripts/extra-*.sh /extrainitscripts
+    echo "Copy custom configuration"
+    touch /configs/mongod.conf
+    if [ -d /customconfig ]; then
+      echo "Create custom mongodb config"
+      cat /customconfig/* >>/configs/mongod.conf
+    fi
+    if [ -d /extraconfigs ]; then
+      echo "Add extra configs to custom mongodb config"
+      cat /extraconfigs/* >>/configs/mongod.conf
+    fi
+    {{- if .Values.replicaSet.enabled }}
+    echo "Copy replicaset key"
+    if [ -f /keyfile-secret/keyfile ]; then
+      echo "Using keyfile from secret"
+      cp /keyfile-secret/keyfile /replicaset/keyfile
+    else
+      echo "Using configured key"
+      echo {{ .Values.replicaSet.key | quote }} > /replicaset/keyfile
+    fi
+    chmod 400 /replicaset/keyfile
+    {{- end }}    
+    echo "Initialization done."

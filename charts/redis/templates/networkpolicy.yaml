@@ -64,7 +64,8 @@ spec:
             matchLabels:
               {{- include "redis.sentinel.selectorLabels" . | nindent 14 }}
     {{- end }}
-    {{- if eq .Values.architecture "cluster" -}}
+    {{- if eq .Values.architecture "cluster" }}
+    # Allow cluster node-to-node communication
     - ports:
         - port: {{ .Values.service.port }}
           protocol: TCP
@@ -74,6 +75,15 @@ spec:
         - podSelector:
             matchLabels:
               {{- include "redis.selectorLabels" . | nindent 14 }}
+    # Allow cluster-init job to access Redis pods
+    - ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "redis.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: cluster-init
     {{- end }}
     {{- if .Values.metrics.enabled }}
     # Allow metrics scraping
@@ -92,6 +102,7 @@ spec:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   egress:
+  {{- if .Values.networkPolicy.egressEnabled }}
     # Allow DNS resolution
     - ports:
         - port: 53
@@ -148,4 +159,8 @@ spec:
     {{- with .Values.networkPolicy.extraEgress }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- else }}
+    # Allow all egress when egressEnabled is false
+    - {}
+  {{- end }}
 {{- end }}

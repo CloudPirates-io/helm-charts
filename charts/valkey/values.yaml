@@ -25,7 +25,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+  tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -41,6 +41,9 @@ architecture: standalone
 ##   without Sentinel, pod-0 is always the master and other pods are replicas
 ##   For example: replicaCount: 3 creates 1 master + 2 replicas
 replicaCount: 3
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
 
 ## @param ipFamily IP family to use for replica and sentinel announce IPs. Allowed values: auto, ipv4, ipv6
 ## auto: Uses the first IP returned by hostname -i (default)
@@ -75,6 +78,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the valkey instance
+priorityClassName: ""
+
 ## @section Valkey Authentication
 auth:
   ## @param auth.enabled Enable password authentication
@@ -106,6 +112,8 @@ tls:
 
 ## @section Valkey Configuration
 config:
+  ## @param config.mountPath Redis configuration options
+  mountPath: /etc/valkey
   ## @param config.maxMemory Maximum memory usage for Valkey (e.g., 256mb, 1gb)
   maxMemory: ""
   ## @param config.maxMemoryPolicy Memory eviction policy when maxmemory is reached
@@ -146,8 +154,7 @@ ingress:
   ## @param ingress.className IngressClass that will be used to implement the Ingress
   className: ""
   ## @param ingress.annotations Additional annotations for the Ingress resource
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   ## @param ingress.hosts[0].host Hostname for Valkey ingress
@@ -176,10 +183,14 @@ resources:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for Valkey data volume
+  existingClaim: ""
   ## @param persistence.storageClass Persistent Volume storage class
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
   annotations: {}
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
   ## @param persistence.size Persistent Volume size
   size: 8Gi
   ## @param persistence.accessModes Persistent Volume access modes
@@ -269,7 +280,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.80.0-alpine@sha256:1484ab443e344ac4fd23bb2df8edd297b704abb9e0a354ab5103017764b4a311"
+    tag: "v1.80.2-alpine@sha256:5c1692551217e4519a04b89aa87a8c3360173f020e8cef280c798e9f5dbc819a"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -315,12 +326,17 @@ sentinel:
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   image:
+    ## @param sentinel.image.registry Valkey Sentinel image registry
+    registry: docker.io
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
-    tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+    tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
+  ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  config:
+    announceHostnames: true
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
