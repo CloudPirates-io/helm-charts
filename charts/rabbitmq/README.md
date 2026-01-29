@@ -152,6 +152,42 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `definitions.topic_permissions`    | Array of RabbitMQ topic permissions to create.                                                                                               | `[]`        |
 | `definitions.policies`             | Array of RabbitMQ policies to create.                                                                                                        | `[]`        |
 
+#### Automatic Configuration Reloading
+
+The chart supports automatic reloading of definitions when the ConfigMap or Secret changes, without requiring a pod restart or Helm upgrade.
+
+| Parameter                                 | Description                                                    | Default           |
+| ----------------------------------------- | -------------------------------------------------------------- | ----------------- |
+| `definitions.autoReload.enabled`          | Enable sidecar container to watch for ConfigMap/Secret changes | `false`           |
+| `definitions.autoReload.image.registry`   | Container image registry for the config watcher sidecar        | `docker.io`       |
+| `definitions.autoReload.image.repository` | Container image repository for the config watcher sidecar      | `curlimages/curl` |
+| `definitions.autoReload.image.tag`        | Container image tag for the config watcher sidecar             | `8.11.1`          |
+| `definitions.autoReload.image.pullPolicy` | Container image pull policy for the config watcher sidecar     | `IfNotPresent`    |
+| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | See values.yaml   |
+
+**How it works:**
+
+When enabled, a lightweight sidecar container runs alongside RabbitMQ and:
+1. Monitors the definitions file for changes (using checksum comparison)
+2. Automatically reloads definitions via RabbitMQ Management API when changes are detected
+3. Checks for changes every 10 seconds
+
+**Example:**
+
+```yaml
+definitions:
+  enabled: true
+  existingConfigMap: my-rabbitmq-definitions
+  autoReload:
+    enabled: true
+```
+
+After deployment, you can update your ConfigMap:
+```bash
+kubectl edit configmap my-rabbitmq-definitions -n <namespace>
+# The sidecar will automatically detect and reload the new configuration
+```
+
 ### Service configuration
 
 | Parameter                               | Description                                                 | Default     |
@@ -211,17 +247,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Metrics configuration
 
-| Parameter                              | Description                                                                                                                 | Default |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false` |
-| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692` |
-| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false` |
-| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`    |
-| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`    |
-| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`    |
-| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`   |
-| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`   |
-| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`    |
+| Parameter                              | Description                                                                                                                 | Default    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false`    |
+| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692`    |
+| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false`    |
+| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`       |
+| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`       |
+| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`       |
+| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`      |
+| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`      |
+| `metrics.serviceMonitor.path`          | Select detail of metrics (`/metrics`, `/metrics/detailed` or `/metrics/per-object`)                                         | `/metrics` |
+| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`       |
 
 ### Persistence
 
@@ -230,6 +267,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `persistence.enabled`       | Enable persistent storage                                                       | `true`              |
 | `persistence.existingClaim` | Name of existing PVC to use (if empty, a new PVC will be created automatically) | `""`                |
 | `persistence.storageClass`  | Storage class to use for persistent volume                                      | `""`                |
+| `persistence.mountPath`     | Set the mountPath for the data Volume                                           | `/var/lib/rabbitmq` |
 | `persistence.accessModes`   | Persistent Volume access modes                                                  | `["ReadWriteOnce"]` |
 | `persistence.size`          | Size of persistent volume                                                       | `8Gi`               |
 | `persistence.labels`        | Labels for persistent volume claims                                             | `{}`                |

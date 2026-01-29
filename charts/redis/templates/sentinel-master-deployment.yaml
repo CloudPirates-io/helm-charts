@@ -37,14 +37,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
       - name: master-discovery
         image: "{{ .Values.sentinel.masterService.image.repository }}:{{ .Values.sentinel.masterService.image.tag }}"
         imagePullPolicy: {{ .Values.sentinel.masterService.image.pullPolicy }}
-        securityContext:
-          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+        securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 10 }}
         resources:
           {{- toYaml .Values.sentinel.masterService.resources | nindent 10 }}
         {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}

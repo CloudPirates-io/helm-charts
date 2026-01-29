@@ -48,13 +48,13 @@ spec:
             - -c
             - |
               {{- if .Values.auth.enabled }}
-              echo "$RABBITMQ_ERLANG_COOKIE" > /var/lib/rabbitmq/.erlang.cookie
+              echo "$RABBITMQ_ERLANG_COOKIE" > {{ .Values.persistence.mountPath }}/.erlang.cookie
               {{- else }}
               # Generate a default Erlang cookie when auth is disabled
-              echo "defaultcookie" > /var/lib/rabbitmq/.erlang.cookie
+              echo "defaultcookie" > {{ .Values.persistence.mountPath }}/.erlang.cookie
               {{- end }}
-              chmod 400 /var/lib/rabbitmq/.erlang.cookie
-              chown $(id -u):$(id -g) /var/lib/rabbitmq/.erlang.cookie
+              chmod 400 {{ .Values.persistence.mountPath }}/.erlang.cookie
+              chown $(id -u):$(id -g) {{ .Values.persistence.mountPath }}/.erlang.cookie
           {{- if .Values.auth.enabled }}
           env:
             - name: RABBITMQ_ERLANG_COOKIE
@@ -65,7 +65,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/rabbitmq
+              mountPath: {{ .Values.persistence.mountPath }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
@@ -75,21 +75,21 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p /var/lib/rabbitmq/plugins
+              mkdir -p {{ .Values.persistence.mountPath }}/plugins
               {{- range .Values.installPlugins }}
               echo "Downloading plugin from {{ . }}"
-              wget -O /var/lib/rabbitmq/plugins/$(basename {{ . }}) {{ . }}
+              wget -O {{ .Values.persistence.mountPath }}/plugins/$(basename {{ . }}) {{ . }}
               {{- end }}
               echo "Moving downloaded plugins to shared directory"
-              if ls /var/lib/rabbitmq/plugins/*.ez 1> /dev/null 2>&1; then
-                mv /var/lib/rabbitmq/plugins/*.ez /tmp/plugins/
+              if ls {{ .Values.persistence.mountPath }}/plugins/*.ez 1> /dev/null 2>&1; then
+                mv {{ .Values.persistence.mountPath }}/plugins/*.ez /tmp/plugins/
                 echo "Successfully moved plugins"
               else
                 echo "No plugins to move"
               fi
           volumeMounts:
             - name: data
-              mountPath: /var/lib/rabbitmq
+              mountPath: {{ .Values.persistence.mountPath }}
             - name: plugins
               mountPath: /tmp/plugins
         - name: copy-plugins
@@ -255,7 +255,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/rabbitmq
+              mountPath: {{ .Values.persistence.mountPath }}
             - name: config
               mountPath: /etc/rabbitmq
             - name: logs
@@ -266,6 +266,10 @@ spec:
             {{- end }}
             {{- if .Values.definitions.enabled }}
             - name: definitions
+              {{- if .Values.definitions.autoReload.enabled }}
+              mountPath: "/etc/rabbitmq-definitions"
+              readOnly: true
+              {{- else }}
               mountPath: "/etc/rabbitmq-definitions/defs.json"
               subPath: {{- if .Values.definitions.existingConfigMap }}
                 {{ .Values.definitions.existingConfigMapKey | default "defs.json" }}
@@ -274,10 +278,90 @@ spec:
               {{- else }}
                 defs.json
               {{- end }}
+              {{- end }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
             {{- end }}
+        {{- if and .Values.definitions.enabled .Values.definitions.autoReload.enabled }}
+        - name: definitions-reloader
+          image: "{{ .Values.definitions.autoReload.image.registry }}/{{ .Values.definitions.autoReload.image.repository }}:{{ .Values.definitions.autoReload.image.tag }}"
+          imagePullPolicy: {{ .Values.definitions.autoReload.image.pullPolicy }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Starting RabbitMQ definitions auto-reloader sidecar..."
+
+              DEFINITIONS_FILE="/etc/rabbitmq-definitions/{{- if .Values.definitions.existingConfigMap }}{{ .Values.definitions.existingConfigMapKey | default "defs.json" }}{{- else if .Values.definitions.existingSecret }}{{ .Values.definitions.existingSecretKey | default "defs.json" }}{{- else }}defs.json{{- end }}"
+              LAST_CHECKSUM=""
+              CHECK_INTERVAL=10
+
+              # Wait for RabbitMQ to be ready
+              echo "Waiting for RabbitMQ management API to be ready..."
+              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:15672/ 2>/dev/null)" = "200" ]; do
+                echo "RabbitMQ not ready yet, waiting..."
+                sleep 5
+              done
+              echo "RabbitMQ is ready!"
+
+              # Monitor loop
+              while true; do
+                if [ -f "$DEFINITIONS_FILE" ]; then
+                  CURRENT_CHECKSUM=$(md5sum "$DEFINITIONS_FILE" | awk '{print $1}')
+
+                  if [ -n "$LAST_CHECKSUM" ] && [ "$CURRENT_CHECKSUM" != "$LAST_CHECKSUM" ]; then
+                    echo "Detected change in definitions file (checksum: $CURRENT_CHECKSUM)"
+                    echo "Reloading RabbitMQ definitions via management API..."
+
+                    # Import definitions using RabbitMQ management API
+                    {{- if .Values.auth.enabled }}
+                    RABBITMQ_PASSWORD=$(cat /var/run/secrets/rabbitmq/{{ include "rabbitmq.secretPasswordKey" . }})
+                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                      -X POST \
+                      -H "Content-Type: application/json" \
+                      -u "{{ .Values.auth.username }}:$RABBITMQ_PASSWORD" \
+                      --data-binary @"$DEFINITIONS_FILE" \
+                      http://localhost:15672/api/definitions)
+                    {{- else }}
+                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+                      -X POST \
+                      -H "Content-Type: application/json" \
+                      --data-binary @"$DEFINITIONS_FILE" \
+                      http://localhost:15672/api/definitions)
+                    {{- end }}
+
+                    if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then
+                      echo "Successfully reloaded definitions!"
+                    else
+                      echo "Warning: Failed to reload definitions (HTTP $HTTP_CODE)"
+                    fi
+                  elif [ -z "$LAST_CHECKSUM" ]; then
+                    echo "Initial checksum: $CURRENT_CHECKSUM"
+                  fi
+
+                  LAST_CHECKSUM=$CURRENT_CHECKSUM
+                else
+                  echo "Warning: Definitions file not found at $DEFINITIONS_FILE"
+                fi
+
+                sleep $CHECK_INTERVAL
+              done
+          {{- with .Values.definitions.autoReload.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: definitions
+              mountPath: "/etc/rabbitmq-definitions"
+              readOnly: true
+            {{- if .Values.auth.enabled }}
+            - name: rabbitmq-secret
+              mountPath: "/var/run/secrets/rabbitmq"
+              readOnly: true
+            {{- end }}
+        {{- end }}
       volumes:
         - name: logs
           emptyDir: {}
@@ -308,6 +392,14 @@ spec:
           configMap:
             name: {{ printf "%s-definitions" (include "rabbitmq.fullname" .) }}
           {{- end }}
+        {{- end }}
+        {{- if and .Values.definitions.enabled .Values.definitions.autoReload.enabled .Values.auth.enabled }}
+        - name: rabbitmq-secret
+          secret:
+            secretName: {{ include "rabbitmq.secretName" . }}
+            items:
+              - key: {{ include "rabbitmq.secretPasswordKey" . }}
+                path: {{ include "rabbitmq.secretPasswordKey" . }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
