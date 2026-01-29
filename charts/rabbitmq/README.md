@@ -156,14 +156,14 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 The chart supports automatic reloading of definitions when the ConfigMap or Secret changes, without requiring a pod restart or Helm upgrade.
 
-| Parameter                                  | Description                                                            | Default           |
-| ------------------------------------------ | ---------------------------------------------------------------------- | ----------------- |
-| `definitions.autoReload.enabled`           | Enable sidecar container to watch for ConfigMap/Secret changes        | `false`           |
-| `definitions.autoReload.image.registry`    | Container image registry for the config watcher sidecar               | `docker.io`       |
-| `definitions.autoReload.image.repository`  | Container image repository for the config watcher sidecar             | `curlimages/curl` |
-| `definitions.autoReload.image.tag`         | Container image tag for the config watcher sidecar                    | `8.11.1`          |
-| `definitions.autoReload.image.pullPolicy`  | Container image pull policy for the config watcher sidecar            | `IfNotPresent`    |
-| `definitions.autoReload.resources`         | Resource limits and requests for the config watcher sidecar           | See values.yaml   |
+| Parameter                                 | Description                                                    | Default           |
+| ----------------------------------------- | -------------------------------------------------------------- | ----------------- |
+| `definitions.autoReload.enabled`          | Enable sidecar container to watch for ConfigMap/Secret changes | `false`           |
+| `definitions.autoReload.image.registry`   | Container image registry for the config watcher sidecar        | `docker.io`       |
+| `definitions.autoReload.image.repository` | Container image repository for the config watcher sidecar      | `curlimages/curl` |
+| `definitions.autoReload.image.tag`        | Container image tag for the config watcher sidecar             | `8.11.1`          |
+| `definitions.autoReload.image.pullPolicy` | Container image pull policy for the config watcher sidecar     | `IfNotPresent`    |
+| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | See values.yaml   |
 
 **How it works:**
 
@@ -267,6 +267,7 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | `persistence.enabled`       | Enable persistent storage                                                       | `true`              |
 | `persistence.existingClaim` | Name of existing PVC to use (if empty, a new PVC will be created automatically) | `""`                |
 | `persistence.storageClass`  | Storage class to use for persistent volume                                      | `""`                |
+| `persistence.mountPath`     | Set the mountPath for the data Volume                                           | `/var/lib/rabbitmq` |
 | `persistence.accessModes`   | Persistent Volume access modes                                                  | `["ReadWriteOnce"]` |
 | `persistence.size`          | Size of persistent volume                                                       | `8Gi`               |
 | `persistence.labels`        | Labels for persistent volume claims                                             | `{}`                |

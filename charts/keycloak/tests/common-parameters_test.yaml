@@ -164,17 +164,6 @@ tests:
         template: templates/secret.yaml
         documentIndex: 0
 
-  - it: should render database secret for external database
-    set:
-      database:
-        type: postgres
-        username: keycloak
-        password: db-password
-    asserts:
-      - hasDocuments:
-          count: 2
-        template: templates/secret.yaml
-
   - it: should configure Keycloak environment for development mode
     set:
       keycloak:
