@@ -22,7 +22,7 @@ image:
   ## @param image.repository etcd image repository
   repository: coreos/etcd
   ## @param image.tag etcd image tag
-  tag: "v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3"
+  tag: "v3.6.7@sha256:6411837ab7d4603073adddf988818b2d253df26dc01dc4e4cb3713aab5b679d7"
   ## @param image.pullPolicy etcd image pull policy
   pullPolicy: IfNotPresent
 
@@ -210,7 +210,7 @@ containerSecurityContext:
   ## @param containerSecurityContext.capabilities.drop Linux capabilities to drop
   capabilities:
     drop:
-    - ALL
+      - ALL
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

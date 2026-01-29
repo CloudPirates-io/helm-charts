@@ -178,7 +178,8 @@ tls:
 
 ## @section Database Configuration
 database:
-  ## @param database.type Database type (postgres, mysql, mariadb, mssql)
+  ## @param database.type Database type (postgres, mysql, mariadb, mssql, empty string)
+  ## Note: If database.type is an empty string, all --db* settings will be omitted, e.g. type, url, etc.
   ## Note: H2 databases (h2-file, h2-mem) are not supported due to readonly filesystem restrictions
   ## Use embedded postgres or mariadb instead
   type: postgres

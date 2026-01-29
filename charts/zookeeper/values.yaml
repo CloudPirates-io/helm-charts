@@ -27,6 +27,12 @@ serverIdOffset: 0
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param selectorLabels Override selector labels (app.kubernetes.io/name and app.kubernetes.io/instance)
+selectorLabels:
+  ## @param selectorLabels.name Override app.kubernetes.io/name selector label
+  name: ""
+  ## @param selectorLabels.instance Override app.kubernetes.io/instance selector label
+  instance: ""
 
 ## @section Zookeeper image parameters
 image:

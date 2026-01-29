@@ -282,6 +282,17 @@
         "revisionHistoryLimit": {
             "type": "integer"
         },
+        "selectorLabels": {
+            "type": "object",
+            "properties": {
+                "instance": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "serverIdOffset": {
             "type": "integer"
         },

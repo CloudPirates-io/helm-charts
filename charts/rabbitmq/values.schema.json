@@ -429,6 +429,9 @@
                         "namespace": {
                             "type": "string"
                         },
+                        "path": {
+                            "type": "string"
+                        },
                         "scrapeTimeout": {
                             "type": "string"
                         }
@@ -490,6 +493,9 @@
                 },
                 "labels": {
                     "type": "object"
+                },
+                "mountPath": {
+                    "type": "string"
                 },
                 "size": {
                     "type": "string"
