@@ -47,28 +47,7 @@ spec:
           env:
             - name: PGDATA
               value: {{ include "postgres.pgdataPath" . }}
-            - name: REPLICATION_USER
-              {{- if .Values.replication.auth.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  {{ if .Values.replication.auth.secretKeys.name }}
-                  name: {{ tpl .Values.replication.auth.existingSecret | quote }}
-                  key: {{ tpl .Values.customUser.secretKeys.name | quote }}
-                  {{- end }}
-              {{- else }}
-              value: {{ .Values.replication.auth.username | quote }}
-              {{- end }}
-            - name: REPLICATION_PASSWORD
-              {{- if .Values.replication.auth.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  {{ if .Values.replication.auth.secretKeys.password }}
-                  name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
-                  key: {{ .Values.customUser.secretKeys.password | quote }}
-                  {{- end }}
-              {{- else }}
-              value: {{ .Values.replication.auth.password | quote }}
-              {{- end }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
           volumeMounts:
             - name: {{ .Values.persistence.volumeName }}
               mountPath: {{ include "postgres.dataDir" . }}
@@ -77,28 +56,10 @@ spec:
               {{- end }}
             - name: run
               mountPath: {{ include "postgres.runDir" . }}
+            - name: replication
+              mountPath: /replication-scripts
           command:
-            - /bin/bash
-            - -ce
-            - |
-              primary_host="{{ tpl .Values.replication.primary.host . }}"
-              primary_port="{{ .Values.replication.primary.port }}"
-              pgpass_file="{{ include "postgres.runDir" . }}/replication.pgpass"
-
-              # We need to mask ':' in this file
-              echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER//:/\\:}:${REPLICATION_PASSWORD//:/\\:}" > "${pgpass_file}"
-              chmod 600 "${pgpass_file}"
-              echo "✅ ${pgpass_file} created"
-
-              if [ -d "${PGDATA}" ]; then
-                echo "${PGDATA} already exists, skipping standby initialization..."
-                exit 0
-              fi
-
-              echo "Initialize database from primary..."
-              PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" --wal-method=stream
-              touch "${PGDATA}/standby.signal"
-              echo "✅ Standby replication initialized"
+            - /replication-scripts/replication-standby-init.sh
         {{- end }}
         {{- if .Values.initContainers }}
         {{- toYaml .Values.initContainers | nindent 8 }}
@@ -205,28 +166,7 @@ spec:
                   key: {{ tpl .Values.customUser.secretKeys.password . | quote }}
             {{- end }}
           {{- if .Values.replication.enabled }}
-            - name: REPLICATION_USER
-              {{- if .Values.replication.auth.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  {{ if .Values.replication.auth.secretKeys.name }}
-                  name: {{ tpl .Values.replication.auth.existingSecret | quote }}
-                  key: {{ tpl .Values.customUser.secretKeys.name | quote }}
-                  {{- end }}
-              {{- else }}
-              value: {{ .Values.replication.auth.username | quote }}
-              {{- end }}
-            - name: REPLICATION_PASSWORD
-              {{- if .Values.replication.auth.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  {{ if .Values.replication.auth.secretKeys.password }}
-                  name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
-                  key: {{ tpl .Values.customUser.secretKeys.password | quote }}
-                  {{- end }}
-              {{- else }}
-              value: {{ .Values.replication.auth.password | quote }}
-              {{- end }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
           {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
@@ -375,6 +315,12 @@ spec:
         - name: wrapper-script
           configMap:
             name: {{ printf "%s-wrapper" (include "postgres.fullname" .) }}
+            defaultMode: 0755
+        {{- end }}
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication
+          configMap:
+            name: {{ printf "%s-replication" (include "postgres.fullname" .) }}
             defaultMode: 0755
         {{- end }}
         {{- if .Values.extraVolumes }}
