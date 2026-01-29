@@ -622,6 +622,9 @@ shardedCluster:
       affinity: {}
 
     ## @section Shard arbiter configuration
+    ## WARNING: MongoDB does NOT recommend using arbiters in sharded cluster deployments.
+    ## Arbiters do not hold data and can lead to consistency issues in sharded environments.
+    ## See: https://www.mongodb.com/docs/manual/core/replica-set-arbiter/#sharded-cluster-considerations
     arbiter:
       ## @param shardedCluster.shardsvr.arbiter.replicaCount Number of arbiter replicas per shard (0 to disable, recommended 0 for sharded clusters)
       replicaCount: 0
