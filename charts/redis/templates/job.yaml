@@ -7,11 +7,19 @@ metadata:
   labels:
     {{- include "redis.labels" . | nindent 4 }}
   annotations:
-{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | nindent 4 }}
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
+    metadata:
+      labels:
+        {{- include "redis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cluster-init
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
 {{- with (include "redis.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -54,6 +62,13 @@ spec:
               set -e
 
               {{- include "redis.auth.acl.setupScript" (dict "type" "job" "context" .) | nindent 14 }}
+
+              # Check if cluster is already initialized
+              FIRST_NODE="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
+              if redis-cli -h "$FIRST_NODE" -p {{ .Values.service.port }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+                echo "Redis cluster is already initialized, skipping creation..."
+                exit 0
+              fi
 
               echo "Building list of Redis nodes..."
               NODES=""
