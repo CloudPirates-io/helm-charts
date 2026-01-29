@@ -137,7 +137,7 @@ data:
     {{- else }}
 
     # Replication standby configuration
-    primary_conninfo = 'host={{ tpl .Values.replication.primary.host . }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile={{ include "postgres.dataDir" . }}/replication.pgpass'
+    primary_conninfo = 'host={{ tpl .Values.replication.primary.host . }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile={{ include "postgres.runDir" . }}/replication.pgpass'
     {{- end }}
   {{- end }}
 

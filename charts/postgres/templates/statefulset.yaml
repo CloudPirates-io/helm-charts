@@ -75,23 +75,25 @@ spec:
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
+            - name: run
+              mountPath: {{ include "postgres.runDir" . }}
           command:
             - /bin/bash
             - -ce
             - |
+              primary_host="{{ tpl .Values.replication.primary.host . }}"
+              primary_port="{{ .Values.replication.primary.port }}"
+              pgpass_file="{{ include "postgres.runDir" . }}/replication.pgpass"
+
+              # We need to mask ':' in this file
+              echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER//:/\\:}:${REPLICATION_PASSWORD//:/\\:}" > "${pgpass_file}"
+              chmod 600 "${pgpass_file}"
+              echo "✅ ${pgpass_file} created"
+
               if [ -d "${PGDATA}" ]; then
                 echo "${PGDATA} already exists, skipping standby initialization..."
                 exit 0
               fi
-
-              pgpass_file="{{ include "postgres.dataDir" . }}/replication.pgpass"
-              primary_host="{{ tpl .Values.replication.primary.host . }}"
-              primary_port="{{ .Values.replication.primary.port }}"
-
-              echo "Initialize standby replication"
-              echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER}:${REPLICATION_PASSWORD}" > "${pgpass_file}"
-              chmod 600 "${pgpass_file}"
-              echo "✅ ${pgpass_file} created"
 
               echo "Initialize database from primary..."
               PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" --wal-method=stream
