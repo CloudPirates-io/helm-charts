@@ -3,6 +3,12 @@ templates:
   - configmap.yaml
 
 tests:
+  - it: default values should be compatible
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_buffers = 16M"
+
   - it: config variations
     set:
       config:
