@@ -25,13 +25,8 @@ data:
     # Check if MinIO is live
     ########################
     is_minio_live() {
-        local status_code
-        status_code=$(curl --write-out '%{http_code}' --silent --output /dev/null "${MINIO_URL}/minio/health/live")
-        if [ "$status_code" = "200" ]; then
-            return 0
-        else
-            return 1
-        fi
+        wget -q --spider "${MINIO_URL}/minio/health/live" 2>/dev/null
+        return $?
     }
 
     ########################
