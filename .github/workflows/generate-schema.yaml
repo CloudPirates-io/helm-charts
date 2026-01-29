@@ -277,6 +277,8 @@ jobs:
         if: |
           github.event_name == 'pull_request' &&
           steps.check-changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.CHANGELOG_PAT }}
         run: |
           # Setup SSH key for signing
           SIGN_KEY_FILE=$(mktemp)
@@ -296,8 +298,18 @@ jobs:
           git commit -m "chore: auto-generate values.schema.json" \
             -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>" || echo "No changes to commit"
 
-          # Push to PR branch
-          git push origin HEAD:${{ github.head_ref }}
+          # Determine if this is a fork PR and push to the correct remote
+          IS_FORK="${{ github.event.pull_request.head.repo.full_name != github.repository }}"
+          HEAD_REF="${{ github.head_ref }}"
+
+          if [ "$IS_FORK" = "true" ]; then
+            echo "Detected fork PR - pushing to fork repository"
+            FORK_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${FORK_REPO}" "HEAD:${HEAD_REF}"
+          else
+            echo "Same-repo PR - pushing to origin"
+            git push origin "HEAD:${HEAD_REF}"
+          fi
 
           rm -f "$SIGN_KEY_FILE"
 
