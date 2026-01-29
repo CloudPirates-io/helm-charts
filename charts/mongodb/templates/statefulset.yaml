@@ -14,6 +14,10 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- toYaml .Values.persistence.persistentVolumeClaimRetentionPolicy | nindent 4 }}
+  {{- end }}
   {{- if .Values.replicaSet.enabled }}
   serviceName: {{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}
   podManagementPolicy: {{ .Values.podManagementPolicy }}
@@ -108,6 +112,12 @@ spec:
             {{- end }}
             {{- if .Values.performance.maxIncomingConnections }}
             - --maxConns={{ .Values.performance.maxIncomingConnections }}
+            {{- end }}
+            {{- if .Values.setParameter.enableLocalhostAuthBypass }}
+            - --setParameter=enableLocalhostAuthBypass={{ .Values.setParameter.enableLocalhostAuthBypass }}
+            {{- end }}
+            {{- if .Values.setParameter.enableFlowControl }}
+            - --setParameter=enableFlowControl={{ .Values.setParameter.enableFlowControl }}
             {{- end }}
           ports:
             - name: mongodb

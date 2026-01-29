@@ -719,30 +719,36 @@ data:
       {{- end }}
       {{- end }}
 
-      # Set cluster-wide write concern if configured
+      # Set cluster-wide read/write concern if configured
       {{- $writeConcern := .Values.shardedCluster.initialization.defaultWriteConcern }}
-      {{- if ne $writeConcern "majority" }}
-      log_shard "Setting cluster-wide write concern to w:{{ $writeConcern }} (configured value)"
+      {{- $readConcern := .Values.shardedCluster.initialization.defaultReadConcern }}
+      {{- if or (ne $writeConcern "majority") $readConcern }}
+      log_shard "Setting cluster-wide read/write concern (write: {{ $writeConcern | default "majority" }}, read: {{ $readConcern | default "local" }})"
       {{- if $.Values.auth.enabled }}
-      result=$(mongosh --host $mongosHost --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --quiet --eval "
+      result=$(mongosh --host $mongosHost --username $MONGO_INITDB_ROOT_USERNAME --password $MONGO_INITDB_ROOT_PASSWORD --quiet --eval '
       {{- else }}
-      result=$(mongosh --host $mongosHost --quiet --eval "
+      result=$(mongosh --host $mongosHost --quiet --eval '
       {{- end }}
         db.adminCommand({
           setDefaultRWConcern: 1,
-          defaultWriteConcern: { w: {{ $writeConcern }} }
+          {{- if ne $writeConcern "majority" }}
+          defaultWriteConcern: { w: {{ $writeConcern | quote }} }{{- if $readConcern }},{{- end }}
+          {{- end }}
+          {{- if $readConcern }}
+          defaultReadConcern: { level: {{ $readConcern | quote }} }
+          {{- end }}
         });
-      " 2>&1 || echo "ERROR")
+      ' 2>&1 || echo "ERROR")
 
       if echo "$result" | grep -q "ERROR"; then
-        log_shard "ERROR: Failed to set write concern to w:{{ $writeConcern }}: $result"
+        log_shard "ERROR: Failed to set read/write concern: $result"
         log_shard "Cannot proceed with adding shards - see warning above for solutions"
         exit 1
       else
-        log_shard "Cluster-wide write concern set to w:{{ $writeConcern }} successfully"
+        log_shard "Cluster-wide read/write concern set successfully"
       fi
       {{- else }}
-      log_shard "Using default write concern: majority (no custom write concern configured)"
+      log_shard "Using default concerns: write=majority, read=local (no custom concerns configured)"
       {{- end }}
 
       # Add each shard to the cluster

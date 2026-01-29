@@ -116,6 +116,12 @@ spec:
             {{- if .Values.performance.maxIncomingConnections }}
             - --maxConns={{ .Values.performance.maxIncomingConnections }}
             {{- end }}
+            {{- if .Values.setParameter.enableLocalhostAuthBypass }}
+            - --setParameter=enableLocalhostAuthBypass={{ .Values.setParameter.enableLocalhostAuthBypass }}
+            {{- end }}
+            {{- if .Values.setParameter.enableFlowControl }}
+            - --setParameter=enableFlowControl={{ .Values.setParameter.enableFlowControl }}
+            {{- end }}
           ports:
             - name: mongodb
               containerPort: 27017

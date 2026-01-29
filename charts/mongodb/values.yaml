@@ -115,6 +115,8 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
 resources:
@@ -459,12 +461,18 @@ replicaSet:
     initDelay: 5
     ## @param replicaSet.disableTelemetry If true, mongosh telemetry is disabled (see https://www.mongodb.com/docs/mongodb-shell/telemetry)
     disableTelemetry: false
+    ## @param replicaSet.extraInit.defaultReadConcern Default read concern for the replica set (empty = MongoDB default: local)
+    ## Options: local, available, majority, linearizable, snapshot
+    defaultReadConcern: ""
+    ## @param replicaSet.extraInit.defaultWriteConcern Default write concern for the replica set (empty = MongoDB default: 1)
+    ## Options: 1, majority, or custom write concern
+    defaultWriteConcern: ""
   ## @param replicaSet.shutdown Internal shutdown configuration
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
 
-## @section Common MongoDB parameters (applies to all sharded cluster components)
+## @section Common MongoDB parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
 common:
   ## @param common.mongodbDirectoryPerDB Enable MongoDB directoryPerDB option
   mongodbDirectoryPerDB: true
@@ -473,17 +481,21 @@ common:
   ## @param common.mongodbExtraFlags Additional MongoDB command line flags
   mongodbExtraFlags: []
 
-## @section Performance tuning parameters (optional performance optimizations)
+## @section MongoDB engine parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
 performance:
   ## @param performance.wiredTigerCacheSizeGB WiredTiger cache size in GB (empty = MongoDB default: 50% of RAM - 1GB)
   wiredTigerCacheSizeGB: ""
-  ## @param performance.oplogSizeMB Oplog size in MB for replica sets (empty = MongoDB default based on disk size)
+  ## @param performance.oplogSizeMB Oplog size in MB for replica sets and sharded clusters (empty = MongoDB default based on disk size)
   oplogSizeMB: ""
   ## @param performance.maxIncomingConnections Maximum number of simultaneous connections (empty = MongoDB default: 65536)
   maxIncomingConnections: ""
-  ## @param performance.readConcern Default read concern level (empty = MongoDB default: local)
-  ## Options: local, available, majority, linearizable, snapshot
-  readConcern: ""
+
+## @section MongoDB setParameter options (advanced server parameters via --setParameter flag)
+setParameter:
+  ## @param setParameter.enableLocalhostAuthBypass Allow connections from localhost without authentication during initial setup (empty = MongoDB default: true)
+  enableLocalhostAuthBypass: ""
+  ## @param setParameter.enableFlowControl Enable flow control to prevent secondaries from falling too far behind (empty = MongoDB default: true for replica sets)
+  enableFlowControl: ""
 
 ## @section Sharded Cluster parameters
 shardedCluster:
@@ -644,6 +656,9 @@ shardedCluster:
     retries: 30
     ## @param shardedCluster.initialization.delay Seconds to wait between initialization retries
     delay: 5
+    ## @param shardedCluster.initialization.defaultReadConcern Cluster-wide default read concern (empty = MongoDB default: local)
+    ## Options: local, available, majority, linearizable, snapshot
+    defaultReadConcern: ""
     ## @param shardedCluster.initialization.defaultWriteConcern Cluster-wide default write concern (default: "majority")
     defaultWriteConcern: "majority"
 
