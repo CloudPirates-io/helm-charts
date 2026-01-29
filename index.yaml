@@ -18,6 +18,54 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 1.0.1
+    created: "2026-01-29T09:16:16.208317436Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.15.3
+    description: Client agent for the CloudPirates Managed Observability Platform
+      to connect your Kubernetes cluster to our infrastructure
+    digest: adfd71e5530c6ac3ad9e936f2b5f4a3aee1a82b7e5ce7eaed2a53a3b227f0844
+    home: https://www.cloudpirates.io
+    icon: https://a.storyblok.com/f/143071/512x512/88dc07809a/cluster-pirate-logo.svg
+    keywords:
+    - kubernetes
+    - clusterpirate
+    - cloudpirates
+    - observability
+    - agent
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: clusterpirate
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/clusterpirate-1.2.16/clusterpirate-1.2.16.tgz
+    version: 1.2.16
+  - annotations:
+      artifacthub.io/category: monitoring-logging
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "Chart updated"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.0.1
     created: "2026-01-28T13:56:53.56149754Z"
     dependencies:
     - name: common
@@ -27286,4 +27334,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-29T08:51:27.280876544Z"
+generated: "2026-01-29T09:16:16.209172682Z"
