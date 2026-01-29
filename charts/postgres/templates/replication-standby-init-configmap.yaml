@@ -15,17 +15,22 @@ data:
     #!/bin/bash
     set -e
 
+    if [ -z "${REPLICATION_USER}" ] || [ -z "${REPLICATION_PASSWORD}" ]; then
+      echo "⛔️ No credentials configured. Aborting"
+      exit 1
+    fi
+
     primary_host="{{ tpl .Values.replication.primary.host . }}"
     primary_port="{{ .Values.replication.primary.port }}"
     pgpass_file="{{ include "postgres.runDir" . }}/replication.pgpass"
 
-    # We need to mask ':' in this file
+    # We need to mask ':' in this file, interpreter must be bash
     echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER//:/\\:}:${REPLICATION_PASSWORD//:/\\:}" > "${pgpass_file}"
     chmod 600 "${pgpass_file}"
     echo "✅ ${pgpass_file} created"
 
     if [ -d "${PGDATA}" ]; then
-      echo "${PGDATA} already exists, skipping standby initialization..."
+      echo "⚠️ ${PGDATA} already exists. Skipping standby initialization"
       exit 0
     fi
 

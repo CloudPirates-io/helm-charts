@@ -229,10 +229,8 @@ For standard images <18, use traditional PGDATA
   {{- if .Values.replication.auth.existingSecret }}
   valueFrom:
     secretKeyRef:
-      {{ if .Values.replication.auth.secretKeys.password }}
       name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
-      key: {{ tpl .Values.replication.auth.secretKeys.password . | quote }}
-      {{- end }}
+      key: {{ .Values.replication.auth.secretKeys.password }}
   {{- else }}
   value: {{ tpl .Values.replication.auth.password . | quote }}
   {{- end }}

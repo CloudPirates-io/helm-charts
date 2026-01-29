@@ -43,6 +43,11 @@ data:
     #!/bin/sh
     set -e
 
+    if [ -z "${REPLICATION_USER}" ] || [ -z "${REPLICATION_PASSWORD}" ]; then
+      echo "⛔️ No credentials configured. Aborting"
+      exit 1
+    fi
+
     PGUSER="${POSTGRES_USER}" psql -v ON_ERROR_STOP=1 -v REPL_USER="${REPLICATION_USER}" -v REPL_PASS="${REPLICATION_PASSWORD}" <<'EOSQL'
       SELECT quote_ident(:'REPL_USER') AS user \gset
       SELECT quote_literal(:'REPL_PASS') AS pass \gset

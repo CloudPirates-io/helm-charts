@@ -1,6 +1,6 @@
 suite: test replication user
 templates:
-  - initialization-configmap.yaml
+  - init-scripts-configmap.yaml
 
 tests:
   - it: primary setup should create replication user
@@ -53,9 +53,23 @@ tests:
     set:
       replication:
         enabled: true
+        auth:
+          password: "geheim"
     asserts:
       - notExists:
           path: spec.template.spec.initContainers[0].name
+      - equal:
+          path: spec.template.spec.containers[0].env[3].name
+          value: REPLICATION_USER
+      - equal:
+          path: spec.template.spec.containers[0].env[3].value
+          value: replication
+      - equal:
+          path: spec.template.spec.containers[0].env[4].name
+          value: REPLICATION_PASSWORD
+      - equal:
+          path: spec.template.spec.containers[0].env[4].value
+          value: "geheim"
 
   - it: standby setup should have init container
     set:
@@ -65,7 +79,7 @@ tests:
           username: "{{ .Release.Name }}-my-repl"
           existingSecret: "{{ .Release.Name }}-repl-secret"
           secretKeys:
-            password: "{{ .Release.Name }}-passwordKey"
+            password: "passwordKey"
         primary:
           host: "prim-host"
           port: 815
@@ -87,7 +101,7 @@ tests:
           value: RELEASE-NAME-repl-secret
       - equal:
           path: spec.template.spec.initContainers[0].env[2].valueFrom.secretKeyRef.key
-          value: RELEASE-NAME-passwordKey
+          value: passwordKey
 ---
 suite: test replication config
 templates:

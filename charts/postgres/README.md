@@ -504,8 +504,6 @@ curl http://localhost:9187/metrics
 
 Replication setup only works for instances without an initialized database and `$PGDATA` directory.
 
-**Important**: The default setup uses a very weak password for replication. You MUST change it - see replication configuration reference for details.
-
 #### Primary setup
 
 This will create a replication user as init script. If you want to set up replication for an already initialized database, you need to create this user afterwards on your own.
@@ -513,6 +511,8 @@ This will create a replication user as init script. If you want to set up replic
 ```yaml
 replication:
   enabled: true
+  auth:
+    password: "secret"
 ```
 
 #### Standby setup
@@ -526,6 +526,8 @@ This will also create an `initContainer` name `replication-standby-init`, which:
 ```yaml
 replication:
   enabled: true
+  auth:
+    password: "secret"  # Password must match primary
   primary:
     host: "your-database.namespace.svc.cluster.local"
 ```

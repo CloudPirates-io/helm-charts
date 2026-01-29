@@ -401,8 +401,8 @@ replication:
   auth:
     # -- Username for replication user
     username: "replication"
-    # -- Password for replication user
-    password: "secret"
+    # -- Password for replication user (cannot be empty)
+    password: ""
     # -- Use existing secret reference instead of password
     existingSecret: ""
     # -- Keys configuration for .existingSecret
