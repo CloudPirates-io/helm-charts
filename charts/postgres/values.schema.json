@@ -60,6 +60,34 @@
                 "pgHbaConfig": {
                     "type": "string"
                 },
+                "postgresql": {
+                    "type": "object",
+                    "properties": {
+                        "locale": {
+                            "type": "string"
+                        },
+                        "timezone": {
+                            "type": "string"
+                        },
+                        "wal": {
+                            "type": "object",
+                            "properties": {
+                                "buffers": {
+                                    "type": "string"
+                                },
+                                "keepSize": {
+                                    "type": "integer"
+                                },
+                                "level": {
+                                    "type": "string"
+                                },
+                                "maxSenders": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
                 "postgresqlCheckpointCompletionTarget": {
                     "type": "string"
                 },
@@ -178,6 +206,9 @@
         "global": {
             "type": "object",
             "properties": {
+                "enableServiceLinks": {
+                    "type": "boolean"
+                },
                 "imagePullSecrets": {
                     "type": "array"
                 },
@@ -465,6 +496,58 @@
         },
         "replicaCount": {
             "type": "integer"
+        },
+        "replication": {
+            "type": "object",
+            "properties": {
+                "allowFrom": {
+                    "type": "object",
+                    "properties": {
+                        "ipv4": {
+                            "type": "string"
+                        },
+                        "ipv6": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        },
+                        "secretKeys": {
+                            "type": "object",
+                            "properties": {
+                                "password": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "username": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "primary": {
+                    "type": "object",
+                    "properties": {
+                        "host": {
+                            "type": "string"
+                        },
+                        "port": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
         },
         "resources": {
             "type": "object"
