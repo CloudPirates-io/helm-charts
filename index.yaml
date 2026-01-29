@@ -23779,6 +23779,58 @@ entries:
         url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
       license: Apache-2.0
     apiVersion: v2
+    appVersion: 2.25.0
+    created: "2026-01-29T11:37:04.764383994Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
+    digest: e4cc66dc5eaa3e7e31e4b0091c7ba1c8c5b0f8a988d2b6c8474588acdcc30586
+    home: https://www.timescale.com
+    icon: https://a.storyblok.com/f/143071/512x512/b2e01452ce/timescaledb-logo.svg
+    keywords:
+    - timescaledb
+    - timeseries
+    - postgresql
+    - database
+    - sql
+    - analytics
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: timescaledb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/timescaledb
+    - https://github.com/timescale/timescaledb
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/timescaledb-0.9.0/timescaledb-0.9.0.tgz
+    version: 0.9.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846)"
+              links:
+                - name: "Commit 17e0af0"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/17e0af0"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: TimescaleDB
+          url: https://www.timescale.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/timescaledb
+        - name: Application
+          url: https://github.com/timescale/timescaledb
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
     appVersion: 2.24.0
     created: "2026-01-28T13:56:56.334979051Z"
     dependencies:
@@ -27334,4 +27386,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-29T09:16:16.209172682Z"
+generated: "2026-01-29T11:37:04.765290132Z"
