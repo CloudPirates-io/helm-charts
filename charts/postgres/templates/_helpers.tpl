@@ -221,3 +221,19 @@ For standard images <18, use traditional PGDATA
 {{- printf "/var/lib/postgresql/data/pgdata" -}}
 {{- end -}}
 {{- end }}
+
+{{- define "postgres.replicationEnv" -}}
+- name: REPLICATION_USER
+  value: {{ tpl .Values.replication.auth.username . | quote }}
+- name: REPLICATION_PASSWORD
+  {{- if .Values.replication.auth.existingSecret }}
+  valueFrom:
+    secretKeyRef:
+      {{ if .Values.replication.auth.secretKeys.password }}
+      name: {{ tpl .Values.replication.auth.existingSecret . | quote }}
+      key: {{ tpl .Values.replication.auth.secretKeys.password . | quote }}
+      {{- end }}
+  {{- else }}
+  value: {{ tpl .Values.replication.auth.password . | quote }}
+  {{- end }}
+{{- end }}

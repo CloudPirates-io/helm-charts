@@ -38,11 +38,34 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.initContainers }}
       initContainers:
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication-standby-init
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "postgres.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          env:
+            - name: PGDATA
+              value: {{ include "postgres.pgdataPath" . }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
+          volumeMounts:
+            - name: {{ .Values.persistence.volumeName }}
+              mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+            - name: run
+              mountPath: {{ include "postgres.runDir" . }}
+            - name: replication
+              mountPath: /replication-scripts
+          command:
+            - /replication-scripts/replication-standby-init.sh
+        {{- end }}
+        {{- if .Values.initContainers }}
         {{- toYaml .Values.initContainers | nindent 8 }}
-      {{- end }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      enableServiceLinks: {{ .Values.global.enableServiceLinks }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -142,6 +165,9 @@ spec:
                   {{- end }}
                   key: {{ tpl .Values.customUser.secretKeys.password . | quote }}
             {{- end }}
+          {{- if .Values.replication.enabled }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
+          {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
             - secretRef:
@@ -289,6 +315,12 @@ spec:
         - name: wrapper-script
           configMap:
             name: {{ printf "%s-wrapper" (include "postgres.fullname" .) }}
+            defaultMode: 0755
+        {{- end }}
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication
+          configMap:
+            name: {{ printf "%s-replication" (include "postgres.fullname" .) }}
             defaultMode: 0755
         {{- end }}
         {{- if .Values.extraVolumes }}

@@ -24,11 +24,16 @@ data:
     host    all             all             127.0.0.1/32            trust
     # IPv6 local connections:
     host    all             all             ::1/128                 trust
-    # Allow replication connections from localhost, by a user with the
-    # replication privilege.
-    local   replication     all                                     trust
-    host    replication     all             127.0.0.1/32            trust
-    host    replication     all             ::1/128                 trust
+
+    {{- if and .Values.replication.enabled (not .Values.replication.primary.host) }}
+    # Replication
+    {{- if .Values.replication.allowFrom.ipv4 }}
+    host   replication     {{ .Values.replication.auth.username }}  {{ .Values.replication.allowFrom.ipv4 }} md5
+    {{- end }}
+    {{- if .Values.replication.allowFrom.ipv6 }}
+    host   replication     {{ .Values.replication.auth.username }}  {{ .Values.replication.allowFrom.ipv6 }} md5
+    {{- end }}
+    {{- end }}
 
     # Allow connections from any host with password authentication
     host    all             all             all                     md5
@@ -68,14 +73,7 @@ data:
     {{- else }}
     maintenance_work_mem = 64MB
     {{- end }}
-    
-    # WAL Settings
-    {{- if .Values.config.postgresqlWalBuffers }}
-    wal_buffers = {{ .Values.config.postgresqlWalBuffers }}
-    {{- else }}
-    wal_buffers = 16MB
-    {{- end }}
-    
+
     # Checkpoint Settings
     {{- if .Values.config.postgresqlCheckpointCompletionTarget }}
     checkpoint_completion_target = {{ .Values.config.postgresqlCheckpointCompletionTarget }}
@@ -115,15 +113,32 @@ data:
     
     # Locale and Formatting
     datestyle = 'iso, mdy'
-    timezone = 'UTC'
-    lc_messages = 'en_US.utf8'
-    lc_monetary = 'en_US.utf8'
-    lc_numeric = 'en_US.utf8'
-    lc_time = 'en_US.utf8'
+    timezone = '{{ .Values.config.postgresql.timezone }}'
+    lc_messages = '{{ .Values.config.postgresql.locale }}'
+    lc_monetary = '{{ .Values.config.postgresql.locale }}'
+    lc_numeric = '{{ .Values.config.postgresql.locale }}'
+    lc_time = '{{ .Values.config.postgresql.locale }}'
     default_text_search_config = 'pg_catalog.english'
     
     # Set pg_hba.conf file to use
     hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
+
+    # WAL Settings
+    wal_buffers = {{ ternary .Values.config.postgresqlWalBuffers .Values.config.postgresql.wal.buffers (ne .Values.config.postgresqlWalBuffers "") }}
+    wal_level = {{ .Values.config.postgresql.wal.level }}
+
+    {{- if .Values.replication.enabled }}
+    {{- if not .Values.replication.primary.host }}
+
+    # Replication primary configuration
+    max_wal_senders = {{ .Values.config.postgresql.wal.maxSenders }}
+    wal_keep_size = {{ .Values.config.postgresql.wal.keepSize }}
+    {{- else }}
+
+    # Replication standby configuration
+    primary_conninfo = 'host={{ tpl .Values.replication.primary.host . }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile={{ include "postgres.runDir" . }}/replication.pgpass'
+    {{- end }}
+    {{- end }}
 
     # Additional Configuration
     {{- range .Values.config.extraConfig }}
