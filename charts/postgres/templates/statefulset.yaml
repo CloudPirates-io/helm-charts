@@ -74,10 +74,6 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           {{- if .Values.command }}
           command: {{- toYaml .Values.command | nindent 12 }}
-          {{- else if $shouldMountInitScripts }}
-          command:
-            - /bin/bash
-            - /scripts/postgres-wrapper.sh
           {{- end }}
           {{- if kindIs "invalid" .Values.args }}
           args:
@@ -239,8 +235,6 @@ spec:
             {{- if $shouldMountInitScripts }}
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
-            - name: wrapper-script
-              mountPath: /scripts
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -312,10 +306,6 @@ spec:
         - name: custom-init-scripts
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
-            defaultMode: 0755
-        - name: wrapper-script
-          configMap:
-            name: {{ printf "%s-wrapper" (include "postgres.fullname" .) }}
             defaultMode: 0755
         {{- end }}
         {{- if and .Values.replication.enabled .Values.replication.primary.host }}
