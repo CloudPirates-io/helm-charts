@@ -70,6 +70,9 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].env[4].value
           value: "geheim"
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[4].name
+          value: custom-init-scripts
 
   - it: standby setup should have init container
     set:

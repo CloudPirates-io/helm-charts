@@ -235,7 +235,7 @@ spec:
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
               mountPath: /tmp
-            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+            {{- if or .Values.initdb.scriptsConfigMap (and .Values.replication.enabled (not .Values.replication.primary.host)) .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
             - name: wrapper-script
