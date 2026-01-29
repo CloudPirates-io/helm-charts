@@ -1,6 +1,46 @@
 # Changelog
 
 
+## 0.13.0 (2026-01-21)
+
+* Add possibility to configure topologySpreadConstraints (#875) ([8fd1775](https://github.com/CloudPirates-io/helm-charts/commit/8fd1775))
+* chore: update CHANGELOG.md for merged changes ([598fe58](https://github.com/CloudPirates-io/helm-charts/commit/598fe58))
+* chore: update CHANGELOG.md for merged changes ([b9e44ca](https://github.com/CloudPirates-io/helm-charts/commit/b9e44ca))
+* chore: update CHANGELOG.md for merged changes ([3209322](https://github.com/CloudPirates-io/helm-charts/commit/3209322))
+
+## 0.12.1 (2026-01-19)
+
+* Update charts/mariadb/values.yaml mariadb (#853) ([238c925](https://github.com/CloudPirates-io/helm-charts/commit/238c925))
+* chore: update CHANGELOG.md for merged changes ([2ea9011](https://github.com/CloudPirates-io/helm-charts/commit/2ea9011))
+* chore: update CHANGELOG.md for merged changes ([4704279](https://github.com/CloudPirates-io/helm-charts/commit/4704279))
+* chore: update CHANGELOG.md for merged changes ([93d6d29](https://github.com/CloudPirates-io/helm-charts/commit/93d6d29))
+
+## 0.12.0 (2026-01-15)
+
+* [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
+* chore: update CHANGELOG.md for merged changes ([b3cbfb0](https://github.com/CloudPirates-io/helm-charts/commit/b3cbfb0))
+
+## 0.11.0 (2026-01-15)
+
+*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+
+## 0.10.1 (2025-12-15)
+
+* chore: update CHANGELOG.md for merged changes ([8ebdaee](https://github.com/CloudPirates-io/helm-charts/commit/8ebdaee))
+* chore: update CHANGELOG.md for merged changes ([57e2dd6](https://github.com/CloudPirates-io/helm-charts/commit/57e2dd6))
+* mariadb: dont enable metrics-exporter by default (#748) ([6e3d667](https://github.com/CloudPirates-io/helm-charts/commit/6e3d667))
+* chore: update CHANGELOG.md for merged changes ([0ec9dd4](https://github.com/CloudPirates-io/helm-charts/commit/0ec9dd4))
+* chore: update CHANGELOG.md for merged changes ([c0cad09](https://github.com/CloudPirates-io/helm-charts/commit/c0cad09))
+* chore: auto-generate values.schema.json (#740) ([f98c3e4](https://github.com/CloudPirates-io/helm-charts/commit/f98c3e4))
+
+## 0.10.0 (2025-12-12)
+
+* chore: update CHANGELOG.md for merged changes ([ed8335f](https://github.com/CloudPirates-io/helm-charts/commit/ed8335f))
+* chore: update CHANGELOG.md for merged changes ([073f370](https://github.com/CloudPirates-io/helm-charts/commit/073f370))
+* add metrics-exporter (#720) ([29c2378](https://github.com/CloudPirates-io/helm-charts/commit/29c2378))
+* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
+* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+
 ## 0.9.0 (2025-12-06)
 
 

@@ -1,6 +1,27 @@
 # Changelog
 
 
+## 0.5.3 (2026-01-08)
+
+* chore: update CHANGELOG.md for merged changes ([53c3b06](https://github.com/CloudPirates-io/helm-charts/commit/53c3b06))
+* chore: auto-generate values.schema.json (#814) ([9920972](https://github.com/CloudPirates-io/helm-charts/commit/9920972))
+* chore: update CHANGELOG.md for merged changes ([281856f](https://github.com/CloudPirates-io/helm-charts/commit/281856f))
+* [nginx]: custom securityContext for initiContainers #765 ([dadbdb7](https://github.com/CloudPirates-io/helm-charts/commit/dadbdb7))
+
+## 0.5.2 (2025-12-22)
+
+* chore: update CHANGELOG.md for merged changes ([ddfd971](https://github.com/CloudPirates-io/helm-charts/commit/ddfd971))
+* chore: update CHANGELOG.md for merged changes ([d48ff1b](https://github.com/CloudPirates-io/helm-charts/commit/d48ff1b))
+* Update charts/nginx/values.yaml nginx (#746) ([d433040](https://github.com/CloudPirates-io/helm-charts/commit/d433040))
+
+## 0.5.1 (2025-12-10)
+
+* chore: update CHANGELOG.md for merged changes ([369bcaf](https://github.com/CloudPirates-io/helm-charts/commit/369bcaf))
+* chore: update CHANGELOG.md for merged changes ([9e98116](https://github.com/CloudPirates-io/helm-charts/commit/9e98116))
+* Update charts/nginx/values.yaml nginx to v1.29.4 (patch) (#718) ([48d2f15](https://github.com/CloudPirates-io/helm-charts/commit/48d2f15))
+* chore: update CHANGELOG.md for merged changes ([0552f92](https://github.com/CloudPirates-io/helm-charts/commit/0552f92))
+* chore: auto-generate values.schema.json (#665) ([ae1ac5a](https://github.com/CloudPirates-io/helm-charts/commit/ae1ac5a))
+
 ## 0.5.0 (2025-11-26)
 
 * chore: update CHANGELOG.md for merged changes ([1050496](https://github.com/CloudPirates-io/helm-charts/commit/1050496))

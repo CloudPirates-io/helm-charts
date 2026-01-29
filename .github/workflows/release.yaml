@@ -16,10 +16,6 @@ on:
         required: false
         type: string
 
-concurrency:
-  group: release
-  cancel-in-progress: true
-
 jobs:
   release:
     permissions:
@@ -29,14 +25,26 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          # Store the key file path for later steps
+          echo "SIGN_KEY_FILE=$SIGN_KEY_FILE" >> $GITHUB_ENV
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
       - name: Login to Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
@@ -51,6 +59,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
       - name: Update chart dependencies
         run: |
@@ -68,11 +81,75 @@ jobs:
             fi
           done
 
+      - name: Detect changed charts
+        id: detect-changed-charts
+        run: |
+          set -euo pipefail
+
+          echo "Detecting charts that actually need to be released..."
+
+          CHANGED_CHARTS=""
+
+          for chart_dir in charts/*; do
+            if [ ! -f "$chart_dir/Chart.yaml" ]; then
+              echo "Skipping $chart_dir (no Chart.yaml)"
+              continue
+            fi
+
+            CHART_NAME=$(basename "$chart_dir")
+            CHART_VERSION=$(yq eval '.version' "$chart_dir/Chart.yaml")
+
+            # Check if this specific chart version already has a tag/release
+            if git tag -l | grep -q "^${CHART_NAME}-${CHART_VERSION}$"; then
+              echo "✓ $CHART_NAME-$CHART_VERSION already released, skipping"
+              continue
+            fi
+
+            # Check if there are actual changes to this chart since its last release
+            LAST_CHART_TAG=$(git tag -l "${CHART_NAME}-*" | sort -V | tail -1)
+
+            if [ -n "$LAST_CHART_TAG" ]; then
+              # Check if there are changes to this chart since its last tag
+              CHART_CHANGES=$(git diff --name-only "$LAST_CHART_TAG" HEAD -- "$chart_dir/" 2>/dev/null || echo "")
+              if [ -z "$CHART_CHANGES" ]; then
+                echo "✓ $CHART_NAME: No changes since $LAST_CHART_TAG, skipping"
+                continue
+              else
+                echo "📦 $CHART_NAME: Changes detected since $LAST_CHART_TAG"
+                echo "   Changed files: $CHART_CHANGES"
+              fi
+            else
+              echo "🆕 $CHART_NAME: New chart (no previous tags)"
+            fi
+
+            # Add to changed charts list
+            if [ -z "$CHANGED_CHARTS" ]; then
+              CHANGED_CHARTS="$CHART_NAME"
+            else
+              CHANGED_CHARTS="$CHANGED_CHARTS,$CHART_NAME"
+            fi
+
+            echo "🚀 Will release: $CHART_NAME-$CHART_VERSION"
+          done
+
+          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
+
+          if [ -n "$CHANGED_CHARTS" ]; then
+            echo "📋 Summary: Will release charts: $CHANGED_CHARTS"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "📋 Summary: No charts need to be released"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run chart-releaser
         id: chart-releaser
+        if: ${{ steps.detect-changed-charts.outputs.has_changes == 'true' }}
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           skip_existing: true
+          charts_dir: charts
+          charts_repo_url: https://charts.cloudpirates.io
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -102,7 +179,7 @@ jobs:
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3.10.0
-        if: ${{ steps.chart-releaser.outputs.changed_charts || github.event.inputs.chart != '' }}
+        if: ${{ steps.detect-changed-charts.outputs.has_changes == 'true' || github.event.inputs.chart != '' }}
 
       - id: github-repo-owner-name
         uses: ASzc/change-string-case-action@d0603cd0a7dd490be678164909f65c7737470a7f # v6
@@ -111,7 +188,7 @@ jobs:
 
       - name: Upload charts to OCI registries
         id: upload
-        if: ${{ steps.chart-releaser.outputs.changed_charts || github.event.inputs.chart != '' }}
+        if: ${{ steps.detect-changed-charts.outputs.has_changes == 'true' || github.event.inputs.chart != '' }}
         env:
           COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
@@ -122,9 +199,10 @@ jobs:
           # Determine which charts to release
           if [ -n "${{ github.event.inputs.chart }}" ]; then
             echo "Manual chart specified: ${{ github.event.inputs.chart }}"
-            CHANGED_CHARTS="${{ github.event.inputs.chart }}"
+            MANUAL_CHART="${{ github.event.inputs.chart }}"
+            CHANGED_CHARTS=$(basename "$MANUAL_CHART")
           else
-            CHANGED_CHARTS="${{ steps.chart-releaser.outputs.changed_charts }}"
+            CHANGED_CHARTS="${{ steps.detect-changed-charts.outputs.changed_charts }}"
           fi
 
 
@@ -156,9 +234,9 @@ jobs:
           retry helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
 
           RELEASED_CHARTS=""
-          for chart_directory in ${CHANGED_CHARTS//,/ }; do
-            CHART_NAME=${chart_directory#charts/}
-            cd $chart_directory
+          for CHART_NAME in ${CHANGED_CHARTS//,/ }; do
+            chart_directory="charts/$CHART_NAME"
+            cd "$chart_directory"
 
             CHART_VERSION=$(yq eval '.version' "Chart.yaml")
             APP_VERSION=$(yq eval '.appVersion' "Chart.yaml")
@@ -189,3 +267,11 @@ jobs:
           echo "### 📍 Registries" >> $GITHUB_STEP_SUMMARY
           echo "- Primary: \`${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- GHCR: \`ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup signing key
+        if: always()
+        run: |
+          if [ -n "$SIGN_KEY_FILE" ] && [ -f "$SIGN_KEY_FILE" ]; then
+            rm -f "$SIGN_KEY_FILE"
+            echo "Signing key cleaned up"
+          fi

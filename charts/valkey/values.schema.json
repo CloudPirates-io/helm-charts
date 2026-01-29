@@ -49,6 +49,9 @@
                 "maxMemoryPolicy": {
                     "type": "string"
                 },
+                "mountPath": {
+                    "type": "string"
+                },
                 "save": {
                     "type": "string"
                 }
@@ -320,6 +323,12 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "existingClaim": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object"
+                },
                 "size": {
                     "type": "string"
                 },
@@ -341,6 +350,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",
@@ -392,9 +404,20 @@
                 }
             }
         },
+        "revisionHistoryLimit": {
+            "type": "integer"
+        },
         "sentinel": {
             "type": "object",
             "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "announceHostnames": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },
@@ -411,6 +434,9 @@
                     "type": "object",
                     "properties": {
                         "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
                             "type": "string"
                         },
                         "repository": {

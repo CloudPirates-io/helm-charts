@@ -28,6 +28,13 @@ $ helm install my-rabbitmq ./charts/rabbitmq
 
 The command deploys RabbitMQ on the Kubernetes cluster in the default configuration. The [Configuration](#configuration) section lists the parameters that can be configured during installation.
 
+## Upgrading the Chart
+
+For HA setups the erlang-cookie is used to join nodes to the cluster. If no erlang-cookie is set, a random one is generated with each chart update and restarted pods wont be able to rejoin the cluster with the new erlang-cookie.
+
+For existing installations this can be fixed after an update by getting the current erlang-cookie from the ENV-Vars, inside the still running old pods and replacing the newly generated erlang-cookie in the k8s secret with the old one.
+
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `my-rabbitmq` deployment:
@@ -110,10 +117,11 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Deployment configuration
 
-| Parameter             | Description                                                                                        | Default        |
-| --------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
-| `replicaCount`        | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
-| `podManagementPolicy` | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| Parameter              | Description                                                                                        | Default        |
+| ---------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
+| `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
+| `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
 
 ### StatefulSet & Pod metadata
 
@@ -144,18 +152,56 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `definitions.topic_permissions`    | Array of RabbitMQ topic permissions to create.                                                                                               | `[]`        |
 | `definitions.policies`             | Array of RabbitMQ policies to create.                                                                                                        | `[]`        |
 
+#### Automatic Configuration Reloading
+
+The chart supports automatic reloading of definitions when the ConfigMap or Secret changes, without requiring a pod restart or Helm upgrade.
+
+| Parameter                                 | Description                                                    | Default           |
+| ----------------------------------------- | -------------------------------------------------------------- | ----------------- |
+| `definitions.autoReload.enabled`          | Enable sidecar container to watch for ConfigMap/Secret changes | `false`           |
+| `definitions.autoReload.image.registry`   | Container image registry for the config watcher sidecar        | `docker.io`       |
+| `definitions.autoReload.image.repository` | Container image repository for the config watcher sidecar      | `curlimages/curl` |
+| `definitions.autoReload.image.tag`        | Container image tag for the config watcher sidecar             | `8.11.1`          |
+| `definitions.autoReload.image.pullPolicy` | Container image pull policy for the config watcher sidecar     | `IfNotPresent`    |
+| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | See values.yaml   |
+
+**How it works:**
+
+When enabled, a lightweight sidecar container runs alongside RabbitMQ and:
+1. Monitors the definitions file for changes (using checksum comparison)
+2. Automatically reloads definitions via RabbitMQ Management API when changes are detected
+3. Checks for changes every 10 seconds
+
+**Example:**
+
+```yaml
+definitions:
+  enabled: true
+  existingConfigMap: my-rabbitmq-definitions
+  autoReload:
+    enabled: true
+```
+
+After deployment, you can update your ConfigMap:
+```bash
+kubectl edit configmap my-rabbitmq-definitions -n <namespace>
+# The sidecar will automatically detect and reload the new configuration
+```
+
 ### Service configuration
 
-| Parameter                     | Description                                 | Default     |
-| ----------------------------- | ------------------------------------------- | ----------- |
-| `service.type`                | Kubernetes service type                     | `ClusterIP` |
-| `service.amqpPort`            | RabbitMQ AMQP service port                  | `5672`      |
-| `service.managementPort`      | RabbitMQ management UI port                 | `15672`     |
-| `service.epmdPort`            | RabbitMQ EPMD port                          | `4369`      |
-| `service.distPort`            | RabbitMQ distribution port                  | `25672`     |
-| `service.annotations`         | Kubernetes service annotations              | `{}`        |
-| `service.annotationsHeadless` | Kubernetes service annotationsHeadless      | `25672`     |
-| `service.trafficDistribution` | Traffic distribution policy for the service | `""`        |
+| Parameter                               | Description                                                 | Default     |
+| --------------------------------------- | ----------------------------------------------------------- | ----------- |
+| `service.type`                          | Kubernetes service type                                     | `ClusterIP` |
+| `service.amqpPort`                      | RabbitMQ AMQP service port                                  | `5672`      |
+| `service.managementPort`                | RabbitMQ management UI port                                 | `15672`     |
+| `service.epmdPort`                      | RabbitMQ EPMD port                                          | `4369`      |
+| `service.distPort`                      | RabbitMQ distribution port                                  | `25672`     |
+| `service.annotations`                   | Kubernetes service annotations                              | `{}`        |
+| `service.annotationsHeadless`           | Kubernetes service annotationsHeadless                      | `25672`     |
+| `service.trafficDistribution`           | Traffic distribution policy for the service                 | `""`        |
+| `service.externalTrafficPolicy`         | External Traffic Policy for the service                     | `Cluster`   |
+| `service.allocateLoadBalancerNodePorts` | Whether to allocate NodePorts for service type LoadBalancer | `true`      |
 
 ### RabbitMQ Authentication
 
@@ -201,17 +247,18 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Metrics configuration
 
-| Parameter                              | Description                                                                                                                 | Default |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false` |
-| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692` |
-| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false` |
-| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`    |
-| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`    |
-| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`    |
-| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`   |
-| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`   |
-| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`    |
+| Parameter                              | Description                                                                                                                 | Default    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `metrics.enabled`                      | Enable RabbitMQ metrics (via prometheus plugin)                                                                             | `false`    |
+| `metrics.port`                         | RabbitMQ metrics port                                                                                                       | `15692`    |
+| `metrics.serviceMonitor.enabled`       | Create ServiceMonitor for Prometheus monitoring                                                                             | `false`    |
+| `metrics.serviceMonitor.namespace`     | Namespace for ServiceMonitor                                                                                                | `""`       |
+| `metrics.serviceMonitor.labels`        | Labels for ServiceMonitor                                                                                                   | `{}`       |
+| `metrics.serviceMonitor.annotations`   | Annotations for ServiceMonitor                                                                                              | `{}`       |
+| `metrics.serviceMonitor.interval`      | Scrape interval                                                                                                             | `30s`      |
+| `metrics.serviceMonitor.scrapeTimeout` | Scrape timeout                                                                                                              | `10s`      |
+| `metrics.serviceMonitor.path`          | Select detail of metrics (`/metrics`, `/metrics/detailed` or `/metrics/per-object`)                                         | `/metrics` |
+| `additionalPlugins`                    | Additional RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added) | `[]`       |
 
 ### Persistence
 
@@ -220,6 +267,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `persistence.enabled`       | Enable persistent storage                                                       | `true`              |
 | `persistence.existingClaim` | Name of existing PVC to use (if empty, a new PVC will be created automatically) | `""`                |
 | `persistence.storageClass`  | Storage class to use for persistent volume                                      | `""`                |
+| `persistence.mountPath`     | Set the mountPath for the data Volume                                           | `/var/lib/rabbitmq` |
 | `persistence.accessModes`   | Persistent Volume access modes                                                  | `["ReadWriteOnce"]` |
 | `persistence.size`          | Size of persistent volume                                                       | `8Gi`               |
 | `persistence.labels`        | Labels for persistent volume claims                                             | `{}`                |
@@ -261,6 +309,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`      |
 
 ### Liveness and readiness probes
 
@@ -304,11 +353,12 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### ServiceAccount
 
-| Parameter                    | Description                       | Default |
-| ---------------------------- | --------------------------------- | ------- |
-| `serviceAccount.create`      | Enable creation of ServiceAccount | `true`  |
-| `serviceAccount.name`        | Name of serviceAccount            | `""`    |
-| `serviceAccount.annotations` | Annotations for service account   | `{}`    |
+| Parameter                                     | Description                                              | Default |
+| --------------------------------------------- | -------------------------------------------------------- | ------- |
+| `serviceAccount.create`                       | Enable creation of ServiceAccount                        | `true`  |
+| `serviceAccount.name`                         | Name of serviceAccount                                   | `""`    |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the RabbitMQ pods | `false` |
+| `serviceAccount.annotations`                  | Annotations for service account                          | `{}`    |
 
 ### RBAC parameters
 
@@ -425,6 +475,8 @@ helm install my-rabbitmq ./charts/rabbitmq -f values-production.yaml
 # values-cluster.yaml
 replicaCount: 3
 
+auth:
+  erlangCookie: "somerandomstring" # chart updates will fail in ha cluster setups without this or existingErlangCookieKey
 peerDiscoveryK8sPlugin:
   enabled: true
   useLongname: true
