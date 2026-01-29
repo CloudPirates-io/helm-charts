@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'charts/**/values.yaml'
-  pull_request:
+  pull_request_target:
     paths:
       - 'charts/**/values.yaml'
   workflow_dispatch:
@@ -38,6 +38,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
+          # For pull_request_target, we need to explicitly checkout the PR head
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
           fetch-depth: 0
           token: ${{ secrets.CHANGELOG_PAT }}
 
@@ -101,7 +103,7 @@ jobs:
           else
             echo "Detecting changed charts from git diff"
 
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
+            if [ "${{ github.event_name }}" = "pull_request_target" ]; then
               BASE_REF="${{ github.event.pull_request.base.sha }}"
             else
               BASE_REF="${{ github.event.before }}"
@@ -275,7 +277,7 @@ jobs:
 
       - name: Commit schema updates to PR branch
         if: |
-          github.event_name == 'pull_request' &&
+          github.event_name == 'pull_request_target' &&
           steps.check-changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.CHANGELOG_PAT }}
