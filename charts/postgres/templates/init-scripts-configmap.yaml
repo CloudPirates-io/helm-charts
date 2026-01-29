@@ -1,6 +1,7 @@
 {{- $createCustomUser := and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
 {{- $appendInitdbScripts := and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
-{{- if or $createCustomUser $appendInitdbScripts .Values.replication.enabled }}
+{{- $replicationPrimary := and .Values.replication.enabled (not .Values.replication.primary.host) }}
+{{- if or $createCustomUser $appendInitdbScripts $replicationPrimary }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,7 +39,7 @@ data:
 
     echo "✅ Custom user and database created successfully!"
   {{- end }}
-  {{- if and .Values.replication.enabled (not .Values.replication.primary.host) }}
+  {{- if $replicationPrimary }}
   00-replication-primary-setup.sh: |
     #!/bin/sh
     set -e
@@ -60,12 +61,4 @@ data:
   {{- if $appendInitdbScripts }}
   {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
   {{- end }}
-  zz-mark-init-complete.sh: |
-    #!/bin/sh
-    # This script runs last (zz prefix ensures it runs after all other init scripts)
-    # It creates a semaphore file to indicate that all init scripts completed successfully
-    set -e
-    echo "✅ All initialization scripts completed successfully"
-    touch {{ include "postgres.dataDir" . }}/.init-scripts-completed
-    echo "Created semaphore file: {{ include "postgres.dataDir" . }}/.init-scripts-completed"
 {{- end }}
