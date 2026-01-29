@@ -25,9 +25,8 @@ data:
     # IPv6 local connections:
     host    all             all             ::1/128                 trust
 
-    {{- if .Values.replication.enabled }}
-
-    # Replication primary
+    {{- if and .Values.replication.enabled (not .Values.replication.primary.host) }}
+    # Replication
     {{- if .Values.replication.allowFrom.ipv4 }}
     host   replication     {{ .Values.replication.auth.username }}  {{ .Values.replication.allowFrom.ipv4 }} md5
     {{- end }}

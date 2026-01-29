@@ -1,0 +1,149 @@
+suite: test replication user
+templates:
+  - initialization-configmap.yaml
+
+tests:
+  - it: primary setup should create replication user
+    set:
+      replication:
+        enabled: true
+    asserts:
+      - exists:
+          path: data["00-replication-primary-setup.sh"]
+
+  - it: standby setup should not create replication user
+    set:
+      replication:
+        enabled: true
+        primary:
+          host: "prim-host"
+    asserts:
+      - notExists:
+          path: data["00-replication-primary-setup.sh"]
+---
+suite: test replication init scripts
+templates:
+  - replication-standby-init-configmap.yaml
+
+tests:
+  - it: primary setup should not have replication init script
+    set:
+      replication:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: standby setup should have init script
+    set:
+      replication:
+        enabled: true
+        primary:
+          host: "prim-host"
+    asserts:
+      - hasDocuments:
+          count: 1
+---
+suite: test replication statefulset
+templates:
+  - statefulset.yaml
+
+tests:
+  - it: primary setup should not have init container
+    set:
+      replication:
+        enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers[0].name
+
+  - it: standby setup should have init container
+    set:
+      replication:
+        enabled: true
+        auth:
+          username: "{{ .Release.Name }}-my-repl"
+          existingSecret: "{{ .Release.Name }}-repl-secret"
+          secretKeys:
+            password: "{{ .Release.Name }}-passwordKey"
+        primary:
+          host: "prim-host"
+          port: 815
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: replication-standby-init
+      - equal:
+          path: spec.template.spec.initContainers[0].env[1].name
+          value: REPLICATION_USER
+      - equal:
+          path: spec.template.spec.initContainers[0].env[1].value
+          value: RELEASE-NAME-my-repl
+      - equal:
+          path: spec.template.spec.initContainers[0].env[2].name
+          value: REPLICATION_PASSWORD
+      - equal:
+          path: spec.template.spec.initContainers[0].env[2].valueFrom.secretKeyRef.name
+          value: RELEASE-NAME-repl-secret
+      - equal:
+          path: spec.template.spec.initContainers[0].env[2].valueFrom.secretKeyRef.key
+          value: RELEASE-NAME-passwordKey
+---
+suite: test replication config
+templates:
+  - configmap.yaml
+
+tests:
+  - it: primary config
+    set:
+      config:
+        postgresql:
+          wal:
+            maxSenders: 99
+            buffers: "1M"
+      replication:
+        enabled: true
+        auth:
+          username: "my-repl"
+        allowFrom:
+          ipv4: "localhost"
+          ipv6: "::1"
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_wal_senders = 99"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_buffers = 1M"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_level = replica"
+      - matchRegex:
+          path: data["pg_hba.conf"]
+          pattern: "host\s+replication\s+my-repl\s+localhost"
+      - matchRegex:
+          path: data["pg_hba.conf"]
+          pattern: "host\s+replication\s+my-repl\s+::1"
+      - notMatchRegex:
+          path: data["postgresql.conf"]
+          pattern: "primary_conninfo = 'host=prim-host port=815 user=my-repl passfile=/var/run/postgresql/replication.pgpass'"
+
+  - it: standby config
+    set:
+      replication:
+        enabled: true
+        auth:
+          username: "my-repl"
+        primary:
+          host: "prim-host"
+          port: 815
+    asserts:
+      - notMatchRegex:
+          path: data["pg_hba.conf"]
+          pattern: "host\s+replication\s+my-repl"
+      - notMatchRegex:
+          path: data["pg_hba.conf"]
+          pattern: "host\s+replication\s+my-repl"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "primary_conninfo = 'host=prim-host port=815 user=my-repl passfile=/var/run/postgresql/replication.pgpass'"

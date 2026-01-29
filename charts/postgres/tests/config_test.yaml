@@ -1,0 +1,35 @@
+suite: test config
+templates:
+  - configmap.yaml
+
+tests:
+  - it: config variations
+    set:
+      config:
+        postgresql:
+          timezone: "Uganda"
+          locale: "fr/FR"
+          wal:
+            buffers: "42M"
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "timezone = 'Uganda'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "lc_messages = 'fr/FR'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_buffers = 42M"
+
+  - it: old values should override new values
+    set:
+      config:
+        postgresqlWalBuffers: "oldValue"
+        postgresql:
+          wal:
+            buffers: "42M"
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_buffers = oldValue"
