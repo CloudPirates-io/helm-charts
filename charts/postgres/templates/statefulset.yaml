@@ -1,3 +1,4 @@
+{{ $shouldMountInitScripts := or .Values.initdb.scriptsConfigMap (and .Values.replication.enabled (not .Values.replication.primary.host)) .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -73,7 +74,7 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           {{- if .Values.command }}
           command: {{- toYaml .Values.command | nindent 12 }}
-          {{- else if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+          {{- else if $shouldMountInitScripts }}
           command:
             - /bin/bash
             - /scripts/postgres-wrapper.sh
@@ -235,7 +236,7 @@ spec:
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
               mountPath: /tmp
-            {{- if or .Values.initdb.scriptsConfigMap (and .Values.replication.enabled (not .Values.replication.primary.host)) .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+            {{- if $shouldMountInitScripts }}
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
             - name: wrapper-script
@@ -307,7 +308,7 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+        {{- if $shouldMountInitScripts }}
         - name: custom-init-scripts
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}

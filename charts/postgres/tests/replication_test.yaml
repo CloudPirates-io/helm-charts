@@ -73,6 +73,15 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].volumeMounts[4].name
           value: custom-init-scripts
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[5].name
+          value: wrapper-script
+      - equal:
+          path: spec.template.spec.volumes[3].name
+          value: custom-init-scripts
+      - equal:
+          path: spec.template.spec.volumes[4].name
+          value: wrapper-script
 
   - it: standby setup should have init container
     set:
