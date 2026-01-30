@@ -1,16 +1,21 @@
-<p align="center">
-    <a href="https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
-</p>
+![Version: 0.15.0](https://img.shields.io/badge/Version-0.15.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18.1.0](https://img.shields.io/badge/AppVersion-18.1.0-informational?style=flat-square)
+<a href="https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-postgres" /></a>
 
 # PostgreSQL
 
-A Helm chart for PostgreSQL - The World's Most Advanced Open Source Relational Database. PostgreSQL is a powerful, open source object-relational database system with over 35 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance.
+The World's Most Advanced Open Source Relational Database
 
 ## Prerequisites
 
 - Kubernetes 1.24+
 - Helm 3.2.0+
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| oci://registry-1.docker.io/cloudpirates | common | 2.x.x |
 
 ## Installing the Chart
 
@@ -67,217 +72,159 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/postgres:<versi
 
 The following table lists the configurable parameters of the PostgreSQL chart and their default values.
 
-### Global parameters
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` | Affinity settings for pod assignment |
+| args | string | `nil` | Override default container args (useful for hardened images that handle startup differently) # Leave unset or null to use default args, set to empty array [] to disable default args for hardened images like DHI |
+| auth.database | string | `""` | Alternative name for the default database to be created at initialisation |
+| auth.existingSecret | string | `""` | Name of existing secret to use for PostgreSQL credentials |
+| auth.password | string | `""` | Password for the custom user to create |
+| auth.secretKeys.adminPasswordKey | string | `"postgres-password"` | Name of key in existing secret to use for PostgreSQL admin credentials |
+| auth.username | string | `""` | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) |
+| command | list | `[]` | Override default container command (useful for hardened images) |
+| commonAnnotations | object | `{}` | Annotations to add to all deployed objects |
+| commonLabels | object | `{}` | Labels to add to all deployed objects |
+| config.existingConfigmap | string | `""` | Name of existing ConfigMap with PostgreSQL configuration |
+| config.extraConfig | list | `[]` | Additional PostgreSQL configuration parameters |
+| config.mountConfigMap | bool | `true` | Enable mounting of ConfigMap with PostgreSQL configuration |
+| config.pgHbaConfig | string | `""` | Content of a custom pg_hba.conf file to be used instead of the default config |
+| config.postgresql.locale | string | `"en_US.utf8"` | Default locale setting |
+| config.postgresql.timezone | string | `"UTC"` | Default timezone setting |
+| config.postgresqlCheckpointCompletionTarget | string | `""` | Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval |
+| config.postgresqlEffectiveCacheSize | string | `""` | Effective cache size |
+| config.postgresqlLogMinDurationStatement | string | `""` | Sets the minimum execution time above which statements will be logged |
+| config.postgresqlLogStatement | string | `""` | Sets the type of statements logged |
+| config.postgresqlMaintenanceWorkMem | string | `""` | Maximum amount of memory to be used by maintenance operations |
+| config.postgresqlMaxConnections | int | `100` | Maximum number of connections |
+| config.postgresqlRandomPageCost | string | `""` | Sets the planner's estimate of the cost of a non-sequentially-fetched disk page |
+| config.postgresqlSharedBuffers | string | `""` | Amount of memory the database server uses for shared memory buffers |
+| config.postgresqlSharedPreloadLibraries | string | `""` | Shared preload libraries (comma-separated list) |
+| config.postgresqlWalBuffers | string | `""` | Amount of memory used in shared memory for WAL data (deprecated, see postgresql.wal.buffers) |
+| config.postgresqlWorkMem | string | `""` | Amount of memory to be used by internal sort operations and hash tables |
+| containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Enable container privilege escalation |
+| containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | Linux capabilities to be dropped |
+| containerSecurityContext.readOnlyRootFilesystem | bool | `false` | Mount container root filesystem as read-only |
+| containerSecurityContext.runAsGroup | int | `999` | Group ID for the PostgreSQL container |
+| containerSecurityContext.runAsNonRoot | bool | `true` | Configure the container to run as a non-root user |
+| containerSecurityContext.runAsUser | int | `999` | User ID for the PostgreSQL container |
+| customUser.database | string | `""` | Name of the database to be created |
+| customUser.existingSecret | string | `""` | Existing secret, in which username, password and database name are saved |
+| customUser.name | string | `""` | Name of the custom user to be created |
+| customUser.password | string | `""` | Password to be used for the custom user |
+| customUser.secretKeys.database | string | `"CUSTOM_DB"` | Custom user database secret reference (set empty to fallback to customUser.database) |
+| customUser.secretKeys.name | string | `"CUSTOM_USER"` | Custom user name secret reference (set empty to fallback to customUser.name) |
+| customUser.secretKeys.password | string | `"CUSTOM_PASSWORD"` |  |
+| extraEnvVars | list | `[]` | Additional environment variables to set |
+| extraEnvVarsSecret | string | `""` | Name of a secret containing additional environment variables |
+| extraObjects | list | `[]` | Array of extra objects to deploy with the release |
+| extraVolumeMounts | list | `[]` | Additional volume mounts to add to the MongoDB container |
+| extraVolumes | list | `[]` | Additional volumes to add to the pod |
+| fullnameOverride | string | `""` | String to fully override postgres.fullname |
+| global.enableServiceLinks | bool | `true` | Whether to add service links env variables to pods |
+| global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
+| global.imageRegistry | string | `""` | Global Docker Image registry |
+| image.imagePullPolicy | string | `"Always"` | PostgreSQL image pull policy |
+| image.registry | string | `"docker.io"` | PostgreSQL image registry |
+| image.repository | string | `"postgres"` | PostgreSQL image repository |
+| image.tag | string | `"18.1@sha256:5773fe724c49c42a7a9ca70202e11e1dff21fb7235b335a73f39297d200b73a2"` | PostgreSQL image tag (immutable tags are recommended) |
+| image.useHardenedImage | bool | `false` | Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18 |
+| ingress.annotations | object | `{}` | Additional annotations for the Ingress resource |
+| ingress.className | string | `""` | IngressClass that will be used to implement the Ingress |
+| ingress.enabled | bool | `false` | Enable ingress record generation for PostgreSQL |
+| ingress.hosts[0].host | string | `"postgres.local"` | Hostname |
+| ingress.hosts[0].paths[0].path | string | `"/"` | Base path |
+| ingress.hosts[0].paths[0].pathType | string | `"Prefix"` | Path type |
+| ingress.tls | list | `[]` | TLS configuration for PostgreSQL ingress |
+| initContainers | list | `[]` | Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades |
+| initdb.args | string | `""` | Send arguments to postgres initdb. This is a space separated string of arguments |
+| initdb.directory | string | `"/docker-entrypoint-initdb.d/"` | Directory where to load initScripts |
+| initdb.scripts | object | `{}` | Dictionary of initdb scripts |
+| initdb.scriptsConfigMap | string | `""` | ConfigMap with scripts to be run at first boot |
+| livenessProbe.enabled | bool | `true` | Enable livenessProbe on PostgreSQL containers |
+| livenessProbe.failureThreshold | int | `3` | Failure threshold for livenessProbe |
+| livenessProbe.initialDelaySeconds | int | `30` | Initial delay seconds for livenessProbe |
+| livenessProbe.periodSeconds | int | `10` | Period seconds for livenessProbe |
+| livenessProbe.successThreshold | int | `1` | Success threshold for livenessProbe |
+| livenessProbe.timeoutSeconds | int | `5` | Timeout seconds for livenessProbe |
+| metrics.enabled | bool | `false` | Start a sidecar prometheus exporter to expose PostgreSQL metrics |
+| metrics.image.pullPolicy | string | `"Always"` | PostgreSQL exporter image pull policy |
+| metrics.image.registry | string | `"quay.io"` | PostgreSQL exporter image registry |
+| metrics.image.repository | string | `"prometheuscommunity/postgres-exporter"` | PostgreSQL exporter image repository |
+| metrics.image.tag | string | `"v0.18.1@sha256:fb96c4413985d4b23ab02b19022b3d70a86c8e0a62f41ab15ebb6f4673781a5d"` | PostgreSQL exporter image tag |
+| metrics.resources | object | `{}` | Resource limits and requests for metrics container |
+| metrics.service.annotations | object | `{}` | Additional custom annotations for Metrics service |
+| metrics.service.labels | object | `{}` | Additional custom labels for Metrics service |
+| metrics.service.port | int | `9187` | Metrics service port |
+| metrics.serviceMonitor.annotations | object | `{}` | ServiceMonitor annotations |
+| metrics.serviceMonitor.enabled | bool | `false` | Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator |
+| metrics.serviceMonitor.honorLabels | bool | `false` | honorLabels chooses the metric's labels on collisions with target labels |
+| metrics.serviceMonitor.interval | string | `"30s"` | The interval at which metrics should be scraped |
+| metrics.serviceMonitor.metricRelabelings | list | `[]` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion |
+| metrics.serviceMonitor.namespace | string | `""` | The namespace in which the ServiceMonitor will be created |
+| metrics.serviceMonitor.namespaceSelector | object | `{}` | ServiceMonitor namespace selector |
+| metrics.serviceMonitor.relabelings | list | `[]` | ServiceMonitor relabel configs to apply to samples before scraping |
+| metrics.serviceMonitor.scrapeTimeout | string | `"10s"` | The timeout after which the scrape is ended |
+| metrics.serviceMonitor.selector | object | `{}` | Additional labels for ServiceMonitor resource |
+| nameOverride | string | `""` | String to partially override postgres.fullname |
+| nodeSelector | object | `{}` | Node labels for pod assignment |
+| persistence.accessModes | list | `["ReadWriteOnce"]` | Persistent Volume access modes |
+| persistence.annotations | object | `{}` | Persistent Volume Claim annotations |
+| persistence.enabled | bool | `true` | Enable persistence using Persistent Volume Claims |
+| persistence.existingClaim | string | `""` | The name of an existing PVC to use for persistence |
+| persistence.labels | object | `{}` | Labels for persistent volume claims |
+| persistence.size | string | `"8Gi"` | Persistent Volume size |
+| persistence.storageClass | string | `""` | Persistent Volume storage class |
+| persistence.subPath | string | `""` | The subdirectory of the volume to mount to # Useful in dev environments and one PV for multiple services |
+| persistence.volumeName | string | `"data"` | Container volume name and volume claim prefix |
+| persistentVolumeClaimRetentionPolicy.enabled | bool | `false` | Enable Persistent volume retention policy for the Statefulset |
+| persistentVolumeClaimRetentionPolicy.whenDeleted | string | `"Retain"` | Volume retention behavior that applies when the StatefulSet is deleted |
+| persistentVolumeClaimRetentionPolicy.whenScaled | string | `"Retain"` | Volume retention behavior when the replica count of the StatefulSet is reduced |
+| podAnnotations | object | `{}` | Map of annotations to add to the pods |
+| podLabels | object | `{}` | Map of labels to add to the pods |
+| podSecurityContext.fsGroup | int | `999` | Group ID for the volumes of the pod |
+| priorityClassName | string | `""` | Priority class name to be used for the pods |
+| readinessProbe.enabled | bool | `true` | Enable readinessProbe on PostgreSQL containers |
+| readinessProbe.failureThreshold | int | `3` | Failure threshold for readinessProbe |
+| readinessProbe.initialDelaySeconds | int | `5` | Initial delay seconds for readinessProbe |
+| readinessProbe.periodSeconds | int | `5` | Period seconds for readinessProbe |
+| readinessProbe.successThreshold | int | `1` | Success threshold for readinessProbe |
+| readinessProbe.timeoutSeconds | int | `5` | Timeout seconds for readinessProbe |
+| replicaCount | int | `1` | Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default) |
+| replication.allowFrom.ipv4 | string | `"0.0.0.0/0"` | Allowed IPv4 network (set empty to disable that feature) |
+| replication.allowFrom.ipv6 | string | `"::/0"` | Allowed IPv6 network (set empty to disable that feature) |
+| replication.auth.existingSecret | string | `""` | Use existing secret reference instead of password |
+| replication.auth.password | string | `""` | Password for replication user (cannot be empty) |
+| replication.auth.secretKeys.password | string | `"replication-password"` | Secret key for replication password |
+| replication.auth.username | string | `"replication"` | Username for replication user |
+| replication.enabled | bool | `false` | Enables the WAL replication feature for both sides (primary and standby) |
+| replication.primary.host | string | `""` | Hostname of the primary server |
+| replication.primary.port | int | `5432` | Port of the primary server |
+| resources | object | `{}` |  |
+| service.annotations | object | `{}` | Service annotations |
+| service.nodePort | int | `30432` | PostgreSQL NodePort port |
+| service.port | int | `5432` | PostgreSQL service port |
+| service.targetPort | int | `5432` | PostgreSQL container port |
+| service.type | string | `"ClusterIP"` | PostgreSQL service type |
+| serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Whether to automount the SA token inside the pod |
+| serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
+| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. |
+| startupProbe.enabled | bool | `true` | Enable startupProbe on PostgreSQL containers |
+| startupProbe.failureThreshold | int | `30` | Failure threshold for startupProbe |
+| startupProbe.initialDelaySeconds | int | `30` | Initial delay seconds for startupProbe |
+| startupProbe.periodSeconds | int | `10` | Period seconds for startupProbe |
+| startupProbe.successThreshold | int | `1` | Success threshold for startupProbe |
+| startupProbe.timeoutSeconds | int | `5` | Timeout seconds for startupProbe |
+| terminationGracePeriodSeconds | int | `30` | Time for Kubernetes to wait for the pod to gracefully terminate |
+| tolerations | list | `[]` | Toleration labels for pod assignment |
 
-| Parameter                 | Description                                     | Default |
-| ------------------------- | ----------------------------------------------- | ------- |
-| `global.imageRegistry`    | Global Docker image registry                    | `""`    |
-| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
+## Examples
 
-### PostgreSQL image configuration
-
-| Parameter                  | Description                                                                                              | Default                                                                          |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `image.registry`           | PostgreSQL image registry                                                                                | `docker.io`                                                                      |
-| `image.repository`         | PostgreSQL image repository                                                                              | `postgres`                                                                       |
-| `image.tag`                | PostgreSQL image tag (immutable tags are recommended)                                                    | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
-| `image.imagePullPolicy`    | PostgreSQL image pull policy                                                                             | `Always`                                                                         |
-| `image.useHardenedImage`   | Set to `true` when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18   | `false`                                                                          |
-
-### Deployment configuration
-
-| Parameter           | Description                                                                                                    | Default |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------- |
-| `replicaCount`      | Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default) | `1`     |
-| `nameOverride`      | String to partially override postgres.fullname                                                                 | `""`    |
-| `fullnameOverride`  | String to fully override postgres.fullname                                                                     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
-| `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
-| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
-
-### Pod annotations and labels
-
-| Parameter        | Description                           | Default |
-| ---------------- | ------------------------------------- | ------- |
-| `podAnnotations` | Map of annotations to add to the pods | `{}`    |
-| `podLabels`      | Map of labels to add to the pods      | `{}`    |
-
-### Security Context
-
-| Parameter                                           | Description                                       | Default   |
-| --------------------------------------------------- | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
-| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `containerSecurityContext.runAsUser`                | User ID for the PostgreSQL container              | `999`     |
-| `containerSecurityContext.runAsGroup`               | Group ID for the PostgreSQL container             | `999`     |
-| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
-| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
-
-### PostgreSQL Authentication
-
-| Parameter                          | Description                                                                                                    | Default               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `auth.username`                    | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
-| `auth.password`                    | Password for the custom user to create                                                                         | `""`                  |
-| `auth.database`                    | Alternative name for the default database to be created at initialisation                                      | `""`                  |
-| `auth.existingSecret`              | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
-| `auth.secretKeys.adminPasswordKey` | Name of key in existing secret to use for PostgreSQL admin credentials                                         | `"postgres-password"` |
-
-### PostgreSQL Configuration
-
-| Parameter                                     | Description                                                                             | Default |
-| --------------------------------------------- | --------------------------------------------------------------------------------------- | ------- |
-| `config.mountConfigMap`                       | Enable mounting of ConfigMap with PostgreSQL configuration                              | `true`  |
-| `config.postgresqlSharedPreloadLibraries`     | Shared preload libraries (comma-separated list)                                         | `""`    |
-| `config.postgresqlMaxConnections`             | Maximum number of connections                                                           | `100`   |
-| `config.postgresqlSharedBuffers`              | Amount of memory the database server uses for shared memory buffers                     | `""`    |
-| `config.postgresqlEffectiveCacheSize`         | Effective cache size                                                                    | `""`    |
-| `config.postgresqlWorkMem`                    | Amount of memory to be used by internal sort operations and hash tables                 | `""`    |
-| `config.postgresqlMaintenanceWorkMem`         | Maximum amount of memory to be used by maintenance operations                           | `""`    |
-| `config.postgresqlWalBuffers`                 | Amount of memory used in shared memory for WAL data                                     | `""`    |
-| `config.postgresqlCheckpointCompletionTarget` | Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval | `""`    |
-| `config.postgresqlRandomPageCost`             | Sets the planner's estimate of the cost of a non-sequentially-fetched disk page         | `""`    |
-| `config.postgresqlLogStatement`               | Sets the type of statements logged                                                      | `""`    |
-| `config.postgresqlLogMinDurationStatement`    | Sets the minimum execution time above which statements will be logged                   | `""`    |
-| `config.extraConfig`                          | Additional PostgreSQL configuration parameters                                          | `[]`    |
-| `config.existingConfigmap`                    | Name of existing ConfigMap with PostgreSQL configuration                                | `""`    |
-| `config.pgHbaConfig`                          | Content of a custom pg_hba.conf file to be used instead of the default config           | `""`    |
-
-### Custom User Configuration
-| Parameter                   | Description                                                                        | Default                                  |
-| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
-| `customUser`                | Optional user to be created at initialisation with a custom password and database  | `{}`                                     |
-| `customUser.name`           | Name of the custom user to be created                                              | `""`                                     |
-| `customUser.database`       | Name of the database to be created                                                 | `""`                                     |
-| `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
-| `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
-| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
-
-### Container Command/Args Override
-
-| Parameter | Description                                                                                                                                       | Default |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `command` | Override default container command (useful for hardened images)                                                                                   | `[]`    |
-| `args`    | Override default container args (useful for hardened images that handle startup differently). Set to `null` to use defaults, `[]` to disable args | `null`  |
-
-These parameters are useful when using hardened PostgreSQL images (such as from DHI or other security-focused registries) that have different entrypoint behaviors than the standard Docker Hub postgres image. When using such images, you may need to set `args: []` to prevent passing the default `postgres` binary name and configuration arguments.
-
-### PostgreSQL Initdb Configuration
-
-| Parameter                 | Description                                                                      | Default |
-| ------------------------- | -------------------------------------------------------------------------------- | ------- |
-| `initdb.args`             | Send arguments to postgres initdb. This is a space separated string of arguments | `""`    |
-| `initdb.scripts`          | Dictionary of initdb scripts                                                     | `{}`    |
-| `initdb.scriptsConfigMap` | ConfigMap with scripts to be run at first boot                                   | `""`    |
-
-### Service configuration
-
-| Parameter                       | Description                                                                       | Default     |
-| ------------------------------- | --------------------------------------------------------------------------------- | ----------- |
-| `service.type`                  | PostgreSQL service type                                                           | `ClusterIP` |
-| `service.port`                  | PostgreSQL service port                                                           | `5432`      |
-| `service.targetPort`            | PostgreSQL container port                                                         | `5432`      |
-| `service.nodePort`              | PostgreSQL NodePort port                                                          | `30432`     |
-| `service.annotations`           | Service annotations                                                               | `{}`        |
-| `service.loadBalancerIP`        | Load balancer IP (applies if service type is `LoadBalancer`)                      | `""`        |
-| `service.externalTrafficPolicy` | External traffic policy (applies if service type is `LoadBalancer` or `NodePort`) | `Cluster`   |
-
-### Ingress configuration
-
-| Parameter                            | Description                                             | Default          |
-| ------------------------------------ | ------------------------------------------------------- | ---------------- |
-| `ingress.enabled`                    | Enable ingress record generation for PostgreSQL         | `false`          |
-| `ingress.className`                  | IngressClass that will be used to implement the Ingress | `""`             |
-| `ingress.annotations`                | Additional annotations for the Ingress resource         | `{}`             |
-| `ingress.hosts[0].host`              | Hostname for PostgreSQL ingress                         | `postgres.local` |
-| `ingress.hosts[0].paths[0].path`     | Path for PostgreSQL ingress                             | `/`              |
-| `ingress.hosts[0].paths[0].pathType` | Path type for PostgreSQL ingress                        | `Prefix`         |
-| `ingress.tls`                        | TLS configuration for PostgreSQL ingress                | `[]`             |
-
-### Resources
-
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
-
-### Persistence
-
-| Parameter                   | Description                                        | Default             |
-| --------------------------- | -------------------------------------------------- | ------------------- |
-| `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
-| `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
-| `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
-| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
-| `persistence.size`          | Persistent Volume size                             | `8Gi`               |
-| `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
-| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
-| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`                |
-
-### Persistent Volume Claim Retention Policy
-
-| Parameter                                          | Description                                                                    | Default    |
-| -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
-| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the Statefulset                  | `false`    |
-| `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
-| `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
-
-### Liveness and readiness probes
-
-| Parameter                            | Description                                    | Default |
-| ------------------------------------ | ---------------------------------------------- | ------- |
-| `livenessProbe.enabled`              | Enable livenessProbe on PostgreSQL containers  | `true`  |
-| `livenessProbe.initialDelaySeconds`  | Initial delay seconds for livenessProbe        | `30`    |
-| `livenessProbe.periodSeconds`        | Period seconds for livenessProbe               | `10`    |
-| `livenessProbe.timeoutSeconds`       | Timeout seconds for livenessProbe              | `5`     |
-| `livenessProbe.failureThreshold`     | Failure threshold for livenessProbe            | `3`     |
-| `livenessProbe.successThreshold`     | Success threshold for livenessProbe            | `1`     |
-| `readinessProbe.enabled`             | Enable readinessProbe on PostgreSQL containers | `true`  |
-| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe       | `5`     |
-| `readinessProbe.periodSeconds`       | Period seconds for readinessProbe              | `5`     |
-| `readinessProbe.timeoutSeconds`      | Timeout seconds for readinessProbe             | `5`     |
-| `readinessProbe.failureThreshold`    | Failure threshold for readinessProbe           | `3`     |
-| `readinessProbe.successThreshold`    | Success threshold for readinessProbe           | `1`     |
-| `startupProbe.enabled`               | Enable startupProbe on PostgreSQL containers   | `true`  |
-| `startupProbe.initialDelaySeconds`   | Initial delay seconds for startupProbe         | `30`    |
-| `startupProbe.periodSeconds`         | Period seconds for startupProbe                | `10`    |
-| `startupProbe.timeoutSeconds`        | Timeout seconds for startupProbe               | `5`     |
-| `startupProbe.failureThreshold`      | Failure threshold for startupProbe             | `30`    |
-| `startupProbe.successThreshold`      | Success threshold for startupProbe             | `1`     |
-
-### Node Selection
-
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
-
-### Service Account
-
-| Parameter                                     | Description                                                                                                               | Default |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `serviceAccount.create`                       | Specifies whether a service account should be created                                                                     | `false` |
-| `serviceAccount.annotations`                  | Annotations to add to the service account                                                                                 | `{}`    |
-| `serviceAccount.name`                         | The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template. | `""`    |
-| `serviceAccount.automountServiceAccountToken` | Whether to automount the SA token inside the pod                                                                          | `false` |
-
-### Extra Configuration Parameters
-
-| Parameter            | Description                                                            | Default |
-| -------------------- | ---------------------------------------------------------------------- | ------- |
-| `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
-| `extraVolumes`       | Additional volumes to add to the pod                                   | `[]`    |
-| `extraVolumeMounts`  | Additional volume mounts to add to the MongoDB container               | `[]`    |
-| `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
-| `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
-
-#### Extra Objects
+### Extra Objects
 
 You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
 
-**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{ .Release.Namespace }}"`.
+**Helm templating is supported in any field, but all template expressions must be quoted.** For example, to use the release namespace, write `namespace: "{{  .Release.Namespace }}"`.
 
 **Example: Deploy a NetworkPolicy with templating**
 
@@ -287,7 +234,7 @@ extraObjects:
     kind: NetworkPolicy
     metadata:
       name: allow-dns
-      namespace: "{{ .Release.Namespace }}"
+      namespace: "{{  .Release.Namespace }}"
     spec:
       podSelector: {}
       policyTypes:
@@ -308,32 +255,6 @@ extraObjects:
 ```
 
 All objects in `extraObjects` will be rendered and deployed with the release. You can use any valid Kubernetes manifest, and reference Helm values or built-in objects as needed (just remember to quote template expressions).
-
-### Metrics Configuration
-
-| Parameter                                  | Description                                                                     | Default                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------- |
-| `metrics.enabled`                          | Start a sidecar prometheus exporter to expose PostgreSQL metrics                | `false`                                 |
-| `metrics.image.registry`                   | PostgreSQL exporter image registry                                              | `quay.io`                               |
-| `metrics.image.repository`                 | PostgreSQL exporter image repository                                            | `prometheuscommunity/postgres-exporter` |
-| `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.18.1`                               |
-| `metrics.image.pullPolicy`                 | PostgreSQL exporter image pull policy                                           | `Always`                                |
-| `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                                    |
-| `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                                    |
-| `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                                    |
-| `metrics.service.port`                     | Metrics service port                                                            | `9187`                                  |
-| `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator | `false`                                 |
-| `metrics.serviceMonitor.namespace`         | The namespace in which the ServiceMonitor will be created                       | `""`                                    |
-| `metrics.serviceMonitor.interval`          | The interval at which metrics should be scraped                                 | `30s`                                   |
-| `metrics.serviceMonitor.scrapeTimeout`     | The timeout after which the scrape is ended                                     | `10s`                                   |
-| `metrics.serviceMonitor.selector`          | Additional labels for ServiceMonitor resource                                   | `{}`                                    |
-| `metrics.serviceMonitor.annotations`       | ServiceMonitor annotations                                                      | `{}`                                    |
-| `metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels        | `false`                                 |
-| `metrics.serviceMonitor.relabelings`       | ServiceMonitor relabel configs to apply to samples before scraping              | `[]`                                    |
-| `metrics.serviceMonitor.metricRelabelings` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion   | `[]`                                    |
-| `metrics.serviceMonitor.namespaceSelector` | ServiceMonitor namespace selector                                               | `{}`                                    |
-
-## Examples
 
 ### Basic Deployment
 
