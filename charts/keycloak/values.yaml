@@ -116,6 +116,8 @@ keycloak:
   production: false
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
+  ## @param keycloak.extraArgsPrefix Additional arguments to pass before the start command (e.g., for --config-file)
+  extraArgsPrefix: []
   ## @param keycloak.extraArgs Additional arguments to pass to the Keycloak startup command
   extraArgs: []
 

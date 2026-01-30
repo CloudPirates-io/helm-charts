@@ -152,6 +152,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
 | `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
 | `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
+| `keycloak.extraArgsPrefix`             | Additional arguments to pass before the start command (e.g., for --config-file)                              | `[]`               |
 | `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
 ### TLS Configuration

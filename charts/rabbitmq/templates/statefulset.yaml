@@ -78,7 +78,7 @@ spec:
               mkdir -p {{ .Values.persistence.mountPath }}/plugins
               {{- range .Values.installPlugins }}
               echo "Downloading plugin from {{ . }}"
-              wget -O {{ .Values.persistence.mountPath }}/plugins/$(basename {{ . }}) {{ . }}
+              wget -O {{ $.Values.persistence.mountPath }}/plugins/$(basename {{ . }}) {{ . }}
               {{- end }}
               echo "Moving downloaded plugins to shared directory"
               if ls {{ .Values.persistence.mountPath }}/plugins/*.ez 1> /dev/null 2>&1; then
