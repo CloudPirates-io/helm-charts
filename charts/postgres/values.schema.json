@@ -63,28 +63,71 @@
                 "postgresql": {
                     "type": "object",
                     "properties": {
+                        "checkpoint_completion_target": {
+                            "type": "number"
+                        },
+                        "datestyle": {
+                            "type": "string"
+                        },
+                        "default_text_search_config": {
+                            "type": "string"
+                        },
+                        "effective_cache_size": {
+                            "type": "string"
+                        },
                         "locale": {
+                            "type": "string"
+                        },
+                        "log_destination": {
+                            "type": "string"
+                        },
+                        "log_min_duration_statement": {
+                            "type": "integer"
+                        },
+                        "log_min_error_statement": {
+                            "type": "string"
+                        },
+                        "log_min_messages": {
+                            "type": "string"
+                        },
+                        "log_statement": {
+                            "type": "string"
+                        },
+                        "logging_collector": {
+                            "type": "string"
+                        },
+                        "maintenance_work_mem": {
+                            "type": "string"
+                        },
+                        "max_connections": {
+                            "type": "integer"
+                        },
+                        "max_wal_senders": {
+                            "type": "integer"
+                        },
+                        "random_page_cost": {
+                            "type": "number"
+                        },
+                        "shared_buffers": {
+                            "type": "string"
+                        },
+                        "shared_preload_libraries": {
                             "type": "string"
                         },
                         "timezone": {
                             "type": "string"
                         },
-                        "wal": {
-                            "type": "object",
-                            "properties": {
-                                "buffers": {
-                                    "type": "string"
-                                },
-                                "keepSize": {
-                                    "type": "integer"
-                                },
-                                "level": {
-                                    "type": "string"
-                                },
-                                "maxSenders": {
-                                    "type": "integer"
-                                }
-                            }
+                        "wal_buffers": {
+                            "type": "string"
+                        },
+                        "wal_keep_size": {
+                            "type": "integer"
+                        },
+                        "wal_level": {
+                            "type": "string"
+                        },
+                        "work_mem": {
+                            "type": "string"
                         }
                     }
                 },
