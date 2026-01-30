@@ -35,7 +35,7 @@ data:
     fi
 
     echo "Initialize database from primary..."
-    PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" --wal-method=stream
+    PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" -c fast --wal-method=stream --progress
     touch "${PGDATA}/standby.signal"
     echo "✅ Standby replication initialized"
 {{- end }}
