@@ -71,6 +71,9 @@ spec:
           command:
             - {{ .Values.image.command }}
           args:
+            {{- with .Values.keycloak.extraArgsPrefix }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             {{- if .Values.keycloak.production }}
             - start
             {{- else }}
