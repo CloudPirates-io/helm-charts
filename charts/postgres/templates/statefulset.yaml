@@ -103,18 +103,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
                   key: {{ include "postgres.adminPasswordKey" . }}
-            {{- if .Values.config.postgresqlMaxConnections }}
-            - name: POSTGRES_MAX_CONNECTIONS
-              value: {{ .Values.config.postgresqlMaxConnections | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlSharedBuffers }}
-            - name: POSTGRES_SHARED_BUFFERS
-              value: {{ .Values.config.postgresqlSharedBuffers | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlEffectiveCacheSize }}
-            - name: POSTGRES_EFFECTIVE_CACHE_SIZE
-              value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
-            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}

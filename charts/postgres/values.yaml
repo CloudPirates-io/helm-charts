@@ -83,27 +83,27 @@ auth:
 config:
   ## @param config.mountConfigMap Enable mounting of ConfigMap with PostgreSQL configuration
   mountConfigMap: true
-  ## @param config.postgresqlSharedPreloadLibraries Shared preload libraries (comma-separated list)
+  ## @param config.postgresqlSharedPreloadLibraries Shared preload libraries (comma-separated list) - deprecated, see postgresql config block
   postgresqlSharedPreloadLibraries: ""
-  ## @param config.postgresqlMaxConnections Maximum number of connections
+  ## @param config.postgresqlMaxConnections Maximum number of connections - deprecated, see postgresql config block
   postgresqlMaxConnections: 100
-  ## @param config.postgresqlSharedBuffers Amount of memory the database server uses for shared memory buffers
+  ## @param config.postgresqlSharedBuffers Amount of memory the database server uses for shared memory buffers - deprecated, see postgresql config block
   postgresqlSharedBuffers: ""
-  ## @param config.postgresqlEffectiveCacheSize Effective cache size
+  ## @param config.postgresqlEffectiveCacheSize Effective cache size - deprecated, see postgresql config block
   postgresqlEffectiveCacheSize: ""
-  ## @param config.postgresqlWorkMem Amount of memory to be used by internal sort operations and hash tables
+  ## @param config.postgresqlWorkMem Amount of memory to be used by internal sort operations and hash tables - deprecated, see postgresql config block
   postgresqlWorkMem: ""
-  ## @param config.postgresqlMaintenanceWorkMem Maximum amount of memory to be used by maintenance operations
+  ## @param config.postgresqlMaintenanceWorkMem Maximum amount of memory to be used by maintenance operations - deprecated, see postgresql config block
   postgresqlMaintenanceWorkMem: ""
-  ## @param config.postgresqlWalBuffers Amount of memory used in shared memory for WAL data (deprecated, see postgresql.wal.buffers)
+  ## @param config.postgresqlWalBuffers Amount of memory used in shared memory for WAL data - deprecated, see postgresql config block
   postgresqlWalBuffers: ""
-  ## @param config.postgresqlCheckpointCompletionTarget Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval
+  ## @param config.postgresqlCheckpointCompletionTarget Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval - deprecated, see postgresql config block
   postgresqlCheckpointCompletionTarget: ""
-  ## @param config.postgresqlRandomPageCost Sets the planner's estimate of the cost of a non-sequentially-fetched disk page
+  ## @param config.postgresqlRandomPageCost Sets the planner's estimate of the cost of a non-sequentially-fetched disk page - deprecated, see postgresql config block
   postgresqlRandomPageCost: ""
-  ## @param config.postgresqlLogStatement Sets the type of statements logged
+  ## @param config.postgresqlLogStatement Sets the type of statements logged - deprecated, see postgresql config block
   postgresqlLogStatement: ""
-  ## @param config.postgresqlLogMinDurationStatement Sets the minimum execution time above which statements will be logged
+  ## @param config.postgresqlLogMinDurationStatement Sets the minimum execution time above which statements will be logged - deprecated, see postgresql config block
   postgresqlLogMinDurationStatement: ""
   ## @param config.extraConfig Additional PostgreSQL configuration parameters
   extraConfig: []
@@ -111,22 +111,52 @@ config:
   existingConfigmap: ""
   ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
   pgHbaConfig: ""
-  # -- New postgresql configuration block
+  # @param config.postgresql Postgresql configuration block
   postgresql:
-    # -- Default timezone setting
+    # @param config.postgresql.max_connections Maximum number of connections - https://postgresqlco.nf/doc/en/param/max_connections/
+    max_connections: 100
+    # @param config.postgresql.shared_buffers Amount of memory the database server uses for shared memory buffers - https://postgresqlco.nf/doc/en/param/shared_buffers/
+    shared_buffers: 128MB
+    # @param config.postgresql.effective_cache_size Sets the planner's assumption about the total size of the data caches - https://postgresqlco.nf/doc/en/param/effective_cache_size/
+    effective_cache_size: 4GB
+    # @param config.postgresql.work_mem Amount of memory to be used by internal sort operations and hash tables - https://postgresqlco.nf/doc/en/param/work_mem/
+    work_mem: 4MB
+    # @param config.postgresql.maintenance_work_mem Maximum amount of memory to be used by maintenance operations - https://postgresqlco.nf/doc/en/param/maintenance_work_mem/
+    maintenance_work_mem: 64MB
+    # @param config.postgresql.checkpoint_completion_target Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval - https://postgresqlco.nf/doc/en/param/checkpoint_completion_target/
+    checkpoint_completion_target: 0.7
+    # @param config.postgresql.random_page_cost Sets the planner's estimate of the cost of a non-sequentially-fetched disk page - https://postgresqlco.nf/doc/en/param/random_page_cost/
+    random_page_cost: 1.1
+    # @param config.postgresql.timezone Default timezone setting - https://postgresqlco.nf/doc/en/param/TimeZone/
     timezone: "UTC"
-    # -- Default locale setting
+    # @param config.postgresql.locale Locale setting for all lc_* settings - https://postgresqlco.nf/doc/en/param/lc_messages/
     locale: "en_US.utf8"
-    # -- WAL settings
-    wal:
-      # -- Amount of memory used in shared memory for WAL data - https://postgresqlco.nf/doc/en/param/wal_buffers/
-      buffers: "16MB"
-      # -- Determines how much information is written to the WAL - https://postgresqlco.nf/doc/en/param/wal_level/
-      level: replica
-      # -- Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients - https://postgresqlco.nf/doc/en/param/max_wal_senders/
-      maxSenders: 5
-      # -- Specifies the minimum size of past WAL files kept in the pg_wal directory (in MB) - https://postgresqlco.nf/doc/en/param/wal_keep_size/
-      keepSize: 1024
+    # @param config.postgresql.default_text_search_config Sets default text search configuration - https://postgresqlco.nf/doc/en/param/default_text_search_config/
+    default_text_search_config: pg_catalog.english
+    # @param config.postgresql.datestyle Sets the display format for date and time values - https://postgresqlco.nf/doc/en/param/DateStyle/
+    datestyle: "iso, mdy"
+    # @param config.postgresql.log_destination Sets the destination for server log output - https://postgresqlco.nf/doc/en/param/log_destination/
+    log_destination: stderr
+    # @param config.postgresql.logging_collector Start a subprocess to capture stderr, csvlog and/or jsonlog into log files - https://postgresqlco.nf/doc/en/param/logging_collector/
+    logging_collector: "off"
+    # @param config.postgresql.log_min_messages Sets the message levels that are logged - https://postgresqlco.nf/doc/en/param/log_min_messages/
+    log_min_messages: warning
+    # @param config.postgresql.log_min_error_statement Causes all statements generating error at or above this level to be logged - https://postgresqlco.nf/doc/en/param/log_min_error_statement/
+    log_min_error_statement: error
+    # @param config.postgresql.log_statement Sets the type of statements logged - https://postgresqlco.nf/doc/en/param/log_statement/
+    log_statement: none
+    # @param config.postgresql.log_min_duration_statement Sets the minimum execution time above which all statements will be logged - https://postgresqlco.nf/doc/en/param/log_min_duration_statement/
+    log_min_duration_statement: -1
+    # @param config.postgresql.shared_preload_libraries Shared preload libraries (comma-separated list) - https://postgresqlco.nf/doc/en/param/shared_preload_libraries/
+    shared_preload_libraries: ""
+    # @param config.postgresql.wal_buffers Amount of memory used in shared memory for WAL data - https://postgresqlco.nf/doc/en/param/wal_buffers/
+    wal_buffers: "16MB"
+    # @param config.postgresql.wal_level Determines how much information is written to the WAL - https://postgresqlco.nf/doc/en/param/wal_level/
+    wal_level: replica
+    # @param config.postgresql.max_wal_senders Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients - https://postgresqlco.nf/doc/en/param/max_wal_senders/
+    max_wal_senders: 5
+    # @param config.postgresql.wal_keep_size Specifies the minimum size of past WAL files kept in the pg_wal directory (in MB) - https://postgresqlco.nf/doc/en/param/wal_keep_size/
+    wal_keep_size: 1024
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser:
@@ -387,30 +417,31 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
     namespaceSelector: {}
 
-# -- Physical WAL replication configuration
+## @section Physical WAL replication configuration
 replication:
-  # -- Enables the WAL replication feature for both sides (primary and standby)
+  # @param replication.enabled Enables the WAL replication feature for both sides (primary and standby)
   enabled: false
-  # -- Standby server configuration
+  # @param replication.primary Standby server configuration
   primary:
-    # -- Hostname of the primary server
+    # @param replication.primary.host Hostname of the primary server
     host: ""
-    # -- Port of the primary server
+    # @param replication.primary.port Port of the primary server
     port: 5432
-  # -- Replication authentication configuration
+  # @param replication.auth Replication authentication configuration
   auth:
-    # -- Username for replication user
+    # @param replication.auth.username Username for replication user
     username: "replication"
-    # -- Password for replication user (cannot be empty)
+    # @param replication.auth.password Password for replication user (cannot be empty)
     password: ""
-    # -- Use existing secret reference instead of password
+    # @param replication.auth.existingSecret Use existing secret reference instead of password
     existingSecret: ""
-    # -- Keys configuration for .existingSecret
+    # @param replication.auth.secretKeys Keys configuration for .existingSecret
     secretKeys:
+      # @param replication.auth.secretKeys.password Key for password field
       password: "replication-password"
-  # -- Allow from IP ranges configuration for the primary server
+  # @param replication.primary.allowFrom Allow from IP ranges configuration for the primary server
   allowFrom:
-    # -- Allowed IPv4 network (set empty to disable that feature)
+    # @param replication.primary.allowFrom.ipv4 Allowed IPv4 network (set empty to disable that feature)
     ipv4: "0.0.0.0/0"
-    # -- Allowed IPv6 network (set empty to disable that feature)
+    # @param replication.primary.allowFrom.ipv6 Allowed IPv6 network (set empty to disable that feature)
     ipv6: "::/0"

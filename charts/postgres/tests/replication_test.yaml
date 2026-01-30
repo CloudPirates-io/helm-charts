@@ -59,16 +59,16 @@ tests:
       - notExists:
           path: spec.template.spec.initContainers[0].name
       - equal:
-          path: spec.template.spec.containers[0].env[3].name
+          path: spec.template.spec.containers[0].env[2].name
           value: REPLICATION_USER
       - equal:
-          path: spec.template.spec.containers[0].env[3].value
+          path: spec.template.spec.containers[0].env[2].value
           value: replication
       - equal:
-          path: spec.template.spec.containers[0].env[4].name
+          path: spec.template.spec.containers[0].env[3].name
           value: REPLICATION_PASSWORD
       - equal:
-          path: spec.template.spec.containers[0].env[4].value
+          path: spec.template.spec.containers[0].env[3].value
           value: "geheim"
       - equal:
           path: spec.template.spec.containers[0].volumeMounts[4].name
@@ -118,9 +118,8 @@ tests:
     set:
       config:
         postgresql:
-          wal:
-            maxSenders: 99
-            buffers: "1M"
+          max_wal_senders: 99
+          wal_buffers: "1M"
       replication:
         enabled: true
         auth:
