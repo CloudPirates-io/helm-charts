@@ -4,6 +4,7 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  enableServiceLinks: true
 
 ## @section Common parameters
 ## @param nameOverride String to partially override postgres.fullname
@@ -94,7 +95,7 @@ config:
   postgresqlWorkMem: ""
   ## @param config.postgresqlMaintenanceWorkMem Maximum amount of memory to be used by maintenance operations
   postgresqlMaintenanceWorkMem: ""
-  ## @param config.postgresqlWalBuffers Amount of memory used in shared memory for WAL data
+  ## @param config.postgresqlWalBuffers Amount of memory used in shared memory for WAL data (deprecated, see postgresql.wal.buffers)
   postgresqlWalBuffers: ""
   ## @param config.postgresqlCheckpointCompletionTarget Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval
   postgresqlCheckpointCompletionTarget: ""
@@ -110,6 +111,22 @@ config:
   existingConfigmap: ""
   ## @param config.pgHbaConfig Content of a custom pg_hba.conf file to be used instead of the default config
   pgHbaConfig: ""
+  # -- New postgresql configuration block
+  postgresql:
+    # -- Default timezone setting
+    timezone: "UTC"
+    # -- Default locale setting
+    locale: "en_US.utf8"
+    # -- WAL settings
+    wal:
+      # -- Amount of memory used in shared memory for WAL data - https://postgresqlco.nf/doc/en/param/wal_buffers/
+      buffers: "16MB"
+      # -- Determines how much information is written to the WAL - https://postgresqlco.nf/doc/en/param/wal_level/
+      level: replica
+      # -- Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients - https://postgresqlco.nf/doc/en/param/max_wal_senders/
+      maxSenders: 5
+      # -- Specifies the minimum size of past WAL files kept in the pg_wal directory (in MB) - https://postgresqlco.nf/doc/en/param/wal_keep_size/
+      keepSize: 1024
 
 ## @section customUser Optional user to be created at initialisation with a custom password and database
 customUser:
@@ -369,3 +386,31 @@ metrics:
     metricRelabelings: []
     ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
     namespaceSelector: {}
+
+# -- Physical WAL replication configuration
+replication:
+  # -- Enables the WAL replication feature for both sides (primary and standby)
+  enabled: false
+  # -- Standby server configuration
+  primary:
+    # -- Hostname of the primary server
+    host: ""
+    # -- Port of the primary server
+    port: 5432
+  # -- Replication authentication configuration
+  auth:
+    # -- Username for replication user
+    username: "replication"
+    # -- Password for replication user (cannot be empty)
+    password: ""
+    # -- Use existing secret reference instead of password
+    existingSecret: ""
+    # -- Keys configuration for .existingSecret
+    secretKeys:
+      password: "replication-password"
+  # -- Allow from IP ranges configuration for the primary server
+  allowFrom:
+    # -- Allowed IPv4 network (set empty to disable that feature)
+    ipv4: "0.0.0.0/0"
+    # -- Allowed IPv6 network (set empty to disable that feature)
+    ipv6: "::/0"

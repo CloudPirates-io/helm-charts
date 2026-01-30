@@ -500,6 +500,38 @@ kubectl port-forward service/my-postgres-metrics 9187:9187
 curl http://localhost:9187/metrics
 ```
 
+### Replication setup
+
+Replication setup only works for instances without an initialized database and `$PGDATA` directory.
+
+#### Primary setup
+
+This will create a replication user as init script. If you want to set up replication for an already initialized database, you need to create this user afterwards on your own.
+
+```yaml
+replication:
+  enabled: true
+  auth:
+    password: "secret"
+```
+
+#### Standby setup
+
+As soon as a primary host is configured, this instance is considered to be a standby server.
+
+This will also create an `initContainer` name `replication-standby-init`, which:
+- Creates/updates the `replication.pgpass` credentials file in the transient run directory
+- Initializes the database using `pg_basebackup` if not already done using the credentials file above
+
+```yaml
+replication:
+  enabled: true
+  auth:
+    password: "secret"  # Password must match primary
+  primary:
+    host: "your-database.namespace.svc.cluster.local"
+```
+
 ### Using Hardened Images
 
 When using hardened PostgreSQL images (such as from DHI or other security-focused registries), you need to configure several settings:

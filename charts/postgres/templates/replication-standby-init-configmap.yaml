@@ -1,0 +1,41 @@
+{{- if and .Values.replication.primary .Values.replication.primary.host }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-replication" (include "postgres.fullname" .) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "postgres.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  replication-standby-init.sh: |
+    #!/bin/bash
+    set -e
+
+    if [ -z "${REPLICATION_USER}" ] || [ -z "${REPLICATION_PASSWORD}" ]; then
+      echo "⛔️ No credentials configured. Aborting"
+      exit 1
+    fi
+
+    primary_host="{{ tpl .Values.replication.primary.host . }}"
+    primary_port="{{ .Values.replication.primary.port }}"
+    pgpass_file="{{ include "postgres.runDir" . }}/replication.pgpass"
+
+    # We need to mask ':' in this file, interpreter must be bash
+    echo "${primary_host}:${primary_port}:replication:${REPLICATION_USER//:/\\:}:${REPLICATION_PASSWORD//:/\\:}" > "${pgpass_file}"
+    chmod 600 "${pgpass_file}"
+    echo "✅ ${pgpass_file} created"
+
+    if [ -d "${PGDATA}" ]; then
+      echo "⚠️ ${PGDATA} already exists. Skipping standby initialization"
+      exit 0
+    fi
+
+    echo "Initialize database from primary..."
+    PGUSER="${REPLICATION_USER}" PGPASSWORD="${REPLICATION_PASSWORD}" pg_basebackup -h "${primary_host}" -p "${primary_port}" -D "${PGDATA}" --wal-method=stream
+    touch "${PGDATA}/standby.signal"
+    echo "✅ Standby replication initialized"
+{{- end }}
