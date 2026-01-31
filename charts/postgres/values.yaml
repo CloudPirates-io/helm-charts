@@ -86,7 +86,7 @@ config:
   ## @param config.postgresqlSharedPreloadLibraries Shared preload libraries (comma-separated list) - deprecated, see postgresql config block
   postgresqlSharedPreloadLibraries: ""
   ## @param config.postgresqlMaxConnections Maximum number of connections - deprecated, see postgresql config block
-  postgresqlMaxConnections: 100
+  postgresqlMaxConnections: 0
   ## @param config.postgresqlSharedBuffers Amount of memory the database server uses for shared memory buffers - deprecated, see postgresql config block
   postgresqlSharedBuffers: ""
   ## @param config.postgresqlEffectiveCacheSize Effective cache size - deprecated, see postgresql config block

@@ -73,6 +73,7 @@ tests:
           timezone: "Uganda"
           locale: "fr/FR"
           wal_buffers: "42M"
+          max_connections: 33
     asserts:
       - matchRegex:
           path: data["postgresql.conf"]
@@ -83,14 +84,33 @@ tests:
       - matchRegex:
           path: data["postgresql.conf"]
           pattern: "wal_buffers = 42M"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_connections = 33"
 
   - it: old values should override new values
     set:
       config:
         postgresqlWalBuffers: "oldValue"
+        postgresqlMaxConnections: 666
+        postgresqlCheckpointCompletionTarget: "0.8"
+        postgresqlLogMinDurationStatement: "42"
+        postgresqlRandomPageCost: "99"
         postgresql:
           wal_buffers: "42M"
     asserts:
       - matchRegex:
           path: data["postgresql.conf"]
           pattern: "wal_buffers = oldValue"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_connections = 666"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "checkpoint_completion_target = 0.8"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_min_duration_statement = '42'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "random_page_cost = 99"
