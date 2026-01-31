@@ -20,6 +20,16 @@ tests:
     asserts:
       - notExists:
           path: data["00-replication-primary-setup.sh"]
+
+  - it: primary should not create replication user when disabled
+    set:
+      replication:
+        enabled: true
+        createUser: false
+    asserts:
+      - notExists:
+          path: data["00-replication-primary-setup.sh"]
+
 ---
 suite: test replication init scripts
 templates:

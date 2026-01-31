@@ -419,7 +419,7 @@ metrics:
 
 ## @section Physical WAL replication configuration
 replication:
-  # @param replication.enabled Enables the WAL replication feature for both sides (primary and standby)
+  # @param replication.enabled Enables the WAL replication feature for both sides (primary and standby), provides the environment variables `REPLICATION_USER` and `REPLICATION_PASSWORD` and configures access in `pg_hba.conf`
   enabled: false
   # @param replication.primary Standby server configuration
   primary:
@@ -427,6 +427,8 @@ replication:
     host: ""
     # @param replication.primary.port Port of the primary server
     port: 5432
+  # -- Whether to create the replication user
+  createUser: true
   # @param replication.auth Replication authentication configuration
   auth:
     # @param replication.auth.username Username for replication user

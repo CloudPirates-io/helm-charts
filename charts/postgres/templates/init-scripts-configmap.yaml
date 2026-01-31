@@ -39,7 +39,7 @@ data:
 
     echo "✅ Custom user and database created successfully!"
   {{- end }}
-  {{- if $replicationPrimary }}
+  {{- if and $replicationPrimary .Values.replication.createUser }}
   00-replication-primary-setup.sh: |
     #!/bin/sh
     set -e
