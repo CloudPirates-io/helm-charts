@@ -43,96 +43,56 @@ data:
 
     # Connection Settings
     listen_addresses = '*'
-    {{- if .Values.config.postgresqlMaxConnections }}
-    max_connections = {{ .Values.config.postgresqlMaxConnections }}
-    {{- else }}
-    max_connections = 100
-    {{- end }}
-    
+    {{/* All ternery conditions can be removed as soon as the old parameters are removed */}}
+    max_connections = {{ ternary .Values.config.postgresqlMaxConnections .Values.config.postgresql.max_connections (gt (.Values.config.postgresqlMaxConnections | int) 0) }}
+
     # Memory Settings
-    {{- if .Values.config.postgresqlSharedBuffers }}
-    shared_buffers = {{ .Values.config.postgresqlSharedBuffers }}
-    {{- else }}
-    shared_buffers = 128MB
-    {{- end }}
-    
-    {{- if .Values.config.postgresqlEffectiveCacheSize }}
-    effective_cache_size = {{ .Values.config.postgresqlEffectiveCacheSize }}
-    {{- else }}
-    effective_cache_size = 4GB
-    {{- end }}
-    
-    {{- if .Values.config.postgresqlWorkMem }}
-    work_mem = {{ .Values.config.postgresqlWorkMem }}
-    {{- else }}
-    work_mem = 4MB
-    {{- end }}
-    
-    {{- if .Values.config.postgresqlMaintenanceWorkMem }}
-    maintenance_work_mem = {{ .Values.config.postgresqlMaintenanceWorkMem }}
-    {{- else }}
-    maintenance_work_mem = 64MB
-    {{- end }}
+    shared_buffers = {{ ternary .Values.config.postgresqlSharedBuffers .Values.config.postgresql.shared_buffers (ne .Values.config.postgresqlSharedBuffers "") }}
+    effective_cache_size = {{ ternary .Values.config.postgresqlEffectiveCacheSize .Values.config.postgresql.effective_cache_size (ne .Values.config.postgresqlEffectiveCacheSize "") }}
+    work_mem = {{ ternary .Values.config.postgresqlWorkMem .Values.config.postgresql.work_mem (ne .Values.config.postgresqlWorkMem "") }}
+    maintenance_work_mem = {{ ternary .Values.config.postgresqlMaintenanceWorkMem .Values.config.postgresql.maintenance_work_mem (ne .Values.config.postgresqlMaintenanceWorkMem "") }}
 
     # Checkpoint Settings
-    {{- if .Values.config.postgresqlCheckpointCompletionTarget }}
-    checkpoint_completion_target = {{ .Values.config.postgresqlCheckpointCompletionTarget }}
-    {{- else }}
-    checkpoint_completion_target = 0.7
-    {{- end }}
-    
+    checkpoint_completion_target = {{ ternary .Values.config.postgresqlCheckpointCompletionTarget .Values.config.postgresql.checkpoint_completion_target (ne .Values.config.postgresqlCheckpointCompletionTarget "") }}
+
     # Query Planner Settings
-    {{- if .Values.config.postgresqlRandomPageCost }}
-    random_page_cost = {{ .Values.config.postgresqlRandomPageCost }}
-    {{- else }}
-    random_page_cost = 1.1
-    {{- end }}
-    
+    random_page_cost = {{ ternary .Values.config.postgresqlRandomPageCost .Values.config.postgresql.random_page_cost (ne .Values.config.postgresqlRandomPageCost "") }}
+
     # Logging Settings
-    log_destination = 'stderr'
-    logging_collector = off
-    log_min_messages = warning
-    log_min_error_statement = error
-    
-    {{- if .Values.config.postgresqlLogStatement }}
-    log_statement = {{ .Values.config.postgresqlLogStatement | squote }}
-    {{- else }}
-    log_statement = 'none'
-    {{- end }}
-    
-    {{- if .Values.config.postgresqlLogMinDurationStatement }}
-    log_min_duration_statement = {{ .Values.config.postgresqlLogMinDurationStatement }}
-    {{- else }}
-    log_min_duration_statement = -1
-    {{- end }}
-    
+    log_destination = '{{ .Values.config.postgresql.log_destination }}'
+    logging_collector = {{ .Values.config.postgresql.logging_collector }}
+    log_min_messages = {{ .Values.config.postgresql.log_min_messages }}
+    log_min_error_statement = {{ .Values.config.postgresql.log_min_error_statement }}
+    log_statement = {{ (ternary .Values.config.postgresqlLogStatement .Values.config.postgresql.log_statement (ne .Values.config.postgresqlLogStatement "")) | squote }}
+    log_min_duration_statement = {{ (ternary .Values.config.postgresqlLogMinDurationStatement .Values.config.postgresql.log_min_duration_statement (ne .Values.config.postgresqlLogMinDurationStatement "")) | squote }}
+
     # Shared Libraries
-    {{- if .Values.config.postgresqlSharedPreloadLibraries }}
-    shared_preload_libraries = {{ .Values.config.postgresqlSharedPreloadLibraries | squote }}
+    {{- if or .Values.config.postgresqlSharedPreloadLibraries .Values.config.postgresql.shared_preload_libraries }}
+    shared_preload_libraries = {{ (ternary .Values.config.postgresqlSharedPreloadLibraries .Values.config.postgresql.shared_preload_libraries (ne .Values.config.postgresqlSharedPreloadLibraries "")) | squote }}
     {{- end }}
     
     # Locale and Formatting
-    datestyle = 'iso, mdy'
+    datestyle = '{{ .Values.config.postgresql.datestyle }}'
     timezone = '{{ .Values.config.postgresql.timezone }}'
     lc_messages = '{{ .Values.config.postgresql.locale }}'
     lc_monetary = '{{ .Values.config.postgresql.locale }}'
     lc_numeric = '{{ .Values.config.postgresql.locale }}'
     lc_time = '{{ .Values.config.postgresql.locale }}'
-    default_text_search_config = 'pg_catalog.english'
+    default_text_search_config = '{{ .Values.config.postgresql.default_text_search_config }}'
     
     # Set pg_hba.conf file to use
     hba_file = '{{ include "postgres.configDir" . }}/pg_hba.conf'
 
     # WAL Settings
-    wal_buffers = {{ ternary .Values.config.postgresqlWalBuffers .Values.config.postgresql.wal.buffers (ne .Values.config.postgresqlWalBuffers "") }}
-    wal_level = {{ .Values.config.postgresql.wal.level }}
+    wal_buffers = {{ ternary .Values.config.postgresqlWalBuffers .Values.config.postgresql.wal_buffers (ne .Values.config.postgresqlWalBuffers "") }}
+    wal_level = {{ .Values.config.postgresql.wal_level }}
 
     {{- if .Values.replication.enabled }}
     {{- if not .Values.replication.primary.host }}
 
     # Replication primary configuration
-    max_wal_senders = {{ .Values.config.postgresql.wal.maxSenders }}
-    wal_keep_size = {{ .Values.config.postgresql.wal.keepSize }}
+    max_wal_senders = {{ .Values.config.postgresql.max_wal_senders }}
+    wal_keep_size = {{ .Values.config.postgresql.wal_keep_size }}
     {{- else }}
 
     # Replication standby configuration

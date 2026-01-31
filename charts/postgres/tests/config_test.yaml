@@ -8,6 +8,63 @@ tests:
       - matchRegex:
           path: data["postgresql.conf"]
           pattern: "wal_buffers = 16M"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "wal_level = replica"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_connections = 100"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "shared_buffers = 128MB"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "effective_cache_size = 4GB"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "work_mem = 4MB"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "maintenance_work_mem = 64MB"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "checkpoint_completion_target = 0.7"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "timezone = 'UTC'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "lc_messages = 'en_US.utf8'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "random_page_cost = 1.1"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "datestyle = 'iso, mdy'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_destination = 'stderr'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "logging_collector = off"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_min_messages = warning"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_min_error_statement = error"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_statement = 'none'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_min_duration_statement = '-1'"
+      - notMatchRegex:
+          path: data["postgresql.conf"]
+          pattern: "shared_preload_libraries"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "default_text_search_config = 'pg_catalog.english'"
 
   - it: config variations
     set:
@@ -15,8 +72,8 @@ tests:
         postgresql:
           timezone: "Uganda"
           locale: "fr/FR"
-          wal:
-            buffers: "42M"
+          wal_buffers: "42M"
+          max_connections: 33
     asserts:
       - matchRegex:
           path: data["postgresql.conf"]
@@ -27,15 +84,33 @@ tests:
       - matchRegex:
           path: data["postgresql.conf"]
           pattern: "wal_buffers = 42M"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_connections = 33"
 
   - it: old values should override new values
     set:
       config:
         postgresqlWalBuffers: "oldValue"
+        postgresqlMaxConnections: 666
+        postgresqlCheckpointCompletionTarget: "0.8"
+        postgresqlLogMinDurationStatement: "42"
+        postgresqlRandomPageCost: "99"
         postgresql:
-          wal:
-            buffers: "42M"
+          wal_buffers: "42M"
     asserts:
       - matchRegex:
           path: data["postgresql.conf"]
           pattern: "wal_buffers = oldValue"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "max_connections = 666"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "checkpoint_completion_target = 0.8"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_min_duration_statement = '42'"
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "random_page_cost = 99"
