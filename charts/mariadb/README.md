@@ -25,7 +25,7 @@ helm install my-mariadb oci://registry-1.docker.io/cloudpirates/mariadb -f my-va
 Or install directly from the local chart:
 
 ```bash
-helm install my-valkey ./charts/valkey
+helm install my-mariadb ./charts/mariadb
 ```
 
 ## Uninstalling the Chart
