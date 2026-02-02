@@ -150,6 +150,18 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Validate ACL configuration - ensure existingSecret and existingFilePath are mutually exclusive
+*/}}
+{{- define "redis.auth.acl.validate" -}}
+{{- if and .Values.auth.acl.existingSecret .Values.auth.acl.existingFilePath -}}
+{{- fail "auth.acl.existingSecret and auth.acl.existingFilePath are mutually exclusive. Please use only one of them." -}}
+{{- end -}}
+{{- if and .Values.auth.acl.enabled (not .Values.auth.acl.existingSecret) (not .Values.auth.acl.existingFilePath) -}}
+{{- fail "auth.acl.enabled is true but neither auth.acl.existingSecret nor auth.acl.existingFilePath is set. Please provide an ACL source." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the ACL file name
 */}}
 {{- define "redis.auth.acl.file" -}}
@@ -160,7 +172,11 @@ Return the ACL file name
 Return the full path to the ACL file
 */}}
 {{- define "redis.auth.acl.path" -}}
+{{- if .Values.auth.acl.existingFilePath -}}
+{{- .Values.auth.acl.existingFilePath -}}
+{{- else -}}
 {{- printf "/etc/redis/%s" (include "redis.auth.acl.file" .) -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

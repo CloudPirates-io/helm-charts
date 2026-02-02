@@ -134,6 +134,45 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.acl.enabled`               | Enable custom ACL rules from a secret file                   | `false` |
 | `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
 | `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
+| `auth.acl.existingFilePath`      | Path to existing ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""`    |
+
+#### ACL Configuration
+
+Redis ACL (Access Control List) allows fine-grained access control with user-specific permissions. When ACL is enabled, all users including the 'default' user must be explicitly configured in the ACL file.
+
+**Using Kubernetes Secret (existingSecret):**
+
+```yaml
+auth:
+  acl:
+    enabled: true
+    existingSecret: "my-redis-acl"
+    existingSecretACLKey: "users.acl"
+```
+
+**Using Vault Agent Injector (existingFilePath):**
+
+```yaml
+auth:
+  acl:
+    enabled: true
+    existingFilePath: "/vault/secrets/redis-acl"
+```
+
+**ACL File Format Example:**
+
+```
+user default >masterpassword ~* +@all
+user readonly >readonlypassword ~* +@read
+user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
+```
+
+**Notes:**
+
+- `existingSecret` and `existingFilePath` are mutually exclusive
+- When using `existingFilePath`, no volume mounting is performed - the file must be available at the specified path
+- The ACL file must contain at least a 'default' user
+- For Sentinel deployments, include a 'sentinel' user or the 'default' user password will be used
 
 ### TLS/SSL Configuration
 
