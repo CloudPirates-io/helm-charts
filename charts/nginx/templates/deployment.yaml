@@ -152,7 +152,7 @@ spec:
             - name: emptydir
               mountPath: /var/cache/nginx/scgi_temp
               subPath: scgi-temp-dir
-          {{- if .Values.cloneStaticSiteFromGit.enabled }}
+          {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}
             - name: static-site
               mountPath: /usr/share/nginx/html
           {{- end }}
@@ -259,9 +259,9 @@ spec:
       volumes:
         - name: emptydir
           emptyDir: {}
-        {{- if .Values.cloneStaticSiteFromGit.enabled }}
+        {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}
         - name: static-site
-          emptyDir: {}
+          {{- include "nginx.staticSiteVolume" . | nindent 10 }}
         {{- end }}
       {{- if or .Values.serverConfig .Values.streamServerConfig }}
         - name: nginx-server-config

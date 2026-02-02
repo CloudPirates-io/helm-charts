@@ -104,6 +104,9 @@ autoscaling:
   targetCPUUtilizationPercentage: ""
   targetMemoryUtilizationPercentage: ""
 
+## @param staticSiteConfigmap Name of existing ConfigMap with the server static site content
+staticSiteConfigmap: ""
+
 ## Get the server static content from a git repository
 cloneStaticSiteFromGit:
   ## @param cloneStaticSiteFromGit.enabled Get the server static content from a Git repository
