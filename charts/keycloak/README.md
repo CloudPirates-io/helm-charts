@@ -350,7 +350,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `initContainers.waitForMariadb.image`          | Full image override for MariaDB init container                  | `""` |
 | `initContainers.waitForMariadb.registry`       | MariaDB image registry (overrides global.imageRegistry)         | `""` |
 | `initContainers.waitForMariadb.repository`     | MariaDB image repository                                        | `mariadb` |
-| `initContainers.waitForMariadb.tag`            | MariaDB image tag                                               | `"12.0.2@ha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
+| `initContainers.waitForMariadb.tag`            | MariaDB image tag                                               | `"12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
 | `initContainers.waitForMariadb.pullPolicy`     | MariaDB image pull policy                                       | `IfNotPresent` |
 | `initContainers.waitForMariadb.resources`      | Resource requests and limits for MariaDB init container         | `{}` |
 
