@@ -464,9 +464,18 @@ data:
     if [ -f /keyfile-secret/keyfile ]; then
       echo "Using keyfile from secret"
       cp /keyfile-secret/keyfile /replicaset/keyfile
+    {{- if .Values.replicaSet.key }}
     else
       echo "Using configured key"
       echo {{ .Values.replicaSet.key | quote }} > /replicaset/keyfile
+    {{- else }}
+    else
+      echo "ERROR: replicaSet.enabled is true but neither replicaSet.key nor replicaSet.keySecretName is configured"
+      echo "Please provide either:"
+      echo "  - replicaSet.key: A base64 encoded string (6-1024 characters)"
+      echo "  - replicaSet.keySecretName: Name of an existing secret with a 'keyfile' key"
+      exit 1
+    {{- end }}
     fi
     chmod 400 /replicaset/keyfile
     {{- end }}    
