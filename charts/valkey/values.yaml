@@ -280,7 +280,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.80.1-alpine@sha256:9c6a2f80054875ab36ca7020edbe68a1d05dd6745d030cc6317812ad14333897"
+    tag: "v1.80.2-alpine@sha256:5c1692551217e4519a04b89aa87a8c3360173f020e8cef280c798e9f5dbc819a"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -326,6 +326,8 @@ sentinel:
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   image:
+    ## @param sentinel.image.registry Valkey Sentinel image registry
+    registry: docker.io
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
