@@ -45,10 +45,7 @@ spec:
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
-      {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "redis.serviceAccountName" . }}
-      serviceAccount: {{ include "redis.serviceAccountName" . }}
-      {{- end }}
       {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
