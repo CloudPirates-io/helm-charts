@@ -389,6 +389,9 @@ data:
       local mongoshell=$(which mongosh)
       if [ ! -z "$mongoshell" ]; then
         log "Using mongosh as default shell"
+        {{- if .Values.replicaSet.extraInit.disableTelemetry }}
+        mongosh --nodb --eval "disableTelemetry()"
+        {{- end }}
         export IS_MONGODB_4="false"
       else
         log "Using mongo as default shell"
@@ -463,7 +466,7 @@ data:
       cp /keyfile-secret/keyfile /replicaset/keyfile
     else
       echo "Using configured key"
-      echo "{{ .Values.replicaSet.key }}" > /replicaset/keyfile
+      echo {{ .Values.replicaSet.key | quote }} > /replicaset/keyfile
     fi
     chmod 400 /replicaset/keyfile
     {{- end }}    

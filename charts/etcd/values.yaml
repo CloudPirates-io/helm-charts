@@ -18,11 +18,11 @@ commonAnnotations: {}
 ## @section etcd image parameters
 image:
   ## @param image.registry etcd image registry
-  registry: quay.io
+  registry: gcr.io
   ## @param image.repository etcd image repository
-  repository: coreos/etcd
+  repository: etcd-development/etcd
   ## @param image.tag etcd image tag
-  tag: "v3.6.5@sha256:3397341272b9e0a6f44d7e3fc7c321c6efe6cbe82ce866b9b01d0c704bfc5bf3"
+  tag: "v3.6.7@sha256:70cd5d29d2efcbc4c15f2a63183fd537aae77ddbc46b3b97a8a97bc8751ec3b4"
   ## @param image.pullPolicy etcd image pull policy
   pullPolicy: IfNotPresent
 
@@ -210,7 +210,7 @@ containerSecurityContext:
   ## @param containerSecurityContext.capabilities.drop Linux capabilities to drop
   capabilities:
     drop:
-    - ALL
+      - ALL
 
 ## @param podSecurityContext Security context for the pod
 podSecurityContext:

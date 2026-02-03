@@ -1,6 +1,6 @@
 suite: test openshift related settings
 templates:
-  - templates/deployment.yaml
+  - templates/statefulset.yaml
 set:
   podSecurityContext:
     fsGroup: 999

@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.5.0@sha256:5fdd7cda82e58775ed124294c7e16fabc33166d38dfc4aabebda7d64e7a964bf"
+  tag: "26.5.2@sha256:fb31a59deb46f746f2aaa25adc5da39ceccac4fd22d36a519562b0bf02e8df20"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -100,6 +100,8 @@ keycloak:
   hostnameBackchannel: ""
   ## @param keycloak.httpEnabled Enable HTTP listener
   httpEnabled: true
+  ## @param keycloak.httpsEnabled Enable HTTPS listener
+  httpsEnabled: false
   ## @param keycloak.httpPort HTTP port
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
@@ -114,6 +116,8 @@ keycloak:
   production: false
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
+  ## @param keycloak.extraArgsPrefix Additional arguments to pass before the start command (e.g., for --config-file)
+  extraArgsPrefix: []
   ## @param keycloak.extraArgs Additional arguments to pass to the Keycloak startup command
   extraArgs: []
 
@@ -176,7 +180,8 @@ tls:
 
 ## @section Database Configuration
 database:
-  ## @param database.type Database type (postgres, mysql, mariadb, mssql)
+  ## @param database.type Database type (postgres, mysql, mariadb, mssql, empty string)
+  ## Note: If database.type is an empty string, all --db* settings will be omitted, e.g. type, url, etc.
   ## Note: H2 databases (h2-file, h2-mem) are not supported due to readonly filesystem restrictions
   ## Use embedded postgres or mariadb instead
   type: postgres

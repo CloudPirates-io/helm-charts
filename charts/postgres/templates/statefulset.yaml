@@ -1,3 +1,4 @@
+{{ $shouldMountInitScripts := or .Values.initdb.scriptsConfigMap (and .Values.replication.enabled (not .Values.replication.primary.host)) .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -38,11 +39,34 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if .Values.initContainers }}
       initContainers:
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication-standby-init
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "postgres.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          env:
+            - name: PGDATA
+              value: {{ include "postgres.pgdataPath" . }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
+          volumeMounts:
+            - name: {{ .Values.persistence.volumeName }}
+              mountPath: {{ include "postgres.dataDir" . }}
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+            - name: run
+              mountPath: {{ include "postgres.runDir" . }}
+            - name: replication
+              mountPath: /replication-scripts
+          command:
+            - /replication-scripts/replication-standby-init.sh
+        {{- end }}
+        {{- if .Values.initContainers }}
         {{- toYaml .Values.initContainers | nindent 8 }}
-      {{- end }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      enableServiceLinks: {{ .Values.global.enableServiceLinks }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -50,10 +74,6 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           {{- if .Values.command }}
           command: {{- toYaml .Values.command | nindent 12 }}
-          {{- else if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
-          command:
-            - /bin/bash
-            - /scripts/postgres-wrapper.sh
           {{- end }}
           {{- if kindIs "invalid" .Values.args }}
           args:
@@ -76,25 +96,13 @@ spec:
             {{- end }}
             {{- if .Values.auth.database }}
             - name: POSTGRES_DB
-              value: {{ .Values.auth.database | quote }}
+              value: {{ include "postgres.database" .}}
             {{- end }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
                   key: {{ include "postgres.adminPasswordKey" . }}
-            {{- if .Values.config.postgresqlMaxConnections }}
-            - name: POSTGRES_MAX_CONNECTIONS
-              value: {{ .Values.config.postgresqlMaxConnections | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlSharedBuffers }}
-            - name: POSTGRES_SHARED_BUFFERS
-              value: {{ .Values.config.postgresqlSharedBuffers | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlEffectiveCacheSize }}
-            - name: POSTGRES_EFFECTIVE_CACHE_SIZE
-              value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
-            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
@@ -142,6 +150,9 @@ spec:
                   {{- end }}
                   key: {{ tpl .Values.customUser.secretKeys.password . | quote }}
             {{- end }}
+          {{- if .Values.replication.enabled }}
+            {{ include "postgres.replicationEnv" . | nindent 12 }}
+          {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
             - secretRef:
@@ -196,7 +207,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: data
+            - name: {{ .Values.persistence.volumeName }}
               mountPath: {{ include "postgres.dataDir" . }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
@@ -209,11 +220,9 @@ spec:
               mountPath: {{ include "postgres.runDir" . }}
             - name: tmp
               mountPath: /tmp
-            {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+            {{- if $shouldMountInitScripts }}
             - name: custom-init-scripts
               mountPath: {{ .Values.initdb.directory }}
-            - name: wrapper-script
-              mountPath: /scripts
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -281,14 +290,16 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-        {{- if or .Values.initdb.scriptsConfigMap .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+        {{- if $shouldMountInitScripts }}
         - name: custom-init-scripts
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
             defaultMode: 0755
-        - name: wrapper-script
+        {{- end }}
+        {{- if and .Values.replication.enabled .Values.replication.primary.host }}
+        - name: replication
           configMap:
-            name: {{ printf "%s-wrapper" (include "postgres.fullname" .) }}
+            name: {{ printf "%s-replication" (include "postgres.fullname" .) }}
             defaultMode: 0755
         {{- end }}
         {{- if .Values.extraVolumes }}
@@ -315,7 +326,7 @@ spec:
   {{- if not .Values.persistence.existingClaim }}
   volumeClaimTemplates:
   - metadata:
-      name: data
+      name: {{ .Values.persistence.volumeName }}
       {{- with $labels := merge (include "postgres.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
       labels:
         {{- toYaml $labels | nindent 8 }}
