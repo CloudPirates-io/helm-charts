@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.15.4
+version: 0.15.5
 appVersion: "4.2.3"
 keywords:
   - rabbitmq
@@ -41,7 +41,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: " [universal] add priorityclasses to multiple charts (#839)"
+          description: "[rabbitmq] Replace deprecated management.load_definitions with definitions.local.path"
           links:
-            - name: "Commit b3d816f"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/b3d816f"
+            - name: "PR 954"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/954"
