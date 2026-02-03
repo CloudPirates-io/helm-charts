@@ -15,55 +15,44 @@ data:
     #!/bin/sh
     set -e
 
-    MINIO_URL="http://{{ include "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+    MINIO_SERVICE="{{ include "minio.fullname" . }}"
+    MINIO_PORT="{{ .Values.service.port }}"
+    MINIO_URL="http://${MINIO_SERVICE}:${MINIO_PORT}"
     MINIO_STARTUP_TIMEOUT="${MINIO_STARTUP_TIMEOUT:-300}"
 
     echo "=== MinIO Bucket Provisioning ==="
     echo "Target: $MINIO_URL"
+    echo "Service: $MINIO_SERVICE"
+    echo "Port: $MINIO_PORT"
 
     ########################
-    # Check if MinIO is live
-    ########################
-    is_minio_live() {
-        local status_code
-        status_code=$(curl --write-out '%{http_code}' --silent --output /dev/null "${MINIO_URL}/minio/health/live")
-        if [ "$status_code" = "200" ]; then
-            return 0
-        else
-            return 1
-        fi
-    }
-
-    ########################
-    # Wait for MinIO start
+    # Wait for MinIO and configure client
     ########################
     wait_for_minio() {
         local waited_time
         waited_time=0
-        echo "Waiting for MinIO to be ready..."
-        while ! is_minio_live && [ "$waited_time" -lt "$MINIO_STARTUP_TIMEOUT" ]; do
+        echo "Waiting for MinIO to be ready and configuring client..."
+
+        while [ "$waited_time" -lt "$MINIO_STARTUP_TIMEOUT" ]; do
+            # Try to configure alias (might fail if MinIO not ready)
+            if mc alias set local "$MINIO_URL" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" 2>/dev/null; then
+                echo "Alias configured, testing connection..."
+                # Try a simple operation to verify MinIO is actually ready
+                if mc ls local >/dev/null 2>&1; then
+                    echo "MinIO is ready!"
+                    return 0
+                else
+                    echo "Alias set but MinIO not fully ready yet..."
+                fi
+            fi
+
             echo "MinIO not ready yet, waiting... (${waited_time}s/${MINIO_STARTUP_TIMEOUT}s)"
             sleep 5
             waited_time=$((waited_time + 5))
         done
-        
-        if [ "$waited_time" -ge "$MINIO_STARTUP_TIMEOUT" ]; then
-            echo "Timeout: MinIO not ready after ${MINIO_STARTUP_TIMEOUT}s"
-            return 1
-        fi
-        echo "MinIO is ready!"
-        sleep 2
-    }
 
-    ########################
-    # MinIO client configuration
-    ########################
-    configure_minio_client() {
-        echo "Configuring MinIO client..."
-        mc alias set local "$MINIO_URL" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}"
-        
-        echo "Testing MinIO client connection..."
-        mc ready local
+        echo "Timeout: MinIO not ready after ${MINIO_STARTUP_TIMEOUT}s"
+        return 1
     }
 
     ########################
@@ -106,12 +95,10 @@ data:
     ########################
     # Main execution
     ########################
-    
+
     wait_for_minio
-    
-    configure_minio_client
-    
+
     minio_create_default_buckets
-    
+
     echo "Bucket provisioning completed successfully."
 {{- end }}

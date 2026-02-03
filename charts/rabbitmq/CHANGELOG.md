@@ -60,6 +60,15 @@
 
 * No changes recorded
 
+## 0.12.4 (2026-01-22)
+
+
+## 0.12.3 (2026-01-22)
+
+* chore: update CHANGELOG.md for merged changes ([d328a7b](https://github.com/CloudPirates-io/helm-charts/commit/d328a7b))
+* chore: update CHANGELOG.md for merged changes ([fe56747](https://github.com/CloudPirates-io/helm-charts/commit/fe56747))
+* chore: update CHANGELOG.md for merged changes ([e1458d8](https://github.com/CloudPirates-io/helm-charts/commit/e1458d8))
+
 ## 0.12.2 (2026-01-21)
 
 * Update charts/rabbitmq/values.yaml rabbitmq (#872) ([ce33816](https://github.com/CloudPirates-io/helm-charts/commit/ce33816))

@@ -1,6 +1,7 @@
 {{- $createCustomUser := and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
 {{- $appendInitdbScripts := and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
-{{- if or $createCustomUser $appendInitdbScripts }}
+{{- $replicationPrimary := and .Values.replication.enabled (not .Values.replication.primary.host) }}
+{{- if or $createCustomUser $appendInitdbScripts $replicationPrimary }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,15 +39,26 @@ data:
 
     echo "✅ Custom user and database created successfully!"
   {{- end }}
+  {{- if and $replicationPrimary .Values.replication.createUser }}
+  00-replication-primary-setup.sh: |
+    #!/bin/sh
+    set -e
+
+    if [ -z "${REPLICATION_USER}" ] || [ -z "${REPLICATION_PASSWORD}" ]; then
+      echo "⛔️ No credentials configured. Aborting"
+      exit 1
+    fi
+
+    PGUSER="${POSTGRES_USER}" psql -v ON_ERROR_STOP=1 -v REPL_USER="${REPLICATION_USER}" -v REPL_PASS="${REPLICATION_PASSWORD}" <<'EOSQL'
+      SELECT quote_ident(:'REPL_USER') AS user \gset
+      SELECT quote_literal(:'REPL_PASS') AS pass \gset
+
+      CREATE ROLE :user WITH REPLICATION LOGIN PASSWORD :pass;
+    EOSQL
+
+    echo "✅ Replication user created"
+  {{- end }}
   {{- if $appendInitdbScripts }}
   {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.initdb.scripts "context" .) | nindent 2 }}
   {{- end }}
-  zz-mark-init-complete.sh: |
-    #!/bin/sh
-    # This script runs last (zz prefix ensures it runs after all other init scripts)
-    # It creates a semaphore file to indicate that all init scripts completed successfully
-    set -e
-    echo "✅ All initialization scripts completed successfully"
-    touch {{ include "postgres.dataDir" . }}/.init-scripts-completed
-    echo "Created semaphore file: {{ include "postgres.dataDir" . }}/.init-scripts-completed"
 {{- end }}
