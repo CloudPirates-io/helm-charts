@@ -16,10 +16,6 @@ on:
         required: false
         type: string
 
-concurrency:
-  group: release
-  cancel-in-progress: false
-
 jobs:
   release:
     permissions:
@@ -35,8 +31,20 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          # Setup SSH key for signing in a secure temp location
+          SIGN_KEY_FILE=$(mktemp)
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > "$SIGN_KEY_FILE"
+          chmod 600 "$SIGN_KEY_FILE"
+
+          # Store the key file path for later steps
+          echo "SIGN_KEY_FILE=$SIGN_KEY_FILE" >> $GITHUB_ENV
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey "$SIGN_KEY_FILE"
+          git config commit.gpgsign true
 
       - name: Login to Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
@@ -259,3 +267,11 @@ jobs:
           echo "### 📍 Registries" >> $GITHUB_STEP_SUMMARY
           echo "- Primary: \`${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- GHCR: \`ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup signing key
+        if: always()
+        run: |
+          if [ -n "$SIGN_KEY_FILE" ] && [ -f "$SIGN_KEY_FILE" ]; then
+            rm -f "$SIGN_KEY_FILE"
+            echo "Signing key cleaned up"
+          fi

@@ -267,3 +267,123 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: should configure acl with existingFilePath in standalone mode
+    template: statefulset.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      # Should not contain acl-file volume mount since using existingFilePath
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: acl-file
+      # Should not contain acl-file volume since using existingFilePath
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: acl-file
+      # Should use the custom path in liveness probe
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: 'vault/secrets/redis-acl'
+
+  - it: should configure acl with existingFilePath in configmap
+    template: configmap.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      - matchRegex:
+          path: data["redis.conf"]
+          pattern: 'aclfile /vault/secrets/redis-acl'
+
+  - it: should configure acl with existingFilePath in replication mode with sentinel
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      # Should not contain acl-file volume mount
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: acl-file
+      # Should not contain acl-file volume
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: acl-file
+      # Sentinel container should not mount ACL volume
+      - notContains:
+          path: spec.template.spec.containers[1].volumeMounts
+          content:
+            name: acl-file
+
+  - it: should configure acl with existingFilePath in cluster mode
+    template: job.yaml
+    set:
+      architecture: cluster
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      # Should not contain acl-file volume mount
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: acl-file
+      # Should not contain acl-file volume
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: acl-file
+
+  - it: should configure acl with existingFilePath in master service
+    template: sentinel-master-deployment.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+      sentinel.masterService.enabled: true
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      # Should not contain acl-file volume mount
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: acl-file
+      # Should not contain acl-file volume
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: acl-file
+
+  - it: should fail when both existingSecret and existingFilePath are set
+    template: statefulset.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingSecret: my-acl-secret
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      - failedTemplate:
+          errorMessage: "auth.acl.existingSecret and auth.acl.existingFilePath are mutually exclusive. Please use only one of them."
+
+  - it: should fail when acl enabled but no source provided
+    template: statefulset.yaml
+    set:
+      auth.acl.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: "auth.acl.enabled is true but neither auth.acl.existingSecret nor auth.acl.existingFilePath is set. Please provide an ACL source."
+
+  - it: should not render secret when acl is enabled with existingFilePath
+    template: secret.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingFilePath: /vault/secrets/redis-acl
+    asserts:
+      - hasDocuments:
+          count: 0

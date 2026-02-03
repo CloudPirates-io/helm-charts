@@ -150,6 +150,18 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Validate ACL configuration - ensure existingSecret and existingFilePath are mutually exclusive
+*/}}
+{{- define "redis.auth.acl.validate" -}}
+{{- if and .Values.auth.acl.existingSecret .Values.auth.acl.existingFilePath -}}
+{{- fail "auth.acl.existingSecret and auth.acl.existingFilePath are mutually exclusive. Please use only one of them." -}}
+{{- end -}}
+{{- if and .Values.auth.acl.enabled (not .Values.auth.acl.existingSecret) (not .Values.auth.acl.existingFilePath) -}}
+{{- fail "auth.acl.enabled is true but neither auth.acl.existingSecret nor auth.acl.existingFilePath is set. Please provide an ACL source." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the ACL file name
 */}}
 {{- define "redis.auth.acl.file" -}}
@@ -160,7 +172,11 @@ Return the ACL file name
 Return the full path to the ACL file
 */}}
 {{- define "redis.auth.acl.path" -}}
+{{- if .Values.auth.acl.existingFilePath -}}
+{{- .Values.auth.acl.existingFilePath -}}
+{{- else -}}
 {{- printf "/etc/redis/%s" (include "redis.auth.acl.file" .) -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -259,6 +275,22 @@ if [ -z "$ACL_PASSWORD" ]; then
   exit 1
 fi
 REDIS_PASSWORD="$ACL_PASSWORD"
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate TLS certificate arguments for redis-cli probes
+When client certificates are available, use them for client authentication
+Otherwise fall back to server certificates (for backwards compatibility)
+Usage: {{ include "redis.tls.probeArgs" . }}
+*/}}
+{{- define "redis.tls.probeArgs" -}}
+{{- if .Values.tls.enabled -}}
+{{- if .Values.tls.client.existingSecret -}}
+--tls --cert /etc/redis/tls-client/{{ .Values.tls.client.certFilename }} --key /etc/redis/tls-client/{{ .Values.tls.client.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+{{- else -}}
+--tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}
 {{- end -}}
 {{- end -}}
 {{- end -}}

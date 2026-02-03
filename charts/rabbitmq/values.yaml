@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.2-management@sha256:5b38b93d6f8cecc6263c0b774b31acd60849bf4d06b2e61169f0c28c1c55c232"
+  tag: "4.2.3-management@sha256:9e537169ec1c6b97f13549c6d3a7a4690a6d5be19d7d6cc42c5beb212fce5873"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -259,7 +259,7 @@ initContainer:
     ## @param initContainer.image.registry Init container image repository
     repository: busybox
     ## @param initContainer.image.tag Init container image tag
-    tag: "1.37.0@sha256:2383baad1860bbe9d8a7a843775048fd07d8afe292b94bd876df64a69aae7cb1"
+    tag: "1.37.0@sha256:b3255e7dfbcd10cb367af0d409747d511aeb66dfac98cf30e97e87e4207dd76f"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
 
@@ -282,6 +282,8 @@ metrics:
     interval: 30s
     ## @param metrics.serviceMonitor.scrapeTimeout Scrape timeout
     scrapeTimeout: 10s
+    ## @param metrics.serviceMonitor.path Select detail of metrics (/metrics, /metrics/detailed, /metrics/per-object)
+    path: /metrics
 
 ## @param additionalPlugins Additional default RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added)
 additionalPlugins: []
@@ -297,6 +299,8 @@ persistence:
   existingClaim: ""
   ## @param persistence.storageClass Storage class to use for persistent volume
   storageClass: ""
+  ## @param persistence.mountPath Set the mountPath for the data Volume
+  mountPath: "/var/lib/rabbitmq"
   ## @param persistence.accessModes Persistent Volume access modes
   accessModes:
     - ReadWriteOnce
@@ -637,3 +641,23 @@ definitions:
   #   configure: ".*"
   #   write: ".*"
   #   read: ".*"
+  ## @param definitions.autoReload.enabled Enable sidecar container to watch for ConfigMap/Secret changes and reload definitions automatically
+  autoReload:
+    enabled: false
+    ## @param definitions.autoReload.image.registry Container image registry for the config watcher sidecar
+    ## @param definitions.autoReload.image.repository Container image repository for the config watcher sidecar
+    ## @param definitions.autoReload.image.tag Container image tag for the config watcher sidecar
+    ## @param definitions.autoReload.image.pullPolicy Container image pull policy for the config watcher sidecar
+    image:
+      registry: docker.io
+      repository: curlimages/curl
+      tag: "8.18.0"
+      pullPolicy: IfNotPresent
+    ## @param definitions.autoReload.resources Resource limits and requests for the config watcher sidecar
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 50m
+        memory: 32Mi

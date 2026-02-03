@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.13.0 (2026-01-21)
+
+* Add possibility to configure topologySpreadConstraints (#875) ([8fd1775](https://github.com/CloudPirates-io/helm-charts/commit/8fd1775))
+* chore: update CHANGELOG.md for merged changes ([598fe58](https://github.com/CloudPirates-io/helm-charts/commit/598fe58))
+* chore: update CHANGELOG.md for merged changes ([b9e44ca](https://github.com/CloudPirates-io/helm-charts/commit/b9e44ca))
+* chore: update CHANGELOG.md for merged changes ([3209322](https://github.com/CloudPirates-io/helm-charts/commit/3209322))
+
 ## 0.12.1 (2026-01-19)
 
 * Update charts/mariadb/values.yaml mariadb (#853) ([238c925](https://github.com/CloudPirates-io/helm-charts/commit/238c925))
