@@ -103,6 +103,10 @@ auth:
     ## user readonly >readonlypassword ~* +@read
     ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
     existingSecretACLKey: ""
+    ## @param auth.acl.existingFilePath Path to existing ACL file injected by Vault Agent Injector or similar tools
+    ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
+    ## Example: "/vault/secrets/redis-acl"
+    existingFilePath: ""
 
 ## @section TLS/SSL configuration
 tls:
@@ -121,6 +125,17 @@ tls:
   port: 6380
   ## @param tls.authClients Require clients to authenticate with a valid client certificate
   authClients: true
+  ## Client certificate configuration for probes and internal connections
+  ## When tls.authClients is true, these certificates are used by readiness/liveness probes
+  ## If not specified, the server certificates will be used (may fail if authClients is true)
+  client:
+    ## @param tls.client.existingSecret Name of an existing secret containing client TLS certificates
+    ## Expected keys in the secret: tls.crt, tls.key
+    existingSecret: ""
+    ## @param tls.client.certFilename Client certificate filename in the secret
+    certFilename: "tls.crt"
+    ## @param tls.client.certKeyFilename Client certificate key filename in the secret
+    certKeyFilename: "tls.key"
 
 ## @section config Redis configuration options
 config:
@@ -346,17 +361,17 @@ sentinel:
     tag: "8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
+  ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
+  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
   config:
     announceHostnames: true
+    loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
   downAfterMilliseconds: 1500
-  ## @param sentinel.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
-  ## When set to 'debug', full sentinel config (including auth) will be logged at startup
-  loglevel: notice
   ## @param sentinel.failoverTimeout Timeout for failover in milliseconds
   failoverTimeout: 15000
   ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured to use the new master during a failover
@@ -466,7 +481,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.80.1-alpine"
+    tag: "v1.80.2-alpine"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
