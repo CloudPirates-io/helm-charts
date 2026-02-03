@@ -446,7 +446,7 @@ initContainers:
         cpu: 100m
         memory: 64Mi
       requests:
-        cpu: 50m
+        cpu: 100m
         memory: 32Mi
   waitForMariadb:
     ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
@@ -465,7 +465,7 @@ initContainers:
         cpu: 100m
         memory: 64Mi
       requests:
-        cpu: 50m
+        cpu: 100m
         memory: 32Mi
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
