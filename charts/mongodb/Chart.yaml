@@ -39,4 +39,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "[mongodb]: properly mount replicaset secret (#947)"
+          links:
+            - name: "Commit 2d04bbb"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/2d04bbb"
+        - kind: changed
+          description: "[all]: Update documentation to include proper cosign public key"
+          links:
+            - name: "Commit e42365d"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"

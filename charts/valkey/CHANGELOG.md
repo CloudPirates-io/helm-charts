@@ -1,175 +1,148 @@
 # Changelog
 
+All notable changes to this chart will be documented in this file.
 
-## 0.15.0 (2026-01-15)
+## [0.15.3] - 2026-01-28
 
-* [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
-* chore: update CHANGELOG.md for merged changes ([b3cbfb0](https://github.com/CloudPirates-io/helm-charts/commit/b3cbfb0))
+- [all]: Update every chart to newest common (#920) ([f8d134d](../../commit/f8d134d))
 
-## 0.14.0 (2026-01-15)
+## [0.15.2] - 2026-01-27
 
-*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.2 (patch) (#907) ([b8b2721](../../commit/b8b2721))
 
-## 0.13.0 (2025-12-11)
+## [0.15.1] - 2026-01-20
 
-* chore: update CHANGELOG.md for merged changes ([79d5eaa](https://github.com/CloudPirates-io/helm-charts/commit/79d5eaa))
-* chore: update CHANGELOG.md for merged changes ([87cca85](https://github.com/CloudPirates-io/helm-charts/commit/87cca85))
-* [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+- Add registry configuration for Sentinel image (#866) ([e462527](../../commit/e462527))
 
-## 0.12.0 (2025-12-10)
+## [0.15.0] - 2026-01-15
 
-* chore: update CHANGELOG.md for merged changes ([ae1cb60](https://github.com/CloudPirates-io/helm-charts/commit/ae1cb60))
-* chore: update CHANGELOG.md for merged changes ([1151f2d](https://github.com/CloudPirates-io/helm-charts/commit/1151f2d))
-* Port #615, #639, #701 & fix custom config never being used (#715) ([58035e4](https://github.com/CloudPirates-io/helm-charts/commit/58035e4))
+- [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](../../commit/17e0af0))
 
-## 0.11.1 (2025-12-06)
+## [0.14.0] - 2026-01-15
 
-* chore: update CHANGELOG.md for merged changes ([46971c0](https://github.com/CloudPirates-io/helm-charts/commit/46971c0))
-* chore: update CHANGELOG.md for merged changes ([e4e2794](https://github.com/CloudPirates-io/helm-charts/commit/e4e2794))
-* [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694) ([beb428d](https://github.com/CloudPirates-io/helm-charts/commit/beb428d))
-* chore: update CHANGELOG.md for merged changes ([a05c8fe](https://github.com/CloudPirates-io/helm-charts/commit/a05c8fe))
-* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
-* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+-  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](../../commit/b3d816f))
 
-## 0.11.0 (2025-12-06)
+## [0.13.0] - 2025-12-11
 
+- [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](../../commit/ac9e1ba))
 
-## 0.10.3 (2025-12-01)
+## [0.12.0] - 2025-12-10
 
-* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
-* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+- Port #615, #639, #701 & fix custom config never being used (#715) ([58035e4](../../commit/58035e4))
 
-## 0.10.2 (2025-11-25)
+## [0.11.1] - 2025-12-06
 
-* chore: update CHANGELOG.md for merged changes ([bfb2fa4](https://github.com/CloudPirates-io/helm-charts/commit/bfb2fa4))
-* chore: update CHANGELOG.md for merged changes ([793c682](https://github.com/CloudPirates-io/helm-charts/commit/793c682))
-* [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.1 (patch) (#647) ([fa2654b](https://github.com/CloudPirates-io/helm-charts/commit/fa2654b))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694) ([beb428d](../../commit/beb428d))
 
-## 0.10.1 (2025-11-25)
+## [0.11.0] - 2025-12-06
 
-* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
-* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
-* chore: update CHANGELOG.md for merged changes ([f333b89](https://github.com/CloudPirates-io/helm-charts/commit/f333b89))
-* chore: update CHANGELOG.md for merged changes ([5bfc9bf](https://github.com/CloudPirates-io/helm-charts/commit/5bfc9bf))
-* chore: auto-generate values.schema.json (#567) ([3f2d3e4](https://github.com/CloudPirates-io/helm-charts/commit/3f2d3e4))
-* chore: update CHANGELOG.md for merged changes ([6d56cbc](https://github.com/CloudPirates-io/helm-charts/commit/6d56cbc))
-* chore: update CHANGELOG.md for merged changes ([1b75d78](https://github.com/CloudPirates-io/helm-charts/commit/1b75d78))
+- [universal] fix statefulset pvc labels (#696) ([b87dbc7](../../commit/b87dbc7))
 
-## 0.10.0 (2025-11-07)
+## [0.10.3] - 2025-12-01
 
-* [valkey]: Support TLS ([3b0b609](https://github.com/CloudPirates-io/helm-charts/commit/3b0b609))
+- [universal] add labels to statefulset pvc-templates (#681) ([87624a5](../../commit/87624a5))
 
-## 0.9.2 (2025-11-03)
+## [0.10.2] - 2025-11-25
 
-* [valkey]: fix broken statement ([49a9fe9](https://github.com/CloudPirates-io/helm-charts/commit/49a9fe9))
-* chore: update CHANGELOG.md for merged changes ([7af5c40](https://github.com/CloudPirates-io/helm-charts/commit/7af5c40))
-* chore: update CHANGELOG.md for merged changes ([e086407](https://github.com/CloudPirates-io/helm-charts/commit/e086407))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.1 (patch) (#647) ([fa2654b](../../commit/fa2654b))
 
-## 0.9.1 (2025-11-03)
+## [0.10.1] - 2025-11-25
 
-* [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf](https://github.com/CloudPirates-io/helm-charts/commit/57d1caf))
-* chore: update CHANGELOG.md for merged changes ([5e662d8](https://github.com/CloudPirates-io/helm-charts/commit/5e662d8))
-* chore: update CHANGELOG.md for merged changes ([bb1523e](https://github.com/CloudPirates-io/helm-charts/commit/bb1523e))
+- [universal] update readme files (#583) ([e63f5f9](../../commit/e63f5f9))
 
-## 0.9.0 (2025-10-31)
+## [0.10.0] - 2025-11-07
 
-* [valkey]: Valkey HA (#518) ([d8b1bbe](https://github.com/CloudPirates-io/helm-charts/commit/d8b1bbe))
-* chore: update CHANGELOG.md for merged changes ([6fd22a6](https://github.com/CloudPirates-io/helm-charts/commit/6fd22a6))
-* chore: update CHANGELOG.md for merged changes ([3eb08ee](https://github.com/CloudPirates-io/helm-charts/commit/3eb08ee))
-* chore: auto-generate values.schema.json (#481) ([d37c7ed](https://github.com/CloudPirates-io/helm-charts/commit/d37c7ed))
-* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
-* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+- [valkey]: Support TLS ([3b0b609](../../commit/3b0b609))
 
-## 0.8.0 (2025-10-28)
+## [0.9.2] - 2025-11-03
 
-* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
-* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+- [valkey]: fix broken statement ([49a9fe9](../../commit/49a9fe9))
 
-## 0.7.1 (2025-10-23)
+## [0.9.1] - 2025-11-03
 
-* chore: update CHANGELOG.md for merged changes ([bfb9443](https://github.com/CloudPirates-io/helm-charts/commit/bfb9443))
-* chore: update CHANGELOG.md for merged changes ([80edeb0](https://github.com/CloudPirates-io/helm-charts/commit/80edeb0))
-* chore: update CHANGELOG.md for merged changes ([cbb73ba](https://github.com/CloudPirates-io/helm-charts/commit/cbb73ba))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf](../../commit/57d1caf))
 
-## 0.7.0 (2025-10-22)
+## [0.9.0] - 2025-10-31
 
-* [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v9 (major) (#442) ([75276a8](https://github.com/CloudPirates-io/helm-charts/commit/75276a8))
-* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
-* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
-* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+- [valkey]: Valkey HA (#518) ([d8b1bbe](../../commit/d8b1bbe))
 
-## 0.6.2 (2025-10-22)
+## [0.8.0] - 2025-10-28
 
-* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
-* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
-* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
-* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
-* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
-* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
-* chore: update CHANGELOG.md for merged changes ([838e5c5](https://github.com/CloudPirates-io/helm-charts/commit/838e5c5))
-* chore: update CHANGELOG.md for merged changes ([e2a1daa](https://github.com/CloudPirates-io/helm-charts/commit/e2a1daa))
+- [universal] unify extraEnvVars in all charts (#477) ([4aee7b4](../../commit/4aee7b4))
 
-## 0.6.1 (2025-10-17)
+## [0.7.1] - 2025-10-23
 
-* [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.79.0 (minor) (#407) ([7c0e2b3](https://github.com/CloudPirates-io/helm-charts/commit/7c0e2b3))
-* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
-* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
-* chore: update CHANGELOG.md for merged changes ([3361964](https://github.com/CloudPirates-io/helm-charts/commit/3361964))
-* chore: update CHANGELOG.md for merged changes ([7f61172](https://github.com/CloudPirates-io/helm-charts/commit/7f61172))
-* chore: update CHANGELOG.md for merged changes ([1ec9aab](https://github.com/CloudPirates-io/helm-charts/commit/1ec9aab))
-* chore: update CHANGELOG.md for merged changes ([c9ff4ec](https://github.com/CloudPirates-io/helm-charts/commit/c9ff4ec))
-* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+- [universal] Update annotations, labels, podannotations and podlabel (#454) ([cdb38db](../../commit/cdb38db))
 
-## 0.6.0 (2025-10-14)
+## [0.7.0] - 2025-10-22
 
-* Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
-* chore: update CHANGELOG.md for merged changes ([84cf67b](https://github.com/CloudPirates-io/helm-charts/commit/84cf67b))
-* chore: update CHANGELOG.md for all charts via manual trigger ([6974964](https://github.com/CloudPirates-io/helm-charts/commit/6974964))
-* chore: update CHANGELOG.md for merged changes ([63b7bfa](https://github.com/CloudPirates-io/helm-charts/commit/63b7bfa))
-* chore: update CHANGELOG.md for merged changes ([da69e0e](https://github.com/CloudPirates-io/helm-charts/commit/da69e0e))
-* chore: update CHANGELOG.md for merged changes ([5da1b15](https://github.com/CloudPirates-io/helm-charts/commit/5da1b15))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v9 (major) (#442) ([75276a8](../../commit/75276a8))
 
-## 0.5.1 (2025-10-13)
+## [0.6.2] - 2025-10-22
 
+- [universal]: Support extra secret templating (#444) ([c2b2024](../../commit/c2b2024))
+- [universal] fix all appversions in charts (#417) ([b8debeb](../../commit/b8debeb))
+- [unversal] Add signing informations for artifacthub (#415) ([e761c90](../../commit/e761c90))
+- [universal] use a string instead of a boolean (#413) ([c24d26d](../../commit/c24d26d))
+- [universal] improve chart artifact annotations (#404) ([37f1c5b](../../commit/37f1c5b))
 
-## 0.5.0 (2025-10-10)
+## [0.6.1] - 2025-10-17
 
-* feat: add metrics exporter (#342) ([e6b474b](https://github.com/CloudPirates-io/helm-charts/commit/e6b474b))
-* add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.79.0 (minor) (#407) ([7c0e2b3](../../commit/7c0e2b3))
+- [universal] Rework all schema json (#393) ([79d1439](../../commit/79d1439))
+- [mariadb] add galera cluster support for mariadb (#348) ([b7a63ee](../../commit/b7a63ee))
 
-## 0.4.1 (2025-10-09)
+## [0.6.0] - 2025-10-14
 
-* [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v8.1.4 (patch) (#266) ([b52fedf](https://github.com/CloudPirates-io/helm-charts/commit/b52fedf))
+- Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](../../commit/87acfb1))
 
-## 0.4.0 (2025-10-06)
+## [0.5.1] - 2025-10-13
 
-* make valkey run on openshift (#206) ([b1f530c](https://github.com/CloudPirates-io/helm-charts/commit/b1f530c))
+- [universal] Fix imagepullsecret in vales.schema.json (#374) ([bcc566c](../../commit/bcc566c))
+- [universal]: Fix changelog generation (#354) ([2e973c0](../../commit/2e973c0))
 
-## 0.3.2 (2025-09-16)
+## [0.5.0] - 2025-10-10
 
-* Update CHANGELOG.md ([3005f2f](https://github.com/CloudPirates-io/helm-charts/commit/3005f2f))
-* Oops, wrong bump ([1d2fefa](https://github.com/CloudPirates-io/helm-charts/commit/1d2fefa))
-* Fix scheduling directives with disabled persistance ([7485b37](https://github.com/CloudPirates-io/helm-charts/commit/7485b37))
+- feat: add metrics exporter (#342) ([e6b474b](../../commit/e6b474b))
+- [mongodb] fix: newline between mongo labels and additional labels (#301) ([ea7937f](../../commit/ea7937f))
+- add tests for openshift (#226) ([c80c98a](../../commit/c80c98a))
+- [mongodb] feat: add metrics exporter (#243) ([c931978](../../commit/c931978))
 
-## 0.3.1 (2025-09-12)
+## [0.4.1] - 2025-10-09
 
-* Update CHANGELOG.md ([36da816](https://github.com/CloudPirates-io/helm-charts/commit/36da816))
-* fix templating of `affinity`, `nodeSelector` and `tolerations` values ([e98c8ea](https://github.com/CloudPirates-io/helm-charts/commit/e98c8ea))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v8.1.4 (patch) (#266) ([b52fedf](../../commit/b52fedf))
 
-## 0.3.0 (2025-09-02)
+## [0.4.0] - 2025-10-06
 
-* bump all chart versions for new extraObjects feature ([aaa57f9](https://github.com/CloudPirates-io/helm-charts/commit/aaa57f9))
-* add extraObject array to all charts ([34772b7](https://github.com/CloudPirates-io/helm-charts/commit/34772b7))
+- make valkey run on openshift (#206) ([b1f530c](../../commit/b1f530c))
+- [rabbitmq] make rabbitmq run on openshift (#201) ([df4deeb](../../commit/df4deeb))
 
-## 0.2.0 (2025-09-02)
+## [0.3.2] - 2025-09-16
 
-* Update serviceaccount config to disable automatic creation, add missing ns ([77281c6](https://github.com/CloudPirates-io/helm-charts/commit/77281c6))
-* Add support for serviceAccount ([16ac6b3](https://github.com/CloudPirates-io/helm-charts/commit/16ac6b3))
+- Update CHANGELOG.md ([3005f2f](../../commit/3005f2f))
+- Oops, wrong bump ([1d2fefa](../../commit/1d2fefa))
+- Fix scheduling directives with disabled persistance ([7485b37](../../commit/7485b37))
 
-## 0.1.7 (2025-08-27)
+## [0.3.1] - 2025-09-12
 
-* Add initial Changelogs to all Charts ([68f10ca](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca))
+- Update CHANGELOG.md ([36da816](../../commit/36da816))
+- fix templating of `affinity`, `nodeSelector` and `tolerations` values ([e98c8ea](../../commit/e98c8ea))
 
-## 0.1.6 (2025-08-26)
+## [0.3.0] - 2025-09-02
 
-* Initial tagged release
+- bump all chart versions for new extraObjects feature ([aaa57f9](../../commit/aaa57f9))
+- add extraObject array to all charts ([34772b7](../../commit/34772b7))
+
+## [0.2.0] - 2025-09-02
+
+- Update serviceaccount config to disable automatic creation, add missing ns ([77281c6](../../commit/77281c6))
+- Add support for serviceAccount ([16ac6b3](../../commit/16ac6b3))
+
+## [0.1.7] - 2025-08-27
+
+- Add initial Changelogs to all Charts ([68f10ca](../../commit/68f10ca))
+
+## [0.1.6] - 2025-08-26
+
+- Initial release
+

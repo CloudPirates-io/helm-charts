@@ -48,17 +48,19 @@ spec:
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
-          image: {{ .Values.initContainers.waitForPostgres.image }}
+          image: {{ include "keycloak.initContainerImage" (dict "config" .Values.initContainers.waitForPostgres "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.initContainers.waitForPostgres.pullPolicy }}
           command: ["sh", "-c", "until pg_isready -h {{ template "postgres.fullname" .Subcharts.postgres }} -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.initContainers.waitForPostgres.resources | nindent 12 }}
         {{- else if .Values.mariadb.enabled }}
         - name: wait-for-mariadb
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
-          image: {{ .Values.initContainers.waitForMariadb.image }}
+          image: {{ include "keycloak.initContainerImage" (dict "config" .Values.initContainers.waitForMariadb "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.initContainers.waitForMariadb.pullPolicy }}
           command: ["sh", "-c", "until mariadb-admin ping -h {{ template "mariadb.fullname" .Subcharts.mariadb }} -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.initContainers.waitForMariadb.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
           {{- toYaml .Values.extraInitContainers | nindent 8 }}
@@ -350,10 +352,10 @@ spec:
         - name: keycloak-providers
           emptyDir: {}
         {{- end }}
-        {{- if .Values.realm.configFile }}
+        {{- if and .Values.realm.import (or .Values.realm.configFile .Values.realm.existingSecret) }}
         - name: realm-config
-          configMap:
-            name: {{ include "keycloak.fullname" . }}-realm
+          secret:
+            secretName: {{ default (printf "%s-realm" (include "keycloak.fullname" .)) .Values.realm.existingSecret }}
         {{- end }}
         {{- if .Values.tls.enabled }}
         - name: tls-certs
