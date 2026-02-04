@@ -41,5 +41,13 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
-        - kind: added
-          description: "Add support for staticSiteConfigmap to serve static content from an existing ConfigMap"
+        - kind: changed
+          description: "[nginx]: Allow loading site from configmap (#935)"
+          links:
+            - name: "Commit ff72433"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/ff72433"
+        - kind: changed
+          description: "[all]: Update documentation to include proper cosign public key"
+          links:
+            - name: "Commit e42365d"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"
