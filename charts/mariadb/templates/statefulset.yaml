@@ -69,11 +69,16 @@ spec:
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
-          {{- if .Values.galera.enabled }}
-          command: 
+          {{- if .Values.command }}
+          command: {{ toYaml .Values.command | nindent 12 }}
+          {{- else if .Values.galera.enabled }}
+          command:
             - /bin/bash
             - -c
             - source /usr/local/bin/galera-entrypoint.sh
+          {{- end }}
+          {{- if .Values.args }}
+          args: {{ toYaml .Values.args | nindent 12 }}
           {{- end }}
           {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.extraEnvVars .Values.galera.enabled }}
           env:
