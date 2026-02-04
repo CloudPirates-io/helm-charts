@@ -221,6 +221,8 @@ realm:
   import: false
   ## @param realm.configFile Json config for initial realm configuration, mounted in /opt/keycloak/data/import
   configFile: ""
+  ## @param realm.existingSecret Name of existing secret containing realm configuration (key: realm.json)
+  existingSecret: ""
 
 ## @section Features Configuration
 features:
@@ -427,12 +429,44 @@ extraObjects: []
 
 ## @section Init Container Configuration
 initContainers:
-  ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting
   waitForPostgres:
-    image: "postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"
-  ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
+    ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting (leave empty to use registry/repository/tag)
+    image: ""
+    ## @param initContainers.waitForPostgres.registry PostgreSQL image registry (overrides global.imageRegistry)
+    registry: ""
+    ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
+    repository: postgres
+    ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
+    tag: "17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"
+    ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
+    pullPolicy: IfNotPresent
+    ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 32Mi
   waitForMariadb:
-    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
+    ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
+    image: ""
+    ## @param initContainers.waitForMariadb.registry MariaDB image registry (overrides global.imageRegistry)
+    registry: ""
+    ## @param initContainers.waitForMariadb.repository MariaDB image repository
+    repository: mariadb
+    ## @param initContainers.waitForMariadb.tag MariaDB image tag
+    tag: "12.1.2@sha256:f54db0cb3ccfe9431aba6d08c65a1763c499789b116b4cb651dd7fcf325965b3"
+    ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
+    pullPolicy: IfNotPresent
+    ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 32Mi
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
 ## @descriptionStart
