@@ -2,6 +2,12 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.13.3] - 2026-02-04
+
+- [mariadb]: Fix both metric and initdb scripts in parallel (#960) ([2dc0439](../../commit/2dc0439))
+- [all]: Update documentation to include proper cosign public key ([e42365d](../../commit/e42365d))
+- Docs - correct Helm local install command (#932) ([c513c7a](../../commit/c513c7a))
+
 ## [0.13.2] - 2026-01-28
 
 - [all]: Update every chart to newest common (#920) ([f8d134d](../../commit/f8d134d))

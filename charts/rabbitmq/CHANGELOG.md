@@ -44,6 +44,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.15.6] - 2026-02-04
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#956) ([d8dad6e](../../commit/d8dad6e))
+
 ## [0.15.5] - 2026-02-04
 
 - The management.load_definitions is deprecated and we should use definitions.local.path now (#954) ([c35081b](../../commit/c35081b))
