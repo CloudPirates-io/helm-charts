@@ -73,8 +73,32 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if .Values.extraEnvVars }}
+          {{- if or .Values.extraEnvVars .Values.config.database.externalConnection.existingSecret.name .Values.config.mail.options.auth.existingSecret.name (and (not .Values.mariadb.enabled) .Values.config.database.externalConnection.existingSecret.name) }}
           env:
+            {{- if and (not .Values.mariadb.enabled) .Values.config.database.externalConnection.existingSecret.name }}
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.externalConnection.existingSecret.name }}
+                  key: {{ .Values.config.database.externalConnection.existingSecret.usernameKey }}
+            - name: database__connection__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.externalConnection.existingSecret.name }}
+                  key: {{ .Values.config.database.externalConnection.existingSecret.passwordKey }}
+            {{- end }}
+            {{- if .Values.config.mail.options.auth.existingSecret.name }}
+            - name: mail__options__auth__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mail.options.auth.existingSecret.name }}
+                  key: {{ .Values.config.mail.options.auth.existingSecret.userKey }}
+            - name: mail__options__auth__pass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mail.options.auth.existingSecret.name }}
+                  key: {{ .Values.config.mail.options.auth.existingSecret.passKey }}
+            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{- toYaml . | nindent 12 }}
             {{- end }}

@@ -89,6 +89,66 @@ config:
   ...
 ```
 
+### Using Kubernetes Secrets for Credentials
+
+#### Database Credentials from Secret
+
+Create a Kubernetes secret with your database credentials:
+
+```bash
+kubectl create secret generic ghost-db-credentials \
+  --from-literal=username=ghost \
+  --from-literal=password=your-secure-password
+```
+
+Reference this secret in your `my-values.yaml`:
+
+```yaml
+mariadb:
+  enabled: false
+
+config:
+  database:
+    client: "mysql"
+    externalConnection:
+      host: "my-external-db.example.com"
+      port: 3306
+      database: "ghost"
+      existingSecret:
+        name: "ghost-db-credentials"
+        usernameKey: "username"
+        passwordKey: "password"
+```
+
+#### SMTP Credentials from Secret
+
+Create a secret for SMTP credentials:
+
+```bash
+kubectl create secret generic ghost-smtp-credentials \
+  --from-literal=user=postmaster@example.mailgun.org \
+  --from-literal=pass=your-smtp-password
+```
+
+Reference it in your values:
+
+```yaml
+config:
+  mail:
+    transport: "SMTP"
+    options:
+      service: "Mailgun"
+      host: "smtp.mailgun.org"
+      port: 465
+      secure: true
+      auth:
+        existingSecret:
+          name: "ghost-smtp-credentials"
+          userKey: "user"
+          passKey: "pass"
+    from: "support@example.com"
+```
+
 
 The following tables list the configurable parameters of the Ghost chart organized by category:
 

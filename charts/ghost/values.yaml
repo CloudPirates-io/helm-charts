@@ -213,6 +213,15 @@ config:
       user: "ghost"
       password: "changeme"
       database: "ghost"
+      ## @param config.database.externalConnection.existingSecret Use existing secret for database credentials
+      ## When set, the chart will read credentials from this secret instead of values
+      existingSecret:
+        ## @param config.database.externalConnection.existingSecret.name Name of the existing secret
+        name: ""
+        ## @param config.database.externalConnection.existingSecret.usernameKey Key in the secret containing the database username
+        usernameKey: "username"
+        ## @param config.database.externalConnection.existingSecret.passwordKey Key in the secret containing the database password
+        passwordKey: "password"
     pool:
       min: 2
       max: 10
@@ -226,6 +235,15 @@ config:
       auth:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
+        ## @param config.mail.options.auth.existingSecret Use existing secret for SMTP credentials
+        ## When set, the chart will read credentials from this secret instead of values
+        existingSecret:
+          ## @param config.mail.options.auth.existingSecret.name Name of the existing secret
+          name: ""
+          ## @param config.mail.options.auth.existingSecret.userKey Key in the secret containing the SMTP username
+          userKey: "user"
+          ## @param config.mail.options.auth.existingSecret.passKey Key in the secret containing the SMTP password
+          passKey: "pass"
     from: "support@example.com"
   server:
     host: "0.0.0.0"
