@@ -2,11 +2,9 @@
     <a href="https://artifacthub.io/packages/helm/cloudpirates-ghost/ghost"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-ghost" /></a>
 </p>
 
-
 # Ghost Helm Chart
 
 Ghost is a simple, powerful publishing platform for creating blogs and online publications. This Helm chart deploys Ghost on Kubernetes with optional MariaDB support.
-
 
 ## Installation
 
@@ -25,7 +23,7 @@ helm install my-ghost oci://registry-1.docker.io/cloudpirates/ghost -f my-values
 Or install directly from the local chart:
 
 ```bash
-helm install my-valkey ./charts/valkey
+helm install my-ghost ./charts/ghost
 ```
 
 The output should show you the URL's for your Ghost instance and Admin interface accoriding to your settings in my-values.yaml
@@ -43,7 +41,6 @@ To uninstall/delete the `my-ghost` deployment:
 ```bash
 helm uninstall my-ghost
 ```
-
 
 ## Security & Signature Verification
 
@@ -64,8 +61,19 @@ To verify the helm chart before installation, copy the public key to the file `c
 cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/ghost:<version>
 ```
 
-
 ## Configuration
+
+### Custom Admin URL
+
+By default, Ghost expects a second ingress host for the admin interface. If you want to customize the admin URL or use a different configuration, you can set it explicitly:
+
+```yaml
+config:
+  admin:
+    url: "https://custom-admin.example.com"
+```
+
+If `config.admin.url` is not set (empty string or not defined), the chart will automatically use the second ingress host defined in `ingress.hosts[1].host`.
 
 ### External database support
 
@@ -88,7 +96,6 @@ config:
       max: 10
   ...
 ```
-
 
 The following tables list the configurable parameters of the Ghost chart organized by category:
 
@@ -206,9 +213,9 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | `extraObjects`      | Extra Kubernetes objects to deploy         | `[]`            |
 | `config`            | Ghost configuration (database, mail, etc.) | See values.yaml |
 
-
 ## Example: Custom Ghost Configuration
-https://docs.ghost.org/config 
+
+https://docs.ghost.org/config
 
 ```yaml
 config:
@@ -234,6 +241,8 @@ config:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
     from: "support@example.com"
+  admin:
+    url: ""  # Optional: Set custom admin URL. Defaults to second ingress host if not set.
   server:
     host: "0.0.0.0"
     port: 2368
@@ -300,21 +309,23 @@ config:
     styles: "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/main.css"
 ```
 
-
 ## Troubleshooting
 
 ### Connection Issues
 
 1. **Check deployment and service status**:
-  ```bash
-  kubectl get deployment -l app.kubernetes.io/name=ghost
-  kubectl get svc -l app.kubernetes.io/name=ghost
-  kubectl get pods -l app.kubernetes.io/name=ghost
-  ```
+
+```bash
+kubectl get deployment -l app.kubernetes.io/name=ghost
+kubectl get svc -l app.kubernetes.io/name=ghost
+kubectl get pods -l app.kubernetes.io/name=ghost
+```
+
 2. **Check pod logs**:
-  ```bash
-  kubectl logs <pod-name>
-  ```
+
+```bash
+kubectl logs <pod-name>
+```
 
 ### Database Issues
 
@@ -326,7 +337,6 @@ config:
 - Adjust resources in `values.yaml` for production workloads.
 - Use persistent storage for content.
 - Monitor pod health and logs for errors.
-
 
 ## Useful Links
 

@@ -227,6 +227,9 @@ config:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
     from: "support@example.com"
+  admin:
+    ## Optional: Set custom admin URL. If not set, defaults to second ingress host (e.g., admin.ghost.localhost)
+    url: ""
   server:
     host: "0.0.0.0"
     port: 2368
