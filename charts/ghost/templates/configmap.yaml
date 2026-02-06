@@ -53,7 +53,7 @@ data:
         "from": {{ .Values.config.mail.from | quote }}
       },
       "admin": {
-        "url": {{ .Values.config.admin.url | default (printf "https://%s" (index .Values.ingress.hosts 1).host) | quote }}
+        "url": {{ include "ghost.admin_url" . | quote }}
       },
       "server": {
         "host": {{ .Values.config.server.host | quote }},

@@ -64,3 +64,14 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Return the admin URL for Ghost
+*/}}
+{{- define "ghost.admin_url" -}}
+{{- if .Values.config.admin.url }}
+{{- .Values.config.admin.url }}
+{{- else }}
+{{- printf "https://%s" (index .Values.ingress.hosts 1).host }}
+{{- end }}
+{{- end }}
