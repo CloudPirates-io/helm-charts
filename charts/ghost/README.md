@@ -93,6 +93,8 @@ config:
 
 #### Database Credentials from Secret
 
+**For external databases:**
+
 Create a Kubernetes secret with your database credentials:
 
 ```bash
@@ -118,6 +120,26 @@ config:
         name: "ghost-db-credentials"
         usernameKey: "username"
         passwordKey: "password"
+```
+
+**For bundled MariaDB:**
+
+You can also use an existing secret with the bundled MariaDB deployment. Create a secret:
+
+```bash
+kubectl create secret generic ghost-mariadb-credentials \
+  --from-literal=username=ghost \
+  --from-literal=mariadb-password=your-secure-password
+```
+
+Reference it in your `my-values.yaml`:
+
+```yaml
+mariadb:
+  enabled: true
+  auth:
+    database: ghost
+    existingSecret: "ghost-mariadb-credentials"
 ```
 
 #### SMTP Credentials from Secret
@@ -204,14 +226,25 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Database Parameters
 
-| Parameter                             | Description                              | Default    |
-| ------------------------------------- | ---------------------------------------- | ---------- |
-| `mariadb.enabled`                     | Deploy MariaDB as dependency             | `true`     |
-| `mariadb.auth.database`               | MariaDB database name                    | `ghost`    |
-| `mariadb.auth.username`               | MariaDB username                         | `ghost`    |
-| `mariadb.auth.password`               | MariaDB password                         | `changeme` |
-| `mariadb.auth.existingSecret`         | Existing secret with MariaDB credentials | `""`       |
-| `mariadb.auth.allowEmptyRootPassword` | Allow empty root password                | `false`    |
+| Parameter                                                 | Description                                        | Default    |
+| --------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| `mariadb.enabled`                                         | Deploy MariaDB as dependency                       | `true`     |
+| `mariadb.auth.database`                                   | MariaDB database name                              | `ghost`    |
+| `mariadb.auth.username`                                   | MariaDB username                                   | `ghost`    |
+| `mariadb.auth.password`                                   | MariaDB password                                   | `changeme` |
+| `mariadb.auth.existingSecret`                             | Existing secret with MariaDB credentials           | `""`       |
+| `mariadb.auth.allowEmptyRootPassword`                     | Allow empty root password                          | `false`    |
+| `config.database.externalConnection.existingSecret.name`  | Name of existing secret for external DB credentials| `""`       |
+| `config.database.externalConnection.existingSecret.usernameKey` | Key in secret containing database username   | `username` |
+| `config.database.externalConnection.existingSecret.passwordKey` | Key in secret containing database password   | `password` |
+
+### Mail Configuration Parameters
+
+| Parameter                                           | Description                                  | Default |
+| --------------------------------------------------- | -------------------------------------------- | ------- |
+| `config.mail.options.auth.existingSecret.name`      | Name of existing secret for SMTP credentials | `""`    |
+| `config.mail.options.auth.existingSecret.userKey`   | Key in secret containing SMTP username       | `user`  |
+| `config.mail.options.auth.existingSecret.passKey`   | Key in secret containing SMTP password       | `pass`  |
 
 ### Pod Parameters
 

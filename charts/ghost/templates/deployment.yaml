@@ -75,15 +75,20 @@ spec:
             {{- end }}
           env:
             {{- if .Values.mariadb.enabled }}
-            - name: database__connection__user
-              value: {{ .Values.mariadb.auth.username | quote }}
             {{- if .Values.mariadb.auth.existingSecret }}
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
             - name: database__connection__password
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.mariadb.auth.existingSecret }}
                   key: mariadb-password
             {{- else }}
+            - name: database__connection__user
+              value: {{ .Values.mariadb.auth.username | quote }}
             - name: database__connection__password
               value: {{ .Values.mariadb.auth.password | quote }}
             {{- end }}
@@ -124,9 +129,9 @@ spec:
               value: {{ .Values.config.mail.options.auth.pass | quote }}
             {{- end }}
             {{- if .Values.extraEnvVars }}
-            {{- with .Values.extraEnvVars }}
+              {{- with .Values.extraEnvVars }}
 {{- toYaml . | nindent 12 }}
-            {{- end }}
+              {{- end }}
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
