@@ -75,20 +75,15 @@ spec:
             {{- end }}
           env:
             {{- if .Values.mariadb.enabled }}
-            {{- if .Values.mariadb.auth.existingSecret }}
             - name: database__connection__user
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.mariadb.auth.existingSecret }}
-                  key: username
+              value: {{ .Values.mariadb.auth.username | quote }}
+            {{- if .Values.mariadb.auth.existingSecret }}
             - name: database__connection__password
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.mariadb.auth.existingSecret }}
-                  key: password
+                  key: mariadb-password
             {{- else }}
-            - name: database__connection__user
-              value: {{ .Values.mariadb.auth.username | quote }}
             - name: database__connection__password
               value: {{ .Values.mariadb.auth.password | quote }}
             {{- end }}
