@@ -1,0 +1,554 @@
+name: "Changelog and Release Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
+    inputs:
+      chart_name:
+        description: 'Specific chart to process (e.g., "nginx"). Leave empty to process all changed charts.'
+        required: false
+        type: string
+      regenerate_changelog:
+        description: 'Delete and regenerate the changelog for the specified chart'
+        required: false
+        type: boolean
+        default: false
+      force_release:
+        description: 'Force re-release of the specified chart (deletes existing tag)'
+        required: false
+        type: boolean
+        default: false
+      reset_all_changelogs:
+        description: '⚠️ Delete and regenerate ALL changelogs (ignores chart_name)'
+        required: false
+        type: boolean
+        default: false
+      skip_changelog:
+        description: 'Skip changelog generation completely'
+        required: false
+        type: boolean
+        default: false
+      skip_release:
+        description: 'Skip release step completely'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  changelog-update:
+    name: Update Changelogs
+    if: |
+      github.event.inputs.skip_changelog != 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.head_commit.author.name != 'cloudpirates-bot' &&
+        github.event.head_commit.committer.name != 'cloudpirates-bot'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      has_changes: ${{ steps.generate-changelog.outputs.has_changes }}
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CHANGELOG_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Determine charts to update
+        id: charts-to-update
+        run: |
+          # For manual workflow_dispatch with reset_all_changelogs
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.reset_all_changelogs }}" = "true" ]; then
+            echo "⚠️ Reset all changelogs enabled: processing ALL charts"
+            all_charts=$(find charts -mindepth 1 -maxdepth 1 -type d ! -name 'common' -exec basename {} \; | tr '\n' ',' | sed 's/,$//')
+            echo "Found charts: $all_charts"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changedCharts=$all_charts" >> $GITHUB_OUTPUT
+            echo "manual_chart=false" >> $GITHUB_OUTPUT
+            echo "reset_all=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For manual workflow_dispatch with specific chart
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.chart_name }}" ]; then
+            CHART_NAME="${{ github.event.inputs.chart_name }}"
+            echo "Manual trigger for specific chart: $CHART_NAME"
+
+            if [ ! -d "charts/$CHART_NAME" ]; then
+              echo "❌ Error: Chart 'charts/$CHART_NAME' not found"
+              exit 1
+            fi
+
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changedCharts=$CHART_NAME" >> $GITHUB_OUTPUT
+            echo "manual_chart=true" >> $GITHUB_OUTPUT
+            echo "reset_all=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For manual workflow_dispatch without specific options - process ALL charts
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger without specific chart: processing ALL charts"
+            all_charts=$(find charts -mindepth 1 -maxdepth 1 -type d ! -name 'common' -exec basename {} \; | tr '\n' ',' | sed 's/,$//')
+            echo "Found charts: $all_charts"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changedCharts=$all_charts" >> $GITHUB_OUTPUT
+            echo "manual_chart=false" >> $GITHUB_OUTPUT
+            echo "reset_all=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For automatic push events, check what changed
+          BEFORE_SHA="${{ github.event.before }}"
+
+          # If BEFORE_SHA is still empty, use HEAD~1 as fallback
+          if [ -z "$BEFORE_SHA" ]; then
+            echo "No before SHA found, using HEAD~1"
+            BEFORE_SHA=$(git rev-parse HEAD~1 2>/dev/null || echo "")
+          fi
+
+          # If still no BEFORE_SHA, get all charts
+          if [ -z "$BEFORE_SHA" ]; then
+            echo "Cannot determine previous commit, processing all charts"
+            all_charts=$(find charts -mindepth 1 -maxdepth 1 -type d ! -name 'common' -exec basename {} \; | tr '\n' ',' | sed 's/,$//')
+            echo "Found charts: $all_charts"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changedCharts=$all_charts" >> $GITHUB_OUTPUT
+            echo "manual_chart=false" >> $GITHUB_OUTPUT
+            echo "reset_all=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          changed_files=$(git diff --name-only "${BEFORE_SHA}" HEAD -- 'charts/**' 2>/dev/null || echo "")
+
+          if [[ -n "$changed_files" ]]; then
+            changed_charts=$(echo "$changed_files" | grep '^charts/' | cut -d/ -f2 | sort -u | grep -v '^common$' | tr '\n' ',')
+            if [[ -n "$changed_charts" ]]; then
+              echo "Changed charts: $changed_charts"
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changedCharts=${changed_charts}" >> $GITHUB_OUTPUT
+              echo "manual_chart=false" >> $GITHUB_OUTPUT
+              echo "reset_all=false" >> $GITHUB_OUTPUT
+            else
+              echo "No chart changes detected"
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "manual_chart=false" >> $GITHUB_OUTPUT
+              echo "reset_all=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No chart changes detected"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "manual_chart=false" >> $GITHUB_OUTPUT
+            echo "reset_all=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelogs
+        id: generate-changelog
+        if: steps.charts-to-update.outputs.changed == 'true'
+        env:
+          REGENERATE: ${{ github.event.inputs.regenerate_changelog == 'true' || github.event.inputs.reset_all_changelogs == 'true' }}
+        run: |
+          set -e
+
+          IFS=',' read -ra CHARTS <<< "${{ steps.charts-to-update.outputs.changedCharts }}"
+
+          for CHART_NAME in "${CHARTS[@]}"; do
+            CHART_NAME=$(echo "$CHART_NAME" | xargs) # trim whitespace
+            [ -z "$CHART_NAME" ] && continue
+
+            echo "Processing changelog for: $CHART_NAME"
+            CHART_DIR="charts/$CHART_NAME"
+            CHANGELOG_FILE="$CHART_DIR/CHANGELOG.md"
+            CHART_VERSION=$(yq eval '.version' "$CHART_DIR/Chart.yaml")
+
+            # Delete existing changelog if regenerate is enabled
+            if [ "$REGENERATE" = "true" ] && [ -f "$CHANGELOG_FILE" ]; then
+              echo "Deleting existing $CHANGELOG_FILE for regeneration"
+              rm "$CHANGELOG_FILE"
+            fi
+
+            # Create or append to changelog
+            if [ ! -f "$CHANGELOG_FILE" ]; then
+              echo "# Changelog" > "$CHANGELOG_FILE"
+              echo "" >> "$CHANGELOG_FILE"
+              echo "All notable changes to this chart will be documented in this file." >> "$CHANGELOG_FILE"
+              echo "" >> "$CHANGELOG_FILE"
+            fi
+
+            # Get all tags for this chart
+            TAGS=$(git tag -l "${CHART_NAME}-*" | sort -V -r || echo "")
+
+            if [ -z "$TAGS" ]; then
+              echo "No tags found for $CHART_NAME, skipping historical generation"
+              continue
+            fi
+
+            # Create temp file for new content
+            TEMP_FILE=$(mktemp)
+            echo "# Changelog" > "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+            echo "All notable changes to this chart will be documented in this file." >> "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+
+            # Process each tag (use process substitution to avoid subshell)
+            while IFS= read -r TAG; do
+              [ -z "$TAG" ] && continue
+
+              VERSION="${TAG#${CHART_NAME}-}"
+              TAG_DATE=$(git log -1 --format=%ai "$TAG" 2>/dev/null | cut -d' ' -f1 || echo "unknown")
+
+              # Get previous tag
+              PREV_TAG=$(git tag -l "${CHART_NAME}-*" | sort -V -r | grep -A1 "^${TAG}$" | tail -1)
+
+              echo "## [$VERSION] - $TAG_DATE" >> "$TEMP_FILE"
+              echo "" >> "$TEMP_FILE"
+
+              # Get commits between tags
+              if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG" ]; then
+                COMMIT_RANGE="${PREV_TAG}..${TAG}"
+
+                # Get commits for this chart
+                while IFS= read -r COMMIT_LINE; do
+                  [ -z "$COMMIT_LINE" ] && continue
+
+                  COMMIT_HASH=$(echo "$COMMIT_LINE" | awk '{print $1}')
+                  COMMIT_MSG=$(echo "$COMMIT_LINE" | cut -d' ' -f2-)
+
+                  # Skip maintenance/bot commits that shouldn't be in changelog
+                  if echo "$COMMIT_MSG" | grep -qiE '(chore:.*CHANGELOG|chore:.*changelog|auto-generate.*schema|regenerate.*CHANGELOG|reset.*CHANGELOG)'; then
+                    continue
+                  fi
+
+                  # Clean up commit message
+                  COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -E "s/^\[${CHART_NAME}\] //i" | sed -E 's/^\[all\] //i')
+
+                  echo "- $COMMIT_MSG ([${COMMIT_HASH}](https://github.com/${{ github.repository }}/commit/${COMMIT_HASH}))" >> "$TEMP_FILE"
+                done < <(git log "$COMMIT_RANGE" --oneline --no-merges -- "$CHART_DIR" 2>/dev/null || true)
+              else
+                echo "- Initial release" >> "$TEMP_FILE"
+              fi
+
+              echo "" >> "$TEMP_FILE"
+            done < <(echo "$TAGS")
+
+            # Replace old changelog
+            mv "$TEMP_FILE" "$CHANGELOG_FILE"
+            echo "✅ Generated changelog for $CHART_NAME"
+          done
+
+          # Check if there are changes
+          echo "Checking for changelog changes..."
+          git status --porcelain
+
+          # If regenerate mode is enabled, always commit (even if content is identical)
+          if [ "$REGENERATE" = "true" ]; then
+            echo "✅ Regenerate mode enabled - forcing commit"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          elif git status --porcelain | grep -q 'CHANGELOG.md'; then
+            echo "✅ Changelog changes detected"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No changelog changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changelog updates
+        if: steps.generate-changelog.outputs.has_changes == 'true'
+        run: |
+          # Setup SSH key for signing
+          mkdir -p ~/.ssh
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > ~/.ssh/signing_key
+          chmod 600 ~/.ssh/signing_key
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey ~/.ssh/signing_key
+          git config commit.gpgsign true
+
+          # Add changelog files (use -f to force add even if no changes detected)
+          find charts -name "CHANGELOG.md" -type f -exec git add {} \;
+
+          # Check if there's actually something to commit
+          if git diff --cached --quiet; then
+            echo "⚠️ No changes to commit after git add"
+            rm -f ~/.ssh/signing_key
+            exit 0
+          fi
+
+          # Determine commit message
+          if [ "${{ github.event.inputs.reset_all_changelogs }}" = "true" ]; then
+            COMMIT_MSG="chore: reset and regenerate ALL CHANGELOG.md files"
+          elif [ "${{ github.event.inputs.regenerate_changelog }}" = "true" ]; then
+            if [ -n "${{ github.event.inputs.chart_name }}" ]; then
+              COMMIT_MSG="chore: regenerate CHANGELOG.md for ${{ github.event.inputs.chart_name }}"
+            else
+              COMMIT_MSG="chore: regenerate CHANGELOG.md"
+            fi
+          elif [ "${{ steps.charts-to-update.outputs.manual_chart }}" = "true" ]; then
+            COMMIT_MSG="chore: update CHANGELOG.md for ${{ github.event.inputs.chart_name }}"
+          else
+            COMMIT_MSG="chore: update CHANGELOG.md for merged changes"
+          fi
+
+          git commit -m "$COMMIT_MSG" \
+            -m "Signed-off-by: cloudpirates-bot <cloudpirates-bot@users.noreply.github.com>"
+
+          # Pull and push
+          git pull --rebase origin main
+          git push origin main
+
+          # Cleanup
+          rm -f ~/.ssh/signing_key
+
+  release:
+    name: Release Charts
+    needs: changelog-update
+    if: |
+      always() &&
+      !cancelled() &&
+      github.event.inputs.skip_release != 'true' &&
+      (needs.changelog-update.result == 'success' || needs.changelog-update.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          # Setup SSH key for signing
+          mkdir -p ~/.ssh
+          echo "${{ secrets.BOT_SSH_SIGNING_KEY }}" > ~/.ssh/signing_key
+          chmod 600 ~/.ssh/signing_key
+
+          # Configure git with SSH signing
+          git config user.name 'cloudpirates-bot'
+          git config user.email 'cloudpirates-bot@users.noreply.github.com'
+          git config gpg.format ssh
+          git config user.signingkey ~/.ssh/signing_key
+          git config commit.gpgsign true
+
+      - name: Login to Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update chart dependencies
+        run: |
+          set -euo pipefail
+          for chart_dir in charts/*; do
+            if [ -f "$chart_dir/Chart.yaml" ]; then
+              if grep -q "^dependencies:" "$chart_dir/Chart.yaml"; then
+                echo "Updating dependencies for $chart_dir"
+                helm dependency update "$chart_dir"
+              fi
+            fi
+          done
+
+      - name: Detect changed charts
+        id: detect-changed-charts
+        run: |
+          set -euo pipefail
+          CHANGED_CHARTS=""
+
+          # Check if force_release is enabled for a specific chart
+          if [ "${{ github.event.inputs.force_release }}" = "true" ] && [ -n "${{ github.event.inputs.chart_name }}" ]; then
+            FORCE_CHART="${{ github.event.inputs.chart_name }}"
+            echo "Force release enabled for chart: $FORCE_CHART"
+
+            if [ ! -d "charts/$FORCE_CHART" ]; then
+              echo "❌ Error: Chart 'charts/$FORCE_CHART' not found"
+              exit 1
+            fi
+
+            if [ ! -f "charts/$FORCE_CHART/Chart.yaml" ]; then
+              echo "❌ Error: Chart.yaml not found in 'charts/$FORCE_CHART'"
+              exit 1
+            fi
+
+            CHART_VERSION=$(yq eval '.version' "charts/$FORCE_CHART/Chart.yaml")
+            echo "🚀 Force releasing: $FORCE_CHART-$CHART_VERSION"
+
+            # Delete the existing tag if it exists to allow re-release
+            if git tag -l | grep -q "^${FORCE_CHART}-${CHART_VERSION}$"; then
+              echo "Deleting existing tag: ${FORCE_CHART}-${CHART_VERSION}"
+              git tag -d "${FORCE_CHART}-${CHART_VERSION}" || true
+              git push origin ":refs/tags/${FORCE_CHART}-${CHART_VERSION}" || true
+            fi
+
+            CHANGED_CHARTS="$FORCE_CHART"
+            echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "force_release=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Normal detection logic
+          for chart_dir in charts/*; do
+            [ ! -f "$chart_dir/Chart.yaml" ] && continue
+
+            CHART_NAME=$(basename "$chart_dir")
+            CHART_VERSION=$(yq eval '.version' "$chart_dir/Chart.yaml")
+
+            # Check if already released
+            if git tag -l | grep -q "^${CHART_NAME}-${CHART_VERSION}$"; then
+              echo "✓ $CHART_NAME-$CHART_VERSION already released"
+              continue
+            fi
+
+            # Check for changes since last release
+            LAST_CHART_TAG=$(git tag -l "${CHART_NAME}-*" | sort -V | tail -1)
+            if [ -n "$LAST_CHART_TAG" ]; then
+              CHART_CHANGES=$(git diff --name-only "$LAST_CHART_TAG" HEAD -- "$chart_dir/" 2>/dev/null || echo "")
+              [ -z "$CHART_CHANGES" ] && continue
+            fi
+
+            # Add to release list
+            [ -z "$CHANGED_CHARTS" ] && CHANGED_CHARTS="$CHART_NAME" || CHANGED_CHARTS="$CHANGED_CHARTS,$CHART_NAME"
+            echo "🚀 Will release: $CHART_NAME-$CHART_VERSION"
+          done
+
+          echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
+          [ -n "$CHANGED_CHARTS" ] && echo "has_changes=true" >> $GITHUB_OUTPUT || echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "force_release=false" >> $GITHUB_OUTPUT
+
+      - name: Run chart-releaser
+        if: steps.detect-changed-charts.outputs.has_changes == 'true'
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
+        with:
+          skip_existing: true
+          charts_dir: charts
+          charts_repo_url: https://charts.cloudpirates.io
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.10.0
+        if: steps.detect-changed-charts.outputs.has_changes == 'true'
+
+      - id: github-repo-owner-name
+        uses: ASzc/change-string-case-action@d0603cd0a7dd490be678164909f65c7737470a7f # v6
+        if: steps.detect-changed-charts.outputs.has_changes == 'true'
+        with:
+          string: ${{ github.repository_owner }}
+
+      - name: Upload charts to OCI registries
+        if: steps.detect-changed-charts.outputs.has_changes == 'true'
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+        run: |
+          set -euo pipefail
+
+          CHANGED_CHARTS="${{ steps.detect-changed-charts.outputs.changed_charts }}"
+          [ -z "$CHANGED_CHARTS" ] && exit 0
+
+          # Retry function
+          retry() {
+            local max_attempts=3
+            local attempt=1
+            local delay=5
+            while [ $attempt -le $max_attempts ]; do
+              if "$@"; then return 0; fi
+              echo "Attempt $attempt failed. Retrying in ${delay}s..."
+              sleep $delay
+              delay=$((delay * 2))
+              attempt=$((attempt + 1))
+            done
+            return 1
+          }
+
+          retry helm registry login --username $REGISTRY_USER --password ${{ secrets.REGISTRY_PASSWORD }} https://${{ vars.REGISTRY }}
+          retry helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
+
+          RELEASED_CHARTS=""
+          for CHART_NAME in ${CHANGED_CHARTS//,/ }; do
+            chart_directory="charts/$CHART_NAME"
+            cd "$chart_directory"
+
+            CHART_VERSION=$(yq eval '.version' "Chart.yaml")
+
+            # Push to primary registry
+            echo "Pushing $CHART_NAME-$CHART_VERSION to primary registry..."
+            if retry helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }} 2>&1 | tee output.log; then
+              DIGEST=$(grep -oP 'Digest:\s*\K(sha256:[a-f0-9]+)' output.log || echo "")
+              if [ -n "$DIGEST" ]; then
+                cosign sign -y --upload=true --key env://COSIGN_KEY ${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST
+                RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
+              fi
+            fi
+
+            # Push to GHCR
+            echo "Pushing $CHART_NAME-$CHART_VERSION to GHCR..."
+            if retry helm push ${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts 2>&1 | tee ghcr-output.log; then
+              GHCR_DIGEST=$(grep -oP 'Digest:\s*\K(sha256:[a-f0-9]+)' ghcr-output.log || echo "")
+              [ -n "$GHCR_DIGEST" ] && cosign sign -y --upload=true --key env://COSIGN_KEY ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST
+            fi
+
+            cd ${{ github.workspace }}
+          done
+
+          echo "released_charts=$RELEASED_CHARTS" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$RELEASED_CHARTS" ]; then
+            echo "## 📦 Helm Charts Released" >> $GITHUB_STEP_SUMMARY
+
+            if [ "${{ steps.detect-changed-charts.outputs.force_release }}" = "true" ]; then
+              echo "**⚠️ Force Release Mode** - Chart: \`${{ github.event.inputs.chart_name }}\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            elif [ -n "${{ github.event.inputs.chart_name }}" ]; then
+              echo "**Manual Release** - Chart: \`${{ github.event.inputs.chart_name }}\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            for chart in $RELEASED_CHARTS; do
+              echo "- ✅ **$chart**" >> $GITHUB_STEP_SUMMARY
+            done
+            echo "### 📍 Registries" >> $GITHUB_STEP_SUMMARY
+            echo "- Primary: \`${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- GHCR: \`ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/signing_key

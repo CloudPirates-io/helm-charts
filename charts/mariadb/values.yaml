@@ -200,6 +200,13 @@ extraEnvVars: []
   #     secretKeyRef:
   #       name: my-secret
   #       key: secret-key
+## @param command Override default container command (useful for custom initialization or maintenance tasks)
+command: []
+  # - /bin/bash
+  # - -c
+  # - sleep infinity
+## @param args Override default container args (if command is also set)
+args: []
 ## @param extraSecrets A list of additional existing secrets that will be mounted into the container
 extraSecrets: []
 ##  - name: secret

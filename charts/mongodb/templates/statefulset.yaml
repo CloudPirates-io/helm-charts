@@ -303,6 +303,12 @@ spec:
             name: {{ include "mongodb.fullname" . }}-config
             {{- end }}
         {{- end }}
+        {{- if and .Values.replicaSet.enabled .Values.replicaSet.keySecretName }}
+        - name: keyfile-secret
+          secret:
+            secretName: {{ .Values.replicaSet.keySecretName }}
+            defaultMode: 0400
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- end }}
