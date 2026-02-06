@@ -239,7 +239,7 @@ jobs:
                   # Clean up commit message
                   COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -E "s/^\[${CHART_NAME}\] //i" | sed -E 's/^\[all\] //i')
 
-                  echo "- $COMMIT_MSG ([${COMMIT_HASH}](../../commit/${COMMIT_HASH}))" >> "$TEMP_FILE"
+                  echo "- $COMMIT_MSG ([${COMMIT_HASH}](https://github.com/${{ github.repository }}/commit/${COMMIT_HASH}))" >> "$TEMP_FILE"
                 done < <(git log "$COMMIT_RANGE" --oneline --no-merges -- "$CHART_DIR" 2>/dev/null || true)
               else
                 echo "- Initial release" >> "$TEMP_FILE"
