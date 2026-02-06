@@ -71,7 +71,9 @@ Return the admin URL for Ghost
 {{- define "ghost.admin_url" -}}
 {{- if .Values.config.admin.url }}
 {{- .Values.config.admin.url }}
-{{- else }}
+{{- else if ge (len .Values.ingress.hosts) 2 }}
 {{- printf "https://%s" (index .Values.ingress.hosts 1).host }}
+{{- else }}
+{{- fail "ERROR: Either config.admin.url must be set, or at least 2 ingress hosts must be configured. Please set config.admin.url or add a second ingress host for the admin interface." }}
 {{- end }}
 {{- end }}
