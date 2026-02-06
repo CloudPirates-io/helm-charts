@@ -169,6 +169,20 @@
                                 "database": {
                                     "type": "string"
                                 },
+                                "existingSecret": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "passwordKey": {
+                                            "type": "string"
+                                        },
+                                        "usernameKey": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
                                 "host": {
                                     "type": "string"
                                 },
@@ -250,6 +264,20 @@
                                 "auth": {
                                     "type": "object",
                                     "properties": {
+                                        "existingSecret": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "passKey": {
+                                                    "type": "string"
+                                                },
+                                                "userKey": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
                                         "pass": {
                                             "type": "string"
                                         },
