@@ -22,11 +22,12 @@ image:
   ## @param image.repository MinIO image repository
   repository: cloudpirates/image-minio
   ## @param image.tag MinIO image tag (immutable tags are recommended)
-  tag: "RELEASE.2025-10-15T17-29-55Z@sha256:49f5294492e7b2b9a308519457b8a257f2fc5766ffcbdd20536443602e45b1e3"
+  ## IMPORTANT: We are using a, by default, hardened image provided by us, which patches cve´s but does not in any way modify the behavior of minio. You are free to switch over to vanilla versions if this concerns you.
+  tag: "RELEASE.2025-10-15T17-29-55Z-hardened@sha256:c153752e0278d6d7817e173d8ea44c15f2a5b20f3eee62a71eee4ea30e3bd046"
   ## @param image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)
   useCpuV1: false
   ## @param iamge.tagCpuV1 The cpuv1 Minio image tag (immutable tags are recommended)
-  tagCpuV1: "RELEASE.2025-10-15T17-29-55Z-cpuv1@sha256:830d7d8c5cf42c02a6e4d575ec0b6a21c285794203d749fcd82251ac815fab36"
+  tagCpuV1: "RELEASE.2025-10-15T17-29-55Z-cpuv1@sha256:d241709cd6758d3f7d01e5db1507dd233734bb473766c5f5a0d983950a0777a1"
   ## @param image.imagePullPolicy MinIO image pull policy
   imagePullPolicy: Always
 

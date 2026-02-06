@@ -28,7 +28,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.1@sha256:3bb77a07b9ce8b8de0fe6d9b063adf20b9cca1068a1bcdc054cac71a69ce0ca6"
+  tag: "18.1@sha256:1090bc3a8ccfb0b55f78a494d76f8d603434f7e4553543d6e807bc7bd6bbd17f"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
   ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
@@ -381,7 +381,7 @@ metrics:
     ## @param metrics.image.repository PostgreSQL exporter image repository
     repository: prometheuscommunity/postgres-exporter
     ## @param metrics.image.tag PostgreSQL exporter image tag
-    tag: "v0.18.1@sha256:fb96c4413985d4b23ab02b19022b3d70a86c8e0a62f41ab15ebb6f4673781a5d"
+    tag: "v0.19.0@sha256:e8a170b85eab07c75c2b0f3aa2806be5c2fe5bba46fd0336914e1f36572cde08"
     ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
