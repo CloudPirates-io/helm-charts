@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.3-management@sha256:497a53176d43a486d26430a2d2ec47c4d896041b11345dba5c1445d58d26ae9c"
+  tag: "4.2.3-management@sha256:1c04fc9f54a130f5a7f9330fe610b5562364f181d636dc5eeee7965fe8215e57"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -233,9 +233,22 @@ queueBalancing:
 ##          targetGroupSize: 3  # 3 replicas even in 5-node cluster
 ##          interval: 1800000  # 30 minutes in milliseconds
 ##
-## Note: When upgrading existing RabbitMQ deployments, enable autoRebalance
-##       to redistribute existing queues. For new deployments, queueLeaderLocator
-##       alone is usually sufficient.
+## Important Notes:
+##
+## - When upgrading existing RabbitMQ deployments, enable autoRebalance to
+##   redistribute existing queues across cluster nodes.
+##
+## - For new deployments with stable nodes and low queue churn, queueLeaderLocator
+##   alone may be sufficient for balanced queue distribution.
+##
+## - However, if you have HIGH QUEUE CHURN (especially auto-delete queues) or expect
+##   node failures/restarts/redeployments during operation, you should ALSO enable
+##   autoRebalance even for new deployments. This ensures queues are rebalanced after
+##   node recoveries, preventing long-term unbalanced distribution.
+##
+##   Example scenario: If a node goes down during peak queue creation (e.g., daily
+##   workstation reconnections), new queues will only be placed on available nodes.
+##   Without autoRebalance, these queues remain unbalanced even after the node returns.
 
 ## @section PeerDiscoveryK8sPlugin configuration
 peerDiscoveryK8sPlugin:
