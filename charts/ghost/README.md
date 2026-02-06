@@ -65,7 +65,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/ghost:<version>
 
 ### Custom Admin URL
 
-By default, Ghost expects a second ingress host for the admin interface. If you want to customize the admin URL or use a different configuration, you can set it explicitly:
+By default, this chart expects a second ingress host for the admin interface. If you want to customize the admin URL or use a different configuration, you can set it explicitly:
 
 ```yaml
 config:
