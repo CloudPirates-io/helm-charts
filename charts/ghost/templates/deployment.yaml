@@ -128,8 +128,10 @@ spec:
             - name: mail__options__auth__pass
               value: {{ .Values.config.mail.options.auth.pass | quote }}
             {{- end }}
+            {{- if .Values.extraEnvVars }}
             {{- with .Values.extraEnvVars }}
 {{- toYaml . | nindent 12 }}
+            {{- end }}
             {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
