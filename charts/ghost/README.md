@@ -147,7 +147,11 @@ mariadb:
   enabled: true
   auth:
     database: ghost
+    username: ghost  # Username for the database (can also be stored in existingSecret)
     existingSecret: "ghost-mariadb-credentials"
+    # When using existingSecret, the secret should contain:
+    # - username: database username (optional if set above)
+    # - mariadb-password: database password for the user
 ```
 
 #### SMTP Credentials from Secret
