@@ -73,9 +73,27 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if or .Values.extraEnvVars .Values.config.database.externalConnection.existingSecret.name .Values.config.mail.options.auth.existingSecret.name (and (not .Values.mariadb.enabled) .Values.config.database.externalConnection.existingSecret.name) }}
           env:
-            {{- if and (not .Values.mariadb.enabled) .Values.config.database.externalConnection.existingSecret.name }}
+            {{- if .Values.mariadb.enabled }}
+            {{- if .Values.mariadb.auth.existingSecret }}
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
+            - name: database__connection__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: password
+            {{- else }}
+            - name: database__connection__user
+              value: {{ .Values.mariadb.auth.username | quote }}
+            - name: database__connection__password
+              value: {{ .Values.mariadb.auth.password | quote }}
+            {{- end }}
+            {{- else }}
+            {{- if .Values.config.database.externalConnection.existingSecret.name }}
             - name: database__connection__user
               valueFrom:
                 secretKeyRef:
@@ -86,6 +104,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.config.database.externalConnection.existingSecret.name }}
                   key: {{ .Values.config.database.externalConnection.existingSecret.passwordKey }}
+            {{- else }}
+            - name: database__connection__user
+              value: {{ .Values.config.database.externalConnection.user | quote }}
+            - name: database__connection__password
+              value: {{ .Values.config.database.externalConnection.password | quote }}
+            {{- end }}
             {{- end }}
             {{- if .Values.config.mail.options.auth.existingSecret.name }}
             - name: mail__options__auth__user
@@ -98,11 +122,15 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.config.mail.options.auth.existingSecret.name }}
                   key: {{ .Values.config.mail.options.auth.existingSecret.passKey }}
+            {{- else }}
+            - name: mail__options__auth__user
+              value: {{ .Values.config.mail.options.auth.user | quote }}
+            - name: mail__options__auth__pass
+              value: {{ .Values.config.mail.options.auth.pass | quote }}
             {{- end }}
             {{- with .Values.extraEnvVars }}
 {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- if eq .Values.livenessProbe.type "httpGet" }}

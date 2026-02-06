@@ -19,8 +19,8 @@ data:
         "connection": {
           "host": "{{ include "ghost.fullname" . }}-mariadb",
           "port": {{ .Values.mariadb.service.port }},
-          "user": {{ .Values.mariadb.auth.username | quote }},
-          "password": {{ .Values.mariadb.auth.password | quote }},
+          "user": "",
+          "password": "",
           "database": {{ .Values.mariadb.auth.database | quote }}
         },
         {{- else }}
@@ -28,13 +28,8 @@ data:
         "connection": {
           "host": {{ .Values.config.database.externalConnection.host | quote }},
           "port": {{ .Values.config.database.externalConnection.port }},
-          {{- if .Values.config.database.externalConnection.existingSecret.name }}
           "user": "",
           "password": "",
-          {{- else }}
-          "user": {{ .Values.config.database.externalConnection.user | quote }},
-          "password": {{ .Values.config.database.externalConnection.password | quote }},
-          {{- end }}
           "database": {{ .Values.config.database.externalConnection.database | quote }}
         },
         {{- end }}
@@ -51,13 +46,8 @@ data:
           "port": {{ .Values.config.mail.options.port }},
           "secure": {{ .Values.config.mail.options.secure }},
           "auth": {
-            {{- if .Values.config.mail.options.auth.existingSecret.name }}
             "user": "",
             "pass": ""
-            {{- else }}
-            "user": {{ .Values.config.mail.options.auth.user | quote }},
-            "pass": {{ .Values.config.mail.options.auth.pass | quote }}
-            {{- end }}
           }
         },
         "from": {{ .Values.config.mail.from | quote }}
