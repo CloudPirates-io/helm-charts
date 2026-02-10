@@ -58,6 +58,20 @@ preserveProviders: false
 ##
 extraInitContainers: []
 
+## @section Extra containers for Keycloak pod
+## @param extraContainers Additional containers to add to the pod
+## Example:
+## extraContainers:
+##   - name: sidecar
+##     image: nginx:latest
+##     imagePullPolicy: Always
+##     ports:
+##       - containerPort: 8000
+##     volumeMounts:
+##       - name: tmp
+##         mountPath: /tmp
+extraContainers: []
+
 ## @section Security Context
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
