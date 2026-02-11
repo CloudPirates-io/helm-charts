@@ -34,6 +34,9 @@ spec:
 {{- . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- with .Values.shareProcessNamespace }}
+      shareProcessNamespace: {{ . }}
+      {{- end }}
       initContainers:
         - name: copy-quarkus-lib
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}

@@ -38,6 +38,10 @@ podAnnotations: {}
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}
 
+## @section Pod configuration
+## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
+shareProcessNamespace: false
+
 ## @section extra volumes and volumes mount
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
 extraVolumes: []

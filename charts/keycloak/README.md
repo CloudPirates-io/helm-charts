@@ -105,6 +105,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
+### Pod configuration
+
+| Parameter                | Description                                                       | Default |
+| ------------------------ | ----------------------------------------------------------------- | ------- |
+| `shareProcessNamespace`  | Enable process namespace sharing between containers in the pod    | `false` |
+
 ### Extra volumes and volumes mount
 
 | Parameter           | Description                                           | Default |
