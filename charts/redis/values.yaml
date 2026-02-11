@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.4.0@sha256:c22af04bb576503bf16b3e34a1fd2fd82de0f765afd866d2e380145e0af30d78"
+  tag: "8.4.1@sha256:90050675141bfc1d833cd291442d63f137c011522f60b682ffdafe48cb682258"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -358,7 +358,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.4.0@sha256:c22af04bb576503bf16b3e34a1fd2fd82de0f765afd866d2e380145e0af30d78"
+    tag: "8.4.1@sha256:90050675141bfc1d833cd291442d63f137c011522f60b682ffdafe48cb682258"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
