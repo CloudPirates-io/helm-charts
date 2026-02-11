@@ -99,6 +99,9 @@
                 }
             }
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -643,6 +646,9 @@
                     "type": "string"
                 }
             }
+        },
+        "shareProcessNamespace": {
+            "type": "boolean"
         },
         "startupProbe": {
             "type": "object",
