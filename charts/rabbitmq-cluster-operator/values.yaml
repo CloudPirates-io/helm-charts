@@ -500,7 +500,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmqoperator/messaging-topology-operator
     ## @skip msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: 1.18.2
+    tag: 1.18.3
     ## @param msgTopologyOperator.image.digest RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
     digest: ""
     ## Specify a imagePullPolicy
