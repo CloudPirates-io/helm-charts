@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.5] - 2026-02-11
+
+- [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.3 (patch) (#991) ([81e423d](https://github.com/CloudPirates-io/helm-charts/commit/81e423d))
+
+## [0.14.4] - 2026-02-11
+
+- Allow extra containers in the keycloak pod (#988) ([daf57f8](https://github.com/CloudPirates-io/helm-charts/commit/daf57f8))
+
 ## [0.14.3] - 2026-02-06
 
 - [postgres] Update initContainers.waitForPostgres.repository to 1090bc3 (#966) ([1717514](https://github.com/CloudPirates-io/helm-charts/commit/1717514))
