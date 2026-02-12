@@ -494,8 +494,8 @@ customScripts:
   #     - name: data
   #       mountPath: /var/lib/rabbitmq
 
-## @param podManagementPolicy
-podManagementPolicy: OrderedReady
+## @param podManagementPolicy Pod management policy for the StatefulSet (OrderedReady or Parallel). RabbitMQ recommends Parallel for proper cluster recovery.
+podManagementPolicy: Parallel
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
