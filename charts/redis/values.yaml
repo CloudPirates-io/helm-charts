@@ -378,6 +378,8 @@ sentinel:
   parallelSyncs: 1
   ## @param sentinel.port Sentinel port
   port: 26379
+  ## @param sentinel.discoveryTimeout Timeout in seconds for redis-cli during master discovery (prevents long TCP timeouts during initial bootstrap)
+  discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
   service:
