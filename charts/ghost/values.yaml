@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.17.0@sha256:ba12ddb9768ed2756bb1d6b366e9424b4f89e2dfe479f1d7dd14a22b2a2f2041"
+  tag: "6.18.0@sha256:99da5a628928dedb71c7ef5952eaa377e0f858fd28a53907d0cbb5729b677e46"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -227,6 +227,9 @@ config:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
     from: "support@example.com"
+  admin:
+    ## Optional: Set custom admin URL. If not set, defaults to second ingress host (e.g., admin.ghost.localhost)
+    url: ""
   server:
     host: "0.0.0.0"
     port: 2368
