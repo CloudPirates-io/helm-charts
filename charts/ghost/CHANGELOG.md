@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.0] - 2026-02-12
+
+- Update charts/ghost/values.yaml ghost to v6.17.0 (minor) (#978) ([adc5952](https://github.com/CloudPirates-io/helm-charts/commit/adc5952))
+
+## [0.9.2] - 2026-02-06
+
+- [ghost]: Allow seperate admin url without second ingress (#969) ([d8dfb54](https://github.com/CloudPirates-io/helm-charts/commit/d8dfb54))
+
 ## [0.9.1] - 2026-02-03
 
 - Update charts/ghost/values.yaml ghost (#948) ([b7cb150](https://github.com/CloudPirates-io/helm-charts/commit/b7cb150))
