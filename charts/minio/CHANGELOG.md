@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.9.1] - 2026-02-12
+
+- [cloudpirates/image-minio] Update image to 11e00b6 (#1003) ([6651fc8](https://github.com/CloudPirates-io/helm-charts/commit/6651fc8))
+
 ## [0.9.0] - 2026-02-05
 
 - [minio]: Switch to hardened image (#974) ([06609dc](https://github.com/CloudPirates-io/helm-charts/commit/06609dc))

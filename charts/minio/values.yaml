@@ -124,6 +124,8 @@ podLabels: {}
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
+  ## @param podSecurityContext.fsGroupChangePolicy Defines behavior of changing ownership and permission of the volume before being exposed inside Pod. Valid values are "OnRootMismatch" and "Always"
+  fsGroupChangePolicy: "OnRootMismatch"
 
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
