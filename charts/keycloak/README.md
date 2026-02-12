@@ -105,6 +105,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
+### Pod configuration
+
+| Parameter                | Description                                                       | Default |
+| ------------------------ | ----------------------------------------------------------------- | ------- |
+| `shareProcessNamespace`  | Enable process namespace sharing between containers in the pod    | `false` |
+
 ### Extra volumes and volumes mount
 
 | Parameter           | Description                                           | Default |
@@ -119,6 +125,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | Parameter             | Description                                       | Default |
 | --------------------- | ------------------------------------------------- | ------- |
 | `extraInitContainers` | Array of initContainer to add to the keycloak pod | `[]`    |
+
+### Extra containers for Keycloak pod
+
+| Parameter             | Description                                       | Default |
+| --------------------- | ------------------------------------------------- | ------- |
+| `extraContainers`     | Array of containers to add to the keycloak pod    | `[]`    |
 
 ### Security
 
@@ -359,6 +371,7 @@ Init containers support the global image registry configuration and can also be 
 Init container resource requests and limits can be configured individually.
 
 **Example:**
+
 ```yaml
 initContainers:
   waitForPostgres:
@@ -605,6 +618,7 @@ extraInitContainers:
 ```
 
 In this example:
+
 - Create a Docker image containing your custom themes in `/themes` and providers in `/providers`
 - The initContainer copies these files to the mounted volumes
 - Keycloak will automatically detect and use them on startup
@@ -661,6 +675,7 @@ ingress:
 ```
 
 **Prerequisites:**
+
 - cert-manager must be installed in your cluster
 - A ClusterIssuer or Issuer must be configured (e.g., Let's Encrypt)
 
@@ -854,6 +869,7 @@ kubectl get secret my-keycloak -o jsonpath="{.data.admin-password}" | base64 --d
    ```
 
 3. **Database Connection Pool**
+
    ```yaml
    database:
      jdbcParams: "?prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048"

@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.22.0] - 2026-02-11
+
+- Update charts/redis/values.yaml redis to v8.6.0 (minor) (#994) ([f0c6417](https://github.com/CloudPirates-io/helm-charts/commit/f0c6417))
+
 ## [0.21.8] - 2026-02-04
 
 - Update charts/redis/values.yaml redis (#955) ([bb7642f](https://github.com/CloudPirates-io/helm-charts/commit/bb7642f))
