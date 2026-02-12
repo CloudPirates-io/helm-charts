@@ -560,7 +560,18 @@
                             "type": "string"
                         },
                         "existingSecret": {
-                            "type": "string"
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "passwordKey": {
+                                    "type": "string"
+                                },
+                                "usernameKey": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "password": {
                             "type": "string"
