@@ -41,17 +41,17 @@ spec:
         - name: wait-for-mariadb
           image: "{{ .Values.initContainers.waitForMariadb.image | default "mariadb:12.0.2" }}"
           env:
-            {{- if .Values.mariadb.auth.existingSecret.name }}
+            {{- if .Values.mariadb.auth.existingSecret }}
             - name: MARIADB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.mariadb.auth.existingSecret.name }}
-                  key: {{ .Values.mariadb.auth.existingSecret.usernameKey }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
             - name: MARIADB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.mariadb.auth.existingSecret.name }}
-                  key: {{ .Values.mariadb.auth.existingSecret.passwordKey }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: mariadb-password
             {{- else }}
             - name: MARIADB_USER
               value: {{ .Values.mariadb.auth.username | quote }}
@@ -93,17 +93,17 @@ spec:
             {{- end }}
           env:
             {{- if .Values.mariadb.enabled }}
-            {{- if .Values.mariadb.auth.existingSecret.name }}
+            {{- if .Values.mariadb.auth.existingSecret }}
             - name: database__connection__user
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.mariadb.auth.existingSecret.name }}
-                  key: {{ .Values.mariadb.auth.existingSecret.usernameKey }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
             - name: database__connection__password
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.mariadb.auth.existingSecret.name }}
-                  key: {{ .Values.mariadb.auth.existingSecret.passwordKey }}
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: mariadb-password
             {{- else }}
             - name: database__connection__user
               value: {{ .Values.mariadb.auth.username | quote }}

@@ -132,7 +132,7 @@ config:
 
 **For bundled MariaDB:**
 
-You can also use an existing secret with the bundled MariaDB deployment. Create a secret:
+You can also use an existing secret with the bundled MariaDB deployment. Create a secret with the required keys:
 
 ```bash
 kubectl create secret generic ghost-mariadb-credentials \
@@ -147,11 +147,12 @@ mariadb:
   enabled: true
   auth:
     database: ghost
-    existingSecret:
-      name: "ghost-mariadb-credentials"
-      usernameKey: "username"
-      passwordKey: "mariadb-password"
+    existingSecret: "ghost-mariadb-credentials"
 ```
+
+**Note:** The secret must contain the following keys:
+- `username`: database username
+- `mariadb-password`: database password for the user
 
 #### SMTP Credentials from Secret
 
@@ -237,16 +238,14 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Database Parameters
 
-| Parameter                                                 | Description                                        | Default              |
-| --------------------------------------------------------- | -------------------------------------------------- | -------------------- |
-| `mariadb.enabled`                                         | Deploy MariaDB as dependency                       | `true`               |
-| `mariadb.auth.database`                                   | MariaDB database name                              | `ghost`              |
-| `mariadb.auth.username`                                   | MariaDB username                                   | `ghost`              |
-| `mariadb.auth.password`                                   | MariaDB password                                   | `changeme`           |
-| `mariadb.auth.existingSecret.name`                        | Name of existing secret with MariaDB credentials   | `""`                 |
-| `mariadb.auth.existingSecret.usernameKey`                 | Key in secret containing database username         | `"username"`         |
-| `mariadb.auth.existingSecret.passwordKey`                 | Key in secret containing database password         | `"mariadb-password"` |
-| `mariadb.auth.allowEmptyRootPassword`                     | Allow empty root password                          | `false`              |
+| Parameter                                                 | Description                                        | Default    |
+| --------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| `mariadb.enabled`                                         | Deploy MariaDB as dependency                       | `true`     |
+| `mariadb.auth.database`                                   | MariaDB database name                              | `ghost`    |
+| `mariadb.auth.username`                                   | MariaDB username                                   | `ghost`    |
+| `mariadb.auth.password`                                   | MariaDB password                                   | `changeme` |
+| `mariadb.auth.existingSecret`                             | Name of existing secret with MariaDB credentials (must contain keys: username, mariadb-password) | `""` |
+| `mariadb.auth.allowEmptyRootPassword`                     | Allow empty root password                          | `false`    |
 | `config.database.externalConnection.existingSecret.name`  | Name of existing secret for external DB credentials| `""`       |
 | `config.database.externalConnection.existingSecret.usernameKey` | Key in secret containing database username   | `username` |
 | `config.database.externalConnection.existingSecret.passwordKey` | Key in secret containing database password   | `password` |

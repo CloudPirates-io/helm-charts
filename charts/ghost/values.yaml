@@ -340,15 +340,9 @@ mariadb:
     username: ghost
     ## @param mariadb.auth.password MariaDB custom user password
     password: changeme
-    ## @param mariadb.auth.existingSecret Use existing secret for MariaDB credentials
-    ## When set, the chart will read credentials from this secret instead of values
-    existingSecret:
-      ## @param mariadb.auth.existingSecret.name Name of the existing secret
-      name: ""
-      ## @param mariadb.auth.existingSecret.usernameKey Key in the secret containing the database username
-      usernameKey: "username"
-      ## @param mariadb.auth.existingSecret.passwordKey Key in the secret containing the database password
-      passwordKey: "mariadb-password"
+    ## @param mariadb.auth.existingSecret Name of existing secret to use for MariaDB credentials
+    ## When set, the secret should contain the keys: username, mariadb-password
+    existingSecret: ""
     ## @param mariadb.auth.allowEmptyRootPassword Allow the root user of MariaDB to have no password set
     allowEmptyRootPassword: false
 
