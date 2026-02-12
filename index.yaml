@@ -11532,6 +11532,60 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 8.2.5
+    created: "2026-02-12T06:45:26.047453088Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 104a27dad00f36efb9fd9c8eb13724d9579078be227491ddef353c73647ef021
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.10.5/mongodb-0.10.5.tgz
+    version: 0.10.5
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[mongodb]: properly mount replicaset secret (#947)"
+              links:
+                - name: "Commit 2d04bbb"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/2d04bbb"
+            - kind: changed
+              description: "[all]: Update documentation to include proper cosign public key"
+              links:
+                - name: "Commit e42365d"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.2.5
     created: "2026-02-11T11:01:00.111073939Z"
     dependencies:
     - name: common
@@ -12917,6 +12971,63 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.1.5/mongodb-0.1.5.tgz
     version: 0.1.5
   nginx:
+  - annotations:
+      artifacthub.io/category: networking
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[nginx]: Allow loading site from configmap (#935)"
+              links:
+                - name: "Commit ff72433"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/ff72433"
+            - kind: changed
+              description: "[all]: Update documentation to include proper cosign public key"
+              links:
+                - name: "Commit e42365d"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Nginx
+          url: https://www.nginx.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+        - name: Application
+          url: https://github.com/nginx/nginx
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.29.5
+    created: "2026-02-12T06:45:26.204823706Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: Nginx is a high-performance HTTP server and reverse proxy.
+    digest: b496388ee466349d3203cf6a31462ac319971723d7e3b59bc4b9b216d6f4ece4
+    home: https://www.nginx.com
+    icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg
+    keywords:
+    - nginx
+    - web server
+    - http
+    - reverse proxy
+    - load balancer
+    - proxy
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: nginx
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+    - https://github.com/nginx/nginx
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/nginx-0.5.11/nginx-0.5.11.tgz
+    version: 0.5.11
   - annotations:
       artifacthub.io/category: networking
       artifacthub.io/changes: |2
@@ -29936,4 +30047,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-11T11:28:07.336056992Z"
+generated: "2026-02-12T06:45:26.205926625Z"
