@@ -283,6 +283,10 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+## @section MariaDB healthcheck parameters
+## @param healthcheckExtraArgs Extra arguments to pass to healthcheck.sh script in probes (e.g., --datadir=/custom/path)
+healthcheckExtraArgs: ""
+
 ## @section Pod Disruption Budget configuration
 podDisruptionBudget:
   ## @param podDisruptionBudget.enabled Enable a Pod Disruption Budget creation

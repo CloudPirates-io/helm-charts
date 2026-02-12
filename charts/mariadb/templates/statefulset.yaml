@@ -199,7 +199,7 @@ spec:
                     exit 1
                   fi
                 {{- else }}
-                - healthcheck.sh --connect --innodb_initialized
+                - healthcheck.sh --connect --innodb_initialized{{ if .Values.healthcheckExtraArgs }} {{ .Values.healthcheckExtraArgs }}{{ end }}
                 {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -213,7 +213,7 @@ spec:
               command:
                 - bash
                 - -c
-                - healthcheck.sh --connect --innodb_initialized
+                - healthcheck.sh --connect --innodb_initialized{{ if .Values.healthcheckExtraArgs }} {{ .Values.healthcheckExtraArgs }}{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -226,7 +226,7 @@ spec:
               command:
                 - bash
                 - -c
-                - healthcheck.sh --connect --innodb_initialized
+                - healthcheck.sh --connect --innodb_initialized{{ if .Values.healthcheckExtraArgs }} {{ .Values.healthcheckExtraArgs }}{{ end }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
