@@ -10762,6 +10762,57 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 2025.10.15
+    created: "2026-02-12T13:53:46.74447136Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: High Performance Object Storage compatible with Amazon S3 APIs
+    digest: 790649e692af3c57240acc21bddf72de436c4bc28f4b4fc284d96132651d9648
+    home: https://min.io
+    icon: https://a.storyblok.com/f/143071/512x512/5d3310f00d/minio-logo.svg
+    keywords:
+    - minio
+    - object-storage
+    - s3
+    - storage
+    - cloud-native
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: minio
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/minio
+    - https://github.com/minio/minio
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/minio-0.9.2/minio-0.9.2.tgz
+    version: 0.9.2
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[minio]: Use wget instead of curl (#899)"
+              links:
+                - name: "Commit 1b83954"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/1b83954"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MinIO
+          url: https://min.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/minio
+        - name: Application
+          url: https://github.com/minio/minio
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2025.10.15
     created: "2026-02-12T08:55:48.41835175Z"
     dependencies:
     - name: common
@@ -30589,4 +30640,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-12T13:48:25.692523712Z"
+generated: "2026-02-12T13:53:46.746860094Z"
