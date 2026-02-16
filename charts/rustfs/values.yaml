@@ -184,6 +184,60 @@ consoleIngress:
           pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
   tls: []
+
+## @section Gateway API configuration
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for RustFS API (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.create Create Gateway resource automatically (WARNING: Not recommended for production - see below)
+  create: false
+  ## WARNING: Auto-creating Gateways (create=true) is NOT RECOMMENDED for production use.
+  ## - Each app creates its own LoadBalancer (expensive in cloud environments)
+  ## - Less control for cluster admins over infrastructure
+  ## - Not the intended Gateway API pattern (separation of concerns)
+  ## - Production deployments should use a shared Gateway managed by cluster admins
+  ## - Auto-creation is convenient for development/testing only
+  ## @param gateway.gatewayClassName GatewayClass to use when creating Gateway (only used if create=true)
+  gatewayClassName: "eg"
+  ## @param gateway.gatewayName Name of existing Gateway resource to attach to (required if create=false)
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: rustfs.localhost
+      paths:
+        - path: /
+          pathType: PathPrefix
+  ## @param gateway.enableWildcard Enable wildcard hostname support (*.host) for bucket-style S3 URLs
+  enableWildcard: true
+
+## @section Console Gateway API configuration (for StatefulSet only)
+consoleGateway:
+  ## @param consoleGateway.enabled Enable Console Gateway API HTTPRoute generation for RustFS API (mutually exclusive with consoleIngress)
+  enabled: false
+  ## @param consoleGateway.create Create Gateway resource automatically (WARNING: Not recommended for production - see below)
+  create: false
+  ## WARNING: Auto-creating Gateways (create=true) is NOT RECOMMENDED for production use.
+  ## - Each app creates its own LoadBalancer (expensive in cloud environments)
+  ## - Less control for cluster admins over infrastructure
+  ## - Not the intended Gateway API pattern (separation of concerns)
+  ## - Production deployments should use a shared Gateway managed by cluster admins
+  ## - Auto-creation is convenient for development/testing only
+  ## @param consoleGateway.gatewayClassName GatewayClass to use when creating Gateway (only used if create=true)
+  gatewayClassName: "eg"
+  ## @param consoleGateway.gatewayName Name of existing Gateway resource to attach to (required if create=false)
+  gatewayName: ""
+  ## @param consoleGateway.annotations Additional annotations for the Console HTTPRoute resource
+  annotations: {}
+  ## @param consoleGateway.hosts An array with hosts and paths
+  hosts:
+    - host: rustfs-console.localhost
+      paths:
+        - path: /
+          pathType: PathPrefix
+  ## @param consoleGateway.enableWildcard Enable wildcard hostname support (*.host)
+  enableWildcard: true
   #  - secretName: rustfs-console-tls
   #    hosts:
   #      - rustfs-console.local

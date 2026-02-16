@@ -1,3 +1,4 @@
+{{- include "cloudpirates.gateway.validateExclusivity" . -}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "keycloak.fullname" . -}}
 {{- $httpPort := .Values.service.httpPort -}}

@@ -205,6 +205,51 @@
                 }
             }
         },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "gatewayClassName": {
+                    "type": "string"
+                },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "type": "string"
+                            },
+                            "paths": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "pathType": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "global": {
             "type": "object",
             "properties": {

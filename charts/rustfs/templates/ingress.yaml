@@ -1,3 +1,9 @@
+{{- if and .Values.gateway.enabled .Values.ingress.enabled -}}
+{{- fail "Gateway API and Ingress cannot both be enabled for RustFS API. Please enable only one routing method." -}}
+{{- end -}}
+{{- if and .Values.consoleGateway.enabled .Values.consoleIngress.enabled -}}
+{{- fail "Gateway API and Ingress cannot both be enabled for RustFS Console. Please enable only one routing method." -}}
+{{- end -}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "rustfs.fullname" . -}}
 {{- $deploymentType := .Values.deploymentType -}}

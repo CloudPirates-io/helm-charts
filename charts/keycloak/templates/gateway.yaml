@@ -1,0 +1,37 @@
+{{- include "cloudpirates.gateway.validateExclusivity" . -}}
+{{- if .Values.gateway.enabled -}}
+{{- $fullName := include "keycloak.fullname" . -}}
+{{- $gatewayName := include "cloudpirates.gateway.resolveName" (dict "gateway" .Values.gateway "fullName" $fullName) -}}
+{{- if .Values.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $gatewayName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ .Values.gateway.gatewayClassName }}
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+{{- end }}
+{{- $svcPort := .Values.keycloak.httpsEnabled | ternary .Values.service.httpsPort .Values.service.httpPort -}}
+{{- $labels := include "keycloak.labels" . -}}
+{{- $annotations := merge .Values.gateway.annotations .Values.commonAnnotations }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  {{- include "cloudpirates.gateway.metadata" (dict "name" $fullName "labels" $labels "annotations" $annotations "context" $) | nindent 2 }}
+spec:
+  parentRefs:
+    - name: {{ $gatewayName }}
+  {{- include "cloudpirates.gateway.hostnames" .Values.gateway.hosts | nindent 2 }}
+  rules:
+    {{- include "cloudpirates.gateway.rules" (dict "hosts" .Values.gateway.hosts "serviceName" $fullName "servicePort" $svcPort) | nindent 4 }}
+{{- end }}
