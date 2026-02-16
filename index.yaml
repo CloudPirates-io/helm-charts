@@ -1058,6 +1058,31 @@ entries:
   common:
   - annotations:
       artifacthub.io/changes: |2
+            - kind: changed
+              description: "Fix YAML parse error caused by whitespace control in selectorLabels (#919)"
+              links:
+                - name: "Commit 4ab389c"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/4ab389c"
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.2.0
+    created: "2026-02-16T13:01:49.94519107Z"
+    description: A library chart for common templates and helper functions
+    digest: f10bdba8e7f685a571ef05c4ec9c102de3fd9f89d70eeecf975fb9a02e2a9e26
+    home: https://www.cloudpirates.io
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: common
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/common
+    type: library
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/common-2.2.0/common-2.2.0.tgz
+    version: 2.2.0
+  - annotations:
+      artifacthub.io/changes: |2
             - kind: fixed
               description: "Fix YAML parse error caused by whitespace control in selectorLabels broken in #914"
       license: Apache-2.0
@@ -31156,4 +31181,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-16T07:47:10.980993914Z"
+generated: "2026-02-16T13:01:49.946215671Z"
