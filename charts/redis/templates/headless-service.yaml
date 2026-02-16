@@ -1,3 +1,4 @@
+{{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -17,6 +18,9 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
+  {{- if $useDeployment }}
+  publishNotReadyAddresses: true
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: redis

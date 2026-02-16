@@ -54,6 +54,11 @@ clusterReplicaCount: 0
 ## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
 revisionHistoryLimit: 10
 
+## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
+## Only takes effect when persistence.enabled=false.
+## When persistence.enabled=true, this value is ignored and StatefulSet is always used (required for PVCs).
+useDeployment: false
+
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}

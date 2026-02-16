@@ -681,6 +681,10 @@
         },
         "topologySpreadConstraints": {
             "type": "array"
+        },
+        "useDeployment": {
+            "type": "boolean",
+            "description": "Use a Deployment instead of a StatefulSet for Redis nodes. Only takes effect when persistence.enabled=false. When persistence.enabled=true, this value is ignored and StatefulSet is always used (required for consistent data)."
         }
     }
 }

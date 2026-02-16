@@ -1,3 +1,4 @@
+{{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 {{- if and (eq .Values.architecture "replication") (not .Values.sentinel.enabled) }}
 apiVersion: v1
 kind: Service
@@ -25,5 +26,7 @@ spec:
     {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
+    {{- if not $useDeployment }}
     statefulset.kubernetes.io/pod-name: {{ include "redis.fullname" . }}-0
+    {{- end }}
 {{- end }}
