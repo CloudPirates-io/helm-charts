@@ -7658,6 +7658,70 @@ entries:
         url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
       license: Apache-2.0
     apiVersion: v2
+    appVersion: 12.2.2
+    created: "2026-02-16T07:34:50.433049437Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.x.x
+    description: MariaDB is a high-performance, open-source relational database server
+      that is a drop-in replacement for MySQL. Supports both single-node and Galera
+      Cluster deployments.
+    digest: ab7486b1203239715b94b3d305ca2b56ea65a98ffe54fddda964a6916a67c594
+    home: https://mariadb.org
+    icon: https://a.storyblok.com/f/143071/512x512/6512dd22ee/mariadb-logo.svg
+    keywords:
+    - mariadb
+    - mysql
+    - database
+    - sql
+    - relational
+    - galera
+    - cluster
+    - replication
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: mariadb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+    - https://github.com/MariaDB/server
+    - https://github.com/MariaDB/mariadb-docker
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mariadb-0.13.6/mariadb-0.13.6.tgz
+    version: 0.13.6
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[all]: Update every chart to newest common (#920)"
+              links:
+                - name: "Commit f8d134d"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MariaDB
+          url: https://mariadb.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+        - name: Application
+          url: https://github.com/MariaDB/server
+        - name: Docker Image
+          url: https://github.com/MariaDB/mariadb-docker
+        - name: Galera Cluster
+          url: https://galeracluster.com
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
     appVersion: 12.1.2
     created: "2026-02-11T11:28:07.335070499Z"
     dependencies:
@@ -30980,4 +31044,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-16T07:30:15.345727006Z"
+generated: "2026-02-16T07:34:50.434156966Z"
