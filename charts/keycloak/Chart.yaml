@@ -2,8 +2,8 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.14.1
-appVersion: "26.5.2"
+version: 0.14.7
+appVersion: "26.5.3"
 keywords:
   - keycloak
   - identity
@@ -52,7 +52,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[keycloak]: Align init container images with global registry, add resource configuration, and improve realm import handling"
-          links:
-            - name: "PR #946"
-              url: "https://github.com/CloudPirates-io/helm-charts/pull/946"
+          description: "Chart updated"

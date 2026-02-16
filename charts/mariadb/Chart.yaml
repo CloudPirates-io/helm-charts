@@ -2,7 +2,7 @@ apiVersion: v2
 name: mariadb
 description: MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. Supports both single-node and Galera Cluster deployments.
 type: application
-version: 0.13.2
+version: 0.13.5
 appVersion: "12.1.2"
 keywords:
   - mariadb
@@ -52,7 +52,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Add possibility to configure topologySpreadConstraints (#875)"
+          description: "[all]: Update every chart to newest common (#920)"
           links:
-            - name: "Commit 8fd1775"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/8fd1775"
+            - name: "Commit f8d134d"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
