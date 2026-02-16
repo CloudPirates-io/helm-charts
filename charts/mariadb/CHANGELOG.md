@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.13.5] - 2026-02-11
+
+- Update charts/mariadb/values.yaml mariadb (#989) ([8439ce6](https://github.com/CloudPirates-io/helm-charts/commit/8439ce6))
+
 ## [0.13.4] - 2026-02-04
 
 - [mariadb]: Modifyable startup command (#961) ([7eec672](https://github.com/CloudPirates-io/helm-charts/commit/7eec672))
