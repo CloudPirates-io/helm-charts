@@ -510,6 +510,10 @@ shardedCluster:
   configsvr:
     ## @param shardedCluster.configsvr.replicaCount Number of config server replicas (minimum 1, recommended 3 for production)
     replicaCount: 3
+    ## @param shardedCluster.configsvr.enableConfigShard Enable config shard mode (MongoDB 8.0+ feature that allows config servers to also store user data)
+    ## When enabled, transitions from dedicated config servers to config shard architecture using transitionFromDedicatedConfigServer
+    ## See: https://www.mongodb.com/docs/manual/reference/command/transitionFromDedicatedConfigServer/
+    enableConfigShard: false
     ## @param shardedCluster.configsvr.priorityClassName Priority class name for config server pods
     priorityClassName: ""
     ## @param shardedCluster.configsvr.resources Resource limits and requests for config server pods
@@ -528,7 +532,7 @@ shardedCluster:
     ## @param shardedCluster.configsvr.persistence Storage configuration for config servers
     persistence:
       ## @param shardedCluster.configsvr.persistence.size Size of persistent volume for config servers
-      size: 4Gi
+      size: 8Gi
       ## @param shardedCluster.configsvr.persistence.storageClass Storage class for config servers
       storageClass: ""
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
@@ -588,7 +592,7 @@ shardedCluster:
     ## @param shardedCluster.shardsvr.persistence Storage configuration for shard servers
     persistence:
       ## @param shardedCluster.shardsvr.persistence.size Size of persistent volume for each shard member
-      size: 20Gi
+      size: 8Gi
       ## @param shardedCluster.shardsvr.persistence.storageClass Storage class for shards
       storageClass: ""
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes

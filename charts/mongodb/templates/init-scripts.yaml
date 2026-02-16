@@ -585,6 +585,56 @@ data:
       fi
     }
 
+    # Transition config server to config shard mode (MongoDB 8.0+ feature)
+    transition_to_config_shard() {
+      {{- if .Values.shardedCluster.configsvr.enableConfigShard }}
+      log_shard "Transitioning config server to config shard mode"
+
+      # Get mongos host
+      local mongosHost="{{ include "mongodb.fullname" . }}-mongos-0.{{ include "mongodb.fullname" . }}-mongos-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"
+
+      # Check if already transitioned to config shard using sh.isConfigShardEnabled()
+      local retries={{ .Values.shardedCluster.initialization.retries | default 30 }}
+      local delay={{ .Values.shardedCluster.initialization.delay | default 5 }}
+
+      # Check if already in config shard mode
+      {{- if .Values.auth.enabled }}
+      result=$(mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "sh.isConfigShardEnabled().enabled ? 1 : 0" 2>/dev/null || echo "0")
+      {{- else }}
+      result=$(mongosh --host $mongosHost --quiet --eval "sh.isConfigShardEnabled().enabled ? 1 : 0" 2>/dev/null || echo "0")
+      {{- end }}
+
+      if [ "$result" = "1" ]; then
+        log_shard "Config server already in config shard mode"
+        return 0
+      fi
+
+      # Run transition command via mongos (with auth - user has been created)
+      log_shard "Running transitionFromDedicatedConfigServer command via mongos..."
+      {{- if .Values.auth.enabled }}
+      transition_output=$(mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "
+        db.adminCommand({ transitionFromDedicatedConfigServer: 1 })
+      " 2>&1)
+      {{- else }}
+      transition_output=$(mongosh --host $mongosHost --eval "
+        db.adminCommand({ transitionFromDedicatedConfigServer: 1 })
+      " 2>&1)
+      {{- end }}
+      result=$?
+
+      if [ $result -eq 0 ]; then
+        log_shard "Successfully transitioned to config shard mode"
+        log_shard "Transition output: $transition_output"
+      else
+        log_shard "Transition command failed with exit code: $result"
+        log_shard "Transition output: $transition_output"
+        logErrorAndExitShard "Failed to transition to config shard mode" $result
+      fi
+      {{- else }}
+      log_shard "Config shard mode disabled, using dedicated config servers"
+      {{- end }}
+    }
+
     # Initialize a single shard replica set
     # $1 - Shard index
     # $2 - Shard replica set name
@@ -718,6 +768,9 @@ data:
       log_shard "========================================================================================================="
       {{- end }}
       {{- end }}
+
+      # Transition config server to config shard mode if enabled (after user creation)
+      transition_to_config_shard
 
       # Set cluster-wide read/write concern if configured
       {{- $writeConcern := .Values.shardedCluster.initialization.defaultWriteConcern }}
