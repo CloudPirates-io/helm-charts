@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.7] - 2026-02-16
+
+- [postgres] Update initContainers.waitForPostgres.repository to v18.2 (#1011) ([ec3a7dd](https://github.com/CloudPirates-io/helm-charts/commit/ec3a7dd))
+
+## [0.14.6] - 2026-02-11
+
+- [mariadb] Update initContainers.waitForMariadb.repository to e487701 (#990) ([951cd24](https://github.com/CloudPirates-io/helm-charts/commit/951cd24))
+
 ## [0.14.5] - 2026-02-11
 
 - [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.3 (patch) (#991) ([81e423d](https://github.com/CloudPirates-io/helm-charts/commit/81e423d))
