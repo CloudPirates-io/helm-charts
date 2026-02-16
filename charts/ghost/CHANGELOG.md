@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.0] - 2026-02-12
+
+- [ghost]: Move secrets from configmap to secret (#972) ([a818e13](https://github.com/CloudPirates-io/helm-charts/commit/a818e13))
+
 ## [0.11.0] - 2026-02-12
 
 - Update charts/ghost/values.yaml ghost to v6.18.0 (minor) (#999) ([6fa8d9b](https://github.com/CloudPirates-io/helm-charts/commit/6fa8d9b))
