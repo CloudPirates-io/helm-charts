@@ -17,6 +17,9 @@
                         "enabled": {
                             "type": "boolean"
                         },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
                         "existingSecret": {
                             "type": "string"
                         },
@@ -590,6 +593,9 @@
                         }
                     }
                 },
+                "discoveryTimeout": {
+                    "type": "integer"
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },
@@ -865,6 +871,20 @@
                 },
                 "certKeyFilename": {
                     "type": "string"
+                },
+                "client": {
+                    "type": "object",
+                    "properties": {
+                        "certFilename": {
+                            "type": "string"
+                        },
+                        "certKeyFilename": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "enabled": {
                     "type": "boolean"

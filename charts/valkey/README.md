@@ -52,8 +52,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -136,6 +136,21 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `config.save`              | Valkey save configuration (e.g., "900 1 300 10 60 10000") | `"900 1 300 10 60 10000"` |
 | `config.extraConfig`       | Additional Valkey configuration parameters                | `[]`                      |
 | `config.existingConfigmap` | Name of existing ConfigMap with Valkey configuration      | `""`                      |
+
+### External Replica Configuration
+
+Configure Valkey as a replica of an external Redis/Valkey server. This is useful for migration scenarios or creating read replicas from external sources.
+
+**Important:** External replica mode is mutually exclusive with Sentinel mode (`sentinel.enabled` must be `false`).
+
+| Parameter                                         | Description                                                      | Default      |
+| ------------------------------------------------- | ---------------------------------------------------------------- | ------------ |
+| `externalReplica.enabled`                         | Enable replication from an external Redis/Valkey server          | `false`      |
+| `externalReplica.host`                            | Hostname or IP address of the external Redis/Valkey master       | `""`         |
+| `externalReplica.port`                            | Port of the external Redis/Valkey master server                  | `6379`       |
+| `externalReplica.auth.enabled`                    | Enable authentication to the external master server              | `false`      |
+| `externalReplica.auth.existingSecret`             | Name of existing secret containing the external master password  | `""`         |
+| `externalReplica.auth.existingSecretPasswordKey`  | Key in the existing secret that contains the password            | `"password"` |
 
 ### Service configuration
 
@@ -547,6 +562,66 @@ You can access metrics directly via port-forward:
 kubectl port-forward service/my-valkey-metrics 9121:9121
 curl http://localhost:9121/metrics
 ```
+
+### External Replica (Migration from Redis)
+
+Configure Valkey as a replica of an external Redis/Valkey server for migration or hybrid deployments:
+
+```yaml
+# values-external-replica.yaml
+# Enable external replica mode
+externalReplica:
+  enabled: true
+  host: "redis-master.example.com"  # External Redis/Valkey server
+  port: 6379
+  auth:
+    enabled: true
+    existingSecret: "external-redis-password"
+    existingSecretPasswordKey: "password"
+
+# Use standalone or replication architecture
+# Note: Sentinel must be disabled (incompatible with external replica)
+architecture: standalone
+
+# Optional: Enable authentication for this Valkey instance
+auth:
+  enabled: true
+  password: "local-valkey-password"
+
+# Configure persistence to keep replicated data
+persistence:
+  enabled: true
+  size: 20Gi
+```
+
+**Setup steps:**
+
+1. Create secret with external master password:
+```bash
+kubectl create secret generic external-redis-password \
+  --from-literal=password='your-external-redis-password' \
+  -n your-namespace
+```
+
+2. Deploy Valkey as replica:
+```bash
+helm install valkey-replica ./charts/valkey -f values-external-replica.yaml
+```
+
+3. Verify replication status:
+```bash
+kubectl exec -it valkey-replica-0 -- valkey-cli INFO replication
+```
+
+**Use cases:**
+- **Migration**: Gradually migrate from Redis to Valkey without downtime
+- **Read replicas**: Create Valkey read replicas of external Redis instances
+- **Hybrid architecture**: Maintain data sync between external and Kubernetes-hosted instances
+
+**Limitations:**
+- Cannot be used with Sentinel mode (mutually exclusive)
+- One-way replication only (Valkey replicates FROM external server)
+- External master password must be stored in a Kubernetes secret
 
 ## Access Valkey
 

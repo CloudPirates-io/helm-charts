@@ -34,7 +34,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.3@sha256:d6b569590880bca35e43318418133a426b024bcb649eeb63bb071bc1490bee41"
+  tag: "8.2.5@sha256:9e52bf8768ae4f59b9ca734845d15cee0e523ced14b900cc3692d241eec9154c"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -238,7 +238,7 @@ metrics:
   image:
     registry: docker.io
     repository: percona/mongodb_exporter
-    tag: "0.47.2"
+    tag: "0.48.0"
     pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:

@@ -41,8 +41,8 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
-      {{- if .Values.galera.enabled }}
       initContainers:
+      {{- if .Values.galera.enabled }}
         - name: galera-config-init
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
@@ -61,19 +61,49 @@ spec:
             - name: galera-config
               mountPath: /tmp/galera-config-ro
               readOnly: true
-            - name: galera-config-rw 
+            - name: galera-config-rw
               mountPath: /tmp/galera-config-rw
+      {{- end }}
+      {{- if and .Values.metrics.enabled .Values.initdbScriptsConfigMap }}
+        - name: init-scripts-merge
+          image: {{ include "mariadb.image" . }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Copy metrics init script first (to run before custom scripts)
+              cp -L /tmp/metrics-scripts/* /tmp/merged-scripts/
+              # Copy custom init scripts (dereference symlinks)
+              cp -rL /tmp/custom-scripts/* /tmp/merged-scripts/
+              # Ensure proper permissions for copied files
+              find /tmp/merged-scripts -type f -exec chmod 755 {} \;
+          volumeMounts:
+            - name: exporter-init-scripts
+              mountPath: /tmp/metrics-scripts
+              readOnly: true
+            - name: custom-init-scripts
+              mountPath: /tmp/custom-scripts
+              readOnly: true
+            - name: merged-init-scripts
+              mountPath: /tmp/merged-scripts
       {{- end }}
       containers:
         - name: mariadb
           image: {{ include "mariadb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
-          {{- if .Values.galera.enabled }}
-          command: 
+          {{- if .Values.command }}
+          command: {{ toYaml .Values.command | nindent 12 }}
+          {{- else if .Values.galera.enabled }}
+          command:
             - /bin/bash
             - -c
             - source /usr/local/bin/galera-entrypoint.sh
+          {{- end }}
+          {{- if .Values.args }}
+          args: {{ toYaml .Values.args | nindent 12 }}
           {{- end }}
           {{- if or .Values.auth.enabled .Values.auth.database .Values.auth.username .Values.auth.allowEmptyRootPassword .Values.extraEnvVars .Values.galera.enabled }}
           env:
@@ -224,14 +254,15 @@ spec:
               mountPath: /usr/local/bin/galera-entrypoint.sh
               subPath: galera-entrypoint.sh
             {{- end }}
-            {{- if .Values.initdbScriptsConfigMap }}
+            {{- if and .Values.metrics.enabled .Values.initdbScriptsConfigMap }}
+            - name: merged-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+            {{- else if .Values.initdbScriptsConfigMap }}
             - name: custom-init-scripts
               mountPath: /docker-entrypoint-initdb.d
-            {{- end }}
-            {{- if .Values.metrics.enabled }}
+            {{- else if .Values.metrics.enabled }}
             - name: exporter-init-scripts
-              mountPath: /docker-entrypoint-initdb.d/initMetricsUser.sql
-              subPath: initMetricsUser.sql
+              mountPath: /docker-entrypoint-initdb.d
             {{- end }}
             {{- if .Values.containerSecurityContext.readOnlyRootFilesystem }}
             - name: run
@@ -303,6 +334,10 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+        {{- if and .Values.metrics.enabled .Values.initdbScriptsConfigMap }}
+        - name: merged-init-scripts
+          emptyDir: {}
+        {{- end }}
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}

@@ -125,6 +125,27 @@ config:
   ## @param config.existingConfigmap Name of existing ConfigMap with Valkey configuration
   existingConfigmap: ""
 
+## @section External Replica Configuration
+## Configure this Valkey instance as a replica of an external Redis/Valkey server
+## IMPORTANT: External replica mode is mutually exclusive with Sentinel (sentinel.enabled must be false)
+## This feature allows you to replicate data from an external Redis/Valkey server, not from internal cluster members
+externalReplica:
+  ## @param externalReplica.enabled Enable replication from an external Redis/Valkey server
+  ## IMPORTANT: Cannot be used with sentinel.enabled=true
+  enabled: false
+  ## @param externalReplica.host Hostname or IP address of the external Redis/Valkey master server
+  host: ""
+  ## @param externalReplica.port Port of the external Redis/Valkey master server
+  port: 6379
+  ## @param externalReplica.auth.enabled Enable authentication to the external master server
+  auth:
+    enabled: false
+    ## @param externalReplica.auth.existingSecret Name of existing secret containing the password for the external master
+    ## The secret should contain a key with the password value
+    existingSecret: ""
+    ## @param externalReplica.auth.existingSecretPasswordKey Key in the existing secret that contains the password
+    existingSecretPasswordKey: "password"
+
 ## @section Service configuration
 service:
   ## @param service.type Valkey service type
@@ -280,7 +301,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.80.2-alpine@sha256:5c1692551217e4519a04b89aa87a8c3360173f020e8cef280c798e9f5dbc819a"
+    tag: "v1.81.0-alpine@sha256:496f642f055bf383b1917e3f0e47990cf7e00d3b4dd73368274388e198a645e1"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container

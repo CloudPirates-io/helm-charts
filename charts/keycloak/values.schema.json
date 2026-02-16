@@ -99,6 +99,9 @@
                 }
             }
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -212,6 +215,45 @@
                     "properties": {
                         "image": {
                             "type": "string"
+                        },
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tag": {
+                            "type": "string"
                         }
                     }
                 },
@@ -219,6 +261,45 @@
                     "type": "object",
                     "properties": {
                         "image": {
+                            "type": "string"
+                        },
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tag": {
                             "type": "string"
                         }
                     }
@@ -238,6 +319,9 @@
                     "type": "string"
                 },
                 "extraArgs": {
+                    "type": "array"
+                },
+                "extraArgsPrefix": {
                     "type": "array"
                 },
                 "hostname": {
@@ -506,6 +590,9 @@
                 "configFile": {
                     "type": "string"
                 },
+                "existingSecret": {
+                    "type": "string"
+                },
                 "import": {
                     "type": "boolean"
                 }
@@ -559,6 +646,9 @@
                     "type": "string"
                 }
             }
+        },
+        "shareProcessNamespace": {
+            "type": "boolean"
         },
         "startupProbe": {
             "type": "object",

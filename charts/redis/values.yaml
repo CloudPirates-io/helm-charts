@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7"
+  tag: "8.6.0@sha256:7b6fb55d8b0adcd77269dc52b3cfffe5f59ca5d43dec3c90dbe18aacce7942e1"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -103,6 +103,10 @@ auth:
     ## user readonly >readonlypassword ~* +@read
     ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
     existingSecretACLKey: ""
+    ## @param auth.acl.existingFilePath Path to existing ACL file injected by Vault Agent Injector or similar tools
+    ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
+    ## Example: "/vault/secrets/redis-acl"
+    existingFilePath: ""
 
 ## @section TLS/SSL configuration
 tls:
@@ -121,6 +125,17 @@ tls:
   port: 6380
   ## @param tls.authClients Require clients to authenticate with a valid client certificate
   authClients: true
+  ## Client certificate configuration for probes and internal connections
+  ## When tls.authClients is true, these certificates are used by readiness/liveness probes
+  ## If not specified, the server certificates will be used (may fail if authClients is true)
+  client:
+    ## @param tls.client.existingSecret Name of an existing secret containing client TLS certificates
+    ## Expected keys in the secret: tls.crt, tls.key
+    existingSecret: ""
+    ## @param tls.client.certFilename Client certificate filename in the secret
+    certFilename: "tls.crt"
+    ## @param tls.client.certKeyFilename Client certificate key filename in the secret
+    certKeyFilename: "tls.key"
 
 ## @section config Redis configuration options
 config:
@@ -343,7 +358,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7"
+    tag: "8.6.0@sha256:7b6fb55d8b0adcd77269dc52b3cfffe5f59ca5d43dec3c90dbe18aacce7942e1"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
@@ -363,6 +378,8 @@ sentinel:
   parallelSyncs: 1
   ## @param sentinel.port Sentinel port
   port: 26379
+  ## @param sentinel.discoveryTimeout Timeout in seconds for redis-cli during master discovery (prevents long TCP timeouts during initial bootstrap)
+  discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
   service:
@@ -397,7 +414,7 @@ sentinel:
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
       repository: alpine/kubectl
-      tag: "1.35.0"
+      tag: "1.35.1"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources:
@@ -466,7 +483,7 @@ metrics:
   image:
     registry: docker.io
     repository: oliver006/redis_exporter
-    tag: "v1.80.2-alpine"
+    tag: "v1.81.0-alpine"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:

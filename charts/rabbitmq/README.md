@@ -74,8 +74,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -238,6 +238,16 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | Parameter                  | Description                       | Default |
 | -------------------------- | --------------------------------- | ------- |
 | `managementPlugin.enabled` | Enable RabbitMQ management plugin | `true`  |
+
+### Init Container configuration
+
+| Parameter                        | Description                                      | Default                                                                                      |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `initContainer.image.registry`   | Init container image registry                    | `docker.io`                                                                                  |
+| `initContainer.image.repository` | Init container image repository                  | `busybox`                                                                                    |
+| `initContainer.image.tag`        | Init container image tag                         | `"1.37.0@sha256:b3255e7dfbcd10cb367af0d409747d511aeb66dfac98cf30e97e87e4207dd76f"`         |
+| `initContainer.image.pullPolicy` | Init container image pull policy                 | `IfNotPresent`                                                                               |
+| `initContainer.resources`        | Resource limits and requests for init containers | `{}`                                                                                         |
 
 ## Plugin configuration
 

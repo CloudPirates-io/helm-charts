@@ -66,6 +66,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+          {{- with .Values.initContainer.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
           image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
@@ -78,7 +81,7 @@ spec:
               mkdir -p {{ .Values.persistence.mountPath }}/plugins
               {{- range .Values.installPlugins }}
               echo "Downloading plugin from {{ . }}"
-              wget -O {{ .Values.persistence.mountPath }}/plugins/$(basename {{ . }}) {{ . }}
+              wget -O {{ $.Values.persistence.mountPath }}/plugins/$(basename {{ . }}) {{ . }}
               {{- end }}
               echo "Moving downloaded plugins to shared directory"
               if ls {{ .Values.persistence.mountPath }}/plugins/*.ez 1> /dev/null 2>&1; then
@@ -92,6 +95,9 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
             - name: plugins
               mountPath: /tmp/plugins
+          {{- with .Values.initContainer.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
         - name: copy-plugins
           image: {{ include "rabbitmq.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
@@ -106,6 +112,9 @@ spec:
           volumeMounts:
             - name: plugins
               mountPath: /tmp/plugins
+          {{- with .Values.initContainer.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.customScripts.initContainers }}
         {{- toYaml .Values.customScripts.initContainers | nindent 8 }}

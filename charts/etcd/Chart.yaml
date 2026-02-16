@@ -2,8 +2,8 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.5.1
-appVersion: "3.6.5"
+version: 0.5.3
+appVersion: "3.6.7"
 keywords:
   - etcd
   - distributed
@@ -41,7 +41,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "[etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846)"
+          description: "Update etcd image registry and repository details"
           links:
-            - name: "Commit 17e0af0"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/17e0af0"
+            - name: "Commit e944a71"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e944a71"
+        - kind: changed
+          description: "[etcd]: Fix invalid sha"
+          links:
+            - name: "Commit 801c35e"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/801c35e"

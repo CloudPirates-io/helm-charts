@@ -1,186 +1,180 @@
 # Changelog
 
+All notable changes to this chart will be documented in this file.
 
-## 0.9.1 (2026-01-19)
+## [0.10.4] - 2026-02-11
 
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.5 (patch) (#992) ([ab5a714](https://github.com/CloudPirates-io/helm-charts/commit/ab5a714))
 
-## 0.9.0 (2026-01-15)
+## [0.10.3] - 2026-02-03
 
-*  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
-* chore: update CHANGELOG.md for merged changes ([9d57904](https://github.com/CloudPirates-io/helm-charts/commit/9d57904))
-* chore: update CHANGELOG.md for merged changes ([509895f](https://github.com/CloudPirates-io/helm-charts/commit/509895f))
-* chore: auto-generate values.schema.json (#836) ([d6e27e6](https://github.com/CloudPirates-io/helm-charts/commit/d6e27e6))
-* chore: update CHANGELOG.md for merged changes ([6998f3c](https://github.com/CloudPirates-io/helm-charts/commit/6998f3c))
-* chore: update CHANGELOG.md for merged changes ([4d4c7da](https://github.com/CloudPirates-io/helm-charts/commit/4d4c7da))
+- [mongodb]: properly mount replicaset secret (#947) ([2d04bbb](https://github.com/CloudPirates-io/helm-charts/commit/2d04bbb))
+- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
 
-## 0.8.0 (2026-01-13)
+## [0.10.2] - 2026-01-29
 
-* add replication architecture (#829) ([7845f5f](https://github.com/CloudPirates-io/helm-charts/commit/7845f5f))
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.4 (patch) (#922) ([81c610d](https://github.com/CloudPirates-io/helm-charts/commit/81c610d))
 
-## 0.7.1 (2025-12-22)
+## [0.10.1] - 2026-01-28
 
-* chore: update CHANGELOG.md for merged changes ([9d5553d](https://github.com/CloudPirates-io/helm-charts/commit/9d5553d))
-* chore: update CHANGELOG.md for merged changes ([6835108](https://github.com/CloudPirates-io/helm-charts/commit/6835108))
-* chore: update CHANGELOG.md for merged changes ([4eaa98d](https://github.com/CloudPirates-io/helm-charts/commit/4eaa98d))
-* chore: update CHANGELOG.md for merged changes ([8620dd7](https://github.com/CloudPirates-io/helm-charts/commit/8620dd7))
+- [all]: Update every chart to newest common (#920) ([f8d134d](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d))
 
-## 0.7.0 (2025-12-06)
+## [0.10.0] - 2026-01-22
 
-* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+- [mongodb]: introduce new value replicaSet.extraInit.disableTelemetry (#881) ([aa526cf](https://github.com/CloudPirates-io/helm-charts/commit/aa526cf))
 
-## 0.6.6 (2025-12-01)
+## [0.9.2] - 2026-01-22
 
-* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
+- [mongodb]: enable replicaSet.[key,keySecretName] (#880) ([5baa210](https://github.com/CloudPirates-io/helm-charts/commit/5baa210))
 
-## 0.6.5 (2025-11-25)
+## [0.9.1] - 2026-01-19
 
-* chore: update CHANGELOG.md for merged changes ([bdf9baf](https://github.com/CloudPirates-io/helm-charts/commit/bdf9baf))
-* chore: update CHANGELOG.md for merged changes ([882e6db](https://github.com/CloudPirates-io/helm-charts/commit/882e6db))
-* [percona/mongodb_exporter] Update image to v0.47.2 (#656) ([e3cebb5](https://github.com/CloudPirates-io/helm-charts/commit/e3cebb5))
-* chore: update CHANGELOG.md for merged changes ([a88b267](https://github.com/CloudPirates-io/helm-charts/commit/a88b267))
-* chore: update CHANGELOG.md for merged changes ([5cf594e](https://github.com/CloudPirates-io/helm-charts/commit/5cf594e))
+- [mongo] Update charts/mongodb/values.yaml mongo (#855) ([c27a625](https://github.com/CloudPirates-io/helm-charts/commit/c27a625))
 
-## 0.6.4 (2025-11-20)
+## [0.9.0] - 2026-01-15
 
-* chore: update CHANGELOG.md for merged changes ([86bdd5d](https://github.com/CloudPirates-io/helm-charts/commit/86bdd5d))
-* chore: update CHANGELOG.md for merged changes ([544e9bd](https://github.com/CloudPirates-io/helm-charts/commit/544e9bd))
-* chore: auto-generate values.schema.json (#616) ([d1d105a](https://github.com/CloudPirates-io/helm-charts/commit/d1d105a))
+-  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
 
-## 0.6.3 (2025-11-17)
+## [0.8.0] - 2026-01-13
 
-* chore: update CHANGELOG.md for merged changes ([005861e](https://github.com/CloudPirates-io/helm-charts/commit/005861e))
-* chore: update CHANGELOG.md for merged changes ([d658aef](https://github.com/CloudPirates-io/helm-charts/commit/d658aef))
-* [mongodb/redis/posgres] Add subPath option when using existingClaim (#613) ([8aa277e](https://github.com/CloudPirates-io/helm-charts/commit/8aa277e))
-* chore: update CHANGELOG.md for merged changes ([f622e2c](https://github.com/CloudPirates-io/helm-charts/commit/f622e2c))
-* chore: update CHANGELOG.md for merged changes ([3dfdb85](https://github.com/CloudPirates-io/helm-charts/commit/3dfdb85))
-* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
-* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+- add replication architecture (#829) ([7845f5f](https://github.com/CloudPirates-io/helm-charts/commit/7845f5f))
 
-## 0.6.2 (2025-11-13)
+## [0.7.1] - 2025-12-22
 
-* chore: update CHANGELOG.md for merged changes ([a23d7d2](https://github.com/CloudPirates-io/helm-charts/commit/a23d7d2))
-* chore: update CHANGELOG.md for merged changes ([55fb45f](https://github.com/CloudPirates-io/helm-charts/commit/55fb45f))
-* chore: update CHANGELOG.md for merged changes ([5e305ab](https://github.com/CloudPirates-io/helm-charts/commit/5e305ab))
-* chore: update CHANGELOG.md for merged changes ([9ab8da3](https://github.com/CloudPirates-io/helm-charts/commit/9ab8da3))
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.3 (patch) (#770) ([ce2ec34](https://github.com/CloudPirates-io/helm-charts/commit/ce2ec34))
+- [mongo] Update charts/mongodb/values.yaml mongo (#717) ([b5a1e22](https://github.com/CloudPirates-io/helm-charts/commit/b5a1e22))
 
-## 0.6.1 (2025-10-29)
+## [0.7.0] - 2025-12-06
 
-* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
-* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+- [universal] fix statefulset pvc labels (#696) ([b87dbc7](https://github.com/CloudPirates-io/helm-charts/commit/b87dbc7))
 
-## 0.6.0 (2025-10-28)
+## [0.6.6] - 2025-12-01
 
-* chore: update CHANGELOG.md for merged changes ([5bf8d10](https://github.com/CloudPirates-io/helm-charts/commit/5bf8d10))
-* chore: update CHANGELOG.md for merged changes ([64bc0ac](https://github.com/CloudPirates-io/helm-charts/commit/64bc0ac))
-* Update README.md (#468) ([26c7a1c](https://github.com/CloudPirates-io/helm-charts/commit/26c7a1c))
-* chore: update CHANGELOG.md for merged changes ([cbf613f](https://github.com/CloudPirates-io/helm-charts/commit/cbf613f))
-* chore: update CHANGELOG.md for merged changes ([48e61e6](https://github.com/CloudPirates-io/helm-charts/commit/48e61e6))
+- [universal] add labels to statefulset pvc-templates (#681) ([87624a5](https://github.com/CloudPirates-io/helm-charts/commit/87624a5))
 
-## 0.5.6 (2025-10-26)
+## [0.6.5] - 2025-11-25
 
+- [percona/mongodb_exporter] Update image to v0.47.2 (#656) ([e3cebb5](https://github.com/CloudPirates-io/helm-charts/commit/e3cebb5))
 
-## 0.5.5 (2025-10-24)
+## [0.6.4] - 2025-11-20
 
-* chore: update CHANGELOG.md for merged changes ([b2b84ce](https://github.com/CloudPirates-io/helm-charts/commit/b2b84ce))
-* chore: update CHANGELOG.md for merged changes ([b1f47df](https://github.com/CloudPirates-io/helm-charts/commit/b1f47df))
-* Allow to set custom command and args (#457) ([06d8f66](https://github.com/CloudPirates-io/helm-charts/commit/06d8f66))
-* chore: auto-generate values.schema.json for updated charts (#455) ([aec6840](https://github.com/CloudPirates-io/helm-charts/commit/aec6840))
-* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
-* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.2 (patch) (#640) ([a29d777](https://github.com/CloudPirates-io/helm-charts/commit/a29d777))
 
-## 0.5.4 (2025-10-23)
+## [0.6.3] - 2025-11-17
 
-* chore: update CHANGELOG.md for merged changes ([4587534](https://github.com/CloudPirates-io/helm-charts/commit/4587534))
-* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
-* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+- [mongodb/redis/posgres] Add subPath option when using existingClaim (#613) ([8aa277e](https://github.com/CloudPirates-io/helm-charts/commit/8aa277e))
+- [mongo] Update charts/mongodb/values.yaml mongo (#599) ([3f5d30f](https://github.com/CloudPirates-io/helm-charts/commit/3f5d30f))
 
-## 0.5.3 (2025-10-22)
+## [0.6.2] - 2025-11-13
 
-* chore: update CHANGELOG.md for merged changes ([bd36e6d](https://github.com/CloudPirates-io/helm-charts/commit/bd36e6d))
-* chore: update CHANGELOG.md for merged changes ([fc6b177](https://github.com/CloudPirates-io/helm-charts/commit/fc6b177))
+- [universal] update readme files (#583) ([e63f5f9](https://github.com/CloudPirates-io/helm-charts/commit/e63f5f9))
+- [mongo] Update charts/mongodb/values.yaml mongo (#588) ([a197ff8](https://github.com/CloudPirates-io/helm-charts/commit/a197ff8))
 
-## 0.5.2 (2025-10-22)
+## [0.6.1] - 2025-10-29
 
-* Fix no auth error in init script (#440) ([54b7221](https://github.com/CloudPirates-io/helm-charts/commit/54b7221))
-* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
-* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
-* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
-* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
-* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
-* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
-* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
-* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
-* chore: update CHANGELOG.md for merged changes ([c76aa29](https://github.com/CloudPirates-io/helm-charts/commit/c76aa29))
-* chore: update CHANGELOG.md for merged changes ([77e0793](https://github.com/CloudPirates-io/helm-charts/commit/77e0793))
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.1 (minor) (#488) ([9986888](https://github.com/CloudPirates-io/helm-charts/commit/9986888))
 
-## 0.5.1 (2025-10-15)
+## [0.6.0] - 2025-10-28
 
-* chore: update CHANGELOG.md for merged changes ([3361964](https://github.com/CloudPirates-io/helm-charts/commit/3361964))
-* chore: update CHANGELOG.md for merged changes ([7f61172](https://github.com/CloudPirates-io/helm-charts/commit/7f61172))
-* chore: update CHANGELOG.md for merged changes ([1ec9aab](https://github.com/CloudPirates-io/helm-charts/commit/1ec9aab))
-* chore: update CHANGELOG.md for merged changes ([c9ff4ec](https://github.com/CloudPirates-io/helm-charts/commit/c9ff4ec))
-* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+- [universal] unify extraEnvVars in all charts (#477) ([4aee7b4](https://github.com/CloudPirates-io/helm-charts/commit/4aee7b4))
+- Update README.md (#468) ([26c7a1c](https://github.com/CloudPirates-io/helm-charts/commit/26c7a1c))
 
-## 0.5.0 (2025-10-14)
+## [0.5.6] - 2025-10-26
 
-* Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
-* chore: update CHANGELOG.md for merged changes ([84cf67b](https://github.com/CloudPirates-io/helm-charts/commit/84cf67b))
-* chore: update CHANGELOG.md for all charts via manual trigger ([6974964](https://github.com/CloudPirates-io/helm-charts/commit/6974964))
+- [mongo] Update charts/mongodb/values.yaml mongo (#460) ([f8dad75](https://github.com/CloudPirates-io/helm-charts/commit/f8dad75))
 
-## 0.4.2 (2025-10-10)
+## [0.5.5] - 2025-10-24
 
+- Allow to set custom command and args (#457) ([06d8f66](https://github.com/CloudPirates-io/helm-charts/commit/06d8f66))
 
-## 0.4.1 (2025-10-09)
+## [0.5.4] - 2025-10-23
 
-* fix: newline between mongo labels and additional labels (#301) ([ea7937f](https://github.com/CloudPirates-io/helm-charts/commit/ea7937f))
-* add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
+- [universal] Update annotations, labels, podannotations and podlabel (#454) ([cdb38db](https://github.com/CloudPirates-io/helm-charts/commit/cdb38db))
 
-## 0.4.0 (2025-10-09)
+## [0.5.3] - 2025-10-22
 
-* feat: add metrics exporter (#243) ([c931978](https://github.com/CloudPirates-io/helm-charts/commit/c931978))
+- [universal]: Support extra secret templating (#444) ([c2b2024](https://github.com/CloudPirates-io/helm-charts/commit/c2b2024))
 
-## 0.3.3 (2025-10-09)
+## [0.5.2] - 2025-10-22
 
-* makes configmap name dynamic (#279) ([6dd10a9](https://github.com/CloudPirates-io/helm-charts/commit/6dd10a9))
+- Fix no auth error in init script (#440) ([54b7221](https://github.com/CloudPirates-io/helm-charts/commit/54b7221))
+- [universal] fix all appversions in charts (#417) ([b8debeb](https://github.com/CloudPirates-io/helm-charts/commit/b8debeb))
+- [unversal] Add signing informations for artifacthub (#415) ([e761c90](https://github.com/CloudPirates-io/helm-charts/commit/e761c90))
+- [universal] use a string instead of a boolean (#413) ([c24d26d](https://github.com/CloudPirates-io/helm-charts/commit/c24d26d))
+- [universal] improve chart artifact annotations (#404) ([37f1c5b](https://github.com/CloudPirates-io/helm-charts/commit/37f1c5b))
+- [universal] Rework all schema json (#393) ([79d1439](https://github.com/CloudPirates-io/helm-charts/commit/79d1439))
 
-## 0.3.2 (2025-10-09)
+## [0.5.1] - 2025-10-15
 
+- [mongo] Update charts/mongodb/values.yaml mongo (#392) ([6802f43](https://github.com/CloudPirates-io/helm-charts/commit/6802f43))
+- [mariadb] add galera cluster support for mariadb (#348) ([b7a63ee](https://github.com/CloudPirates-io/helm-charts/commit/b7a63ee))
 
-## 0.3.1 (2025-10-08)
+## [0.5.0] - 2025-10-14
 
-* update values.schema.json (#242) ([f973e47](https://github.com/CloudPirates-io/helm-charts/commit/f973e47))
-*  [minio, mongodb, postgres, timescaledb] Update securityContext to containerSecurityContext in the values schema (#213) ([8a4003f](https://github.com/CloudPirates-io/helm-charts/commit/8a4003f))
+- Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
+- [universal]: Fix changelog generation (#354) ([2e973c0](https://github.com/CloudPirates-io/helm-charts/commit/2e973c0))
 
-## 0.3.0 (2025-10-02)
+## [0.4.2] - 2025-10-10
 
-* make mongodb run on openshift (#202) ([b654629](https://github.com/CloudPirates-io/helm-charts/commit/b654629))
+- [mongo] Update charts/mongodb/values.yaml mongo (#319) ([ecf445f](https://github.com/CloudPirates-io/helm-charts/commit/ecf445f))
 
-## 0.2.0 (2025-09-25)
+## [0.4.1] - 2025-10-09
 
-* add custom user creation at initialization (#153) ([772d18f](https://github.com/CloudPirates-io/helm-charts/commit/772d18f))
+- fix: newline between mongo labels and additional labels (#301) ([ea7937f](https://github.com/CloudPirates-io/helm-charts/commit/ea7937f))
+- add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
 
-## 0.1.9 (2025-09-16)
+## [0.4.0] - 2025-10-09
 
-* Update CHANGELOG.md ([72601e5](https://github.com/CloudPirates-io/helm-charts/commit/72601e5))
-* Bump chart version ([77f76af](https://github.com/CloudPirates-io/helm-charts/commit/77f76af))
+- feat: add metrics exporter (#243) ([c931978](https://github.com/CloudPirates-io/helm-charts/commit/c931978))
 
-## 0.1.8 (2025-09-11)
+## [0.3.3] - 2025-10-09
 
-* Update CHANGELOG.md ([5c9f4d0](https://github.com/CloudPirates-io/helm-charts/commit/5c9f4d0))
-* Bump chart version ([159ba82](https://github.com/CloudPirates-io/helm-charts/commit/159ba82))
+- makes configmap name dynamic (#279) ([6dd10a9](https://github.com/CloudPirates-io/helm-charts/commit/6dd10a9))
 
-## 0.1.7 (2025-09-09)
+## [0.3.2] - 2025-10-09
 
-* Update CHANGELOG.md ([3174cb2](https://github.com/CloudPirates-io/helm-charts/commit/3174cb2))
-* Bump chart version ([98d3ee6](https://github.com/CloudPirates-io/helm-charts/commit/98d3ee6))
-* Update docker.io/mongo:8.0.13 Docker digest to c750922 ([cbd41d9](https://github.com/CloudPirates-io/helm-charts/commit/cbd41d9))
-* add extraObject array to all charts ([34772b7](https://github.com/CloudPirates-io/helm-charts/commit/34772b7))
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.0.15 (patch) (#262) ([2fc1f1a](https://github.com/CloudPirates-io/helm-charts/commit/2fc1f1a))
 
-## 0.1.6 (2025-08-27)
+## [0.3.1] - 2025-10-08
 
-* Fix values.yaml / Chart.yaml linting issues ([043c7e0](https://github.com/CloudPirates-io/helm-charts/commit/043c7e0))
-* Add initial Changelogs to all Charts ([68f10ca](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca))
+- update values.schema.json (#242) ([f973e47](https://github.com/CloudPirates-io/helm-charts/commit/f973e47))
+- [mariadb] use tpl to return existingConfigMap (#217) ([c7c2f4c](https://github.com/CloudPirates-io/helm-charts/commit/c7c2f4c))
+-  [minio, mongodb, postgres, timescaledb] Update securityContext to containerSecurityContext in the values schema (#213) ([8a4003f](https://github.com/CloudPirates-io/helm-charts/commit/8a4003f))
 
-## 0.1.5 (2025-08-26)
+## [0.3.0] - 2025-10-02
 
-* Initial tagged release
+- make mongodb run on openshift (#202) ([b654629](https://github.com/CloudPirates-io/helm-charts/commit/b654629))
+- [redis] return fqdn for sentinel master lookup (#156) ([00b9882](https://github.com/CloudPirates-io/helm-charts/commit/00b9882))
+
+## [0.2.0] - 2025-09-25
+
+- add custom user creation at initialization (#153) ([772d18f](https://github.com/CloudPirates-io/helm-charts/commit/772d18f))
+
+## [0.1.9] - 2025-09-16
+
+- Update CHANGELOG.md ([72601e5](https://github.com/CloudPirates-io/helm-charts/commit/72601e5))
+- Bump chart version ([77f76af](https://github.com/CloudPirates-io/helm-charts/commit/77f76af))
+- [mongo] chore(deps): update docker.io/mongo:8.0.13 Docker digest to cf340b1 ([3fe0172](https://github.com/CloudPirates-io/helm-charts/commit/3fe0172))
+
+## [0.1.8] - 2025-09-11
+
+- Update CHANGELOG.md ([5c9f4d0](https://github.com/CloudPirates-io/helm-charts/commit/5c9f4d0))
+- Bump chart version ([159ba82](https://github.com/CloudPirates-io/helm-charts/commit/159ba82))
+- [mongo] chore(deps): update docker.io/mongo:8.0.13 Docker digest to 7acbcf3 ([37cb0a1](https://github.com/CloudPirates-io/helm-charts/commit/37cb0a1))
+
+## [0.1.7] - 2025-09-09
+
+- Update CHANGELOG.md ([3174cb2](https://github.com/CloudPirates-io/helm-charts/commit/3174cb2))
+- Bump chart version ([98d3ee6](https://github.com/CloudPirates-io/helm-charts/commit/98d3ee6))
+- Update docker.io/mongo:8.0.13 Docker digest to c750922 ([cbd41d9](https://github.com/CloudPirates-io/helm-charts/commit/cbd41d9))
+- add extraObject array to all charts ([34772b7](https://github.com/CloudPirates-io/helm-charts/commit/34772b7))
+
+## [0.1.6] - 2025-08-27
+
+- Fix values.yaml / Chart.yaml linting issues ([043c7e0](https://github.com/CloudPirates-io/helm-charts/commit/043c7e0))
+- Add initial Changelogs to all Charts ([68f10ca](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca))
+
+## [0.1.5] - 2025-08-26
+
+- Initial release
+

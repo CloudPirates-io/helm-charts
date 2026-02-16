@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.5.2@sha256:fb31a59deb46f746f2aaa25adc5da39ceccac4fd22d36a519562b0bf02e8df20"
+  tag: "26.5.3@sha256:5a236ae4dd8ece77490115bace15a11a4d15e9cbcf58a490b95a7da2cd71d32a"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -37,6 +37,10 @@ replicaCount: 1
 podAnnotations: {}
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}
+
+## @section Pod configuration
+## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
+shareProcessNamespace: false
 
 ## @section extra volumes and volumes mount
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
@@ -57,6 +61,20 @@ preserveProviders: false
 ##     imagePullPolicy: Always
 ##
 extraInitContainers: []
+
+## @section Extra containers for Keycloak pod
+## @param extraContainers Additional containers to add to the pod
+## Example:
+## extraContainers:
+##   - name: sidecar
+##     image: nginx:latest
+##     imagePullPolicy: Always
+##     ports:
+##       - containerPort: 8000
+##     volumeMounts:
+##       - name: tmp
+##         mountPath: /tmp
+extraContainers: []
 
 ## @section Security Context
 podSecurityContext:
@@ -116,6 +134,8 @@ keycloak:
   production: false
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
+  ## @param keycloak.extraArgsPrefix Additional arguments to pass before the start command (e.g., for --config-file)
+  extraArgsPrefix: []
   ## @param keycloak.extraArgs Additional arguments to pass to the Keycloak startup command
   extraArgs: []
 
@@ -219,6 +239,8 @@ realm:
   import: false
   ## @param realm.configFile Json config for initial realm configuration, mounted in /opt/keycloak/data/import
   configFile: ""
+  ## @param realm.existingSecret Name of existing secret containing realm configuration (key: realm.json)
+  existingSecret: ""
 
 ## @section Features Configuration
 features:
@@ -425,12 +447,44 @@ extraObjects: []
 
 ## @section Init Container Configuration
 initContainers:
-  ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting
   waitForPostgres:
-    image: "postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"
-  ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
+    ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting (leave empty to use registry/repository/tag)
+    image: ""
+    ## @param initContainers.waitForPostgres.registry PostgreSQL image registry (overrides global.imageRegistry)
+    registry: ""
+    ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
+    repository: postgres
+    ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
+    tag: "18.2@sha256:b6b4d0b75c699a2c94dfc5a94fe09f38630f3b67ab0e1653ede1b7ac8e13c197"
+    ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
+    pullPolicy: IfNotPresent
+    ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 32Mi
   waitForMariadb:
-    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
+    ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
+    image: ""
+    ## @param initContainers.waitForMariadb.registry MariaDB image registry (overrides global.imageRegistry)
+    registry: ""
+    ## @param initContainers.waitForMariadb.repository MariaDB image repository
+    repository: mariadb
+    ## @param initContainers.waitForMariadb.tag MariaDB image tag
+    tag: "12.2.2@sha256:3ba727e641ef0ea24054e47c72a831b1067da32d5139c0405b629c25b115eb89"
+    ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
+    pullPolicy: IfNotPresent
+    ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 100m
+        memory: 32Mi
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
 ## @descriptionStart

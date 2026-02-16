@@ -52,8 +52,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -105,6 +105,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `podAnnotations` | Map of annotations to add to the pods | `{}`    |
 | `podLabels`      | Map of labels to add to the pods      | `{}`    |
 
+### Pod configuration
+
+| Parameter                | Description                                                       | Default |
+| ------------------------ | ----------------------------------------------------------------- | ------- |
+| `shareProcessNamespace`  | Enable process namespace sharing between containers in the pod    | `false` |
+
 ### Extra volumes and volumes mount
 
 | Parameter           | Description                                           | Default |
@@ -119,6 +125,12 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | Parameter             | Description                                       | Default |
 | --------------------- | ------------------------------------------------- | ------- |
 | `extraInitContainers` | Array of initContainer to add to the keycloak pod | `[]`    |
+
+### Extra containers for Keycloak pod
+
+| Parameter             | Description                                       | Default |
+| --------------------- | ------------------------------------------------- | ------- |
+| `extraContainers`     | Array of containers to add to the keycloak pod    | `[]`    |
 
 ### Security
 
@@ -152,6 +164,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
 | `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
 | `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
+| `keycloak.extraArgsPrefix`             | Additional arguments to pass before the start command (e.g., for --config-file)                              | `[]`               |
 | `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
 ### TLS Configuration
@@ -206,10 +219,11 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Realm Configuration
 
-| Parameter          | Description                                                                            | Default |
-| ------------------ | -------------------------------------------------------------------------------------- | ------- |
-| `realm.import`     | Enable import of realms from /opt/keycloak/data/import (production mode must be false) | `false` |
-| `realm.configFile` | Json config for initial realm configuration, mounted in /opt/keycloak/data/import      | `""`    |
+| Parameter              | Description                                                                                               | Default |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | ------- |
+| `realm.import`         | Enable import of realms from /opt/keycloak/data/import (production mode must be false)                    | `false` |
+| `realm.configFile`     | Json config for initial realm configuration, stored in a Secret and mounted in /opt/keycloak/data/import  | `""`    |
+| `realm.existingSecret` | Name of existing secret containing realm configuration (key: realm.json)                                  | `""`    |
 
 ### Features Configuration
 
@@ -337,10 +351,38 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Init Container Configuration
 
-| Parameter                              | Description                                 | Default                                                                                  |
-| -------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `initContainers.waitForPostgres.image` | PostgreSQL init container image for waiting | `postgres:17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a`  |
-| `initContainers.waitForMariadb.image`  | MariaDB init container image for waiting    | `mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545` |
+| Parameter                                      | Description                                                     | Default |
+| ---------------------------------------------- | --------------------------------------------------------------- | ------- |
+| `initContainers.waitForPostgres.image`         | Full image override for PostgreSQL init container               | `""` |
+| `initContainers.waitForPostgres.registry`      | PostgreSQL image registry (overrides global.imageRegistry)      | `""` |
+| `initContainers.waitForPostgres.repository`    | PostgreSQL image repository                                     | `postgres` |
+| `initContainers.waitForPostgres.tag`           | PostgreSQL image tag                                            | `"17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"` |
+| `initContainers.waitForPostgres.pullPolicy`    | PostgreSQL image pull policy                                    | `IfNotPresent` |
+| `initContainers.waitForPostgres.resources`     | Resource requests and limits for PostgreSQL init container      | `{}` |
+| `initContainers.waitForMariadb.image`          | Full image override for MariaDB init container                  | `""` |
+| `initContainers.waitForMariadb.registry`       | MariaDB image registry (overrides global.imageRegistry)         | `""` |
+| `initContainers.waitForMariadb.repository`     | MariaDB image repository                                        | `mariadb` |
+| `initContainers.waitForMariadb.tag`            | MariaDB image tag                                               | `"12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
+| `initContainers.waitForMariadb.pullPolicy`     | MariaDB image pull policy                                       | `IfNotPresent` |
+| `initContainers.waitForMariadb.resources`      | Resource requests and limits for MariaDB init container         | `{}` |
+
+Init containers support the global image registry configuration and can also be overridden individually per container.
+
+Init container resource requests and limits can be configured individually.
+
+**Example:**
+
+```yaml
+initContainers:
+  waitForPostgres:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+```
 
 ### PostgreSQL Configuration
 
@@ -355,7 +397,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                   | Description                                       | Default      |
 | --------------------------- | ------------------------------------------------- | ------------ |
-| `mariadb.enabled`           | Enable embedded PostgreSQL database               | `false`      |
+| `mariadb.enabled`           | Enable embedded MariaDB database                  | `false`      |
 | `mariadb.auth.database`     | MariaDB database name                             | `"keycloak"` |
 | `mariadb.auth.username`     | MariaDB database user (leave empty for root user) | `""`         |
 | `mariadb.auth.password`     | MariaDB database password                         | `""`         |
@@ -538,6 +580,16 @@ realm:
     }
 ```
 
+#### Using an existing Secret (recommended)
+
+For production use, it is recommended to store realm configuration in a Kubernetes Secret.
+
+```yaml
+realm:
+  import: true
+  existingSecret: my-realm-secret
+```
+
 ### Using Custom Themes and Providers
 
 The Keycloak deployment automatically mounts empty directories at `/opt/keycloak/themes` and `/opt/keycloak/providers`. You can use initContainers to copy custom themes and providers into these directories.
@@ -566,6 +618,7 @@ extraInitContainers:
 ```
 
 In this example:
+
 - Create a Docker image containing your custom themes in `/themes` and providers in `/providers`
 - The initContainer copies these files to the mounted volumes
 - Keycloak will automatically detect and use them on startup
@@ -622,6 +675,7 @@ ingress:
 ```
 
 **Prerequisites:**
+
 - cert-manager must be installed in your cluster
 - A ClusterIssuer or Issuer must be configured (e.g., Let's Encrypt)
 
@@ -815,6 +869,7 @@ kubectl get secret my-keycloak -o jsonpath="{.data.admin-password}" | base64 --d
    ```
 
 3. **Database Connection Pool**
+
    ```yaml
    database:
      jdbcParams: "?prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048"

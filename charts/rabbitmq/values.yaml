@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.3-management@sha256:9e537169ec1c6b97f13549c6d3a7a4690a6d5be19d7d6cc42c5beb212fce5873"
+  tag: "4.2.3-management@sha256:5deee3f817cb61eef73b2a934c9fe303be347a23db4e45123ec1698f25118e8c"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -233,9 +233,22 @@ queueBalancing:
 ##          targetGroupSize: 3  # 3 replicas even in 5-node cluster
 ##          interval: 1800000  # 30 minutes in milliseconds
 ##
-## Note: When upgrading existing RabbitMQ deployments, enable autoRebalance
-##       to redistribute existing queues. For new deployments, queueLeaderLocator
-##       alone is usually sufficient.
+## Important Notes:
+##
+## - When upgrading existing RabbitMQ deployments, enable autoRebalance to
+##   redistribute existing queues across cluster nodes.
+##
+## - For new deployments with stable nodes and low queue churn, queueLeaderLocator
+##   alone may be sufficient for balanced queue distribution.
+##
+## - However, if you have HIGH QUEUE CHURN (especially auto-delete queues) or expect
+##   node failures/restarts/redeployments during operation, you should ALSO enable
+##   autoRebalance even for new deployments. This ensures queues are rebalanced after
+##   node recoveries, preventing long-term unbalanced distribution.
+##
+##   Example scenario: If a node goes down during peak queue creation (e.g., daily
+##   workstation reconnections), new queues will only be placed on available nodes.
+##   Without autoRebalance, these queues remain unbalanced even after the node returns.
 
 ## @section PeerDiscoveryK8sPlugin configuration
 peerDiscoveryK8sPlugin:
@@ -259,9 +272,20 @@ initContainer:
     ## @param initContainer.image.registry Init container image repository
     repository: busybox
     ## @param initContainer.image.tag Init container image tag
-    tag: "1.37.0@sha256:e226d6308690dbe282443c8c7e57365c96b5228f0fe7f40731b5d84d37a06839"
+    tag: "1.37.0@sha256:b3255e7dfbcd10cb367af0d409747d511aeb66dfac98cf30e97e87e4207dd76f"
     ## @param initContainer.image.pullPolicy Init container image pull policy
     pullPolicy: IfNotPresent
+  resources: {}
+    ## We usually recommend not to specify default resources and to leave this as a conscious
+    ## choice for the user. This also increases chances charts run on environments with little
+    ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+    ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
 ## @section Metrics configuration
 metrics:
@@ -481,8 +505,8 @@ customScripts:
   #     - name: data
   #       mountPath: /var/lib/rabbitmq
 
-## @param podManagementPolicy
-podManagementPolicy: OrderedReady
+## @param podManagementPolicy Pod management policy for the StatefulSet (OrderedReady or Parallel). RabbitMQ recommends Parallel for proper cluster recovery.
+podManagementPolicy: Parallel
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:

@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.5.7
-appVersion: "1.29.4"
+version: 0.5.11
+appVersion: "1.29.5"
 keywords:
   - nginx
   - web server
@@ -42,4 +42,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
         - kind: changed
-          description: "Chart updated"
+          description: "[nginx]: Allow loading site from configmap (#935)"
+          links:
+            - name: "Commit ff72433"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/ff72433"
+        - kind: changed
+          description: "[all]: Update documentation to include proper cosign public key"
+          links:
+            - name: "Commit e42365d"
+              url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"

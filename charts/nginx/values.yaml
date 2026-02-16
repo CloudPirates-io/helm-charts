@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.4-alpine@sha256:7d7a15b8a280c661051955f14c2b91fed3e23724ddba18d2f53e8b44e74ab37a"
+  tag: "1.29.5-alpine@sha256:1d13701a5f9f3fb01aaa88cef2344d65b6b5bf6b7d9fa4cf0dca557a8d7702ba"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -103,6 +103,9 @@ autoscaling:
   maxReplicas: ""
   targetCPUUtilizationPercentage: ""
   targetMemoryUtilizationPercentage: ""
+
+## @param staticSiteConfigmap Name of existing ConfigMap with the server static site content
+staticSiteConfigmap: ""
 
 ## Get the server static content from a git repository
 cloneStaticSiteFromGit:
