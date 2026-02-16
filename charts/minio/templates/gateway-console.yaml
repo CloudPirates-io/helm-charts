@@ -3,6 +3,27 @@
 {{- end -}}
 {{- if .Values.consoleGateway.enabled -}}
 {{- $fullName := include "minio.fullname" . -}}
+{{- $gatewayName := include "cloudpirates.gateway.resolveName" (dict "gateway" .Values.consoleGateway "fullName" (printf "%s-console" $fullName)) -}}
+{{- if .Values.consoleGateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $gatewayName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "minio.labels" . | nindent 4 }}
+    app.kubernetes.io/component: console
+spec:
+  gatewayClassName: {{ .Values.consoleGateway.gatewayClassName }}
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+{{- end }}
 {{- $svcPort := .Values.service.consolePort -}}
 {{- $labels := include "minio.labels" . -}}
 {{- $annotations := merge .Values.consoleGateway.annotations .Values.commonAnnotations }}
@@ -12,7 +33,7 @@ metadata:
   {{- include "cloudpirates.gateway.metadata" (dict "name" (printf "%s-console" $fullName) "labels" $labels "annotations" $annotations "context" $) | nindent 2 }}
 spec:
   parentRefs:
-    - name: {{ required "consoleGateway.gatewayName is required when consoleGateway.enabled is true" .Values.consoleGateway.gatewayName }}
+    - name: {{ $gatewayName }}
   {{- include "cloudpirates.gateway.hostnames" .Values.consoleGateway.hosts | nindent 2 }}
   rules:
     {{- include "cloudpirates.gateway.rules" (dict "hosts" .Values.consoleGateway.hosts "serviceName" $fullName "servicePort" $svcPort) | nindent 4 }}

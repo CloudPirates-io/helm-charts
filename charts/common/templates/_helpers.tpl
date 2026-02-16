@@ -397,3 +397,18 @@ hostnames:
 {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Resolve Gateway name - auto-generate if create=true and gatewayName not provided.
+Usage: {{ include "cloudpirates.gateway.resolveName" (dict "gateway" .Values.gateway "fullName" $fullName) }}
+Returns the gateway name to use in HTTPRoute parentRefs.
+*/}}
+{{- define "cloudpirates.gateway.resolveName" -}}
+{{- if .gateway.gatewayName -}}
+{{- .gateway.gatewayName -}}
+{{- else if .gateway.create -}}
+{{- printf "%s-gateway" .fullName -}}
+{{- else -}}
+{{- fail "gateway.gatewayName is required when gateway.enabled is true (or set gateway.create=true to auto-create)" -}}
+{{- end -}}
+{{- end -}}

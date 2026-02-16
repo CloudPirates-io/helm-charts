@@ -193,7 +193,17 @@ ingress:
 gateway:
   ## @param gateway.enabled Enable Gateway API HTTPRoute generation (mutually exclusive with ingress)
   enabled: false
-  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  ## @param gateway.create Create Gateway resource automatically (WARNING: Not recommended for production - see below)
+  create: false
+  ## WARNING: Auto-creating Gateways (create=true) is NOT RECOMMENDED for production use.
+  ## - Each app creates its own LoadBalancer (expensive in cloud environments)
+  ## - Less control for cluster admins over infrastructure
+  ## - Not the intended Gateway API pattern (separation of concerns)
+  ## - Production deployments should use a shared Gateway managed by cluster admins
+  ## - Auto-creation is convenient for development/testing only
+  ## @param gateway.gatewayClassName GatewayClass to use when creating Gateway (only used if create=true)
+  gatewayClassName: "eg"
+  ## @param gateway.gatewayName Name of existing Gateway resource to attach to (required if create=false)
   gatewayName: ""
   ## @param gateway.annotations Additional annotations for the HTTPRoute resource
   annotations: {}

@@ -1,6 +1,26 @@
 {{- include "cloudpirates.gateway.validateExclusivity" . -}}
 {{- if .Values.gateway.enabled -}}
 {{- $fullName := include "rabbitmq.fullname" . -}}
+{{- $gatewayName := include "cloudpirates.gateway.resolveName" (dict "gateway" .Values.gateway "fullName" $fullName) -}}
+{{- if .Values.gateway.create }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $gatewayName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rabbitmq.labels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ .Values.gateway.gatewayClassName }}
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+{{- end }}
 {{- $svcPort := .Values.service.managementPort -}}
 {{- $labels := include "rabbitmq.labels" . -}}
 {{- $annotations := merge .Values.gateway.annotations .Values.commonAnnotations }}
@@ -10,7 +30,7 @@ metadata:
   {{- include "cloudpirates.gateway.metadata" (dict "name" $fullName "labels" $labels "annotations" $annotations "context" $) | nindent 2 }}
 spec:
   parentRefs:
-    - name: {{ required "gateway.gatewayName is required when gateway.enabled is true" .Values.gateway.gatewayName }}
+    - name: {{ $gatewayName }}
   {{- include "cloudpirates.gateway.hostnames" .Values.gateway.hosts | nindent 2 }}
   rules:
     {{- include "cloudpirates.gateway.rules" (dict "hosts" .Values.gateway.hosts "serviceName" $fullName "servicePort" $svcPort) | nindent 4 }}
