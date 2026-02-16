@@ -2,6 +2,11 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.15.4] - 2026-02-12
+
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.81.0 (minor) (#996) ([20245de](https://github.com/CloudPirates-io/helm-charts/commit/20245de))
+- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
+
 ## [0.15.3] - 2026-01-28
 
 - [all]: Update every chart to newest common (#920) ([f8d134d](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d))

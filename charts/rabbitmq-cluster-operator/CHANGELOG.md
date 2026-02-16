@@ -2,6 +2,11 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.1.6] - 2026-02-12
+
+- [rabbitmqoperator/cluster-operator] Update image to v2.19.1 (#982) ([6cca1d5](https://github.com/CloudPirates-io/helm-charts/commit/6cca1d5))
+- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
+
 ## [0.1.5] - 2026-01-28
 
 - [all]: Update every chart to newest common (#920) ([f8d134d](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d))
