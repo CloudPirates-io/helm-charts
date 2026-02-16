@@ -1,0 +1,19 @@
+{{- if and .Values.consoleGateway.enabled .Values.consoleIngress.enabled -}}
+{{- fail "Gateway API and Ingress cannot both be enabled for MinIO Console. Please enable only one routing method." -}}
+{{- end -}}
+{{- if .Values.consoleGateway.enabled -}}
+{{- $fullName := include "minio.fullname" . -}}
+{{- $svcPort := .Values.service.consolePort -}}
+{{- $labels := include "minio.labels" . -}}
+{{- $annotations := merge .Values.consoleGateway.annotations .Values.commonAnnotations }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  {{- include "cloudpirates.gateway.metadata" (dict "name" (printf "%s-console" $fullName) "labels" $labels "annotations" $annotations "context" $) | nindent 2 }}
+spec:
+  parentRefs:
+    - name: {{ required "consoleGateway.gatewayName is required when consoleGateway.enabled is true" .Values.consoleGateway.gatewayName }}
+  {{- include "cloudpirates.gateway.hostnames" .Values.consoleGateway.hosts | nindent 2 }}
+  rules:
+    {{- include "cloudpirates.gateway.rules" (dict "hosts" .Values.consoleGateway.hosts "serviceName" $fullName "servicePort" $svcPort) | nindent 4 }}
+{{- end }}

@@ -221,6 +221,21 @@ ingress:
   ## @param ingress.tls TLS configuration for PostgreSQL ingress
   tls: []
   #  - secretName: postgres-tls
+
+## @section Gateway API configuration
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: postgres.local
+      paths:
+        - path: /
+          pathType: PathPrefix
   #    hosts:
   #      - postgres.local
 

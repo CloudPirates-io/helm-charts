@@ -1,0 +1,17 @@
+{{- include "cloudpirates.gateway.validateExclusivity" . -}}
+{{- if .Values.gateway.enabled -}}
+{{- $fullName := include "postgres.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- $labels := include "postgres.labels" . -}}
+{{- $annotations := merge .Values.gateway.annotations .Values.commonAnnotations }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  {{- include "cloudpirates.gateway.metadata" (dict "name" $fullName "labels" $labels "annotations" $annotations "context" $) | nindent 2 }}
+spec:
+  parentRefs:
+    - name: {{ required "gateway.gatewayName is required when gateway.enabled is true" .Values.gateway.gatewayName }}
+  {{- include "cloudpirates.gateway.hostnames" .Values.gateway.hosts | nindent 2 }}
+  rules:
+    {{- include "cloudpirates.gateway.rules" (dict "hosts" .Values.gateway.hosts "serviceName" $fullName "servicePort" $svcPort) | nindent 4 }}
+{{- end }}

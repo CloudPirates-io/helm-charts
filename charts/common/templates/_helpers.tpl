@@ -324,3 +324,76 @@ Usage: {{ include "cloudpirates.renderContainerSecurityContext" . }}
 {{- toYaml .Values.containerSecurityContext }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validate that Gateway API and Ingress are mutually exclusive.
+Fails deployment if both are enabled.
+Usage: {{ include "cloudpirates.gateway.validateExclusivity" . }}
+*/}}
+{{- define "cloudpirates.gateway.validateExclusivity" -}}
+{{- if and .Values.gateway.enabled .Values.ingress.enabled -}}
+{{- fail "Gateway API and Ingress cannot both be enabled. Please enable only one routing method." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate Gateway API HTTPRoute metadata with labels and annotations.
+Usage: {{ include "cloudpirates.gateway.metadata" (dict "name" $name "labels" $labels "annotations" $annotations "context" $) }}
+*/}}
+{{- define "cloudpirates.gateway.metadata" -}}
+name: {{ .name }}
+namespace: {{ .context.Release.Namespace | quote }}
+labels:
+  {{- .labels | nindent 2 }}
+{{- if .annotations }}
+annotations:
+  {{- .annotations | nindent 2 }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate Gateway API HTTPRoute backendRef for a service.
+Usage: {{ include "cloudpirates.gateway.backendRef" (dict "serviceName" $svcName "port" $port "weight" $weight) }}
+*/}}
+{{- define "cloudpirates.gateway.backendRef" -}}
+- name: {{ .serviceName }}
+  {{- if kindIs "string" .port }}
+  port: {{ .port }}
+  {{- else }}
+  port: {{ .port | int }}
+  {{- end }}
+  {{- if .weight }}
+  weight: {{ .weight }}
+  {{- end }}
+{{- end -}}
+
+{{/*
+Generate Gateway API HTTPRoute rules from hosts configuration.
+Expects gateway config structure with hosts, each containing paths.
+Usage: {{ include "cloudpirates.gateway.rules" (dict "hosts" .Values.gateway.hosts "serviceName" $svcName "servicePort" $port) }}
+*/}}
+{{- define "cloudpirates.gateway.rules" -}}
+{{- range .hosts }}
+- matches:
+  {{- range .paths }}
+    - path:
+        type: {{ .pathType | default "Prefix" }}
+        value: {{ .path }}
+  {{- end }}
+  backendRefs:
+    {{- include "cloudpirates.gateway.backendRef" (dict "serviceName" $.serviceName "port" $.servicePort) | nindent 4 }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate Gateway API HTTPRoute hostnames from hosts configuration.
+Usage: {{ include "cloudpirates.gateway.hostnames" .Values.gateway.hosts }}
+*/}}
+{{- define "cloudpirates.gateway.hostnames" -}}
+{{- if . }}
+hostnames:
+{{- range . }}
+  - {{ .host | quote }}
+{{- end }}
+{{- end }}
+{{- end -}}

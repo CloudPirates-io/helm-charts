@@ -184,6 +184,40 @@ consoleIngress:
           pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
   tls: []
+
+## @section Gateway API configuration
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for RustFS API (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: rustfs.localhost
+      paths:
+        - path: /
+          pathType: PathPrefix
+  ## @param gateway.enableWildcard Enable wildcard hostname support (*.host) for bucket-style S3 URLs
+  enableWildcard: true
+
+## @section Console Gateway API configuration (for StatefulSet only)
+consoleGateway:
+  ## @param consoleGateway.enabled Enable Console Gateway API HTTPRoute generation for RustFS API (mutually exclusive with consoleIngress)
+  enabled: false
+  ## @param consoleGateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param consoleGateway.annotations Additional annotations for the Console HTTPRoute resource
+  annotations: {}
+  ## @param consoleGateway.hosts An array with hosts and paths
+  hosts:
+    - host: rustfs-console.localhost
+      paths:
+        - path: /
+          pathType: PathPrefix
+  ## @param consoleGateway.enableWildcard Enable wildcard hostname support (*.host)
+  enableWildcard: true
   #  - secretName: rustfs-console-tls
   #    hosts:
   #      - rustfs-console.local

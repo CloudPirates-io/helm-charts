@@ -85,6 +85,25 @@ ingress:
   ## @param ingress.tls An array with the tls configuration
   tls: []
 
+## @section Gateway API parameters
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: ghost.localhost
+      paths:
+        - path: /
+          pathType: PathPrefix
+    - host: admin.ghost.localhost
+      paths:
+        - path: /ghost
+          pathType: PathPrefix
+
 ## @section Service Account parameters
 serviceAccount:
   ## @param serviceAccount.create Specifies whether a service account should be created

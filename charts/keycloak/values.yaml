@@ -289,6 +289,21 @@ ingress:
   tls: []
   #  - secretName: keycloak-tls
   #    hosts:
+
+## @section Gateway API configuration
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: keycloak.local
+      paths:
+        - path: /
+          pathType: PathPrefix
   #      - keycloak.local
 
 ## @section Resources

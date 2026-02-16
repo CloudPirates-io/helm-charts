@@ -209,6 +209,36 @@ consoleIngress:
   ## @param consoleIngress.tls TLS configuration for MinIO Console ingress
   tls: []
 
+## @section Gateway API configuration
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for MinIO (mutually exclusive with ingress)
+  enabled: false
+  ## @param gateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.hosts An array with hosts and paths
+  hosts:
+    - host: minio.local
+      paths:
+        - path: /
+          pathType: PathPrefix
+
+## @section Console Gateway API configuration
+consoleGateway:
+  ## @param consoleGateway.enabled Enable Gateway API HTTPRoute generation for MinIO Console (mutually exclusive with consoleIngress)
+  enabled: false
+  ## @param consoleGateway.gatewayName Name of the Gateway resource to attach to
+  gatewayName: ""
+  ## @param consoleGateway.annotations Additional annotations for the Console HTTPRoute resource
+  annotations: {}
+  ## @param consoleGateway.hosts An array with hosts and paths
+  hosts:
+    - host: minio-console.local
+      paths:
+        - path: /
+          pathType: PathPrefix
+
 ## @section Resources
 resources:
   {}

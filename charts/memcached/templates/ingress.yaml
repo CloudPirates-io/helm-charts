@@ -1,3 +1,4 @@
+{{- include "cloudpirates.gateway.validateExclusivity" . -}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "memcached.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
