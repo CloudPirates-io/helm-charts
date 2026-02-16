@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.14.8
+version: 0.15.0
 appVersion: "26.5.3"
 keywords:
   - keycloak
@@ -23,7 +23,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
   - name: postgres
     version: "0.9.x"
