@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.4] - 2026-02-11
+
+- [mongo] Update charts/mongodb/values.yaml mongo to v8.2.5 (patch) (#992) ([ab5a714](https://github.com/CloudPirates-io/helm-charts/commit/ab5a714))
+
 ## [0.10.3] - 2026-02-03
 
 - [mongodb]: properly mount replicaset secret (#947) ([2d04bbb](https://github.com/CloudPirates-io/helm-charts/commit/2d04bbb))

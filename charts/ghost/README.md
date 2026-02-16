@@ -2,11 +2,9 @@
     <a href="https://artifacthub.io/packages/helm/cloudpirates-ghost/ghost"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cloudpirates-ghost" /></a>
 </p>
 
-
 # Ghost Helm Chart
 
 Ghost is a simple, powerful publishing platform for creating blogs and online publications. This Helm chart deploys Ghost on Kubernetes with optional MariaDB support.
-
 
 ## Installation
 
@@ -25,7 +23,7 @@ helm install my-ghost oci://registry-1.docker.io/cloudpirates/ghost -f my-values
 Or install directly from the local chart:
 
 ```bash
-helm install my-valkey ./charts/valkey
+helm install my-ghost ./charts/ghost
 ```
 
 The output should show you the URL's for your Ghost instance and Admin interface accoriding to your settings in my-values.yaml
@@ -43,7 +41,6 @@ To uninstall/delete the `my-ghost` deployment:
 ```bash
 helm uninstall my-ghost
 ```
-
 
 ## Security & Signature Verification
 
@@ -64,8 +61,19 @@ To verify the helm chart before installation, copy the public key to the file `c
 cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/ghost:<version>
 ```
 
-
 ## Configuration
+
+### Custom Admin URL
+
+By default, this chart expects a second ingress host for the admin interface. If you want to customize the admin URL or use a different configuration, you can set it explicitly:
+
+```yaml
+config:
+  admin:
+    url: "https://custom-admin.example.com"
+```
+
+If `config.admin.url` is not set (empty string or not defined), the chart will automatically use the second ingress host defined in `ingress.hosts[1].host`.
 
 ### External database support
 
@@ -87,6 +95,92 @@ config:
       min: 2
       max: 10
   ...
+```
+
+### Using Kubernetes Secrets for Credentials
+
+#### Database Credentials from Secret
+
+**For external databases:**
+
+Create a Kubernetes secret with your database credentials:
+
+```bash
+kubectl create secret generic ghost-db-credentials \
+  --from-literal=username=ghost \
+  --from-literal=password=your-secure-password
+```
+
+Reference this secret in your `my-values.yaml`:
+
+```yaml
+mariadb:
+  enabled: false
+
+config:
+  database:
+    client: "mysql"
+    externalConnection:
+      host: "my-external-db.example.com"
+      port: 3306
+      database: "ghost"
+      existingSecret:
+        name: "ghost-db-credentials"
+        usernameKey: "username"
+        passwordKey: "password"
+```
+
+**For bundled MariaDB:**
+
+You can also use an existing secret with the bundled MariaDB deployment. Create a secret with the required keys:
+
+```bash
+kubectl create secret generic ghost-mariadb-credentials \
+  --from-literal=username=ghost \
+  --from-literal=mariadb-password=your-secure-password
+```
+
+Reference it in your `my-values.yaml`:
+
+```yaml
+mariadb:
+  enabled: true
+  auth:
+    database: ghost
+    existingSecret: "ghost-mariadb-credentials"
+```
+
+**Note:** The secret must contain the following keys:
+- `username`: database username
+- `mariadb-password`: database password for the user
+
+#### SMTP Credentials from Secret
+
+Create a secret for SMTP credentials:
+
+```bash
+kubectl create secret generic ghost-smtp-credentials \
+  --from-literal=user=postmaster@example.mailgun.org \
+  --from-literal=pass=your-smtp-password
+```
+
+Reference it in your values:
+
+```yaml
+config:
+  mail:
+    transport: "SMTP"
+    options:
+      service: "Mailgun"
+      host: "smtp.mailgun.org"
+      port: 465
+      secure: true
+      auth:
+        existingSecret:
+          name: "ghost-smtp-credentials"
+          userKey: "user"
+          passKey: "pass"
+    from: "support@example.com"
 ```
 
 
@@ -144,14 +238,25 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Database Parameters
 
-| Parameter                             | Description                              | Default    |
-| ------------------------------------- | ---------------------------------------- | ---------- |
-| `mariadb.enabled`                     | Deploy MariaDB as dependency             | `true`     |
-| `mariadb.auth.database`               | MariaDB database name                    | `ghost`    |
-| `mariadb.auth.username`               | MariaDB username                         | `ghost`    |
-| `mariadb.auth.password`               | MariaDB password                         | `changeme` |
-| `mariadb.auth.existingSecret`         | Existing secret with MariaDB credentials | `""`       |
-| `mariadb.auth.allowEmptyRootPassword` | Allow empty root password                | `false`    |
+| Parameter                                                 | Description                                        | Default    |
+| --------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| `mariadb.enabled`                                         | Deploy MariaDB as dependency                       | `true`     |
+| `mariadb.auth.database`                                   | MariaDB database name                              | `ghost`    |
+| `mariadb.auth.username`                                   | MariaDB username                                   | `ghost`    |
+| `mariadb.auth.password`                                   | MariaDB password                                   | `changeme` |
+| `mariadb.auth.existingSecret`                             | Name of existing secret with MariaDB credentials (must contain keys: username, mariadb-password) | `""` |
+| `mariadb.auth.allowEmptyRootPassword`                     | Allow empty root password                          | `false`    |
+| `config.database.externalConnection.existingSecret.name`  | Name of existing secret for external DB credentials| `""`       |
+| `config.database.externalConnection.existingSecret.usernameKey` | Key in secret containing database username   | `username` |
+| `config.database.externalConnection.existingSecret.passwordKey` | Key in secret containing database password   | `password` |
+
+### Mail Configuration Parameters
+
+| Parameter                                           | Description                                  | Default |
+| --------------------------------------------------- | -------------------------------------------- | ------- |
+| `config.mail.options.auth.existingSecret.name`      | Name of existing secret for SMTP credentials | `""`    |
+| `config.mail.options.auth.existingSecret.userKey`   | Key in secret containing SMTP username       | `user`  |
+| `config.mail.options.auth.existingSecret.passKey`   | Key in secret containing SMTP password       | `pass`  |
 
 ### Pod Parameters
 
@@ -206,9 +311,9 @@ The following tables list the configurable parameters of the Ghost chart organiz
 | `extraObjects`      | Extra Kubernetes objects to deploy         | `[]`            |
 | `config`            | Ghost configuration (database, mail, etc.) | See values.yaml |
 
-
 ## Example: Custom Ghost Configuration
-https://docs.ghost.org/config 
+
+https://docs.ghost.org/config
 
 ```yaml
 config:
@@ -234,6 +339,8 @@ config:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
     from: "support@example.com"
+  admin:
+    url: ""  # Optional: Set custom admin URL. Defaults to second ingress host if not set.
   server:
     host: "0.0.0.0"
     port: 2368
@@ -300,21 +407,23 @@ config:
     styles: "https://cdn.jsdelivr.net/npm/@tryghost/comments-ui@~{version}/umd/main.css"
 ```
 
-
 ## Troubleshooting
 
 ### Connection Issues
 
 1. **Check deployment and service status**:
-  ```bash
-  kubectl get deployment -l app.kubernetes.io/name=ghost
-  kubectl get svc -l app.kubernetes.io/name=ghost
-  kubectl get pods -l app.kubernetes.io/name=ghost
-  ```
+
+```bash
+kubectl get deployment -l app.kubernetes.io/name=ghost
+kubectl get svc -l app.kubernetes.io/name=ghost
+kubectl get pods -l app.kubernetes.io/name=ghost
+```
+
 2. **Check pod logs**:
-  ```bash
-  kubectl logs <pod-name>
-  ```
+
+```bash
+kubectl logs <pod-name>
+```
 
 ### Database Issues
 
@@ -326,7 +435,6 @@ config:
 - Adjust resources in `values.yaml` for production workloads.
 - Use persistent storage for content.
 - Monitor pod health and logs for errors.
-
 
 ## Useful Links
 

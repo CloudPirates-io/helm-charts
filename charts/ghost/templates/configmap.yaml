@@ -19,8 +19,8 @@ data:
         "connection": {
           "host": "{{ include "ghost.fullname" . }}-mariadb",
           "port": {{ .Values.mariadb.service.port }},
-          "user": {{ .Values.mariadb.auth.username | quote }},
-          "password": {{ .Values.mariadb.auth.password | quote }},
+          "user": "",
+          "password": "",
           "database": {{ .Values.mariadb.auth.database | quote }}
         },
         {{- else }}
@@ -28,8 +28,8 @@ data:
         "connection": {
           "host": {{ .Values.config.database.externalConnection.host | quote }},
           "port": {{ .Values.config.database.externalConnection.port }},
-          "user": {{ .Values.config.database.externalConnection.user | quote }},
-          "password": {{ .Values.config.database.externalConnection.password | quote }},
+          "user": "",
+          "password": "",
           "database": {{ .Values.config.database.externalConnection.database | quote }}
         },
         {{- end }}
@@ -46,14 +46,14 @@ data:
           "port": {{ .Values.config.mail.options.port }},
           "secure": {{ .Values.config.mail.options.secure }},
           "auth": {
-            "user": {{ .Values.config.mail.options.auth.user | quote }},
-            "pass": {{ .Values.config.mail.options.auth.pass | quote }}
+            "user": "",
+            "pass": ""
           }
         },
         "from": {{ .Values.config.mail.from | quote }}
       },
       "admin": {
-        "url": {{ printf "https://%s" (index .Values.ingress.hosts 1).host | quote }}
+        "url": {{ include "ghost.admin_url" . | quote }}
       },
       "server": {
         "host": {{ .Values.config.server.host | quote }},

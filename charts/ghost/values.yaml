@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: ghost
   ## @param image.tag Nginx image tag
-  tag: "6.16.1@sha256:b2262ff484e11aec57a5379ee85d0034275cf2b61321c26afd2127b534cd1694"
+  tag: "6.18.0@sha256:99da5a628928dedb71c7ef5952eaa377e0f858fd28a53907d0cbb5729b677e46"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -213,6 +213,15 @@ config:
       user: "ghost"
       password: "changeme"
       database: "ghost"
+      ## @param config.database.externalConnection.existingSecret Use existing secret for database credentials
+      ## When set, the chart will read credentials from this secret instead of values
+      existingSecret:
+        ## @param config.database.externalConnection.existingSecret.name Name of the existing secret
+        name: ""
+        ## @param config.database.externalConnection.existingSecret.usernameKey Key in the secret containing the database username
+        usernameKey: "username"
+        ## @param config.database.externalConnection.existingSecret.passwordKey Key in the secret containing the database password
+        passwordKey: "password"
     pool:
       min: 2
       max: 10
@@ -226,7 +235,19 @@ config:
       auth:
         user: "postmaster@example.mailgun.org"
         pass: "1234567890"
+        ## @param config.mail.options.auth.existingSecret Use existing secret for SMTP credentials
+        ## When set, the chart will read credentials from this secret instead of values
+        existingSecret:
+          ## @param config.mail.options.auth.existingSecret.name Name of the existing secret
+          name: ""
+          ## @param config.mail.options.auth.existingSecret.userKey Key in the secret containing the SMTP username
+          userKey: "user"
+          ## @param config.mail.options.auth.existingSecret.passKey Key in the secret containing the SMTP password
+          passKey: "pass"
     from: "support@example.com"
+  admin:
+    ## Optional: Set custom admin URL. If not set, defaults to second ingress host (e.g., admin.ghost.localhost)
+    url: ""
   server:
     host: "0.0.0.0"
     port: 2368
@@ -320,6 +341,7 @@ mariadb:
     ## @param mariadb.auth.password MariaDB custom user password
     password: changeme
     ## @param mariadb.auth.existingSecret Name of existing secret to use for MariaDB credentials
+    ## When set, the secret should contain the keys: username, mariadb-password
     existingSecret: ""
     ## @param mariadb.auth.allowEmptyRootPassword Allow the root user of MariaDB to have no password set
     allowEmptyRootPassword: false

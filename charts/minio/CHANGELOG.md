@@ -2,6 +2,15 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.9.1] - 2026-02-12
+
+- [cloudpirates/image-minio] Update image to 11e00b6 (#1003) ([6651fc8](https://github.com/CloudPirates-io/helm-charts/commit/6651fc8))
+
+## [0.9.0] - 2026-02-05
+
+- [minio]: Switch to hardened image (#974) ([06609dc](https://github.com/CloudPirates-io/helm-charts/commit/06609dc))
+- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
+
 ## [0.8.2] - 2026-01-29
 
 - [minio]: Use wget instead of curl (#899) ([1b83954](https://github.com/CloudPirates-io/helm-charts/commit/1b83954))

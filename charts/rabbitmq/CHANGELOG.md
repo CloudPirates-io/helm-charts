@@ -2,6 +2,22 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [cluster-operator-0.1.7] - 2026-02-12
+
+
+## [cluster-operator-0.1.6] - 2026-02-12
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#984) ([14485f3](https://github.com/CloudPirates-io/helm-charts/commit/14485f3))
+- Rabbitmq extra objects linting (#980) ([a5b5e8b](https://github.com/CloudPirates-io/helm-charts/commit/a5b5e8b))
+- Update charts/rabbitmq/values.yaml rabbitmq (#977) ([512735b](https://github.com/CloudPirates-io/helm-charts/commit/512735b))
+- [rabbitmq]: Update README to better reflect queue balancing ([174a964](https://github.com/CloudPirates-io/helm-charts/commit/174a964))
+- Update charts/rabbitmq/values.yaml rabbitmq (#956) ([d8dad6e](https://github.com/CloudPirates-io/helm-charts/commit/d8dad6e))
+- The management.load_definitions is deprecated and we should use definitions.local.path now (#954) ([c35081b](https://github.com/CloudPirates-io/helm-charts/commit/c35081b))
+- [busybox] Update image to b3255e7 (#941) ([987aa3e](https://github.com/CloudPirates-io/helm-charts/commit/987aa3e))
+- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
+- Fix template scope in installPlugins range block (#927) ([b4521bd](https://github.com/CloudPirates-io/helm-charts/commit/b4521bd))
+- Update charts/rabbitmq/values.yaml rabbitmq (#889) ([39f2c6c](https://github.com/CloudPirates-io/helm-charts/commit/39f2c6c))
+
 ## [cluster-operator-0.1.5] - 2026-01-28
 
 - [all]: Update every chart to newest common (#920) ([f8d134d](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d))
@@ -43,6 +59,22 @@ All notable changes to this chart will be documented in this file.
 
 ## [cluster-operator-0.1.0] - 2025-12-01
 
+
+## [0.15.10] - 2026-02-12
+
+- Allow configuration of the resources for the initContainers (#1004) ([4427cf9](https://github.com/CloudPirates-io/helm-charts/commit/4427cf9))
+
+## [0.15.9] - 2026-02-11
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#984) ([14485f3](https://github.com/CloudPirates-io/helm-charts/commit/14485f3))
+
+## [0.15.8] - 2026-02-11
+
+- Rabbitmq extra objects linting (#980) ([a5b5e8b](https://github.com/CloudPirates-io/helm-charts/commit/a5b5e8b))
+
+## [0.15.7] - 2026-02-06
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#977) ([512735b](https://github.com/CloudPirates-io/helm-charts/commit/512735b))
 
 ## [0.15.6] - 2026-02-04
 
