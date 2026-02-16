@@ -1,3 +1,6 @@
+{{- if and .Values.externalReplica.enabled .Values.sentinel.enabled }}
+{{- fail "External replica mode cannot be used with Sentinel. Sentinel manages internal replication, while external replica connects to an external Redis/Valkey server. These are mutually exclusive. Set either externalReplica.enabled=false or sentinel.enabled=false." }}
+{{- end }}
 {{- if not .Values.config.existingConfigmap }}
 apiVersion: v1
 kind: ConfigMap
@@ -59,6 +62,13 @@ data:
     protected-mode yes
     {{- else }}
     protected-mode no
+    {{- end }}
+    
+    {{- if .Values.externalReplica.enabled }}
+    # External replication
+    # Replicate from external Redis/Valkey server
+    replicaof {{ required "externalReplica.host is required when externalReplica.enabled is true" .Values.externalReplica.host }} {{ .Values.externalReplica.port }}
+    # masterauth is injected via init container when externalReplica.auth.enabled is true
     {{- end }}
     
     # Additional configuration
