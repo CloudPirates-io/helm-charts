@@ -12602,6 +12602,60 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 8.2.5
+    created: "2026-02-17T07:33:12.638915015Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 8c34e86586a42e725cc19bf9d0802bcb14a63bd128de9381b6c09761be7aed57
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.12.0/mongodb-0.12.0.tgz
+    version: 0.12.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "[mongodb]: properly mount replicaset secret (#947)"
+              links:
+                - name: "Commit 2d04bbb"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/2d04bbb"
+            - kind: changed
+              description: "[all]: Update documentation to include proper cosign public key"
+              links:
+                - name: "Commit e42365d"
+                  url: "https://github.com/CloudPirates-io/helm-charts/commit/e42365d"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.2.5
     created: "2026-02-16T16:10:38.834118479Z"
     dependencies:
     - name: common
@@ -32227,4 +32281,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-17T06:51:46.633889708Z"
+generated: "2026-02-17T07:33:12.640051654Z"
