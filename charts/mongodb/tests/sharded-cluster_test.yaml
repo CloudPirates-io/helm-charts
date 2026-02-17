@@ -266,20 +266,17 @@ tests:
       metrics:
         enabled: true
     asserts:
-      - contains:
-          path: spec.template.spec.containers
-          content:
-            name: mongodb-exporter
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
         template: statefulset-configserver.yaml
-      - contains:
-          path: spec.template.spec.containers
-          content:
-            name: mongodb-exporter
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
         template: statefulset-mongos.yaml
-      - contains:
-          path: spec.template.spec.containers
-          content:
-            name: mongodb-exporter
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
         template: statefulset-shard.yaml
         documentIndex: 0
 
@@ -299,11 +296,11 @@ tests:
         template: statefulset-configserver.yaml
       - contains:
           path: spec.template.spec.containers[0].command
-          content: --keyFile=/opt/mongodb/keyfile
+          content: --keyFile=/keyfile-data/keyfile
         template: statefulset-configserver.yaml
       - contains:
           path: spec.template.spec.containers[0].command
-          content: --keyFile=/opt/mongodb/keyfile
+          content: --keyFile=/keyfile-data/keyfile
         template: statefulset-mongos.yaml
       - contains:
           path: spec.template.spec.containers[0].command
