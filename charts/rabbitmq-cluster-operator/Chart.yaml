@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq-cluster-operator
 description: Kubernetes operator to deploy and manage RabbitMQ clusters.
 type: application
-version: 0.1.7
+version: 0.2.0
 appVersion: "2.19.1"
 keywords:
   - rabbitmq-cluster-operator
@@ -24,7 +24,7 @@ maintainers:
     url: https://about.bl4ko.com
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
 annotations:

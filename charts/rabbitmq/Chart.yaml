@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.15.11
+version: 0.16.0
 appVersion: "4.2.3"
 keywords:
   - rabbitmq
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
 annotations:
