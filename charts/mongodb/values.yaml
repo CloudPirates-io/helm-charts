@@ -354,7 +354,7 @@ replicaSet:
   enabled: false
   ## @param replicaSet.name Replica set name
   name: "repl"
-  ## @param replicaSet.key Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
+  ## @param replicaSet.key Key for internal replica set authentication (plain text string 6-1024 chars)
   key: ""
   ## @param replicaSet.keySecretName Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
   keySecretName: ""
@@ -501,7 +501,7 @@ setParameter:
 shardedCluster:
   ## @param shardedCluster.enabled Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)
   enabled: false
-  ## @param shardedCluster.keyFile Key for internal cluster authentication (base64 encoded string 6-1024 chars)
+  ## @param shardedCluster.keyFile Key for internal cluster authentication (plain text string 6-1024 chars)
   keyFile: ""
   ## @param shardedCluster.keySecretName Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
   keySecretName: ""
