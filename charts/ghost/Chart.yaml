@@ -2,8 +2,8 @@ apiVersion: v2
 name: ghost
 description: A simple, powerful publishing platform that allows you to share your stories with the world.
 type: application
-version: 0.11.0
-appVersion: "6.18.0"
+version: 0.13.0
+appVersion: "6.18.2"
 keywords:
   - ghost
   - blogging
@@ -21,7 +21,7 @@ maintainers:
     url: https://www.srf.ch
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
   - name: mariadb
     version: "0.4.x"
