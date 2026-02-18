@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.9.2] - 2026-02-12
 
 - [minio]: Add fsGroupChangePolicy (#1002) ([4a1db204](https://github.com/CloudPirates-io/helm-charts/commit/4a1db204))
