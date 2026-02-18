@@ -22,11 +22,10 @@ podLabels: {}
 
 ## @param revisionHistoryLimit Maximum number of revisions maintained in revision history
 revisionHistoryLimit: 10
-## @param podManagementPolicy Pod management policy
-podManagementPolicy: OrderedReady
+## @param podManagementPolicy Pod management policy (Parallel for faster startup, OrderedReady for ordered initialization)
+podManagementPolicy: Parallel
 ## param updateStrategyType Pod update strategy
 updateStrategyType: RollingUpdate
-
 
 ## @section MongoDB image parameters
 image:
@@ -35,7 +34,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.4@sha256:6f55a078e025aa29fea2826c82f67ff2f774b82efd816c4c30bbfe67904f0bb8"
+  tag: "8.2.5@sha256:474f5c3bf0e355bb97dafda730e725169a4d51c5578abf7be9ec7ad3fdee4481"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -116,6 +115,8 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
 resources:
@@ -182,15 +183,15 @@ startupProbe:
   ## @param startupProbe.enabled Enable startup probe
   enabled: true
   ## @param startupProbe.initialDelaySeconds Initial delay before starting probes
-  initialDelaySeconds: 10
+  initialDelaySeconds: 5
   ## @param startupProbe.timeoutSeconds Timeout for each probe attempt
   timeoutSeconds: 5
   ## @param startupProbe.failureThreshold Number of failures before pod is marked unready
-  failureThreshold: 30
+  failureThreshold: 60
   ## @param startupProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
   ## @param startupProbe.periodSeconds How often to perform the probe
-  periodSeconds: 10
+  periodSeconds: 5
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -237,7 +238,7 @@ metrics:
   image:
     registry: docker.io
     repository: percona/mongodb_exporter
-    tag: "0.47.2"
+    tag: "0.48.0"
     pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
   resources:
@@ -353,7 +354,7 @@ replicaSet:
   enabled: false
   ## @param replicaSet.name Replica set name
   name: "repl"
-  ## @param replicaSet.key Key for internal replica set authentication (base64 encoded string 6-1024 chars.)
+  ## @param replicaSet.key Key for internal replica set authentication (plain text string 6-1024 chars)
   key: ""
   ## @param replicaSet.keySecretName Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
   keySecretName: ""
@@ -460,7 +461,224 @@ replicaSet:
     initDelay: 5
     ## @param replicaSet.disableTelemetry If true, mongosh telemetry is disabled (see https://www.mongodb.com/docs/mongodb-shell/telemetry)
     disableTelemetry: false
+    ## @param replicaSet.extraInit.defaultReadConcern Default read concern for the replica set (empty = MongoDB default: local)
+    ## Options: local, available, majority, linearizable, snapshot
+    defaultReadConcern: ""
+    ## @param replicaSet.extraInit.defaultWriteConcern Default write concern for the replica set (empty = MongoDB default: 1)
+    ## Options: 1, majority, or custom write concern
+    defaultWriteConcern: ""
   ## @param replicaSet.shutdown Internal shutdown configuration
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
+
+## @section Common MongoDB parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
+common:
+  ## @param common.mongodbDirectoryPerDB Enable MongoDB directoryPerDB option
+  mongodbDirectoryPerDB: true
+  ## @param common.mongodbDisableSystemLog Disable MongoDB system log
+  mongodbDisableSystemLog: false
+  ## @param common.mongodbExtraFlags Additional MongoDB command line flags
+  mongodbExtraFlags: []
+
+## @section MongoDB engine parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
+performance:
+  ## @param performance.wiredTigerCacheSizeGB WiredTiger cache size in GB (empty = MongoDB default: 50% of RAM - 1GB)
+  wiredTigerCacheSizeGB: ""
+  ## @param performance.oplogSizeMB Oplog size in MB for replica sets and sharded clusters (empty = MongoDB default based on disk size)
+  oplogSizeMB: ""
+  ## @param performance.maxIncomingConnections Maximum number of simultaneous connections (empty = MongoDB default: 65536)
+  maxIncomingConnections: ""
+
+## @section MongoDB setParameter options (advanced server parameters via --setParameter flag)
+setParameter:
+  ## @param setParameter.enableLocalhostAuthBypass Allow connections from localhost without authentication during initial setup (empty = MongoDB default: true)
+  enableLocalhostAuthBypass: ""
+  ## @param setParameter.enableFlowControl Enable flow control to prevent secondaries from falling too far behind (empty = MongoDB default: true for replica sets)
+  enableFlowControl: ""
+
+## @section Sharded Cluster parameters
+shardedCluster:
+  ## @param shardedCluster.enabled Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)
+  enabled: false
+  ## @param shardedCluster.keyFile Key for internal cluster authentication (plain text string 6-1024 chars)
+  keyFile: ""
+  ## @param shardedCluster.keySecretName Name of an existing secret with a file named "keyfile" containing the base64 encoded key string
+  keySecretName: ""
+
+  ## @section Config Servers configuration
+  configsvr:
+    ## @param shardedCluster.configsvr.replicaCount Number of config server replicas (minimum 1, recommended 3 for production)
+    replicaCount: 3
+    ## @param shardedCluster.configsvr.enableConfigShard Enable config shard mode (MongoDB 8.0+ feature that allows config servers to also store user data)
+    ## When enabled, transitions from dedicated config servers to config shard architecture using transitionFromDedicatedConfigServer
+    ## See: https://www.mongodb.com/docs/manual/reference/command/transitionFromDedicatedConfigServer/
+    enableConfigShard: false
+    ## @param shardedCluster.configsvr.priorityClassName Priority class name for config server pods
+    priorityClassName: ""
+    ## @param shardedCluster.configsvr.resources Resource limits and requests for config server pods
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+    ## @param shardedCluster.configsvr.nodeSelector Node selector for config server pods
+    nodeSelector: {}
+    ## @param shardedCluster.configsvr.tolerations Tolerations for config server pods
+    tolerations: []
+    ## @param shardedCluster.configsvr.affinity Affinity rules for config server pods
+    affinity: {}
+    ## @param shardedCluster.configsvr.persistence Storage configuration for config servers
+    persistence:
+      ## @param shardedCluster.configsvr.persistence.size Size of persistent volume for config servers
+      size: 8Gi
+      ## @param shardedCluster.configsvr.persistence.storageClass Storage class for config servers
+      storageClass: ""
+      ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
+      accessMode: ReadWriteOnce
+      ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      persistentVolumeClaimRetentionPolicy:
+    ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
+    ## Example: customInit: |
+    ##   echo "Custom config server initialization"
+    ##   # Add your custom commands here
+    customInit: ""
+
+  ## @section Mongos router configuration
+  mongos:
+    ## @param shardedCluster.mongos.replicaCount Number of mongos router instances (minimum 1, recommended 2+ for production)
+    replicaCount: 2
+    ## @param shardedCluster.mongos.priorityClassName Priority class name for mongos router pods
+    priorityClassName: ""
+    ## @param shardedCluster.mongos.resources Resource limits and requests for mongos router pods
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    ## @param shardedCluster.mongos.nodeSelector Node selector for mongos router pods
+    nodeSelector: {}
+    ## @param shardedCluster.mongos.tolerations Tolerations for mongos router pods
+    tolerations: []
+    ## @param shardedCluster.mongos.affinity Affinity rules for mongos router pods
+    affinity: {}
+    ## @param shardedCluster.mongos.service Service configuration for mongos routers
+    service:
+      ## @param shardedCluster.mongos.service.type Service type for mongos routers
+      type: ClusterIP
+      ## @param shardedCluster.mongos.service.port Service port for mongos routers
+      port: 27017
+      ## @param shardedCluster.mongos.service.annotations Additional annotations for mongos service
+      annotations: {}
+    ## @param shardedCluster.mongos.customInit Custom shell commands to run during mongos router initialization (executed on each mongos pod)
+    ## Example: customInit: |
+    ##   echo "Custom mongos initialization"
+    ##   # Add your custom commands here
+    customInit: ""
+
+  ## @param shardedCluster.shards Number of shards (minimum 2 for meaningful sharding)
+  shards: 2
+
+  ## @section Shard servers configuration
+  shardsvr:
+    ## @param shardedCluster.shardsvr.nodeSelector Node selector for shard server pods (applies to all shard components)
+    nodeSelector: {}
+    ## @param shardedCluster.shardsvr.tolerations Tolerations for shard server pods (applies to all shard components)
+    tolerations: []
+    ## @param shardedCluster.shardsvr.affinity Affinity rules for shard server pods (applies to all shard components)
+    affinity: {}
+    ## @param shardedCluster.shardsvr.persistence Storage configuration for shard servers
+    persistence:
+      ## @param shardedCluster.shardsvr.persistence.size Size of persistent volume for each shard member
+      size: 8Gi
+      ## @param shardedCluster.shardsvr.persistence.storageClass Storage class for shards
+      storageClass: ""
+      ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
+      accessMode: ReadWriteOnce
+      ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      persistentVolumeClaimRetentionPolicy:
+    ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
+    ## Example: customInit: |
+    ##   echo "Custom shard initialization"
+    ##   # Add your custom commands here
+    customInit: ""
+
+    ## @section Shard data node configuration
+    dataNode:
+      ## @param shardedCluster.shardsvr.dataNode.replicaCount Number of data node replicas per shard (minimum 1, recommended 3 for production)
+      replicaCount: 3
+      ## @param shardedCluster.shardsvr.dataNode.priorityClassName Priority class name for shard data node pods
+      priorityClassName: ""
+      ## @param shardedCluster.shardsvr.dataNode.resources Resource limits and requests for shard data node pods
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 1Gi
+      ## @param shardedCluster.shardsvr.dataNode.nodeSelector Node selector for shard data node pods (overrides shardsvr.nodeSelector)
+      nodeSelector: {}
+      ## @param shardedCluster.shardsvr.dataNode.tolerations Tolerations for shard data node pods (overrides shardsvr.tolerations)
+      tolerations: []
+      ## @param shardedCluster.shardsvr.dataNode.affinity Affinity rules for shard data node pods (overrides shardsvr.affinity)
+      affinity: {}
+
+    ## @section Shard arbiter configuration
+    ## WARNING: MongoDB does NOT recommend using arbiters in sharded cluster deployments.
+    ## Arbiters do not hold data and can lead to consistency issues in sharded environments.
+    ## See: https://www.mongodb.com/docs/manual/core/replica-set-arbiter/#sharded-cluster-considerations
+    arbiter:
+      ## @param shardedCluster.shardsvr.arbiter.replicaCount Number of arbiter replicas per shard (0 to disable, recommended 0 for sharded clusters)
+      replicaCount: 0
+      ## @param shardedCluster.shardsvr.arbiter.priorityClassName Priority class name for arbiter pods
+      priorityClassName: ""
+      ## @param shardedCluster.shardsvr.arbiter.resources Resource limits and requests for arbiter pods
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      ## @param shardedCluster.shardsvr.arbiter.nodeSelector Node selector for arbiter pods (overrides shardsvr.nodeSelector)
+      nodeSelector: {}
+      ## @param shardedCluster.shardsvr.arbiter.tolerations Tolerations for arbiter pods (overrides shardsvr.tolerations)
+      tolerations: []
+      ## @param shardedCluster.shardsvr.arbiter.affinity Affinity rules for arbiter pods (overrides shardsvr.affinity)
+      affinity: {}
+      ## @param shardedCluster.shardsvr.arbiter.extraVolumeMounts Additional volume mounts for arbiter pods
+      extraVolumeMounts: []
+      ## @param shardedCluster.shardsvr.arbiter.extraVolumes Additional volumes for arbiter pods
+      extraVolumes: []
+
+  ## @section Sharding initialization configuration
+  initialization:
+    ## @param shardedCluster.initialization.enableShardingDatabases List of databases to enable sharding on during initialization
+    enableShardingDatabases: []
+    ## @param shardedCluster.initialization.shardCollections List of collections to shard during initialization
+    ## Example: [{"database": "mydb", "collection": "mycollection", "key": "{userId: 1}"}]
+    shardCollections: []
+    ## @param shardedCluster.initialization.retries Number of retries during cluster initialization
+    retries: 30
+    ## @param shardedCluster.initialization.delay Seconds to wait between initialization retries
+    delay: 5
+    ## @param shardedCluster.initialization.defaultReadConcern Cluster-wide default read concern (empty = MongoDB default: local)
+    ## Options: local, available, majority, linearizable, snapshot
+    defaultReadConcern: ""
+    ## @param shardedCluster.initialization.defaultWriteConcern Cluster-wide default write concern (default: "majority")
+    defaultWriteConcern: "majority"
+
+  ## @section Balancer configuration
+  balancer:
+    ## @param shardedCluster.balancer.enabled Enable or disable the balancer
+    enabled: true
+    ## @param shardedCluster.balancer.chunkSize Chunk size in MB (default: 64MB)
+    chunkSize: 64
+    ## @param shardedCluster.balancer.window.start Start time for balancer window (format: HH:MM, empty = always on)
+    ## @param shardedCluster.balancer.window.stop Stop time for balancer window (format: HH:MM, empty = always on)
+    window:
+      start: ""
+      stop: ""
+    ## @param shardedCluster.balancer.autoSplitEnabled Enable automatic chunk splitting (MongoDB 6.0+)
+    autoSplitEnabled: true

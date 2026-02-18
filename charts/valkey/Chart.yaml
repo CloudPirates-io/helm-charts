@@ -2,7 +2,7 @@ apiVersion: v2
 name: valkey
 description: High performance in-memory data structure store, fork of Redis. Valkey is an open-source, high-performance key/value datastore that supports a variety of workloads such as caching, message queues, and can act as a primary database.
 type: application
-version: 0.15.3
+version: 0.17.0
 appVersion: "9.0.0"
 home: https://www.valkey.io
 sources:
@@ -22,7 +22,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
 annotations:
@@ -42,6 +42,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |2
+        - kind: added
+          description: "Add external replica configuration support for replicating from external Redis/Valkey servers"
         - kind: changed
           description: "[all]: Update every chart to newest common (#920)"
           links:

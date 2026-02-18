@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.10.3
-appVersion: "8.2.4"
+version: 0.12.2
+appVersion: "8.2.5"
 keywords:
   - mongodb
   - database
@@ -18,7 +18,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
 annotations:
