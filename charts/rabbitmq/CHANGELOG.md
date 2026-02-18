@@ -2,6 +2,12 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [cluster-operator-0.2.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+- [rabbitmq]: Adjust default podManagementPolicy to parallel (#1000) ([e396ff60](https://github.com/CloudPirates-io/helm-charts/commit/e396ff60))
+- Allow configuration of the resources for the initContainers (#1004) ([4427cf9a](https://github.com/CloudPirates-io/helm-charts/commit/4427cf9a))
+
 ## [cluster-operator-0.1.7] - 2026-02-12
 
 
@@ -59,6 +65,10 @@ All notable changes to this chart will be documented in this file.
 
 ## [cluster-operator-0.1.0] - 2025-12-01
 
+
+## [0.16.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
 
 ## [0.15.11] - 2026-02-12
 
