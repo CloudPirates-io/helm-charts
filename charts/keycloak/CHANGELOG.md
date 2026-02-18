@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.15.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.14.8] - 2026-02-16
 
 - [mariadb] Update initContainers.waitForMariadb.repository to v12.2.2 (#1013) ([042b064c](https://github.com/CloudPirates-io/helm-charts/commit/042b064c))
