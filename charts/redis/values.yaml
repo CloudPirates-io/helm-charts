@@ -378,6 +378,8 @@ sentinel:
   parallelSyncs: 1
   ## @param sentinel.port Sentinel port
   port: 26379
+  ## @param sentinel.discoveryTimeout Timeout in seconds for redis-cli during master discovery (prevents long TCP timeouts during initial bootstrap)
+  discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
   service:
@@ -412,7 +414,7 @@ sentinel:
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
       repository: alpine/kubectl
-      tag: "1.35.0"
+      tag: "1.35.1"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources:

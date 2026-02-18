@@ -239,6 +239,16 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | -------------------------- | --------------------------------- | ------- |
 | `managementPlugin.enabled` | Enable RabbitMQ management plugin | `true`  |
 
+### Init Container configuration
+
+| Parameter                        | Description                                      | Default                                                                                      |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `initContainer.image.registry`   | Init container image registry                    | `docker.io`                                                                                  |
+| `initContainer.image.repository` | Init container image repository                  | `busybox`                                                                                    |
+| `initContainer.image.tag`        | Init container image tag                         | `"1.37.0@sha256:b3255e7dfbcd10cb367af0d409747d511aeb66dfac98cf30e97e87e4207dd76f"`         |
+| `initContainer.image.pullPolicy` | Init container image pull policy                 | `IfNotPresent`                                                                               |
+| `initContainer.resources`        | Resource limits and requests for init containers | `{}`                                                                                         |
+
 ## Plugin configuration
 
 | Parameter        | Description                                                  | Default |
