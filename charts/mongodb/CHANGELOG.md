@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.1] - 2026-02-17
+
+- [mongodb]: Fix unauthed probes causing giant log files (#1027) ([a5325f24](https://github.com/CloudPirates-io/helm-charts/commit/a5325f24))
+
 ## [0.12.0] - 2026-02-17
 
 - [mongodb]: Support sharded clusters (#1008) ([a56b3f11](https://github.com/CloudPirates-io/helm-charts/commit/a56b3f11))
