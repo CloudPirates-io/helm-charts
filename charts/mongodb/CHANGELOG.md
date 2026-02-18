@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.0] - 2026-02-17
+
+- [mongodb]: Support sharded clusters (#1008) ([a56b3f11](https://github.com/CloudPirates-io/helm-charts/commit/a56b3f11))
+
 ## [0.11.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))

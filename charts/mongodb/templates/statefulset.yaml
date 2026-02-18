@@ -190,9 +190,16 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -203,9 +210,16 @@ spec:
           readinessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
