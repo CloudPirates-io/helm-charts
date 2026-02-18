@@ -2,150 +2,154 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.0] - 2026-02-16
+
+- Add external replica configuration support (#1009) ([fd8c95fe](https://github.com/CloudPirates-io/helm-charts/commit/fd8c95fe))
+
 ## [0.15.4] - 2026-02-12
 
-- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.81.0 (minor) (#996) ([20245de](https://github.com/CloudPirates-io/helm-charts/commit/20245de))
-- [all]: Update documentation to include proper cosign public key ([e42365d](https://github.com/CloudPirates-io/helm-charts/commit/e42365d))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.81.0 (minor) (#996) ([20245de9](https://github.com/CloudPirates-io/helm-charts/commit/20245de9))
+- [all]: Update documentation to include proper cosign public key ([e42365dc](https://github.com/CloudPirates-io/helm-charts/commit/e42365dc))
 
 ## [0.15.3] - 2026-01-28
 
-- [all]: Update every chart to newest common (#920) ([f8d134d](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d))
+- [all]: Update every chart to newest common (#920) ([f8d134d5](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d5))
 
 ## [0.15.2] - 2026-01-27
 
-- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.2 (patch) (#907) ([b8b2721](https://github.com/CloudPirates-io/helm-charts/commit/b8b2721))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.2 (patch) (#907) ([b8b2721a](https://github.com/CloudPirates-io/helm-charts/commit/b8b2721a))
 
 ## [0.15.1] - 2026-01-20
 
-- Add registry configuration for Sentinel image (#866) ([e462527](https://github.com/CloudPirates-io/helm-charts/commit/e462527))
+- Add registry configuration for Sentinel image (#866) ([e4625273](https://github.com/CloudPirates-io/helm-charts/commit/e4625273))
 
 ## [0.15.0] - 2026-01-15
 
-- [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0))
+- [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0f](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0f))
 
 ## [0.14.0] - 2026-01-15
 
--  [universal] add priorityclasses to multiple charts (#839) ([b3d816f](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f))
+-  [universal] add priorityclasses to multiple charts (#839) ([b3d816f1](https://github.com/CloudPirates-io/helm-charts/commit/b3d816f1))
 
 ## [0.13.0] - 2025-12-11
 
-- [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba))
+- [redis, valkey,rabbitmq,zookeeper]: allow setting revisionHistoryLimit (#725) ([ac9e1ba9](https://github.com/CloudPirates-io/helm-charts/commit/ac9e1ba9))
 
 ## [0.12.0] - 2025-12-10
 
-- Port #615, #639, #701 & fix custom config never being used (#715) ([58035e4](https://github.com/CloudPirates-io/helm-charts/commit/58035e4))
+- Port #615, #639, #701 & fix custom config never being used (#715) ([58035e42](https://github.com/CloudPirates-io/helm-charts/commit/58035e42))
 
 ## [0.11.1] - 2025-12-06
 
-- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694) ([beb428d](https://github.com/CloudPirates-io/helm-charts/commit/beb428d))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey (#694) ([beb428d4](https://github.com/CloudPirates-io/helm-charts/commit/beb428d4))
 
 ## [0.11.0] - 2025-12-06
 
-- [universal] fix statefulset pvc labels (#696) ([b87dbc7](https://github.com/CloudPirates-io/helm-charts/commit/b87dbc7))
+- [universal] fix statefulset pvc labels (#696) ([b87dbc7a](https://github.com/CloudPirates-io/helm-charts/commit/b87dbc7a))
 
 ## [0.10.3] - 2025-12-01
 
-- [universal] add labels to statefulset pvc-templates (#681) ([87624a5](https://github.com/CloudPirates-io/helm-charts/commit/87624a5))
+- [universal] add labels to statefulset pvc-templates (#681) ([87624a55](https://github.com/CloudPirates-io/helm-charts/commit/87624a55))
 
 ## [0.10.2] - 2025-11-25
 
-- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.1 (patch) (#647) ([fa2654b](https://github.com/CloudPirates-io/helm-charts/commit/fa2654b))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.1 (patch) (#647) ([fa2654ba](https://github.com/CloudPirates-io/helm-charts/commit/fa2654ba))
 
 ## [0.10.1] - 2025-11-25
 
-- [universal] update readme files (#583) ([e63f5f9](https://github.com/CloudPirates-io/helm-charts/commit/e63f5f9))
+- [universal] update readme files (#583) ([e63f5f94](https://github.com/CloudPirates-io/helm-charts/commit/e63f5f94))
 
 ## [0.10.0] - 2025-11-07
 
-- [valkey]: Support TLS ([3b0b609](https://github.com/CloudPirates-io/helm-charts/commit/3b0b609))
+- [valkey]: Support TLS ([3b0b6093](https://github.com/CloudPirates-io/helm-charts/commit/3b0b6093))
 
 ## [0.9.2] - 2025-11-03
 
-- [valkey]: fix broken statement ([49a9fe9](https://github.com/CloudPirates-io/helm-charts/commit/49a9fe9))
+- [valkey]: fix broken statement ([49a9fe9f](https://github.com/CloudPirates-io/helm-charts/commit/49a9fe9f))
 
 ## [0.9.1] - 2025-11-03
 
-- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf](https://github.com/CloudPirates-io/helm-charts/commit/57d1caf))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.80.0 (minor) (#531) ([57d1caf3](https://github.com/CloudPirates-io/helm-charts/commit/57d1caf3))
 
 ## [0.9.0] - 2025-10-31
 
-- [valkey]: Valkey HA (#518) ([d8b1bbe](https://github.com/CloudPirates-io/helm-charts/commit/d8b1bbe))
+- [valkey]: Valkey HA (#518) ([d8b1bbe1](https://github.com/CloudPirates-io/helm-charts/commit/d8b1bbe1))
 
 ## [0.8.0] - 2025-10-28
 
-- [universal] unify extraEnvVars in all charts (#477) ([4aee7b4](https://github.com/CloudPirates-io/helm-charts/commit/4aee7b4))
+- [universal] unify extraEnvVars in all charts (#477) ([4aee7b4a](https://github.com/CloudPirates-io/helm-charts/commit/4aee7b4a))
 
 ## [0.7.1] - 2025-10-23
 
-- [universal] Update annotations, labels, podannotations and podlabel (#454) ([cdb38db](https://github.com/CloudPirates-io/helm-charts/commit/cdb38db))
+- [universal] Update annotations, labels, podannotations and podlabel (#454) ([cdb38db9](https://github.com/CloudPirates-io/helm-charts/commit/cdb38db9))
 
 ## [0.7.0] - 2025-10-22
 
-- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v9 (major) (#442) ([75276a8](https://github.com/CloudPirates-io/helm-charts/commit/75276a8))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v9 (major) (#442) ([75276a84](https://github.com/CloudPirates-io/helm-charts/commit/75276a84))
 
 ## [0.6.2] - 2025-10-22
 
-- [universal]: Support extra secret templating (#444) ([c2b2024](https://github.com/CloudPirates-io/helm-charts/commit/c2b2024))
-- [universal] fix all appversions in charts (#417) ([b8debeb](https://github.com/CloudPirates-io/helm-charts/commit/b8debeb))
-- [unversal] Add signing informations for artifacthub (#415) ([e761c90](https://github.com/CloudPirates-io/helm-charts/commit/e761c90))
-- [universal] use a string instead of a boolean (#413) ([c24d26d](https://github.com/CloudPirates-io/helm-charts/commit/c24d26d))
-- [universal] improve chart artifact annotations (#404) ([37f1c5b](https://github.com/CloudPirates-io/helm-charts/commit/37f1c5b))
+- [universal]: Support extra secret templating (#444) ([c2b20246](https://github.com/CloudPirates-io/helm-charts/commit/c2b20246))
+- [universal] fix all appversions in charts (#417) ([b8debebf](https://github.com/CloudPirates-io/helm-charts/commit/b8debebf))
+- [unversal] Add signing informations for artifacthub (#415) ([e761c906](https://github.com/CloudPirates-io/helm-charts/commit/e761c906))
+- [universal] use a string instead of a boolean (#413) ([c24d26d6](https://github.com/CloudPirates-io/helm-charts/commit/c24d26d6))
+- [universal] improve chart artifact annotations (#404) ([37f1c5be](https://github.com/CloudPirates-io/helm-charts/commit/37f1c5be))
 
 ## [0.6.1] - 2025-10-17
 
-- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.79.0 (minor) (#407) ([7c0e2b3](https://github.com/CloudPirates-io/helm-charts/commit/7c0e2b3))
-- [universal] Rework all schema json (#393) ([79d1439](https://github.com/CloudPirates-io/helm-charts/commit/79d1439))
-- [mariadb] add galera cluster support for mariadb (#348) ([b7a63ee](https://github.com/CloudPirates-io/helm-charts/commit/b7a63ee))
+- [oliver006/redis_exporter] Update charts/valkey/values.yaml oliver006/redis_exporter to v1.79.0 (minor) (#407) ([7c0e2b3e](https://github.com/CloudPirates-io/helm-charts/commit/7c0e2b3e))
+- [universal] Rework all schema json (#393) ([79d1439f](https://github.com/CloudPirates-io/helm-charts/commit/79d1439f))
+- [mariadb] add galera cluster support for mariadb (#348) ([b7a63ee8](https://github.com/CloudPirates-io/helm-charts/commit/b7a63ee8))
 
 ## [0.6.0] - 2025-10-14
 
-- Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
+- Update chart.yaml dependencies for indepentent charts (#382) ([87acfb14](https://github.com/CloudPirates-io/helm-charts/commit/87acfb14))
 
 ## [0.5.1] - 2025-10-13
 
-- [universal] Fix imagepullsecret in vales.schema.json (#374) ([bcc566c](https://github.com/CloudPirates-io/helm-charts/commit/bcc566c))
-- [universal]: Fix changelog generation (#354) ([2e973c0](https://github.com/CloudPirates-io/helm-charts/commit/2e973c0))
+- [universal] Fix imagepullsecret in vales.schema.json (#374) ([bcc566c2](https://github.com/CloudPirates-io/helm-charts/commit/bcc566c2))
+- [universal]: Fix changelog generation (#354) ([2e973c09](https://github.com/CloudPirates-io/helm-charts/commit/2e973c09))
 
 ## [0.5.0] - 2025-10-10
 
-- feat: add metrics exporter (#342) ([e6b474b](https://github.com/CloudPirates-io/helm-charts/commit/e6b474b))
-- [mongodb] fix: newline between mongo labels and additional labels (#301) ([ea7937f](https://github.com/CloudPirates-io/helm-charts/commit/ea7937f))
-- add tests for openshift (#226) ([c80c98a](https://github.com/CloudPirates-io/helm-charts/commit/c80c98a))
-- [mongodb] feat: add metrics exporter (#243) ([c931978](https://github.com/CloudPirates-io/helm-charts/commit/c931978))
+- feat: add metrics exporter (#342) ([e6b474bd](https://github.com/CloudPirates-io/helm-charts/commit/e6b474bd))
+- [mongodb] fix: newline between mongo labels and additional labels (#301) ([ea7937ff](https://github.com/CloudPirates-io/helm-charts/commit/ea7937ff))
+- add tests for openshift (#226) ([c80c98ac](https://github.com/CloudPirates-io/helm-charts/commit/c80c98ac))
+- [mongodb] feat: add metrics exporter (#243) ([c931978f](https://github.com/CloudPirates-io/helm-charts/commit/c931978f))
 
 ## [0.4.1] - 2025-10-09
 
-- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v8.1.4 (patch) (#266) ([b52fedf](https://github.com/CloudPirates-io/helm-charts/commit/b52fedf))
+- [valkey/valkey] Update charts/valkey/values.yaml valkey/valkey to v8.1.4 (patch) (#266) ([b52fedf0](https://github.com/CloudPirates-io/helm-charts/commit/b52fedf0))
 
 ## [0.4.0] - 2025-10-06
 
-- make valkey run on openshift (#206) ([b1f530c](https://github.com/CloudPirates-io/helm-charts/commit/b1f530c))
-- [rabbitmq] make rabbitmq run on openshift (#201) ([df4deeb](https://github.com/CloudPirates-io/helm-charts/commit/df4deeb))
+- make valkey run on openshift (#206) ([b1f530c7](https://github.com/CloudPirates-io/helm-charts/commit/b1f530c7))
+- [rabbitmq] make rabbitmq run on openshift (#201) ([df4deebc](https://github.com/CloudPirates-io/helm-charts/commit/df4deebc))
 
 ## [0.3.2] - 2025-09-16
 
-- Update CHANGELOG.md ([3005f2f](https://github.com/CloudPirates-io/helm-charts/commit/3005f2f))
-- Oops, wrong bump ([1d2fefa](https://github.com/CloudPirates-io/helm-charts/commit/1d2fefa))
-- Fix scheduling directives with disabled persistance ([7485b37](https://github.com/CloudPirates-io/helm-charts/commit/7485b37))
+- Update CHANGELOG.md ([3005f2fd](https://github.com/CloudPirates-io/helm-charts/commit/3005f2fd))
+- Oops, wrong bump ([1d2fefa3](https://github.com/CloudPirates-io/helm-charts/commit/1d2fefa3))
+- Fix scheduling directives with disabled persistance ([7485b370](https://github.com/CloudPirates-io/helm-charts/commit/7485b370))
 
 ## [0.3.1] - 2025-09-12
 
-- Update CHANGELOG.md ([36da816](https://github.com/CloudPirates-io/helm-charts/commit/36da816))
-- fix templating of `affinity`, `nodeSelector` and `tolerations` values ([e98c8ea](https://github.com/CloudPirates-io/helm-charts/commit/e98c8ea))
+- Update CHANGELOG.md ([36da8169](https://github.com/CloudPirates-io/helm-charts/commit/36da8169))
+- fix templating of `affinity`, `nodeSelector` and `tolerations` values ([e98c8ea1](https://github.com/CloudPirates-io/helm-charts/commit/e98c8ea1))
 
 ## [0.3.0] - 2025-09-02
 
-- bump all chart versions for new extraObjects feature ([aaa57f9](https://github.com/CloudPirates-io/helm-charts/commit/aaa57f9))
-- add extraObject array to all charts ([34772b7](https://github.com/CloudPirates-io/helm-charts/commit/34772b7))
+- bump all chart versions for new extraObjects feature ([aaa57f90](https://github.com/CloudPirates-io/helm-charts/commit/aaa57f90))
+- add extraObject array to all charts ([34772b70](https://github.com/CloudPirates-io/helm-charts/commit/34772b70))
 
 ## [0.2.0] - 2025-09-02
 
-- Update serviceaccount config to disable automatic creation, add missing ns ([77281c6](https://github.com/CloudPirates-io/helm-charts/commit/77281c6))
-- Add support for serviceAccount ([16ac6b3](https://github.com/CloudPirates-io/helm-charts/commit/16ac6b3))
+- Update serviceaccount config to disable automatic creation, add missing ns ([77281c62](https://github.com/CloudPirates-io/helm-charts/commit/77281c62))
+- Add support for serviceAccount ([16ac6b33](https://github.com/CloudPirates-io/helm-charts/commit/16ac6b33))
 
 ## [0.1.7] - 2025-08-27
 
-- Add initial Changelogs to all Charts ([68f10ca](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca))
+- Add initial Changelogs to all Charts ([68f10ca2](https://github.com/CloudPirates-io/helm-charts/commit/68f10ca2))
 
 ## [0.1.6] - 2025-08-26
 
