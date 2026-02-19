@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.2] - 2026-02-18
+
+- [mongo] Update charts/mongodb/values.yaml mongo (#1031) ([f242e63e](https://github.com/CloudPirates-io/helm-charts/commit/f242e63e))
+
 ## [0.12.1] - 2026-02-17
 
 - [mongodb]: Fix unauthed probes causing giant log files (#1027) ([a5325f24](https://github.com/CloudPirates-io/helm-charts/commit/a5325f24))
