@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.2] - 2026-02-19
+
+- [mariadb]: Extra args for health check (#1007) ([70f25144](https://github.com/CloudPirates-io/helm-charts/commit/70f25144))
+
 ## [0.14.1] - 2026-02-18
 
 - Update charts/mariadb/values.yaml mariadb (#1029) ([ec472dae](https://github.com/CloudPirates-io/helm-charts/commit/ec472dae))
