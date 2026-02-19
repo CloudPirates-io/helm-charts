@@ -610,11 +610,17 @@
                 "annotations": {
                     "type": "object"
                 },
+                "httpNodePort": {
+                    "type": "string"
+                },
                 "httpPort": {
                     "type": "integer"
                 },
                 "httpTargetPort": {
                     "type": "integer"
+                },
+                "httpsNodePort": {
+                    "type": "string"
                 },
                 "httpsPort": {
                     "type": "integer"
@@ -624,12 +630,6 @@
                 },
                 "trafficDistribution": {
                     "type": "string"
-                },
-                "httpNodePort": {
-                    "type": "integer"
-                },
-                "httpsNodePort": {
-                    "type": "integer"
                 },
                 "type": {
                     "type": "string"
