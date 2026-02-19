@@ -215,11 +215,11 @@ spec:
                 - |
                   mongosh \
                   {{- if .Values.auth.enabled }}
-                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --username "${MONGO_INITDB_ROOT_USERNAME}" \
                   --password "${MONGO_INITDB_ROOT_PASSWORD}" \
                   --authenticationDatabase admin \
                   {{- end }}
-                  --eval "db.adminCommand('ping')" --quiet
+                  --eval 'try{var h=db.adminCommand({hello:1}); if(!(h.isWritablePrimary||h.secondary)) quit(1);}catch(e){quit(1)}' --quiet
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
