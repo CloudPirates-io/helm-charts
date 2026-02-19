@@ -18,12 +18,18 @@ spec:
       targetPort: {{ .Values.service.httpTargetPort }}
       protocol: TCP
       name: http
+      {{- if and (eq .Values.service.type "NodePort") (.Values.service.httpNodePort) }}
+      nodePort: {{ .Values.service.httpNodePort }}
+      {{- end }}
     {{- end }}
     {{- if .Values.keycloak.httpsEnabled }}
     - port: {{ .Values.service.httpsPort }}
       targetPort: {{ .Values.service.httpsTargetPort }}
       protocol: TCP
       name: https
+      {{- if and (eq .Values.service.type "NodePort") (.Values.service.httpsNodePort) }}
+      nodePort: {{ .Values.service.httpsNodePort }}
+      {{- end }}
     {{- end }}
   selector:
     {{- include "keycloak.selectorLabels" . | nindent 4 }}

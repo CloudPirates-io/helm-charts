@@ -107,9 +107,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Pod configuration
 
-| Parameter                | Description                                                       | Default |
-| ------------------------ | ----------------------------------------------------------------- | ------- |
-| `shareProcessNamespace`  | Enable process namespace sharing between containers in the pod    | `false` |
+| Parameter               | Description                                                    | Default |
+| ----------------------- | -------------------------------------------------------------- | ------- |
+| `shareProcessNamespace` | Enable process namespace sharing between containers in the pod | `false` |
 
 ### Extra volumes and volumes mount
 
@@ -128,9 +128,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Extra containers for Keycloak pod
 
-| Parameter             | Description                                       | Default |
-| --------------------- | ------------------------------------------------- | ------- |
-| `extraContainers`     | Array of containers to add to the keycloak pod    | `[]`    |
+| Parameter         | Description                                    | Default |
+| ----------------- | ---------------------------------------------- | ------- |
+| `extraContainers` | Array of containers to add to the keycloak pod | `[]`    |
 
 ### Security
 
@@ -219,11 +219,11 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Realm Configuration
 
-| Parameter              | Description                                                                                               | Default |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- | ------- |
-| `realm.import`         | Enable import of realms from /opt/keycloak/data/import (production mode must be false)                    | `false` |
-| `realm.configFile`     | Json config for initial realm configuration, stored in a Secret and mounted in /opt/keycloak/data/import  | `""`    |
-| `realm.existingSecret` | Name of existing secret containing realm configuration (key: realm.json)                                  | `""`    |
+| Parameter              | Description                                                                                              | Default |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- | ------- |
+| `realm.import`         | Enable import of realms from /opt/keycloak/data/import (production mode must be false)                   | `false` |
+| `realm.configFile`     | Json config for initial realm configuration, stored in a Secret and mounted in /opt/keycloak/data/import | `""`    |
+| `realm.existingSecret` | Name of existing secret containing realm configuration (key: realm.json)                                 | `""`    |
 
 ### Features Configuration
 
@@ -243,6 +243,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `service.httpsTargetPort`     | Keycloak HTTPS container port | `8443`      |
 | `service.annotations`         | Service annotations           | `{}`        |
 | `service.trafficDistribution` | Service traffic distribution  | `""`        |
+| `service.httpNodePort`        | Keycloak HTTP node port       | `""`        |
+| `service.httpsNodePort`       | Keycloak HTTPS node port      | `""`        |
 
 ### Ingress configuration
 
@@ -259,7 +261,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 ### Resources
 
 | Parameter   | Description                                                                 | Default |
-| ----------- |-----------------------------------------------------------------------------| ------- |
+| ----------- | --------------------------------------------------------------------------- | ------- |
 | `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
 
 ### Persistence
@@ -351,20 +353,20 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Init Container Configuration
 
-| Parameter                                      | Description                                                     | Default |
-| ---------------------------------------------- | --------------------------------------------------------------- | ------- |
-| `initContainers.waitForPostgres.image`         | Full image override for PostgreSQL init container               | `""` |
-| `initContainers.waitForPostgres.registry`      | PostgreSQL image registry (overrides global.imageRegistry)      | `""` |
-| `initContainers.waitForPostgres.repository`    | PostgreSQL image repository                                     | `postgres` |
-| `initContainers.waitForPostgres.tag`           | PostgreSQL image tag                                            | `"17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"` |
-| `initContainers.waitForPostgres.pullPolicy`    | PostgreSQL image pull policy                                    | `IfNotPresent` |
-| `initContainers.waitForPostgres.resources`     | Resource requests and limits for PostgreSQL init container      | `{}` |
-| `initContainers.waitForMariadb.image`          | Full image override for MariaDB init container                  | `""` |
-| `initContainers.waitForMariadb.registry`       | MariaDB image registry (overrides global.imageRegistry)         | `""` |
-| `initContainers.waitForMariadb.repository`     | MariaDB image repository                                        | `mariadb` |
-| `initContainers.waitForMariadb.tag`            | MariaDB image tag                                               | `"12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
-| `initContainers.waitForMariadb.pullPolicy`     | MariaDB image pull policy                                       | `IfNotPresent` |
-| `initContainers.waitForMariadb.resources`      | Resource requests and limits for MariaDB init container         | `{}` |
+| Parameter                                   | Description                                                | Default                                                                            |
+| ------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `initContainers.waitForPostgres.image`      | Full image override for PostgreSQL init container          | `""`                                                                               |
+| `initContainers.waitForPostgres.registry`   | PostgreSQL image registry (overrides global.imageRegistry) | `""`                                                                               |
+| `initContainers.waitForPostgres.repository` | PostgreSQL image repository                                | `postgres`                                                                         |
+| `initContainers.waitForPostgres.tag`        | PostgreSQL image tag                                       | `"17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"`   |
+| `initContainers.waitForPostgres.pullPolicy` | PostgreSQL image pull policy                               | `IfNotPresent`                                                                     |
+| `initContainers.waitForPostgres.resources`  | Resource requests and limits for PostgreSQL init container | `{}`                                                                               |
+| `initContainers.waitForMariadb.image`       | Full image override for MariaDB init container             | `""`                                                                               |
+| `initContainers.waitForMariadb.registry`    | MariaDB image registry (overrides global.imageRegistry)    | `""`                                                                               |
+| `initContainers.waitForMariadb.repository`  | MariaDB image repository                                   | `mariadb`                                                                          |
+| `initContainers.waitForMariadb.tag`         | MariaDB image tag                                          | `"12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
+| `initContainers.waitForMariadb.pullPolicy`  | MariaDB image pull policy                                  | `IfNotPresent`                                                                     |
+| `initContainers.waitForMariadb.resources`   | Resource requests and limits for MariaDB init container    | `{}`                                                                               |
 
 Init containers support the global image registry configuration and can also be overridden individually per container.
 
@@ -660,7 +662,7 @@ tls:
       - auth.yourdomain.com
 
 keycloak:
-  httpEnabled: false  # Disable HTTP when using TLS
+  httpEnabled: false # Disable HTTP when using TLS
   production: true
   hostname: "auth.yourdomain.com"
 
@@ -715,7 +717,7 @@ tls:
   existingSecret: "keycloak-tls-certs"
 
 keycloak:
-  httpEnabled: false  # Disable HTTP when using TLS
+  httpEnabled: false # Disable HTTP when using TLS
   production: true
   hostname: "auth.yourdomain.com"
 ```
