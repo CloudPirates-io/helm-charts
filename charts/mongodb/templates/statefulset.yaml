@@ -1,3 +1,6 @@
+{{/* Render validation for deployment mode conflicts */}}
+{{- include "mongodb.validateShardedCluster" . -}}
+{{- if not .Values.shardedCluster.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -11,6 +14,10 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- toYaml .Values.persistence.persistentVolumeClaimRetentionPolicy | nindent 4 }}
+  {{- end }}
   {{- if .Values.replicaSet.enabled }}
   serviceName: {{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}
   podManagementPolicy: {{ .Values.podManagementPolicy }}
@@ -97,6 +104,21 @@ spec:
             - --keyFile
             - "/replicaset/keyfile"
             {{- end }}
+            {{- if .Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ .Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if .Values.performance.oplogSizeMB }}
+            - --oplogSize={{ .Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if .Values.performance.maxIncomingConnections }}
+            - --maxConns={{ .Values.performance.maxIncomingConnections }}
+            {{- end }}
+            {{- if .Values.setParameter.enableLocalhostAuthBypass }}
+            - --setParameter=enableLocalhostAuthBypass={{ .Values.setParameter.enableLocalhostAuthBypass }}
+            {{- end }}
+            {{- if .Values.setParameter.enableFlowControl }}
+            - --setParameter=enableFlowControl={{ .Values.setParameter.enableFlowControl }}
+            {{- end }}
           ports:
             - name: mongodb
               containerPort: 27017
@@ -168,9 +190,16 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -181,9 +210,16 @@ spec:
           readinessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -348,3 +384,4 @@ spec:
             storage: {{ .Values.persistence.size | quote }}
     {{- end }}
   {{- end }}
+{{- end }}
