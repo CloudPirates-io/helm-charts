@@ -4415,6 +4415,65 @@ entries:
       license: Apache-2.0
     apiVersion: v2
     appVersion: 26.5.3
+    created: "2026-02-20T14:30:19.185543733Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.9.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: Open Source Identity and Access Management Solution
+    digest: 5f4dda74cfc359f8c5f08d366f4a2dcc2cec1c09f09b069d23fe09de80ad0cee
+    home: https://www.keycloak.org
+    icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg
+    keywords:
+    - keycloak
+    - identity
+    - access-management
+    - authentication
+    - authorization
+    - oauth
+    - openid-connect
+    - saml
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: keycloak
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.16.3/keycloak-0.16.3.tgz
+    version: 0.16.3
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |2
+            - kind: changed
+              description: "Chart updated"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Keycloak
+          url: https://www.keycloak.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+        - name: Application
+          url: https://github.com/keycloak/keycloak
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 26.5.3
     created: "2026-02-20T09:20:12.373130988Z"
     dependencies:
     - name: common
@@ -33126,4 +33185,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-20T10:46:19.781801889Z"
+generated: "2026-02-20T14:30:19.186453767Z"
