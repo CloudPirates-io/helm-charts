@@ -243,8 +243,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `service.httpsTargetPort`     | Keycloak HTTPS container port | `8443`      |
 | `service.annotations`         | Service annotations           | `{}`        |
 | `service.trafficDistribution` | Service traffic distribution  | `""`        |
-| `service.httpNodePort`        | Keycloak HTTP node port       | `""`        |
-| `service.httpsNodePort`       | Keycloak HTTPS node port      | `""`        |
+| `service.httpNodePort`        | Keycloak HTTP node port       | `30080`     |
+| `service.httpsNodePort`       | Keycloak HTTPS node port      | `30443"`    |
 
 ### Ingress configuration
 

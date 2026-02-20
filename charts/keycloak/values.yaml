@@ -266,9 +266,9 @@ service:
   ## @param service.trafficDistribution Traffic distribution preference for the keycloak service. If the field is not set, the implementation will apply its default routing strategy.
   trafficDistribution: ""
   ## @param service.nodePort Keycloak HTTP node port
-  httpNodePort: ""
+  httpNodePort: 30080
   ## @param service.nodePort Keycloak HTTPS node port
-  httpsNodePort: ""
+  httpsNodePort: 30443
 
 ## @section Ingress configuration
 ingress:
