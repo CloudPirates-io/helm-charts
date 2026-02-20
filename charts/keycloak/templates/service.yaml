@@ -18,7 +18,7 @@ spec:
       targetPort: {{ .Values.service.httpTargetPort }}
       protocol: TCP
       name: http
-      {{- if and (eq .Values.service.type "NodePort") (.Values.service.httpNodePort) }}
+      {{- if eq .Values.service.type "NodePort" }}
       nodePort: {{ .Values.service.httpNodePort }}
       {{- end }}
     {{- end }}
@@ -27,7 +27,7 @@ spec:
       targetPort: {{ .Values.service.httpsTargetPort }}
       protocol: TCP
       name: https
-      {{- if and (eq .Values.service.type "NodePort") (.Values.service.httpsNodePort) }}
+      {{- if eq .Values.service.type "NodePort" }}
       nodePort: {{ .Values.service.httpsNodePort }}
       {{- end }}
     {{- end }}
