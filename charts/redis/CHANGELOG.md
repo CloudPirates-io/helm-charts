@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.23.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.22.3] - 2026-02-16
 
 - [alpine/kubectl] Update image to v1.35.1 (#1016) ([c9b58fcf](https://github.com/CloudPirates-io/helm-charts/commit/c9b58fcf))

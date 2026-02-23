@@ -199,7 +199,7 @@ spec:
                     exit 1
                   fi
                 {{- else }}
-                - hhealthcheck.sh {{ if .Values.healthcheckExtraArgs }}{{ .Values.healthcheckExtraArgs }} {{ end }}--connect --innodb_initialized
+                - healthcheck.sh {{ if .Values.healthcheckExtraArgs }}{{ .Values.healthcheckExtraArgs }} {{ end }}--connect --innodb_initialized
                 {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}

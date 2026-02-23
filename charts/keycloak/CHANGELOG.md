@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.3] - 2026-02-20
+
+- [keycloak]: fixes issue with realm import volume mount (#1039) ([0d7caf73](https://github.com/CloudPirates-io/helm-charts/commit/0d7caf73))
+
+## [0.16.2] - 2026-02-20
+
+- fix: set default values for nodePort values (#1037) ([0a630223](https://github.com/CloudPirates-io/helm-charts/commit/0a630223))
+
+## [0.16.1] - 2026-02-20
+
+- add variables to set own nodePort values (#1036) ([044c07ba](https://github.com/CloudPirates-io/helm-charts/commit/044c07ba))
+
 ## [0.15.1] - 2026-02-18
 
 - [mariadb] Update initContainers.waitForMariadb.repository to b1cb255 (#1030) ([270c00a1](https://github.com/CloudPirates-io/helm-charts/commit/270c00a1))
