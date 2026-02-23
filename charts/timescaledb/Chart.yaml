@@ -2,8 +2,8 @@ apiVersion: v2
 name: timescaledb
 description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
 type: application
-version: 0.9.0
-appVersion: "2.25.0"
+version: 0.10.1
+appVersion: "2.25.1"
 keywords:
   - timescaledb
   - timeseries
@@ -21,7 +21,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/b2e01452ce/timescaledb-logo.svg
 annotations:

@@ -25,6 +25,20 @@
                 }
             }
         },
+        "common": {
+            "type": "object",
+            "properties": {
+                "mongodbDirectoryPerDB": {
+                    "type": "boolean"
+                },
+                "mongodbDisableSystemLog": {
+                    "type": "boolean"
+                },
+                "mongodbExtraFlags": {
+                    "type": "array"
+                }
+            }
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -343,6 +357,20 @@
         "nodeSelector": {
             "type": "object"
         },
+        "performance": {
+            "type": "object",
+            "properties": {
+                "maxIncomingConnections": {
+                    "type": "string"
+                },
+                "oplogSizeMB": {
+                    "type": "string"
+                },
+                "wiredTigerCacheSizeGB": {
+                    "type": "string"
+                }
+            }
+        },
         "persistence": {
             "type": "object",
             "properties": {
@@ -363,6 +391,9 @@
                 },
                 "mountPath": {
                     "type": "string"
+                },
+                "persistentVolumeClaimRetentionPolicy": {
+                    "type": "null"
                 },
                 "size": {
                     "type": "string"
@@ -494,6 +525,12 @@
                 "extraInit": {
                     "type": "object",
                     "properties": {
+                        "defaultReadConcern": {
+                            "type": "string"
+                        },
+                        "defaultWriteConcern": {
+                            "type": "string"
+                        },
                         "delay": {
                             "type": "integer"
                         },
@@ -646,6 +683,338 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "setParameter": {
+            "type": "object",
+            "properties": {
+                "enableFlowControl": {
+                    "type": "string"
+                },
+                "enableLocalhostAuthBypass": {
+                    "type": "string"
+                }
+            }
+        },
+        "shardedCluster": {
+            "type": "object",
+            "properties": {
+                "balancer": {
+                    "type": "object",
+                    "properties": {
+                        "autoSplitEnabled": {
+                            "type": "boolean"
+                        },
+                        "chunkSize": {
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "window": {
+                            "type": "object",
+                            "properties": {
+                                "start": {
+                                    "type": "string"
+                                },
+                                "stop": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "configsvr": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "type": "object"
+                        },
+                        "customInit": {
+                            "type": "string"
+                        },
+                        "enableConfigShard": {
+                            "type": "boolean"
+                        },
+                        "nodeSelector": {
+                            "type": "object"
+                        },
+                        "persistence": {
+                            "type": "object",
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "persistentVolumeClaimRetentionPolicy": {
+                                    "type": "null"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "priorityClassName": {
+                            "type": "string"
+                        },
+                        "replicaCount": {
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "tolerations": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "initialization": {
+                    "type": "object",
+                    "properties": {
+                        "defaultReadConcern": {
+                            "type": "string"
+                        },
+                        "defaultWriteConcern": {
+                            "type": "string"
+                        },
+                        "delay": {
+                            "type": "integer"
+                        },
+                        "enableShardingDatabases": {
+                            "type": "array"
+                        },
+                        "retries": {
+                            "type": "integer"
+                        },
+                        "shardCollections": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "keyFile": {
+                    "type": "string"
+                },
+                "keySecretName": {
+                    "type": "string"
+                },
+                "mongos": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "type": "object"
+                        },
+                        "customInit": {
+                            "type": "string"
+                        },
+                        "nodeSelector": {
+                            "type": "object"
+                        },
+                        "priorityClassName": {
+                            "type": "string"
+                        },
+                        "replicaCount": {
+                            "type": "integer"
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "port": {
+                                    "type": "integer"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "tolerations": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "shards": {
+                    "type": "integer"
+                },
+                "shardsvr": {
+                    "type": "object",
+                    "properties": {
+                        "affinity": {
+                            "type": "object"
+                        },
+                        "arbiter": {
+                            "type": "object",
+                            "properties": {
+                                "affinity": {
+                                    "type": "object"
+                                },
+                                "extraVolumeMounts": {
+                                    "type": "array"
+                                },
+                                "extraVolumes": {
+                                    "type": "array"
+                                },
+                                "nodeSelector": {
+                                    "type": "object"
+                                },
+                                "priorityClassName": {
+                                    "type": "string"
+                                },
+                                "replicaCount": {
+                                    "type": "integer"
+                                },
+                                "resources": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limits": {
+                                            "type": "object",
+                                            "properties": {
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "requests": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cpu": {
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "tolerations": {
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "customInit": {
+                            "type": "string"
+                        },
+                        "dataNode": {
+                            "type": "object",
+                            "properties": {
+                                "affinity": {
+                                    "type": "object"
+                                },
+                                "nodeSelector": {
+                                    "type": "object"
+                                },
+                                "priorityClassName": {
+                                    "type": "string"
+                                },
+                                "replicaCount": {
+                                    "type": "integer"
+                                },
+                                "resources": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limits": {
+                                            "type": "object",
+                                            "properties": {
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "requests": {
+                                            "type": "object",
+                                            "properties": {
+                                                "cpu": {
+                                                    "type": "string"
+                                                },
+                                                "memory": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "tolerations": {
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "nodeSelector": {
+                            "type": "object"
+                        },
+                        "persistence": {
+                            "type": "object",
+                            "properties": {
+                                "accessMode": {
+                                    "type": "string"
+                                },
+                                "persistentVolumeClaimRetentionPolicy": {
+                                    "type": "null"
+                                },
+                                "size": {
+                                    "type": "string"
+                                },
+                                "storageClass": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "tolerations": {
+                            "type": "array"
+                        }
+                    }
                 }
             }
         },

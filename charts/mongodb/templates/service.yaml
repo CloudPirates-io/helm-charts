@@ -1,4 +1,4 @@
-{{- if not .Values.replicaSet.enabled }}
+{{- if and (not .Values.replicaSet.enabled) (not .Values.shardedCluster.enabled) }}
 apiVersion: v1
 kind: Service
 metadata:

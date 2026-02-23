@@ -125,6 +125,27 @@ config:
   ## @param config.existingConfigmap Name of existing ConfigMap with Valkey configuration
   existingConfigmap: ""
 
+## @section External Replica Configuration
+## Configure this Valkey instance as a replica of an external Redis/Valkey server
+## IMPORTANT: External replica mode is mutually exclusive with Sentinel (sentinel.enabled must be false)
+## This feature allows you to replicate data from an external Redis/Valkey server, not from internal cluster members
+externalReplica:
+  ## @param externalReplica.enabled Enable replication from an external Redis/Valkey server
+  ## IMPORTANT: Cannot be used with sentinel.enabled=true
+  enabled: false
+  ## @param externalReplica.host Hostname or IP address of the external Redis/Valkey master server
+  host: ""
+  ## @param externalReplica.port Port of the external Redis/Valkey master server
+  port: 6379
+  ## @param externalReplica.auth.enabled Enable authentication to the external master server
+  auth:
+    enabled: false
+    ## @param externalReplica.auth.existingSecret Name of existing secret containing the password for the external master
+    ## The secret should contain a key with the password value
+    existingSecret: ""
+    ## @param externalReplica.auth.existingSecretPasswordKey Key in the existing secret that contains the password
+    existingSecretPasswordKey: "password"
+
 ## @section Service configuration
 service:
   ## @param service.type Valkey service type
