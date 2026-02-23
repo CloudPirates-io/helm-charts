@@ -66,6 +66,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.16.2] - 2026-02-19
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#1033) ([108dd1e9](https://github.com/CloudPirates-io/helm-charts/commit/108dd1e9))
+
 ## [0.16.1] - 2026-02-18
 
 - Update charts/rabbitmq/values.yaml rabbitmq to v4.2.4 (patch) (#1028) ([76381223](https://github.com/CloudPirates-io/helm-charts/commit/76381223))
