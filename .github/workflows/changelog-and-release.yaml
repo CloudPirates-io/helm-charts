@@ -58,7 +58,7 @@ jobs:
       has_changes: ${{ steps.generate-changelog.outputs.has_changes }}
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           token: ${{ secrets.CHANGELOG_PAT || secrets.GITHUB_TOKEN }}
@@ -269,8 +269,125 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Update ArtifactHub changes annotations
+        id: update-ah-changes
+        if: steps.charts-to-update.outputs.changed == 'true'
+        env:
+          GH_REPO: ${{ github.repository }}
+          AH_PYTHON_SCRIPT: |
+            import subprocess, re, os, sys
+
+            chart_name = os.environ['AH_CHART_NAME']
+            chart_dir = os.environ['AH_CHART_DIR']
+            commit_range = os.environ['AH_COMMIT_RANGE']
+            repo = os.environ['AH_REPO']
+
+            result = subprocess.run(
+                ["git", "log", commit_range, "--oneline", "--no-merges", "--", chart_dir],
+                capture_output=True, text=True
+            )
+
+            changes = []
+            for line in result.stdout.strip().split('\n'):
+                if not line.strip():
+                    continue
+                parts = line.split(' ', 1)
+                if len(parts) < 2:
+                    continue
+                hash_, msg = parts
+
+                if re.search(r'(chore:.*changelog|auto-generate.*schema|regenerate.*changelog|reset.*changelog)', msg, re.I):
+                    continue
+
+                msg = re.sub(rf'^\[{re.escape(chart_name)}\][:\s]+', '', msg, flags=re.I)
+                msg = re.sub(r'^\[all\][:\s]+', '', msg, flags=re.I)
+                msg = msg.strip()
+                if not msg:
+                    continue
+
+                kind = 'changed'
+                if re.search(r'\b(fix(es|ed)?|bugfix)\b', msg, re.I):
+                    kind = 'fixed'
+                elif re.search(r'\b(add(s|ed)?|new|feat(ure)?)\b', msg, re.I):
+                    kind = 'added'
+                elif re.search(r'\bsecurity\b', msg, re.I):
+                    kind = 'security'
+                elif re.search(r'\b(remov(es|ed)?|delet(es|ed)?)\b', msg, re.I):
+                    kind = 'removed'
+                elif re.search(r'\bdeprecate(s|d)?\b', msg, re.I):
+                    kind = 'deprecated'
+
+                desc = msg.replace('"', '\\"')
+                changes.append((kind, desc, hash_))
+
+            if not changes:
+                sys.exit(0)
+
+            lines = []
+            for kind, desc, hash_ in changes:
+                lines.append(f'- kind: {kind}')
+                lines.append(f'  description: "{desc}"')
+                lines.append(f'  links:')
+                lines.append(f'    - name: "GitHub Commit"')
+                lines.append(f'      url: "https://github.com/{repo}/commit/{hash_}"')
+
+            print('\n'.join(lines))
+        run: |
+          set -e
+          IFS=',' read -ra CHARTS <<< "${{ steps.charts-to-update.outputs.changedCharts }}"
+
+          for CHART_NAME in "${CHARTS[@]}"; do
+            CHART_NAME=$(echo "$CHART_NAME" | xargs)
+            [ -z "$CHART_NAME" ] && continue
+
+            CHART_DIR="charts/$CHART_NAME"
+            [ ! -f "$CHART_DIR/Chart.yaml" ] && continue
+
+            CHART_VERSION=$(yq eval '.version' "$CHART_DIR/Chart.yaml")
+            CURRENT_TAG="${CHART_NAME}-${CHART_VERSION}"
+
+            if git tag -l | grep -q "^${CURRENT_TAG}$"; then
+              PREV_TAG=$(git tag -l "${CHART_NAME}-*" | sort -V | grep -B1 "^${CURRENT_TAG}$" | head -1)
+              if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
+                echo "⚠️ No previous tag for $CHART_NAME, skipping"
+                continue
+              fi
+              COMMIT_RANGE="${PREV_TAG}..${CURRENT_TAG}"
+            else
+              LATEST_TAG=$(git tag -l "${CHART_NAME}-*" | sort -V | tail -1)
+              if [ -z "$LATEST_TAG" ]; then
+                echo "⚠️ No tags found for $CHART_NAME, skipping"
+                continue
+              fi
+              COMMIT_RANGE="${LATEST_TAG}..HEAD"
+            fi
+
+            echo "Updating ArtifactHub annotation for $CHART_NAME ($COMMIT_RANGE)"
+
+            export AH_CHART_NAME="$CHART_NAME"
+            export AH_CHART_DIR="$CHART_DIR"
+            export AH_COMMIT_RANGE="$COMMIT_RANGE"
+            export AH_REPO="$GH_REPO"
+
+            CHANGES_YAML=$(echo "$AH_PYTHON_SCRIPT" | python3 -)
+
+            if [ -n "$CHANGES_YAML" ]; then
+              export CHANGES_YAML
+              yq eval '.annotations["artifacthub.io/changes"] = strenv(CHANGES_YAML)' -i "$CHART_DIR/Chart.yaml"
+              echo "✅ Updated artifacthub.io/changes for $CHART_NAME"
+            else
+              echo "⚠️ No relevant commits found for $CHART_NAME annotation"
+            fi
+          done
+
+          if git status --porcelain | grep -q 'Chart.yaml'; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit and push changelog updates
-        if: steps.generate-changelog.outputs.has_changes == 'true'
+        if: steps.generate-changelog.outputs.has_changes == 'true' || steps.update-ah-changes.outputs.has_changes == 'true'
         run: |
           # Setup SSH key for signing
           mkdir -p ~/.ssh
@@ -286,6 +403,7 @@ jobs:
 
           # Add changelog files (use -f to force add even if no changes detected)
           find charts -name "CHANGELOG.md" -type f -exec git add {} \;
+          find charts -name "Chart.yaml" -type f -exec git add {} \;
 
           # Check if there's actually something to commit
           if git diff --cached --quiet; then
@@ -337,7 +455,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           ref: main
@@ -357,14 +475,14 @@ jobs:
           git config commit.gpgsign true
 
       - name: Login to Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ${{ vars.REGISTRY }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Login to GHCR
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

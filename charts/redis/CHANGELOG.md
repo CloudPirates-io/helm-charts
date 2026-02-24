@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.0] - 2026-02-24
+
+- [redis]: Extend redis secret connection (#1045) ([514618e6](https://github.com/CloudPirates-io/helm-charts/commit/514618e6))
+
 ## [0.24.0] - 2026-02-20
 
 - [redis]: Redis Sentinel now also uses TLS for itself and connections to Redis Instances (#1038) ([87236b20](https://github.com/CloudPirates-io/helm-charts/commit/87236b20))
