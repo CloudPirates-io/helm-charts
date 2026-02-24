@@ -38,10 +38,19 @@ helm install my-redis ./charts/redis
 
 ### Getting Started
 
-1. Get the Redis password:
+1. Get the Redis connection details:
 
 ```bash
+# Get password
 kubectl get secret my-redis -o jsonpath="{.data.redis-password}" | base64 -d
+
+# Get full connection URI
+kubectl get secret my-redis -o jsonpath="{.data.uri}" | base64 -d
+
+# Get individual connection fields
+kubectl get secret my-redis -o jsonpath="{.data.host}" | base64 -d
+kubectl get secret my-redis -o jsonpath="{.data.port}" | base64 -d
+kubectl get secret my-redis -o jsonpath="{.data.username}" | base64 -d
 ```
 
 2. Connect to Redis from inside the cluster:
@@ -135,6 +144,18 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
 | `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 | `auth.acl.existingFilePath`      | Path to existing ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""`    |
+
+#### Connection Details Secret
+
+When `auth.enabled` is `true` and no `auth.existingSecret` or `auth.acl.enabled` is set, the chart creates a Secret containing full connection details:
+
+| Key              | Description                                                                 |
+| ---------------- | --------------------------------------------------------------------------- |
+| `redis-password` | The Redis password (base64 encoded)                                         |
+| `host`           | The Redis service hostname: `<fullname>.<namespace>.svc` (base64 encoded)   |
+| `port`           | The Redis service port (base64 encoded). Uses `tls.port` when TLS is enabled |
+| `username`       | The Redis username: `default` (base64 encoded)                              |
+| `uri`            | Full connection URI: `redis://default:<password>@<host>:<port>` (base64 encoded). Uses `rediss://` scheme when TLS is enabled |
 
 #### ACL Configuration
 
