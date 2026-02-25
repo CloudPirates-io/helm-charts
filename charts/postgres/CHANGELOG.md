@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.15.6] - 2026-02-16
 
 - Update charts/postgres/values.yaml postgres to v18.2 (minor) (#1010) ([87eedb14](https://github.com/CloudPirates-io/helm-charts/commit/87eedb14))

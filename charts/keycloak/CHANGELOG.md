@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.4] - 2026-02-23
+
+- [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.4 (patch) (#1040) ([84c4a798](https://github.com/CloudPirates-io/helm-charts/commit/84c4a798))
+
 ## [0.16.3] - 2026-02-20
 
 - [keycloak]: fixes issue with realm import volume mount (#1039) ([0d7caf73](https://github.com/CloudPirates-io/helm-charts/commit/0d7caf73))
