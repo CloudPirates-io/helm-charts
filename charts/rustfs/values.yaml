@@ -114,8 +114,6 @@ service:
   type: ClusterIP
   ## @param service.port RustFS API service port
   port: 9000
-  ## @param service.consolePort RustFS console service port
-  consolePort: 9001
   ## @param service.annotations Service annotations
   annotations: {}
 
@@ -126,9 +124,7 @@ consoleService:
   ## @param consoleService.type Console service type
   type: ClusterIP
   ## @param consoleService.port Console service API port
-  port: 9000
-  ## @param consoleService.consolePort Console service console port
-  consolePort: 9001
+  port: 9001
   ## @param consoleService.sessionAffinityTimeout Session affinity timeout in seconds
   sessionAffinityTimeout: 10800
   ## @param consoleService.annotations Console service annotations
