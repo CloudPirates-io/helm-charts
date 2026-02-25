@@ -174,17 +174,15 @@ The following table lists the configurable parameters of the RustFS chart and th
 | --------------------- | --------------------------- | ----------- |
 | `service.type`        | RustFS service type         | `ClusterIP` |
 | `service.port`        | RustFS API service port     | `9000`      |
-| `service.consolePort` | RustFS console service port | `9001`      |
 | `service.annotations` | Service annotations         | `{}`        |
 
 ### Console Service configuration (for StatefulSet only)
 
 | Parameter                               | Description                                              | Default     |
-| --------------------------------------- | -------------------------------------------------------- | ----------- |
+| --------------------------------------- |----------------------------------------------------------| ----------- |
 | `consoleService.enabled`                | Enable Console service that routes to the first pod only | `true`      |
 | `consoleService.type`                   | Console service type                                     | `ClusterIP` |
-| `consoleService.port`                   | Console service API port                                 | `9000`      |
-| `consoleService.consolePort`            | Console service console port                             | `9001`      |
+| `consoleService.port`                   | Console service port                                     | `9001`      |
 | `consoleService.sessionAffinityTimeout` | Session affinity timeout in seconds                      | `10800`     |
 | `consoleService.annotations`            | Console service annotations                              | `{}`        |
 
