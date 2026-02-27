@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.6.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.5.11] - 2026-02-12
 
 - Update charts/nginx/values.yaml nginx (#983) ([811e4588](https://github.com/CloudPirates-io/helm-charts/commit/811e4588))
