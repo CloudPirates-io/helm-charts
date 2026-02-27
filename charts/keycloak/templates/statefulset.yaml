@@ -309,7 +309,7 @@ spec:
             - name: keycloak-providers
               mountPath: /opt/keycloak/providers
             {{- end }}
-            {{- if .Values.realm.configFile }}
+            {{- if and .Values.realm.import (or .Values.realm.configFile .Values.realm.existingSecret) }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
               readOnly: true

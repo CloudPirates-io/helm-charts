@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.6.0@sha256:7b6fb55d8b0adcd77269dc52b3cfffe5f59ca5d43dec3c90dbe18aacce7942e1"
+  tag: "8.6.1@sha256:5cb00b0f236e286254ce9f3eea989b00bb69d04fb9b6c9a9d0b07e588e49f44e"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -358,7 +358,7 @@ sentinel:
   ## @param sentinel.image.repository Redis Sentinel image repository
   image:
     repository: redis
-    tag: "8.6.0@sha256:7b6fb55d8b0adcd77269dc52b3cfffe5f59ca5d43dec3c90dbe18aacce7942e1"
+    tag: "8.6.1@sha256:5cb00b0f236e286254ce9f3eea989b00bb69d04fb9b6c9a9d0b07e588e49f44e"
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
@@ -414,7 +414,7 @@ sentinel:
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
       repository: alpine/kubectl
-      tag: "1.35.0"
+      tag: "1.35.1"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources:
