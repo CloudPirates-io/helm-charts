@@ -40,9 +40,11 @@ annotations:
       url: https://github.com/redis/redis
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "[redis]: Adjust condition around serviceAccountName (#945)"
-          links:
-            - name: "Commit ff1ee15"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/ff1ee15"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Update charts/redis/values.yaml redis"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1054"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/redis/CHANGELOG.md"

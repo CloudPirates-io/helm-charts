@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.2] - 2026-02-27
+
+- [prometheuscommunity/postgres-exporter] Update charts/postgres/values.yaml prometheuscommunity/postgres-exporter to v0.19.1 (patch) (#1063) ([23ab66c1](https://github.com/CloudPirates-io/helm-charts/commit/23ab66c1))
+
+## [0.16.1] - 2026-02-25
+
+- Update charts/postgres/values.yaml postgres (#1056) ([5b67b6cd](https://github.com/CloudPirates-io/helm-charts/commit/5b67b6cd))
+
 ## [0.16.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
