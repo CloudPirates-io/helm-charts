@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.16.3
+version: 0.17.1
 appVersion: "4.2.4"
 keywords:
   - rabbitmq
@@ -39,14 +39,24 @@ annotations:
       url: https://github.com/rabbitmq/rabbitmq-server
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
-        - kind: changed
-          description: "add option to set mountPath for data volume (#902)"
-          links:
-            - name: "Commit 7d892f9"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/7d892f9"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Auto-inject missing vhosts and auth user into definitions to prevent boot failure (#1044)"
+      links:
+        - name: "GitHub Commit"
+          url: "https://github.com/CloudPirates-io/helm-charts/commit/719a507a"
+    - kind: changed
+      description: "Update charts/rabbitmq/values.yaml rabbitmq (#1042)"
+      links:
+        - name: "GitHub Commit"
+          url: "https://github.com/CloudPirates-io/helm-charts/commit/8e7b82a2"
+    - kind: changed
+      description: "Update charts/rabbitmq/values.yaml rabbitmq (#1033)"
+      links:
+        - name: "GitHub Commit"
+          url: "https://github.com/CloudPirates-io/helm-charts/commit/108dd1e9"
+    - kind: changed
+      description: "Update charts/rabbitmq/values.yaml rabbitmq to v4.2.4 (patch) (#1028)"
+      links:
+        - name: "GitHub Commit"
+          url: "https://github.com/CloudPirates-io/helm-charts/commit/76381223"

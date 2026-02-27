@@ -6,26 +6,26 @@ global:
   imagePullSecrets: []
 
 ## @section Common parameters
-## @param nameOverride String to partially override nginx.fullname
+## @param nameOverride String to partially override ghost.fullname
 nameOverride: ""
-## @param fullnameOverride String to fully override nginx.fullname
+## @param fullnameOverride String to fully override ghost.fullname
 fullnameOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
-## @param replicaCount Number of Nginx replicas to deploy
+## @param replicaCount Number of Ghost replicas to deploy
 replicaCount: 1
 
-## @section Nginx image parameters
+## @section Ghost image parameters
 image:
-  ## @param image.registry Nginx image registry
+  ## @param image.registry Ghost image registry
   registry: docker.io
-  ## @param image.repository Nginx image repository
+  ## @param image.repository Ghost image repository
   repository: ghost
-  ## @param image.tag Nginx image tag
-  tag: "6.19.1@sha256:54c5bc4f8555e3c9926d97121f307059bc41c480d1f2f9b21c3ce81ec39ea39f"
-  ## @param image.pullPolicy Nginx image pull policy
+  ## @param image.tag Ghost image tag
+  tag: "6.19.2@sha256:2e30830118cf95b1fe22717ebc0d1746fc36b0d3009ff5b4e30dfc848c9fe5f6"
+  ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 
 
