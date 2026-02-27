@@ -2,7 +2,7 @@ apiVersion: v2
 name: memcached
 description: Memcached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.
 type: application
-version: 0.9.5
+version: 0.10.1
 appVersion: "1.6.40"
 keywords:
   - memcached
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
 annotations:
@@ -37,9 +37,11 @@ annotations:
       url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Update charts/memcached/values.yaml memcached (#834)"
-          links:
-            - name: "Commit a93b816"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/a93b816"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Update charts/memcached/values.yaml memcached"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1053"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/memcached/CHANGELOG.md"

@@ -39,7 +39,7 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
-      {{- if eq .Values.architecture "replication" }}
+      {{- if or (eq .Values.architecture "replication") .Values.externalReplica.enabled }}
       initContainers:
         - name: valkey-init
           image: {{ include "valkey.image" . }}
@@ -59,7 +59,20 @@ spec:
 
               echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
 
-              {{- if .Values.sentinel.enabled }}
+              {{- if and .Values.externalReplica.enabled (eq .Values.architecture "standalone") }}
+              # External replica mode with standalone architecture
+              # Copy base config from configmap
+              if [ -f "{{ include "valkey.configFullName" . }}" ]; then
+                cat {{ include "valkey.configFullName" . }} >> /tmp/valkey/valkey.conf
+              fi
+              
+              # Add masterauth if external replica auth is enabled
+              {{- if .Values.externalReplica.auth.enabled }}
+              echo "" >> /tmp/valkey/valkey.conf
+              echo "# External replica authentication (injected from secret)" >> /tmp/valkey/valkey.conf
+              echo "masterauth ${EXTERNAL_MASTER_PASSWORD}" >> /tmp/valkey/valkey.conf
+              {{- end }}
+              {{- else if .Values.sentinel.enabled }}
               # Add Valkey configurations for better Sentinel failover tolerance
               echo "" >> /tmp/valkey/valkey.conf
               echo "# Configurations for Kubernetes force deletion tolerance" >> /tmp/valkey/valkey.conf
@@ -181,14 +194,28 @@ spec:
               port {{ .Values.service.port }}
               EOF
               fi
-          {{- if .Values.auth.enabled }}
+              
+              # Add masterauth for external replica if enabled (for replication without sentinel)
+              {{- if and .Values.externalReplica.enabled .Values.externalReplica.auth.enabled (not .Values.sentinel.enabled) }}
+              echo "" >> /tmp/valkey/valkey.conf
+              echo "# External replica authentication (injected from secret)" >> /tmp/valkey/valkey.conf
+              echo "masterauth ${EXTERNAL_MASTER_PASSWORD}" >> /tmp/valkey/valkey.conf
+              {{- end }}
           env:
+            {{- if .Values.auth.enabled }}
             - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
-          {{- end }}
+            {{- end }}
+            {{- if and .Values.externalReplica.enabled .Values.externalReplica.auth.enabled }}
+            - name: EXTERNAL_MASTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "externalReplica.auth.existingSecret is required when externalReplica.auth.enabled is true" .Values.externalReplica.auth.existingSecret }}
+                  key: {{ .Values.externalReplica.auth.existingSecretPasswordKey }}
+            {{- end }}
           resources: {{- toYaml .Values.initContainer.resources | nindent 12 }}
           volumeMounts:
             - name: config
@@ -205,7 +232,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              {{- if eq .Values.architecture "replication" }}
+              {{- if or (eq .Values.architecture "replication") .Values.externalReplica.enabled }}
               CONFIG_FILE="/tmp/valkey/valkey.conf"
               {{- else }}
               CONFIG_FILE="{{ include "valkey.configFullName" . }}"
@@ -284,7 +311,7 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ include "valkey.dataDir" . }}
-            {{- if eq .Values.architecture "replication" }}
+            {{- if or (eq .Values.architecture "replication") .Values.externalReplica.enabled }}
             - name: valkey-config
               mountPath: /tmp/valkey
             {{- if .Values.sentinel.enabled }}
@@ -520,7 +547,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
-        {{- if eq .Values.architecture "replication" }}
+        {{- if or (eq .Values.architecture "replication") .Values.externalReplica.enabled }}
         - name: valkey-config
           emptyDir: {}
         {{- if .Values.sentinel.enabled }}

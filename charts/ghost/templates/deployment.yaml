@@ -40,6 +40,24 @@ spec:
       initContainers:
         - name: wait-for-mariadb
           image: "{{ .Values.initContainers.waitForMariadb.image | default "mariadb:12.0.2" }}"
+          env:
+            {{- if .Values.mariadb.auth.existingSecret }}
+            - name: MARIADB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: mariadb-password
+            {{- else }}
+            - name: MARIADB_USER
+              value: {{ .Values.mariadb.auth.username | quote }}
+            - name: MARIADB_PASSWORD
+              value: {{ .Values.mariadb.auth.password | quote }}
+            {{- end }}
           command:
             - sh
             - -c
@@ -48,16 +66,16 @@ spec:
               max_retries=15;
               until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.fullname" . }}-mariadb
               -P {{ .Values.mariadb.service.port }}
-              -u{{ .Values.mariadb.auth.username }}
-              -p{{ .Values.mariadb.auth.password }}
-              --silent; do 
+              -u${MARIADB_USER}
+              -p${MARIADB_PASSWORD}
+              --silent; do
                 retries=$((retries+1));
-                echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)"; 
+                echo "Waiting for MariaDB to become ready... (Attempt: $retries/$max_retries)";
                 if [ $retries -ge $max_retries ]; then
                   echo "Maximum number of retries reached. Exiting.";
                   exit 1;
                 fi;
-                sleep 2; 
+                sleep 2;
               done;
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
       {{- end }}
@@ -73,12 +91,66 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if .Values.extraEnvVars }}
           env:
-            {{- with .Values.extraEnvVars }}
-{{- toYaml . | nindent 12 }}
+            {{- if .Values.mariadb.enabled }}
+            {{- if .Values.mariadb.auth.existingSecret }}
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: username
+            - name: database__connection__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: mariadb-password
+            {{- else }}
+            - name: database__connection__user
+              value: {{ .Values.mariadb.auth.username | quote }}
+            - name: database__connection__password
+              value: {{ .Values.mariadb.auth.password | quote }}
             {{- end }}
-          {{- end }}
+            {{- else }}
+            {{- if .Values.config.database.externalConnection.existingSecret.name }}
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.externalConnection.existingSecret.name }}
+                  key: {{ .Values.config.database.externalConnection.existingSecret.usernameKey }}
+            - name: database__connection__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.externalConnection.existingSecret.name }}
+                  key: {{ .Values.config.database.externalConnection.existingSecret.passwordKey }}
+            {{- else }}
+            - name: database__connection__user
+              value: {{ .Values.config.database.externalConnection.user | quote }}
+            - name: database__connection__password
+              value: {{ .Values.config.database.externalConnection.password | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.mail.options.auth.existingSecret.name }}
+            - name: mail__options__auth__user
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mail.options.auth.existingSecret.name }}
+                  key: {{ .Values.config.mail.options.auth.existingSecret.userKey }}
+            - name: mail__options__auth__pass
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.mail.options.auth.existingSecret.name }}
+                  key: {{ .Values.config.mail.options.auth.existingSecret.passKey }}
+            {{- else }}
+            - name: mail__options__auth__user
+              value: {{ .Values.config.mail.options.auth.user | quote }}
+            - name: mail__options__auth__pass
+              value: {{ .Values.config.mail.options.auth.pass | quote }}
+            {{- end }}
+            {{- if .Values.extraEnvVars }}
+              {{- with .Values.extraEnvVars }}
+{{- toYaml . | nindent 12 }}
+              {{- end }}
+            {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- if eq .Values.livenessProbe.type "httpGet" }}
