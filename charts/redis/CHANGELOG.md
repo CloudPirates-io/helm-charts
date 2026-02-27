@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.1] - 2026-02-24
+
+- Update charts/redis/values.yaml redis to v8.6.1 (patch) (#1047) ([6e8d4335](https://github.com/CloudPirates-io/helm-charts/commit/6e8d4335))
+
 ## [0.25.0] - 2026-02-24
 
 - [redis]: Extend redis secret connection (#1045) ([514618e6](https://github.com/CloudPirates-io/helm-charts/commit/514618e6))

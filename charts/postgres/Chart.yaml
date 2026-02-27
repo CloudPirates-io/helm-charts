@@ -2,8 +2,8 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.16.2
-appVersion: "18.2.0"
+version: 0.17.0
+appVersion: "18.3.0"
 keywords:
   - postgres
   - postgresql
@@ -43,9 +43,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[prometheuscommunity/postgres-exporter] Update charts/postgres/values.yaml prometheuscommunity/postgres-exporter to v0.19.1 (patch)"
+      description: "Update charts/postgres/values.yaml postgres to v18.3 (minor)"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1063"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1066"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/postgres/CHANGELOG.md"

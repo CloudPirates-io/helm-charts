@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.13.2] - 2026-02-23
+
+- Update charts/ghost/values.yaml ghost to v6.19.2 (patch) (#1043) ([a407c0e5](https://github.com/CloudPirates-io/helm-charts/commit/a407c0e5))
+
 ## [0.13.1] - 2026-02-17
 
 - Update charts/ghost/values.yaml ghost to v6.19.1 (minor) (#1023) ([9524ff48](https://github.com/CloudPirates-io/helm-charts/commit/9524ff48))
