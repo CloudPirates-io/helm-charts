@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.3] - 2026-02-19
+
+- [mongodb]: Fix duplicated startup probes (#1035) ([74660673](https://github.com/CloudPirates-io/helm-charts/commit/74660673))
+
 ## [0.12.2] - 2026-02-18
 
 - [mongo] Update charts/mongodb/values.yaml mongo (#1031) ([f242e63e](https://github.com/CloudPirates-io/helm-charts/commit/f242e63e))
