@@ -141,3 +141,103 @@ Return ServiceMonitor labels
 {{ toYaml . }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Additional helper functions needed for sharded cluster
+*/}}
+{{- define "mongodb.metricsSecretPasswordKey" -}}
+{{- if and .Values.metrics.username .Values.metrics.enabled }}
+mongodb-metrics-password
+{{- else }}
+{{- include "mongodb.secretPasswordKey" . -}}
+{{- end }}
+{{- end -}}
+
+{{- define "mongodb.configMapName" -}}
+{{- if .Values.config.existingConfigmap }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.existingConfigmap "context" .) }}
+{{- else }}
+{{- printf "%s-config" (include "mongodb.fullname" .) }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Helper functions for sharded cluster configuration
+*/}}
+
+{{/*
+Return the keyfile secret name for replica set and sharded cluster authentication
+*/}}
+{{- define "mongodb.keyfileSecretName" -}}
+{{- if .Values.shardedCluster.keySecretName }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.shardedCluster.keySecretName "context" .) }}
+{{- else if .Values.replicaSet.keySecretName }}
+{{- include "cloudpirates.tplvalues.render" (dict "value" .Values.replicaSet.keySecretName "context" .) }}
+{{- else }}
+{{- printf "%s-keyfile" (include "mongodb.fullname" .) }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validate sharded cluster configuration
+*/}}
+{{- define "mongodb.validateShardedCluster" -}}
+{{- if and .Values.shardedCluster.enabled .Values.replicaSet.enabled }}
+{{- fail "Cannot enable both shardedCluster and replicaSet modes simultaneously" }}
+{{- end }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shards) 2) }}
+{{- fail "Sharded cluster requires at least 2 shards (shardedCluster.shards >= 2)" }}
+{{- end }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.configsvr.replicaCount) 1) }}
+{{- fail "Sharded cluster requires at least 1 config server (shardedCluster.configsvr.replicaCount >= 1)" }}
+{{- end }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.mongos.replicaCount) 1) }}
+{{- fail "Sharded cluster requires at least 1 mongos router (shardedCluster.mongos.replicaCount >= 1)" }}
+{{- end }}
+{{- if and .Values.shardedCluster.enabled (lt (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) 1) }}
+{{- fail "Each shard requires at least 1 data node replica (shardedCluster.shardsvr.dataNode.replicaCount >= 1)" }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return config server connection string for mongos
+*/}}
+{{- define "mongodb.configServerConnectionString" -}}
+{{- $configRsName := printf "%s-configserver-rs" (include "mongodb.fullname" .) -}}
+{{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) .Release.Namespace (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $configServers := list -}}
+{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) -}}
+{{- $host := printf "%s-configserver-%d.%s:27017" (include "mongodb.fullname" $) $i $configService -}}
+{{- $configServers = append $configServers $host -}}
+{{- end -}}
+{{- printf "%s/%s" $configRsName (join "," $configServers) -}}
+{{- end -}}
+
+{{/*
+Return shard replica set connection string
+*/}}
+{{- define "mongodb.shardConnectionString" -}}
+{{- $shardIndex := .shardIndex -}}
+{{- $context := .context -}}
+{{- $shardRsName := printf "%s-shard-%d-rs" (include "mongodb.fullname" $context) $shardIndex -}}
+{{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex $context.Release.Namespace ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $shardMembers := list -}}
+{{- range $i := until (int $context.Values.shardedCluster.shardsvr.dataNode.replicaCount) -}}
+{{- $host := printf "%s-shard-%d-%d.%s:27017" (include "mongodb.fullname" $context) $shardIndex $i $shardService -}}
+{{- $shardMembers = append $shardMembers $host -}}
+{{- end -}}
+{{- printf "%s/%s" $shardRsName (join "," $shardMembers) -}}
+{{- end -}}
+
+{{/*
+Return deployment mode for current configuration
+*/}}
+{{- define "mongodb.deploymentMode" -}}
+{{- if .Values.shardedCluster.enabled -}}
+sharded-cluster
+{{- else if .Values.replicaSet.enabled -}}
+replica-set
+{{- else -}}
+standalone
+{{- end -}}
+{{- end -}}

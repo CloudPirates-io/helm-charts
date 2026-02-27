@@ -1,0 +1,66 @@
+{{- if .Values.shardedCluster.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" . }}-mongos
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: mongos
+  {{- with .Values.shardedCluster.mongos.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with (include "mongodb.annotations" .) }}
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.shardedCluster.mongos.service.type }}
+  sessionAffinity: None
+  ports:
+    - name: mongodb
+      port: {{ .Values.shardedCluster.mongos.service.port }}
+      targetPort: mongodb
+      protocol: TCP
+    {{- if .Values.metrics.enabled }}
+    - name: http-metrics
+      port: 9216
+      targetPort: http-metrics
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "mongodb.selectorLabels" . | nindent 4 }}
+    service-type: mongos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" . }}-mongos-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: mongos
+  {{- with (include "mongodb.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+      protocol: TCP
+    {{- if .Values.metrics.enabled }}
+    - name: http-metrics
+      port: 9216
+      targetPort: http-metrics
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "mongodb.selectorLabels" . | nindent 4 }}
+    service-type: mongos
+{{- end }}
