@@ -1,0 +1,422 @@
+suite: test mongodb sharded cluster configuration
+templates:
+  - statefulset-configserver.yaml
+  - statefulset-mongos.yaml
+  - statefulset-shard.yaml
+  - service-configserver.yaml
+  - service-mongos.yaml
+  - service-shard.yaml
+  - init-scripts.yaml
+set:
+  shardedCluster:
+    enabled: true
+    shards: 2
+    configsvr:
+      replicaCount: 3
+    mongos:
+      replicaCount: 2
+    shardsvr:
+      dataNode:
+        replicaCount: 3
+  image:
+    tag: 8.2.3@sha256:d6b569590880bca35e43318418133a426b024bcb649eeb63bb071bc1490bee41
+tests:
+  - it: should create config server statefulset when sharded cluster is enabled
+    template: statefulset-configserver.yaml
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-configserver
+      - equal:
+          path: metadata.labels["service-type"]
+          value: configserver
+      - equal:
+          path: spec.replicas
+          value: 3
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-mongodb-configserver-headless
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --configsvr
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --replSet=RELEASE-NAME-mongodb-configserver-rs
+
+  - it: should create mongos statefulset when sharded cluster is enabled
+    template: statefulset-mongos.yaml
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-mongos
+      - equal:
+          path: metadata.labels["service-type"]
+          value: mongos
+      - equal:
+          path: spec.replicas
+          value: 2
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-mongodb-mongos-headless
+      - equal:
+          path: spec.template.spec.containers[0].command[0]
+          value: mongos
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --configdb=RELEASE-NAME-mongodb-configserver-rs/RELEASE-NAME-mongodb-configserver-0.RELEASE-NAME-mongodb-configserver-headless.NAMESPACE.svc.cluster.local:27017,RELEASE-NAME-mongodb-configserver-1.RELEASE-NAME-mongodb-configserver-headless.NAMESPACE.svc.cluster.local:27017,RELEASE-NAME-mongodb-configserver-2.RELEASE-NAME-mongodb-configserver-headless.NAMESPACE.svc.cluster.local:27017
+
+  - it: should create shard statefulsets when sharded cluster is enabled
+    template: statefulset-shard.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: StatefulSet
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-0
+        documentIndex: 0
+      - equal:
+          path: metadata.labels["service-type"]
+          value: shard
+        documentIndex: 0
+      - equal:
+          path: metadata.labels["shard-index"]
+          value: "0"
+        documentIndex: 0
+      - equal:
+          path: spec.replicas
+          value: 3
+        documentIndex: 0
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --shardsvr
+        documentIndex: 0
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --replSet=RELEASE-NAME-mongodb-shard-0-rs
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-1
+        documentIndex: 1
+      - equal:
+          path: metadata.labels["shard-index"]
+          value: "1"
+        documentIndex: 1
+
+  - it: should create config server services
+    template: service-configserver.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Service
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-configserver
+        documentIndex: 0
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-configserver-headless
+        documentIndex: 1
+      - equal:
+          path: spec.clusterIP
+          value: None
+        documentIndex: 1
+
+  - it: should create mongos services
+    template: service-mongos.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Service
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-mongos
+        documentIndex: 0
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-mongos-headless
+        documentIndex: 1
+      - equal:
+          path: spec.clusterIP
+          value: None
+        documentIndex: 1
+
+  - it: should create shard services
+    template: service-shard.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Service
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-0-headless
+        documentIndex: 0
+      - equal:
+          path: metadata.labels["shard-index"]
+          value: "0"
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-1-headless
+        documentIndex: 1
+      - equal:
+          path: metadata.labels["shard-index"]
+          value: "1"
+        documentIndex: 1
+
+  - it: should include sharding initialization scripts
+    template: init-scripts.yaml
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-init-scripts
+      - isNotEmpty:
+          path: data["extra-init-sharded.sh"]
+
+  - it: should use custom resources for config servers
+    template: statefulset-configserver.yaml
+    set:
+      shardedCluster:
+        enabled: true
+        configsvr:
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 1Gi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 1Gi
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 200m
+
+  - it: should use custom storage for shards
+    template: statefulset-shard.yaml
+    set:
+      shardedCluster:
+        enabled: true
+        shardsvr:
+          persistence:
+            size: 50Gi
+            storageClass: fast-ssd
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+        documentIndex: 0
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+        documentIndex: 0
+
+  - it: should not create sharded cluster resources when disabled
+    set:
+      shardedCluster:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: statefulset-configserver.yaml
+      - hasDocuments:
+          count: 0
+        template: statefulset-mongos.yaml
+      - hasDocuments:
+          count: 0
+        template: statefulset-shard.yaml
+      - hasDocuments:
+          count: 0
+        template: service-configserver.yaml
+      - hasDocuments:
+          count: 0
+        template: service-mongos.yaml
+      - hasDocuments:
+          count: 0
+        template: service-shard.yaml
+
+  - it: should support metrics with sharded cluster
+    set:
+      shardedCluster:
+        enabled: true
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
+        template: statefulset-configserver.yaml
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
+        template: statefulset-mongos.yaml
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: mongodb-exporter
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
+  - it: should support authentication with sharded cluster
+    set:
+      shardedCluster:
+        enabled: true
+      auth:
+        enabled: true
+        rootPassword: "mypassword"
+      replicaSet:
+        key: "bXlzZWNyZXRrZXk="
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --auth
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --keyFile=/keyfile-data/keyfile
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --keyFile=/keyfile-data/keyfile
+        template: statefulset-mongos.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --auth
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
+  - it: should support per-component priorityClassName
+    set:
+      shardedCluster:
+        enabled: true
+        configsvr:
+          priorityClassName: config-priority
+        mongos:
+          priorityClassName: mongos-priority
+        shardsvr:
+          dataNode:
+            priorityClassName: shard-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: config-priority
+        template: statefulset-configserver.yaml
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: mongos-priority
+        template: statefulset-mongos.yaml
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: shard-priority
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
+  - it: should support common MongoDB configuration flags
+    set:
+      shardedCluster:
+        enabled: true
+      common:
+        mongodbDirectoryPerDB: true
+        mongodbDisableSystemLog: true
+        mongodbExtraFlags:
+          - --wiredTigerCacheSizeGB=1
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --directoryperdb
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --quiet
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].command
+          content: --wiredTigerCacheSizeGB=1
+        template: statefulset-configserver.yaml
+
+  - it: should support arbiter configuration
+    set:
+      shardedCluster:
+        enabled: true
+        shards: 1
+        shardsvr:
+          arbiter:
+            replicaCount: 1
+            priorityClassName: arbiter-priority
+            resources:
+              limits:
+                memory: 512Mi
+    asserts:
+      - hasDocuments:
+          count: 2  # 1 data node + 1 arbiter
+        template: statefulset-shard.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mongodb-shard-0-arbiter
+        template: statefulset-shard.yaml
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: arbiter-priority
+        template: statefulset-shard.yaml
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 512Mi
+        template: statefulset-shard.yaml
+        documentIndex: 1
+
+  - it: should support hierarchical nodeSelector and tolerations
+    set:
+      shardedCluster:
+        enabled: true
+        shardsvr:
+          nodeSelector:
+            shared-constraint: "true"
+          tolerations:
+            - key: shared-taint
+              operator: Equal
+              value: "true"
+              effect: NoSchedule
+          dataNode:
+            nodeSelector:
+              data-node-constraint: "true"
+            tolerations:
+              - key: data-node-taint
+                operator: Equal
+                value: "true"
+                effect: NoSchedule
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector["data-node-constraint"]
+          value: "true"
+        template: statefulset-shard.yaml
+        documentIndex: 0
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: data-node-taint
+        template: statefulset-shard.yaml
+        documentIndex: 0

@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.5.3
+version: 0.6.0
 appVersion: "3.6.7"
 keywords:
   - etcd
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/513x513/36b7a72378/etcd-logo.svg
 annotations:

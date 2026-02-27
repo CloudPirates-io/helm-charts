@@ -48,33 +48,34 @@ Create chart name and version as used by the chart label.
 
 {{/*
 Common labels
+Uses merge to avoid duplicate keys when commonLabels overrides standard labels.
+commonLabels takes highest precedence.
 */}}
 {{- define "cloudpirates.labels" -}}
-helm.sh/chart: {{ include "cloudpirates.chart" . }}
-{{ include "cloudpirates.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.commonLabels }}
-{{ toYaml . }}
-{{- end }}
+{{- $default := dict
+    "helm.sh/chart" (include "cloudpirates.chart" .)
+    "app.kubernetes.io/managed-by" .Release.Service -}}
+{{- with .Chart.AppVersion -}}
+  {{- $_ := set $default "app.kubernetes.io/version" . -}}
+{{- end -}}
+{{- $selectorLabels := include "cloudpirates.selectorLabels" . | fromYaml -}}
+{{- $commonLabels := .Values.commonLabels | default dict -}}
+{{- merge $commonLabels $selectorLabels $default | toYaml }}
 {{- end }}
 
 {{/*
 Selector labels
+Picks app.kubernetes.io/name and app.kubernetes.io/instance from commonLabels
+so name overrides flow into selectors.
+Arbitrary commonLabels are NOT added to selectors — only name and instance.
 */}}
 {{- define "cloudpirates.selectorLabels" -}}
-{{- if and .Values.selectorLabels .Values.selectorLabels.name }}
-app.kubernetes.io/name: {{ .Values.selectorLabels.name }}
-{{- else -}}
-app.kubernetes.io/name: {{ include "cloudpirates.name" . }}
-{{ end -}}
-{{- if and .Values.selectorLabels .Values.selectorLabels.instance }}
-app.kubernetes.io/instance: {{ .Values.selectorLabels.instance }}
-{{- else -}}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- $default := dict "app.kubernetes.io/name" (include "cloudpirates.name" .) "app.kubernetes.io/instance" .Release.Name -}}
+{{- $override := dict -}}
+{{- with .Values.commonLabels -}}
+  {{- $override = pick . "app.kubernetes.io/name" "app.kubernetes.io/instance" -}}
 {{- end -}}
+{{- merge $override $default | toYaml }}
 {{- end }}
 
 {{/*

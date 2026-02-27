@@ -71,7 +71,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             - name: console
-              containerPort: {{ .Values.service.consolePort }}
+              containerPort: {{ .Values.consoleService.port }}
               protocol: TCP
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
