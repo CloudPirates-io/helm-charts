@@ -73,6 +73,8 @@ service:
   type: ClusterIP
   ## @param service.port Redis service port
   port: 6379
+  ## @param service.nodePort Specify the nodePort value for NodePort and LoadBalancer service types
+  nodePort: ""
   ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
   clusterPort: 16379
   headless:
