@@ -41,22 +41,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Auto-inject missing vhosts and auth user into definitions to prevent boot failure (#1044)"
+      description: "Update charts/rabbitmq/values.yaml rabbitmq"
       links:
-        - name: "GitHub Commit"
-          url: "https://github.com/CloudPirates-io/helm-charts/commit/719a507a"
-    - kind: changed
-      description: "Update charts/rabbitmq/values.yaml rabbitmq (#1042)"
-      links:
-        - name: "GitHub Commit"
-          url: "https://github.com/CloudPirates-io/helm-charts/commit/8e7b82a2"
-    - kind: changed
-      description: "Update charts/rabbitmq/values.yaml rabbitmq (#1033)"
-      links:
-        - name: "GitHub Commit"
-          url: "https://github.com/CloudPirates-io/helm-charts/commit/108dd1e9"
-    - kind: changed
-      description: "Update charts/rabbitmq/values.yaml rabbitmq to v4.2.4 (patch) (#1028)"
-      links:
-        - name: "GitHub Commit"
-          url: "https://github.com/CloudPirates-io/helm-charts/commit/76381223"
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1060"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq/CHANGELOG.md"

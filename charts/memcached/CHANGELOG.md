@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.9.6] - 2026-02-04
 
 - Update charts/memcached/values.yaml memcached (#951) ([6f205b23](https://github.com/CloudPirates-io/helm-charts/commit/6f205b23))
