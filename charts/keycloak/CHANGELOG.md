@@ -2,6 +2,30 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.4] - 2026-02-23
+
+- [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.4 (patch) (#1040) ([84c4a798](https://github.com/CloudPirates-io/helm-charts/commit/84c4a798))
+
+## [0.16.3] - 2026-02-20
+
+- [keycloak]: fixes issue with realm import volume mount (#1039) ([0d7caf73](https://github.com/CloudPirates-io/helm-charts/commit/0d7caf73))
+
+## [0.16.2] - 2026-02-20
+
+- fix: set default values for nodePort values (#1037) ([0a630223](https://github.com/CloudPirates-io/helm-charts/commit/0a630223))
+
+## [0.16.1] - 2026-02-20
+
+- add variables to set own nodePort values (#1036) ([044c07ba](https://github.com/CloudPirates-io/helm-charts/commit/044c07ba))
+
+## [0.15.1] - 2026-02-18
+
+- [mariadb] Update initContainers.waitForMariadb.repository to b1cb255 (#1030) ([270c00a1](https://github.com/CloudPirates-io/helm-charts/commit/270c00a1))
+
+## [0.15.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.14.8] - 2026-02-16
 
 - [mariadb] Update initContainers.waitForMariadb.repository to v12.2.2 (#1013) ([042b064c](https://github.com/CloudPirates-io/helm-charts/commit/042b064c))

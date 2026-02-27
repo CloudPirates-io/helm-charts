@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [1.3.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [1.2.18] - 2026-02-16
 
 - [helm] Update valkey Docker tag to v0.16.0 (#1017) ([1daab835](https://github.com/CloudPirates-io/helm-charts/commit/1daab835))

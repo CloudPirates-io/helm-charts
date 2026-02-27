@@ -2,6 +2,26 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.3] - 2026-02-19
+
+- [mongodb]: Fix duplicated startup probes (#1035) ([74660673](https://github.com/CloudPirates-io/helm-charts/commit/74660673))
+
+## [0.12.2] - 2026-02-18
+
+- [mongo] Update charts/mongodb/values.yaml mongo (#1031) ([f242e63e](https://github.com/CloudPirates-io/helm-charts/commit/f242e63e))
+
+## [0.12.1] - 2026-02-17
+
+- [mongodb]: Fix unauthed probes causing giant log files (#1027) ([a5325f24](https://github.com/CloudPirates-io/helm-charts/commit/a5325f24))
+
+## [0.12.0] - 2026-02-17
+
+- [mongodb]: Support sharded clusters (#1008) ([a56b3f11](https://github.com/CloudPirates-io/helm-charts/commit/a56b3f11))
+
+## [0.11.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.10.5] - 2026-02-12
 
 - [percona/mongodb_exporter] Update image to v0.48.0 (#995) ([046c7826](https://github.com/CloudPirates-io/helm-charts/commit/046c7826))

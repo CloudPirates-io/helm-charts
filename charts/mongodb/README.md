@@ -363,6 +363,26 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `replicaSet.shutdown.delay` | Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance | `10`    |
 
+### Sharded Cluster Parameters
+
+For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead of `replicaSet.enabled`. Sharded clusters consist of config servers, mongos routers, and shard servers.
+
+| Parameter                                                 | Description                                                                                    | Default   |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------- |
+| `shardedCluster.enabled`                                  | Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)                 | `false`   |
+| `shardedCluster.keyFile`                                  | Key for internal cluster authentication (base64 encoded string 6-1024 chars)                   | `""`      |
+| `shardedCluster.keySecretName`                            | Name of an existing secret with a file named "keyfile" containing the base64 encoded key       | `""`      |
+| `shardedCluster.shards`                                   | Number of shards (minimum 2 for meaningful sharding)                                           | `2`       |
+| `shardedCluster.configsvr.replicaCount`                   | Number of config server replicas (minimum 1, recommended 3 for production)                     | `3`       |
+| `shardedCluster.mongos.replicaCount`                      | Number of mongos router instances (minimum 1, recommended 2+ for production)                   | `2`       |
+| `shardedCluster.shardsvr.dataNode.replicaCount`           | Number of data node replicas per shard (minimum 1, recommended 3 for production)               | `3`       |
+| `shardedCluster.shardsvr.arbiter.replicaCount`            | Number of arbiter replicas per shard (see warning below)                                       | `0`       |
+| `shardedCluster.initialization.defaultWriteConcern`       | Cluster-wide default write concern                                                             | `majority`|
+
+> **WARNING**: MongoDB does **NOT** recommend using arbiters (`shardedCluster.shardsvr.arbiter.replicaCount > 0`) in sharded cluster deployments. Arbiters do not hold data and can lead to consistency issues in sharded environments. For high availability in sharded clusters, use data-bearing replica set members instead.
+>
+> See official MongoDB documentation: [Replica Set Arbiter - Sharded Cluster Considerations](https://www.mongodb.com/docs/manual/core/replica-set-arbiter/#sharded-cluster-considerations)
+
 #### Extra Objects
 
 You can use the `extraObjects` array to deploy additional Kubernetes resources (such as NetworkPolicies, ConfigMaps, etc.) alongside the release. This is useful for customizing your deployment with extra manifests that are not covered by the default chart options.
