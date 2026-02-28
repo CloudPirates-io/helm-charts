@@ -394,6 +394,7 @@ initContainers:
 | `postgres.auth.database` | PostgreSQL database name                                      | `"keycloak"` |
 | `postgres.auth.username` | PostgreSQL database user (leave empty for default 'postgres') | `""`         |
 | `postgres.auth.password` | PostgreSQL database password                                  | `""`         |
+| `postgres.auth.existingSecret` | Existing secret containing PostgreSQL credentials | `""` |
 
 ### MariaDB Configuration
 
@@ -404,6 +405,8 @@ initContainers:
 | `mariadb.auth.username`     | MariaDB database user (leave empty for root user) | `""`         |
 | `mariadb.auth.password`     | MariaDB database password                         | `""`         |
 | `mariadb.auth.rootPassword` | MariaDB root password                             | `""`         |
+| `mariadb.auth.existingSecret` | Existing secret containing MariaDB root and user passwords | `""` |
+| `mariadb.auth.secretKeys` | Secret keys for MariaDB credentials | `{rootPasswordKey: mariadb-root-password, userPasswordKey: mariadb-password}` |
 
 #### Extra Objects
 
