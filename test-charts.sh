@@ -93,7 +93,7 @@ check_prerequisites() {
 
     if ! helm plugin list | grep -q unittest; then
         echo -e "${YELLOW}⚠️  helm-unittest plugin not found. Installing...${NC}"
-        helm plugin install https://github.com/helm-unittest/helm-unittest
+        helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
     fi
     
     echo -e "${GREEN}✅ All prerequisites are met${NC}"
