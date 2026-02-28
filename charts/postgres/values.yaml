@@ -199,6 +199,10 @@ service:
   nodePort: 30432
   ## @param service.annotations Service annotations
   annotations: {}
+  ## @param service.loadBalancerIP LoadBalancer IP if service type is `LoadBalancer`
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: ""
 
 ## @section Ingress configuration
 ingress:
