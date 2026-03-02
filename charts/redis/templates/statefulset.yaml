@@ -825,7 +825,7 @@ spec:
               sentinel announce-ip ${SENTINEL_IP}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
-              loglevel {{ .Values.sentinel.loglevel }}
+              loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
               # Note: In deployment mode, known-sentinel entries are intentionally omitted.
@@ -834,7 +834,7 @@ spec:
               # from the headless service DNS accumulate stale entries during rolling updates,
               # inflating quorum requirements and blocking failover.
 
-              {{- if eq .Values.sentinel.loglevel "debug" }}
+              {{- if eq .Values.sentinel.config.loglevel "debug" }}
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
               {{- else }}
