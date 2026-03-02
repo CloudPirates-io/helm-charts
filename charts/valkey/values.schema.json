@@ -49,6 +49,9 @@
                 "maxMemoryPolicy": {
                     "type": "string"
                 },
+                "mountPath": {
+                    "type": "string"
+                },
                 "save": {
                     "type": "string"
                 }
@@ -81,6 +84,34 @@
                     "type": "boolean"
                 },
                 "runAsUser": {
+                    "type": "integer"
+                }
+            }
+        },
+        "externalReplica": {
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
                     "type": "integer"
                 }
             }
@@ -320,6 +351,12 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "existingClaim": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object"
+                },
                 "size": {
                     "type": "string"
                 },
@@ -341,6 +378,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",
@@ -398,6 +438,14 @@
         "sentinel": {
             "type": "object",
             "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "announceHostnames": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "downAfterMilliseconds": {
                     "type": "integer"
                 },
@@ -414,6 +462,9 @@
                     "type": "object",
                     "properties": {
                         "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
                             "type": "string"
                         },
                         "repository": {

@@ -2,8 +2,8 @@ apiVersion: v2
 name: minio
 description: High Performance Object Storage compatible with Amazon S3 APIs
 type: application
-version: 0.6.0
-appVersion: "2025.09.07"
+version: 0.10.1
+appVersion: "2025.10.15"
 keywords:
   - minio
   - object-storage
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/5d3310f00d/minio-logo.svg
 annotations:
@@ -39,9 +39,11 @@ annotations:
       url: https://github.com/minio/minio
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Rename post job and add variables to configure it (#741)"
-          links:
-            - name: "Commit 289cc4c"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/289cc4c"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "[cloudpirates/image-minio] Update image to 8dc02a7"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1025"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/minio/CHANGELOG.md"

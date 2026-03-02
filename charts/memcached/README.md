@@ -44,8 +44,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -122,6 +122,7 @@ The following table lists the configurable parameters of the Memcached chart and
 | `containerSecurityContext.runAsUser`                | Set Memcached container's Security Context runAsUser    | `11211` |
 | `containerSecurityContext.runAsNonRoot`             | Set Memcached container's Security Context runAsNonRoot | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set Memcached container's privilege escalation          | `false` |
+| `priorityClassName`                                 | Priority class for the memcached instance               | `""`    |
 
 ### Resources Parameters
 

@@ -9,7 +9,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[1].image
-          value: docker.io/prom/memcached-exporter:v0.15.4@sha256:b6763ecb3c47f2408e0398518851b7f8c5fc46232b2649f8c78a321130c54266
+          value: docker.io/prom/memcached-exporter:v0.15.5@sha256:92a6ad5a3d3e2dffc75efd4e18d1470fa5703dd79b6bace53fe11312b634578e
       - equal:
           path: spec.template.spec.containers[1].imagePullPolicy
           value: Always

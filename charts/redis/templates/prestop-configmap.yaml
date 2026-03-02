@@ -31,6 +31,9 @@ data:
     export REDISCLI_AUTH="${REDIS_PASSWORD}"
     {{- end }}
 
+    # Check for ACL authentication
+    {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -50,28 +53,77 @@ data:
         [[ "$REDIS_ROLE" == "master" ]]
     }
 
-    # Function to get full hostname for a pod
-    get_full_hostname() {
-        hostname="$1"
-        full_hostname="${hostname}.${HEADLESS_SERVICE}"
-        echo "${full_hostname}"
+    # Function to get current pod's IP address
+    get_current_pod_ip() {
+        # Get Pod IP from hostname -i
+        hostname -i 2>/dev/null | awk '{print $1}'
     }
 
     # Function to run Sentinel commands
+    # NOTE: Sentinel runs in the same Pod, so we connect via localhost (REDIS_LOOPBACK)
     run_sentinel_command() {
-        redis-cli -h "$REDIS_SERVICE" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel "$@"
     }
 
     # Function to check if sentinel failover has finished
+    # Returns 0 (true) if failover is complete (current pod is no longer master)
+    # Returns 1 (false) if this pod is still the master or cannot verify
     sentinel_failover_finished() {
-        REDIS_SENTINEL_INFO=($(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>/dev/null || echo ""))
-        if [ ${#REDIS_SENTINEL_INFO[@]} -ge 1 ]; then
-            REDIS_MASTER_HOST="${REDIS_SENTINEL_INFO[0]}"
-            [[ "$REDIS_MASTER_HOST" != "$(get_full_hostname $HOSTNAME)" ]]
+        local current_pod_ip
+        current_pod_ip=$(get_current_pod_ip)
+
+        if [ -z "$current_pod_ip" ]; then
+            echo "Warning: Could not determine current pod IP"
+            return 1  # Cannot verify, assume not finished
+        fi
+
+        local sentinel_output
+        sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
+        local sentinel_exit_code=$?
+
+        if [ $sentinel_exit_code -ne 0 ]; then
+            echo "Warning: Failed to query Sentinel: $sentinel_output"
+            return 1  # Cannot verify, assume not finished
+        fi
+
+        # Parse the sentinel response (returns: IP PORT)
+        REDIS_SENTINEL_INFO=($sentinel_output)
+
+        if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
+            echo "Warning: Invalid Sentinel response: $sentinel_output"
+            return 1  # Invalid response, assume not finished
+        fi
+
+        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+
+        if [[ "$master_ip" == "$current_pod_ip" ]]; then
+            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+            return 1
         else
-            # If we can't get master info, assume failover is complete
+            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
             return 0
         fi
+    }
+
+    # Function to trigger failover with INPROG handling
+    trigger_failover() {
+        local failover_output
+        failover_output=$(run_sentinel_command failover "$MASTER_NAME" 2>&1)
+        local failover_exit_code=$?
+
+        if [ $failover_exit_code -eq 0 ]; then
+            echo "Failover command sent successfully"
+            return 0
+        fi
+
+        # Check if failover is already in progress (INPROG error)
+        if echo "$failover_output" | grep -qi "INPROG\|in progress\|already"; then
+            echo "Failover already in progress, will wait for completion"
+            return 0  # This is acceptable, another pod triggered failover
+        fi
+
+        echo "Warning: Failover command failed: $failover_output"
+        return 1
     }
 
     # Function to wait with retries
@@ -93,8 +145,11 @@ data:
 
     echo "Redis preStop hook starting for pod: $HOSTNAME"
 
+    # Check if we should wait for failover (controlled by sentinel.redisShutdownWaitFailover)
+    WAIT_FOR_FAILOVER={{ .Values.sentinel.redisShutdownWaitFailover | default true }}
+
     # Only proceed with failover if this instance is the master
-    if is_master; then
+    if is_master && [ "$WAIT_FOR_FAILOVER" = "true" ]; then
         echo "I am the master pod and I'm being stopped. Initiating graceful failover."
 
         # Pause client write connections to prevent data loss during failover
@@ -105,13 +160,9 @@ data:
             echo "Warning: Failed to pause client connections, continuing anyway"
         fi
 
-        # Issue failover command to Sentinel
+        # Issue failover command to Sentinel (handles INPROG case)
         echo "Issuing failover command to Sentinel..."
-        if run_sentinel_command failover "$MASTER_NAME"; then
-            echo "Failover command sent successfully"
-        else
-            echo "Warning: Failed to send failover command, Sentinel may handle this automatically"
-        fi
+        trigger_failover
 
         # Wait for Sentinel to complete the failover
         echo "Waiting for Sentinel to complete failover (up to 20 seconds)..."
@@ -125,10 +176,143 @@ data:
         echo "Allowing additional time for new master to stabilize..."
         sleep 3
 
+    elif is_master && [ "$WAIT_FOR_FAILOVER" != "true" ]; then
+        echo "I am the master but redisShutdownWaitFailover is disabled, skipping failover wait"
     else
         echo "I am not the master, no failover needed"
     fi
 
     echo "Redis preStop hook completed"
+    exit 0
+  prestop-sentinel.sh: |
+    #!/bin/bash
+
+    # Sentinel preStop hook for graceful shutdown during rolling updates
+    # Ensures Redis failover completes before Sentinel terminates
+
+    set -e
+
+    # Configuration
+    REDIS_PORT="{{ .Values.service.port }}"
+    SENTINEL_PORT="{{ .Values.sentinel.port }}"
+    MASTER_NAME="{{ .Values.sentinel.masterName }}"
+    HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+
+    # Set authentication if enabled
+    {{- if .Values.auth.enabled }}
+    export REDISCLI_AUTH="${REDIS_PASSWORD}"
+    {{- end }}
+
+    # Set loopback address based on ipFamily configuration
+    {{- if eq .Values.ipFamily "ipv6" }}
+    REDIS_LOOPBACK="::1"
+    {{- else }}
+    REDIS_LOOPBACK="127.0.0.1"
+    {{- end }}
+
+    echo "Sentinel preStop hook starting for pod: $HOSTNAME"
+
+    # Function to run local Redis commands
+    run_redis_command() {
+        local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        redis-cli "${args[@]}" "$@"
+    }
+
+    # Function to run local Sentinel commands
+    run_sentinel_command() {
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+    }
+
+    # Function to check if current Redis instance is master
+    is_redis_master() {
+        REDIS_ROLE=$(run_redis_command role 2>/dev/null | head -1 || echo "")
+        [[ "$REDIS_ROLE" == "master" ]]
+    }
+
+    # Function to get current pod's IP address
+    get_current_pod_ip() {
+        # Get Pod IP from hostname -i
+        hostname -i 2>/dev/null | awk '{print $1}'
+    }
+
+    # Function to check if sentinel failover has finished
+    # Returns 0 (true) if failover is complete (current pod is no longer master)
+    # Returns 1 (false) if this pod is still the master or cannot verify
+    sentinel_failover_finished() {
+        local current_pod_ip
+        current_pod_ip=$(get_current_pod_ip)
+
+        if [ -z "$current_pod_ip" ]; then
+            echo "Warning: Could not determine current pod IP"
+            return 1  # Cannot verify, assume not finished
+        fi
+
+        local sentinel_output
+        sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
+        local sentinel_exit_code=$?
+
+        if [ $sentinel_exit_code -ne 0 ]; then
+            echo "Warning: Failed to query Sentinel: $sentinel_output"
+            return 1  # Cannot verify, assume not finished
+        fi
+
+        # Parse the sentinel response (returns: IP PORT)
+        REDIS_SENTINEL_INFO=($sentinel_output)
+
+        if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
+            echo "Warning: Invalid Sentinel response: $sentinel_output"
+            return 1  # Invalid response, assume not finished
+        fi
+
+        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+
+        if [[ "$master_ip" == "$current_pod_ip" ]]; then
+            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+            return 1
+        else
+            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
+            return 0
+        fi
+    }
+
+    # Function to wait with retries
+    retry_while() {
+        local condition="$1"
+        local max_attempts="$2"
+        local sleep_time="$3"
+        local attempt=0
+
+        while [ $attempt -lt $max_attempts ]; do
+            if $condition; then
+                return 0
+            fi
+            sleep "$sleep_time"
+            ((attempt++))
+        done
+        return 1
+    }
+
+    # If this pod's Redis instance is the master, wait for failover to complete
+    # This ensures clients can still connect to Sentinel to discover the new master
+    if is_redis_master; then
+        echo "Local Redis is master. Waiting for failover to complete before Sentinel shuts down..."
+
+        # Wait for Sentinel to complete the failover (up to 25 seconds)
+        if retry_while "sentinel_failover_finished" "25" "1"; then
+            echo "Failover completed, new master elected"
+        else
+            echo "Warning: Failover may still be in progress"
+        fi
+
+        # Additional delay to ensure clients have time to discover new master
+        echo "Allowing additional time for client discovery..."
+        sleep 5
+    else
+        echo "Local Redis is replica, waiting briefly for stability..."
+        # Even for replicas, wait briefly to ensure smooth transition
+        sleep 2
+    fi
+
+    echo "Sentinel preStop hook completed"
     exit 0
 {{- end }}

@@ -105,3 +105,24 @@ Return the proper Nginx metrics image name
 {{- define "nginx.metrics.image" -}}
 {{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
+
+{{/*
+Return true if a static site should be loaded from a ConfigMap
+*/}}
+{{- define "nginx.useStaticSite" -}}
+{{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the static site volume
+*/}}
+{{- define "nginx.staticSiteVolume" -}}
+{{- if .Values.cloneStaticSiteFromGit.enabled }}
+emptyDir: {}
+{{- else if .Values.staticSiteConfigmap }}
+configMap:
+  name: {{ .Values.staticSiteConfigmap }}
+{{- end }}
+{{- end -}}

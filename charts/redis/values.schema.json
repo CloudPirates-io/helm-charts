@@ -11,6 +11,23 @@
         "auth": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -28,8 +45,59 @@
                 }
             }
         },
+        "cluster": {
+            "type": "object",
+            "properties": {
+                "announceHostnames": {
+                    "type": "boolean"
+                },
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "nodeTimeout": {
+                            "type": "integer"
+                        },
+                        "requireFullCoverage": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "clusterDomain": {
             "type": "string"
+        },
+        "clusterInitJob": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         },
         "clusterReplicaCount": {
             "type": "integer"
@@ -125,6 +193,9 @@
                     }
                 }
             }
+        },
+        "extraConfig": {
+            "type": "string"
         },
         "extraEnvVars": {
             "type": "array"
@@ -265,6 +336,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -356,6 +430,9 @@
             "type": "object",
             "properties": {
                 "allowExternal": {
+                    "type": "boolean"
+                },
+                "egressEnabled": {
                     "type": "boolean"
                 },
                 "enabled": {
@@ -478,6 +555,9 @@
                 "limits": {
                     "type": "object",
                     "properties": {
+                        "cpu": {
+                            "type": "string"
+                        },
                         "memory": {
                             "type": "string"
                         }
@@ -507,8 +587,14 @@
                     "properties": {
                         "announceHostnames": {
                             "type": "boolean"
+                        },
+                        "loglevel": {
+                            "type": "string"
                         }
                     }
+                },
+                "discoveryTimeout": {
+                    "type": "integer"
                 },
                 "downAfterMilliseconds": {
                     "type": "integer"
@@ -536,8 +622,89 @@
                         }
                     }
                 },
+                "livenessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "masterName": {
                     "type": "string"
+                },
+                "masterService": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "checkInterval": {
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "resources": {
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "requests": {
+                                    "type": "object",
+                                    "properties": {
+                                        "cpu": {
+                                            "type": "string"
+                                        },
+                                        "memory": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "parallelSyncs": {
                     "type": "integer"
@@ -545,8 +712,42 @@
                 "port": {
                     "type": "integer"
                 },
+                "preStop": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "quorum": {
                     "type": "integer"
+                },
+                "readinessProbe": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "failureThreshold": {
+                            "type": "integer"
+                        },
+                        "initialDelaySeconds": {
+                            "type": "integer"
+                        },
+                        "periodSeconds": {
+                            "type": "integer"
+                        },
+                        "successThreshold": {
+                            "type": "integer"
+                        },
+                        "timeoutSeconds": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "redisShutdownWaitFailover": {
+                    "type": "boolean"
                 },
                 "resources": {
                     "type": "object",
@@ -554,6 +755,9 @@
                         "limits": {
                             "type": "object",
                             "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
                                 "memory": {
                                     "type": "string"
                                 }
@@ -601,6 +805,9 @@
                             "type": "object"
                         }
                     }
+                },
+                "nodePort": {
+                    "type": "string"
                 },
                 "port": {
                     "type": "integer"
@@ -650,6 +857,9 @@
                 }
             }
         },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
+        },
         "tls": {
             "type": "object",
             "properties": {
@@ -664,6 +874,20 @@
                 },
                 "certKeyFilename": {
                     "type": "string"
+                },
+                "client": {
+                    "type": "object",
+                    "properties": {
+                        "certFilename": {
+                            "type": "string"
+                        },
+                        "certKeyFilename": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "enabled": {
                     "type": "boolean"

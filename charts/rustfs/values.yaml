@@ -22,7 +22,7 @@ image:
   ## @param image.repository RustFS image repository
   repository: rustfs/rustfs
   ## @param image.tag RustFS image tag (immutable tags are recommended)
-  tag: "1.0.0-alpha.64@sha256:11ba8ff3870e8ee88494ad5b34e6942d1d91321483895c05aa264643f6d99a94"
+  tag: "1.0.0-alpha.83@sha256:1cfa82fb394a7c6a4ffc24f5333b52afee608d258503f94b37fcce5cc965c896"
   ## @param image.imagePullPolicy RustFS image pull policy
   imagePullPolicy: Always
 
@@ -105,14 +105,15 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the rustfs instance
+priorityClassName: ""
+
 ## @section Service configuration
 service:
   ## @param service.type RustFS service type
   type: ClusterIP
   ## @param service.port RustFS API service port
   port: 9000
-  ## @param service.consolePort RustFS console service port
-  consolePort: 9001
   ## @param service.annotations Service annotations
   annotations: {}
 
@@ -122,10 +123,8 @@ consoleService:
   enabled: true
   ## @param consoleService.type Console service type
   type: ClusterIP
-  ## @param consoleService.port Console service API port
-  port: 9000
-  ## @param consoleService.consolePort Console service console port
-  consolePort: 9001
+  ## @param consoleService.port Console service port
+  port: 9001
   ## @param consoleService.sessionAffinityTimeout Session affinity timeout in seconds
   sessionAffinityTimeout: 10800
   ## @param consoleService.annotations Console service annotations

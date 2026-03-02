@@ -334,6 +334,9 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "fsGroupChangePolicy": {
+                    "type": "string"
                 }
             }
         },
@@ -344,6 +347,9 @@
                     "type": "object"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",

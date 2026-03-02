@@ -2,8 +2,8 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.4.0
-appVersion: "3.6.5"
+version: 0.6.1
+appVersion: "3.6.8"
 keywords:
   - etcd
   - distributed
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/513x513/36b7a72378/etcd-logo.svg
 annotations:
@@ -39,6 +39,11 @@ annotations:
       url: https://github.com/etcd-io/etcd
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Update charts/etcd/values.yaml etcd-development/etcd to v3.6.8 (patch)"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1069"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/etcd/CHANGELOG.md"

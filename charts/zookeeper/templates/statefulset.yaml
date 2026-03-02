@@ -32,6 +32,7 @@ spec:
 {{- with (include "zookeeper.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      automountServiceAccountToken: false
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
@@ -51,14 +52,39 @@ spec:
             - name: admin
               containerPort: {{ .Values.service.ports.admin | default 8080 }}
               protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.service.port | default 7000 }}
+              protocol: TCP
+            {{- end }}
           env:
           {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
           {{- end }}
-            - name: ZOO_MY_ID
+            - name: POD_INDEX
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
+            - name: SERVER_ID_OFFSET
+              value: {{ .Values.serverIdOffset | default 0 | quote }}
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              # Create data directory if it doesn't exist (supports fresh installs and Bitnami migrations)
+              DATA_DIR="${ZOO_DATA_DIR:-{{ .Values.persistence.dataDir | default .Values.persistence.mountPath | default "/data" | quote }}}"
+              mkdir -p "$DATA_DIR"
+              echo "Created data directory: $DATA_DIR (if it didn't exist)"
+              
+              # Calculate ZOO_MY_ID with serverIdOffset
+              export ZOO_MY_ID=$((POD_INDEX + SERVER_ID_OFFSET))
+              echo "Calculated ZOO_MY_ID=$ZOO_MY_ID (pod-index=$POD_INDEX + offset=$SERVER_ID_OFFSET)"
+              
+              {{- if .Values.command }}
+              {{- /* user-supplied full command */ -}}
+              {{- range $i, $c := .Values.command -}}{{ if $i }} {{ end }}{{ $c | quote }}{{- end -}}
+              {{- else }}
+              exec /docker-entrypoint.sh zkServer.sh start-foreground
+              {{- end }}
           livenessProbe:
             tcpSocket:
               port: client
@@ -117,7 +143,9 @@ spec:
       {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         labels:
           {{- include "zookeeper.labels" . | nindent 10 }}

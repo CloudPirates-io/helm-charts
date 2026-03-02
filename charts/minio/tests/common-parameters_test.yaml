@@ -18,7 +18,7 @@ tests:
           value: RELEASE-NAME
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+          value: docker.io/cloudpirates/image-minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
@@ -30,7 +30,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: my-registry.com/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+          value: my-registry.com/cloudpirates/image-minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
 
   - it: should respect global.imagePullSecrets
     set:
@@ -98,7 +98,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: custom-registry.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+          value: custom-registry.io/cloudpirates/image-minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
 
   - it: should respect image.repository override
     set:
@@ -116,7 +116,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/minio/minio:RELEASE.2024-01-01T00-00-00Z@sha256:newdigest123
+          value: docker.io/cloudpirates/image-minio:RELEASE.2024-01-01T00-00-00Z@sha256:newdigest123
 
   - it: should respect image.imagePullPolicy override
     set:
@@ -136,7 +136,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: global-registry.com/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+          value: global-registry.com/cloudpirates/image-minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
 
   - it: should combine all overrides correctly
     set:

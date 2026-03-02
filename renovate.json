@@ -24,32 +24,20 @@
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Match etcd image and use GitHub releases",
-      "managerFilePatterns": [
-        "/^charts/etcd/values\\.ya?ml$/"
-      ],
-      "matchStrings": [
-        "(?<depName>image):\\s*\\n(?:[^\\n]*\\n){0,5}?\\s*repository:\\s*coreos/etcd\\s*\\n(?:[^\\n]*\\n){0,3}?\\s*tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
-      ],
-      "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "etcd-io/etcd",
-      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ],
   "packageRules": [
     {
-      "description": "Disable Docker datasource for etcd packages (use GitHub releases instead)",
+      "description": "Use gcr.io registry for etcd image",
       "matchDatasources": [
         "docker"
       ],
       "matchPackageNames": [
-        "coreos/etcd",
-        "quay.io/coreos/etcd"
+        "etcd-development/etcd"
       ],
-      "enabled": false
+      "registryUrls": [
+        "https://gcr.io"
+      ]
     },
     {
       "matchManagers": [
@@ -65,8 +53,7 @@
       "commitMessageTopic": "{{{depName}}}",
       "commitMessagePrefix": "[{{{replace 'docker.io/' '' packageName}}}]",
       "automerge": false,
-      "separateMinorPatch": true,
-      "groupName": "{{packageFile}} {{packageName}}"
+      "separateMinorPatch": true
     },
     {
       "matchManagers": [
@@ -102,14 +89,13 @@
       "recreateWhen": "never"
     },
     {
-      "description": "Configure etcd updates from GitHub releases",
+      "description": "Configure etcd image updates",
       "matchDatasources": [
-        "github-releases"
+        "docker"
       ],
       "matchPackageNames": [
-        "etcd-io/etcd"
+        "etcd-development/etcd"
       ],
-      "pinDigests": false,
       "labels": [
         "dependencies",
         "renovate"

@@ -12,7 +12,7 @@ metadata:
 data:
   zoo.cfg: |
     tickTime={{ .Values.zookeeperConfig.tickTime | default 2000 }}
-    dataDir={{ .Values.persistence.mountPath | default "/data" }}
+    dataDir={{ .Values.persistence.dataDir | default .Values.persistence.mountPath | default "/data" }}
     initLimit={{ .Values.zookeeperConfig.initLimit | default 10 }}
     syncLimit={{ .Values.zookeeperConfig.syncLimit | default 5 }}
     clientPort={{ .Values.service.ports.client | default 2181 }}

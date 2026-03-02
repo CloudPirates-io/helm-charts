@@ -22,5 +22,5 @@ spec:
     - port: prometheus
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
-      path: /metrics
+      path: {{ .Values.metrics.serviceMonitor.path }}
 {{- end }}

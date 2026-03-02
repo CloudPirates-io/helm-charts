@@ -1,0 +1,89 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "mariadb.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mariadb.labels" . | nindent 4 }}
+  {{- $annotations := .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "mariadb.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow MariaDB client connections
+    - ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+      {{- if not .Values.networkPolicy.allowExternal }}
+      from:
+        - podSelector:
+            matchLabels: {}
+        {{- if .Values.networkPolicy.ingressNSMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.ingressNSMatchLabels | nindent 14 }}
+          {{- if .Values.networkPolicy.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.networkPolicy.ingressNSPodMatchLabels | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.galera.enabled }}
+    # Allow Galera cluster communication (replication, IST, SST)
+    - ports:
+        - port: 4567
+          protocol: TCP
+        - port: 4568
+          protocol: TCP
+        - port: 4444
+          protocol: TCP
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "mariadb.selectorLabels" . | nindent 14 }}
+    {{- end }}
+    {{- if .Values.metrics.enabled }}
+    # Allow metrics scraping
+    - ports:
+        - port: {{ .Values.metrics.port }}
+          protocol: TCP
+      {{- if not .Values.networkPolicy.allowExternal }}
+      from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      {{- end }}
+    {{- end }}
+  egress:
+    # Allow DNS resolution
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- if .Values.galera.enabled }}
+    # Allow Galera cluster communication
+    - ports:
+        - port: 4567
+          protocol: TCP
+        - port: 4568
+          protocol: TCP
+        - port: 4444
+          protocol: TCP
+      to:
+        - podSelector:
+            matchLabels:
+              {{- include "mariadb.selectorLabels" . | nindent 14 }}
+    {{- end }}
+{{- end }}

@@ -1,82 +1,88 @@
 # Changelog
 
+All notable changes to this chart will be documented in this file.
 
-## 0.4.0 (2025-12-06)
+## [0.6.0] - 2026-02-16
 
-* chore: update CHANGELOG.md for merged changes ([acb75b9](https://github.com/CloudPirates-io/helm-charts/commit/acb75b9))
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+- [all]: Update documentation to include proper cosign public key ([e42365dc](https://github.com/CloudPirates-io/helm-charts/commit/e42365dc))
 
-## 0.3.4 (2025-12-01)
+## [0.5.3] - 2026-02-02
 
-* chore: update CHANGELOG.md for merged changes ([834af35](https://github.com/CloudPirates-io/helm-charts/commit/834af35))
-* chore: update CHANGELOG.md for merged changes ([60a1994](https://github.com/CloudPirates-io/helm-charts/commit/60a1994))
-* [etcd]: fix probes https ([12ec01c](https://github.com/CloudPirates-io/helm-charts/commit/12ec01c))
+- Bump etcd version to 0.5.3 and update repo URL ([b71da4b3](https://github.com/CloudPirates-io/helm-charts/commit/b71da4b3))
+- Update etcd image registry and repository details ([e944a712](https://github.com/CloudPirates-io/helm-charts/commit/e944a712))
+- [etcd]: Fix invalid sha ([801c35e2](https://github.com/CloudPirates-io/helm-charts/commit/801c35e2))
 
-## 0.3.3 (2025-11-18)
+## [0.5.2] - 2026-01-29
 
-* chore: update CHANGELOG.md for merged changes ([0f3e7ef](https://github.com/CloudPirates-io/helm-charts/commit/0f3e7ef))
-* chore: update CHANGELOG.md for merged changes ([35c7b94](https://github.com/CloudPirates-io/helm-charts/commit/35c7b94))
-*  [etcd] Use http for probes (#622) ([c9d2054](https://github.com/CloudPirates-io/helm-charts/commit/c9d2054))
-* chore: update CHANGELOG.md for merged changes ([96c472e](https://github.com/CloudPirates-io/helm-charts/commit/96c472e))
-* chore: update CHANGELOG.md for merged changes ([9923048](https://github.com/CloudPirates-io/helm-charts/commit/9923048))
+- Bump chart version ([d87aa843](https://github.com/CloudPirates-io/helm-charts/commit/d87aa843))
 
-## 0.3.2 (2025-11-13)
+## [0.5.1] - 2026-01-28
 
-* chore: update CHANGELOG.md for merged changes ([0ef2300](https://github.com/CloudPirates-io/helm-charts/commit/0ef2300))
-* chore: update CHANGELOG.md for merged changes ([170dd6a](https://github.com/CloudPirates-io/helm-charts/commit/170dd6a))
-* chore: update CHANGELOG.md for merged changes ([9227d83](https://github.com/CloudPirates-io/helm-charts/commit/9227d83))
+- [all]: Update every chart to newest common (#920) ([f8d134d5](https://github.com/CloudPirates-io/helm-charts/commit/f8d134d5))
 
-## 0.3.1 (2025-10-28)
+## [0.5.0] - 2026-01-15
 
-* [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c7310](https://github.com/CloudPirates-io/helm-charts/commit/91c7310))
-* chore: update CHANGELOG.md for merged changes ([8260788](https://github.com/CloudPirates-io/helm-charts/commit/8260788))
-* chore: update CHANGELOG.md for merged changes ([402f7bd](https://github.com/CloudPirates-io/helm-charts/commit/402f7bd))
+- [etcd,mariadb,rustfs,timescaledb,valkey] add existingClaim (#846) ([17e0af0f](https://github.com/CloudPirates-io/helm-charts/commit/17e0af0f))
 
-## 0.3.0 (2025-10-28)
+## [0.4.0] - 2025-12-06
 
-* chore: update CHANGELOG.md for merged changes ([f9c3ff0](https://github.com/CloudPirates-io/helm-charts/commit/f9c3ff0))
-* chore: update CHANGELOG.md for merged changes ([db2d800](https://github.com/CloudPirates-io/helm-charts/commit/db2d800))
+- [universal] fix statefulset pvc labels (#696) ([b87dbc7a](https://github.com/CloudPirates-io/helm-charts/commit/b87dbc7a))
 
-## 0.2.3 (2025-10-23)
+## [0.3.4] - 2025-12-01
 
-* chore: update CHANGELOG.md for merged changes ([051ad83](https://github.com/CloudPirates-io/helm-charts/commit/051ad83))
-* chore: update CHANGELOG.md for merged changes ([1a50307](https://github.com/CloudPirates-io/helm-charts/commit/1a50307))
+- [universal] add labels to statefulset pvc-templates (#681) ([87624a55](https://github.com/CloudPirates-io/helm-charts/commit/87624a55))
+- [etcd]: fix probes https ([12ec01c4](https://github.com/CloudPirates-io/helm-charts/commit/12ec01c4))
 
-## 0.2.2 (2025-10-22)
+## [0.3.3] - 2025-11-18
 
-* chore: update CHANGELOG.md for merged changes ([c80ea42](https://github.com/CloudPirates-io/helm-charts/commit/c80ea42))
-* chore: update CHANGELOG.md for merged changes ([8ccb4bb](https://github.com/CloudPirates-io/helm-charts/commit/8ccb4bb))
-* chore: update CHANGELOG.md for merged changes ([5d1f01a](https://github.com/CloudPirates-io/helm-charts/commit/5d1f01a))
-* chore: update CHANGELOG.md for merged changes ([fc47c5d](https://github.com/CloudPirates-io/helm-charts/commit/fc47c5d))
-* chore: update CHANGELOG.md for merged changes ([1a4f87b](https://github.com/CloudPirates-io/helm-charts/commit/1a4f87b))
-* chore: update CHANGELOG.md for merged changes ([da866ca](https://github.com/CloudPirates-io/helm-charts/commit/da866ca))
-* chore: update CHANGELOG.md for merged changes ([b54c4f1](https://github.com/CloudPirates-io/helm-charts/commit/b54c4f1))
-* chore: update CHANGELOG.md for merged changes ([5a2ed20](https://github.com/CloudPirates-io/helm-charts/commit/5a2ed20))
-* chore: update CHANGELOG.md for merged changes ([3361964](https://github.com/CloudPirates-io/helm-charts/commit/3361964))
-* chore: update CHANGELOG.md for merged changes ([7f61172](https://github.com/CloudPirates-io/helm-charts/commit/7f61172))
-* chore: update CHANGELOG.md for merged changes ([c9ff4ec](https://github.com/CloudPirates-io/helm-charts/commit/c9ff4ec))
-* chore: update CHANGELOG.md for merged changes ([86f1d25](https://github.com/CloudPirates-io/helm-charts/commit/86f1d25))
+-  [etcd] Use http for probes (#622) ([c9d20547](https://github.com/CloudPirates-io/helm-charts/commit/c9d20547))
 
-## 0.2.0 (2025-10-14)
+## [0.3.2] - 2025-11-13
 
-* Update chart.yaml dependencies for indepentent charts (#382) ([87acfb1](https://github.com/CloudPirates-io/helm-charts/commit/87acfb1))
-* chore: update CHANGELOG.md for merged changes ([84cf67b](https://github.com/CloudPirates-io/helm-charts/commit/84cf67b))
-* chore: update CHANGELOG.md for all charts via manual trigger ([6974964](https://github.com/CloudPirates-io/helm-charts/commit/6974964))
-* chore: update CHANGELOG.md for merged changes ([63b7bfa](https://github.com/CloudPirates-io/helm-charts/commit/63b7bfa))
-* chore: update CHANGELOG.md for merged changes ([da69e0e](https://github.com/CloudPirates-io/helm-charts/commit/da69e0e))
-* chore: update CHANGELOG.md for merged changes ([5da1b15](https://github.com/CloudPirates-io/helm-charts/commit/5da1b15))
+- [universal] update readme files (#583) ([e63f5f94](https://github.com/CloudPirates-io/helm-charts/commit/e63f5f94))
 
-## 0.1.3 (2025-10-13)
+## [0.3.1] - 2025-10-28
 
+- [etcd, rabbitmq, redis, zookeeper] add signature verification documentation to readme (#476) ([91c73105](https://github.com/CloudPirates-io/helm-charts/commit/91c73105))
 
-## 0.1.2 (2025-10-13)
+## [0.3.0] - 2025-10-28
 
-* update helm-chart icon (#360) ([6544ddf](https://github.com/CloudPirates-io/helm-charts/commit/6544ddf))
+- [universal] unify extraEnvVars in all charts (#477) ([4aee7b4a](https://github.com/CloudPirates-io/helm-charts/commit/4aee7b4a))
 
-## 0.1.1 (2025-10-10)
+## [0.2.3] - 2025-10-23
 
-* artifact hub repository id (#333) ([36ca7c7](https://github.com/CloudPirates-io/helm-charts/commit/36ca7c7))
-* [etcd]: Invalid repo used (#331) ([92617cf](https://github.com/CloudPirates-io/helm-charts/commit/92617cf))
+- [universal] Update annotations, labels, podannotations and podlabel (#454) ([cdb38db9](https://github.com/CloudPirates-io/helm-charts/commit/cdb38db9))
 
-## 0.1.0 (2025-10-10)
+## [0.2.2] - 2025-10-22
 
-* Initial tagged release
+- [universal]: Support extra secret templating (#444) ([c2b20246](https://github.com/CloudPirates-io/helm-charts/commit/c2b20246))
+- [universal] fix all appversions in charts (#417) ([b8debebf](https://github.com/CloudPirates-io/helm-charts/commit/b8debebf))
+- [unversal] Add signing informations for artifacthub (#415) ([e761c906](https://github.com/CloudPirates-io/helm-charts/commit/e761c906))
+- [universal] use a string instead of a boolean (#413) ([c24d26d6](https://github.com/CloudPirates-io/helm-charts/commit/c24d26d6))
+- [universal] improve chart artifact annotations (#404) ([37f1c5be](https://github.com/CloudPirates-io/helm-charts/commit/37f1c5be))
+- [universal] Rework all schema json (#393) ([79d1439f](https://github.com/CloudPirates-io/helm-charts/commit/79d1439f))
+- [mariadb] add galera cluster support for mariadb (#348) ([b7a63ee8](https://github.com/CloudPirates-io/helm-charts/commit/b7a63ee8))
+
+## [0.2.0] - 2025-10-14
+
+- Update chart.yaml dependencies for indepentent charts (#382) ([87acfb14](https://github.com/CloudPirates-io/helm-charts/commit/87acfb14))
+
+## [0.1.3] - 2025-10-13
+
+- [universal] Fix imagepullsecret in vales.schema.json (#374) ([bcc566c2](https://github.com/CloudPirates-io/helm-charts/commit/bcc566c2))
+
+## [0.1.2] - 2025-10-13
+
+- update helm-chart icon (#360) ([6544ddf6](https://github.com/CloudPirates-io/helm-charts/commit/6544ddf6))
+- [universal]: Fix changelog generation (#354) ([2e973c09](https://github.com/CloudPirates-io/helm-charts/commit/2e973c09))
+
+## [0.1.1] - 2025-10-10
+
+- artifact hub repository id (#333) ([36ca7c70](https://github.com/CloudPirates-io/helm-charts/commit/36ca7c70))
+- [etcd]: Invalid repo used (#331) ([92617cfd](https://github.com/CloudPirates-io/helm-charts/commit/92617cfd))
+
+## [0.1.0] - 2025-10-10
+
+- Initial release
+

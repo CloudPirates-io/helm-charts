@@ -1,0 +1,11 @@
+{{- if .Values.useCertManager }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  name: {{ template "cloudpirates.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . | quote }}
+spec:
+  selfSigned: {}
+{{- end }}

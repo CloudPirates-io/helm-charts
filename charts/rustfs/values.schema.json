@@ -114,9 +114,6 @@
                 "annotations": {
                     "type": "object"
                 },
-                "consolePort": {
-                    "type": "integer"
-                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -179,6 +176,9 @@
                 },
                 "existingClaim": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object"
                 },
                 "mountPath": {
                     "type": "string"
@@ -311,6 +311,9 @@
                 "existingClaim": {
                     "type": "string"
                 },
+                "labels": {
+                    "type": "object"
+                },
                 "mountPath": {
                     "type": "string"
                 },
@@ -344,6 +347,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "priorityClassName": {
+            "type": "string"
         },
         "readinessProbe": {
             "type": "object",
@@ -379,9 +385,6 @@
             "properties": {
                 "annotations": {
                     "type": "object"
-                },
-                "consolePort": {
-                    "type": "integer"
                 },
                 "port": {
                     "type": "integer"

@@ -1,3 +1,4 @@
+{{- include "redis.auth.acl.validate" . -}}
 {{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: apps/v1
 {{- if $useDeployment }}
@@ -37,11 +38,17 @@ spec:
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+        app.kubernetes.io/component: sentinel
+        {{- end }}
       annotations:
         {{- if .Values.config.existingConfigmap }}
         checksum/config: {{ .Values.config.existingConfigmap | sha256sum }}
         {{- else if .Values.config.content }}
         checksum/config: {{ .Values.config.content | sha256sum }}
+        {{- end }}
+        {{- if .Values.extraConfig }}
+        checksum/extraConfig: {{ .Values.extraConfig | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -52,10 +59,7 @@ spec:
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
-      {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "redis.serviceAccountName" . }}
-      serviceAccount: {{ include "redis.serviceAccountName" . }}
-      {{- end }}
       {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
@@ -286,6 +290,9 @@ spec:
 
               touch /tmp/redis.conf
 
+              # Check if we are using ACL authentication
+              {{- include "redis.auth.acl.setupScript" (dict "type" "init" "context" .) | nindent 14 }}
+
               echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
 
               {{- if eq .Values.architecture "replication" }}
@@ -299,11 +306,12 @@ spec:
               # Try to determine current master from Sentinel (if any sentinel is available)
               CURRENT_MASTER=""
               SENTINEL_FOUND=false
+              SENTINEL_PASSWORD="${REDIS_PASSWORD}"
 
               # Check if any sentinel is already running and knows the master
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                MASTER_INFO=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                MASTER_INFO=$(redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
@@ -397,19 +405,60 @@ spec:
               {{- end }}
               {{- else if eq .Values.architecture "cluster" }}
               echo "" >> /tmp/redis.conf
-              echo "# Default cluster settings" >> /tmp/redis.conf
+              echo "# Redis Cluster Configuration" >> /tmp/redis.conf
               echo "cluster-enabled yes" >> /tmp/redis.conf
               echo "cluster-config-file nodes.conf" >> /tmp/redis.conf
-              echo "cluster-node-timeout 5000" >> /tmp/redis.conf
+              echo "cluster-node-timeout {{ .Values.cluster.config.nodeTimeout }}" >> /tmp/redis.conf
               echo "cluster-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- if .Values.cluster.config.requireFullCoverage }}
+              echo "cluster-require-full-coverage yes" >> /tmp/redis.conf
+              {{- else }}
+              echo "cluster-require-full-coverage no" >> /tmp/redis.conf
+              {{- end }}
               echo "databases 1" >> /tmp/redis.conf
+
+              {{- if .Values.cluster.announceHostnames }}
+              # Hostname-based cluster announcements (recommended for Kubernetes)
+              MY_HOSTNAME=$(hostname)
+              MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster hostname-based announcements for Kubernetes resilience" >> /tmp/redis.conf
+              echo "cluster-preferred-endpoint-type hostname" >> /tmp/redis.conf
+              echo "cluster-announce-hostname ${MY_HOSTNAME_FQDN}" >> /tmp/redis.conf
+              echo "cluster-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- else }}
+              # IP-based cluster announcements (default Redis behavior)
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster IP-based announcements (default behavior)" >> /tmp/redis.conf
+              {{- if eq .Values.ipFamily "ipv4" }}
+              MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+              {{- else if eq .Values.ipFamily "ipv6" }}
+              MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9a-fA-F:]+$' | head -n1)
+              {{- else }}
+              MY_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "cluster-announce-ip ${MY_IP}" >> /tmp/redis.conf
+              echo "cluster-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port {{ .Values.service.clusterPort }}" >> /tmp/redis.conf
+              {{- end }}
+
               {{- if .Values.auth.enabled }}
               echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
               {{- end }}
               echo "" >> /tmp/redis.conf
-              echo "# Increased durability" >> /tmp/redis.conf
+              echo "# Increased durability for cluster mode" >> /tmp/redis.conf
               echo "appendonly yes" >> /tmp/redis.conf
               {{- end }}
+              {{- end }}
+
+              {{- if and .Values.auth.enabled (ne .Values.architecture "standalone") }}
+              # IMPORTANT: Always add masterauth for non-standalone architectures
+              # Even if this pod starts as master, it may become a replica after failover
+              # Without masterauth, SLAVEOF commands from sentinel will fail with NOAUTH
+              echo "" >> /tmp/redis.conf
+              echo "# Authentication for replication (required for failover scenarios)" >> /tmp/redis.conf
+              echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
               {{- end }}
 
               # Add user provided settings at the end of file to ensure their precedence
@@ -426,7 +475,16 @@ spec:
               port {{ .Values.service.port }}
               EOF
               fi
-          {{- if .Values.auth.enabled }}
+
+              {{- if .Values.extraConfig }}
+              # Add extra configuration from values.yaml
+              echo "" >> /tmp/redis.conf
+              echo "# Extra configuration from values.yaml" >> /tmp/redis.conf
+              cat >> /tmp/redis.conf << 'EOF'
+              {{- .Values.extraConfig | nindent 14 }}
+              EOF
+              {{- end }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -440,6 +498,12 @@ spec:
               mountPath: {{ .Values.config.mountPath }}
             - name: redis-config
               mountPath: /tmp
+            {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+            - name: acl-file
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
+              readOnly: true
+            {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -456,7 +520,7 @@ spec:
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
               {{- end }}
 
-              redis-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
+              redis-server "$CONFIG_FILE" {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:
             - name: redis
               containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}6379{{ end }}
@@ -472,7 +536,7 @@ spec:
             {{- end }}
           {{- if or .Values.auth.enabled .Values.extraEnvVars }}
           env:
-            {{- if .Values.auth.enabled }}
+            {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -494,7 +558,9 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
+                - |
+                  {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -507,7 +573,9 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                - |
+                  {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -520,7 +588,9 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping
+                - |
+                  {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -572,6 +642,17 @@ spec:
             - name: tls-certs
               mountPath: /etc/redis/tls
               readOnly: true
+            {{- if .Values.tls.client.existingSecret }}
+            - name: tls-client-certs
+              mountPath: /etc/redis/tls-client
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+            - name: acl-file
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
+              readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -584,10 +665,24 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
+            {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+            - name: acl-file
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
+              readOnly: true
+            {{- end }}
           {{- if .Values.tls.enabled }}
             - name: tls-certs
               mountPath: /etc/redis/tls
               readOnly: true
+            {{- if .Values.tls.client.existingSecret }}
+            - name: tls-client-certs
+              mountPath: /etc/redis/tls-client
+              readOnly: true
+            {{- end }}
           {{- end }}
           {{- if .Values.sentinel.extraVolumeMounts }}
             {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
@@ -780,6 +875,8 @@ spec:
               {{- else }}
               set -e
 
+              {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel" "context" .) | nindent 14 }}
+
               # Wait for Redis to be ready
               echo "Waiting for Redis to start..."
               {{- if eq .Values.ipFamily "ipv6" }}
@@ -787,7 +884,7 @@ spec:
               {{- else }}
               REDIS_HOST="127.0.0.1"
               {{- end }}
-              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} --tls --cert /etc/redis/tls/{{ .Values.tls.certFilename }} --key /etc/redis/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/redis/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping >/dev/null 2>&1; do
+              while ! redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping >/dev/null 2>&1; do
                 sleep 1
               done
               echo "Redis is ready"
@@ -802,7 +899,7 @@ spec:
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
                   SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
                     MASTER_HOST="$EXISTING_MASTER"
                     SENTINEL_FOUND_MASTER=true
@@ -817,7 +914,7 @@ spec:
                 echo "No Sentinels available, checking Redis instances directly..."
                 for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                   REDIS_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                  ROLE_INFO=$(redis-cli -h "${REDIS_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
+                  ROLE_INFO=$(redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${REDIS_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$REDIS_HOST"
                     echo "Found current master by role check: $MASTER_HOST"
@@ -853,7 +950,22 @@ spec:
 
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
+              # Enable TLS in Sentinel
+              {{- if .Values.tls.enabled }}
+              port 0
+              tls-port {{ .Values.sentinel.port }}
+              tls-replication yes
+              tls-cert-file /etc/redis/tls/{{ .Values.tls.certFilename }}
+              tls-key-file /etc/redis/tls/{{ .Values.tls.certKeyFilename }}
+              tls-ca-cert-file /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+              {{- if .Values.tls.authClients }}
+              tls-auth-clients yes
+              {{- else }}
+              tls-auth-clients no
+              {{- end }}
+              {{- else }}
               port {{ .Values.sentinel.port }}
+              {{- end }}
               bind * -::*
               # Enable hostname resolution for Redis Sentinel
               sentinel resolve-hostnames yes
@@ -866,7 +978,7 @@ spec:
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
               {{- end }}
               {{- if .Values.auth.sentinel }}
-              requirepass "${REDIS_PASSWORD}"
+              requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
               sentinel deny-scripts-reconfig yes
@@ -882,7 +994,7 @@ spec:
               {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
-              loglevel {{ .Values.sentinel.loglevel }}
+              loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
               # Add known sentinels to help with discovery (using hostnames for resilience)
@@ -899,7 +1011,7 @@ spec:
                 fi
               done
 
-              {{- if eq .Values.sentinel.loglevel "debug" }}
+              {{- if eq .Values.sentinel.config.loglevel "debug" }}
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
               {{- else }}
@@ -912,28 +1024,51 @@ spec:
             - name: sentinel
               containerPort: {{ .Values.sentinel.port }}
               protocol: TCP
+          {{- if .Values.sentinel.readinessProbe.enabled }}
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
-                {{- if eq .Values.ipFamily "ipv6" }}
-                - redis-cli -h "::1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- else }}
-                - redis-cli -h "127.0.0.1" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} ping | grep -q PONG
-                {{- end }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-            successThreshold: 1
-          {{- if or .Values.auth.enabled .Values.auth.sentinel }}
+                - |
+                  {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel-probe" "context" .) | nindent 18 }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ .Values.sentinel.port }} {{ if .Values.auth.sentinel }}-a "${REDIS_PASSWORD}"{{- end }} {{ if .Values.tls.enabled }}{{ include "redis.tls.probeArgs" . }}{{- end }} ping | grep -q PONG
+            initialDelaySeconds: {{ .Values.sentinel.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sentinel.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sentinel.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sentinel.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.sentinel.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.sentinel.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel-probe" "context" .) | nindent 18 }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ .Values.sentinel.port }} {{ if .Values.auth.sentinel }}-a "${REDIS_PASSWORD}"{{- end }} {{ if .Values.tls.enabled }}{{ include "redis.tls.probeArgs" . }}{{- end }} ping | grep -q PONG
+            initialDelaySeconds: {{ .Values.sentinel.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sentinel.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sentinel.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sentinel.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.sentinel.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if and (or .Values.auth.enabled .Values.auth.sentinel) (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "redis.secretName" . }}
                   key: {{ include "redis.secretPasswordKey" . }}
+          {{- end }}
+          {{- if .Values.sentinel.preStop.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - /scripts/prestop-sentinel.sh
           {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
@@ -942,7 +1077,7 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.metrics.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
-          {{- if .Values.auth.enabled }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -952,14 +1087,18 @@ spec:
           {{- end }}
           {{- if .Values.metrics.extraArgs }}
           command:
-            - /redis_exporter
-          args:
-            {{- range .Values.metrics.extraArgs }}
-            - {{ . }}
-            {{- end }}
+            - /bin/sh
+            - -c
+            - |
+              {{- include "redis.auth.acl.setupScript" (dict "type" "metrics" "context" .) | nindent 14 }}
+              /redis_exporter {{- range .Values.metrics.extraArgs }} {{ . }}{{- end }}
           {{- else }}
           command:
-            - /redis_exporter
+            - /bin/sh
+            - -c
+            - |
+              {{- include "redis.auth.acl.setupScript" (dict "type" "metrics" "context" .) | nindent 14 }}
+              /redis_exporter
           {{- end }}
           ports:
             - name: metrics
@@ -984,6 +1123,13 @@ spec:
             failureThreshold: 3
             successThreshold: 1
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+          {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+          volumeMounts:
+            - name: acl-file
+              mountPath: {{ include "redis.auth.acl.path" . }}
+              subPath: {{ include "redis.auth.acl.file" . }}
+              readOnly: true
+          {{- end }}
         {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
@@ -1027,6 +1173,21 @@ spec:
                 path: {{ .Values.tls.certKeyFilename }}
               - key: {{ .Values.tls.certCAFilename }}
                 path: {{ .Values.tls.certCAFilename }}
+        {{- if .Values.tls.client.existingSecret }}
+        - name: tls-client-certs
+          secret:
+            secretName: {{ .Values.tls.client.existingSecret }}
+            items:
+              - key: {{ .Values.tls.client.certFilename }}
+                path: {{ .Values.tls.client.certFilename }}
+              - key: {{ .Values.tls.client.certKeyFilename }}
+                path: {{ .Values.tls.client.certKeyFilename }}
+        {{- end }}
+        {{- end }}
+        {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+        - name: acl-file
+          secret:
+            secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
@@ -1046,7 +1207,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-{{- if .Values.persistence.enabled }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
+  {{- if .Values.persistence.enabled }}
   {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}

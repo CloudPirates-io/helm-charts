@@ -239,6 +239,9 @@
                 }
             }
         },
+        "initContainerSecurityContext": {
+            "type": "object"
+        },
         "livenessProbe": {
             "type": "object",
             "properties": {
@@ -489,6 +492,9 @@
         },
         "sidecars": {
             "type": "array"
+        },
+        "staticSiteConfigmap": {
+            "type": "string"
         },
         "streamServerConfig": {
             "type": "string"

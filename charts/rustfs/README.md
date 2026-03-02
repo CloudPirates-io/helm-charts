@@ -68,8 +68,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -166,6 +166,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `containerSecurityContext.runAsGroup`               | Group ID for the RustFS container                 | `1001`    |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the rustfs instance            | `""`      |
 
 ### Service configuration
 
@@ -173,17 +174,15 @@ The following table lists the configurable parameters of the RustFS chart and th
 | --------------------- | --------------------------- | ----------- |
 | `service.type`        | RustFS service type         | `ClusterIP` |
 | `service.port`        | RustFS API service port     | `9000`      |
-| `service.consolePort` | RustFS console service port | `9001`      |
 | `service.annotations` | Service annotations         | `{}`        |
 
 ### Console Service configuration (for StatefulSet only)
 
 | Parameter                               | Description                                              | Default     |
-| --------------------------------------- | -------------------------------------------------------- | ----------- |
+| --------------------------------------- |----------------------------------------------------------| ----------- |
 | `consoleService.enabled`                | Enable Console service that routes to the first pod only | `true`      |
 | `consoleService.type`                   | Console service type                                     | `ClusterIP` |
-| `consoleService.port`                   | Console service API port                                 | `9000`      |
-| `consoleService.consolePort`            | Console service console port                             | `9001`      |
+| `consoleService.port`                   | Console service port                                     | `9001`      |
 | `consoleService.sessionAffinityTimeout` | Session affinity timeout in seconds                      | `10800`     |
 | `consoleService.annotations`            | Console service annotations                              | `{}`        |
 

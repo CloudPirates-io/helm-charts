@@ -1,0 +1,24 @@
+suite: test postgres pgvector image tag support
+templates:
+  - statefulset.yaml
+tests:
+  - it: volume claim name should be default value
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].name
+          value: data
+
+  - it: volume claim name should be changed
+    set:
+      persistence:
+        volumeName: pgdata
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: pgdata
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].name
+          value: pgdata

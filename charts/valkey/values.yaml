@@ -78,6 +78,9 @@ containerSecurityContext:
     drop:
       - ALL
 
+## @param priorityClassName Priority class for the valkey instance
+priorityClassName: ""
+
 ## @section Valkey Authentication
 auth:
   ## @param auth.enabled Enable password authentication
@@ -121,6 +124,27 @@ config:
   extraConfig: []
   ## @param config.existingConfigmap Name of existing ConfigMap with Valkey configuration
   existingConfigmap: ""
+
+## @section External Replica Configuration
+## Configure this Valkey instance as a replica of an external Redis/Valkey server
+## IMPORTANT: External replica mode is mutually exclusive with Sentinel (sentinel.enabled must be false)
+## This feature allows you to replicate data from an external Redis/Valkey server, not from internal cluster members
+externalReplica:
+  ## @param externalReplica.enabled Enable replication from an external Redis/Valkey server
+  ## IMPORTANT: Cannot be used with sentinel.enabled=true
+  enabled: false
+  ## @param externalReplica.host Hostname or IP address of the external Redis/Valkey master server
+  host: ""
+  ## @param externalReplica.port Port of the external Redis/Valkey master server
+  port: 6379
+  ## @param externalReplica.auth.enabled Enable authentication to the external master server
+  auth:
+    enabled: false
+    ## @param externalReplica.auth.existingSecret Name of existing secret containing the password for the external master
+    ## The secret should contain a key with the password value
+    existingSecret: ""
+    ## @param externalReplica.auth.existingSecretPasswordKey Key in the existing secret that contains the password
+    existingSecretPasswordKey: "password"
 
 ## @section Service configuration
 service:
@@ -180,6 +204,8 @@ resources:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for Valkey data volume
+  existingClaim: ""
   ## @param persistence.storageClass Persistent Volume storage class
   storageClass: ""
   ## @param persistence.annotations Persistent Volume Claim annotations
@@ -275,7 +301,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.80.1-alpine@sha256:9c6a2f80054875ab36ca7020edbe68a1d05dd6745d030cc6317812ad14333897"
+    tag: "v1.81.0-alpine@sha256:496f642f055bf383b1917e3f0e47990cf7e00d3b4dd73368274388e198a645e1"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -321,6 +347,8 @@ sentinel:
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
   image:
+    ## @param sentinel.image.registry Valkey Sentinel image registry
+    registry: docker.io
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag

@@ -52,8 +52,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -76,12 +76,13 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL image configuration
 
-| Parameter               | Description                                           | Default                                                                          |
-| ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `image.registry`        | PostgreSQL image registry                             | `docker.io`                                                                      |
-| `image.repository`      | PostgreSQL image repository                           | `postgres`                                                                       |
-| `image.tag`             | PostgreSQL image tag (immutable tags are recommended) | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
-| `image.imagePullPolicy` | PostgreSQL image pull policy                          | `Always`                                                                         |
+| Parameter                  | Description                                                                                              | Default                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `image.registry`           | PostgreSQL image registry                                                                                | `docker.io`                                                                      |
+| `image.repository`         | PostgreSQL image repository                                                                              | `postgres`                                                                       |
+| `image.tag`                | PostgreSQL image tag (immutable tags are recommended)                                                    | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
+| `image.imagePullPolicy`    | PostgreSQL image pull policy                                                                             | `Always`                                                                         |
+| `image.useHardenedImage`   | Set to `true` when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18   | `false`                                                                          |
 
 ### Deployment configuration
 
@@ -93,6 +94,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
 | `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
+| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
 
 ### Pod annotations and labels
 
@@ -152,6 +154,15 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
 | `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
 | `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
+
+### Container Command/Args Override
+
+| Parameter | Description                                                                                                                                       | Default |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `command` | Override default container command (useful for hardened images)                                                                                   | `[]`    |
+| `args`    | Override default container args (useful for hardened images that handle startup differently). Set to `null` to use defaults, `[]` to disable args | `null`  |
+
+These parameters are useful when using hardened PostgreSQL images (such as from DHI or other security-focused registries) that have different entrypoint behaviors than the standard Docker Hub postgres image. When using such images, you may need to set `args: []` to prevent passing the default `postgres` binary name and configuration arguments.
 
 ### PostgreSQL Initdb Configuration
 
@@ -489,6 +500,127 @@ kubectl port-forward service/my-postgres-metrics 9187:9187
 curl http://localhost:9187/metrics
 ```
 
+### Replication setup
+
+Replication setup only works for instances without an initialized database and `$PGDATA` directory.
+
+#### Primary setup
+
+This will create a replication user as init script. If you want to set up replication for an already initialized database, you need to create this user afterwards on your own.
+
+```yaml
+replication:
+  enabled: true
+  auth:
+    password: "secret"
+```
+
+#### Standby setup
+
+As soon as a primary host is configured, this instance is considered to be a standby server.
+
+This will also create an `initContainer` name `replication-standby-init`, which:
+- Creates/updates the `replication.pgpass` credentials file in the transient run directory
+- Initializes the database using `pg_basebackup` if not already done using the credentials file above
+
+```yaml
+replication:
+  enabled: true
+  auth:
+    password: "secret"  # Password must match primary
+  primary:
+    host: "your-database.namespace.svc.cluster.local"
+```
+
+### Using Hardened Images
+
+When using hardened PostgreSQL images (such as from DHI or other security-focused registries), you need to configure several settings:
+
+```yaml
+# values-hardened-image.yaml
+image:
+  registry: dhi.io
+  repository: postgres
+  tag: "18.1"
+  imagePullPolicy: IfNotPresent
+  # Enable hardened image mode for correct PGDATA paths (required for Postgres <18)
+  useHardenedImage: true
+
+# Disable default args for hardened images
+args: []
+
+# Adjust security context to match hardened image requirements
+podSecurityContext:
+  fsGroup: 70
+
+containerSecurityContext:
+  runAsUser: 70
+  runAsGroup: 70
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+```
+
+**Important Notes:**
+
+1. **PGDATA Paths:** The `image.useHardenedImage` parameter is particularly important for PostgreSQL versions below 18, as hardened images use different PGDATA paths (`/var/lib/postgresql/<version>/data`) compared to standard images (`/var/lib/postgresql/data/pgdata`). For PostgreSQL 18+, both image types use the same path structure.
+
+2. **Persistent Storage:** When using hardened images with persistent storage, you **must** add an initContainer to fix directory permissions. Hardened images enforce strict permission checks (0700 or 0750) and will fail to start if the Kubernetes-managed volumes have incorrect permissions (typically 2770 with setgid bit).
+
+```yaml
+# values-hardened-image-with-persistence.yaml
+image:
+  registry: dhi.io
+  repository: postgres
+  tag: "17.7"
+  imagePullPolicy: IfNotPresent
+  useHardenedImage: true
+
+args: []
+
+podSecurityContext:
+  fsGroup: 70
+
+containerSecurityContext:
+  runAsUser: 70
+  runAsGroup: 70
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Enable persistence
+persistence:
+  enabled: true
+  size: 10Gi
+
+# REQUIRED: Init container to fix permissions for hardened images with persistence
+initContainers:
+  - name: fix-permissions
+    image: busybox:1.36
+    command:
+      - sh
+      - -c
+      - |
+        chown -R 70:70 /var/lib/postgresql
+        find /var/lib/postgresql -type d -exec chmod 750 {} \;
+    securityContext:
+      runAsUser: 0
+      runAsNonRoot: false
+    volumeMounts:
+      - name: data
+        mountPath: /var/lib/postgresql
+```
+
+**Why is the initContainer needed?**
+
+Hardened PostgreSQL images have strict security requirements and will not automatically fix directory permissions. When Kubernetes creates persistent volumes with `fsGroup`, it sets permissions to 2770 (including the setgid bit), which PostgreSQL's hardened images reject. The initContainer runs once before PostgreSQL starts to correct these permissions.
+
 ## Access PostgreSQL
 
 ### Via kubectl port-forward
@@ -547,7 +679,20 @@ kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
    - Verify environment variables are set correctly
    - Review pod events: `kubectl describe pod <pod-name>`
 
-4. **Performance issues**
+4. **Hardened image fails with "invalid argument: postgres"**
+
+   - This occurs when using hardened images with different entrypoint behavior
+   - Solution: Set `args: []` in your values file to disable default args
+   - See [Using Hardened Images](#using-hardened-images) example
+
+5. **Permission denied errors with hardened images**
+
+   - Occurs when switching from standard postgres image (UID 999) to hardened image (e.g., UID 70)
+   - Existing data directory has wrong ownership
+   - Solution: Add init container to fix permissions
+   - After successful startup, remove the init container
+
+6. **Performance issues**
    - Check configured memory settings
    - Monitor resource usage with `kubectl top pod`
    - Adjust PostgreSQL configuration parameters

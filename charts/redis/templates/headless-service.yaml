@@ -18,7 +18,7 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
-  {{- if $useDeployment }}
+  {{- if or $useDeployment .Values.sentinel.enabled }}
   publishNotReadyAddresses: true
   {{- end }}
   ports:

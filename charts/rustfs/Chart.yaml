@@ -2,7 +2,7 @@ apiVersion: v2
 name: rustfs
 description: (ALPHA) High-performance distributed object storage with S3-compatible API
 type: application
-version: 0.2.0
+version: 0.5.1
 appVersion: "1.0.0"
 keywords:
   - rustfs
@@ -24,7 +24,7 @@ maintainers:
     url: https://www.srf.ch
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/513x513/246ebb8da4/rustfs-logo.svg
 annotations:
@@ -41,6 +41,11 @@ annotations:
       url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rustfs
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+  artifacthub.io/changes: |-
+    - kind: fixed
+      description: "Fix rustfs-console Service"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1061"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rustfs/CHANGELOG.md"

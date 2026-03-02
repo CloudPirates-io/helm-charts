@@ -52,8 +52,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -95,9 +95,9 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 
 ### Pod labels
 
-| Parameter        | Description     | Default |
-| ---------------- | --------------- | ------- |
-| `podLabels`      | Pod labels      | `{}`    |
+| Parameter   | Description | Default |
+| ----------- | ----------- | ------- |
+| `podLabels` | Pod labels  | `{}`    |
 
 ### Security Context
 
@@ -110,6 +110,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `containerSecurityContext.runAsGroup`               | Group ID for the TimescaleDB container            | `999`     |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
 | `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| `priorityClassName`                                 | Priority class for the timescaledb instance       | `""`      |
 
 ### TimescaleDB Authentication
 

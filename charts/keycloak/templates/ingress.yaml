@@ -16,7 +16,7 @@ metadata:
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
-    {{- if not $.Values.keycloak.httpEnabled }}
+    {{- if $.Values.keycloak.httpsEnabled }}
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     {{- end }}
   {{- end }}
@@ -49,17 +49,17 @@ spec:
               service:
                 name: {{ $fullName }}
                 port:
-                  {{- if $.Values.keycloak.httpEnabled }}
-                  number: {{ $httpPort }}
-                  {{- else }}
+                  {{- if $.Values.keycloak.httpsEnabled }}
                   number: {{ $httpsPort }}
+                  {{- else }}
+                  number: {{ $httpPort }}
                   {{- end }}
               {{- else }}
               serviceName: {{ $fullName }}
-              {{- if $.Values.keycloak.httpEnabled }}
-              servicePort: {{ $httpPort }}
-              {{- else }}
+              {{- if $.Values.keycloak.httpsEnabled }}
               servicePort: {{ $httpsPort }}
+              {{- else }}
+              servicePort: {{ $httpPort }}
               {{- end }}
               {{- end }}
           {{- end }}

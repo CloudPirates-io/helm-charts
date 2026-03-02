@@ -1,0 +1,288 @@
+{{- if .Values.shardedCluster.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" . }}-mongos
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    service-type: mongos
+  {{- with (include "mongodb.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "mongodb.fullname" . }}-mongos-headless
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+  updateStrategy:
+    type: {{ .Values.updateStrategyType }}
+  replicas: {{ .Values.shardedCluster.mongos.replicaCount }}
+  {{- if .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mongodb.selectorLabels" . | nindent 6 }}
+      service-type: mongos
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        service-type: mongos
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+      {{- if or (include "mongodb.annotations" .) .Values.podAnnotations }}
+      annotations:
+{{- include "mongodb.annotations" . | indent 8 }}
+      {{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
+      {{- end }}
+    spec:
+{{- with (include "mongodb.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if or .Values.shardedCluster.mongos.priorityClassName .Values.priorityClassName }}
+      priorityClassName: {{ .Values.shardedCluster.mongos.priorityClassName | default .Values.priorityClassName }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
+      {{- end }}
+      {{- with (coalesce .Values.shardedCluster.mongos.nodeSelector .Values.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (coalesce .Values.shardedCluster.mongos.affinity .Values.affinity) }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (coalesce .Values.shardedCluster.mongos.tolerations .Values.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: init-mongos
+          image: {{ include "mongodb.image" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Initializing mongos router..."
+
+              # Wait for config server replica set to be initialized (by Job)
+              # Use isMaster which works without authentication
+              echo "Waiting for config server replica set to be initialized..."
+              while true; do
+                ISMASTER=$(mongosh --host {{ include "mongodb.fullname" . }}-configserver-0.{{ include "mongodb.fullname" . }}-configserver-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('isMaster').setName" --quiet 2>&1 | grep -v "Defaulted" | grep -v "^$")
+                if [ ! -z "$ISMASTER" ] && [ "$ISMASTER" != "null" ]; then
+                  echo "Config server replica set is initialized: $ISMASTER"
+                  break
+                fi
+                echo "Config server replica set not initialized yet, waiting..."
+                sleep 2.5
+              done
+
+              # Check if keyfile authentication is enabled
+              if [ -f /opt/mongodb/keyfile ]; then
+                echo "Found keyfile, copying to writable location"
+                cp /opt/mongodb/keyfile /keyfile-data/keyfile
+                chmod 400 /keyfile-data/keyfile
+                chown mongodb:mongodb /keyfile-data/keyfile
+              fi
+
+              echo "Mongos router initialization completed"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            {{- if .Values.config.content }}
+            - name: mongodb-config
+              mountPath: {{ .Values.config.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
+            - name: mongodb-keyfile
+              mountPath: /opt/mongodb/keyfile
+              subPath: keyfile
+              readOnly: true
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
+            {{- end }}
+          resources: {{ toYaml (coalesce .Values.shardedCluster.mongos.resources .Values.initContainer.resources) | nindent 12 }}
+      containers:
+        - name: mongos
+          image: {{ include "mongodb.image" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - mongos
+            - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
+            - --port=27017
+            {{- if .Values.auth.enabled }}
+            {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
+            - --keyFile=/keyfile-data/keyfile
+            {{- end }}
+            {{- end }}
+            - --bind_ip_all
+            {{- if .Values.common.mongodbDisableSystemLog }}
+            - --quiet
+            {{- end }}
+            {{- range .Values.common.mongodbExtraFlags }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range .Values.image.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- if .Values.auth.enabled }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.config.content }}
+            - name: mongodb-config
+              mountPath: {{ .Values.config.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
+            - name: mongodb-keyfile-data
+              mountPath: /keyfile-data
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources: {{ toYaml .Values.shardedCluster.mongos.resources | nindent 12 }}
+        {{- if .Values.metrics.enabled }}
+        - name: mongodb-exporter
+          image: {{ include "mongodb.metrics.image" . }}
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
+          command:
+            - mongodb_exporter
+            - --mongodb.uri=mongodb://{{ if .Values.auth.enabled }}$(MONGODB_METRICS_USERNAME):$(MONGODB_METRICS_PASSWORD)@{{ end }}localhost:27017{{ if .Values.auth.enabled }}/admin{{ end }}
+            - --web.listen-address=:9216
+            - --collect-all
+            {{- range .Values.metrics.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          env:
+            {{- if .Values.auth.enabled }}
+            - name: MONGODB_METRICS_USERNAME
+              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
+            - name: MONGODB_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+            {{- end }}
+            {{- with .Values.metrics.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http-metrics
+              containerPort: 9216
+              protocol: TCP
+          {{- if .Values.metrics.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            initialDelaySeconds: {{ .Values.metrics.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.metrics.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.metrics.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.metrics.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.metrics.livenessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.metrics.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-metrics
+            initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.metrics.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.metrics.readinessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.metrics.readinessProbe.periodSeconds }}
+          {{- end }}
+          resources: {{ toYaml .Values.metrics.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+        {{- if .Values.config.content }}
+        - name: mongodb-config
+          configMap:
+            name: {{ include "mongodb.configMapName" . }}
+        {{- end }}
+        {{- if or .Values.auth.enabled .Values.replicaSet.key .Values.replicaSet.keySecretName }}
+        - name: mongodb-keyfile
+          secret:
+            secretName: {{ include "mongodb.keyfileSecretName" . }}
+            defaultMode: 0400
+        - name: mongodb-keyfile-data
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

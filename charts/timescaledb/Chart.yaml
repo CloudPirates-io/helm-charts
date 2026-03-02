@@ -2,8 +2,8 @@ apiVersion: v2
 name: timescaledb
 description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
 type: application
-version: 0.6.1
-appVersion: "2.24.0"
+version: 0.10.1
+appVersion: "2.25.1"
 keywords:
   - timescaledb
   - timeseries
@@ -21,7 +21,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/b2e01452ce/timescaledb-logo.svg
 annotations:
@@ -40,6 +40,11 @@ annotations:
       url: https://github.com/timescale/timescaledb
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "[timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.25.1 (patch)"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1026"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/timescaledb/CHANGELOG.md"

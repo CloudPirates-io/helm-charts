@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e"
+  tag: "1.29.5-alpine@sha256:1d13701a5f9f3fb01aaa88cef2344d65b6b5bf6b7d9fa4cf0dca557a8d7702ba"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -104,6 +104,9 @@ autoscaling:
   targetCPUUtilizationPercentage: ""
   targetMemoryUtilizationPercentage: ""
 
+## @param staticSiteConfigmap Name of existing ConfigMap with the server static site content
+staticSiteConfigmap: ""
+
 ## Get the server static content from a git repository
 cloneStaticSiteFromGit:
   ## @param cloneStaticSiteFromGit.enabled Get the server static content from a Git repository
@@ -115,7 +118,7 @@ cloneStaticSiteFromGit:
   image:
     registry: docker.io
     repository: alpine/git
-    tag: v2.49.1
+    tag: v2.52.0
     digest: "sha256:9c9c6debba3eac25c9230db4bbd1e17d0c27efffdb93e502a47f6f447ab90ac4"
     pullPolicy: IfNotPresent
     pullSecrets: []
@@ -197,6 +200,16 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
+
+## @param initContainerSecurityContext Security context for init containers (useful for Istio sidecar scenarios)
+## When using Istio, init containers may need to run as the Istio proxy user (1337) to access external network
+## Example for Istio:
+## initContainerSecurityContext:
+##   runAsUser: 1337
+##   runAsGroup: 1337
+##   runAsNonRoot: true
+##   allowPrivilegeEscalation: false
+initContainerSecurityContext: {}
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe

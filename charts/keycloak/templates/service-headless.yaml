@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    {{- if .Values.keycloak.httpEnabled }}
+    - port: {{ .Values.service.httpPort }}
+      targetPort: {{ .Values.service.httpTargetPort }}
+      protocol: TCP
+      name: http
+    {{- end }}
+    {{- if .Values.keycloak.httpsEnabled }}
+    - port: {{ .Values.service.httpsPort }}
+      targetPort: {{ .Values.service.httpsTargetPort }}
+      protocol: TCP
+      name: https
+    {{- end }}
+  selector:
+    {{- include "keycloak.selectorLabels" . | nindent 4 }}

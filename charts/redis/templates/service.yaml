@@ -25,6 +25,15 @@ spec:
       targetPort: redis
       protocol: TCP
       name: redis
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+    {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
+    - port: {{ .Values.sentinel.port }}
+      targetPort: sentinel
+      protocol: TCP
+      name: sentinel
+    {{- end }}
     {{- range .Values.extraPorts }}
     - port: {{ .port }}
       targetPort: {{ .targetPort | default .name }}

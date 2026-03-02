@@ -22,7 +22,7 @@ image:
   ## @param image.repository MariaDB image repository
   repository: mariadb
   ## @param image.tag MariaDB image tag (immutable tags are recommended)
-  tag: "12.1.2@sha256:e1bcd6f85781f4a875abefb11c4166c1d79e4237c23de597bf0df81fec225b40"
+  tag: "12.2.2@sha256:b1cb255a9939d28a1856815f0de6046c20c28c21b92a9f2696bc782b247a47ee"
   ## @param image.pullPolicy MariaDB image pull policy
   imagePullPolicy: Always
 
@@ -133,6 +133,8 @@ service:
 persistence:
   ## @param persistence.enabled Enable MariaDB data persistence using PVC
   enabled: true
+  ## @param persistence.existingClaim Name of an existing PersistentVolumeClaim to use for MariaDB data volume
+  existingClaim: ""
   ## @param persistence.storageClass PVC Storage Class for MariaDB data volume
   storageClass: ""
   ## @param persistence.accessModes PVC Access modes
@@ -162,6 +164,9 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   ## @param containerSecurityContext.readOnlyRootFilesystem Set MariaDB container's Security Context readOnlyRootFilesystem
   readOnlyRootFilesystem: false
+
+## @param priorityClassName Priority class for the MariaDB instance
+priorityClassName: ""
 
 ## @section Resources parameters
 resources:
@@ -195,6 +200,13 @@ extraEnvVars: []
   #     secretKeyRef:
   #       name: my-secret
   #       key: secret-key
+## @param command Override default container command (useful for custom initialization or maintenance tasks)
+command: []
+  # - /bin/bash
+  # - -c
+  # - sleep infinity
+## @param args Override default container args (if command is also set)
+args: []
 ## @param extraSecrets A list of additional existing secrets that will be mounted into the container
 extraSecrets: []
 ##  - name: secret
@@ -271,6 +283,10 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+## @section MariaDB healthcheck parameters
+## @param healthcheckExtraArgs Extra arguments to pass to healthcheck.sh script in probes (e.g., --datadir=/custom/path)
+healthcheckExtraArgs: ""
+
 ## @section Pod Disruption Budget configuration
 podDisruptionBudget:
   ## @param podDisruptionBudget.enabled Enable a Pod Disruption Budget creation
@@ -315,6 +331,7 @@ podLabels: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+topologySpreadConstraints: {}
 
 ## @param extraObjects Array of extra objects to deploy with the release
 extraObjects: []

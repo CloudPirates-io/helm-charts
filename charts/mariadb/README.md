@@ -25,7 +25,7 @@ helm install my-mariadb oci://registry-1.docker.io/cloudpirates/mariadb -f my-va
 Or install directly from the local chart:
 
 ```bash
-helm install my-valkey ./charts/valkey
+helm install my-mariadb ./charts/mariadb
 ```
 
 ## Uninstalling the Chart
@@ -46,8 +46,8 @@ This Helm chart is cryptographically signed with Cosign to ensure authenticity a
 
 ```
 -----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BgqFgKdPtHdXz6OfYBklYwJgGWQ
-mZzYz8qJ9r6QhF3NxK8rD2oG7Bk6nHJz7qWXhQoU2JvJdI3Zx9HGpLfKvw==
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5U+rM2d3hDjgP5T3cLShuuQIU9vR
+Z4/G+Nug6q5vRa+C3qUA1wXjbaJFAfcIrv5VjmYAYOj13shnPpp3Zh4fnQ==
 -----END PUBLIC KEY-----
 ```
 
@@ -181,15 +181,16 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 
 ### Persistence Parameters
 
-| Parameter                  | Description                                 | Default             |
-| -------------------------- | ------------------------------------------- | ------------------- |
-| `persistence.enabled`      | Enable MariaDB data persistence using PVC   | `true`              |
-| `persistence.storageClass` | PVC Storage Class for MariaDB data volume   | `""`                |
-| `persistence.accessModes`  | PVC Access modes                            | `["ReadWriteOnce"]` |
-| `persistence.size`         | PVC Storage Request for MariaDB data volume | `8Gi`               |
-| `persistence.annotations`  | Additional custom annotations for the PVC   | `{}`                |
-| `persistence.labels`       | Labels for persistent volume claims         | `{}`                |
-| `persistence.selector`     | Additional labels for the PVC               | `{}`                |
+| Parameter                   | Description                                                | Default             |
+| --------------------------- | ---------------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable MariaDB data persistence using PVC                  | `true`              |
+| `persistence.existingClaim` | Name of an existing PVC to use for MariaDB data volume     | `""`                |
+| `persistence.storageClass`  | PVC Storage Class for MariaDB data volume                  | `""`                |
+| `persistence.accessModes`   | PVC Access modes                                           | `["ReadWriteOnce"]` |
+| `persistence.size`          | PVC Storage Request for MariaDB data volume                | `8Gi`               |
+| `persistence.annotations`   | Additional custom annotations for the PVC                  | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                        | `{}`                |
+| `persistence.selector`      | Additional labels for the PVC                              | `{}`                |
 
 ### Security Context Parameters
 
@@ -200,6 +201,7 @@ For a detailed explanation of Galera parameters and usage, see [README_GALERA.md
 | `containerSecurityContext.runAsNonRoot`             | Set MariaDB container's Security Context runAsNonRoot           | `true`  |
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MariaDB container's privilege escalation                    | `false` |
 | `containerSecurityContext.readOnlyRootFilesystem`   | Set MariaDB container's Security Context readOnlyRootFilesystem | `false` |
+| `priorityClassName`                                 | Priority class for the MariaDB instance                         | `""`    |
 
 ### Resources Parameters
 
@@ -315,13 +317,14 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 
 ### Pod Configuration Parameters
 
-| Parameter        | Description                    | Default |
-| ---------------- | ------------------------------ | ------- |
-| `podAnnotations` | Additional pod annotations     | `{}`    |
-| `podLabels`      | Additional pod labels          | `{}`    |
-| `nodeSelector`   | Node labels for pod assignment | `{}`    |
-| `tolerations`    | Tolerations for pod assignment | `[]`    |
-| `affinity`       | Affinity for pod assignment    | `{}`    |
+  | Parameter                   | Description                                     | Default |
+  | ----------------            | ------------------------------                  | ------- |
+  | `podAnnotations`            | Additional pod annotations                      | `{}`    |
+  | `podLabels`                 | Additional pod labels                           | `{}`    |
+  | `nodeSelector`              | Node labels for pod assignment                  | `{}`    |
+  | `tolerations`               | Tolerations for pod assignment                  | `[]`    |
+  | `affinity`                  | Affinity for pod assignment                     | `{}`    |
+  | `topologySpreadConstraints` | TopologySpreadConstraints for pod assignment    | `{}`    |
 
 ### Metrics
 
@@ -401,6 +404,16 @@ auth:
     rootPasswordKey: "root-password"
     userPasswordKey: "user-password"
 ```
+
+### Using Existing PersistentVolumeClaim
+
+```yaml
+persistence:
+  enabled: true
+  existingClaim: "my-existing-pvc"
+```
+
+> **Note:** When using an existing PVC, the `storageClass`, `accessModes`, `size`, and `selector` parameters are ignored, as these properties are already defined in the existing PVC.
 
 ### Custom Configuration
 
