@@ -38,6 +38,11 @@ annotations:
       url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Chart updated"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "[helm] Update valkey Docker tag to v0.17.0"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1021"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/clusterpirate/CHANGELOG.md"

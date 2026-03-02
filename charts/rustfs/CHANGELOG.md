@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.5.1] - 2026-02-25
+
+- Fix rustfs-console Service (#1061) ([6b617e98](https://github.com/CloudPirates-io/helm-charts/commit/6b617e98))
+
 ## [0.5.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))

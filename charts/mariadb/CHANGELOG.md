@@ -2,6 +2,11 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.3] - 2026-02-20
+
+- [mariadb]: Fixes broken healthcheck (#1041) ([b48b0318](https://github.com/CloudPirates-io/helm-charts/commit/b48b0318))
+- [rabbitmq]: Fix partially broken readiness / liveness probes ([7b9d0236](https://github.com/CloudPirates-io/helm-charts/commit/7b9d0236))
+
 ## [0.14.2] - 2026-02-19
 
 - [mariadb]: Extra args for health check (#1007) ([70f25144](https://github.com/CloudPirates-io/helm-charts/commit/70f25144))

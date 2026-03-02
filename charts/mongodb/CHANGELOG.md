@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.4] - 2026-02-27
+
+- [percona/mongodb_exporter] Update image to v0.49.0 (#1065) ([482ff0a3](https://github.com/CloudPirates-io/helm-charts/commit/482ff0a3))
+
 ## [0.12.3] - 2026-02-19
 
 - [mongodb]: Fix duplicated startup probes (#1035) ([74660673](https://github.com/CloudPirates-io/helm-charts/commit/74660673))

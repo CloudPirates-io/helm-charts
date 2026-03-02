@@ -41,14 +41,11 @@ annotations:
       url: https://github.com/apache/zookeeper
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Use latest common version (#934)"
-          links:
-            - name: "Commit b7f36a2"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/b7f36a2"
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Update charts/zookeeper/values.yaml zookeeper"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1032"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/zookeeper/CHANGELOG.md"

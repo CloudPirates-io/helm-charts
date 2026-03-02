@@ -41,11 +41,11 @@ annotations:
       url: https://github.com/valkey-io/valkey
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: added
-          description: "Add external replica configuration support for replicating from external Redis/Valkey servers"
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "[universal]: Bump all charts to common 2.2.0"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1020"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/valkey/CHANGELOG.md"

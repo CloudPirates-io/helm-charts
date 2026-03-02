@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.7.0] - 2026-02-25
+
+- [nginx]: existingServerConfigConfigmap volume mismatch fix (#1059) ([5dd64454](https://github.com/CloudPirates-io/helm-charts/commit/5dd64454))
+
 ## [0.6.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))

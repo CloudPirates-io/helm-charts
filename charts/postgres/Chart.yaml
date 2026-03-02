@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.17.0
+version: 0.17.1
 appVersion: "18.3.0"
 keywords:
   - postgres
@@ -43,9 +43,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update charts/postgres/values.yaml postgres to v18.3 (minor)"
+      description: "Update image to 69e8582"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1066"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1076"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/postgres/CHANGELOG.md"

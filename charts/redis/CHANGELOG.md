@@ -2,6 +2,15 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.3] - 2026-03-02
+
+- Update image to 1c054d5 (#1079) ([1cc09940](https://github.com/CloudPirates-io/helm-charts/commit/1cc09940))
+- Fix renovate and pin mongodb + redis ([42c4b8d9](https://github.com/CloudPirates-io/helm-charts/commit/42c4b8d9))
+
+## [0.25.2] - 2026-02-27
+
+- Update charts/redis/values.yaml redis (#1054) ([02c5ad1a](https://github.com/CloudPirates-io/helm-charts/commit/02c5ad1a))
+
 ## [0.25.1] - 2026-02-24
 
 - Update charts/redis/values.yaml redis to v8.6.1 (patch) (#1047) ([6e8d4335](https://github.com/CloudPirates-io/helm-charts/commit/6e8d4335))

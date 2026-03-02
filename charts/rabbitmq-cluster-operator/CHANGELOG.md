@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.2.1] - 2026-02-24
+
+- rabbitmq-cluster-operator: Fix template error when namespaced watch is defined. (#1052) ([7d12ccb6](https://github.com/CloudPirates-io/helm-charts/commit/7d12ccb6))
+
 ## [0.2.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))

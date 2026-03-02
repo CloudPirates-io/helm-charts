@@ -50,9 +50,11 @@ annotations:
       url: https://galeracluster.com
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+  artifacthub.io/changes: |-
+    - kind: fixed
+      description: "Fixes broken healthcheck"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1041"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mariadb/CHANGELOG.md"

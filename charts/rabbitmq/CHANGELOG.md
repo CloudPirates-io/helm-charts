@@ -73,6 +73,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.17.1] - 2026-02-27
+
+- Update charts/rabbitmq/values.yaml rabbitmq (#1060) ([4eb3c9a4](https://github.com/CloudPirates-io/helm-charts/commit/4eb3c9a4))
+
 ## [0.17.0] - 2026-02-24
 
 - [rabbitmq]: Auto-inject missing vhosts and auth user into definitions to prevent boot failure (#1044) ([719a507a](https://github.com/CloudPirates-io/helm-charts/commit/719a507a))

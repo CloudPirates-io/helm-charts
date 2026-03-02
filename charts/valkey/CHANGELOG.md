@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.17.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.16.0] - 2026-02-16
 
 - Add external replica configuration support (#1009) ([fd8c95fe](https://github.com/CloudPirates-io/helm-charts/commit/fd8c95fe))

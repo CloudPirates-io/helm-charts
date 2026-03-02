@@ -39,9 +39,11 @@ annotations:
       url: https://github.com/minio/minio
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "[minio]: Use wget instead of curl (#899)"
-          links:
-            - name: "Commit 1b83954"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/1b83954"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "[cloudpirates/image-minio] Update image to 8dc02a7"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1025"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/minio/CHANGELOG.md"
