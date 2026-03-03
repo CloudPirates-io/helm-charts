@@ -734,9 +734,21 @@ spec:
                 [ $retry -lt 5 ] && sleep 3
               done
 
+              # Verify master reachability: after scale-down or node failure, sentinel may report a stale master.
+              # If unreachable, fall back to bootstrap election so the cluster can re-form.
+              if [ "$SENTINEL_FOUND_MASTER" = true ] && [ -n "$MASTER_HOST" ]; then
+                if ! redis-cli -h "$MASTER_HOST" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
+                  echo "WARNING: Sentinel's master $MASTER_HOST is unreachable, falling back to bootstrap election"
+                  SENTINEL_FOUND_MASTER=false
+                  MASTER_HOST=""
+                else
+                  echo "Master $MASTER_HOST is reachable"
+                fi
+              fi
+
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
-                # No sentinel found: check for existing Redis master, then elect by lowest IP
-                echo "No sentinel found, discovering peers..."
+                # No sentinel found or master unreachable: check for existing Redis master, then elect by lowest IP
+                echo "No sentinel/reachable master found, discovering peers..."
                 for i in $(seq 1 10); do
                   IP_COUNT=$(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u | wc -l)
                   [ "$IP_COUNT" -ge 2 ] && break
@@ -780,7 +792,28 @@ spec:
                       sleep 1
                     done
                     echo "Bootstrap: got master from lowest-IP sentinel: $MASTER_HOST"
+                    # Verify the reported master is reachable (may be stale after scale-down or rolling update)
+                    if ! redis-cli -h "$MASTER_HOST" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
+                      echo "WARNING: Master $MASTER_HOST from lowest-IP sentinel is unreachable, using lowest IP ${LOWEST_IP} as master"
+                      MASTER_HOST="$LOWEST_IP"
+                    fi
                   fi
+                fi
+
+              fi
+
+              # Ensure local Redis topology matches the discovered master.
+              # Sentinel container may restart without Redis restarting (init container won't re-run),
+              # so Redis instances may still replicate from a dead master after scale-down.
+              if [ -n "$MASTER_HOST" ]; then
+                CURRENT_MASTER=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} info replication 2>/dev/null | tr -d '\r' | awk -F: '/^master_host:/{print $2}')
+                CURRENT_ROLE=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} role 2>/dev/null | head -1)
+                if [ "$MASTER_HOST" = "$MY_IP" ] && [ "$CURRENT_ROLE" != "master" ]; then
+                  echo "Promoting local Redis to master (REPLICAOF NO ONE)..."
+                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} REPLICAOF NO ONE 2>/dev/null && echo "Local Redis promoted to master" || echo "Warning: REPLICAOF NO ONE failed"
+                elif [ "$MASTER_HOST" != "$MY_IP" ] && [ "$CURRENT_MASTER" != "$MASTER_HOST" ]; then
+                  echo "Reconfiguring local Redis to replicate from master ${MASTER_HOST} (was: ${CURRENT_MASTER:-none})..."
+                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} REPLICAOF "$MASTER_HOST" {{ .Values.service.port }} 2>/dev/null && echo "Local Redis now replicating from $MASTER_HOST" || echo "Warning: REPLICAOF failed"
                 fi
               fi
 
@@ -841,7 +874,7 @@ spec:
               echo "Starting Sentinel..."
               {{- end }}
 
-              # Start sentinel in background, then clean stale peer entries
+              # Start sentinel in background for one-time stale peer cleanup
               redis-sentinel /tmp/sentinel.conf &
               SENTINEL_PID=$!
 
@@ -852,23 +885,25 @@ spec:
                 [ $_sentinel_wait -ge 30 ] && break
                 sleep 1
               done
-
-              # Background loop: periodically remove stale sentinel peers (s_down).
-              # Unlike SENTINEL RESET, this preserves the replica list so failover can promote slaves.
-              # Runs continuously to handle stale entries that appear at runtime (e.g. node failures).
-              (
-                sleep 10
-                while true; do
-                  redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
-                    /^name$/ { getline; id=$0 }
-                    /^flags$/ { getline; if ($0 ~ /s_down/) print id }
-                  ' | while read STALE_ID; do
-                    [ -n "$STALE_ID" ] && redis-cli --no-auth-warning {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }} SENTINEL REMOVE {{ .Values.sentinel.masterName }} "$STALE_ID" >/dev/null 2>&1 && echo "Removed stale sentinel: $STALE_ID"
-                  done
-                  sleep 10
-                done
-              ) &
               echo "Sentinel started"
+
+              # One-time stale sentinel cleanup (runs once in background, then exits).
+              # After pub/sub peer discovery (~10s), checks for s_down sentinel entries
+              # and resets local + peer sentinels if stale entries exist. SENTINEL RESET
+              # clears known sentinels/slaves; live ones re-discover via pub/sub within ~2s.
+              {
+                sleep 10
+                echo "Running one-time stale sentinel cleanup..."
+                for TARGET in 127.0.0.1 $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u | grep -v "^${MY_IP}$"); do
+                  HAS_STALE=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
+                    /^flags$/ { getline; if ($0 ~ /s_down/) { print "yes"; exit } }
+                  ')
+                  if [ "$HAS_STALE" = "yes" ]; then
+                    redis-cli --no-auth-warning {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }} SENTINEL RESET {{ .Values.sentinel.masterName }} >/dev/null 2>&1 && echo "Reset sentinel state on $TARGET (had stale peers)"
+                  fi
+                done
+                echo "Stale sentinel cleanup complete"
+              } &
 
               # Return to foreground
               wait $SENTINEL_PID
@@ -1047,7 +1082,18 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel-probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ .Values.sentinel.port }} {{ if .Values.auth.sentinel }}-a "${REDIS_PASSWORD}"{{- end }} {{ if .Values.tls.enabled }}{{ include "redis.tls.probeArgs" . }}{{- end }} ping | grep -q PONG
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ .Values.sentinel.port }} {{ if .Values.auth.sentinel }}-a "${REDIS_PASSWORD}"{{- end }} {{ if .Values.tls.enabled }}{{ include "redis.tls.probeArgs" . }}{{- end }} ping | grep -q PONG || exit 1
+                  {{- if $useDeployment }}
+                  # Fail probe if monitored master is unreachable (s_down flag file set by
+                  # background check). Triggers container restart → re-bootstrap with live master.
+                  # Normal failover completes in <20s; failureThreshold (6 * 10s = 60s) prevents
+                  # restart during transient failovers. Flag file adds 1-cycle (10s) delay.
+                  [ -f /tmp/sentinel-master-sdown ] && exit 1
+                  {
+                  MASTER_FLAGS=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }} sentinel master {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '/^flags$/{getline; print}')
+                  if echo "$MASTER_FLAGS" | grep -q "s_down"; then touch /tmp/sentinel-master-sdown; else rm -f /tmp/sentinel-master-sdown; fi
+                  } &
+                  {{- end }}
             initialDelaySeconds: {{ .Values.sentinel.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sentinel.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.sentinel.livenessProbe.timeoutSeconds }}
