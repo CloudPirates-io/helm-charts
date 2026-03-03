@@ -129,6 +129,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `service.annotations` | Kubernetes service annotations | `{}`        |
 | `service.type`        | Kubernetes service type        | `ClusterIP` |
 | `service.port`        | Redis service port             | `6379`      |
+| `service.nodePort`    | NodePort value for NodePort and LoadBalancer service types | `""` |
 | `service.clusterPort` | Redis cluster service port     | `16379`     |
 
 ### Authentication
