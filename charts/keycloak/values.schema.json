@@ -405,11 +405,25 @@
                         "database": {
                             "type": "string"
                         },
+                        "existingSecret": {
+                            "type": "string"
+                        },
                         "password": {
                             "type": "string"
                         },
                         "rootPassword": {
                             "type": "string"
+                        },
+                        "secretKeys": {
+                            "type": "object",
+                            "properties": {
+                                "rootPasswordKey": {
+                                    "type": "string"
+                                },
+                                "userPasswordKey": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "username": {
                             "type": "string"
@@ -537,6 +551,9 @@
                     "type": "object",
                     "properties": {
                         "database": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
                             "type": "string"
                         },
                         "password": {
