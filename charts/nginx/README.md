@@ -456,6 +456,13 @@ All containers in `sidecars` will be added to the pod and run alongside the main
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
 | `affinity`          | Affinity rules for pod assignment | `{}`    |
 
+### DaemonSet Configuration Parameters
+
+| Parameter                  | Description                                         | Default |
+| -------------------------- | --------------------------------------------------- | ------- |
+| `daemonset.enabled`        | Deploy Nginx as a DaemonSet instead of a Deployment | `false` |
+| `daemonset.updateStrategy` | DaemonSet update strategy                           | `{}`    |
+
 ## Examples
 
 
