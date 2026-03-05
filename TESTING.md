@@ -7,7 +7,7 @@ This repository includes comprehensive tests for all Helm charts to validate com
 You need to have the `helm-unittest` plugin installed:
 
 ```bash
-helm plugin install https://github.com/helm-unittest/helm-unittest
+helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
 ```
 
 ## Running Tests

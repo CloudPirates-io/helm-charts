@@ -418,3 +418,10 @@ extraInitContainers: []
 ##             name: oauth2-proxy-secret
 ##             key: client-secret
 sidecars: []
+
+## @section DaemonSet parameters
+daemonset:
+  ## @param daemonset.enabled Deploy Nginx as a DaemonSet instead of a Deployment
+  enabled: false
+  ## @param daemonset.updateStrategy DaemonSet update strategy
+  updateStrategy: {}

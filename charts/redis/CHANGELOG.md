@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.6] - 2026-03-03
+
+- [redis]: Fix egress policies (#1081) ([569b9095](https://github.com/CloudPirates-io/helm-charts/commit/569b9095))
+
 ## [0.25.5] - 2026-03-02
 
 - [redis]: Allow nodePort to be configured for standalone mode (#1064) ([f1e2728f](https://github.com/CloudPirates-io/helm-charts/commit/f1e2728f))

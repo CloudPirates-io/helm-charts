@@ -112,6 +112,8 @@ metrics:
     port: 7000
     ## @param metrics.service.annotations Additional annotations for metrics service
     annotations: {}
+    ## @param metrics.service.labels Additional labels for metrics service
+    labels: {}
   ## Prometheus ServiceMonitor configuration
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
@@ -272,6 +274,8 @@ startupProbe:
   successThreshold: 1
 
 
+## @param command Override default container command (useful when the default entrypoint needs to be replaced)
+command: []
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
   # - name: CUSTOM_VAR
