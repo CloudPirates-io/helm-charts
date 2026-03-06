@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.8] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
 ## [0.16.7] - 2026-03-02
 
 - [postgres] Update initContainers.waitForPostgres.repository to 69e8582 (#1078) ([c2480924](https://github.com/CloudPirates-io/helm-charts/commit/c2480924))
