@@ -13934,6 +13934,57 @@ entries:
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
+        - kind: fixed
+          description: "fix a race condition between detect_cluster and Kubernetes Service DNS"
+          links:
+            - name: "Pull Request"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/1093"
+            - name: "Changelog"
+              url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.2.5
+    created: "2026-03-07T10:47:11.753457109Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 8f9ac4cf4d325d572159d8eee08595a0c4f7016940b65e9ac3ab2a9b0e58494a
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.12.5/mongodb-0.12.5.tgz
+    version: 0.12.5
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
         - kind: changed
           description: "[percona/mongodb_exporter] Update image to v0.49.0"
           links:
@@ -35515,4 +35566,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-07T10:42:42.898062981Z"
+generated: "2026-03-07T10:47:11.754676693Z"
