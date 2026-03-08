@@ -308,6 +308,8 @@ metrics:
     scrapeTimeout: 10s
     ## @param metrics.serviceMonitor.path Select detail of metrics (/metrics, /metrics/detailed, /metrics/per-object)
     path: /metrics
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
 
 ## @param additionalPlugins Additional default RabbitMQ plugins to enable (Prometheus Metrics, PeerDiscoveryK8s and Management plugins are automatically added)
 additionalPlugins: []

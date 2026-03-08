@@ -23,4 +23,8 @@ spec:
       interval: {{ .Values.metrics.serviceMonitor.interval }}
       scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
       path: {{ .Values.metrics.serviceMonitor.path }}
+  {{- with .Values.metrics.serviceMonitor.namespaceSelector }}
+  namespaceSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
