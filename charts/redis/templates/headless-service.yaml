@@ -17,6 +17,13 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
+  {{- if .Values.service.headless.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.service.headless.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.headless.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.service.headless.ipFamilyPolicy }}
+  {{- end }}
   {{- if .Values.sentinel.enabled }}
   publishNotReadyAddresses: true
   {{- end }}

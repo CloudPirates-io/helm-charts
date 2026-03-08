@@ -366,6 +366,12 @@
                         "clusterIP": {
                             "type": "string"
                         },
+                        "ipFamilies": {
+                            "type": "array"
+                        },
+                        "ipFamilyPolicy": {
+                            "type": "string"
+                        },
                         "loadBalancerIP": {
                             "type": "string"
                         },
@@ -677,6 +683,12 @@
                                 }
                             }
                         },
+                        "ipFamilies": {
+                            "type": "array"
+                        },
+                        "ipFamilyPolicy": {
+                            "type": "string"
+                        },
                         "resources": {
                             "type": "object",
                             "properties": {
@@ -782,6 +794,12 @@
                 "service": {
                     "type": "object",
                     "properties": {
+                        "ipFamilies": {
+                            "type": "array"
+                        },
+                        "ipFamilyPolicy": {
+                            "type": "string"
+                        },
                         "port": {
                             "type": "integer"
                         },
@@ -806,8 +824,20 @@
                     "properties": {
                         "annotations": {
                             "type": "object"
+                        },
+                        "ipFamilies": {
+                            "type": "array"
+                        },
+                        "ipFamilyPolicy": {
+                            "type": "string"
                         }
                     }
+                },
+                "ipFamilies": {
+                    "type": "array"
+                },
+                "ipFamilyPolicy": {
+                    "type": "string"
                 },
                 "nodePort": {
                     "type": "string"
