@@ -1,0 +1,48 @@
+suite: Test setup
+templates:
+  - setup-job.yaml
+  - setup-secret.yaml
+
+tests:
+  - it: No setup should be present
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Secret should be present
+    set:
+      setup:
+        buckets:
+          - name: test
+    template: setup-secret.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: kind
+          value: Secret
+
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-setup
+
+  - it: Secret should not be present if custom defined
+    set:
+      setup:
+        existingSecret: "katze"
+    template: setup-secret.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Job should be present
+    set:
+      setup:
+        buckets:
+          - name: test
+    template: setup-job.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: kind
+          value: Job

@@ -133,6 +133,38 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `config.tlsPath`                   | Path to TLS certificates                           | `"/opt/tls"`           |
 | `config.extraEnvVars`              | Extra environment variables                        | `[]`                   |
 
+### RustFS setup
+
+| Parameter              | Description | Default |
+|------------------------| ---|---------|
+| `setup.image`          | Image configuration for `rustfs/rc` CLI |         |
+| `setup.existingSecret` | If defined, uses a pre-configured SecretMap with the keys defined below as YAML | `"" `   |
+| `setup.policies`       | Policy definitions | `[]`     |
+| `setup.buckets`        | Bucket definitions | `[]`     |
+| `setup.users`          | User definitions | `[]`     |
+
+**Policies**
+```yaml
+- name: my-policy
+  spec:
+    Version: 2012-10-17
+    Statement:
+      - Condition: {}
+```
+
+**Buckets**
+```yaml
+- name: my-bucket
+```
+
+**Users**
+```yaml
+- name: my-user
+  password: secret
+  policies:
+    - readwrite
+```
+
 ### Deployment configuration
 
 | Parameter      | Description        | Default |

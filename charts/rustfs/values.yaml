@@ -64,6 +64,37 @@ config:
   ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
   extraEnvVars: []
 
+# -- Setups RustFS via CLI
+setup:
+  image:
+    ## @param image.registry RustFS image registry
+    registry: docker.io
+    ## @param image.repository RustFS image repository
+    repository: rustfs/rc
+    ## @param image.tag RustFS CLI image tag (immutable tags are recommended)
+    tag: "v0.1.7"
+    ## @param image.imagePullPolicy RustFS image pull policy
+    imagePullPolicy: Always
+  # -- If defined, uses a pre-configured SecretMap with the keys defined below as YAML
+  existingSecret: ""
+  # -- Policy definitions
+  policies: []
+#    - name: test
+#      # -- Raw policy definition
+#      spec:
+#        Version: 2012-10-17
+#        Statement:
+#          - Condition: {}
+  # -- User definitions
+  users: []
+#    - name: test
+#      password: secret
+#      policies:
+#        - readwrite
+  # -- Bucket definitions
+  buckets: []
+#    - name: test
+
 ## @section Deployment configuration
 replicaCount: 1
 ## @section Deployment type configuration
