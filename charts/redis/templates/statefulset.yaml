@@ -1,3 +1,4 @@
+{{- /* This template renders either a Deployment or a StatefulSet depending on useDeployment and persistence settings. */ -}}
 {{- include "redis.auth.acl.validate" . -}}
 {{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: apps/v1
@@ -19,7 +20,7 @@ spec:
   {{- if $useDeployment }}
   strategy:
     {{- if or (eq .Values.architecture "standalone") (not .Values.sentinel.enabled) }}
-    type: Recreate
+    type: RollingUpdate
     {{- else }}
     type: RollingUpdate
     {{- end }}
@@ -97,7 +98,7 @@ spec:
               for retry in $(seq 1 5); do
                 for SENTINEL_IP in $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u); do
                   [ "$SENTINEL_IP" = "$MY_IP" ] && continue
-                  MASTER_INFO=$(redis-cli -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  MASTER_INFO=$(redis-cli --no-auth-warning -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   # Validate response is an IP address (reject error messages like "NOAUTH Authentication required.")
                   # Supports both IPv4 (1.2.3.4) and IPv6 (fd00::1). Valid IPs never contain spaces.
                   if [ -n "$MASTER_INFO" ] && echo "$MASTER_INFO" | grep -qE '^[0-9a-f.:]+$'; then
@@ -115,7 +116,7 @@ spec:
               # Verify master reachability: after a node failure, sentinel may report a stale master (s_down).
               # If unreachable, fall back to bootstrap election so the cluster can re-form.
               if [ "$SENTINEL_FOUND" = true ] && [ -n "$CURRENT_MASTER" ]; then
-                if ! redis-cli -h "$CURRENT_MASTER" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
+                if ! redis-cli --no-auth-warning -h "$CURRENT_MASTER" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
                   echo "WARNING: Sentinel's master $CURRENT_MASTER is unreachable (node failure?), falling back to bootstrap election"
                   SENTINEL_FOUND=false
                   CURRENT_MASTER=""
@@ -151,7 +152,7 @@ spec:
                 EXISTING_MASTER=""
                 for PEER_IP in $ALL_IPS; do
                   [ "$PEER_IP" = "$MY_IP" ] && continue
-                  if redis-cli -h "$PEER_IP" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
+                  if redis-cli --no-auth-warning -h "$PEER_IP" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
                     EXISTING_MASTER="$PEER_IP"
                     echo "Found existing Redis master at $PEER_IP"
                     break
@@ -173,12 +174,12 @@ spec:
                   else
                     echo "Bootstrap: waiting for Redis master at ${LOWEST_IP}..."
                     _wait=0
-                    until redis-cli -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; do
+                    until redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; do
                       _wait=$((_wait + 1))
                       [ $_wait -ge 60 ] && { echo "Timeout waiting for master at ${LOWEST_IP}, starting as independent master"; break; }
                       sleep 1
                     done
-                    if redis-cli -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; then
+                    if redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; then
                       echo "Configuring as replica of bootstrap master: ${LOWEST_IP}"
                       echo "replicaof ${LOWEST_IP} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                       {{- if .Values.auth.enabled }}
@@ -208,9 +209,7 @@ spec:
               echo "Using IP address: ${MY_IP}"
               echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
-              echo "slave-announce-ip ${MY_IP}" >> /tmp/redis.conf
-              echo "slave-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
-              echo "slave-priority 100" >> /tmp/redis.conf
+              echo "replica-priority 100" >> /tmp/redis.conf
               echo "replica-read-only yes" >> /tmp/redis.conf
               {{- else }}
               # Replication without Sentinel: IP-based deterministic master election
@@ -228,7 +227,7 @@ spec:
               EXISTING_MASTER=""
               for PEER_IP in $ALL_IPS; do
                 [ "$PEER_IP" = "$MY_IP" ] && continue
-                if redis-cli -h "$PEER_IP" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
+                if redis-cli --no-auth-warning -h "$PEER_IP" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
                   EXISTING_MASTER="$PEER_IP"
                   echo "Found existing Redis master at $PEER_IP"
                   break
@@ -251,12 +250,12 @@ spec:
                 else
                   echo "Bootstrap: waiting for Redis master at ${LOWEST_IP}..."
                   _wait=0
-                  until redis-cli -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; do
+                  until redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; do
                     _wait=$((_wait + 1))
                     [ $_wait -ge 60 ] && { echo "Timeout waiting for master at ${LOWEST_IP}, starting as independent master"; break; }
                     sleep 1
                   done
-                  if redis-cli -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; then
+                  if redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} PING >/dev/null 2>&1; then
                     echo "Configuring as replica of ${LOWEST_IP}"
                     echo "replicaof ${LOWEST_IP} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                     {{- if .Values.auth.enabled }}
@@ -719,7 +718,7 @@ spec:
               for retry in $(seq 1 5); do
                 for SENTINEL_IP in $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u); do
                   [ "$SENTINEL_IP" = "$MY_IP" ] && continue
-                  EXISTING_MASTER=$(redis-cli -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(redis-cli --no-auth-warning -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   # Validate response is an IP address (reject error messages like "NOAUTH Authentication required.")
                   # Supports both IPv4 (1.2.3.4) and IPv6 (fd00::1). Valid IPs never contain spaces.
                   if [ -n "$EXISTING_MASTER" ] && echo "$EXISTING_MASTER" | grep -qE '^[0-9a-f.:]+$'; then
@@ -737,7 +736,7 @@ spec:
               # Verify master reachability: after scale-down or node failure, sentinel may report a stale master.
               # If unreachable, fall back to bootstrap election so the cluster can re-form.
               if [ "$SENTINEL_FOUND_MASTER" = true ] && [ -n "$MASTER_HOST" ]; then
-                if ! redis-cli -h "$MASTER_HOST" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
+                if ! redis-cli --no-auth-warning -h "$MASTER_HOST" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} -t 2 PING >/dev/null 2>&1; then
                   echo "WARNING: Sentinel's master $MASTER_HOST is unreachable, falling back to bootstrap election"
                   SENTINEL_FOUND_MASTER=false
                   MASTER_HOST=""
@@ -761,7 +760,7 @@ spec:
                 FOUND_MASTER_IP=""
                 for PEER_IP in $ALL_IPS; do
                   [ "$PEER_IP" = "$MY_IP" ] && continue
-                  if redis-cli -h "$PEER_IP" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
+                  if redis-cli --no-auth-warning -h "$PEER_IP" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} -t 2 info replication 2>/dev/null | grep -q "role:master"; then
                     FOUND_MASTER_IP="$PEER_IP"
                     echo "Found existing Redis master at $PEER_IP"
                     break
@@ -781,7 +780,7 @@ spec:
                     echo "Bootstrap: waiting for sentinel at lowest-IP pod ${LOWEST_IP}..."
                     _wait=0
                     while true; do
-                      MASTER_HOST=$(redis-cli -h "${LOWEST_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                      MASTER_HOST=$(redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                       # Validate response is an IP address (IPv4 or IPv6)
                       if [ -n "$MASTER_HOST" ] && echo "$MASTER_HOST" | grep -qE '^[0-9a-f.:]+$'; then
                         break
@@ -793,7 +792,7 @@ spec:
                     done
                     echo "Bootstrap: got master from lowest-IP sentinel: $MASTER_HOST"
                     # Verify the reported master is reachable (may be stale after scale-down or rolling update)
-                    if ! redis-cli -h "$MASTER_HOST" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} -t 2 PING >/dev/null 2>&1; then
+                    if ! redis-cli --no-auth-warning -h "$MASTER_HOST" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} -t 2 PING >/dev/null 2>&1; then
                       echo "WARNING: Master $MASTER_HOST from lowest-IP sentinel is unreachable, using lowest IP ${LOWEST_IP} as master"
                       MASTER_HOST="$LOWEST_IP"
                     fi
@@ -806,14 +805,14 @@ spec:
               # Sentinel container may restart without Redis restarting (init container won't re-run),
               # so Redis instances may still replicate from a dead master after scale-down.
               if [ -n "$MASTER_HOST" ]; then
-                CURRENT_MASTER=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} info replication 2>/dev/null | tr -d '\r' | awk -F: '/^master_host:/{print $2}')
-                CURRENT_ROLE=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} role 2>/dev/null | head -1)
+                CURRENT_MASTER=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} info replication 2>/dev/null | tr -d '\r' | awk -F: '/^master_host:/{print $2}')
+                CURRENT_ROLE=$(redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} role 2>/dev/null | head -1)
                 if [ "$MASTER_HOST" = "$MY_IP" ] && [ "$CURRENT_ROLE" != "master" ]; then
                   echo "Promoting local Redis to master (REPLICAOF NO ONE)..."
-                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} REPLICAOF NO ONE 2>/dev/null && echo "Local Redis promoted to master" || echo "Warning: REPLICAOF NO ONE failed"
+                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} REPLICAOF NO ONE 2>/dev/null && echo "Local Redis promoted to master" || echo "Warning: REPLICAOF NO ONE failed"
                 elif [ "$MASTER_HOST" != "$MY_IP" ] && [ "$CURRENT_MASTER" != "$MASTER_HOST" ]; then
                   echo "Reconfiguring local Redis to replicate from master ${MASTER_HOST} (was: ${CURRENT_MASTER:-none})..."
-                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ .Values.service.port }} REPLICAOF "$MASTER_HOST" {{ .Values.service.port }} 2>/dev/null && echo "Local Redis now replicating from $MASTER_HOST" || echo "Warning: REPLICAOF failed"
+                  redis-cli {{- if .Values.auth.enabled }} -a "${REDIS_PASSWORD}"{{- end }} --no-auth-warning -h "${REDIS_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} REPLICAOF "$MASTER_HOST" {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} 2>/dev/null && echo "Local Redis now replicating from $MASTER_HOST" || echo "Warning: REPLICAOF failed"
                 fi
               fi
 
@@ -838,11 +837,26 @@ spec:
 
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
+              # Enable TLS in Sentinel
+              {{- if .Values.tls.enabled }}
+              port 0
+              tls-port {{ .Values.sentinel.port }}
+              tls-replication yes
+              tls-cert-file /etc/redis/tls/{{ .Values.tls.certFilename }}
+              tls-key-file /etc/redis/tls/{{ .Values.tls.certKeyFilename }}
+              tls-ca-cert-file /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+              {{- if .Values.tls.authClients }}
+              tls-auth-clients yes
+              {{- else }}
+              tls-auth-clients no
+              {{- end }}
+              {{- else }}
               port {{ .Values.sentinel.port }}
+              {{- end }}
               bind * -::*
               sentinel resolve-hostnames yes
               sentinel announce-hostnames no
-              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ .Values.service.port }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
@@ -880,7 +894,7 @@ spec:
 
               # Wait for sentinel to be ready
               _sentinel_wait=0
-              while ! redis-cli {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }} PING 2>/dev/null | grep -q PONG; do
+              while ! redis-cli --no-auth-warning {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} PING 2>/dev/null | grep -q PONG; do
                 _sentinel_wait=$((_sentinel_wait + 1))
                 [ $_sentinel_wait -ge 30 ] && break
                 sleep 1
@@ -895,11 +909,11 @@ spec:
                 sleep 10
                 echo "Running one-time stale sentinel cleanup..."
                 for TARGET in 127.0.0.1 $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u | grep -v "^${MY_IP}$"); do
-                  HAS_STALE=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
+                  HAS_STALE=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
                     /^flags$/ { getline; if ($0 ~ /s_down/) { print "yes"; exit } }
                   ')
                   if [ "$HAS_STALE" = "yes" ]; then
-                    redis-cli --no-auth-warning {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }} SENTINEL RESET {{ .Values.sentinel.masterName }} >/dev/null 2>&1 && echo "Reset sentinel state on $TARGET (had stale peers)"
+                    redis-cli --no-auth-warning {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} SENTINEL RESET {{ .Values.sentinel.masterName }} >/dev/null 2>&1 && echo "Reset sentinel state on $TARGET (had stale peers)"
                   fi
                 done
                 echo "Stale sentinel cleanup complete"
@@ -1090,7 +1104,7 @@ spec:
                   # restart during transient failovers. Flag file adds 1-cycle (10s) delay.
                   [ -f /tmp/sentinel-master-sdown ] && exit 1
                   {
-                  MASTER_FLAGS=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }} sentinel master {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '/^flags$/{getline; print}')
+                  MASTER_FLAGS=$(redis-cli --no-auth-warning --raw {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel master {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '/^flags$/{getline; print}')
                   if echo "$MASTER_FLAGS" | grep -q "s_down"; then touch /tmp/sentinel-master-sdown; else rm -f /tmp/sentinel-master-sdown; fi
                   } &
                   {{- end }}
