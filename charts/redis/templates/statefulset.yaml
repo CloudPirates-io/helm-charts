@@ -19,10 +19,10 @@ metadata:
 spec:
   {{- if $useDeployment }}
   strategy:
-    {{- if or (eq .Values.architecture "standalone") (not .Values.sentinel.enabled) }}
+    {{- if eq .Values.architecture "standalone" }}
     type: RollingUpdate
     {{- else }}
-    type: RollingUpdate
+    type: Recreate
     {{- end }}
   {{- else }}
   serviceName: {{ include "redis.fullname" . }}-headless
