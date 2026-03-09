@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.8] - 2026-03-06
+
+- [redis]: honor serviceMonitor namespace (#1094) ([368bb9fc](https://github.com/CloudPirates-io/helm-charts/commit/368bb9fc))
+
 ## [0.25.7] - 2026-03-05
 
 - Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
