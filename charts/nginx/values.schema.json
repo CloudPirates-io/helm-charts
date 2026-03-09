@@ -142,6 +142,17 @@
                 }
             }
         },
+        "daemonset": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "updateStrategy": {
+                    "type": "object"
+                }
+            }
+        },
         "existingConfigConfigmap": {
             "type": "string"
         },
