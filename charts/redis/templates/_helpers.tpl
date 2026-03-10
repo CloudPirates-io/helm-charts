@@ -55,10 +55,7 @@ Get the secret name for Redis password
 Get the secret key for Redis password
 */}}
 {{- define "redis.secretPasswordKey" -}}
-{{- if .Values.auth.existingSecretPasswordKey }}
 {{- .Values.auth.existingSecretPasswordKey }}
-{{- else }}redis-password
-{{- end }}
 {{- end }}
 
 {{/*

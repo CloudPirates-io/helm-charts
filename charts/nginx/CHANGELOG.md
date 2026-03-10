@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.8.0] - 2026-03-05
+
+- Add daemonset mode (#1092) ([3cea25af](https://github.com/CloudPirates-io/helm-charts/commit/3cea25af))
+
 ## [0.7.0] - 2026-02-25
 
 - [nginx]: existingServerConfigConfigmap volume mismatch fix (#1059) ([5dd64454](https://github.com/CloudPirates-io/helm-charts/commit/5dd64454))

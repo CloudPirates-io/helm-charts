@@ -96,7 +96,7 @@ auth:
   ## @param auth.existingSecret Name of existing secret containing Redis password
   existingSecret: ""
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
-  existingSecretPasswordKey: ""
+  existingSecretPasswordKey: "redis-password"
   ## @param auth.acl Custom ACL rules to be applied. When set, all users, including the 'default' user, must be explicitly configured in the ACL file.
   acl:
     ## @param auth.acl.enabled Enable custom ACL rules.
