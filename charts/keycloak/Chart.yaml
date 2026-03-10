@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.16.9
+version: 0.17.0
 appVersion: "26.5.5"
 keywords:
   - keycloak
@@ -52,9 +52,12 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[keycloak/keycloak] Update image.repository to v26.5.5"
+      description: "**BREAKING** Default value of `keycloak.production` changed from `false` to `true`. Existing deployments that relied on the default must explicitly set `keycloak.production: false` to preserve previous behavior."
       links:
-        - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1096"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/CHANGELOG.md"
+    - kind: changed
+      description: "Improve documentation accuracy: add missing `keycloak.httpsEnabled` and `image.command` parameters, fix outdated image tag defaults, fix `keycloak.httpRelativePath` default, clarify `hostname` requires full URL with scheme, add `database.type` empty string behavior, fix `service.httpsNodePort` typo, improve descriptions for `preserveThemes`, `preserveProviders`, and `tls.truststoreExistingSecretKey`"
+      links:
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/CHANGELOG.md"
