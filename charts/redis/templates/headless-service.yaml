@@ -53,3 +53,4 @@ spec:
     {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
+{{- end }}
