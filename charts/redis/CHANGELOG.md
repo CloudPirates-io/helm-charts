@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.0] - 2026-03-10
+
+- Added Option to run redis as Deployment (#1091) ([40983de0](https://github.com/CloudPirates-io/helm-charts/commit/40983de0))
+
+## [0.25.10] - 2026-03-09
+
+- Properly set the default for existingSecretPasswordKey inside the values.yaml ([bdba22f5](https://github.com/CloudPirates-io/helm-charts/commit/bdba22f5))
+
+## [0.25.9] - 2026-03-09
+
+- [oliver006/redis_exporter] Update image to v1.82.0 (#1100) ([d506ea7a](https://github.com/CloudPirates-io/helm-charts/commit/d506ea7a))
+
 ## [0.25.8] - 2026-03-06
 
 - [redis]: honor serviceMonitor namespace (#1094) ([368bb9fc](https://github.com/CloudPirates-io/helm-charts/commit/368bb9fc))
