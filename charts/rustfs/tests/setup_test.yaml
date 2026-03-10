@@ -1,6 +1,6 @@
 suite: Test setup
 templates:
-  - setup-job.yaml
+  - setup-pod.yaml
   - setup-secret.yaml
 
 tests:
@@ -40,9 +40,9 @@ tests:
       setup:
         buckets:
           - name: test
-    template: setup-job.yaml
+    template: setup-pod.yaml
     asserts:
       - documentIndex: 0
         equal:
           path: kind
-          value: Job
+          value: Pod
