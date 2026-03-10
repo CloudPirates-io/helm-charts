@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.2] - 2026-03-09
+
+- Update image to v1.6.41 (#1098) ([1723ff6d](https://github.com/CloudPirates-io/helm-charts/commit/1723ff6d))
+
 ## [0.10.1] - 2026-02-27
 
 - Update charts/memcached/values.yaml memcached (#1053) ([863f6b67](https://github.com/CloudPirates-io/helm-charts/commit/863f6b67))
