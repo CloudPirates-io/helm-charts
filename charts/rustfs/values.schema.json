@@ -411,6 +411,40 @@
                 }
             }
         },
+        "setup": {
+            "type": "object",
+            "properties": {
+                "buckets": {
+                    "type": "array"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "policies": {
+                    "type": "array"
+                },
+                "users": {
+                    "type": "array"
+                }
+            }
+        },
         "startupProbe": {
             "type": "object",
             "properties": {
