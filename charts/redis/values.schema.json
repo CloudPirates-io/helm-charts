@@ -614,6 +614,9 @@
                         "pullPolicy": {
                             "type": "string"
                         },
+                        "registry": {
+                            "type": "string"
+                        },
                         "repository": {
                             "type": "string"
                         },
@@ -805,6 +808,9 @@
                             "type": "object"
                         }
                     }
+                },
+                "nodePort": {
+                    "type": "string"
                 },
                 "port": {
                     "type": "integer"

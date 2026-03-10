@@ -2,6 +2,35 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.25.9] - 2026-03-09
+
+- [oliver006/redis_exporter] Update image to v1.82.0 (#1100) ([d506ea7a](https://github.com/CloudPirates-io/helm-charts/commit/d506ea7a))
+
+## [0.25.8] - 2026-03-06
+
+- [redis]: honor serviceMonitor namespace (#1094) ([368bb9fc](https://github.com/CloudPirates-io/helm-charts/commit/368bb9fc))
+
+## [0.25.7] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
+## [0.25.6] - 2026-03-03
+
+- [redis]: Fix egress policies (#1081) ([569b9095](https://github.com/CloudPirates-io/helm-charts/commit/569b9095))
+
+## [0.25.5] - 2026-03-02
+
+- [redis]: Allow nodePort to be configured for standalone mode (#1064) ([f1e2728f](https://github.com/CloudPirates-io/helm-charts/commit/f1e2728f))
+
+## [0.25.4] - 2026-03-02
+
+- [alpine/kubectl] Update image to v1.35.2 (#1080) ([55143c4c](https://github.com/CloudPirates-io/helm-charts/commit/55143c4c))
+
+## [0.25.3] - 2026-03-02
+
+- Update image to 1c054d5 (#1079) ([1cc09940](https://github.com/CloudPirates-io/helm-charts/commit/1cc09940))
+- Fix renovate and pin mongodb + redis ([42c4b8d9](https://github.com/CloudPirates-io/helm-charts/commit/42c4b8d9))
+
 ## [0.25.2] - 2026-02-27
 
 - Update charts/redis/values.yaml redis (#1054) ([02c5ad1a](https://github.com/CloudPirates-io/helm-charts/commit/02c5ad1a))

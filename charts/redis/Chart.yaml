@@ -2,7 +2,7 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.25.3
+version: 0.25.10
 appVersion: "8.6.1"
 keywords:
   - redis
@@ -42,9 +42,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update image to 1c054d5"
+      description: "Properly set the default for existingSecretPasswordKey inside the values.yaml"
       links:
-        - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1079"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/redis/CHANGELOG.md"

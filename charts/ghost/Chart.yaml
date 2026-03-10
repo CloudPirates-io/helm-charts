@@ -2,8 +2,8 @@ apiVersion: v2
 name: ghost
 description: A simple, powerful publishing platform that allows you to share your stories with the world.
 type: application
-version: 0.13.5
-appVersion: "6.19.3"
+version: 0.14.0
+appVersion: "6.21.0"
 keywords:
   - ghost
   - blogging
@@ -45,9 +45,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update image.repository to v6.19.3"
+      description: "Update image to v6.21.0"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1075"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1089"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/ghost/CHANGELOG.md"

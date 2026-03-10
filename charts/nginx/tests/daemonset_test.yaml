@@ -1,0 +1,54 @@
+suite: test nginx daemonset mode
+templates:
+  - deployment.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+tests:
+  - it: should render a Deployment by default with spec.replicas and without spec.updateStrategy
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - isNotNull:
+          path: spec.replicas
+      - isNull:
+          path: spec.updateStrategy
+
+  - it: should render a DaemonSet without spec.replicas when daemonset.enabled is true
+    set:
+      daemonset:
+        enabled: true
+    asserts:
+      - equal:
+          path: kind
+          value: DaemonSet
+      - isNull:
+          path: spec.replicas
+
+  - it: should render a DaemonSet with spec.updateStrategy when daemonset.enabled is true and daemonset.updateStrategy is set
+    set:
+      daemonset:
+        enabled: true
+        updateStrategy:
+          type: RollingUpdate
+    asserts:
+      - equal:
+          path: kind
+          value: DaemonSet
+      - equal:
+          path: spec.updateStrategy.type
+          value: RollingUpdate
+
+  - it: should render Deployment without spec.updateStrategy when daemonset.enabled is false daemonset.updateStrategy is set
+    set:
+      daemonset:
+        enabled: false
+        updateStrategy:
+          type: RollingUpdate
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - isNull:
+          path: spec.updateStrategy
