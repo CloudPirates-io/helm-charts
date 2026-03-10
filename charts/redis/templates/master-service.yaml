@@ -1,3 +1,4 @@
+{{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 {{- if and (eq .Values.architecture "replication") (not .Values.sentinel.enabled) }}
 apiVersion: v1
 kind: Service
@@ -13,6 +14,13 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if .Values.service.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.service.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.service.ipFamilyPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: redis
@@ -28,5 +36,7 @@ spec:
     {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
+    {{- if not $useDeployment }}
     statefulset.kubernetes.io/pod-name: {{ include "redis.fullname" . }}-0
+    {{- end }}
 {{- end }}

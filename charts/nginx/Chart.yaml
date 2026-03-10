@@ -2,7 +2,7 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.8.0
+version: 0.8.1
 appVersion: "1.29.5"
 keywords:
   - nginx
@@ -42,9 +42,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: added
-      description: "Add daemonset mode"
+      description: "Add internalTrafficPolicy to service"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1092"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1103"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/nginx/CHANGELOG.md"
