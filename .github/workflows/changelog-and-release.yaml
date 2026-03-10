@@ -548,7 +548,14 @@ jobs:
           fi
 
           # Normal detection logic
-          for chart_dir in charts/*; do
+          # If a specific chart was requested via workflow_dispatch, only process that chart
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.chart_name }}" ]; then
+            CHART_DIRS="charts/${{ github.event.inputs.chart_name }}"
+          else
+            CHART_DIRS="charts/*"
+          fi
+
+          for chart_dir in $CHART_DIRS; do
             [ ! -f "$chart_dir/Chart.yaml" ] && continue
 
             CHART_NAME=$(basename "$chart_dir")
