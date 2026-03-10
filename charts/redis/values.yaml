@@ -54,6 +54,11 @@ clusterReplicaCount: 0
 ## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
 revisionHistoryLimit: 10
 
+## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
+## Only takes effect when persistence.enabled=false.
+## When persistence.enabled=true, this value is ignored and StatefulSet is always used (required for PVCs).
+useDeployment: false
+
 ## @section Pod labels and annotations
 ## @param podLabels Map of labels to add to the pods
 podLabels: {}
@@ -77,9 +82,17 @@ service:
   nodePort: ""
   ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
   clusterPort: 16379
+  ## @param service.ipFamilies List of IP families (e.g. [IPv4], [IPv6], [IPv4,IPv6])
+  ipFamilies: []
+  ## @param service.ipFamilyPolicy IP family policy (SingleStack, PreferDualStack, RequireDualStack)
+  ipFamilyPolicy: ""
   headless:
     ## @param service.headless.annotations Additional custom annotations for Redis headless service
     annotations: {}
+    ## @param service.headless.ipFamilies List of IP families for the headless service
+    ipFamilies: []
+    ## @param service.headless.ipFamilyPolicy IP family policy for the headless service
+    ipFamilyPolicy: ""
 
 auth:
   ## @param auth.enabled Enable Redis authentication
@@ -393,6 +406,10 @@ sentinel:
     type: ClusterIP
     ## @param sentinel.service.port Sentinel service port
     port: 26379
+    ## @param sentinel.service.ipFamilies List of IP families for the sentinel service
+    ipFamilies: []
+    ## @param sentinel.service.ipFamilyPolicy IP family policy for the sentinel service
+    ipFamilyPolicy: ""
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
   resources:
     limits:
@@ -415,6 +432,10 @@ sentinel:
     type: ""
     ## @param sentinel.masterService.annotations Additional custom annotations for master service
     annotations: {}
+    ## @param sentinel.masterService.ipFamilies List of IP families for the sentinel master service
+    ipFamilies: []
+    ## @param sentinel.masterService.ipFamilyPolicy IP family policy for the sentinel master service
+    ipFamilyPolicy: ""
     ## @param sentinel.masterService.checkInterval Interval in seconds to check for master changes
     checkInterval: 60
     ## @param sentinel.masterService.image.repository Image for master discovery deployment
@@ -520,6 +541,10 @@ metrics:
     clusterIP: ""
     ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
     nodePort: ""
+    ## @param metrics.service.ipFamilies List of IP families for the metrics service
+    ipFamilies: []
+    ## @param metrics.service.ipFamilyPolicy IP family policy for the metrics service
+    ipFamilyPolicy: ""
   ## Prometheus ServiceMonitor configuration
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
