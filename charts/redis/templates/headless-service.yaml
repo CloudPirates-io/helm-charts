@@ -1,3 +1,4 @@
+{{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,6 +26,7 @@ spec:
   ipFamilyPolicy: {{ .Values.service.headless.ipFamilyPolicy }}
   {{- end }}
   {{- if .Values.sentinel.enabled }}
+  {{- if or $useDeployment .Values.sentinel.enabled }}
   publishNotReadyAddresses: true
   {{- end }}
   ports:
