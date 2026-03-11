@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.8.2] - 2026-03-10
+
+- Fix internalTrafficPolicy values (#1113) ([437c7c3a](https://github.com/CloudPirates-io/helm-charts/commit/437c7c3a))
+
 ## [0.8.1] - 2026-03-10
 
 - Add internalTrafficPolicy to service (#1103) ([cf14e66d](https://github.com/CloudPirates-io/helm-charts/commit/cf14e66d))
