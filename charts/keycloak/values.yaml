@@ -124,6 +124,8 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
+  ## @param keycloak.managementPort Management interface port (health endpoints are served here)
+  managementPort: 9000
   ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded). Must be set when running behind a reverse proxy (e.g. nginx ingress), otherwise Keycloak will not trust X-Forwarded-* headers and will generate incorrect URLs. Leave empty only when Keycloak is directly exposed without a proxy.
   proxyHeaders: ""
   ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
