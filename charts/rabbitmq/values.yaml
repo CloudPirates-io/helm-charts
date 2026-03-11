@@ -356,6 +356,27 @@ ingress:
   ## @param ingress.tls Ingress TLS configuration
   tls: []
 
+## @section Gateway API parameters
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for RabbitMQ management
+  enabled: false
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.parentRefs References to the parent Gateways
+  parentRefs:
+    - name: gateway
+      namespace: ""
+      sectionName: ""
+  ## @param gateway.hostnames List of hostnames to match
+  hostnames:
+    - rabbitmq.local
+  ## @param gateway.rules HTTPRoute rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
 ## @section Resources
 ## @param resources Resource limits and requests for RabbitMQ pods
 resources: {}

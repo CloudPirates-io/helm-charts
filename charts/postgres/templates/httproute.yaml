@@ -1,0 +1,47 @@
+{{- if .Values.gateway.enabled -}}
+{{- $fullName := include "postgres.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.gateway.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- range .Values.gateway.parentRefs }}
+    - name: {{ .name }}
+      {{- if .namespace }}
+      namespace: {{ .namespace }}
+      {{- end }}
+      {{- if .sectionName }}
+      sectionName: {{ .sectionName }}
+      {{- end }}
+    {{- end }}
+  {{- if .Values.gateway.hostnames }}
+  hostnames:
+    {{- range .Values.gateway.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.gateway.rules }}
+    - {{- if .matches }}
+      matches:
+        {{- range .matches }}
+        - path:
+            type: {{ .path.type }}
+            value: {{ .path.value }}
+        {{- end }}
+      {{- end }}
+      backendRefs:
+        - name: {{ $fullName }}
+          port: {{ $svcPort }}
+    {{- end }}
+{{- end }}

@@ -155,6 +155,27 @@ ingress:
   #    hosts:
   #      - rustfs.local
 
+## @section Gateway API parameters
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for RustFS API
+  enabled: false
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.parentRefs References to the parent Gateways
+  parentRefs:
+    - name: gateway
+      namespace: ""
+      sectionName: ""
+  ## @param gateway.hostnames List of hostnames to match
+  hostnames:
+    - rustfs.localhost
+  ## @param gateway.rules HTTPRoute rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
 ## @section Console Ingress configuration (for StatefulSet only)
 consoleIngress:
   ## @param consoleIngress.enabled Enable Console ingress record generation for RustFS API (routes to first pod only)
@@ -183,6 +204,27 @@ consoleIngress:
   #  - secretName: rustfs-console-tls
   #    hosts:
   #      - rustfs-console.local
+
+## @section Console Gateway API parameters (for StatefulSet only)
+consoleGateway:
+  ## @param consoleGateway.enabled Enable Gateway API HTTPRoute generation for RustFS Console (routes to first pod only)
+  enabled: false
+  ## @param consoleGateway.annotations Additional annotations for the Console HTTPRoute resource
+  annotations: {}
+  ## @param consoleGateway.parentRefs References to the parent Gateways
+  parentRefs:
+    - name: gateway
+      namespace: ""
+      sectionName: ""
+  ## @param consoleGateway.hostnames List of hostnames to match
+  hostnames:
+    - rustfs-console.localhost
+  ## @param consoleGateway.rules HTTPRoute rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
 
 ## @section Resources
 resources:

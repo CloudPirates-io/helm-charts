@@ -228,6 +228,27 @@ ingress:
   #    hosts:
   #      - postgres.local
 
+## @section Gateway API parameters
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for PostgreSQL
+  enabled: false
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.parentRefs References to the parent Gateways
+  parentRefs:
+    - name: gateway
+      namespace: ""
+      sectionName: ""
+  ## @param gateway.hostnames List of hostnames to match
+  hostnames:
+    - postgres.local
+  ## @param gateway.rules HTTPRoute rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
 ## @section Resources
 resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious

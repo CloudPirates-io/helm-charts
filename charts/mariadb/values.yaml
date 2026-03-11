@@ -314,6 +314,27 @@ ingress:
   ## @param ingress.tls TLS configuration for the Ingress
   tls: []
 
+## @section Gateway API parameters
+gateway:
+  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for MariaDB
+  enabled: false
+  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
+  annotations: {}
+  ## @param gateway.parentRefs References to the parent Gateways
+  parentRefs:
+    - name: gateway
+      namespace: ""
+      sectionName: ""
+  ## @param gateway.hostnames List of hostnames to match
+  hostnames:
+    - mariadb.local
+  ## @param gateway.rules HTTPRoute rules
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
 ## @section Network Policy configuration
 networkPolicy:
   ## @param networkPolicy.enabled Specifies whether a NetworkPolicy should be created
