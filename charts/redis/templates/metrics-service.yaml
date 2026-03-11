@@ -14,6 +14,13 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.metrics.service.type }}
+  {{- if .Values.metrics.service.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.metrics.service.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- if .Values.metrics.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.metrics.service.ipFamilyPolicy }}
+  {{- end }}
   {{- if and (eq .Values.metrics.service.type "LoadBalancer") .Values.metrics.service.loadBalancerIP }}
   loadBalancerIP: {{ .Values.metrics.service.loadBalancerIP }}
   {{- end }}

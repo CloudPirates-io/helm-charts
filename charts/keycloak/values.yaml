@@ -47,9 +47,9 @@ shareProcessNamespace: false
 extraVolumes: []
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
 extraVolumeMounts: []
-## @param Specify if the original themes directory must be preserved.
+## @param preserveThemes Disable mounting an emptyDir over /opt/keycloak/themes, preserving the themes bundled in the image.
 preserveThemes: false
-## @param Specify if the original providers directory must be preserved.
+## @param preserveProviders Disable mounting an emptyDir over /opt/keycloak/providers, preserving the providers bundled in the image.
 preserveProviders: false
 
 ## @section Extra init containers for Keycloak pod
@@ -108,13 +108,13 @@ keycloak:
   ## @param keycloak.secretKeys Secret keys for admin credentials
   secretKeys:
     adminPasswordKey: "admin-password"
-  ## @param keycloak.hostname Keycloak hostname
+  ## @param keycloak.hostname Keycloak hostname including scheme (e.g. https://keycloak.example.com)
   hostname: ""
-  ## @param keycloak.hostnameAdmin Keycloak admin hostname
+  ## @param keycloak.hostnameAdmin Keycloak admin hostname including scheme (e.g. https://keycloak.example.com)
   hostnameAdmin: ""
   ## @param keycloak.hostnameStrict Enable strict hostname resolution
   hostnameStrict: false
-  ## @param keycloak.hostnameBackchannel Keycloak backchannel hostname
+  ## @param keycloak.hostnameBackchannel Keycloak backchannel hostname including scheme (e.g. https://keycloak.example.com)
   hostnameBackchannel: ""
   ## @param keycloak.httpEnabled Enable HTTP listener
   httpEnabled: true
@@ -124,14 +124,14 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
-  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded)
+  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded). Must be set when running behind a reverse proxy (e.g. nginx ingress), otherwise Keycloak will not trust X-Forwarded-* headers and will generate incorrect URLs. Leave empty only when Keycloak is directly exposed without a proxy.
   proxyHeaders: ""
   ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
   proxyProtocolEnabled: false
   ## @param keycloak.proxyTrustedAddresses A comma separated list of trusted proxy addresses
   proxyTrustedAddresses: ""
-  ## @param keycloak.production Enable production mode
-  production: false
+  ## @param keycloak.production Enable production mode (runs 'start' instead of 'start-dev'). Should only be disabled for local development.
+  production: true
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
   ## @param keycloak.extraArgsPrefix Additional arguments to pass before the start command (e.g., for --config-file)
@@ -189,7 +189,7 @@ tls:
   ## @param tls.truststoreExistingSecret Name of existing secret containing truststore file (Java Keystore format)
   ## The secret should contain 'truststore.jks' key or the key specified in the value 'tls.truststoreExistingSecretKey'
   truststoreExistingSecret: ""
-  ## @param tls.truststoreExistingSecretKey Key of the secret to get the trustStorePassword from
+  ## @param tls.truststoreExistingSecretKey Key within the truststore secret that holds the truststore file
   truststoreExistingSecretKey: "truststore.jks"
   ## @param tls.truststorePassword Password for the truststore (use with caution - consider using existingSecret)
   truststorePassword: ""
@@ -235,7 +235,7 @@ cache:
 
 ## @section Realm Configuration
 realm:
-  ## @param realm.import Enable import of realms from /opt/keycloak/data/import (production mode must be false)
+  ## @param realm.import Enable import of realms from /opt/keycloak/data/import
   import: false
   ## @param realm.configFile Json config for initial realm configuration, mounted in /opt/keycloak/data/import
   configFile: ""

@@ -2,7 +2,7 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.12.5
+version: 0.12.7
 appVersion: "8.2.5"
 keywords:
   - mongodb
@@ -38,10 +38,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "fix a race condition between detect_cluster and Kubernetes Service DNS"
+    - kind: changed
+      description: "[mongo] Update image.repository to 3a7947f"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1093"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1123"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"
