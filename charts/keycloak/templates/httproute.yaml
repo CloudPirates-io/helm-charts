@@ -1,9 +1,7 @@
 {{- if .Values.gatewayAPI.httpRoute.enabled -}}
 {{- $fullName := include "keycloak.fullname" . -}}
-{{- $httpPort := .Values.service.httpPort -}}
-{{- $httpsPort := .Values.service.httpsPort -}}
-{{- $svcPort := $httpPort -}}
-{{- if .Values.keycloak.httpsEnabled }}{{ $svcPort = $httpsPort }}{{- end -}}
+{{- $svcPort := .Values.service.httpPort -}}
+{{- if .Values.keycloak.httpsEnabled }}{{ $svcPort = .Values.service.httpsPort }}{{- end -}}
 {{- $httpRoute := .Values.gatewayAPI.httpRoute -}}
 {{- $hostnames := $httpRoute.hostnames -}}
 {{- if not $hostnames }}

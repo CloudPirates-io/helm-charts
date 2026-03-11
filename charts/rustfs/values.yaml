@@ -156,6 +156,14 @@ ingress:
   #      - rustfs.local
 
 ## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
 gatewayAPI:
   httpRoute:
     ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for RustFS API
@@ -167,10 +175,15 @@ gatewayAPI:
       - name: gateway
         namespace: ""
         sectionName: ""
-    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match (if empty, uses ingress hosts)
-    hostnames: []
-    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules (if empty, derived from ingress paths)
-    rules: []
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rustfs.localhost
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
   consoleHttpRoute:
     ## @param gatewayAPI.consoleHttpRoute.enabled Enable Gateway API HTTPRoute generation for RustFS Console (routes to first pod only)
     enabled: false
@@ -181,10 +194,15 @@ gatewayAPI:
       - name: gateway
         namespace: ""
         sectionName: ""
-    ## @param gatewayAPI.consoleHttpRoute.hostnames List of hostnames to match (if empty, uses consoleIngress hosts)
-    hostnames: []
-    ## @param gatewayAPI.consoleHttpRoute.rules HTTPRoute rules (if empty, derived from consoleIngress paths)
-    rules: []
+    ## @param gatewayAPI.consoleHttpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rustfs-console.localhost
+    ## @param gatewayAPI.consoleHttpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Console Ingress configuration (for StatefulSet only)
 consoleIngress:
