@@ -38,10 +38,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "fix a race condition between detect_cluster and Kubernetes Service DNS"
+    - kind: added
+      description: "Add serviceAccountName to StatefulSet spec to support WI/MSI/CSI"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1093"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1118"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"

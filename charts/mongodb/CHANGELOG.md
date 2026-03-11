@@ -2,6 +2,11 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.5] - 2026-03-07
+
+- fix a race condition between detect_cluster and Kubernetes Service DNS (#1093) ([7b98fc45](https://github.com/CloudPirates-io/helm-charts/commit/7b98fc45))
+- Fix renovate and pin mongodb + redis ([42c4b8d9](https://github.com/CloudPirates-io/helm-charts/commit/42c4b8d9))
+
 ## [0.12.4] - 2026-02-27
 
 - [percona/mongodb_exporter] Update image to v0.49.0 (#1065) ([482ff0a3](https://github.com/CloudPirates-io/helm-charts/commit/482ff0a3))

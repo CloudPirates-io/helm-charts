@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.1] - 2026-03-10
+
+- [redis]: Add ipFamilies and ipFamilyPolicy support to all services (#1088) ([082f5e16](https://github.com/CloudPirates-io/helm-charts/commit/082f5e16))
+
 ## [0.26.0] - 2026-03-10
 
 - Added Option to run redis as Deployment (#1091) ([40983de0](https://github.com/CloudPirates-io/helm-charts/commit/40983de0))
