@@ -1,6 +1,14 @@
-{{- if .Values.gateway.enabled -}}
+{{- if .Values.gatewayAPI.httpRoute.enabled -}}
 {{- $fullName := include "mariadb.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $httpRoute := .Values.gatewayAPI.httpRoute -}}
+{{- $hostnames := $httpRoute.hostnames -}}
+{{- if not $hostnames }}
+{{- $hostnames = list -}}
+{{- range .Values.ingress.hosts -}}
+{{- $hostnames = append $hostnames .host -}}
+{{- end -}}
+{{- end -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -8,14 +16,14 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "mariadb.labels" . | nindent 4 }}
-  {{- $annotations := merge .Values.gateway.annotations .Values.commonAnnotations }}
+  {{- $annotations := merge $httpRoute.annotations .Values.commonAnnotations }}
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-    {{- range .Values.gateway.parentRefs }}
+    {{- range $httpRoute.parentRefs }}
     - name: {{ .name }}
       {{- if .namespace }}
       namespace: {{ .namespace }}
@@ -24,14 +32,15 @@ spec:
       sectionName: {{ .sectionName }}
       {{- end }}
     {{- end }}
-  {{- if .Values.gateway.hostnames }}
+  {{- if $hostnames }}
   hostnames:
-    {{- range .Values.gateway.hostnames }}
+    {{- range $hostnames }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.gateway.rules }}
+    {{- if $httpRoute.rules }}
+    {{- range $httpRoute.rules }}
     - {{- if .matches }}
       matches:
         {{- range .matches }}
@@ -43,5 +52,18 @@ spec:
       backendRefs:
         - name: {{ $fullName }}
           port: {{ $svcPort }}
+    {{- end }}
+    {{- else }}
+    {{- range .Values.ingress.hosts }}
+    {{- range .paths }}
+    - matches:
+        - path:
+            type: {{ if eq .pathType "Exact" }}Exact{{ else }}PathPrefix{{ end }}
+            value: {{ .path }}
+      backendRefs:
+        - name: {{ $fullName }}
+          port: {{ $svcPort }}
+    {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}

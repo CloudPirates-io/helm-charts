@@ -315,25 +315,21 @@ ingress:
   tls: []
 
 ## @section Gateway API parameters
-gateway:
-  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for MariaDB
-  enabled: false
-  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
-  annotations: {}
-  ## @param gateway.parentRefs References to the parent Gateways
-  parentRefs:
-    - name: gateway
-      namespace: ""
-      sectionName: ""
-  ## @param gateway.hostnames List of hostnames to match
-  hostnames:
-    - mariadb.local
-  ## @param gateway.rules HTTPRoute rules
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for MariaDB
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match (if empty, uses ingress hosts)
+    hostnames: []
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules (if empty, derived from ingress paths)
+    rules: []
 
 ## @section Network Policy configuration
 networkPolicy:

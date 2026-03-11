@@ -189,25 +189,35 @@ ingress:
   #      - minio.local
 
 ## @section Gateway API parameters
-gateway:
-  ## @param gateway.enabled Enable Gateway API HTTPRoute generation for MinIO
-  enabled: false
-  ## @param gateway.annotations Additional annotations for the HTTPRoute resource
-  annotations: {}
-  ## @param gateway.parentRefs References to the parent Gateways
-  parentRefs:
-    - name: gateway
-      namespace: ""
-      sectionName: ""
-  ## @param gateway.hostnames List of hostnames to match
-  hostnames:
-    - minio.local
-  ## @param gateway.rules HTTPRoute rules
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for MinIO
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match (if empty, uses ingress hosts)
+    hostnames: []
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules (if empty, derived from ingress paths)
+    rules: []
+  consoleHttpRoute:
+    ## @param gatewayAPI.consoleHttpRoute.enabled Enable Gateway API HTTPRoute generation for MinIO Console
+    enabled: false
+    ## @param gatewayAPI.consoleHttpRoute.annotations Additional annotations for the Console HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.consoleHttpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.consoleHttpRoute.hostnames List of hostnames to match (if empty, uses consoleIngress hosts)
+    hostnames: []
+    ## @param gatewayAPI.consoleHttpRoute.rules HTTPRoute rules (if empty, derived from consoleIngress paths)
+    rules: []
 
 ## @section Console Ingress configuration
 consoleIngress:
@@ -229,27 +239,6 @@ consoleIngress:
           pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for MinIO Console ingress
   tls: []
-
-## @section Console Gateway API parameters
-consoleGateway:
-  ## @param consoleGateway.enabled Enable Gateway API HTTPRoute generation for MinIO Console
-  enabled: false
-  ## @param consoleGateway.annotations Additional annotations for the Console HTTPRoute resource
-  annotations: {}
-  ## @param consoleGateway.parentRefs References to the parent Gateways
-  parentRefs:
-    - name: gateway
-      namespace: ""
-      sectionName: ""
-  ## @param consoleGateway.hostnames List of hostnames to match
-  hostnames:
-    - minio-console.local
-  ## @param consoleGateway.rules HTTPRoute rules
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
 
 ## @section Resources
 resources:
