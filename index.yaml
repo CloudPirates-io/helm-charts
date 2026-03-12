@@ -32152,6 +32152,62 @@ entries:
   - annotations:
       artifacthub.io/category: storage
       artifacthub.io/changes: |-
+        - kind: added
+          description: "Feature/rustfs setup"
+          links:
+            - name: "Pull Request"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/1111"
+            - name: "Changelog"
+              url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rustfs/CHANGELOG.md"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RustFS
+          url: https://github.com/rustfs/rustfs
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rustfs
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-03-12T12:15:39.933374599Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: (ALPHA) High-performance distributed object storage with S3-compatible
+      API
+    digest: 0ca3656e3353625b163eba7e0d016e0c84ae076c37aa8c765dcdc896046d72e9
+    home: https://github.com/rustfs/rustfs
+    icon: https://a.storyblok.com/f/143071/513x513/246ebb8da4/rustfs-logo.svg
+    keywords:
+    - rustfs
+    - file-system
+    - s3
+    - storage
+    - cloud-native
+    - rust
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: rustfs
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rustfs
+    - https://github.com/rustfs/rustfs
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rustfs-0.6.0/rustfs-0.6.0.tgz
+    version: 0.6.0
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |-
         - kind: fixed
           description: "Fix rustfs-console Service"
           links:
@@ -36878,4 +36934,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-12T07:00:02.333455287Z"
+generated: "2026-03-12T12:15:39.934516536Z"
