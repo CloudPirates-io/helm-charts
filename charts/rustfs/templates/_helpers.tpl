@@ -52,7 +52,7 @@ Return the proper RustFS image name
 {{- end }}
 
 {{/*
-Return the proper RustFS image name
+Return the proper RustFS CLI image name
 */}}
 {{- define "rustfs-setup.image" -}}
 {{- include "cloudpirates.image" (dict "image" .Values.setup.image "global" .Values.global) -}}
