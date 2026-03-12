@@ -185,13 +185,24 @@ Return the database JDBC URL
 {{- end }}
 
 {{/*
-Return the url to use for probes
+Return the url to use for liveness probe
 */}}
-{{- define "keycloak.probeUrl" -}}
+{{- define "keycloak.livenessProbeUrl" -}}
 {{- if or (eq .Values.keycloak.httpRelativePath "") (eq .Values.keycloak.httpRelativePath "/") -}}
-{{- printf "/realms/master" -}}
+{{- printf "/health/live" -}}
 {{- else -}}
-{{- printf "%s/realms/master" .Values.keycloak.httpRelativePath -}}
+{{- printf "%s/health/live" .Values.keycloak.httpRelativePath -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return the url to use for readiness probe
+*/}}
+{{- define "keycloak.readinessProbeUrl" -}}
+{{- if or (eq .Values.keycloak.httpRelativePath "") (eq .Values.keycloak.httpRelativePath "/") -}}
+{{- printf "/health/ready" -}}
+{{- else -}}
+{{- printf "%s/health/ready" .Values.keycloak.httpRelativePath -}}
 {{- end -}}
 {{- end }}
 

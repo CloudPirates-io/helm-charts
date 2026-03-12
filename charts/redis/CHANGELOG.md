@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.3] - 2026-03-11
+
+- [redis]: Make master discovery service respect tls certificates (#1129) ([ce85ec27](https://github.com/CloudPirates-io/helm-charts/commit/ce85ec27))
+
+## [0.26.2] - 2026-03-11
+
+- Increase resource limits for sentinel pods (#1119) ([1f459645](https://github.com/CloudPirates-io/helm-charts/commit/1f459645))
+
+## [0.26.1] - 2026-03-10
+
+- [redis]: Add ipFamilies and ipFamilyPolicy support to all services (#1088) ([082f5e16](https://github.com/CloudPirates-io/helm-charts/commit/082f5e16))
+
 ## [0.26.0] - 2026-03-10
 
 - Added Option to run redis as Deployment (#1091) ([40983de0](https://github.com/CloudPirates-io/helm-charts/commit/40983de0))
