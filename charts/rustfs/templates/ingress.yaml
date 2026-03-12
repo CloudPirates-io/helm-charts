@@ -43,20 +43,6 @@ spec:
                 port:
                   name: api
           {{- end }}
-    - host: "*.{{ .host }}"
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ $fullName }}
-                port:
-                  name: api
-          {{- end }}
     {{- end }}
 {{- end }}
 
@@ -92,20 +78,6 @@ spec:
   rules:
     {{- range .Values.consoleIngress.hosts }}
     - host: {{ .host }}
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ include "rustfs.fullname" $ }}-console
-                port:
-                  name: console
-          {{- end }}
-    - host: "*.{{ .host }}"
       http:
         paths:
           {{- range .paths }}
