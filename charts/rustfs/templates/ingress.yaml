@@ -101,9 +101,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "rustfs.fullname" $ }}-pod0
+                name: {{ include "rustfs.fullname" $ }}-console
                 port:
-                  name: api
+                  name: console
           {{- end }}
     - host: "*.{{ .host }}"
       http:
@@ -115,9 +115,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "rustfs.fullname" $ }}-pod0
+                name: {{ include "rustfs.fullname" $ }}-console
                 port:
-                  name: api
+                  name: console
           {{- end }}
     {{- end }}
 {{- end }}

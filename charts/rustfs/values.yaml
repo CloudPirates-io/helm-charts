@@ -177,11 +177,11 @@ ingress:
   ## @param ingress.hosts[0].host Hostname for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].path Path for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].pathType Path type for RustFS API ingress
-  hosts:
-    - host: rustfs.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param ingress.tls TLS configuration for RustFS API ingress
   tls: []
   #  - secretName: rustfs-tls
@@ -206,11 +206,11 @@ consoleIngress:
   ## @param consoleIngress.hosts[0].host Hostname for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].path Path for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].pathType Path type for Console RustFS API ingress
-  hosts:
-    - host: rustfs-console.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs-console.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
   tls: []
   #  - secretName: rustfs-console-tls
