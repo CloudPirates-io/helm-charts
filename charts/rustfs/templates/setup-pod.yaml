@@ -90,7 +90,7 @@ spec:
           done
 
           # Read, add users and assign policies
-          jq -c '.[]' setup/users | while read -r user; do
+          jq -c '.[]' /setup/users | while read -r user; do
             name=$(echo "${user}" | jq -r '.name')
             password=$(echo "${user}" | jq -r '.password')
 
@@ -112,7 +112,7 @@ spec:
           done
 
           # Create buckets
-          jq -c '.[]' setup/buckets | while read -r bucket; do
+          jq -c '.[]' /setup/buckets | while read -r bucket; do
             name=$(echo "${bucket}" | jq -r '.name')
 
             rc mb "local/${name}"
