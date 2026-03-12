@@ -52,6 +52,13 @@ Return the proper RustFS image name
 {{- end }}
 
 {{/*
+Return the proper RustFS CLI image name
+*/}}
+{{- define "rustfs-setup.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.setup.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "rustfs.imagePullSecrets" -}}
