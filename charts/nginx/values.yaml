@@ -24,7 +24,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.5-alpine@sha256:1d13701a5f9f3fb01aaa88cef2344d65b6b5bf6b7d9fa4cf0dca557a8d7702ba"
+  tag: "1.29.6-alpine@sha256:f46cb72c7df02710e693e863a983ac42f6a9579058a59a35f1ae36c9958e4ce0"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -66,7 +66,7 @@ service:
       protocol: TCP
       name: http
   ## @param service.internalTrafficPolicy Kubernetes service internal traffic policy
-  internalTrafficPolicy:
+  internalTrafficPolicy: ""
   ## @param service.annotations Additional annotations to add to the service
   annotations: {}
 

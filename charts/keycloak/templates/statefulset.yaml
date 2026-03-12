@@ -131,6 +131,9 @@ spec:
             {{- if .Values.metrics.enabled }}
             - --metrics-enabled=true
             {{- end }}
+            {{- if or .Values.livenessProbe.enabled .Values.readinessProbe.enabled .Values.startupProbe.enabled }}
+            - --health-enabled=true
+            {{- end }}
             {{- with .Values.keycloak.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -228,6 +231,9 @@ spec:
               containerPort: {{ .Values.keycloak.httpsPort }}
               protocol: TCP
             {{- end }}
+            - name: management
+              containerPort: {{ .Values.keycloak.managementPort }}
+              protocol: TCP
             {{- if .Values.metrics.enabled }}
             - name: {{ .Values.metrics.service.targetPort }}
               containerPort: {{ .Values.metrics.service.port }}
@@ -236,14 +242,9 @@ spec:
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.livenessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -253,14 +254,9 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.readinessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -270,14 +266,9 @@ spec:
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.livenessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}

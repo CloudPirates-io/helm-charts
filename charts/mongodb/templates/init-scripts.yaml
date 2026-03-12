@@ -349,28 +349,56 @@ data:
       local service=$1
       local replicaset=$2
       log "Start ReplicaSet initialization"
-      # First try to detect if other instance of this ReplicSet cluster are available
-      detect_cluster $service
-      if [ $? -eq 0 ]; then
-        # Try to find the primary instance
-        local primary=$(find_primary $service)
-        if [ -z "$primary" ]; then
-          log "Primary not found - Trying to detect if this instance was PRIMARY before"
-          result=$(detect_instance $service "$HOSTNAME.$service")
-          # Find out whether the actual instance was the primary before
-          if [ "$result" = "0" ]; then
-            log "Not the PRIMARY - Can't add this instance $HOSTNAME.$service without a running PRIMARY - Exiting"
-            exit 1
+
+      # Determine pod ordinal from hostname (e.g. "mongodb-2" -> "2")
+      local ordinal="${HOSTNAME##*-}"
+      # Derive pod-0's individual FQDN by prepending "<base>-0." to the headless service FQDN.
+      # Example: HOSTNAME=mongodb-1, service=mongodb-headless.ns.svc.cluster.local:27017
+      #   -> pod_zero=mongodb-0.mongodb-headless.ns.svc.cluster.local:27017
+      local pod_zero="${HOSTNAME%-*}-0.${service}"
+
+      if [ "$ordinal" = "0" ]; then
+        # Pod-0 is the designated bootstrap node. It is the only pod that may call
+        # rs.initiate(). Preserve the original detect-then-init logic unchanged.
+        detect_cluster $service
+        if [ $? -eq 0 ]; then
+          # Cluster already exists; find the current primary
+          local primary=$(find_primary $service)
+          if [ -z "$primary" ]; then
+            log "Primary not found - Trying to detect if this instance was PRIMARY before"
+            result=$(detect_instance $service "$HOSTNAME.$service")
+            if [ "$result" = "0" ]; then
+              log "Not the PRIMARY - Can't add this instance $HOSTNAME.$service without a running PRIMARY - Exiting"
+              exit 1
+            else
+              log "This instance $HOSTNAME.$service was the PRIMARY before - Continue starting..."
+            fi
           else
-            log "This instance $HOSTNAME.$service was the PRIMARY before - Continue starting..."
+            log "Primary $primary found"
+            add_secondary $primary "$HOSTNAME.$service"
           fi
         else
-          log "Primary $primary found"
-          add_secondary $primary "$HOSTNAME.$service"
+          # No cluster found - initialize this instance as primary
+          init_primary "$HOSTNAME.$service" $replicaset
         fi
       else
-        # Assume that this is the first instance in the cluster - initialize it as primary 
-        init_primary "$HOSTNAME.$service" $replicaset
+        # Non-bootstrap pods (ordinal > 0) must NEVER call rs.initiate().
+        # Querying the load-balanced headless service risks hitting an uninitialised
+        # peer and falsely concluding no cluster exists (the split-brain root cause).
+        # Instead, query pod-0 directly and wait until a PRIMARY is available there.
+        log "Pod ordinal $ordinal: waiting for bootstrap node $pod_zero to have an active PRIMARY..."
+        until detect_cluster $pod_zero; do
+          log "Bootstrap node not ready yet, retrying in 5s..."
+          sleep 5
+        done
+        local primary=$(find_primary $pod_zero)
+        if [ ! -z "$primary" ]; then
+          log "Primary $primary found via $pod_zero - Adding $HOSTNAME.$service as SECONDARY"
+          add_secondary $primary "$HOSTNAME.$service"
+        else
+          log "ERROR: ReplicaSet found at $pod_zero but no PRIMARY elected - Exiting"
+          exit 1
+        fi
       fi
       log "Done with ReplicaSet initialization\n-----"
     }
