@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.7] - 2026-03-11
+
+- [mongo] Update image.repository to 3a7947f (#1123) ([714c8101](https://github.com/CloudPirates-io/helm-charts/commit/714c8101))
+
 ## [0.12.6] - 2026-03-11
 
 - Add serviceAccountName to StatefulSet spec to support WI/MSI/CSI (#1118) ([1deaed63](https://github.com/CloudPirates-io/helm-charts/commit/1deaed63))
