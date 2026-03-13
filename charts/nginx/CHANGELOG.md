@@ -2,6 +2,22 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.8.4] - 2026-03-11
+
+- Update image.repository to v1.29.6 (#1128) ([b5321813](https://github.com/CloudPirates-io/helm-charts/commit/b5321813))
+
+## [0.8.3] - 2026-03-11
+
+- Update image.repository to 1eff5a5 (#1121) ([50712fe2](https://github.com/CloudPirates-io/helm-charts/commit/50712fe2))
+
+## [0.8.2] - 2026-03-10
+
+- Fix internalTrafficPolicy values (#1113) ([437c7c3a](https://github.com/CloudPirates-io/helm-charts/commit/437c7c3a))
+
+## [0.8.1] - 2026-03-10
+
+- Add internalTrafficPolicy to service (#1103) ([cf14e66d](https://github.com/CloudPirates-io/helm-charts/commit/cf14e66d))
+
 ## [0.8.0] - 2026-03-05
 
 - Add daemonset mode (#1092) ([3cea25af](https://github.com/CloudPirates-io/helm-charts/commit/3cea25af))

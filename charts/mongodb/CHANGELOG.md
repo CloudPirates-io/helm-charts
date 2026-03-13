@@ -2,6 +2,19 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.7] - 2026-03-11
+
+- [mongo] Update image.repository to 3a7947f (#1123) ([714c8101](https://github.com/CloudPirates-io/helm-charts/commit/714c8101))
+
+## [0.12.6] - 2026-03-11
+
+- Add serviceAccountName to StatefulSet spec to support WI/MSI/CSI (#1118) ([1deaed63](https://github.com/CloudPirates-io/helm-charts/commit/1deaed63))
+
+## [0.12.5] - 2026-03-07
+
+- fix a race condition between detect_cluster and Kubernetes Service DNS (#1093) ([7b98fc45](https://github.com/CloudPirates-io/helm-charts/commit/7b98fc45))
+- Fix renovate and pin mongodb + redis ([42c4b8d9](https://github.com/CloudPirates-io/helm-charts/commit/42c4b8d9))
+
 ## [0.12.4] - 2026-02-27
 
 - [percona/mongodb_exporter] Update image to v0.49.0 (#1065) ([482ff0a3](https://github.com/CloudPirates-io/helm-charts/commit/482ff0a3))

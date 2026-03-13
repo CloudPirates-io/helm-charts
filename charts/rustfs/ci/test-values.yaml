@@ -4,8 +4,6 @@
 image:
   # Use IfNotPresent to avoid repeated pulls in CI
   imagePullPolicy: IfNotPresent
-  # Keep latest tag for testing
-  tag: "latest"
 
 # Disable ingress for CI tests
 ingress:

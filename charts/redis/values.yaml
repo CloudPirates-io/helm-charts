@@ -413,10 +413,10 @@ sentinel:
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
   resources:
     limits:
-      cpu: 50m
+      cpu: 200m
       memory: 128Mi
     requests:
-      cpu: 25m
+      cpu: 50m
       memory: 64Mi
   ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
   ## When true: On master termination, waits for failover to complete (zero-downtime)

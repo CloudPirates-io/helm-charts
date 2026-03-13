@@ -64,6 +64,39 @@ config:
   ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
   extraEnvVars: []
 
+# -- Setups RustFS via CLI
+setup:
+  image:
+    ## @param image.registry RustFS CLI image registry
+    registry: docker.io
+    ## @param image.repository RustFS CLI image repository
+    repository: rustfs/rc
+    ## @param image.tag RustFS CLI image tag (immutable tags are recommended)
+    tag: "v0.1.7@sha256:e3361b199091cd82affc4d72a78af54eb2c0d4e0565daeb2bef67ddc67358475"
+    ## @param image.imagePullPolicy RustFS CLI image pull policy
+    imagePullPolicy: Always
+  # -- If defined, uses a pre-configured *SecretMap* with the keys below as JSON
+  existingSecret: ""
+  # -- Policy definitions
+  policies: []
+#    - name: test
+#      # -- Raw policy definition
+#      spec:
+#        Version: 2012-10-17
+#        Statement:
+#          - Effect: Allow
+#            Action: [ "*" ]
+#            Resource: [ "arn:aws:s3:::*" ]
+  # -- User definitions
+  users: []
+#    - name: test
+#      password: thisIsMySecretPassword
+#      policies:
+#        - readwrite
+  # -- Bucket definitions
+  buckets: []
+#    - name: test
+
 ## @section Deployment configuration
 replicaCount: 1
 ## @section Deployment type configuration
@@ -144,11 +177,11 @@ ingress:
   ## @param ingress.hosts[0].host Hostname for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].path Path for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].pathType Path type for RustFS API ingress
-  hosts:
-    - host: rustfs.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param ingress.tls TLS configuration for RustFS API ingress
   tls: []
   #  - secretName: rustfs-tls
@@ -173,11 +206,11 @@ consoleIngress:
   ## @param consoleIngress.hosts[0].host Hostname for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].path Path for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].pathType Path type for Console RustFS API ingress
-  hosts:
-    - host: rustfs-console.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs-console.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
   tls: []
   #  - secretName: rustfs-console-tls
