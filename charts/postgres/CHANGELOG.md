@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.17.2] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
 ## [0.17.1] - 2026-03-02
 
 - Update image to 69e8582 (#1076) ([cebec9dc](https://github.com/CloudPirates-io/helm-charts/commit/cebec9dc))
