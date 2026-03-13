@@ -2,11 +2,24 @@ suite: test service account
 templates:
   - templates/statefulset.yaml
 tests:
-  - it: readiness probe should be original
+  - it: liveness probe should use /health/live
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /health/live
+  - it: liveness probe should include the httpRelativePath
+    set:
+      keycloak:
+        httpRelativePath: /auth
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /auth/health/live
+  - it: readiness probe should use /health/ready
     asserts:
       - equal:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
-          value: /realms/master
+          value: /health/ready
   - it: readiness probe should include the httpRelativePath
     set:
       keycloak:
@@ -14,7 +27,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
-          value: /auth/realms/master
+          value: /auth/health/ready
   - it: hostname explicitly set should be unchanged
     set:
       keycloak:

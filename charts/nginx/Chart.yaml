@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.8.3
-appVersion: "1.29.5"
+version: 0.8.5
+appVersion: "1.29.6"
 keywords:
   - nginx
   - web server
@@ -42,9 +42,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update image.repository to 1eff5a5"
+      description: "Update image.repository to f46cb72"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1121"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1134"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/nginx/CHANGELOG.md"
