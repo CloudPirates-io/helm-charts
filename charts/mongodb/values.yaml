@@ -79,21 +79,36 @@ config:
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
 
-## @section customUser Optional user to be created at initialisation with a custom password and database
-customUser: {}
-  ## @param customUser.name Name of the custom user to be created
-  # name: ""
-  ## @param customUser.database Name of the database to be created
-  # database: ""
-  ## @param customUser.password Password to be used for the custom user
-  # password: ""
-  ## @param customUser.existingSecret Existing secret, in which username, password and database name are saved
-  # existingSecret: ""
-  ## @param customUser.secretKeys Name of keys in existing secret to use the custom user name, password and database
-  # secretKeys:
-  #   name: ""
+## @section customUsers Optional users to be created at initialisation
+customUsers: []
+  ## Each entry supports the following fields:
+  ## @param customUsers[].name Username. A secret is auto-generated if existingSecret is not set.
+  ## @param customUsers[].database Database to create the user in. Defaults to name if not set.
+  ## @param customUsers[].password Password. Random 32-char string generated if not set.
+  ## @param customUsers[].existingSecret Name of an existing secret. Supports Helm template strings.
+  ## @param customUsers[].secretKeys.name Key in existingSecret for username (default: CUSTOM_USER)
+  ## @param customUsers[].secretKeys.password Key in existingSecret for password (default: CUSTOM_PASSWORD)
+  ## @param customUsers[].secretKeys.database Key in existingSecret for database (default: CUSTOM_DB)
+  ## @param customUsers[].roles List of MongoDB roles. Strings apply to the user's own database.
+  ##   Use {role: x, db: y} for cross-database roles.
+  ## Example:
+  # - name: appuser
+  #   database: appdb
   #   password: ""
-  #   database: ""
+  #   roles:
+  #     - readWrite
+  #     - dbAdmin
+  # - name: readonlyuser
+  #   database: reportingdb
+  #   roles:
+  #     - read
+  # - existingSecret: my-secret
+  #   secretKeys:
+  #     name: CUSTOM_USER
+  #     password: CUSTOM_PASSWORD
+  #     database: CUSTOM_DB
+  #   roles:
+  #     - readWrite
 
 persistence:
   ## @param persistence.enabled Enable persistent storage
