@@ -761,41 +761,48 @@ data:
       fi
 
       {{- if .Values.auth.enabled }}
-      # Create admin user using localhost exception (must be done from inside the mongos pod)
+      # Create admin user if it doesn't already exist.
+      # First check if credentials already work (upgrade/re-deploy scenario).
+      # If not, try via localhost exception (fresh install).
       log_shard "Creating admin user if needed..."
-      result=$(kubectl exec {{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} -- mongosh --eval "
-        try {
-          db.getSiblingDB('admin').createUser({
-            user: '$MONGO_INITDB_ROOT_USERNAME',
-            pwd: '$MONGO_INITDB_ROOT_PASSWORD',
-            roles: [
-              { role: 'root', db: 'admin' },
-              { role: 'clusterAdmin', db: 'admin' },
-              { role: 'userAdminAnyDatabase', db: 'admin' }
-            ]
-          });
-          print('USER_CREATED');
-        } catch (e) {
-          if (e.code === 51003) {
-            print('USER_EXISTS');
-          } else {
-            print('ERROR: ' + e.message);
-            throw e;
+      auth_check=$(mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
+      if [ "$auth_check" = "1" ]; then
+        log_shard "Admin user already exists and credentials are valid"
+      else
+        result=$(kubectl exec {{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} -- mongosh --eval "
+          try {
+            db.getSiblingDB('admin').createUser({
+              user: '$MONGO_INITDB_ROOT_USERNAME',
+              pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+              roles: [
+                { role: 'root', db: 'admin' },
+                { role: 'clusterAdmin', db: 'admin' },
+                { role: 'userAdminAnyDatabase', db: 'admin' }
+              ]
+            });
+            print('USER_CREATED');
+          } catch (e) {
+            if (e.code === 51003) {
+              print('USER_EXISTS');
+            } else {
+              print('ERROR: ' + e.message);
+              throw e;
+            }
           }
-        }
-      " 2>&1)
+        " 2>&1)
 
-      case "$result" in
-        *USER_CREATED*)
-          log_shard "Admin user created successfully"
-          ;;
-        *USER_EXISTS*)
-          log_shard "Admin user already exists"
-          ;;
-        *)
-          log_shard "Warning: User creation result: $result"
-          ;;
-      esac
+        case "$result" in
+          *USER_CREATED*)
+            log_shard "Admin user created successfully"
+            ;;
+          *USER_EXISTS*)
+            log_shard "Admin user already exists"
+            ;;
+          *)
+            logErrorAndExitShard "Failed to create admin user: $result" 1
+            ;;
+        esac
+      fi
       {{- end }}
 
       # Check arbiter configuration and log warnings
