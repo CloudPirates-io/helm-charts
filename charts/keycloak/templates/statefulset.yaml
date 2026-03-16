@@ -46,24 +46,18 @@ spec:
           volumeMounts:
             - name: keycloak-lib-quarkus
               mountPath: /shared-quarkus
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.initContainerImage" (dict "config" .Values.initContainers.waitForPostgres "global" .Values.global) }}
           imagePullPolicy: {{ .Values.initContainers.waitForPostgres.pullPolicy }}
           command: ["sh", "-c", "until pg_isready -h {{ template "postgres.fullname" .Subcharts.postgres }} -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"]
-          resources:
-            {{- toYaml .Values.initContainers.waitForPostgres.resources | nindent 12 }}
         {{- else if .Values.mariadb.enabled }}
         - name: wait-for-mariadb
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.initContainerImage" (dict "config" .Values.initContainers.waitForMariadb "global" .Values.global) }}
           imagePullPolicy: {{ .Values.initContainers.waitForMariadb.pullPolicy }}
           command: ["sh", "-c", "until mariadb-admin ping -h {{ template "mariadb.fullname" .Subcharts.mariadb }} -P 3306 --silent; do echo waiting for database; sleep 2; done;"]
-          resources:
-            {{- toYaml .Values.initContainers.waitForMariadb.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
           {{- toYaml .Values.extraInitContainers | nindent 8 }}

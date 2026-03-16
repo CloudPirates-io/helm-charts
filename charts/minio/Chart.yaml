@@ -2,7 +2,7 @@ apiVersion: v2
 name: minio
 description: High Performance Object Storage compatible with Amazon S3 APIs
 type: application
-version: 0.10.1
+version: 0.11.0
 appVersion: "2025.10.15"
 keywords:
   - minio
@@ -41,9 +41,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[cloudpirates/image-minio] Update image to 8dc02a7"
+      description: "Support gateway api in addition to ingress where applicable"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1025"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1132"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/minio/CHANGELOG.md"
