@@ -235,6 +235,46 @@ tests:
           value: fast-ssd
         documentIndex: 0
 
+  - it: should inject customUsers env vars into sharded cluster statefulsets
+    set:
+      shardedCluster:
+        enabled: true
+        shards: 1
+      customUsers:
+        - name: appuser
+          database: appdb
+          roles:
+            - readWrite
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MONGO_CUSTOM_USER_0_NAME
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-mongodb-custom-user-0-secret
+                key: CUSTOM_USER
+        template: statefulset-configserver.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MONGO_CUSTOM_USER_0_NAME
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-mongodb-custom-user-0-secret
+                key: CUSTOM_USER
+        template: statefulset-mongos.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MONGO_CUSTOM_USER_0_NAME
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-mongodb-custom-user-0-secret
+                key: CUSTOM_USER
+        template: statefulset-shard.yaml
+        documentIndex: 0
+
   - it: should not create sharded cluster resources when disabled
     set:
       shardedCluster:
