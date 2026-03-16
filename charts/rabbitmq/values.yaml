@@ -77,7 +77,7 @@ auth:
   ## @param auth.existingErlangCookieKey Key in existing secret containing Erlang cookie
   existingErlangCookieKey: "erlang-cookie"
   ## @param auth.erlangCookiePermissions [experimental] File permissions for the .erlang.cookie file. See https://github.com/CloudPirates-io/helm-charts/issues/1141
-  erlangCookiePermissions: "400"
+  erlangCookiePermissions: 400
 
 ## @section RabbitMQ configuration
 config:
@@ -107,7 +107,7 @@ config:
     ##   value: "8GB"            # absolute: 8 gigabytes
     ##   value: "8590000000"     # absolute: 8590000000 bytes (use string for large numbers)
     ##
-    value: 0.4  # @schema type:[number, string]
+    value: 0.4 # @schema type:[number, string]
   ## Logging configuration
   ## ref: https://www.rabbitmq.com/docs/logging
   ##
@@ -162,7 +162,7 @@ queueBalancing:
   ## Helps RabbitMQ make better decisions during cluster formation and queue placement
   ## Leave empty/null to use RabbitMQ's default
   clusterFormation:
-    targetClusterSizeHint: null  # @schema type:[integer,null]
+    targetClusterSizeHint: null # @schema type:[integer,null]
 
   ## Quorum queue reconciliation settings (for RabbitMQ 3.10+)
   ## Helps ensure quorum queues have the correct number of replicas across cluster nodes
@@ -173,13 +173,13 @@ queueBalancing:
       enabled: false
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize Target number of members per quorum queue (integer)
       ## Set to cluster size for full replication, or leave empty/null to use cluster_formation.target_cluster_size_hint
-      targetGroupSize: null  # @schema type:[integer,null]
+      targetGroupSize: null # @schema type:[integer,null]
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.interval Reconciliation check interval in milliseconds
       ## Default: 3600000 (1 hour) to match RabbitMQ's default
       interval: 3600000
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval How often to trigger reconciliation in milliseconds (integer)
       ## Leave empty/null to use RabbitMQ's default
-      triggerInterval: null  # @schema type:[integer,null]
+      triggerInterval: null # @schema type:[integer,null]
 
   ## Automatic queue rebalancing
   ## @param queueBalancing.autoRebalance.enabled Enable automatic queue rebalancing on pod startup
