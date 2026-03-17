@@ -73,6 +73,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.19.1] - 2026-03-16
+
+- Update image.repository to 693b201 (#1140) ([d319df36](https://github.com/CloudPirates-io/helm-charts/commit/d319df36))
+
 ## [0.19.0] - 2026-03-13
 
 - [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
