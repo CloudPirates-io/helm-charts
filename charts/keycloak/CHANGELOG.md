@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
 ## [0.18.0] - 2026-03-11
 
 - [keycloak]: Differentiate probes (#1125) ([58ab1d63](https://github.com/CloudPirates-io/helm-charts/commit/58ab1d63))
