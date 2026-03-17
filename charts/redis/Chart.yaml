@@ -41,8 +41,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "Fix missing tls arguments for sentinel probe monitoring"
+    - kind: changed
+      description: "Update image.repository to a019c00"
       links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1146"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/redis/CHANGELOG.md"
