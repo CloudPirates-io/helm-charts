@@ -74,17 +74,6 @@ postgres-password
 {{- end }}
 
 {{/*
-Return PostgreSQL user password key
-*/}}
-{{- define "postgres.userPasswordKey" -}}
-{{- if .Values.auth.existingSecret -}}
-    {{- .Values.auth.secretKeys.userPasswordKey -}}
-{{- else -}}
-password
-{{- end -}}
-{{- end }}
-
-{{/*
 Return PostgreSQL configuration ConfigMap name
 */}}
 {{- define "postgres.configmapName" -}}

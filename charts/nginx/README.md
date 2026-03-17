@@ -4,7 +4,7 @@
 
 # Nginx
 
-nginx ("engine x") is an HTTP web server, reverse proxy, content cache, load balancer, TCP/UDP proxy server, and mail proxy server. 
+nginx ("engine x") is an HTTP web server, reverse proxy, content cache, load balancer, TCP/UDP proxy server, and mail proxy server.
 
 ## Installing the Chart
 
@@ -62,7 +62,7 @@ serverConfig: |
     listen 0.0.0.0:8080;
     root /usr/share/nginx/html;
     index index.html index.htm;
-    
+
     location / {
       try_files $uri $uri/ /index.html;
     }
@@ -200,11 +200,12 @@ containerPorts:
 
 ### Service Parameters
 
-| Parameter             | Description                                                    | Default     |
-| --------------------- | -------------------------------------------------------------- | ----------- |
-| `service.type`        | Nginx service type                                             | `ClusterIP` |
-| `service.ports`       | Array of service ports (advanced configuration) - see examples | `[]`        |
-| `service.annotations` | Additional annotations to add to the service                   | `{}`        |
+| Parameter                       | Description                                                    | Default     |
+| ------------------------------- | -------------------------------------------------------------- | ----------- |
+| `service.type`                  | Nginx service type                                             | `ClusterIP` |
+| `service.ports`                 | Array of service ports (advanced configuration) - see examples | `[]`        |
+| `service.internalTrafficPolicy` | Kubernetes service internal traffic policy                     | `Cluster`   |
+| `service.annotations`           | Additional annotations to add to the service                   | `{}`        |
 
 #### Service Ports Examples
 
@@ -338,7 +339,7 @@ readinessProbe:
 | `metrics.serviceMonitor.annotations`       | Additional annotations for ServiceMonitor                      | `{}`                              |
 | `metrics.serviceMonitor.namespaceSelector` | Namespace selector for ServiceMonitor                          | `{}`                              |
 
-**Note:**  
+**Note:**
 To enable metrics, set `metrics.enabled: true` and ensure your Nginx configuration includes a stub status endpoint, e.g.:
 ```nginx
 location /stub_status {

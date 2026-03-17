@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.0] - 2026-03-11
+
+- [keycloak]: Differentiate probes (#1125) ([58ab1d63](https://github.com/CloudPirates-io/helm-charts/commit/58ab1d63))
+
+## [0.17.0] - 2026-03-10
+
+- Documentation improvements (#1112) ([9be6cf73](https://github.com/CloudPirates-io/helm-charts/commit/9be6cf73))
+
+## [0.16.9] - 2026-03-06
+
+- [keycloak/keycloak] Update image.repository to v26.5.5 (#1096) ([26b39e28](https://github.com/CloudPirates-io/helm-charts/commit/26b39e28))
+
 ## [0.16.8] - 2026-03-05
 
 - Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
