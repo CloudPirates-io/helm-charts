@@ -1,6 +1,6 @@
-{{- if .Values.ingress.enabled -}}
 {{- $fullName := include "rustfs.fullname" . -}}
-{{- $deploymentType := .Values.deploymentType -}}
+
+{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -43,20 +43,6 @@ spec:
                 port:
                   name: api
           {{- end }}
-    - host: "*.{{ .host }}"
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ $fullName }}
-                port:
-                  name: api
-          {{- end }}
     {{- end }}
 {{- end }}
 
@@ -65,7 +51,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "rustfs.fullname" . }}-console
+  name: {{ $fullName }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
@@ -101,23 +87,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "rustfs.fullname" $ }}-pod0
+                name: {{ $fullName }}-console
                 port:
-                  name: api
-          {{- end }}
-    - host: "*.{{ .host }}"
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ include "rustfs.fullname" $ }}-pod0
-                port:
-                  name: api
+                  name: console
           {{- end }}
     {{- end }}
 {{- end }}

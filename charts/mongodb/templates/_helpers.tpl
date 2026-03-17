@@ -230,6 +230,82 @@ Return shard replica set connection string
 {{- end -}}
 
 {{/*
+Render roles for one customUsers entry as JS role objects joined by ", ".
+Call with: (dict "roles" $user.roles "q" "\\\"" "i" $i)  — double-quote shell arg context
+       or: (dict "roles" $user.roles "q" "'"   "i" $i)  — single-quote JS inside double-quoted shell
+
+Roles can be:
+  - plain strings: "readWrite"  → {role: "readWrite", db: "$MONGO_CUSTOM_USER_<i>_DATABASE"}
+  - objects without db: {role: readWrite}  → same as above
+  - objects with db: {role: clusterMonitor, db: admin}  → {role: "clusterMonitor", db: "admin"}
+*/}}
+{{- define "mongodb.customUsers.rolesJs" -}}
+{{- $q := .q -}}
+{{- $i := .i -}}
+{{- $roles := list -}}
+{{- range .roles -}}
+  {{- if kindIs "string" . -}}
+    {{- $roles = append $roles (printf "{role: %s%s%s, db: %s$MONGO_CUSTOM_USER_%d_DATABASE%s}" $q . $q $q $i $q) -}}
+  {{- else if .db -}}
+    {{- $roles = append $roles (printf "{role: %s%s%s, db: %s%s%s}" $q .role $q $q .db $q) -}}
+  {{- else -}}
+    {{- $roles = append $roles (printf "{role: %s%s%s, db: %s$MONGO_CUSTOM_USER_%d_DATABASE%s}" $q .role $q $q $i $q) -}}
+  {{- end -}}
+{{- end -}}
+{{- join ", " $roles -}}
+{{- end -}}
+
+{{/*
+Render env vars for all customUsers entries.
+Call with: (dict "ctx" .)
+Produces MONGO_CUSTOM_USER_<i>_NAME, _PASSWORD, _DATABASE for each user.
+*/}}
+{{- define "mongodb.customUsers.envVars" -}}
+{{- $ctx := .ctx -}}
+{{- range $i, $user := $ctx.Values.customUsers -}}
+- name: MONGO_CUSTOM_USER_{{ $i }}_NAME
+  valueFrom:
+    secretKeyRef:
+      {{- if $user.existingSecret }}
+      name: {{ include "cloudpirates.tplvalues.render" (dict "value" $user.existingSecret "context" $ctx) }}
+      {{- else }}
+      name: {{ include "mongodb.fullname" $ctx }}-custom-user-{{ $i }}-secret
+      {{- end }}
+      {{- if and $user.secretKeys $user.secretKeys.name }}
+      key: {{ $user.secretKeys.name }}
+      {{- else }}
+      key: CUSTOM_USER
+      {{- end }}
+- name: MONGO_CUSTOM_USER_{{ $i }}_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      {{- if $user.existingSecret }}
+      name: {{ include "cloudpirates.tplvalues.render" (dict "value" $user.existingSecret "context" $ctx) }}
+      {{- else }}
+      name: {{ include "mongodb.fullname" $ctx }}-custom-user-{{ $i }}-secret
+      {{- end }}
+      {{- if and $user.secretKeys $user.secretKeys.password }}
+      key: {{ $user.secretKeys.password }}
+      {{- else }}
+      key: CUSTOM_PASSWORD
+      {{- end }}
+- name: MONGO_CUSTOM_USER_{{ $i }}_DATABASE
+  valueFrom:
+    secretKeyRef:
+      {{- if $user.existingSecret }}
+      name: {{ include "cloudpirates.tplvalues.render" (dict "value" $user.existingSecret "context" $ctx) }}
+      {{- else }}
+      name: {{ include "mongodb.fullname" $ctx }}-custom-user-{{ $i }}-secret
+      {{- end }}
+      {{- if and $user.secretKeys $user.secretKeys.database }}
+      key: {{ $user.secretKeys.database }}
+      {{- else }}
+      key: CUSTOM_DB
+      {{- end }}
+{{ end }}
+{{- end -}}
+
+{{/*
 Return deployment mode for current configuration
 */}}
 {{- define "mongodb.deploymentMode" -}}

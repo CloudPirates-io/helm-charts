@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.13.0] - 2026-03-11
+
+- [mongodb]: Fix multiple primary´s in primary secondary architecture (#1110) ([1d0becb6](https://github.com/CloudPirates-io/helm-charts/commit/1d0becb6))
+
+## [0.12.7] - 2026-03-11
+
+- [mongo] Update image.repository to 3a7947f (#1123) ([714c8101](https://github.com/CloudPirates-io/helm-charts/commit/714c8101))
+
+## [0.12.6] - 2026-03-11
+
+- Add serviceAccountName to StatefulSet spec to support WI/MSI/CSI (#1118) ([1deaed63](https://github.com/CloudPirates-io/helm-charts/commit/1deaed63))
+
 ## [0.12.5] - 2026-03-07
 
 - fix a race condition between detect_cluster and Kubernetes Service DNS (#1093) ([7b98fc45](https://github.com/CloudPirates-io/helm-charts/commit/7b98fc45))

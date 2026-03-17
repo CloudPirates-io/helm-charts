@@ -124,6 +124,8 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
+  ## @param keycloak.managementPort Management interface port (health endpoints are served here)
+  managementPort: 9000
   ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded). Must be set when running behind a reverse proxy (e.g. nginx ingress), otherwise Keycloak will not trust X-Forwarded-* headers and will generate incorrect URLs. Leave empty only when Keycloak is directly exposed without a proxy.
   proxyHeaders: ""
   ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
@@ -294,6 +296,36 @@ ingress:
   #  - secretName: keycloak-tls
   #    hosts:
   #      - keycloak.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for Keycloak
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - keycloak.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Resources
 resources: {}
@@ -478,7 +510,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.2.2@sha256:b1cb255a9939d28a1856815f0de6046c20c28c21b92a9f2696bc782b247a47ee"
+    tag: "12.2.2@sha256:310a2b521cdf1c3c1cfd2cb468e3f0843cc0d7b06d7325b7d48e197592f5d8bd"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container

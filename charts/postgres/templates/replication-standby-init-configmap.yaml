@@ -1,4 +1,4 @@
-{{- if and .Values.replication.primary .Values.replication.primary.host }}
+{{- if and .Values.replication.enabled .Values.replication.primary.host }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

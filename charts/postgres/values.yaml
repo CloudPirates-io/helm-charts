@@ -228,6 +228,36 @@ ingress:
   #    hosts:
   #      - postgres.local
 
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for PostgreSQL
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - postgres.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
 ## @section Resources
 resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious

@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.4-management@sha256:068bba7e53c9daf2573d02b4f3314d2a3d9fbd54c526d85f04bf473c072d1d83"
+  tag: "4.2.4-management@sha256:693b2012f0823c3b75e75e9e6248426e9dc1802e748b5e8deddaa71602c4383b"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -355,6 +355,36 @@ ingress:
           pathType: Prefix
   ## @param ingress.tls Ingress TLS configuration
   tls: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for RabbitMQ management
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rabbitmq.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Resources
 ## @param resources Resource limits and requests for RabbitMQ pods

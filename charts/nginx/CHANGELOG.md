@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.8.5] - 2026-03-12
+
+- Update image.repository to f46cb72 (#1134) ([931183e3](https://github.com/CloudPirates-io/helm-charts/commit/931183e3))
+
+## [0.8.4] - 2026-03-11
+
+- Update image.repository to v1.29.6 (#1128) ([b5321813](https://github.com/CloudPirates-io/helm-charts/commit/b5321813))
+
+## [0.8.3] - 2026-03-11
+
+- Update image.repository to 1eff5a5 (#1121) ([50712fe2](https://github.com/CloudPirates-io/helm-charts/commit/50712fe2))
+
 ## [0.8.2] - 2026-03-10
 
 - Fix internalTrafficPolicy values (#1113) ([437c7c3a](https://github.com/CloudPirates-io/helm-charts/commit/437c7c3a))
