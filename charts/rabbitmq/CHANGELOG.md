@@ -73,6 +73,30 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.19.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
+## [0.18.3] - 2026-03-13
+
+- Update image.repository to 4a2be7e (#1136) ([acb5c848](https://github.com/CloudPirates-io/helm-charts/commit/acb5c848))
+
+## [0.18.2] - 2026-03-11
+
+- Update image.repository to 81de74a (#1126) ([353c61f0](https://github.com/CloudPirates-io/helm-charts/commit/353c61f0))
+
+## [0.18.1] - 2026-03-10
+
+- Update image.repository to 068bba7 (#1107) ([e4d039f1](https://github.com/CloudPirates-io/helm-charts/commit/e4d039f1))
+
+## [0.18.0] - 2026-03-07
+
+- Add namespaceSelector to serviceMonitor (#1097) ([7be4cff6](https://github.com/CloudPirates-io/helm-charts/commit/7be4cff6))
+
+## [0.17.2] - 2026-03-02
+
+- Update image.repository to 1dd8956 (#1073) ([e7d3f268](https://github.com/CloudPirates-io/helm-charts/commit/e7d3f268))
+
 ## [0.17.1] - 2026-02-27
 
 - Update charts/rabbitmq/values.yaml rabbitmq (#1060) ([4eb3c9a4](https://github.com/CloudPirates-io/helm-charts/commit/4eb3c9a4))

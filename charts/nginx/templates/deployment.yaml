@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ if .Values.daemonset.enabled }}DaemonSet{{ else }}Deployment{{ end }}
 metadata:
   name: {{ include "nginx.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
@@ -10,12 +10,16 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if and (not .Values.autoscaling.enabled) (not .Values.daemonset.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "nginx.selectorLabels" . | nindent 6 }}
+  {{- if and .Values.daemonset.enabled .Values.daemonset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml .Values.daemonset.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:

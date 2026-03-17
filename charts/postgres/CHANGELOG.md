@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.17.3] - 2026-03-13
+
+- [postgres]: Various QOL fixes concerning the README and smaller bugs (#1114) ([e874e1be](https://github.com/CloudPirates-io/helm-charts/commit/e874e1be))
+
+## [0.17.2] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
+## [0.17.1] - 2026-03-02
+
+- Update image to 69e8582 (#1076) ([cebec9dc](https://github.com/CloudPirates-io/helm-charts/commit/cebec9dc))
+
 ## [0.17.0] - 2026-02-27
 
 - Update charts/postgres/values.yaml postgres to v18.3 (minor) (#1066) ([e92d8a3c](https://github.com/CloudPirates-io/helm-charts/commit/e92d8a3c))

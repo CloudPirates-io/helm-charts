@@ -2,8 +2,8 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.16.7
-appVersion: "26.5.4"
+version: 0.19.2
+appVersion: "26.5.5"
 keywords:
   - keycloak
   - identity
@@ -52,9 +52,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[postgres] Update initContainers.waitForPostgres.repository to v18.3"
+      description: "[mariadb] Update initContainers.waitForMariadb.repository to 310a2b5"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1068"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1149"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/CHANGELOG.md"

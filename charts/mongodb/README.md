@@ -14,12 +14,14 @@ This Helm chart provides a complete MongoDB StatefulSet deployment solution with
 
 - **Official MongoDB Image**: Uses the official `mongo` Docker image from Docker Hub
 - **Authentication**: Configurable MongoDB authentication with root user credentials
+- **Custom User**: Optional custom user creation at initialisation with configurable credentials and database — works in both standalone and sharded cluster modes
 - **Persistent Storage**: Automatic persistent volume management through StatefulSet volumeClaimTemplates
 - **Security**: Non-root container execution with proper security contexts
 - **Health Checks**: Liveness and readiness probes using mongosh
 - **Flexible Configuration**: Comprehensive configuration options for various deployment needs
 - **Service Account**: RBAC-ready with configurable service account
 - **Resource Management**: Configurable CPU and memory limits/requests
+- **Sharded Cluster**: Full sharded cluster support with config servers, mongos routers, and shard servers including automated initialisation, replica set setup, balancer configuration, and auto-sharding
 
 ## Installing the Chart
 
@@ -133,15 +135,53 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Custom User Configuration
 
-| Parameter                        | Description                                                              | Default |
-| -------------------------------- | ------------------------------------------------------------------------ | ------- |
-| `customUser.name`                | Name of the custom user to be created                                    | `""`    |
-| `customUser.database`            | Name of the database to be created                                       | `""`    |
-| `customUser.password`            | Password to be used for the custom user                                  | `""`    |
-| `customUser.existingSecret`      | Existing secret, in which username, password and database name are saved | `""`    |
-| `customUser.secretKeys.name`     | Name of key in existing secret containing username                       | `""`    |
-| `customUser.secretKeys.password` | Name of key in existing secret containing password                       | `""`    |
-| `customUser.secretKeys.database` | Name of key in existing secret containing database                       | `""`    |
+Multiple users can be created at initialisation time via the `customUsers` array. Each user gets the specified roles on their database. This works in standalone, replica set, and sharded cluster modes (in sharded mode users are created via the mongos router after cluster initialisation).
+
+Each entry supports either inline credentials (`name` + optional `password`/`database`) or an existing Kubernetes secret (`existingSecret`).
+
+| Parameter                             | Description                                                                                             | Default                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `customUsers[].name`                  | Username. A secret named `<release>-custom-user-<i>-secret` is auto-generated when no `existingSecret` | `""`                           |
+| `customUsers[].database`              | Database to create the user in. Defaults to `name` if not set                                          | `""`                           |
+| `customUsers[].password`              | Password. A random 32-char password is generated if not set                                             | `""`                           |
+| `customUsers[].existingSecret`        | Name of an existing secret. Supports Helm template strings                                              | `""`                           |
+| `customUsers[].secretKeys.name`       | Key in `existingSecret` holding the username                                                            | `CUSTOM_USER`                  |
+| `customUsers[].secretKeys.password`   | Key in `existingSecret` holding the password                                                            | `CUSTOM_PASSWORD`              |
+| `customUsers[].secretKeys.database`   | Key in `existingSecret` holding the database name                                                       | `CUSTOM_DB`                    |
+| `customUsers[].roles`                 | MongoDB roles to grant. Plain strings apply to the user's own database; use `{role, db}` for cross-database roles | `[readWrite, dbAdmin]` |
+
+**Examples:**
+
+```yaml
+customUsers:
+  - name: appuser
+    database: appdb
+    password: supersecret
+    roles:
+      - readWrite
+      - dbAdmin
+
+  - name: readonlyuser
+    database: reportingdb
+    roles:
+      - read
+
+  # Cross-database role
+  - name: monitoruser
+    database: admin
+    roles:
+      - clusterMonitor
+      - { role: readAnyDatabase, db: admin }
+
+  # From an existing secret
+  - existingSecret: my-app-credentials
+    secretKeys:
+      name: MONGO_USERNAME
+      password: MONGO_PASSWORD
+      database: MONGO_DATABASE
+    roles:
+      - readWrite
+```
 
 ### Persistence Parameters
 
@@ -365,23 +405,104 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Sharded Cluster Parameters
 
-For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead of `replicaSet.enabled`. Sharded clusters consist of config servers, mongos routers, and shard servers.
+For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead of `replicaSet.enabled`. Sharded clusters consist of config servers, mongos routers, and shard servers. Cluster initialisation (replica set setup, shard registration, balancer configuration, and custom user creation) is handled automatically by a post-install Job.
 
-| Parameter                                                 | Description                                                                                    | Default   |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------- |
-| `shardedCluster.enabled`                                  | Enable sharded cluster deployment (mutually exclusive with replicaSet.enabled)                 | `false`   |
-| `shardedCluster.keyFile`                                  | Key for internal cluster authentication (base64 encoded string 6-1024 chars)                   | `""`      |
-| `shardedCluster.keySecretName`                            | Name of an existing secret with a file named "keyfile" containing the base64 encoded key       | `""`      |
-| `shardedCluster.shards`                                   | Number of shards (minimum 2 for meaningful sharding)                                           | `2`       |
-| `shardedCluster.configsvr.replicaCount`                   | Number of config server replicas (minimum 1, recommended 3 for production)                     | `3`       |
-| `shardedCluster.mongos.replicaCount`                      | Number of mongos router instances (minimum 1, recommended 2+ for production)                   | `2`       |
-| `shardedCluster.shardsvr.dataNode.replicaCount`           | Number of data node replicas per shard (minimum 1, recommended 3 for production)               | `3`       |
-| `shardedCluster.shardsvr.arbiter.replicaCount`            | Number of arbiter replicas per shard (see warning below)                                       | `0`       |
-| `shardedCluster.initialization.defaultWriteConcern`       | Cluster-wide default write concern                                                             | `majority`|
+#### General
 
-> **WARNING**: MongoDB does **NOT** recommend using arbiters (`shardedCluster.shardsvr.arbiter.replicaCount > 0`) in sharded cluster deployments. Arbiters do not hold data and can lead to consistency issues in sharded environments. For high availability in sharded clusters, use data-bearing replica set members instead.
->
-> See official MongoDB documentation: [Replica Set Arbiter - Sharded Cluster Considerations](https://www.mongodb.com/docs/manual/core/replica-set-arbiter/#sharded-cluster-considerations)
+| Parameter                      | Description                                                                              | Default  |
+| ------------------------------ | ---------------------------------------------------------------------------------------- | -------- |
+| `shardedCluster.enabled`       | Enable sharded cluster deployment (mutually exclusive with `replicaSet.enabled`)         | `false`  |
+| `shardedCluster.keyFile`       | Plain-text keyfile string (6-1024 chars) for internal cluster authentication             | `""`     |
+| `shardedCluster.keySecretName` | Name of an existing secret with a file named `keyfile` containing the keyfile string     | `""`     |
+| `shardedCluster.shards`        | Number of shards (minimum 2)                                                             | `2`      |
+
+#### Config Servers
+
+| Parameter                                                              | Description                                                                                                  | Default         |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------- |
+| `shardedCluster.configsvr.replicaCount`                                | Number of config server replicas (minimum 1, recommended 3 for production)                                   | `3`             |
+| `shardedCluster.configsvr.enableConfigShard`                           | Enable config shard mode (MongoDB 8.0+): config servers also store user data via `transitionFromDedicatedConfigServer` | `false` |
+| `shardedCluster.configsvr.priorityClassName`                           | Priority class name for config server pods                                                                   | `""`            |
+| `shardedCluster.configsvr.resources`                                   | Resource limits and requests for config server pods                                                          | `limits: {memory: 512Mi}, requests: {cpu: 100m, memory: 512Mi}` |
+| `shardedCluster.configsvr.nodeSelector`                                | Node selector for config server pods                                                                         | `{}`            |
+| `shardedCluster.configsvr.tolerations`                                 | Tolerations for config server pods                                                                           | `[]`            |
+| `shardedCluster.configsvr.affinity`                                    | Affinity rules for config server pods                                                                        | `{}`            |
+| `shardedCluster.configsvr.persistence.size`                            | Size of persistent volume for config servers                                                                 | `8Gi`           |
+| `shardedCluster.configsvr.persistence.storageClass`                    | Storage class for config servers                                                                             | `""`            |
+| `shardedCluster.configsvr.persistence.accessMode`                      | Access mode for config server persistent volumes                                                             | `ReadWriteOnce` |
+| `shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy` | PVC retention policy when the StatefulSet is scaled or deleted                                          | `{}`            |
+| `shardedCluster.configsvr.customInit`                                  | Custom shell commands run during config server initialisation (executed on each config server pod)           | `""`            |
+
+#### Mongos Routers
+
+| Parameter                                  | Description                                                                            | Default         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- | --------------- |
+| `shardedCluster.mongos.replicaCount`       | Number of mongos router instances (minimum 1, recommended 2+ for production)          | `2`             |
+| `shardedCluster.mongos.priorityClassName`  | Priority class name for mongos router pods                                             | `""`            |
+| `shardedCluster.mongos.resources`          | Resource limits and requests for mongos router pods                                    | `limits: {memory: 256Mi}, requests: {cpu: 50m, memory: 256Mi}` |
+| `shardedCluster.mongos.nodeSelector`       | Node selector for mongos router pods                                                   | `{}`            |
+| `shardedCluster.mongos.tolerations`        | Tolerations for mongos router pods                                                     | `[]`            |
+| `shardedCluster.mongos.affinity`           | Affinity rules for mongos router pods                                                  | `{}`            |
+| `shardedCluster.mongos.service.type`       | Service type for mongos routers                                                        | `ClusterIP`     |
+| `shardedCluster.mongos.service.port`       | Service port for mongos routers                                                        | `27017`         |
+| `shardedCluster.mongos.service.annotations`| Additional annotations for the mongos service                                          | `{}`            |
+| `shardedCluster.mongos.customInit`         | Custom shell commands run during mongos initialisation (executed on each mongos pod)   | `""`            |
+
+#### Shard Servers
+
+| Parameter                                                                   | Description                                                                                                      | Default         |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------- |
+| `shardedCluster.shardsvr.nodeSelector`                                      | Node selector applied to all shard components (overridden by component-level selectors)                          | `{}`            |
+| `shardedCluster.shardsvr.tolerations`                                       | Tolerations applied to all shard components (overridden by component-level tolerations)                          | `[]`            |
+| `shardedCluster.shardsvr.affinity`                                          | Affinity rules applied to all shard components (overridden by component-level affinity)                          | `{}`            |
+| `shardedCluster.shardsvr.persistence.size`                                  | Size of persistent volume for each shard member                                                                  | `8Gi`           |
+| `shardedCluster.shardsvr.persistence.storageClass`                          | Storage class for shard persistent volumes                                                                       | `""`            |
+| `shardedCluster.shardsvr.persistence.accessMode`                            | Access mode for shard persistent volumes                                                                         | `ReadWriteOnce` |
+| `shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy`  | PVC retention policy when the StatefulSet is scaled or deleted                                                   | `{}`            |
+| `shardedCluster.shardsvr.customInit`                                        | Custom shell commands run during shard initialisation (executed on each data node pod)                           | `""`            |
+| `shardedCluster.shardsvr.dataNode.replicaCount`                             | Number of data node replicas per shard (minimum 1, recommended 3 for production)                                 | `3`             |
+| `shardedCluster.shardsvr.dataNode.priorityClassName`                        | Priority class name for shard data node pods                                                                     | `""`            |
+| `shardedCluster.shardsvr.dataNode.resources`                                | Resource limits and requests for shard data node pods                                                            | `limits: {memory: 1Gi}, requests: {cpu: 100m, memory: 1Gi}` |
+| `shardedCluster.shardsvr.dataNode.nodeSelector`                             | Node selector for shard data node pods (overrides `shardsvr.nodeSelector`)                                       | `{}`            |
+| `shardedCluster.shardsvr.dataNode.tolerations`                              | Tolerations for shard data node pods (overrides `shardsvr.tolerations`)                                          | `[]`            |
+| `shardedCluster.shardsvr.dataNode.affinity`                                 | Affinity rules for shard data node pods (overrides `shardsvr.affinity`)                                          | `{}`            |
+
+#### Shard Arbiters
+
+> **WARNING**: MongoDB does **NOT** recommend using arbiters (`shardedCluster.shardsvr.arbiter.replicaCount > 0`) in sharded cluster deployments. Arbiters do not hold data and can lead to consistency issues in sharded environments. Use data-bearing replica set members for high availability instead.
+> See: [Replica Set Arbiter - Sharded Cluster Considerations](https://www.mongodb.com/docs/manual/core/replica-set-arbiter/#sharded-cluster-considerations)
+
+| Parameter                                               | Description                                                                        | Default         |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------- |
+| `shardedCluster.shardsvr.arbiter.replicaCount`          | Number of arbiter replicas per shard (0 to disable, recommended 0)                 | `0`             |
+| `shardedCluster.shardsvr.arbiter.priorityClassName`     | Priority class name for arbiter pods                                               | `""`            |
+| `shardedCluster.shardsvr.arbiter.resources`             | Resource limits and requests for arbiter pods                                      | `limits: {memory: 256Mi}, requests: {cpu: 50m, memory: 256Mi}` |
+| `shardedCluster.shardsvr.arbiter.nodeSelector`          | Node selector for arbiter pods (overrides `shardsvr.nodeSelector`)                 | `{}`            |
+| `shardedCluster.shardsvr.arbiter.tolerations`           | Tolerations for arbiter pods (overrides `shardsvr.tolerations`)                    | `[]`            |
+| `shardedCluster.shardsvr.arbiter.affinity`              | Affinity rules for arbiter pods (overrides `shardsvr.affinity`)                    | `{}`            |
+| `shardedCluster.shardsvr.arbiter.extraVolumeMounts`     | Additional volume mounts for arbiter pods                                          | `[]`            |
+| `shardedCluster.shardsvr.arbiter.extraVolumes`          | Additional volumes for arbiter pods                                                | `[]`            |
+
+#### Cluster Initialisation
+
+| Parameter                                               | Description                                                                                              | Default      |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------ |
+| `shardedCluster.initialization.enableShardingDatabases` | List of database names to enable sharding on during initialisation                                       | `[]`         |
+| `shardedCluster.initialization.shardCollections`        | List of collections to shard. Each entry: `{database, collection, key}` e.g. `{userId: 1}`              | `[]`         |
+| `shardedCluster.initialization.retries`                 | Number of retries during cluster initialisation                                                          | `30`         |
+| `shardedCluster.initialization.delay`                   | Seconds to wait between initialisation retries                                                           | `5`          |
+| `shardedCluster.initialization.defaultReadConcern`      | Cluster-wide default read concern. Options: `local`, `available`, `majority`, `linearizable`, `snapshot` | `""` (local) |
+| `shardedCluster.initialization.defaultWriteConcern`     | Cluster-wide default write concern                                                                       | `majority`   |
+
+#### Balancer
+
+| Parameter                                  | Description                                                         | Default  |
+| ------------------------------------------ | ------------------------------------------------------------------- | -------- |
+| `shardedCluster.balancer.enabled`          | Enable or disable the MongoDB balancer                              | `true`   |
+| `shardedCluster.balancer.chunkSize`        | Chunk size in MB                                                    | `64`     |
+| `shardedCluster.balancer.window.start`     | Start time of the balancer window (format: `HH:MM`, empty = always) | `""`     |
+| `shardedCluster.balancer.window.stop`      | Stop time of the balancer window (format: `HH:MM`, empty = always)  | `""`     |
+| `shardedCluster.balancer.autoSplitEnabled` | Enable automatic chunk splitting (MongoDB 6.0+)                     | `true`   |
 
 #### Extra Objects
 
@@ -475,6 +596,69 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+```
+
+### Custom Users
+
+```yaml
+customUsers:
+  - name: appuser
+    database: appdb
+    password: "myAppPassword"
+    roles:
+      - readWrite
+      - dbAdmin
+
+  - name: readonlyuser
+    database: appdb
+    roles:
+      - read
+
+  # From an existing secret (e.g. managed by external-secrets)
+  - existingSecret: my-app-credentials
+    roles:
+      - readWrite
+```
+
+The secret must contain keys `CUSTOM_USER`, `CUSTOM_PASSWORD`, and `CUSTOM_DB` (or configure custom key names via `secretKeys`):
+
+```bash
+kubectl create secret generic my-app-credentials \
+  --from-literal=CUSTOM_USER=appuser \
+  --from-literal=CUSTOM_PASSWORD=apppassword \
+  --from-literal=CUSTOM_DB=appdb
+```
+
+### Sharded Cluster
+
+```yaml
+shardedCluster:
+  enabled: true
+  keyFile: "<base64-encoded-keyfile>"  # or use keySecretName
+  shards: 2
+  configsvr:
+    replicaCount: 3
+    persistence:
+      size: 8Gi
+  mongos:
+    replicaCount: 2
+  shardsvr:
+    dataNode:
+      replicaCount: 3
+    persistence:
+      size: 50Gi
+
+auth:
+  enabled: true
+  rootPassword: "myRootPassword"
+
+# Custom users are created via mongos after cluster initialisation
+customUsers:
+  - name: appuser
+    database: appdb
+    roles:
+      - readWrite
+      - dbAdmin
 ```
 
 ## Accessing MongoDB

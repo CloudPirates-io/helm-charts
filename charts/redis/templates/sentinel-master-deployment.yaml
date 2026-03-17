@@ -100,7 +100,7 @@ spec:
               # Query Sentinel for the current master hostname
               # Use the first pod (redis-0) as it should always be available
               master_hostname=$(kubectl exec -n "$NAMESPACE" "${RELEASE_NAME}-0" -c sentinel -- \
-                redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.auth.sentinel }} -a "$REDIS_PASSWORD"{{- end }} \
+                redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.auth.sentinel }} -a "$REDIS_PASSWORD"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
                 sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
                 | head -n1 || echo "")
 

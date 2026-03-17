@@ -99,6 +99,7 @@ zkCli.sh -server my-zookeeper:2181
 | `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
 | `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
 | `networkPolicy.enabled`              | Enable network policies                                                                 | `true`  |
+| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]` |
 
 ### ZooKeeper Configuration
 
@@ -128,6 +129,7 @@ zkCli.sh -server my-zookeeper:2181
 | `metrics.service.type`                     | Metrics service type                                                             | `ClusterIP` |
 | `metrics.service.ports.port`               | Metrics service port                                                             | `7000`      |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                | `{}`        |
+| `metrics.service.labels`                   | Additional labels for metrics service                                            | `{}`        |
 | `metrics.serviceMonitor.enabled`           | Create ServiceMonitor resource(s) for scraping metrics using Prometheus Operator | `false` |
 | `metrics.serviceMonitor.namespace`         | Namespace in which to create ServiceMonitor resource(s)                          | `""`    |
 | `metrics.serviceMonitor.interval`          | Interval at which metrics should be scraped                                      | `10s`   |

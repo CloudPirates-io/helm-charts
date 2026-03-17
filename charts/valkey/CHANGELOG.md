@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.17.1] - 2026-03-09
+
+- [oliver006/redis_exporter] Update image to v1.82.0 (#1100) ([d506ea7a](https://github.com/CloudPirates-io/helm-charts/commit/d506ea7a))
+
 ## [0.17.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))

@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.6.0] - 2026-03-12
+
+- Feature/rustfs setup (#1111) ([b373b86b](https://github.com/CloudPirates-io/helm-charts/commit/b373b86b))
+
 ## [0.5.1] - 2026-02-25
 
 - Fix rustfs-console Service (#1061) ([6b617e98](https://github.com/CloudPirates-io/helm-charts/commit/6b617e98))

@@ -129,6 +129,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `service.annotations` | Kubernetes service annotations | `{}`        |
 | `service.type`        | Kubernetes service type        | `ClusterIP` |
 | `service.port`        | Redis service port             | `6379`      |
+| `service.nodePort`    | NodePort value for NodePort and LoadBalancer service types | `""` |
 | `service.clusterPort` | Redis cluster service port     | `16379`     |
 
 ### Authentication
@@ -344,6 +345,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | Parameter                                     | Description                                                                                   | Default     |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------- |
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
+| `sentinel.image.registry`                     | Redis Sentinel image registry                                                                 | `docker.io` |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
 | `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
