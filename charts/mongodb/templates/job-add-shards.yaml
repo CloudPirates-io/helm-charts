@@ -84,6 +84,9 @@ spec:
                   name: {{ include "mongodb.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
+            {{- if $.Values.customUsers }}
+            {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
+            {{- end }}
           volumeMounts:
             - name: kubectl-bin
               mountPath: /kubectl

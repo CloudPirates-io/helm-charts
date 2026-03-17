@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.0] - 2026-03-16
+
+- [mongodb]: CustomUser rework for single / sharded setup (#1143) ([4d9c939e](https://github.com/CloudPirates-io/helm-charts/commit/4d9c939e))
+
+## [0.13.0] - 2026-03-11
+
+- [mongodb]: Fix multiple primary´s in primary secondary architecture (#1110) ([1d0becb6](https://github.com/CloudPirates-io/helm-charts/commit/1d0becb6))
+
 ## [0.12.7] - 2026-03-11
 
 - [mongo] Update image.repository to 3a7947f (#1123) ([714c8101](https://github.com/CloudPirates-io/helm-charts/commit/714c8101))
