@@ -86,14 +86,11 @@ data:
     # WAL Settings
     wal_buffers = {{ ternary .Values.config.postgresqlWalBuffers .Values.config.postgresql.wal_buffers (ne .Values.config.postgresqlWalBuffers "") }}
     wal_level = {{ .Values.config.postgresql.wal_level }}
-
-    {{- if .Values.replication.enabled }}
-    {{- if not .Values.replication.primary.host }}
-
-    # Replication primary configuration
     max_wal_senders = {{ .Values.config.postgresql.max_wal_senders }}
     wal_keep_size = {{ .Values.config.postgresql.wal_keep_size }}
-    {{- else }}
+
+    {{- if .Values.replication.enabled }}
+    {{- if .Values.replication.primary.host }}
 
     # Replication standby configuration
     primary_conninfo = 'host={{ tpl .Values.replication.primary.host . }} port={{ .Values.replication.primary.port }} user={{ .Values.replication.auth.username }} passfile={{ include "postgres.runDir" . }}/replication.pgpass'
