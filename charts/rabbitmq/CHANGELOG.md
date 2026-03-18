@@ -73,6 +73,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.19.2] - 2026-03-17
+
+- Update image.repository to 402d829 (#1155) ([0b66b6ab](https://github.com/CloudPirates-io/helm-charts/commit/0b66b6ab))
+
 ## [0.19.1] - 2026-03-16
 
 - Update image.repository to 693b201 (#1140) ([d319df36](https://github.com/CloudPirates-io/helm-charts/commit/d319df36))
