@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.15.1] - 2026-03-17
+
+- Update image.repository to ddb976b (#1148) ([1113ad5f](https://github.com/CloudPirates-io/helm-charts/commit/1113ad5f))
+
 ## [0.15.0] - 2026-03-13
 
 - [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
