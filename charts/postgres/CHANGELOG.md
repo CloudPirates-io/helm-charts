@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.1] - 2026-03-17
+
+- Update image.repository to 98f32d2 (#1153) ([a965537a](https://github.com/CloudPirates-io/helm-charts/commit/a965537a))
+
 ## [0.18.0] - 2026-03-13
 
 - [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
