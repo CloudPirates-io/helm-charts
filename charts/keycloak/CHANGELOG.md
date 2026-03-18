@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.1] - 2026-03-17
+
+- [mariadb] Update initContainers.waitForMariadb.repository to 310a2b5 (#1149) ([912ab906](https://github.com/CloudPirates-io/helm-charts/commit/912ab906))
+
 ## [0.19.0] - 2026-03-13
 
 - [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
