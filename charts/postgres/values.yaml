@@ -154,7 +154,7 @@ config:
     # @param config.postgresql.wal_level Determines how much information is written to the WAL - https://postgresqlco.nf/doc/en/param/wal_level/
     wal_level: replica
     # @param config.postgresql.max_wal_senders Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients - https://postgresqlco.nf/doc/en/param/max_wal_senders/
-    max_wal_senders: 5
+    max_wal_senders: 10
     # @param config.postgresql.wal_keep_size Specifies the minimum size of past WAL files kept in the pg_wal directory (in MB) - https://postgresqlco.nf/doc/en/param/wal_keep_size/
     wal_keep_size: 1024
 
