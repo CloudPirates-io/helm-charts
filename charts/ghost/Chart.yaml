@@ -2,8 +2,8 @@ apiVersion: v2
 name: ghost
 description: A simple, powerful publishing platform that allows you to share your stories with the world.
 type: application
-version: 0.13.0
-appVersion: "6.18.2"
+version: 0.15.0
+appVersion: "6.21.2"
 keywords:
   - ghost
   - blogging
@@ -43,9 +43,11 @@ annotations:
       url: https://github.com/TryGhost/Ghost
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Update charts/ghost/values.yaml ghost (#948)"
-          links:
-            - name: "Commit b7cb150"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/b7cb150"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Support gateway api in addition to ingress where applicable"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1132"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/ghost/CHANGELOG.md"

@@ -2,6 +2,58 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.0] - 2026-03-11
+
+- [keycloak]: Differentiate probes (#1125) ([58ab1d63](https://github.com/CloudPirates-io/helm-charts/commit/58ab1d63))
+
+## [0.17.0] - 2026-03-10
+
+- Documentation improvements (#1112) ([9be6cf73](https://github.com/CloudPirates-io/helm-charts/commit/9be6cf73))
+
+## [0.16.9] - 2026-03-06
+
+- [keycloak/keycloak] Update image.repository to v26.5.5 (#1096) ([26b39e28](https://github.com/CloudPirates-io/helm-charts/commit/26b39e28))
+
+## [0.16.8] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
+## [0.16.7] - 2026-03-02
+
+- [postgres] Update initContainers.waitForPostgres.repository to 69e8582 (#1078) ([c2480924](https://github.com/CloudPirates-io/helm-charts/commit/c2480924))
+
+## [0.16.6] - 2026-02-27
+
+- [postgres] Update initContainers.waitForPostgres.repository to v18.3 (#1068) ([9647bee4](https://github.com/CloudPirates-io/helm-charts/commit/9647bee4))
+
+## [0.16.5] - 2026-02-25
+
+- [postgres] Update initContainers.waitForPostgres.repository to 9b5bd94 (#1057) ([bbde73a4](https://github.com/CloudPirates-io/helm-charts/commit/bbde73a4))
+
+## [0.16.4] - 2026-02-23
+
+- [keycloak/keycloak] Update charts/keycloak/values.yaml keycloak/keycloak to v26.5.4 (patch) (#1040) ([84c4a798](https://github.com/CloudPirates-io/helm-charts/commit/84c4a798))
+
+## [0.16.3] - 2026-02-20
+
+- [keycloak]: fixes issue with realm import volume mount (#1039) ([0d7caf73](https://github.com/CloudPirates-io/helm-charts/commit/0d7caf73))
+
+## [0.16.2] - 2026-02-20
+
+- fix: set default values for nodePort values (#1037) ([0a630223](https://github.com/CloudPirates-io/helm-charts/commit/0a630223))
+
+## [0.16.1] - 2026-02-20
+
+- add variables to set own nodePort values (#1036) ([044c07ba](https://github.com/CloudPirates-io/helm-charts/commit/044c07ba))
+
+## [0.15.1] - 2026-02-18
+
+- [mariadb] Update initContainers.waitForMariadb.repository to b1cb255 (#1030) ([270c00a1](https://github.com/CloudPirates-io/helm-charts/commit/270c00a1))
+
+## [0.15.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.14.8] - 2026-02-16
 
 - [mariadb] Update initContainers.waitForMariadb.repository to v12.2.2 (#1013) ([042b064c](https://github.com/CloudPirates-io/helm-charts/commit/042b064c))

@@ -2,6 +2,42 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.1] - 2026-03-11
+
+- Update image.repository to v6.21.2 (#1127) ([44af0282](https://github.com/CloudPirates-io/helm-charts/commit/44af0282))
+
+## [0.14.0] - 2026-03-06
+
+- Update image to v6.21.0 (#1089) ([33001ba4](https://github.com/CloudPirates-io/helm-charts/commit/33001ba4))
+
+## [0.13.6] - 2026-03-03
+
+- Update image.repository to v6.19.4 (#1084) ([db822ccb](https://github.com/CloudPirates-io/helm-charts/commit/db822ccb))
+
+## [0.13.5] - 2026-03-02
+
+- Update image.repository to v6.19.3 (#1075) ([ecc8d657](https://github.com/CloudPirates-io/helm-charts/commit/ecc8d657))
+
+## [0.13.4] - 2026-02-27
+
+- Update charts/ghost/values.yaml ghost (#1067) ([7090b4fd](https://github.com/CloudPirates-io/helm-charts/commit/7090b4fd))
+
+## [0.13.3] - 2026-02-27
+
+- Update charts/ghost/values.yaml ghost (#1055) ([b21cc8d1](https://github.com/CloudPirates-io/helm-charts/commit/b21cc8d1))
+
+## [0.13.2] - 2026-02-23
+
+- Update charts/ghost/values.yaml ghost to v6.19.2 (patch) (#1043) ([a407c0e5](https://github.com/CloudPirates-io/helm-charts/commit/a407c0e5))
+
+## [0.13.1] - 2026-02-17
+
+- Update charts/ghost/values.yaml ghost to v6.19.1 (minor) (#1023) ([9524ff48](https://github.com/CloudPirates-io/helm-charts/commit/9524ff48))
+
+## [0.13.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.12.1] - 2026-02-16
 
 - Update charts/ghost/values.yaml ghost to v6.18.2 (patch) (#998) ([49aee9c5](https://github.com/CloudPirates-io/helm-charts/commit/49aee9c5))

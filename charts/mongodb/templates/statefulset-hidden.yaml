@@ -1,4 +1,4 @@
-{{- if and .Values.replicaSet.enabled (gt (int .Values.replicaSet.hiddenSecondaries.instances | default 0) 0) }}
+{{- if and .Values.replicaSet.enabled (gt (int .Values.replicaSet.hiddenSecondaries.instances | default 0) 0) (not .Values.shardedCluster.enabled) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -106,6 +106,21 @@ spec:
             - {{ .Values.replicaSet.name | quote }}
             - --keyFile
             - "/replicaset/keyfile"
+            {{- end }}
+            {{- if .Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ .Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if .Values.performance.oplogSizeMB }}
+            - --oplogSize={{ .Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if .Values.performance.maxIncomingConnections }}
+            - --maxConns={{ .Values.performance.maxIncomingConnections }}
+            {{- end }}
+            {{- if .Values.setParameter.enableLocalhostAuthBypass }}
+            - --setParameter=enableLocalhostAuthBypass={{ .Values.setParameter.enableLocalhostAuthBypass }}
+            {{- end }}
+            {{- if .Values.setParameter.enableFlowControl }}
+            - --setParameter=enableFlowControl={{ .Values.setParameter.enableFlowControl }}
             {{- end }}
           ports:
             - name: mongodb

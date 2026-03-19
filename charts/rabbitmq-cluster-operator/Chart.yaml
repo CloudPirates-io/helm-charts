@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq-cluster-operator
 description: Kubernetes operator to deploy and manage RabbitMQ clusters.
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "2.19.1"
 keywords:
   - rabbitmq-cluster-operator
@@ -43,9 +43,11 @@ annotations:
       url: https://github.com/rabbitmq/cluster-operator
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+  artifacthub.io/changes: |-
+    - kind: fixed
+      description: "rabbitmq-cluster-operator: Fix template error when namespaced watch is defined."
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1052"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq-cluster-operator/CHANGELOG.md"

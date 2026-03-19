@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.6.2] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
+## [0.6.1] - 2026-02-18
+
+- Update charts/zookeeper/values.yaml zookeeper (#1032) ([c460311c](https://github.com/CloudPirates-io/helm-charts/commit/c460311c))
+
+## [0.6.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+
 ## [0.5.5] - 2026-02-06
 
 - Update charts/zookeeper/values.yaml zookeeper (#979) ([c2658505](https://github.com/CloudPirates-io/helm-charts/commit/c2658505))

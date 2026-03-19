@@ -2,6 +2,11 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.6.0] - 2026-02-16
+
+- [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
+- [all]: Update documentation to include proper cosign public key ([e42365dc](https://github.com/CloudPirates-io/helm-charts/commit/e42365dc))
+
 ## [0.5.3] - 2026-02-02
 
 - Bump etcd version to 0.5.3 and update repo URL ([b71da4b3](https://github.com/CloudPirates-io/helm-charts/commit/b71da4b3))

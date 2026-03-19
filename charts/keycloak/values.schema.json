@@ -134,6 +134,72 @@
         "fullnameOverride": {
             "type": "string"
         },
+        "gatewayAPI": {
+            "type": "object",
+            "properties": {
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "parentRefs": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "namespace": {
+                                        "type": "string"
+                                    },
+                                    "sectionName": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "rules": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "matches": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "global": {
             "type": "object",
             "properties": {
@@ -351,6 +417,9 @@
                 "httpsPort": {
                     "type": "integer"
                 },
+                "managementPort": {
+                    "type": "integer"
+                },
                 "production": {
                     "type": "boolean"
                 },
@@ -405,11 +474,25 @@
                         "database": {
                             "type": "string"
                         },
+                        "existingSecret": {
+                            "type": "string"
+                        },
                         "password": {
                             "type": "string"
                         },
                         "rootPassword": {
                             "type": "string"
+                        },
+                        "secretKeys": {
+                            "type": "object",
+                            "properties": {
+                                "rootPasswordKey": {
+                                    "type": "string"
+                                },
+                                "userPasswordKey": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "username": {
                             "type": "string"
@@ -539,6 +622,9 @@
                         "database": {
                             "type": "string"
                         },
+                        "existingSecret": {
+                            "type": "string"
+                        },
                         "password": {
                             "type": "string"
                         },
@@ -610,10 +696,16 @@
                 "annotations": {
                     "type": "object"
                 },
+                "httpNodePort": {
+                    "type": "integer"
+                },
                 "httpPort": {
                     "type": "integer"
                 },
                 "httpTargetPort": {
+                    "type": "integer"
+                },
+                "httpsNodePort": {
                     "type": "integer"
                 },
                 "httpsPort": {

@@ -22,7 +22,7 @@ image:
   ## @param image.repository RustFS image repository
   repository: rustfs/rustfs
   ## @param image.tag RustFS image tag (immutable tags are recommended)
-  tag: "1.0.0-alpha.64@sha256:11ba8ff3870e8ee88494ad5b34e6942d1d91321483895c05aa264643f6d99a94"
+  tag: "1.0.0-alpha.83@sha256:1cfa82fb394a7c6a4ffc24f5333b52afee608d258503f94b37fcce5cc965c896"
   ## @param image.imagePullPolicy RustFS image pull policy
   imagePullPolicy: Always
 
@@ -63,6 +63,39 @@ config:
 
   ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
   extraEnvVars: []
+
+# -- Setups RustFS via CLI
+setup:
+  image:
+    ## @param image.registry RustFS CLI image registry
+    registry: docker.io
+    ## @param image.repository RustFS CLI image repository
+    repository: rustfs/rc
+    ## @param image.tag RustFS CLI image tag (immutable tags are recommended)
+    tag: "v0.1.7@sha256:e3361b199091cd82affc4d72a78af54eb2c0d4e0565daeb2bef67ddc67358475"
+    ## @param image.imagePullPolicy RustFS CLI image pull policy
+    imagePullPolicy: Always
+  # -- If defined, uses a pre-configured *SecretMap* with the keys below as JSON
+  existingSecret: ""
+  # -- Policy definitions
+  policies: []
+#    - name: test
+#      # -- Raw policy definition
+#      spec:
+#        Version: 2012-10-17
+#        Statement:
+#          - Effect: Allow
+#            Action: [ "*" ]
+#            Resource: [ "arn:aws:s3:::*" ]
+  # -- User definitions
+  users: []
+#    - name: test
+#      password: thisIsMySecretPassword
+#      policies:
+#        - readwrite
+  # -- Bucket definitions
+  buckets: []
+#    - name: test
 
 ## @section Deployment configuration
 replicaCount: 1
@@ -114,8 +147,6 @@ service:
   type: ClusterIP
   ## @param service.port RustFS API service port
   port: 9000
-  ## @param service.consolePort RustFS console service port
-  consolePort: 9001
   ## @param service.annotations Service annotations
   annotations: {}
 
@@ -125,10 +156,8 @@ consoleService:
   enabled: true
   ## @param consoleService.type Console service type
   type: ClusterIP
-  ## @param consoleService.port Console service API port
-  port: 9000
-  ## @param consoleService.consolePort Console service console port
-  consolePort: 9001
+  ## @param consoleService.port Console service port
+  port: 9001
   ## @param consoleService.sessionAffinityTimeout Session affinity timeout in seconds
   sessionAffinityTimeout: 10800
   ## @param consoleService.annotations Console service annotations
@@ -148,16 +177,65 @@ ingress:
   ## @param ingress.hosts[0].host Hostname for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].path Path for RustFS API ingress
   ## @param ingress.hosts[0].paths[0].pathType Path type for RustFS API ingress
-  hosts:
-    - host: rustfs.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param ingress.tls TLS configuration for RustFS API ingress
   tls: []
   #  - secretName: rustfs-tls
   #    hosts:
   #      - rustfs.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for RustFS API
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rustfs.localhost
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+  consoleHttpRoute:
+    ## @param gatewayAPI.consoleHttpRoute.enabled Enable Gateway API HTTPRoute generation for RustFS Console (routes to first pod only)
+    enabled: false
+    ## @param gatewayAPI.consoleHttpRoute.annotations Additional annotations for the Console HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.consoleHttpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.consoleHttpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rustfs-console.localhost
+    ## @param gatewayAPI.consoleHttpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Console Ingress configuration (for StatefulSet only)
 consoleIngress:
@@ -177,11 +255,11 @@ consoleIngress:
   ## @param consoleIngress.hosts[0].host Hostname for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].path Path for Console RustFS API ingress
   ## @param consoleIngress.hosts[0].paths[0].pathType Path type for Console RustFS API ingress
-  hosts:
-    - host: rustfs-console.localhost
-      paths:
-        - path: /
-          pathType: Prefix
+  hosts: []
+#    - host: rustfs-console.localhost
+#      paths:
+#        - path: /
+#          pathType: Prefix
   ## @param consoleIngress.tls TLS configuration for Console RustFS API ingress
   tls: []
   #  - secretName: rustfs-console-tls

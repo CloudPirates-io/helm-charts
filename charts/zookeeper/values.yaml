@@ -41,7 +41,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.4@sha256:f0f1d5e4a2763041ce1f7fc25e2b5347a2a0dfb0eaf0f46a49fe2e01945f9f09"
+  tag: "3.9.5@sha256:9f39b069ec93eccf22968ed842f3ffb7aac5fbc0da0600b73183b49bb27082d6"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -112,6 +112,8 @@ metrics:
     port: 7000
     ## @param metrics.service.annotations Additional annotations for metrics service
     annotations: {}
+    ## @param metrics.service.labels Additional labels for metrics service
+    labels: {}
   ## Prometheus ServiceMonitor configuration
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
@@ -272,6 +274,8 @@ startupProbe:
   successThreshold: 1
 
 
+## @param command Override default container command (useful when the default entrypoint needs to be replaced)
+command: []
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
   # - name: CUSTOM_VAR

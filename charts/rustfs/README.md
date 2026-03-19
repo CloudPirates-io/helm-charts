@@ -133,6 +133,40 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `config.tlsPath`                   | Path to TLS certificates                           | `"/opt/tls"`           |
 | `config.extraEnvVars`              | Extra environment variables                        | `[]`                   |
 
+### RustFS setup
+
+| Parameter              | Description                                                               | Default |
+|------------------------|---------------------------------------------------------------------------|---------|
+| `setup.image`          | Image configuration for `rustfs/rc` CLI                                   |         |
+| `setup.existingSecret` | If defined, uses a pre-configured *SecretMap* with the keys below as JSON | `""`    |
+| `setup.policies`       | Policy definitions                                                        | `[]`    |
+| `setup.buckets`        | Bucket definitions                                                        | `[]`    |
+| `setup.users`          | User definitions                                                          | `[]`    |
+
+**Policies**
+```yaml
+- name: my-policy
+  spec:
+    Version: 2012-10-17
+    Statement:
+      - Effect: Allow
+        Action: [ "*" ]
+        Resource: [ "arn:aws:s3:::*" ]
+```
+
+**Buckets**
+```yaml
+- name: my-bucket
+```
+
+**Users**
+```yaml
+- name: my-user
+  password: thisIsMySecretPassword
+  policies:
+    - readwrite
+```
+
 ### Deployment configuration
 
 | Parameter      | Description        | Default |
@@ -174,17 +208,15 @@ The following table lists the configurable parameters of the RustFS chart and th
 | --------------------- | --------------------------- | ----------- |
 | `service.type`        | RustFS service type         | `ClusterIP` |
 | `service.port`        | RustFS API service port     | `9000`      |
-| `service.consolePort` | RustFS console service port | `9001`      |
 | `service.annotations` | Service annotations         | `{}`        |
 
 ### Console Service configuration (for StatefulSet only)
 
 | Parameter                               | Description                                              | Default     |
-| --------------------------------------- | -------------------------------------------------------- | ----------- |
+| --------------------------------------- |----------------------------------------------------------| ----------- |
 | `consoleService.enabled`                | Enable Console service that routes to the first pod only | `true`      |
 | `consoleService.type`                   | Console service type                                     | `ClusterIP` |
-| `consoleService.port`                   | Console service API port                                 | `9000`      |
-| `consoleService.consolePort`            | Console service console port                             | `9001`      |
+| `consoleService.port`                   | Console service port                                     | `9001`      |
 | `consoleService.sessionAffinityTimeout` | Session affinity timeout in seconds                      | `10800`     |
 | `consoleService.annotations`            | Console service annotations                              | `{}`        |
 

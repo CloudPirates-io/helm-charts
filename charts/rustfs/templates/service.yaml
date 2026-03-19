@@ -28,7 +28,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
-  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -43,12 +42,13 @@ spec:
       targetPort: api
   selector:
     {{- include "rustfs.selectorLabels" . | nindent 4 }}
+{{- end }}
 ---
-{{- if and .Values.config.consoleEnabled .Values.consoleIngress.enabled (eq .Values.deploymentType "statefulset") }}
+{{- if and .Values.config.consoleEnabled .Values.consoleService.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "rustfs.fullname" . }}-pod0
+  name: {{ include "rustfs.fullname" . }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
@@ -67,10 +67,8 @@ spec:
   ports:
     - port: {{ .Values.consoleService.port }}
       protocol: TCP
-      name: api
-      targetPort: api
+      name: console
+      targetPort: console
   selector:
     {{- include "rustfs.selectorLabels" . | nindent 4 }}
-    statefulset.kubernetes.io/pod-name: {{ include "rustfs.fullname" . }}-0
-{{- end }}
 {{- end }}
