@@ -1,4 +1,7 @@
-{{ $shouldMountInitScripts := or .Values.initdb.scriptsConfigMap (and .Values.replication.enabled (not .Values.replication.primary.host)) .Values.initdb.scripts (and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret)) }}
+{{- $createCustomUser := and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) -}}
+{{- $replicationPrimary := and .Values.replication.enabled (not .Values.replication.primary.host) -}}
+{{- $hasGeneratedScripts := or $createCustomUser $replicationPrimary .Values.initdb.scripts -}}
+{{- $shouldMountInitScripts := or $hasGeneratedScripts .Values.initdb.scriptsConfigMap -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -242,13 +245,13 @@ spec:
             runAsUser: 65534
             runAsGroup: 65534
           env:
-            - name: DATA_SOURCE_NAME
-              value: "postgresql://{{ include "postgres.username" . }}:$(POSTGRES_PASSWORD)@localhost:{{ .Values.service.targetPort }}/{{ include "postgres.database" . }}?sslmode=disable"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgres.secretName" . }}
                   key: {{ include "postgres.adminPasswordKey" . }}
+            - name: DATA_SOURCE_NAME
+              value: "postgresql://{{ include "postgres.username" . }}:$(POSTGRES_PASSWORD)@localhost:{{ .Values.service.targetPort }}/{{ include "postgres.database" . }}?sslmode=disable"
           ports:
             - name: metrics
               containerPort: 9187
@@ -272,11 +275,11 @@ spec:
         {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
-        - name: data
+        - name: {{ .Values.persistence.volumeName }}
           emptyDir: {}
         {{- end }}
         {{- if .Values.persistence.existingClaim }}
-        - name: data
+        - name: {{ .Values.persistence.volumeName }}
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
         {{- end }}
@@ -292,9 +295,19 @@ spec:
           emptyDir: {}
         {{- if $shouldMountInitScripts }}
         - name: custom-init-scripts
+          {{- if and $hasGeneratedScripts .Values.initdb.scriptsConfigMap }}
+          projected:
+            defaultMode: 0755
+            sources:
+              - configMap:
+                  name: {{ printf "%s-init-scripts" (include "postgres.fullname" .) }}
+              - configMap:
+                  name: {{ tpl .Values.initdb.scriptsConfigMap . }}
+          {{- else }}
           configMap:
             name: {{ include "postgres.initdb.scriptsCM" . }}
             defaultMode: 0755
+          {{- end }}
         {{- end }}
         {{- if and .Values.replication.enabled .Values.replication.primary.host }}
         - name: replication

@@ -89,8 +89,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `image.registry`        | Keycloak image registry                             | `docker.io`                                                                        |
 | `image.repository`      | Keycloak image repository                           | `keycloak/keycloak`                                                                |
-| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007"` |
+| `image.tag`             | Keycloak image tag (immutable tags are recommended) | `"26.5.5@sha256:a7b0cb7a43a1235a61872883414d3f1d9a3ceac9df6e5907bd12202778a6265c"` |
 | `image.imagePullPolicy` | Keycloak image pull policy                          | `Always`                                                                           |
+| `image.command`         | Keycloak container entrypoint command               | `"/opt/keycloak/bin/kc.sh"`                                                        |
 
 ### Deployment configuration
 
@@ -117,8 +118,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | ------------------- | ----------------------------------------------------- | ------- |
 | `extraVolumes`      | Array of Volume to add to the keycloak pod            | `[]`    |
 | `extraVolumeMounts` | Array of VolumeMount to add to the keycloak container | `[]`    |
-| `preserveThemes`    | Preserve the original themes folder of the image      | `false` |
-| `preserveProviders` | Preserve the original providers folder of the image   | `false` |
+| `preserveThemes`    | Disable mounting an emptyDir over `/opt/keycloak/themes`, preserving the themes bundled in the image     | `false` |
+| `preserveProviders` | Disable mounting an emptyDir over `/opt/keycloak/providers`, preserving the providers bundled in the image | `false` |
 
 ### Extra init containers for Keycloak pod
 
@@ -152,18 +153,19 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `keycloak.adminPassword`               | Keycloak admin password                                                                                      | `""`               |
 | `keycloak.existingSecret`              | Name of existing secret to use for Keycloak admin credentials                                                | `""`               |
 | `keycloak.secretKeys.adminPasswordKey` | Secret key for admin credentials                                                                             | `"admin-password"` |
-| `keycloak.hostname`                    | Keycloak hostname                                                                                            | `""`               |
-| `keycloak.hostnameAdmin`               | Keycloak admin hostname                                                                                      | `""`               |
+| `keycloak.hostname`                    | Keycloak hostname including scheme (e.g. `https://keycloak.example.com`)                                     | `""`               |
+| `keycloak.hostnameAdmin`               | Keycloak admin hostname including scheme (e.g. `https://keycloak.example.com`)                               | `""`               |
 | `keycloak.hostnameStrict`              | Enable strict hostname resolution                                                                            | `false`            |
-| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname                                                                                | `""`               |
+| `keycloak.hostnameBackchannel`         | Keycloak backchannel hostname including scheme (e.g. `https://keycloak.example.com`)                         | `""`               |
 | `keycloak.httpEnabled`                 | Enable HTTP listener                                                                                         | `true`             |
+| `keycloak.httpsEnabled`                | Enable HTTPS listener (only when Keycloak itself terminates TLS via `tls.enabled`)                           | `false`            |
 | `keycloak.httpPort`                    | HTTP port                                                                                                    | `8080`             |
 | `keycloak.httpsPort`                   | HTTPS port                                                                                                   | `8443`             |
-| `keycloak.proxyHeaders`                | The proxy headers that should be accepted by the server. (forwarded, xforwarded)                             | `""`               |
+| `keycloak.proxyHeaders`                | Proxy headers to trust (`forwarded` or `xforwarded`). Must be set when running behind a reverse proxy (e.g. nginx ingress). Leave empty only when Keycloak is directly exposed without a proxy. | `""`               |
 | `keycloak.proxyProtocolEnabled`        | Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false) | `false`            |
 | `keycloak.proxyTrustedAddresses`       | A comma separated list of trusted proxy addresses                                                            | `""`               |
-| `keycloak.production`                  | Enable production mode                                                                                       | `false`            |
-| `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `""`               |
+| `keycloak.production`                  | Enable production mode (runs `start` instead of `start-dev`). Should only be disabled for local development. | `true`             |
+| `keycloak.httpRelativePath`            | Set relative path for serving resources; must start with a /                                                 | `/`                |
 | `keycloak.extraArgsPrefix`             | Additional arguments to pass before the start command (e.g., for --config-file)                              | `[]`               |
 | `keycloak.extraArgs`                   | Additional arguments to pass to the Keycloak startup command                                                 | `[]`               |
 
@@ -189,7 +191,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `tls.certManager.annotations`     | Additional annotations for the Certificate resource                                                    | `{}`                                        |
 | `tls.truststoreEnabled`           | Enable truststore for client certificate validation or outgoing HTTPS requests                         | `false`                                     |
 | `tls.truststoreExistingSecret`    | Name of existing secret containing truststore file (Java Keystore format, default-key: truststore.jks) | `""`                                        |
-| `tls.truststoreExistingSecretKey` | Key of the secret to get the trustStorePassword from                                                   | `"truststore.jks"`                          |
+| `tls.truststoreExistingSecretKey` | Key within the truststore secret that holds the truststore file                                        | `"truststore.jks"`                          |
 | `tls.truststorePassword`          | Password for the truststore (use with caution - consider using existing secret)                        | `""`                                        |
 | `tls.truststoreFile`              | Path where the truststore file will be mounted (internal)                                              | `"/opt/keycloak/truststore/truststore.jks"` |
 
@@ -197,7 +199,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                         | Description                                                                                                                   | Default         |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `database.type`                   | Database type (postgres, mysql, mariadb, mssql). Note: H2 databases are not supported due to readonly filesystem restrictions | `postgres`      |
+| `database.type`                   | Database type (`postgres`, `mysql`, `mariadb`, `mssql`). Set to `""` to omit all database configuration (e.g. when using a custom `--db-url` via `keycloak.extraArgs`). Note: H2 databases are not supported due to readonly filesystem restrictions. | `postgres`      |
 | `database.host`                   | Database host (only used when not using embedded database)                                                                    | `""`            |
 | `database.port`                   | Database port (only used when not using embedded database, defaults: postgres=5432, mysql/mariadb=3306, mssql=1433)           | `""`            |
 | `database.schema`                 | Database schema                                                                                                               | `""`            |
@@ -221,7 +223,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter              | Description                                                                                              | Default |
 | ---------------------- | -------------------------------------------------------------------------------------------------------- | ------- |
-| `realm.import`         | Enable import of realms from /opt/keycloak/data/import (production mode must be false)                   | `false` |
+| `realm.import`         | Enable import of realms from /opt/keycloak/data/import                                                   | `false` |
 | `realm.configFile`     | Json config for initial realm configuration, stored in a Secret and mounted in /opt/keycloak/data/import | `""`    |
 | `realm.existingSecret` | Name of existing secret containing realm configuration (key: realm.json)                                 | `""`    |
 
@@ -242,9 +244,9 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `service.httpTargetPort`      | Keycloak HTTP container port  | `8080`      |
 | `service.httpsTargetPort`     | Keycloak HTTPS container port | `8443`      |
 | `service.annotations`         | Service annotations           | `{}`        |
-| `service.trafficDistribution` | Service traffic distribution  | `""`        |
-| `service.httpNodePort`        | Keycloak HTTP node port       | `30080`     |
-| `service.httpsNodePort`       | Keycloak HTTPS node port      | `30443"`    |
+| `service.trafficDistribution` | Traffic distribution preference (e.g. `PreferClose`). Requires Kubernetes 1.31+.  | `""`        |
+| `service.httpNodePort`        | HTTP node port (only used when `service.type: NodePort`)                           | `30080`     |
+| `service.httpsNodePort`       | HTTPS node port (only used when `service.type: NodePort`)                          | `30443`     |
 
 ### Ingress configuration
 
@@ -358,13 +360,13 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `initContainers.waitForPostgres.image`      | Full image override for PostgreSQL init container          | `""`                                                                               |
 | `initContainers.waitForPostgres.registry`   | PostgreSQL image registry (overrides global.imageRegistry) | `""`                                                                               |
 | `initContainers.waitForPostgres.repository` | PostgreSQL image repository                                | `postgres`                                                                         |
-| `initContainers.waitForPostgres.tag`        | PostgreSQL image tag                                       | `"17.6@sha256:e6a4209d1a4893f2df3bdcde58f8926c3c929c4d51df90990ed1b36d83c1382a"`   |
+| `initContainers.waitForPostgres.tag`        | PostgreSQL image tag                                       | `"18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d"`   |
 | `initContainers.waitForPostgres.pullPolicy` | PostgreSQL image pull policy                               | `IfNotPresent`                                                                     |
 | `initContainers.waitForPostgres.resources`  | Resource requests and limits for PostgreSQL init container | `{}`                                                                               |
 | `initContainers.waitForMariadb.image`       | Full image override for MariaDB init container             | `""`                                                                               |
 | `initContainers.waitForMariadb.registry`    | MariaDB image registry (overrides global.imageRegistry)    | `""`                                                                               |
 | `initContainers.waitForMariadb.repository`  | MariaDB image repository                                   | `mariadb`                                                                          |
-| `initContainers.waitForMariadb.tag`         | MariaDB image tag                                          | `"12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"` |
+| `initContainers.waitForMariadb.tag`         | MariaDB image tag                                          | `"12.2.2@sha256:b1cb255a9939d28a1856815f0de6046c20c28c21b92a9f2696bc782b247a47ee"` |
 | `initContainers.waitForMariadb.pullPolicy`  | MariaDB image pull policy                                  | `IfNotPresent`                                                                     |
 | `initContainers.waitForMariadb.resources`   | Resource requests and limits for MariaDB init container    | `{}`                                                                               |
 
@@ -460,9 +462,8 @@ helm install my-keycloak ./charts/keycloak
 # values-production.yaml
 keycloak:
   adminPassword: "secure-admin-password"
-  hostname: "auth.yourdomain.com"
-  production: true
-  proxyHeaders: "xforwarded"
+  hostname: "https://auth.yourdomain.com"
+  proxyHeaders: "xforwarded"  # required when running behind nginx ingress
 
 database:
   type: "postgres"
@@ -515,8 +516,7 @@ helm install my-keycloak ./charts/keycloak -f values-production.yaml
 # values-development.yaml
 keycloak:
   adminPassword: "admin"
-  httpEnabled: true
-  production: false
+  production: false  # overrides default — enables start-dev mode for local development
 
 postgres:
   enabled: true
@@ -666,8 +666,7 @@ tls:
 
 keycloak:
   httpEnabled: false # Disable HTTP when using TLS
-  production: true
-  hostname: "auth.yourdomain.com"
+  hostname: "https://auth.yourdomain.com"
 
 ingress:
   enabled: true
@@ -721,8 +720,7 @@ tls:
 
 keycloak:
   httpEnabled: false # Disable HTTP when using TLS
-  production: true
-  hostname: "auth.yourdomain.com"
+  hostname: "https://auth.yourdomain.com"
 ```
 
 Create the TLS secret first with your certificate and key in PEM format:
@@ -760,9 +758,8 @@ replicaCount: 3
 
 keycloak:
   adminPassword: "secure-admin-password"
-  hostname: "auth.yourdomain.com"
-  production: true
-  proxyHeaders: "xforwarded"
+  hostname: "https://auth.yourdomain.com"
+  proxyHeaders: "xforwarded"  # required when running behind nginx ingress
 
 cache:
   stack: "ispn" # Use Infinispan for clustering

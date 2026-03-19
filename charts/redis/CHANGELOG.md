@@ -2,6 +2,42 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.4] - 2026-03-11
+
+- [redis]: Fix missing tls arguments for sentinel probe monitoring ([c7e4f959](https://github.com/CloudPirates-io/helm-charts/commit/c7e4f959))
+
+## [0.26.3] - 2026-03-11
+
+- [redis]: Make master discovery service respect tls certificates (#1129) ([ce85ec27](https://github.com/CloudPirates-io/helm-charts/commit/ce85ec27))
+
+## [0.26.2] - 2026-03-11
+
+- Increase resource limits for sentinel pods (#1119) ([1f459645](https://github.com/CloudPirates-io/helm-charts/commit/1f459645))
+
+## [0.26.1] - 2026-03-10
+
+- [redis]: Add ipFamilies and ipFamilyPolicy support to all services (#1088) ([082f5e16](https://github.com/CloudPirates-io/helm-charts/commit/082f5e16))
+
+## [0.26.0] - 2026-03-10
+
+- Added Option to run redis as Deployment (#1091) ([40983de0](https://github.com/CloudPirates-io/helm-charts/commit/40983de0))
+
+## [0.25.10] - 2026-03-09
+
+- Properly set the default for existingSecretPasswordKey inside the values.yaml ([bdba22f5](https://github.com/CloudPirates-io/helm-charts/commit/bdba22f5))
+
+## [0.25.9] - 2026-03-09
+
+- [oliver006/redis_exporter] Update image to v1.82.0 (#1100) ([d506ea7a](https://github.com/CloudPirates-io/helm-charts/commit/d506ea7a))
+
+## [0.25.8] - 2026-03-06
+
+- [redis]: honor serviceMonitor namespace (#1094) ([368bb9fc](https://github.com/CloudPirates-io/helm-charts/commit/368bb9fc))
+
+## [0.25.7] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
 ## [0.25.6] - 2026-03-03
 
 - [redis]: Fix egress policies (#1081) ([569b9095](https://github.com/CloudPirates-io/helm-charts/commit/569b9095))

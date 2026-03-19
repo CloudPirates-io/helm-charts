@@ -22,7 +22,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.5.5@sha256:a7b0cb7a43a1235a61872883414d3f1d9a3ceac9df6e5907bd12202778a6265c"
+  tag: "26.5.6@sha256:8d44614c74798322c4e07fbe0ecb15cfbb5879d69b484628555f58ade06f0d8c"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -47,9 +47,9 @@ shareProcessNamespace: false
 extraVolumes: []
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container
 extraVolumeMounts: []
-## @param Specify if the original themes directory must be preserved.
+## @param preserveThemes Disable mounting an emptyDir over /opt/keycloak/themes, preserving the themes bundled in the image.
 preserveThemes: false
-## @param Specify if the original providers directory must be preserved.
+## @param preserveProviders Disable mounting an emptyDir over /opt/keycloak/providers, preserving the providers bundled in the image.
 preserveProviders: false
 
 ## @section Extra init containers for Keycloak pod
@@ -108,13 +108,13 @@ keycloak:
   ## @param keycloak.secretKeys Secret keys for admin credentials
   secretKeys:
     adminPasswordKey: "admin-password"
-  ## @param keycloak.hostname Keycloak hostname
+  ## @param keycloak.hostname Keycloak hostname including scheme (e.g. https://keycloak.example.com)
   hostname: ""
-  ## @param keycloak.hostnameAdmin Keycloak admin hostname
+  ## @param keycloak.hostnameAdmin Keycloak admin hostname including scheme (e.g. https://keycloak.example.com)
   hostnameAdmin: ""
   ## @param keycloak.hostnameStrict Enable strict hostname resolution
   hostnameStrict: false
-  ## @param keycloak.hostnameBackchannel Keycloak backchannel hostname
+  ## @param keycloak.hostnameBackchannel Keycloak backchannel hostname including scheme (e.g. https://keycloak.example.com)
   hostnameBackchannel: ""
   ## @param keycloak.httpEnabled Enable HTTP listener
   httpEnabled: true
@@ -124,14 +124,16 @@ keycloak:
   httpPort: 8080
   ## @param keycloak.httpsPort HTTPS port
   httpsPort: 8443
-  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded)
+  ## @param keycloak.managementPort Management interface port (health endpoints are served here)
+  managementPort: 9000
+  ## @param keycloak.proxyHeaders The proxy headers that should be accepted by the server. (forwarded, xforwarded). Must be set when running behind a reverse proxy (e.g. nginx ingress), otherwise Keycloak will not trust X-Forwarded-* headers and will generate incorrect URLs. Leave empty only when Keycloak is directly exposed without a proxy.
   proxyHeaders: ""
   ## @param keycloak.proxyProtocolEnabled  Whether the server should use the HA PROXY protocol when serving requests from behind a proxy. (true, false(default))
   proxyProtocolEnabled: false
   ## @param keycloak.proxyTrustedAddresses A comma separated list of trusted proxy addresses
   proxyTrustedAddresses: ""
-  ## @param keycloak.production Enable production mode
-  production: false
+  ## @param keycloak.production Enable production mode (runs 'start' instead of 'start-dev'). Should only be disabled for local development.
+  production: true
   ## @param keycloak.httpRelativePath Set relative path for serving resources; must start with a /
   httpRelativePath: /
   ## @param keycloak.extraArgsPrefix Additional arguments to pass before the start command (e.g., for --config-file)
@@ -189,7 +191,7 @@ tls:
   ## @param tls.truststoreExistingSecret Name of existing secret containing truststore file (Java Keystore format)
   ## The secret should contain 'truststore.jks' key or the key specified in the value 'tls.truststoreExistingSecretKey'
   truststoreExistingSecret: ""
-  ## @param tls.truststoreExistingSecretKey Key of the secret to get the trustStorePassword from
+  ## @param tls.truststoreExistingSecretKey Key within the truststore secret that holds the truststore file
   truststoreExistingSecretKey: "truststore.jks"
   ## @param tls.truststorePassword Password for the truststore (use with caution - consider using existingSecret)
   truststorePassword: ""
@@ -235,7 +237,7 @@ cache:
 
 ## @section Realm Configuration
 realm:
-  ## @param realm.import Enable import of realms from /opt/keycloak/data/import (production mode must be false)
+  ## @param realm.import Enable import of realms from /opt/keycloak/data/import
   import: false
   ## @param realm.configFile Json config for initial realm configuration, mounted in /opt/keycloak/data/import
   configFile: ""
@@ -294,6 +296,36 @@ ingress:
   #  - secretName: keycloak-tls
   #    hosts:
   #      - keycloak.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for Keycloak
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - keycloak.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Resources
 resources: {}
@@ -459,7 +491,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d"
+    tag: "18.3@sha256:98f32d2e093deea07127bcc373f89729b77ff3486511cc77224c530e63a41f0e"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
@@ -478,7 +510,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.2.2@sha256:b1cb255a9939d28a1856815f0de6046c20c28c21b92a9f2696bc782b247a47ee"
+    tag: "12.2.2@sha256:e16f61b8f6ed25111adbb1c5c19bbc2904efc8ed14029999af0cbe1c7ae18bf1"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container

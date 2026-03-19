@@ -1,0 +1,69 @@
+{{- if .Values.gatewayAPI.httpRoute.enabled -}}
+{{- $fullName := include "rabbitmq.fullname" . -}}
+{{- $svcPort := .Values.service.managementPort -}}
+{{- $httpRoute := .Values.gatewayAPI.httpRoute -}}
+{{- $hostnames := $httpRoute.hostnames -}}
+{{- if not $hostnames }}
+{{- $hostnames = list -}}
+{{- range .Values.ingress.hosts -}}
+{{- $hostnames = append $hostnames .host -}}
+{{- end -}}
+{{- end -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rabbitmq.labels" . | nindent 4 }}
+  {{- $annotations := merge $httpRoute.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- range $httpRoute.parentRefs }}
+    - name: {{ .name }}
+      {{- if .namespace }}
+      namespace: {{ .namespace }}
+      {{- end }}
+      {{- if .sectionName }}
+      sectionName: {{ .sectionName }}
+      {{- end }}
+    {{- end }}
+  {{- if $hostnames }}
+  hostnames:
+    {{- range $hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- if $httpRoute.rules }}
+    {{- range $httpRoute.rules }}
+    - {{- if .matches }}
+      matches:
+        {{- range .matches }}
+        - path:
+            type: {{ .path.type }}
+            value: {{ .path.value }}
+        {{- end }}
+      {{- end }}
+      backendRefs:
+        - name: {{ $fullName }}
+          port: {{ $svcPort }}
+    {{- end }}
+    {{- else }}
+    {{- range .Values.ingress.hosts }}
+    {{- range .paths }}
+    - matches:
+        - path:
+            type: {{ if eq .pathType "Exact" }}Exact{{ else }}PathPrefix{{ end }}
+            value: {{ .path }}
+      backendRefs:
+        - name: {{ $fullName }}
+          port: {{ $svcPort }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}

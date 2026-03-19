@@ -2,6 +2,30 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.16.1] - 2026-03-17
+
+- Update image.repository to 28f5c44 (#1147) ([7cac7b43](https://github.com/CloudPirates-io/helm-charts/commit/7cac7b43))
+
+## [0.16.0] - 2026-03-16
+
+- Update image.repository to v6.22.0 (#1139) ([8ec2d15d](https://github.com/CloudPirates-io/helm-charts/commit/8ec2d15d))
+
+## [0.15.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
+## [0.14.1] - 2026-03-11
+
+- Update image.repository to v6.21.2 (#1127) ([44af0282](https://github.com/CloudPirates-io/helm-charts/commit/44af0282))
+
+## [0.14.0] - 2026-03-06
+
+- Update image to v6.21.0 (#1089) ([33001ba4](https://github.com/CloudPirates-io/helm-charts/commit/33001ba4))
+
+## [0.13.6] - 2026-03-03
+
+- Update image.repository to v6.19.4 (#1084) ([db822ccb](https://github.com/CloudPirates-io/helm-charts/commit/db822ccb))
+
 ## [0.13.5] - 2026-03-02
 
 - Update image.repository to v6.19.3 (#1075) ([ecc8d657](https://github.com/CloudPirates-io/helm-charts/commit/ecc8d657))

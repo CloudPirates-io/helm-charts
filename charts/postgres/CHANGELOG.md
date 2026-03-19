@@ -2,6 +2,26 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.2] - 2026-03-18
+
+- [postgres]: Allow for configuration of wal settings without replication (#1163) ([f99fe177](https://github.com/CloudPirates-io/helm-charts/commit/f99fe177))
+
+## [0.18.1] - 2026-03-17
+
+- Update image.repository to 98f32d2 (#1153) ([a965537a](https://github.com/CloudPirates-io/helm-charts/commit/a965537a))
+
+## [0.18.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
+## [0.17.3] - 2026-03-13
+
+- [postgres]: Various QOL fixes concerning the README and smaller bugs (#1114) ([e874e1be](https://github.com/CloudPirates-io/helm-charts/commit/e874e1be))
+
+## [0.17.2] - 2026-03-05
+
+- Some values.yaml fixes across a few charts. (#1077) ([84211ef5](https://github.com/CloudPirates-io/helm-charts/commit/84211ef5))
+
 ## [0.17.1] - 2026-03-02
 
 - Update image to 69e8582 (#1076) ([cebec9dc](https://github.com/CloudPirates-io/helm-charts/commit/cebec9dc))

@@ -10,11 +10,13 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
 data:
-{{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
+{{- if .Values.customUsers }}
   init-custom-user.sh: |
     #!/bin/sh
     set -e
-    mongosh --eval "db.getSiblingDB(\"$MONGO_INITDB_DATABASE\").createUser({user: \"$MONGO_CUSTOM_USERNAME\", pwd: \"$MONGO_CUSTOM_USER_PASSWORD\", roles: [ \"readWrite\", \"dbAdmin\" ]})"
+    {{- range $i, $user := .Values.customUsers }}
+    mongosh --eval "db.getSiblingDB(\"$MONGO_CUSTOM_USER_{{ $i }}_DATABASE\").createUser({user: \"$MONGO_CUSTOM_USER_{{ $i }}_NAME\", pwd: \"$MONGO_CUSTOM_USER_{{ $i }}_PASSWORD\", roles: [ {{ include "mongodb.customUsers.rolesJs" (dict "roles" ($user.roles | default (list "readWrite" "dbAdmin")) "q" "\\\"" "i" $i) }} ]})"
+    {{- end }}
 {{- end }}
 {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
   init-metrics-user.sh: |
@@ -106,7 +108,14 @@ data:
     # returns - 0 when cluster exists otherwise errorcode
     detect_cluster() {
       local service=$1
-      $MONGOSHELL --host $service --eval "db.version()"
+
+      # Wait for service DNS entry to be set
+      until getent hosts "${service%:*}" > /dev/null 2>&1; do
+        log "Waiting for ${service%:*} to resolve..."
+        sleep 2
+      done
+
+      $MONGOSHELL --host $service --eval "db.adminCommand( { replSetGetStatus: 1 } )"
       result=$?
       if [ $result -eq 0 ]; then
         log "ReplicaSet cluster found"
@@ -342,28 +351,56 @@ data:
       local service=$1
       local replicaset=$2
       log "Start ReplicaSet initialization"
-      # First try to detect if other instance of this ReplicSet cluster are available
-      detect_cluster $service
-      if [ $? -eq 0 ]; then
-        # Try to find the primary instance
-        local primary=$(find_primary $service)
-        if [ -z "$primary" ]; then
-          log "Primary not found - Trying to detect if this instance was PRIMARY before"
-          result=$(detect_instance $service "$HOSTNAME.$service")
-          # Find out whether the actual instance was the primary before
-          if [ "$result" = "0" ]; then
-            log "Not the PRIMARY - Can't add this instance $HOSTNAME.$service without a running PRIMARY - Exiting"
-            exit 1
+
+      # Determine pod ordinal from hostname (e.g. "mongodb-2" -> "2")
+      local ordinal="${HOSTNAME##*-}"
+      # Derive pod-0's individual FQDN by prepending "<base>-0." to the headless service FQDN.
+      # Example: HOSTNAME=mongodb-1, service=mongodb-headless.ns.svc.cluster.local:27017
+      #   -> pod_zero=mongodb-0.mongodb-headless.ns.svc.cluster.local:27017
+      local pod_zero="${HOSTNAME%-*}-0.${service}"
+
+      if [ "$ordinal" = "0" ]; then
+        # Pod-0 is the designated bootstrap node. It is the only pod that may call
+        # rs.initiate(). Preserve the original detect-then-init logic unchanged.
+        detect_cluster $service
+        if [ $? -eq 0 ]; then
+          # Cluster already exists; find the current primary
+          local primary=$(find_primary $service)
+          if [ -z "$primary" ]; then
+            log "Primary not found - Trying to detect if this instance was PRIMARY before"
+            result=$(detect_instance $service "$HOSTNAME.$service")
+            if [ "$result" = "0" ]; then
+              log "Not the PRIMARY - Can't add this instance $HOSTNAME.$service without a running PRIMARY - Exiting"
+              exit 1
+            else
+              log "This instance $HOSTNAME.$service was the PRIMARY before - Continue starting..."
+            fi
           else
-            log "This instance $HOSTNAME.$service was the PRIMARY before - Continue starting..."
+            log "Primary $primary found"
+            add_secondary $primary "$HOSTNAME.$service"
           fi
         else
-          log "Primary $primary found"
-          add_secondary $primary "$HOSTNAME.$service"
+          # No cluster found - initialize this instance as primary
+          init_primary "$HOSTNAME.$service" $replicaset
         fi
       else
-        # Assume that this is the first instance in the cluster - initialize it as primary 
-        init_primary "$HOSTNAME.$service" $replicaset
+        # Non-bootstrap pods (ordinal > 0) must NEVER call rs.initiate().
+        # Querying the load-balanced headless service risks hitting an uninitialised
+        # peer and falsely concluding no cluster exists (the split-brain root cause).
+        # Instead, query pod-0 directly and wait until a PRIMARY is available there.
+        log "Pod ordinal $ordinal: waiting for bootstrap node $pod_zero to have an active PRIMARY..."
+        until detect_cluster $pod_zero; do
+          log "Bootstrap node not ready yet, retrying in 5s..."
+          sleep 5
+        done
+        local primary=$(find_primary $pod_zero)
+        if [ ! -z "$primary" ]; then
+          log "Primary $primary found via $pod_zero - Adding $HOSTNAME.$service as SECONDARY"
+          add_secondary $primary "$HOSTNAME.$service"
+        else
+          log "ERROR: ReplicaSet found at $pod_zero but no PRIMARY elected - Exiting"
+          exit 1
+        fi
       fi
       log "Done with ReplicaSet initialization\n-----"
     }
@@ -724,41 +761,48 @@ data:
       fi
 
       {{- if .Values.auth.enabled }}
-      # Create admin user using localhost exception (must be done from inside the mongos pod)
+      # Create admin user if it doesn't already exist.
+      # First check if credentials already work (upgrade/re-deploy scenario).
+      # If not, try via localhost exception (fresh install).
       log_shard "Creating admin user if needed..."
-      result=$(kubectl exec {{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} -- mongosh --eval "
-        try {
-          db.getSiblingDB('admin').createUser({
-            user: '$MONGO_INITDB_ROOT_USERNAME',
-            pwd: '$MONGO_INITDB_ROOT_PASSWORD',
-            roles: [
-              { role: 'root', db: 'admin' },
-              { role: 'clusterAdmin', db: 'admin' },
-              { role: 'userAdminAnyDatabase', db: 'admin' }
-            ]
-          });
-          print('USER_CREATED');
-        } catch (e) {
-          if (e.code === 51003) {
-            print('USER_EXISTS');
-          } else {
-            print('ERROR: ' + e.message);
-            throw e;
+      auth_check=$(mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null || echo "0")
+      if [ "$auth_check" = "1" ]; then
+        log_shard "Admin user already exists and credentials are valid"
+      else
+        result=$(kubectl exec {{ include "mongodb.fullname" . }}-mongos-0 -n {{ .Release.Namespace }} -- mongosh --eval "
+          try {
+            db.getSiblingDB('admin').createUser({
+              user: '$MONGO_INITDB_ROOT_USERNAME',
+              pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+              roles: [
+                { role: 'root', db: 'admin' },
+                { role: 'clusterAdmin', db: 'admin' },
+                { role: 'userAdminAnyDatabase', db: 'admin' }
+              ]
+            });
+            print('USER_CREATED');
+          } catch (e) {
+            if (e.code === 51003) {
+              print('USER_EXISTS');
+            } else {
+              print('ERROR: ' + e.message);
+              throw e;
+            }
           }
-        }
-      " 2>&1)
+        " 2>&1)
 
-      case "$result" in
-        *USER_CREATED*)
-          log_shard "Admin user created successfully"
-          ;;
-        *USER_EXISTS*)
-          log_shard "Admin user already exists"
-          ;;
-        *)
-          log_shard "Warning: User creation result: $result"
-          ;;
-      esac
+        case "$result" in
+          *USER_CREATED*)
+            log_shard "Admin user created successfully"
+            ;;
+          *USER_EXISTS*)
+            log_shard "Admin user already exists"
+            ;;
+          *)
+            logErrorAndExitShard "Failed to create admin user: $result" 1
+            ;;
+        esac
+      fi
       {{- end }}
 
       # Check arbiter configuration and log warnings
@@ -845,6 +889,41 @@ data:
       {{- end }}
 
       log_shard "All shards added to cluster successfully"
+
+      {{- if .Values.customUsers }}
+      {{- range $i, $user := .Values.customUsers }}
+      # Create custom user {{ $i }} via mongos
+      log_shard "Creating custom user {{ $i }} in database '$MONGO_CUSTOM_USER_{{ $i }}_DATABASE'..."
+      result=$({{- if $.Values.auth.enabled }}mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin{{- else }}mongosh --host $mongosHost{{- end }} --eval "
+        try {
+          db.getSiblingDB('$MONGO_CUSTOM_USER_{{ $i }}_DATABASE').createUser({
+            user: '$MONGO_CUSTOM_USER_{{ $i }}_NAME',
+            pwd: '$MONGO_CUSTOM_USER_{{ $i }}_PASSWORD',
+            roles: [ {{ include "mongodb.customUsers.rolesJs" (dict "roles" ($user.roles | default (list "readWrite" "dbAdmin")) "q" "'" "i" $i) }} ]
+          });
+          print('CUSTOM_USER_CREATED');
+        } catch (e) {
+          if (e.code === 51003) {
+            print('CUSTOM_USER_EXISTS');
+          } else {
+            print('ERROR: ' + e.message);
+            throw e;
+          }
+        }
+      " 2>&1)
+      case "$result" in
+        *CUSTOM_USER_CREATED*)
+          log_shard "Custom user {{ $i }} created successfully"
+          ;;
+        *CUSTOM_USER_EXISTS*)
+          log_shard "Custom user {{ $i }} already exists"
+          ;;
+        *)
+          logErrorAndExitShard "Failed to create custom user {{ $i }}: $result" 1
+          ;;
+      esac
+      {{- end }}
+      {{- end }}
     }
 
     # Enable sharding on databases and collections

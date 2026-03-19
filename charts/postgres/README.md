@@ -69,32 +69,33 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### Global parameters
 
-| Parameter                 | Description                                     | Default |
-| ------------------------- | ----------------------------------------------- | ------- |
-| `global.imageRegistry`    | Global Docker image registry                    | `""`    |
-| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
+| Parameter                   | Description                                     | Default |
+| --------------------------- | ----------------------------------------------- | ------- |
+| `global.imageRegistry`      | Global Docker image registry                    | `""`    |
+| `global.imagePullSecrets`   | Global Docker registry secret names as an array | `[]`    |
+| `global.enableServiceLinks` | Enable service links in pods                    | `true`  |
 
 ### PostgreSQL image configuration
 
-| Parameter                  | Description                                                                                              | Default                                                                          |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `image.registry`           | PostgreSQL image registry                                                                                | `docker.io`                                                                      |
-| `image.repository`         | PostgreSQL image repository                                                                              | `postgres`                                                                       |
-| `image.tag`                | PostgreSQL image tag (immutable tags are recommended)                                                    | `"18.1@sha256:28bda6d50590658221007b10573830c941b483e9d1a5bc2713a3f60477df8389"` |
-| `image.imagePullPolicy`    | PostgreSQL image pull policy                                                                             | `Always`                                                                         |
-| `image.useHardenedImage`   | Set to `true` when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18   | `false`                                                                          |
+| Parameter                | Description                                                                                            | Default                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `image.registry`         | PostgreSQL image registry                                                                              | `docker.io`                                                                      |
+| `image.repository`       | PostgreSQL image repository                                                                            | `postgres`                                                                       |
+| `image.tag`              | PostgreSQL image tag (immutable tags are recommended)                                                  | `"18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d"` |
+| `image.imagePullPolicy`  | PostgreSQL image pull policy                                                                           | `Always`                                                                         |
+| `image.useHardenedImage` | Set to `true` when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18 | `false`                                                                          |
 
 ### Deployment configuration
 
-| Parameter           | Description                                                                                                    | Default |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------- |
-| `replicaCount`      | Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default) | `1`     |
-| `nameOverride`      | String to partially override postgres.fullname                                                                 | `""`    |
-| `fullnameOverride`  | String to fully override postgres.fullname                                                                     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects                                                                          | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects                                                                     | `{}`    |
-| `priorityClassName` | Priority class name to be used for the pods                                                                    | ``      |
-| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
+| Parameter                       | Description                                                                                                    | Default |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------- |
+| `replicaCount`                  | Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default) | `1`     |
+| `nameOverride`                  | String to partially override postgres.fullname                                                                 | `""`    |
+| `fullnameOverride`              | String to fully override postgres.fullname                                                                     | `""`    |
+| `commonLabels`                  | Labels to add to all deployed objects                                                                          | `{}`    |
+| `commonAnnotations`             | Annotations to add to all deployed objects                                                                     | `{}`    |
+| `priorityClassName`             | Priority class name to be used for the pods                                                                    | ``      |
+| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                                | `30`    |
 
 ### Pod annotations and labels
 
@@ -117,21 +118,68 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 
 ### PostgreSQL Authentication
 
-| Parameter                          | Description                                                                                                    | Default               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `auth.username`                    | Name for a custom superuser to create at initialisation. (This will also create a database with the same name) | `"openfga"`           |
-| `auth.password`                    | Password for the custom user to create                                                                         | `""`                  |
-| `auth.database`                    | Alternative name for the default database to be created at initialisation                                      | `""`                  |
-| `auth.existingSecret`              | Name of existing secret to use for PostgreSQL credentials                                                      | `""`                  |
-| `auth.secretKeys.adminPasswordKey` | Name of key in existing secret to use for PostgreSQL admin credentials                                         | `"postgres-password"` |
+| Parameter                          | Description                                                                                                           | Default               |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `auth.username`                    | PostgreSQL superuser name (`POSTGRES_USER`). If empty, defaults to `postgres`.                                        | `""`                  |
+| `auth.password`                    | Password for the PostgreSQL superuser (`POSTGRES_PASSWORD`). Auto-generated if empty.                                 | `""`                  |
+| `auth.database`                    | Default database to create (`POSTGRES_DB`). Defaults to the superuser name if empty.                                  | `""`                  |
+| `auth.existingSecret`              | Name of an existing secret containing the superuser password. When set, the chart does **not** create its own secret. | `""`                  |
+| `auth.secretKeys.adminPasswordKey` | Key in `auth.existingSecret` that holds the superuser password.                                                       | `"postgres-password"` |
+
+#### Chart-generated secret
+
+When `auth.existingSecret` is **not** set the chart creates a secret named `<fullname>` (e.g. `my-postgres`) with the following keys:
+
+| Key                 | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `postgres-password` | Superuser password (plain-text encoded)         |
+| `host`              | Service hostname (`<fullname>.<namespace>.svc`) |
+| `port`              | Service port                                    |
+| `username`          | Superuser name                                  |
+| `database`          | Default database name                           |
+| `uri`               | Full `postgresql://` connection URI             |
+
+When `auth.existingSecret` is set, none of these keys are generated. Your secret must contain at minimum the key referenced by `auth.secretKeys.adminPasswordKey`.
 
 ### PostgreSQL Configuration
 
+| Parameter                                        | Description                                                                             | Default              |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------- | -------------------- |
+| `config.mountConfigMap`                          | Enable mounting of ConfigMap with PostgreSQL configuration                              | `true`               |
+| `config.extraConfig`                             | Additional PostgreSQL configuration parameters (list of raw config lines)               | `[]`                 |
+| `config.existingConfigmap`                       | Name of existing ConfigMap with PostgreSQL configuration                                | `""`                 |
+| `config.pgHbaConfig`                             | Content of a custom pg_hba.conf file to be used instead of the default config           | `""`                 |
+| `config.postgresql.max_connections`              | Maximum number of connections                                                           | `100`                |
+| `config.postgresql.shared_buffers`               | Amount of memory the database server uses for shared memory buffers                     | `128MB`              |
+| `config.postgresql.effective_cache_size`         | Sets the planner's assumption about the total size of the data caches                   | `4GB`                |
+| `config.postgresql.work_mem`                     | Amount of memory to be used by internal sort operations and hash tables                 | `4MB`                |
+| `config.postgresql.maintenance_work_mem`         | Maximum amount of memory to be used by maintenance operations                           | `64MB`               |
+| `config.postgresql.checkpoint_completion_target` | Time spent flushing dirty buffers during checkpoint, as fraction of checkpoint interval | `0.7`                |
+| `config.postgresql.random_page_cost`             | Sets the planner's estimate of the cost of a non-sequentially-fetched disk page         | `1.1`                |
+| `config.postgresql.timezone`                     | Default timezone setting                                                                | `UTC`                |
+| `config.postgresql.locale`                       | Locale setting for all lc\_\* settings                                                  | `en_US.utf8`         |
+| `config.postgresql.default_text_search_config`   | Sets default text search configuration                                                  | `pg_catalog.english` |
+| `config.postgresql.datestyle`                    | Sets the display format for date and time values                                        | `iso, mdy`           |
+| `config.postgresql.log_destination`              | Sets the destination for server log output                                              | `stderr`             |
+| `config.postgresql.logging_collector`            | Start a subprocess to capture stderr output into log files                              | `off`                |
+| `config.postgresql.log_min_messages`             | Sets the message levels that are logged                                                 | `warning`            |
+| `config.postgresql.log_min_error_statement`      | Causes all statements generating error at or above this level to be logged              | `error`              |
+| `config.postgresql.log_statement`                | Sets the type of statements logged                                                      | `none`               |
+| `config.postgresql.log_min_duration_statement`   | Sets the minimum execution time above which all statements will be logged               | `-1`                 |
+| `config.postgresql.shared_preload_libraries`     | Shared preload libraries (comma-separated list)                                         | `""`                 |
+| `config.postgresql.wal_buffers`                  | Amount of memory used in shared memory for WAL data                                     | `16MB`               |
+| `config.postgresql.wal_level`                    | Determines how much information is written to the WAL                                   | `replica`            |
+| `config.postgresql.max_wal_senders`              | Maximum number of concurrent connections from standby servers                           | `5`                  |
+| `config.postgresql.wal_keep_size`                | Minimum size of past WAL files kept in the pg_wal directory (in MB)                     | `1024`               |
+
+#### Deprecated Configuration Parameters
+
+The following parameters are deprecated in favour of the `config.postgresql` block above. They still work and take precedence when set to a non-empty/non-zero value.
+
 | Parameter                                     | Description                                                                             | Default |
 | --------------------------------------------- | --------------------------------------------------------------------------------------- | ------- |
-| `config.mountConfigMap`                       | Enable mounting of ConfigMap with PostgreSQL configuration                              | `true`  |
 | `config.postgresqlSharedPreloadLibraries`     | Shared preload libraries (comma-separated list)                                         | `""`    |
-| `config.postgresqlMaxConnections`             | Maximum number of connections                                                           | `100`   |
+| `config.postgresqlMaxConnections`             | Maximum number of connections (set to `0` to use `config.postgresql.max_connections`)   | `0`     |
 | `config.postgresqlSharedBuffers`              | Amount of memory the database server uses for shared memory buffers                     | `""`    |
 | `config.postgresqlEffectiveCacheSize`         | Effective cache size                                                                    | `""`    |
 | `config.postgresqlWorkMem`                    | Amount of memory to be used by internal sort operations and hash tables                 | `""`    |
@@ -141,19 +189,32 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `config.postgresqlRandomPageCost`             | Sets the planner's estimate of the cost of a non-sequentially-fetched disk page         | `""`    |
 | `config.postgresqlLogStatement`               | Sets the type of statements logged                                                      | `""`    |
 | `config.postgresqlLogMinDurationStatement`    | Sets the minimum execution time above which statements will be logged                   | `""`    |
-| `config.extraConfig`                          | Additional PostgreSQL configuration parameters                                          | `[]`    |
-| `config.existingConfigmap`                    | Name of existing ConfigMap with PostgreSQL configuration                                | `""`    |
-| `config.pgHbaConfig`                          | Content of a custom pg_hba.conf file to be used instead of the default config           | `""`    |
 
 ### Custom User Configuration
-| Parameter                   | Description                                                                        | Default                                  |
-| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------- |
-| `customUser`                | Optional user to be created at initialisation with a custom password and database  | `{}`                                     |
-| `customUser.name`           | Name of the custom user to be created                                              | `""`                                     |
-| `customUser.database`       | Name of the database to be created                                                 | `""`                                     |
-| `customUser.password`       | Password to be used for the custom user                                            | `""`                                     |
-| `customUser.existingSecret` | Existing secret, in which username, password and database name are saved           | `""`                                     |
-| `customUser.secretKeys`     | Name of keys in existing secret to use the custom user name, password and database | `{name: "", database: "", password: ""}` |
+
+`customUser` creates an **additional, non-superuser** account during first initialisation. This is separate from the superuser configured in the `auth` section.
+
+| Parameter                        | Description                                                                                                          | Default           |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `customUser.name`                | Name of the additional user to create                                                                                | `""`              |
+| `customUser.database`            | Name of the database to create and grant to the user (defaults to `customUser.name` if empty)                        | `""`              |
+| `customUser.password`            | Password for the custom user. Auto-generated and preserved across upgrades if empty.                                 | `""`              |
+| `customUser.existingSecret`      | Name of an existing secret. When set the chart does **not** generate its own custom-user secret.                     | `""`              |
+| `customUser.secretKeys.name`     | Key in the secret that holds the username. Set to empty to use `customUser.name` as a static value instead.          | `CUSTOM_USER`     |
+| `customUser.secretKeys.database` | Key in the secret that holds the database name. Set to empty to use `customUser.database` as a static value instead. | `CUSTOM_DB`       |
+| `customUser.secretKeys.password` | Key in the secret that holds the password. **Always read from the secret** — no static fallback.                     | `CUSTOM_PASSWORD` |
+
+#### Chart-generated custom-user secret
+
+When `customUser.name` is set and `customUser.existingSecret` is **not** set, the chart creates a secret named `<fullname>-custom-user-credentials` (e.g. `my-postgres-custom-user-credentials`) with the following keys:
+
+| Key               | Description          |
+| ----------------- | -------------------- |
+| `CUSTOM_USER`     | Custom user name     |
+| `CUSTOM_DB`       | Custom database name |
+| `CUSTOM_PASSWORD` | Custom user password |
+
+The password is auto-generated on first install and preserved on subsequent upgrades. To set a fixed password, use `customUser.password` or provide `customUser.existingSecret`.
 
 ### Container Command/Args Override
 
@@ -166,11 +227,12 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 
 ### PostgreSQL Initdb Configuration
 
-| Parameter                 | Description                                                                      | Default |
-| ------------------------- | -------------------------------------------------------------------------------- | ------- |
-| `initdb.args`             | Send arguments to postgres initdb. This is a space separated string of arguments | `""`    |
-| `initdb.scripts`          | Dictionary of initdb scripts                                                     | `{}`    |
-| `initdb.scriptsConfigMap` | ConfigMap with scripts to be run at first boot                                   | `""`    |
+| Parameter                 | Description                                                                      | Default                        |
+| ------------------------- | -------------------------------------------------------------------------------- | ------------------------------ |
+| `initdb.args`             | Send arguments to postgres initdb. This is a space separated string of arguments | `""`                           |
+| `initdb.scripts`          | Dictionary of initdb scripts                                                     | `{}`                           |
+| `initdb.scriptsConfigMap` | ConfigMap with scripts to be run at first boot                                   | `""`                           |
+| `initdb.directory`        | Directory inside the container where initdb scripts are mounted                  | `/docker-entrypoint-initdb.d/` |
 
 ### Service configuration
 
@@ -182,7 +244,7 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 | `service.nodePort`              | PostgreSQL NodePort port                                                          | `30432`     |
 | `service.annotations`           | Service annotations                                                               | `{}`        |
 | `service.loadBalancerIP`        | Load balancer IP (applies if service type is `LoadBalancer`)                      | `""`        |
-| `service.externalTrafficPolicy` | External traffic policy (applies if service type is `LoadBalancer` or `NodePort`) | `Cluster`   |
+| `service.externalTrafficPolicy` | External traffic policy (applies if service type is `LoadBalancer` or `NodePort`) | `""`        |
 
 ### Ingress configuration
 
@@ -204,16 +266,17 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 
 ### Persistence
 
-| Parameter                   | Description                                        | Default             |
-| --------------------------- | -------------------------------------------------- | ------------------- |
-| `persistence.enabled`       | Enable persistence using Persistent Volume Claims  | `true`              |
-| `persistence.storageClass`  | Persistent Volume storage class                    | `""`                |
-| `persistence.annotations`   | Persistent Volume Claim annotations                | `{}`                |
-| `persistence.labels`        | Labels for persistent volume claims                | `{}`                |
-| `persistence.size`          | Persistent Volume size                             | `8Gi`               |
-| `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
-| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
-| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`                |
+| Parameter                   | Description                                          | Default             |
+| --------------------------- | ---------------------------------------------------- | ------------------- |
+| `persistence.enabled`       | Enable persistence using Persistent Volume Claims    | `true`              |
+| `persistence.storageClass`  | Persistent Volume storage class                      | `""`                |
+| `persistence.annotations`   | Persistent Volume Claim annotations                  | `{}`                |
+| `persistence.labels`        | Labels for persistent volume claims                  | `{}`                |
+| `persistence.size`          | Persistent Volume size                               | `8Gi`               |
+| `persistence.accessModes`   | Persistent Volume access modes                       | `["ReadWriteOnce"]` |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence   | `""`                |
+| `persistence.subPath`       | The subdirectory of the volume to mount to           | `""`                |
+| `persistence.volumeName`    | Container volume name and VolumeClaimTemplate prefix | `data`              |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -316,7 +379,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.enabled`                          | Start a sidecar prometheus exporter to expose PostgreSQL metrics                | `false`                                 |
 | `metrics.image.registry`                   | PostgreSQL exporter image registry                                              | `quay.io`                               |
 | `metrics.image.repository`                 | PostgreSQL exporter image repository                                            | `prometheuscommunity/postgres-exporter` |
-| `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.18.1`                               |
+| `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.19.1`                               |
 | `metrics.image.pullPolicy`                 | PostgreSQL exporter image pull policy                                           | `Always`                                |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                                    |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                                    |
@@ -332,6 +395,21 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.serviceMonitor.relabelings`       | ServiceMonitor relabel configs to apply to samples before scraping              | `[]`                                    |
 | `metrics.serviceMonitor.metricRelabelings` | ServiceMonitor metricRelabelings configs to apply to samples before ingestion   | `[]`                                    |
 | `metrics.serviceMonitor.namespaceSelector` | ServiceMonitor namespace selector                                               | `{}`                                    |
+
+### WAL Replication Configuration
+
+| Parameter                              | Description                                                                          | Default                |
+| -------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------- |
+| `replication.enabled`                  | Enable WAL replication (provides `REPLICATION_USER`/`REPLICATION_PASSWORD` env vars) | `false`                |
+| `replication.primary.host`             | Hostname of the primary server (set to configure this instance as a standby)         | `""`                   |
+| `replication.primary.port`             | Port of the primary server                                                           | `5432`                 |
+| `replication.createUser`               | Whether to create the replication user via init script                               | `true`                 |
+| `replication.auth.username`            | Username for the replication user                                                    | `replication`          |
+| `replication.auth.password`            | Password for the replication user (required when not using `existingSecret`)         | `""`                   |
+| `replication.auth.existingSecret`      | Existing secret containing the replication password                                  | `""`                   |
+| `replication.auth.secretKeys.password` | Key for the password field in `replication.auth.existingSecret`                      | `replication-password` |
+| `replication.allowFrom.ipv4`           | Allowed IPv4 network for replication connections (set empty to disable)              | `0.0.0.0/0`            |
+| `replication.allowFrom.ipv6`           | Allowed IPv6 network for replication connections (set empty to disable)              | `::/0`                 |
 
 ## Examples
 
@@ -365,18 +443,20 @@ auth:
   password: "your-secure-app-password"
 
 config:
-  postgresqlMaxConnections: 200
-  postgresqlSharedBuffers: "256MB"
-  postgresqlEffectiveCacheSize: "1GB"
-  postgresqlWorkMem: "8MB"
-  postgresqlMaintenanceWorkMem: "128MB"
+  postgresql:
+    max_connections: 200
+    shared_buffers: "256MB"
+    effective_cache_size: "1GB"
+    work_mem: "8MB"
+    maintenance_work_mem: "128MB"
 
 customUser:
   existingSecret: "postgres-custom-user"
-  secretKeys:
-    name: "username"
-    password: "password"
-    database: "mydatabase"
+  # default secretKeys (CUSTOM_USER / CUSTOM_DB / CUSTOM_PASSWORD) are used
+  # create with: kubectl create secret generic postgres-custom-user
+  #   --from-literal=CUSTOM_USER=myuser
+  #   --from-literal=CUSTOM_DB=mydb
+  #   --from-literal=CUSTOM_PASSWORD=mypassword
 
 ingress:
   enabled: true
@@ -411,17 +491,16 @@ resources:
     cpu: "4000m"
 
 config:
-  postgresqlMaxConnections: 500
-  postgresqlSharedBuffers: "2GB"
-  postgresqlEffectiveCacheSize: "6GB"
-  postgresqlWorkMem: "16MB"
-  postgresqlMaintenanceWorkMem: "512MB"
-  postgresqlWalBuffers: "32MB"
-  postgresqlCheckpointCompletionTarget: "0.9"
-  postgresqlRandomPageCost: "1.0"
+  postgresql:
+    max_connections: 500
+    shared_buffers: "2GB"
+    effective_cache_size: "6GB"
+    work_mem: "16MB"
+    maintenance_work_mem: "512MB"
+    wal_buffers: "32MB"
+    checkpoint_completion_target: 0.9
+    random_page_cost: 1.0
   extraConfig:
-    - "wal_level = replica"
-    - "max_wal_senders = 3"
     - "archive_mode = on"
     - "archive_command = 'test ! -f /backup/%f && cp %p /backup/%f'"
 
@@ -439,36 +518,49 @@ affinity:
           topologyKey: kubernetes.io/hostname
 ```
 
-### Using Existing Secret for Authentication
+### Using Existing Secrets
+
+#### Superuser credentials
+
+Supply your own secret instead of letting the chart generate one. The secret must contain the key named by `auth.secretKeys.adminPasswordKey` (default `postgres-password`). Note: when using an existing secret the chart does **not** create its own, so the convenience keys (`host`, `port`, `uri`, etc.) will not be present.
+
+```bash
+kubectl create secret generic postgres-credentials \
+  --from-literal=postgres-password=your-admin-password
+```
 
 ```yaml
-# values-external-secret.yaml
 auth:
   existingSecret: "postgres-credentials"
-  secretKeys:
-    adminPasswordKey: "postgres-password"
+  # secretKeys.adminPasswordKey defaults to "postgres-password", only override if your key differs
+```
 
-# For custom users, use the customUser section
+#### Custom user credentials
+
+Supply your own secret for the custom user. All three keys (`name`, `database`, `password`) are read from the secret. The `name` and `database` keys can be left empty to fall back to the static values in `customUser.name` / `customUser.database`, but the `password` key **must always be present** in the secret — there is no static fallback for it.
+
+```bash
+kubectl create secret generic postgres-custom-user \
+  --from-literal=CUSTOM_USER=myuser \
+  --from-literal=CUSTOM_DB=mydb \
+  --from-literal=CUSTOM_PASSWORD=myuserpassword
+```
+
+```yaml
+customUser:
+  existingSecret: "postgres-custom-user"
+  # secretKeys default to CUSTOM_USER / CUSTOM_DB / CUSTOM_PASSWORD — only override if your keys differ
+```
+
+If your existing secret uses different key names, configure them explicitly:
+
+```yaml
 customUser:
   existingSecret: "postgres-custom-user"
   secretKeys:
-    name: "username"  # Set empty for fallback to customUser.name
-    database: "database"  # Set empty for fallback to customUser.database
+    name: "username"
+    database: "database"
     password: "password"
-```
-
-Create the secrets first:
-
-```bash
-# Admin/superuser credentials
-kubectl create secret generic postgres-credentials \
-  --from-literal=postgres-password=your-admin-password
-
-# Custom user credentials (optional)
-kubectl create secret generic postgres-custom-user \
-  --from-literal=username=myuser \
-  --from-literal=password=myuserpassword \
-  --from-literal=database=mydb
 ```
 
 ### Custom Configuration with ConfigMap
@@ -515,19 +607,37 @@ replication:
     password: "secret"
 ```
 
-#### Standby setup
+To use an existing secret instead of a plain-text password, create a secret containing the replication password under the key referenced by `replication.auth.secretKeys.password` (default `replication-password`):
 
-As soon as a primary host is configured, this instance is considered to be a standby server.
-
-This will also create an `initContainer` name `replication-standby-init`, which:
-- Creates/updates the `replication.pgpass` credentials file in the transient run directory
-- Initializes the database using `pg_basebackup` if not already done using the credentials file above
+```bash
+kubectl create secret generic postgres-replication \
+  --from-literal=replication-password=secret
+```
 
 ```yaml
 replication:
   enabled: true
   auth:
-    password: "secret"  # Password must match primary
+    existingSecret: "postgres-replication"
+    # secretKeys.password defaults to "replication-password" — only override if your key differs
+```
+
+#### Standby setup
+
+As soon as a primary host is configured, this instance is considered to be a standby server.
+
+This will also create an `initContainer` named `replication-standby-init`, which:
+
+- Creates/updates the `replication.pgpass` credentials file in the transient run directory
+- Initializes the database using `pg_basebackup` if not already done using the credentials file above
+
+The password on the standby must match what was configured on the primary.
+
+```yaml
+replication:
+  enabled: true
+  auth:
+    password: "secret" # must match the primary's replication password
   primary:
     host: "your-database.namespace.svc.cluster.local"
 ```
@@ -649,11 +759,14 @@ PGPASSWORD=your-password psql -h localhost -U myapp -d myappdb
 Get the auto-generated passwords:
 
 ```bash
-# Admin password
+# Superuser (admin) password
 kubectl get secret my-postgres -o jsonpath="{.data.postgres-password}" | base64 --decode
 
-# Custom user password
-kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
+# Custom user password (in the separate custom-user secret)
+kubectl get secret my-postgres-custom-user-credentials -o jsonpath="{.data.CUSTOM_PASSWORD}" | base64 --decode
+
+# Full connection URI (superuser)
+kubectl get secret my-postgres -o jsonpath="{.data.uri}" | base64 --decode
 ```
 
 ## Troubleshooting
@@ -661,32 +774,27 @@ kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
 ### Common Issues
 
 1. **Pod fails to start with permission errors**
-
    - Ensure your storage class supports the required access modes
    - Check if security contexts are compatible with your cluster policies
    - Verify the PostgreSQL data directory permissions
 
 2. **Cannot connect to PostgreSQL**
-
    - Verify the service is running: `kubectl get svc`
    - Check if authentication is properly configured
    - Ensure firewall rules allow access to port 5432
    - Check PostgreSQL logs: `kubectl logs <pod-name>`
 
 3. **Database initialization fails**
-
    - Check if persistent volume has enough space
    - Verify environment variables are set correctly
    - Review pod events: `kubectl describe pod <pod-name>`
 
 4. **Hardened image fails with "invalid argument: postgres"**
-
    - This occurs when using hardened images with different entrypoint behavior
    - Solution: Set `args: []` in your values file to disable default args
    - See [Using Hardened Images](#using-hardened-images) example
 
 5. **Permission denied errors with hardened images**
-
    - Occurs when switching from standard postgres image (UID 999) to hardened image (e.g., UID 70)
    - Existing data directory has wrong ownership
    - Solution: Add init container to fix permissions
@@ -704,27 +812,29 @@ kubectl get secret my-postgres -o jsonpath="{.data.password}" | base64 --decode
 
    ```yaml
    config:
-     postgresqlSharedBuffers: "256MB" # 25% of RAM
-     postgresqlEffectiveCacheSize: "1GB" # 75% of RAM
-     postgresqlWorkMem: "8MB" # RAM / max_connections
-     postgresqlMaintenanceWorkMem: "128MB"
+     postgresql:
+       shared_buffers: "256MB" # 25% of RAM
+       effective_cache_size: "1GB" # 75% of RAM
+       work_mem: "8MB" # RAM / max_connections
+       maintenance_work_mem: "128MB"
    ```
 
 2. **Connection Settings**
 
    ```yaml
    config:
-     postgresqlMaxConnections: 200
+     postgresql:
+       max_connections: 200
    ```
 
 3. **WAL and Checkpoints**
 
    ```yaml
    config:
-     postgresqlWalBuffers: "16MB"
-     postgresqlCheckpointCompletionTarget: "0.7"
+     postgresql:
+       wal_buffers: "16MB"
+       checkpoint_completion_target: 0.7
      extraConfig:
-       - "wal_level = replica"
        - "max_wal_size = 2GB"
        - "min_wal_size = 1GB"
    ```

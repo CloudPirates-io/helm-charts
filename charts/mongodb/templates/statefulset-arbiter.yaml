@@ -178,46 +178,8 @@ spec:
                   name: {{ include "mongodb.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
-            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-            - name: MONGO_CUSTOM_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.name }}
-                  key: {{ .Values.customUser.secretKeys.name }}
-                  {{- else }}
-                  key: CUSTOM_USER
-                  {{- end }}
-            - name: MONGO_CUSTOM_USER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.password }}
-                  key: {{ .Values.customUser.secretKeys.password }}
-                  {{- else }}
-                  key: CUSTOM_PASSWORD
-                  {{- end }}
-            - name: MONGO_INITDB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.database }}
-                  key: {{ .Values.customUser.secretKeys.database }}
-                  {{- else }}
-                  key: CUSTOM_DB
-                  {{- end }}
+            {{- if .Values.customUsers }}
+            {{- include "mongodb.customUsers.envVars" (dict "ctx" .) | nindent 12 }}
             {{- end }}
             {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
             - name: MONGO_METRICS_USERNAME
