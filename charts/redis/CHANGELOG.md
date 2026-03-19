@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.4] - 2026-03-11
+
+- [redis]: Fix missing tls arguments for sentinel probe monitoring ([c7e4f959](https://github.com/CloudPirates-io/helm-charts/commit/c7e4f959))
+
 ## [0.26.3] - 2026-03-11
 
 - [redis]: Make master discovery service respect tls certificates (#1129) ([ce85ec27](https://github.com/CloudPirates-io/helm-charts/commit/ce85ec27))

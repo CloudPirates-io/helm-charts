@@ -2,7 +2,7 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.19.0
+version: 0.19.3
 appVersion: "26.5.5"
 keywords:
   - keycloak
@@ -52,9 +52,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Support gateway api in addition to ingress where applicable"
+      description: "[mariadb] Update initContainers.waitForMariadb.repository to e16f61b"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1132"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1159"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/CHANGELOG.md"

@@ -2,6 +2,18 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.2] - 2026-03-17
+
+- [postgres] Update initContainers.waitForPostgres.repository to 98f32d2 (#1154) ([c1d49892](https://github.com/CloudPirates-io/helm-charts/commit/c1d49892))
+
+## [0.19.1] - 2026-03-17
+
+- [mariadb] Update initContainers.waitForMariadb.repository to 310a2b5 (#1149) ([912ab906](https://github.com/CloudPirates-io/helm-charts/commit/912ab906))
+
+## [0.19.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
 ## [0.18.0] - 2026-03-11
 
 - [keycloak]: Differentiate probes (#1125) ([58ab1d63](https://github.com/CloudPirates-io/helm-charts/commit/58ab1d63))

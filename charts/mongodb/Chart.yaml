@@ -2,7 +2,7 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.14.0
+version: 0.14.1
 appVersion: "8.2.5"
 keywords:
   - mongodb
@@ -39,9 +39,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "CustomUser rework for single / sharded setup"
+      description: "[mongo] Update image.repository to 60aa240"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1143"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1150"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"
