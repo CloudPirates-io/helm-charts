@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.1] - 2026-03-17
+
+- [mongo] Update image.repository to 60aa240 (#1150) ([9f18375d](https://github.com/CloudPirates-io/helm-charts/commit/9f18375d))
+
 ## [0.14.0] - 2026-03-16
 
 - [mongodb]: CustomUser rework for single / sharded setup (#1143) ([4d9c939e](https://github.com/CloudPirates-io/helm-charts/commit/4d9c939e))
