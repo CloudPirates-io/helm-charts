@@ -73,6 +73,10 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.19.5] - 2026-03-18
+
+- [rabbitmq]: Erlang Cookie configurable permissions (#1142) ([f7783bb2](https://github.com/CloudPirates-io/helm-charts/commit/f7783bb2))
+
 ## [0.19.4] - 2026-03-18
 
 - Update image.repository to aeee1db (#1162) ([c1b807f7](https://github.com/CloudPirates-io/helm-charts/commit/c1b807f7))

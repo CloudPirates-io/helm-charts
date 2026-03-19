@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.26.5] - 2026-03-17
+
+- Update image.repository to a019c00 (#1146) ([9e1d0494](https://github.com/CloudPirates-io/helm-charts/commit/9e1d0494))
+
 ## [0.26.4] - 2026-03-11
 
 - [redis]: Fix missing tls arguments for sentinel probe monitoring ([c7e4f959](https://github.com/CloudPirates-io/helm-charts/commit/c7e4f959))

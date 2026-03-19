@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.3] - 2026-03-18
+
+- [mariadb] Update initContainers.waitForMariadb.repository to e16f61b (#1159) ([43dcfff1](https://github.com/CloudPirates-io/helm-charts/commit/43dcfff1))
+
 ## [0.19.2] - 2026-03-17
 
 - [postgres] Update initContainers.waitForPostgres.repository to 98f32d2 (#1154) ([c1d49892](https://github.com/CloudPirates-io/helm-charts/commit/c1d49892))
