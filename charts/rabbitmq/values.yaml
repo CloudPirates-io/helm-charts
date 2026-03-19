@@ -23,7 +23,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.4-management@sha256:86b74e99dfc5694b7adbc6adb9496e73211430bfef1d308b5fe1dab83b0b888f"
+  tag: "4.2.5-management@sha256:e974715db94827f51a4829a049b7e94321a36132988395053713805dfc6b63a2"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -76,6 +76,8 @@ auth:
   existingPasswordKey: "password"
   ## @param auth.existingErlangCookieKey Key in existing secret containing Erlang cookie
   existingErlangCookieKey: "erlang-cookie"
+  ## @param auth.erlangCookiePermissions [experimental] File permissions for the .erlang.cookie file. See https://github.com/CloudPirates-io/helm-charts/issues/1141
+  erlangCookiePermissions: 400
 
 ## @section RabbitMQ configuration
 config:

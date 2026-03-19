@@ -53,7 +53,7 @@ spec:
               # Generate a default Erlang cookie when auth is disabled
               echo "defaultcookie" > {{ .Values.persistence.mountPath }}/.erlang.cookie
               {{- end }}
-              chmod 400 {{ .Values.persistence.mountPath }}/.erlang.cookie
+              chmod {{ .Values.auth.erlangCookiePermissions }} {{ .Values.persistence.mountPath }}/.erlang.cookie
               chown $(id -u):$(id -g) {{ .Values.persistence.mountPath }}/.erlang.cookie
           {{- if .Values.auth.enabled }}
           env:
