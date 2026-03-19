@@ -76,6 +76,8 @@ auth:
   existingPasswordKey: "password"
   ## @param auth.existingErlangCookieKey Key in existing secret containing Erlang cookie
   existingErlangCookieKey: "erlang-cookie"
+  ## @param auth.erlangCookiePermissions [experimental] File permissions for the .erlang.cookie file. See https://github.com/CloudPirates-io/helm-charts/issues/1141
+  erlangCookiePermissions: 400
 
 ## @section RabbitMQ configuration
 config:

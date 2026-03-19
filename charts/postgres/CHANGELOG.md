@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.2] - 2026-03-18
+
+- [postgres]: Allow for configuration of wal settings without replication (#1163) ([f99fe177](https://github.com/CloudPirates-io/helm-charts/commit/f99fe177))
+
 ## [0.18.1] - 2026-03-17
 
 - Update image.repository to 98f32d2 (#1153) ([a965537a](https://github.com/CloudPirates-io/helm-charts/commit/a965537a))
