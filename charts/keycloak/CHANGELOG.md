@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.7] - 2026-03-20
+
+- [keycloak] Add tpl support for extra\* fields (extraInitContainers, extraVolumes, extraVolumeMounts, extraEnvVars, extraContainers) to enable Helm template expressions such as `global.imageRegistry` in user-provided values
+
 ## [0.19.5] - 2026-03-19
 
 - [keycloak/keycloak] Update image.repository to v26.5.6 (#1169) ([c759051e](https://github.com/CloudPirates-io/helm-charts/commit/c759051e))
