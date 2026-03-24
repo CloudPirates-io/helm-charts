@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.6.1] - 2026-02-27
+
+- Update charts/etcd/values.yaml etcd-development/etcd to v3.6.8 (patch) (#1069) ([9a9fcc57](https://github.com/CloudPirates-io/helm-charts/commit/9a9fcc57))
+
 ## [0.6.0] - 2026-02-16
 
 - [universal]: Bump all charts to common 2.2.0 (#1020) ([cbeb5b19](https://github.com/CloudPirates-io/helm-charts/commit/cbeb5b19))
