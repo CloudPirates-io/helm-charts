@@ -1,0 +1,147 @@
+{{- $numPolicies := len .Values.setup.policies }}
+{{- $numBuckets := len .Values.setup.buckets }}
+{{- $numUsers := len .Values.setup.users }}
+{{- if or (gt $numPolicies 0) (gt $numBuckets 0) (gt $numUsers 0) }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "rustfs.fullname" . }}-setup-{{ randAlpha 5 | lower }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rustfs.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "rustfs.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  securityContext: {} # CLI is not running with any SecurityContext
+  restartPolicy: Never
+  volumes:
+    - name: setup
+      secret:
+        {{- if .Values.setup.existingSecret }}
+        secretName: {{ .Values.setup.existingSecret }}
+        {{- else }}
+        secretName: {{ include "rustfs.fullname" . }}-setup
+        {{- end }}
+  initContainers:
+    - name: waiting-for-service
+      image: {{ include "rustfs-setup.image" . }}
+      imagePullPolicy: {{ .Values.setup.image.imagePullPolicy }}
+      env:
+        - name: TIMEOUT
+          value: "90"
+        - name: HOST
+          value: {{ include "rustfs.fullname" . }}
+        - name: PORT
+          value: {{ .Values.service.port | quote }}
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          PORT="${PORT:-5432}"
+          TIMEOUT="${TIMEOUT:-60}"
+          INTERVAL="${INTERVAL:-2}"
+
+          echo "Waiting for ${HOST}:${PORT} (with timeout: ${TIMEOUT}s)"
+
+          START=$(date +%s)
+
+          while true; do
+            if nc -z "${HOST}" "${PORT}" >/dev/null 2>&1; then
+              echo "✅ ${HOST}:${PORT} available"
+              exit 0
+            fi
+
+            NOW=$(date +%s)
+            if [ $((NOW - START)) -ge "${TIMEOUT}" ]; then
+              echo "❌ Timeout reached"
+              exit 1
+            fi
+
+            sleep "$INTERVAL"
+          done
+  containers:
+    - name: setup
+      securityContext: {} # CLI is not running with any SecurityContext
+      image: {{ include "rustfs-setup.image" . }}
+      imagePullPolicy: {{ .Values.setup.image.imagePullPolicy }}
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          # We do not use -e here and intercept the error codes
+
+          rc alias set local "http://${RUSTFS_HOST}:${RUSTFS_PORT}" "${RUSTFS_ACCESS_KEY}" "${RUSTFS_SECRET_KEY}"
+          ret=$?
+          if [ ${ret} -ne 0 ]; then
+            exit ${ret}
+          fi
+
+          # Create/update policies
+          jq -c '.[]' /setup/policies | while read -r policy; do
+            name=$(echo "${policy}" | jq -r '.name')
+            echo "${policy}" | jq -r '.spec' > /tmp/policy.json
+
+            rc admin policy create local "${name}" /tmp/policy.json
+
+            ret=$?
+            if [ ${ret} -ne 0 ]; then
+              exit ${ret}
+            fi
+          done
+
+          # Read, add users and assign policies
+          jq -c '.[]' /setup/users | while read -r user; do
+            name=$(echo "${user}" | jq -r '.name')
+            password=$(echo "${user}" | jq -r '.password')
+
+            rc admin user add local "${name}" "${password}"
+
+            ret=$?
+            if [ ${ret} -ne 0 ]; then
+              exit ${ret}
+            fi
+
+            echo "${user}" | jq -r '.policies[]' | while read -r policy; do
+              rc admin policy attach local "${policy}" --user "${name}"
+
+              ret=$?
+              if [ ${ret} -ne 0 ]; then
+                exit ${ret}
+              fi
+            done
+          done
+
+          # Create buckets
+          jq -c '.[]' /setup/buckets | while read -r bucket; do
+            name=$(echo "${bucket}" | jq -r '.name')
+
+            rc mb "local/${name}"
+
+            ret=$?
+            if [ ${ret} -ne 0 ]; then
+              if [ ${ret} -eq 3 ]; then
+                echo "Bucket '${name}' seems to exist already"
+              else
+                exit ${ret}
+              fi
+            fi
+          done
+      volumeMounts:
+        - mountPath: /setup
+          name: setup
+      env:
+        - name: RUSTFS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "rustfs.secretName" . }}
+              key: {{ include "rustfs.accessKeyKey" . }}
+        - name: RUSTFS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "rustfs.secretName" . }}
+              key: {{ include "rustfs.secretKeyKey" . }}
+        - name: RUSTFS_HOST
+          value: {{ include "rustfs.fullname" . }}
+        - name: RUSTFS_PORT
+          value: {{ .Values.service.port | quote }}
+{{- end }}

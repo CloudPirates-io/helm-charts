@@ -25,12 +25,11 @@ spec:
   {{- if .Values.service.headless.ipFamilyPolicy }}
   ipFamilyPolicy: {{ .Values.service.headless.ipFamilyPolicy }}
   {{- end }}
-  {{- if .Values.sentinel.enabled }}
   {{- if or $useDeployment .Values.sentinel.enabled }}
   publishNotReadyAddresses: true
   {{- end }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
       targetPort: redis
       protocol: TCP
       name: redis
@@ -53,4 +52,3 @@ spec:
     {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
-{{- end }}

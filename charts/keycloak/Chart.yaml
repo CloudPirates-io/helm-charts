@@ -2,8 +2,8 @@ apiVersion: v2
 name: keycloak
 description: Open Source Identity and Access Management Solution
 type: application
-version: 0.17.0
-appVersion: "26.5.5"
+version: 0.19.7
+appVersion: "26.5.6"
 keywords:
   - keycloak
   - identity
@@ -51,10 +51,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: changed
-      description: "Documentation improvements"
+    - kind: added
+      description: "Add tpl support for extra* fields to enable global.imageRegistry"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1112"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1173"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/CHANGELOG.md"

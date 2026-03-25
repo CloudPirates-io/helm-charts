@@ -49,12 +49,24 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
-          {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+          {{- if or (and .Values.auth.acl.enabled .Values.auth.acl.existingSecret) .Values.tls.enabled }}
           volumeMounts:
+            {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
             - name: acl-file
               mountPath: {{ include "redis.auth.acl.path" . }}
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/redis/tls
+              readOnly: true
+            {{- if .Values.tls.client.existingSecret }}
+            - name: tls-client-certs
+              mountPath: /etc/redis/tls-client
+              readOnly: true
+            {{- end }}
+            {{- end }}
           {{- end }}
           command:
             - /bin/sh
@@ -66,7 +78,7 @@ spec:
 
               # Check if cluster is already initialized
               FIRST_NODE="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
-              if redis-cli -h "$FIRST_NODE" -p {{ .Values.service.port }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+              if redis-cli -h "$FIRST_NODE" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
                 echo "Redis cluster is already initialized, skipping creation..."
                 exit 0
               fi
@@ -74,12 +86,12 @@ spec:
               echo "Building list of Redis nodes..."
               NODES=""
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:{{ .Values.service.port }}"
+                NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
               done
 
               echo "Waiting for all Redis pods to be reachable..."
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p {{ .Values.service.port }} ping 2>/dev/null ; do
+                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null ; do
                   echo "Waiting for pod {{ include "redis.fullname" . }}-${i}..."
                   sleep 3
                 done
@@ -88,17 +100,44 @@ spec:
               echo "Creating Redis cluster with nodes: $NODES"
               redis-cli \
                 -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless \
-                -p {{ .Values.service.port }} \
+                -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} \
+                {{- if .Values.tls.enabled }}
+                {{ include "redis.tls.probeArgs" . }} \
+                {{- end }}
                 --cluster create \
                 $NODES \
                 {{- if ne (int .Values.clusterReplicaCount) 0 }}
                 --cluster-replicas {{ .Values.clusterReplicaCount }} \
                 {{- end }}
                 --cluster-yes
-      {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+      {{- if or (and .Values.auth.acl.enabled .Values.auth.acl.existingSecret) .Values.tls.enabled }}
       volumes:
+        {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
         - name: acl-file
           secret:
             secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls-certs
+          secret:
+            secretName: {{ required "TLS secret name is required when TLS is enabled" .Values.tls.existingSecret }}
+            items:
+              - key: {{ .Values.tls.certFilename }}
+                path: {{ .Values.tls.certFilename }}
+              - key: {{ .Values.tls.certKeyFilename }}
+                path: {{ .Values.tls.certKeyFilename }}
+              - key: {{ .Values.tls.certCAFilename }}
+                path: {{ .Values.tls.certCAFilename }}
+        {{- if .Values.tls.client.existingSecret }}
+        - name: tls-client-certs
+          secret:
+            secretName: {{ .Values.tls.client.existingSecret }}
+            items:
+              - key: {{ .Values.tls.client.certFilename }}
+                path: {{ .Values.tls.client.certFilename }}
+              - key: {{ .Values.tls.client.certKeyFilename }}
+                path: {{ .Values.tls.client.certKeyFilename }}
+        {{- end }}
+        {{- end }}
       {{- end }}
 {{- end }}

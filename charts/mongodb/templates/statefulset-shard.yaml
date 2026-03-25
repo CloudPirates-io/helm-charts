@@ -182,6 +182,9 @@ spec:
                   name: {{ include "mongodb.secretName" $ }}
                   key: {{ include "mongodb.secretPasswordKey" $ }}
             {{- end }}
+            {{- if $.Values.customUsers }}
+            {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
+            {{- end }}
             {{- with $.Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -311,7 +314,7 @@ spec:
           configMap:
             name: {{ include "mongodb.configMapName" $ }}
         {{- end }}
-        {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+        {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
         - name: mongodb-keyfile
           secret:
             secretName: {{ include "mongodb.keyfileSecretName" $ }}
@@ -525,6 +528,9 @@ spec:
                   name: {{ include "mongodb.secretName" $ }}
                   key: {{ include "mongodb.secretPasswordKey" $ }}
             {{- end }}
+            {{- if $.Values.customUsers }}
+            {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
+            {{- end }}
             {{- with $.Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -618,7 +624,7 @@ spec:
           configMap:
             name: {{ include "mongodb.configMapName" $ }}
         {{- end }}
-        {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName }}
+        {{- if or $.Values.auth.enabled $.Values.replicaSet.key $.Values.replicaSet.keySecretName $.Values.shardedCluster.keyFile $.Values.shardedCluster.keySecretName }}
         - name: mongodb-keyfile
           secret:
             secretName: {{ include "mongodb.keyfileSecretName" $ }}

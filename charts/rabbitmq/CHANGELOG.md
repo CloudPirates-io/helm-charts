@@ -73,6 +73,46 @@ All notable changes to this chart will be documented in this file.
 ## [cluster-operator-0.1.0] - 2025-12-01
 
 
+## [0.19.7] - 2026-03-23
+
+- Update image.repository to 494bbcd (#1177) ([e1eb871d](https://github.com/CloudPirates-io/helm-charts/commit/e1eb871d))
+
+## [0.19.6] - 2026-03-19
+
+- Update image.repository to v4.2.5 (#1168) ([c75c03b2](https://github.com/CloudPirates-io/helm-charts/commit/c75c03b2))
+
+## [0.19.5] - 2026-03-18
+
+- [rabbitmq]: Erlang Cookie configurable permissions (#1142) ([f7783bb2](https://github.com/CloudPirates-io/helm-charts/commit/f7783bb2))
+
+## [0.19.4] - 2026-03-18
+
+- Update image.repository to aeee1db (#1162) ([c1b807f7](https://github.com/CloudPirates-io/helm-charts/commit/c1b807f7))
+
+## [0.19.3] - 2026-03-17
+
+- Update image.repository to 86b74e9 (#1157) ([b94d0cde](https://github.com/CloudPirates-io/helm-charts/commit/b94d0cde))
+
+## [0.19.2] - 2026-03-17
+
+- Update image.repository to 402d829 (#1155) ([0b66b6ab](https://github.com/CloudPirates-io/helm-charts/commit/0b66b6ab))
+
+## [0.19.1] - 2026-03-16
+
+- Update image.repository to 693b201 (#1140) ([d319df36](https://github.com/CloudPirates-io/helm-charts/commit/d319df36))
+
+## [0.19.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
+## [0.18.3] - 2026-03-13
+
+- Update image.repository to 4a2be7e (#1136) ([acb5c848](https://github.com/CloudPirates-io/helm-charts/commit/acb5c848))
+
+## [0.18.2] - 2026-03-11
+
+- Update image.repository to 81de74a (#1126) ([353c61f0](https://github.com/CloudPirates-io/helm-charts/commit/353c61f0))
+
 ## [0.18.1] - 2026-03-10
 
 - Update image.repository to 068bba7 (#1107) ([e4d039f1](https://github.com/CloudPirates-io/helm-charts/commit/e4d039f1))

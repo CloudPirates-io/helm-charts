@@ -13,12 +13,12 @@ metadata:
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
   {{- $annotations := merge .Values.ingress.annotations .Values.commonAnnotations }}
+  {{- if $.Values.keycloak.httpsEnabled }}
+    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/backend-protocol" "HTTPS" }}
+  {{- end }}
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
-    {{- if $.Values.keycloak.httpsEnabled }}
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    {{- end }}
   {{- end }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
