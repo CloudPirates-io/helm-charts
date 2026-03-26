@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.10.2] - 2026-03-03
+
+- [timescale/timescaledb] Update image.repository to v2.25.2 (#1087) ([1d17d1c2](https://github.com/CloudPirates-io/helm-charts/commit/1d17d1c2))
+
 ## [0.10.1] - 2026-02-18
 
 - [timescale/timescaledb] Update charts/timescaledb/values.yaml timescale/timescaledb to v2.25.1 (patch) (#1026) ([77dd9816](https://github.com/CloudPirates-io/helm-charts/commit/77dd9816))
