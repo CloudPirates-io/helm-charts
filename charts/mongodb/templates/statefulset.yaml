@@ -261,7 +261,7 @@ spec:
           {{- if .Values.metrics.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /
+              path: /metrics
               port: http-metrics
             initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.metrics.readinessProbe.periodSeconds }}
