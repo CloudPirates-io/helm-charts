@@ -28375,6 +28375,63 @@ entries:
   - annotations:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
+        - kind: changed
+          description: "Update CRDs and remove ALPHA tag"
+          links:
+            - name: "Pull Request"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/1191"
+            - name: "Changelog"
+              url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq-cluster-operator/CHANGELOG.md"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RabbitMQ
+          url: https://www.rabbitmq.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+        - name: RabbitMQ Cluster Operator
+          url: https://github.com/rabbitmq/cluster-operator
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.19.1
+    created: "2026-03-27T12:42:56.537169943Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: Kubernetes operator to deploy and manage RabbitMQ clusters.
+    digest: a024938350a88fa1322ee71c52e87ef1adb2f64cca07c23c9fdf269fb211adc8
+    home: https://www.rabbitmq.com
+    icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+    keywords:
+    - rabbitmq-cluster-operator
+    - rabbitmq
+    - operator
+    - message broker
+    - amqp
+    - messaging
+    - queue
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - name: Gasper Oblak
+      url: https://about.bl4ko.com
+    name: rabbitmq-cluster-operator
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+    - https://github.com/rabbitmq/cluster-operator
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-cluster-operator-0.2.2/rabbitmq-cluster-operator-0.2.2.tgz
+    version: 0.2.2
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
         - kind: fixed
           description: "rabbitmq-cluster-operator: Fix template error when namespaced watch is defined."
           links:
@@ -40229,4 +40286,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-26T06:39:05.406481888Z"
+generated: "2026-03-27T12:42:56.538188442Z"
