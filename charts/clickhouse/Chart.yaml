@@ -1,0 +1,49 @@
+apiVersion: v2
+name: clickhouse
+description: The Open-Source, High Performance Columnar OLAP Database Management System
+type: application
+version: 0.1.0
+appVersion: "25.3.14.14"
+keywords:
+  - clickhouse
+  - database
+  - olap
+  - analytics
+  - columnar
+home: https://clickhouse.com
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clickhouse
+  - https://github.com/ClickHouse/ClickHouse
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
+    url: https://www.cloudpirates.io
+dependencies:
+  - name: common
+    version: "2.2.x"
+    repository: oci://registry-1.docker.io/cloudpirates
+icon: https://a.storyblok.com/f/143071/512x512/7be3e97a51/clickhouse-logo.svg
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: ClickHouse
+      url: https://clickhouse.com
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clickhouse
+    - name: Application
+      url: https://github.com/ClickHouse/ClickHouse
+    - name: Docker Image
+      url: https://hub.docker.com/r/clickhouse/clickhouse-server
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |-
+    - kind: added
+      description: "Initial release of the ClickHouse chart"
+      links:
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/clickhouse/CHANGELOG.md"

@@ -1,0 +1,64 @@
+suite: test clickhouse persistence
+templates:
+  - statefulset.yaml
+tests:
+  - it: should create volumeClaimTemplate when persistence is enabled
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: data
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 10Gi
+
+  - it: should use emptyDir when persistence is disabled
+    set:
+      persistence:
+        enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
+  - it: should use existingClaim when set
+    set:
+      persistence:
+        existingClaim: "my-existing-pvc"
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: my-existing-pvc
+
+  - it: should use custom storageClass
+    set:
+      persistence:
+        storageClass: "fast-ssd"
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+
+  - it: should set empty storageClass when set to dash
+    set:
+      persistence:
+        storageClass: "-"
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ""
+
+  - it: should use custom persistence size
+    set:
+      persistence:
+        size: 50Gi
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi

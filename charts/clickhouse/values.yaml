@@ -1,0 +1,351 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+  enableServiceLinks: true
+
+## @section Common parameters
+## @param nameOverride String to partially override clickhouse.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override clickhouse.fullname
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+## @param priorityClassName Priority class name to be used for the pods
+priorityClassName: ""
+
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
+
+## @section ClickHouse image configuration
+image:
+  ## @param image.registry ClickHouse image registry
+  registry: docker.io
+  ## @param image.repository ClickHouse image repository
+  repository: clickhouse/clickhouse-server
+  ## @param image.tag ClickHouse image tag (immutable tags are recommended)
+  tag: "25.3@sha256:b627d7a9bc0e0c1bac26cdbe9d2fc6316faa29c5d8a174f28f5abd57d0fa6ba2"
+  ## @param image.imagePullPolicy ClickHouse image pull policy
+  imagePullPolicy: Always
+
+## @section Deployment configuration
+## @param replicaCount Number of ClickHouse replicas to deploy
+replicaCount: 1
+
+## @section Pod annotations and labels
+## @param podAnnotations Map of annotations to add to the pods
+podAnnotations: {}
+## @param podLabels Map of labels to add to the pods
+podLabels: {}
+
+## @section Security Context
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
+  fsGroup: 101
+
+containerSecurityContext:
+  ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.runAsNonRoot Configure the container to run as a non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.runAsUser User ID for the ClickHouse container
+  runAsUser: 101
+  ## @param containerSecurityContext.runAsGroup Group ID for the ClickHouse container
+  runAsGroup: 101
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: false
+  ## @param containerSecurityContext.capabilities.drop Linux capabilities to be dropped
+  capabilities:
+    drop:
+      - ALL
+
+## @section ClickHouse Authentication
+auth:
+  ## @param auth.username ClickHouse admin username
+  username: "default"
+  ## @param auth.password Password for the ClickHouse admin user (auto-generated if empty)
+  password: ""
+  ## @param auth.database Default database to create at initialisation
+  database: "default"
+  ## @param auth.existingSecret Name of existing secret to use for ClickHouse credentials
+  existingSecret: ""
+  secretKeys:
+    ## @param auth.secretKeys.passwordKey Name of key in existing secret for ClickHouse admin password
+    passwordKey: "clickhouse-password"
+
+## @section ClickHouse Configuration
+config:
+  ## @param config.existingConfigmap Name of existing ConfigMap with ClickHouse configuration (config.xml)
+  existingConfigmap: ""
+  ## @param config.existingUsersConfigmap Name of existing ConfigMap with ClickHouse users configuration (users.xml)
+  existingUsersConfigmap: ""
+  ## @param config.listenHost Listen host for ClickHouse (default: listen on all interfaces)
+  listenHost: "0.0.0.0"
+  ## @param config.maxConnections Maximum number of simultaneous client connections
+  maxConnections: 4096
+  ## @param config.maxConcurrentQueries Maximum number of simultaneously processed queries
+  maxConcurrentQueries: 100
+  ## @param config.maxMemoryUsage Maximum memory usage for a single query in bytes (0 = unlimited)
+  maxMemoryUsage: 0
+  ## @param config.timezone Default timezone
+  timezone: "UTC"
+  ## @param config.logLevel Log level (trace, debug, information, warning, error, fatal)
+  logLevel: "information"
+  ## @param config.extraConfig Additional ClickHouse XML configuration snippets merged into config.xml
+  extraConfig: ""
+  ## @param config.extraUsersConfig Additional ClickHouse XML configuration snippets merged into users.xml
+  extraUsersConfig: ""
+
+## @section ClickHouse Initialization scripts
+initdb:
+  ## @param initdb.scripts Dictionary of SQL scripts to run at first boot (key: filename, value: SQL content)
+  scripts: {}
+  ## @param initdb.scriptsConfigMap ConfigMap with SQL scripts to be run at first boot
+  scriptsConfigMap: ""
+
+## @section Service configuration
+service:
+  ## @param service.type ClickHouse service type
+  type: ClusterIP
+  ## @param service.httpPort ClickHouse HTTP interface port
+  httpPort: 8123
+  ## @param service.tcpPort ClickHouse TCP (native) interface port
+  tcpPort: 9000
+  ## @param service.nodePort NodePort for TCP service (only used when type=NodePort)
+  nodePort: 30900
+  ## @param service.annotations Service annotations
+  annotations: {}
+  ## @param service.loadBalancerIP LoadBalancer IP if service type is `LoadBalancer`
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: ""
+
+## @section Ingress configuration
+ingress:
+  ## @param ingress.enabled Enable ingress record generation for ClickHouse HTTP interface
+  enabled: false
+  ## @param ingress.className IngressClass that will be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  ## @param ingress.hosts[0].host Hostname for ClickHouse ingress
+  ## @param ingress.hosts[0].paths[0].path Path for ClickHouse ingress
+  ## @param ingress.hosts[0].paths[0].pathType Path type for ClickHouse ingress
+  hosts:
+    - host: clickhouse.local
+      paths:
+        - path: /
+          pathType: Prefix
+  ## @param ingress.tls TLS configuration for ClickHouse ingress
+  tls: []
+  #  - secretName: clickhouse-tls
+  #    hosts:
+  #      - clickhouse.local
+
+## @section Gateway API parameters
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for ClickHouse
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - clickhouse.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+## @section Resources
+resources: {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: "2"
+  #   memory: 4Gi
+  # requests:
+  #   cpu: 500m
+  #   memory: 1Gi
+
+## @section Persistence
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  enabled: true
+  ## @param persistence.storageClass Persistent Volume storage class
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  annotations: {}
+  ## @param persistence.size Persistent Volume size
+  size: 10Gi
+  ## @param persistence.accessModes Persistent Volume access modes
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  existingClaim: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to
+  subPath: ""
+  ## @param persistence.labels Labels for persistent volume claims
+  labels: {}
+  ## @param persistence.volumeName Container volume name and volume claim prefix
+  volumeName: "data"
+
+## @section Persistent Volume Claim Retention Policy
+persistentVolumeClaimRetentionPolicy:
+  ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the Statefulset
+  enabled: false
+  ## @param persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  whenScaled: Retain
+  ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  whenDeleted: Retain
+
+## @section Liveness and readiness probes
+livenessProbe:
+  ## @param livenessProbe.enabled Enable livenessProbe on ClickHouse containers
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Success threshold for livenessProbe
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readinessProbe on ClickHouse containers
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  initialDelaySeconds: 10
+  ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+  periodSeconds: 5
+  ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Success threshold for readinessProbe
+  successThreshold: 1
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startupProbe on ClickHouse containers
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  initialDelaySeconds: 30
+  ## @param startupProbe.periodSeconds Period seconds for startupProbe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Failure threshold for startupProbe
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Success threshold for startupProbe
+  successThreshold: 1
+
+## @section Node Selection
+## @param nodeSelector Node labels for pod assignment
+nodeSelector: {}
+
+## @param tolerations Toleration labels for pod assignment
+tolerations: []
+
+## @param affinity Affinity settings for pod assignment
+affinity: {}
+
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken whether to automount the SA token inside the pod
+  automountServiceAccountToken: false
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+
+## @param extraEnvVarsSecret Name of a secret containing additional environment variables
+extraEnvVarsSecret: ""
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the ClickHouse container
+extraVolumeMounts: []
+
+## @param initContainers Init containers to add to the ClickHouse pods
+initContainers: []
+
+## @param command Override default container command
+command: []
+
+## @param args Override default container args
+args: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+
+## @section Metrics configuration
+metrics:
+  ## @param metrics.enabled Start a sidecar prometheus exporter to expose ClickHouse metrics
+  enabled: false
+  image:
+    ## @param metrics.image.registry ClickHouse exporter image registry
+    registry: docker.io
+    ## @param metrics.image.repository ClickHouse exporter image repository
+    repository: altinity/clickhouse-exporter
+    ## @param metrics.image.tag ClickHouse exporter image tag
+    tag: "0.0.2@sha256:d19bb9e5e42c3eedbb14e1da7e43b59de86cf87b0012f9acb6c7d74e69cefb58"
+    ## @param metrics.image.pullPolicy ClickHouse exporter image pull policy
+    pullPolicy: Always
+  ## @param metrics.resources Resource limits and requests for metrics container
+  resources: {}
+  ## Metrics service configuration
+  service:
+    ## @param metrics.service.annotations Additional custom annotations for Metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional custom labels for Metrics service
+    labels: {}
+    ## @param metrics.service.port Metrics service port
+    port: 9116
+  ## Prometheus Operator ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace The namespace in which the ServiceMonitor will be created
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval The interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout The timeout after which the scrape is ended
+    scrapeTimeout: 10s
+    ## @param metrics.serviceMonitor.selector Additional labels for ServiceMonitor resource
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations ServiceMonitor annotations
+    annotations: {}
+    ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.relabelings ServiceMonitor relabel configs to apply to samples before scraping
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings ServiceMonitor metricRelabelings configs to apply to samples before ingestion
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.namespaceSelector ServiceMonitor namespace selector
+    namespaceSelector: {}
