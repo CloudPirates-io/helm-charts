@@ -2,8 +2,8 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.19.1
-appVersion: "4.2.4"
+version: 0.19.9
+appVersion: "4.2.5"
 keywords:
   - rabbitmq
   - message broker
@@ -41,9 +41,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update image.repository to 693b201"
+      description: "Update image.repository to 23fe4f2"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1140"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1181"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq/CHANGELOG.md"

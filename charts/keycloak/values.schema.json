@@ -276,6 +276,14 @@
         "initContainers": {
             "type": "object",
             "properties": {
+                "copyQuarkusLib": {
+                    "type": "object",
+                    "properties": {
+                        "resources": {
+                            "type": "object"
+                        }
+                    }
+                },
                 "waitForMariadb": {
                     "type": "object",
                     "properties": {

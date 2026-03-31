@@ -2,6 +2,36 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.14.5] - 2026-03-27
+
+- Force new release ([d271c297](https://github.com/CloudPirates-io/helm-charts/commit/d271c297))
+
+## [0.14.4] - 2026-03-27
+
+- redis: use musl ([54360938](https://github.com/CloudPirates-io/helm-charts/commit/54360938))
+- Fix broken init container ([a2bb2794](https://github.com/CloudPirates-io/helm-charts/commit/a2bb2794))
+- [redis]: Fix unauthed / utf-8 encoding in the metrics ([6034bed1](https://github.com/CloudPirates-io/helm-charts/commit/6034bed1))
+
+## [0.14.3] - 2026-03-26
+
+- Fix identical liveness and readiness probes on metrics sidecar (#1187) ([07385e22](https://github.com/CloudPirates-io/helm-charts/commit/07385e22))
+
+## [0.14.2] - 2026-03-19
+
+- [mongo] Update image.repository to v8.2.6 (#1167) ([94a46e1f](https://github.com/CloudPirates-io/helm-charts/commit/94a46e1f))
+
+## [0.14.1] - 2026-03-17
+
+- [mongo] Update image.repository to 60aa240 (#1150) ([9f18375d](https://github.com/CloudPirates-io/helm-charts/commit/9f18375d))
+
+## [0.14.0] - 2026-03-16
+
+- [mongodb]: CustomUser rework for single / sharded setup (#1143) ([4d9c939e](https://github.com/CloudPirates-io/helm-charts/commit/4d9c939e))
+
+## [0.13.0] - 2026-03-11
+
+- [mongodb]: Fix multiple primary´s in primary secondary architecture (#1110) ([1d0becb6](https://github.com/CloudPirates-io/helm-charts/commit/1d0becb6))
+
 ## [0.12.7] - 2026-03-11
 
 - [mongo] Update image.repository to 3a7947f (#1123) ([714c8101](https://github.com/CloudPirates-io/helm-charts/commit/714c8101))

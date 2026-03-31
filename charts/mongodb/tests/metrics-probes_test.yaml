@@ -1,0 +1,96 @@
+suite: test mongodb metrics sidecar probes
+templates:
+  - statefulset.yaml
+set:
+  image:
+    tag: 8.0.12@sha256:a6bda40d00e56682aeaa1bfc88e024b7dd755782c575c02760104fe02010f94f
+  metrics:
+    enabled: true
+    livenessProbe:
+      enabled: true
+    readinessProbe:
+      enabled: true
+tests:
+  - it: should use / for metrics liveness probe path in standalone statefulset
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.port
+          value: http-metrics
+
+  - it: should use /metrics for metrics readiness probe path in standalone statefulset
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
+          value: /metrics
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.port
+          value: http-metrics
+
+  - it: should have different liveness and readiness probe paths in standalone statefulset
+    asserts:
+      - notEqual:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
+          value: /metrics
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
+          value: /metrics
+
+---
+suite: test mongodb metrics sidecar probes for sharded cluster
+templates:
+  - statefulset-configserver.yaml
+  - statefulset-mongos.yaml
+  - statefulset-shard.yaml
+set:
+  shardedCluster:
+    enabled: true
+    shards: 1
+    configsvr:
+      replicaCount: 1
+    mongos:
+      replicaCount: 1
+    shardsvr:
+      dataNode:
+        replicaCount: 1
+  image:
+    tag: 8.0.12@sha256:a6bda40d00e56682aeaa1bfc88e024b7dd755782c575c02760104fe02010f94f
+  metrics:
+    enabled: true
+    livenessProbe:
+      enabled: true
+    readinessProbe:
+      enabled: true
+tests:
+  - it: should use / for metrics liveness probe and /metrics for readiness probe in configserver
+    template: statefulset-configserver.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
+          value: /metrics
+
+  - it: should use / for metrics liveness probe and /metrics for readiness probe in mongos
+    template: statefulset-mongos.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
+          value: /metrics
+
+  - it: should use / for metrics liveness probe and /metrics for readiness probe in shard
+    template: statefulset-shard.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
+          value: /metrics
