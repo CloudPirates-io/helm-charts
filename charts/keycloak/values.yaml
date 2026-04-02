@@ -483,6 +483,9 @@ extraObjects: []
 
 ## @section Init Container Configuration
 initContainers:
+  copyQuarkusLib:
+    ## @param initContainers.copyQuarkusLib.resources Resource requests and limits for the copy-quarkus-lib init container
+    resources: {}
   waitForPostgres:
     ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting (leave empty to use registry/repository/tag)
     image: ""

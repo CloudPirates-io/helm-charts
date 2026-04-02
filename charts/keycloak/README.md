@@ -264,7 +264,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter   | Description                                                                 | Default |
 | ----------- | --------------------------------------------------------------------------- | ------- |
-| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
+| `resources` | The resources to allocate for the main Keycloak container | `{}`    |
 
 ### Persistence
 
@@ -357,6 +357,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                                   | Description                                                | Default                                                                            |
 | ------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `initContainers.copyQuarkusLib.resources`   | Resource requests and limits for the copy-quarkus-lib init container | `{}`                                                                               |
 | `initContainers.waitForPostgres.image`      | Full image override for PostgreSQL init container          | `""`                                                                               |
 | `initContainers.waitForPostgres.registry`   | PostgreSQL image registry (overrides global.imageRegistry) | `""`                                                                               |
 | `initContainers.waitForPostgres.repository` | PostgreSQL image repository                                | `postgres`                                                                         |
