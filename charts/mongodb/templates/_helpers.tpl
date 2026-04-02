@@ -101,6 +101,10 @@ Return the proper MongoDB Exporter image name
 {{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
+{{- define "mongodb.metrics.uriEncodeImage" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.uriEncodeImage "global" .Values.global) -}}
+{{- end }}
+
 {{/*
 Return the MongoDB connection string for metrics
 */}}

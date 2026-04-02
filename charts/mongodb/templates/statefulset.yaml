@@ -87,6 +87,34 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-uri-init
+          image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cp /bin/busybox /metrics-config/busybox
+              chmod +x /metrics-config/busybox
+              urlencode() {
+                printf '%s' "$1" | od -An -tx1 | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F'
+              }
+              ENCODED_USER=$(urlencode "$MONGO_METRICS_USERNAME")
+              ENCODED_PASS=$(urlencode "$MONGO_METRICS_PASSWORD")
+              printf 'mongodb://%s:%s@127.0.0.1:27017/admin?authSource=admin' "$ENCODED_USER" "$ENCODED_PASS" > /metrics-config/uri
+          env:
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -216,6 +244,24 @@ spec:
           securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
           image: {{ include "mongodb.metrics.image" . | quote }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          {{- if .Values.auth.enabled }}
+          command: ["/metrics-config/busybox", "sh", "-c"]
+          args:
+            - |
+              exec /mongodb_exporter \
+                --mongodb.uri="$(/metrics-config/busybox cat /metrics-config/uri)" \
+                --web.listen-address=0.0.0.0:9216 \
+                --collect-all \
+                --mongodb.direct-connect{{- range .Values.metrics.extraArgs }} \
+                {{ . }}{{- end }}
+          {{- with .Values.metrics.extraEnvVars }}
+          env:
+{{ toYaml . | indent 12}}
+          {{- end }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+          {{- else }}
           args:
             - --mongodb.uri={{ include "mongodb.metrics.connectionString" . }}
             - --web.listen-address=0.0.0.0:9216
@@ -224,24 +270,10 @@ spec:
             {{- range .Values.metrics.extraArgs }}
             - {{ . }}
             {{- end }}
-          {{- if .Values.auth.enabled }}
+          {{- with .Values.metrics.extraEnvVars }}
           env:
-            - name: MONGO_METRICS_USERNAME
-              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
-            - name: MONGO_METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mongodb.metrics.secretName" . }}
-                  key: {{ include "mongodb.secretPasswordKey" . }}
-            {{- with .Values.metrics.extraEnvVars }}
 {{ toYaml . | indent 12}}
-            {{- end }}
-          {{- else }}
-          env:
-            {{- range .Values.metrics.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+          {{- end }}
           {{- end }}
           ports:
             - name: http-metrics
@@ -280,6 +312,10 @@ spec:
           emptyDir: {}
         - name: keyfile
           emptyDir: {}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-config
+          emptyDir: {}
+        {{- end }}
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}

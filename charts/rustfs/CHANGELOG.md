@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.7.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
 ## [0.6.0] - 2026-03-12
 
 - Feature/rustfs setup (#1111) ([b373b86b](https://github.com/CloudPirates-io/helm-charts/commit/b373b86b))

@@ -2,8 +2,8 @@ apiVersion: v2
 name: timescaledb
 description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
 type: application
-version: 0.10.2
-appVersion: "2.25.2"
+version: 0.10.4
+appVersion: "2.26.1"
 keywords:
   - timescaledb
   - timeseries
@@ -42,9 +42,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[timescale/timescaledb] Update image.repository to v2.25.2"
+      description: "[timescale/timescaledb] Update image.repository to v2.26.1"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1087"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1195"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/timescaledb/CHANGELOG.md"
