@@ -1488,6 +1488,60 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: "Update image.repository to v3.6.10"
+          links:
+            - name: "Pull Request"
+              url: "https://github.com/CloudPirates-io/helm-charts/pull/1202"
+            - name: "Changelog"
+              url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/etcd/CHANGELOG.md"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: etcd
+          url: https://etcd.io/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+        - name: Application
+          url: https://github.com/etcd-io/etcd
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.6.10
+    created: "2026-04-02T06:29:04.32740858Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: etcd is a distributed reliable key-value store for the most critical
+      data of a distributed system
+    digest: 57da851ab9f55f33d9022e43a6a294cf6858a1d9dbd37728d33f81f275074dbb
+    home: https://etcd.io/
+    icon: https://a.storyblok.com/f/143071/513x513/36b7a72378/etcd-logo.svg
+    keywords:
+    - etcd
+    - distributed
+    - key-value
+    - consensus
+    - raft
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: etcd
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+    - https://github.com/etcd-io/etcd
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/etcd-0.6.3/etcd-0.6.3.tgz
+    version: 0.6.3
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: "Update image.repository to v3.6.9"
           links:
             - name: "Pull Request"
@@ -40774,4 +40828,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-02T05:51:20.954692316Z"
+generated: "2026-04-02T06:29:04.329912135Z"
