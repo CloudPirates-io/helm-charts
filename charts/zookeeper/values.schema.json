@@ -5,6 +5,9 @@
         "affinity": {
             "type": "object"
         },
+        "command": {
+            "type": "array"
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -132,6 +135,9 @@
                     "type": "object",
                     "properties": {
                         "annotations": {
+                            "type": "object"
+                        },
+                        "labels": {
                             "type": "object"
                         },
                         "port": {

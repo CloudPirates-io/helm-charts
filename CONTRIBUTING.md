@@ -72,14 +72,14 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 2. Clone your fork locally:
 
    ```bash
-   git clone https://github.com/your-username/helm-charts.git
+   git clone https://github.com/your-username/helm-charts.git --verify=false
    cd helm-charts
    ```
 
 3. Install the helm-unittest plugin:
 
    ```bash
-   helm plugin install https://github.com/helm-unittest/helm-unittest
+   helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
    ```
 
 4. Make sure to sign your commits

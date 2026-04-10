@@ -17,6 +17,13 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.sentinel.masterService.type | default .Values.service.type }}
+  {{- if .Values.sentinel.masterService.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.sentinel.masterService.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- if .Values.sentinel.masterService.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.sentinel.masterService.ipFamilyPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: redis

@@ -28,7 +28,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.1@sha256:1090bc3a8ccfb0b55f78a494d76f8d603434f7e4553543d6e807bc7bd6bbd17f"
+  tag: "18.3@sha256:a9abf4275f9e99bff8e6aed712b3b7dfec9cac1341bba01c1ffdfce9ff9fc34a"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
   ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
@@ -154,7 +154,7 @@ config:
     # @param config.postgresql.wal_level Determines how much information is written to the WAL - https://postgresqlco.nf/doc/en/param/wal_level/
     wal_level: replica
     # @param config.postgresql.max_wal_senders Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients - https://postgresqlco.nf/doc/en/param/max_wal_senders/
-    max_wal_senders: 5
+    max_wal_senders: 10
     # @param config.postgresql.wal_keep_size Specifies the minimum size of past WAL files kept in the pg_wal directory (in MB) - https://postgresqlco.nf/doc/en/param/wal_keep_size/
     wal_keep_size: 1024
 
@@ -199,6 +199,10 @@ service:
   nodePort: 30432
   ## @param service.annotations Service annotations
   annotations: {}
+  ## @param service.loadBalancerIP LoadBalancer IP if service type is `LoadBalancer`
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: ""
 
 ## @section Ingress configuration
 ingress:
@@ -223,6 +227,36 @@ ingress:
   #  - secretName: postgres-tls
   #    hosts:
   #      - postgres.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for PostgreSQL
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - postgres.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Resources
 resources: {}
@@ -381,7 +415,7 @@ metrics:
     ## @param metrics.image.repository PostgreSQL exporter image repository
     repository: prometheuscommunity/postgres-exporter
     ## @param metrics.image.tag PostgreSQL exporter image tag
-    tag: "v0.19.0@sha256:e8a170b85eab07c75c2b0f3aa2806be5c2fe5bba46fd0336914e1f36572cde08"
+    tag: "v0.19.1@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f"
     ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container

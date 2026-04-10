@@ -1,3 +1,6 @@
+{{/* Render validation for deployment mode conflicts */}}
+{{- include "mongodb.validateShardedCluster" . -}}
+{{- if not .Values.shardedCluster.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -11,6 +14,10 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.persistence.persistentVolumeClaimRetentionPolicy }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- toYaml .Values.persistence.persistentVolumeClaimRetentionPolicy | nindent 4 }}
+  {{- end }}
   {{- if .Values.replicaSet.enabled }}
   serviceName: {{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}
   podManagementPolicy: {{ .Values.podManagementPolicy }}
@@ -44,6 +51,7 @@ spec:
 {{- with (include "mongodb.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
@@ -79,6 +87,34 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-uri-init
+          image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cp /bin/busybox /metrics-config/busybox
+              chmod +x /metrics-config/busybox
+              urlencode() {
+                printf '%s' "$1" | od -An -tx1 | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F'
+              }
+              ENCODED_USER=$(urlencode "$MONGO_METRICS_USERNAME")
+              ENCODED_PASS=$(urlencode "$MONGO_METRICS_PASSWORD")
+              printf 'mongodb://%s:%s@127.0.0.1:27017/admin?authSource=admin' "$ENCODED_USER" "$ENCODED_PASS" > /metrics-config/uri
+          env:
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -97,6 +133,21 @@ spec:
             - --keyFile
             - "/replicaset/keyfile"
             {{- end }}
+            {{- if .Values.performance.wiredTigerCacheSizeGB }}
+            - --wiredTigerCacheSizeGB={{ .Values.performance.wiredTigerCacheSizeGB }}
+            {{- end }}
+            {{- if .Values.performance.oplogSizeMB }}
+            - --oplogSize={{ .Values.performance.oplogSizeMB }}
+            {{- end }}
+            {{- if .Values.performance.maxIncomingConnections }}
+            - --maxConns={{ .Values.performance.maxIncomingConnections }}
+            {{- end }}
+            {{- if .Values.setParameter.enableLocalhostAuthBypass }}
+            - --setParameter=enableLocalhostAuthBypass={{ .Values.setParameter.enableLocalhostAuthBypass }}
+            {{- end }}
+            {{- if .Values.setParameter.enableFlowControl }}
+            - --setParameter=enableFlowControl={{ .Values.setParameter.enableFlowControl }}
+            {{- end }}
           ports:
             - name: mongodb
               containerPort: 27017
@@ -111,46 +162,8 @@ spec:
                   name: {{ include "mongodb.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
-            {{- if and .Values.customUser (or .Values.customUser.name .Values.customUser.existingSecret) }}
-            - name: MONGO_CUSTOM_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.name }}
-                  key: {{ .Values.customUser.secretKeys.name }}
-                  {{- else }}
-                  key: CUSTOM_USER
-                  {{- end }}
-            - name: MONGO_CUSTOM_USER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.password }}
-                  key: {{ .Values.customUser.secretKeys.password }}
-                  {{- else }}
-                  key: CUSTOM_PASSWORD
-                  {{- end }}
-            - name: MONGO_INITDB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.customUser.existingSecret }}
-                  name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.customUser.existingSecret "context" $) }}
-                  {{- else }}
-                  name: {{ include "mongodb.fullname" . }}-custom-user-secret
-                  {{- end }}
-                  {{- if and .Values.customUser.secretKeys .Values.customUser.secretKeys.database }}
-                  key: {{ .Values.customUser.secretKeys.database }}
-                  {{- else }}
-                  key: CUSTOM_DB
-                  {{- end }}
+            {{- if .Values.customUsers }}
+            {{- include "mongodb.customUsers.envVars" (dict "ctx" .) | nindent 12 }}
             {{- end }}
             {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
             - name: MONGO_METRICS_USERNAME
@@ -168,9 +181,16 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -181,9 +201,16 @@ spec:
           readinessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  --username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval 'try{var h=db.adminCommand({hello:1}); if(!(h.isWritablePrimary||h.secondary)) quit(1);}catch(e){quit(1)}' --quiet
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -217,6 +244,24 @@ spec:
           securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
           image: {{ include "mongodb.metrics.image" . | quote }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
+          {{- if .Values.auth.enabled }}
+          command: ["/metrics-config/busybox", "sh", "-c"]
+          args:
+            - |
+              exec /mongodb_exporter \
+                --mongodb.uri="$(/metrics-config/busybox cat /metrics-config/uri)" \
+                --web.listen-address=0.0.0.0:9216 \
+                --collect-all \
+                --mongodb.direct-connect{{- range .Values.metrics.extraArgs }} \
+                {{ . }}{{- end }}
+          {{- with .Values.metrics.extraEnvVars }}
+          env:
+{{ toYaml . | indent 12}}
+          {{- end }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+          {{- else }}
           args:
             - --mongodb.uri={{ include "mongodb.metrics.connectionString" . }}
             - --web.listen-address=0.0.0.0:9216
@@ -225,24 +270,10 @@ spec:
             {{- range .Values.metrics.extraArgs }}
             - {{ . }}
             {{- end }}
-          {{- if .Values.auth.enabled }}
+          {{- with .Values.metrics.extraEnvVars }}
           env:
-            - name: MONGO_METRICS_USERNAME
-              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
-            - name: MONGO_METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mongodb.metrics.secretName" . }}
-                  key: {{ include "mongodb.secretPasswordKey" . }}
-            {{- with .Values.metrics.extraEnvVars }}
 {{ toYaml . | indent 12}}
-            {{- end }}
-          {{- else }}
-          env:
-            {{- range .Values.metrics.extraEnv }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+          {{- end }}
           {{- end }}
           ports:
             - name: http-metrics
@@ -281,6 +312,10 @@ spec:
           emptyDir: {}
         - name: keyfile
           emptyDir: {}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-config
+          emptyDir: {}
+        {{- end }}
         {{- if not .Values.persistence.enabled }}
         - name: data
           emptyDir: {}
@@ -348,3 +383,4 @@ spec:
             storage: {{ .Values.persistence.size | quote }}
     {{- end }}
   {{- end }}
+{{- end }}

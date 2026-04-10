@@ -13,6 +13,13 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.sentinel.service.type }}
+  {{- if .Values.sentinel.service.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.sentinel.service.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- if .Values.sentinel.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.sentinel.service.ipFamilyPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.sentinel.service.port }}
       targetPort: sentinel

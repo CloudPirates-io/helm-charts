@@ -47,7 +47,7 @@ spec:
             - name: keycloak-lib-quarkus
               mountPath: /shared-quarkus
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.initContainers.copyQuarkusLib.resources | nindent 12 }}
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -66,7 +66,7 @@ spec:
             {{- toYaml .Values.initContainers.waitForMariadb.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
-          {{- toYaml .Values.extraInitContainers | nindent 8 }}
+          {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -130,6 +130,9 @@ spec:
             {{- end }}
             {{- if .Values.metrics.enabled }}
             - --metrics-enabled=true
+            {{- end }}
+            {{- if or .Values.livenessProbe.enabled .Values.readinessProbe.enabled .Values.startupProbe.enabled }}
+            - --health-enabled=true
             {{- end }}
             {{- with .Values.keycloak.extraArgs }}
             {{- toYaml . | nindent 12 }}
@@ -210,7 +213,7 @@ spec:
               {{- end }}
             {{- end }}
             {{- with .Values.extraEnvVars }}
-{{- toYaml . | nindent 12 }}
+{{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
@@ -228,6 +231,9 @@ spec:
               containerPort: {{ .Values.keycloak.httpsPort }}
               protocol: TCP
             {{- end }}
+            - name: management
+              containerPort: {{ .Values.keycloak.managementPort }}
+              protocol: TCP
             {{- if .Values.metrics.enabled }}
             - name: {{ .Values.metrics.service.targetPort }}
               containerPort: {{ .Values.metrics.service.port }}
@@ -236,14 +242,9 @@ spec:
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.livenessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -253,14 +254,9 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.readinessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -270,14 +266,9 @@ spec:
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             httpGet:
-              path: {{ include "keycloak.probeUrl" . }}
-              {{- if .Values.keycloak.httpsEnabled }}
-              port: https
-              scheme: HTTPS
-              {{- else }}
-              port: http
-              scheme: HTTP
-              {{- end }}
+              path: {{ include "keycloak.livenessProbeUrl" . }}
+              port: management
+              scheme: {{ .Values.tls.enabled | ternary "HTTPS" "HTTP" }}
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -309,7 +300,7 @@ spec:
             - name: keycloak-providers
               mountPath: /opt/keycloak/providers
             {{- end }}
-            {{- if .Values.realm.configFile }}
+            {{- if and .Values.realm.import (or .Values.realm.configFile .Values.realm.existingSecret) }}
             - name: realm-config
               mountPath: /opt/keycloak/data/import
               readOnly: true
@@ -325,10 +316,10 @@ spec:
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-              {{- toYaml .Values.extraVolumeMounts | nindent 12}}
+              {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
             {{- end }}
         {{- with .Values.extraContainers }}
-          {{- toYaml . | nindent 8 }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
         {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
@@ -382,7 +373,7 @@ spec:
                 path: truststore.jks
         {{- end }}
         {{- if .Values.extraVolumes }}
-          {{- toYaml .Values.extraVolumes | nindent 8 }}
+          {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

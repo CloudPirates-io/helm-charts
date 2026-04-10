@@ -2,8 +2,8 @@ apiVersion: v2
 name: zookeeper
 description: Apache ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.
 type: application
-version: 0.5.5
-appVersion: "3.9.4"
+version: 0.6.7
+appVersion: "3.9.5"
 keywords:
   - zookeeper
   - distributed
@@ -22,7 +22,7 @@ maintainers:
     url: https://www.srf.ch
 dependencies:
   - name: common
-    version: "2.x.x"
+    version: "2.2.0"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg
 annotations:
@@ -41,14 +41,11 @@ annotations:
       url: https://github.com/apache/zookeeper
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
-  artifacthub.io/changes: |2
-        - kind: changed
-          description: "Use latest common version (#934)"
-          links:
-            - name: "Commit b7f36a2"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/b7f36a2"
-        - kind: changed
-          description: "[all]: Update every chart to newest common (#920)"
-          links:
-            - name: "Commit f8d134d"
-              url: "https://github.com/CloudPirates-io/helm-charts/commit/f8d134d"
+  artifacthub.io/changes: |-
+    - kind: changed
+      description: "Update image.repository to 5883391"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1201"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/zookeeper/CHANGELOG.md"

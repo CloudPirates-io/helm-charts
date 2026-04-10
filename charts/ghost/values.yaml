@@ -6,26 +6,26 @@ global:
   imagePullSecrets: []
 
 ## @section Common parameters
-## @param nameOverride String to partially override nginx.fullname
+## @param nameOverride String to partially override ghost.fullname
 nameOverride: ""
-## @param fullnameOverride String to fully override nginx.fullname
+## @param fullnameOverride String to fully override ghost.fullname
 fullnameOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
-## @param replicaCount Number of Nginx replicas to deploy
+## @param replicaCount Number of Ghost replicas to deploy
 replicaCount: 1
 
-## @section Nginx image parameters
+## @section Ghost image parameters
 image:
-  ## @param image.registry Nginx image registry
+  ## @param image.registry Ghost image registry
   registry: docker.io
-  ## @param image.repository Nginx image repository
+  ## @param image.repository Ghost image repository
   repository: ghost
-  ## @param image.tag Nginx image tag
-  tag: "6.18.0@sha256:99da5a628928dedb71c7ef5952eaa377e0f858fd28a53907d0cbb5729b677e46"
-  ## @param image.pullPolicy Nginx image pull policy
+  ## @param image.tag Ghost image tag
+  tag: "6.25.1@sha256:1e72c22226bc4e668e0eb197fb2e56e996b038e77d96e49072451f221ae94f1f"
+  ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 
 
@@ -84,6 +84,37 @@ ingress:
           pathType: Prefix
   ## @param ingress.tls An array with the tls configuration
   tls: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - ghost.localhost
+      - admin.ghost.localhost
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Service Account parameters
 serviceAccount:
