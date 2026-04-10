@@ -62,44 +62,124 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].args[2]
           value: --hostname-admin=keycloak.mydomain.com
-  - it: resources should be set
+
+  # init container resources
+  - it: copy-quarkus-lib should render resources when configured
     set:
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
+      initContainers:
+        copyQuarkusLib:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].resources.requests.cpu
-          value: 100m
-      - equal:
-          path: spec.template.spec.containers[0].resources.requests.memory
-          value: 128Mi
+          path: spec.template.spec.initContainers[0].name
+          value: copy-quarkus-lib
       - equal:
           path: spec.template.spec.initContainers[0].resources.requests.cpu
-          value: 100m
+          value: 50m
       - equal:
           path: spec.template.spec.initContainers[0].resources.requests.memory
-          value: 128Mi
-  - it: resources should be set when postgres is enabled
-    set:
-      resources:
-        requests:
-          cpu: 100m
-      postgres:
-        enabled: true
+          value: 32Mi
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.limits.memory
+          value: 64Mi
+
+  - it: copy-quarkus-lib should render empty resources by default
     asserts:
       - equal:
-          path: spec.template.spec.initContainers[1].resources.requests.cpu
-          value: 100m
-  - it: resources should be set when mariadb is enabled
+          path: spec.template.spec.initContainers[0].name
+          value: copy-quarkus-lib
+      - isEmpty:
+          path: spec.template.spec.initContainers[0].resources
+
+  # extraInitContainers tpl support
+  - it: extraInitContainers with static image should render unchanged
     set:
-      resources:
-        requests:
-          cpu: 100m
-      mariadb:
-        enabled: true
+      extraInitContainers:
+        - name: test-init
+          image: myregistry/myimage:1.0.0
+          command: ["sh", "-c", "echo hello"]
     asserts:
-      - equal:
-          path: spec.template.spec.initContainers[1].resources.requests.cpu
-          value: 100m
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: test-init
+            image: myregistry/myimage:1.0.0
+            command: ["sh", "-c", "echo hello"]
+  - it: extraInitContainers should resolve template expressions with global.imageRegistry
+    set:
+      global:
+        imageRegistry: custom.registry.io
+      extraInitContainers:
+        - name: test-init
+          image: '{{ printf "%s/%s:%s" .Values.global.imageRegistry "myimage" "1.0.0" }}'
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: test-init
+            image: custom.registry.io/myimage:1.0.0
+  - it: extraInitContainers should not render when empty
+    set:
+      extraInitContainers: []
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: test-init
+
+  # extraVolumes tpl support
+  - it: extraVolumes should resolve template expressions
+    set:
+      global:
+        imageRegistry: custom.registry.io
+      myConfigMap: my-custom-config
+      extraVolumes:
+        - name: '{{ .Values.myConfigMap }}'
+          configMap:
+            name: '{{ .Values.myConfigMap }}'
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: my-custom-config
+            configMap:
+              name: my-custom-config
+
+  # extraVolumeMounts tpl support
+  - it: extraVolumeMounts should resolve template expressions
+    set:
+      myMountName: custom-mount
+      extraVolumeMounts:
+        - name: '{{ .Values.myMountName }}'
+          mountPath: /opt/keycloak/custom
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: custom-mount
+            mountPath: /opt/keycloak/custom
+
+  # extraEnvVars tpl support
+  - it: extraEnvVars should resolve template expressions
+    set:
+      mySecretName: my-secret
+      extraEnvVars:
+        - name: MY_VAR
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.mySecretName }}'
+              key: password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MY_VAR
+            valueFrom:
+              secretKeyRef:
+                name: my-secret
+                key: password

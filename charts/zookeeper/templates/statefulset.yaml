@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "zookeeper.selectorLabels" . | nindent 8 }}
+        {{- include "zookeeper.labels" . | nindent 8 }}
       annotations:
         {{- with (include "zookeeper.annotations" .) }}
         {{- . | nindent 8 }}

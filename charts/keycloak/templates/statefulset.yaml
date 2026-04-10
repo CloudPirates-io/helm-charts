@@ -47,7 +47,7 @@ spec:
             - name: keycloak-lib-quarkus
               mountPath: /shared-quarkus
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.initContainers.copyQuarkusLib.resources | nindent 12 }}
         {{- if .Values.postgres.enabled }}
         - name: wait-for-postgres
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -66,7 +66,7 @@ spec:
             {{- toYaml .Values.initContainers.waitForMariadb.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.extraInitContainers }}
-          {{- toYaml .Values.extraInitContainers | nindent 8 }}
+          {{- tpl (toYaml .Values.extraInitContainers) . | nindent 8 }}
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -213,7 +213,7 @@ spec:
               {{- end }}
             {{- end }}
             {{- with .Values.extraEnvVars }}
-{{- toYaml . | nindent 12 }}
+{{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
           {{- if .Values.extraEnvVarsSecret }}
           envFrom:
@@ -316,10 +316,10 @@ spec:
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-              {{- toYaml .Values.extraVolumeMounts | nindent 12}}
+              {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
             {{- end }}
         {{- with .Values.extraContainers }}
-          {{- toYaml . | nindent 8 }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
         {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
@@ -373,7 +373,7 @@ spec:
                 path: truststore.jks
         {{- end }}
         {{- if .Values.extraVolumes }}
-          {{- toYaml .Values.extraVolumes | nindent 8 }}
+          {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

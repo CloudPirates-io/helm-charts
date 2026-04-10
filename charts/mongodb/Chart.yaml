@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.13.0
-appVersion: "8.2.5"
+version: 0.14.7
+appVersion: "8.2.6"
 keywords:
   - mongodb
   - database
@@ -38,10 +38,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "Fix multiple primary´s in primary secondary architecture"
+    - kind: changed
+      description: "[mongo] Update image.repository to eea8506"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1110"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1200"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"

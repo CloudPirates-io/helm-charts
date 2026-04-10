@@ -73,8 +73,8 @@
                 }
             }
         },
-        "customUser": {
-            "type": "object"
+        "customUsers": {
+            "type": "array"
         },
         "extraEnvVars": {
             "type": "array"
@@ -331,6 +331,23 @@
                             "type": "array"
                         },
                         "scrapeTimeout": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "uriEncodeImage": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
                             "type": "string"
                         }
                     }
