@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "minio.fullname" . }}-post-job
+  name: {{ include "minio.fullname" . }}-bucket-init
   namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "minio.labels" . | nindent 4 }}
@@ -20,8 +20,11 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "minio.selectorLabels" . | nindent 8 }}
+        {{- include "minio.labels" . | nindent 8 }}
         app.kubernetes.io/component: bucket-init
+        {{- with .Values.bucketInitJob.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.bucketInitJob.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -30,6 +33,10 @@ spec:
 {{- with (include "minio.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      serviceAccountName: {{ template "minio.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       restartPolicy: {{ .Values.bucketInitJob.restartPolicy }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
