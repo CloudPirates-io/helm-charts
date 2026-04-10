@@ -117,11 +117,12 @@ The following table lists the configurable parameters of the MinIO chart and the
 
 ### Deployment configuration
 
-| Parameter          | Description                                 | Default |
-| ------------------ | ------------------------------------------- | ------- |
-| `replicaCount`     | Number of MinIO replicas to deploy          | `1`     |
-| `nameOverride`     | String to partially override minio.fullname | `""`    |
-| `fullnameOverride` | String to fully override minio.fullname     | `""`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `replicaCount`      | Number of MinIO replicas to deploy                 | `1`     |
+| `nameOverride`      | String to partially override minio.fullname        | `""`    |
+| `fullnameOverride`  | String to fully override minio.fullname            | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
 
 ### Pod annotations and labels
 

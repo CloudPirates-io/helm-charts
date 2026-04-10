@@ -65,7 +65,7 @@ This is useful when migrating from Bitnami Zookeeper, which uses 1-based IDs (my
 Set serverIdOffset=1 to generate server.1, server.2, server.3 instead of server.0, server.1, server.2.
 */}}
 {{- define "zookeeper.servers" -}}
-{{- $namespace := .Release.Namespace }}
+{{- $namespace := include "cloudpirates.namespace" . }}
 {{- $name := include "zookeeper.fullname" . -}}
 {{- $peersPort := .Values.service.ports.quorum -}}
 {{- $leaderElectionPort := .Values.service.ports.leaderElection -}}

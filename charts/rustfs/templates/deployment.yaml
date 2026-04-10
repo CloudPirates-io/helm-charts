@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "rustfs.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}

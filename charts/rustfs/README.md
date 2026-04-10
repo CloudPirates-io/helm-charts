@@ -92,12 +92,13 @@ The following table lists the configurable parameters of the RustFS chart and th
 
 ### Common parameters
 
-| Parameter           | Description                                  | Default |
-| ------------------- | -------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override rustfs.fullname | `""`    |
-| `fullnameOverride`  | String to fully override rustfs.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects        | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects   | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override rustfs.fullname       | `""`    |
+| `fullnameOverride`  | String to fully override rustfs.fullname           | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 ### RustFS image configuration
 

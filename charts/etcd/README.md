@@ -100,15 +100,16 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 
 ### Common Parameters
 
-| Parameter           | Description                                     | Default |
-| ------------------- | ----------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override etcd.fullname      | `""`    |
-| `fullnameOverride`  | String to fully override etcd.fullname          | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects           | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects      | `{}`    |
-| `replicaCount`      | Number of etcd replicas to deploy (must be odd) | `3`     |
-| `podLabels`         | Additional labels for etcd pods                 | `{}`    |
-| `podAnnotations`    | Additional annotations for etcd pods            | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override etcd.fullname         | `""`    |
+| `fullnameOverride`  | String to fully override etcd.fullname             | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
+| `replicaCount`      | Number of etcd replicas to deploy (must be odd)    | `3`     |
+| `podLabels`         | Additional labels for etcd pods                    | `{}`    |
+| `podAnnotations`    | Additional annotations for etcd pods               | `{}`    |
 
 ### Service Configuration
 

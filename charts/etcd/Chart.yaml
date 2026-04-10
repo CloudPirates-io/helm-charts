@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.6.3
+version: 0.7.0
 appVersion: "3.6.10"
 keywords:
   - etcd
@@ -40,10 +40,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: changed
-      description: "Update image.repository to v3.6.10"
+    - kind: added
+      description: "Add namespaceOverride Value to all Charts that missing it"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1202"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/etcd/CHANGELOG.md"

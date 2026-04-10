@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.2.2] - 2026-03-27
+
+- Update CRDs and remove ALPHA tag (#1191) ([3aa66d70](https://github.com/CloudPirates-io/helm-charts/commit/3aa66d70))
+
 ## [0.2.1] - 2026-02-24
 
 - rabbitmq-cluster-operator: Fix template error when namespaced watch is defined. (#1052) ([7d12ccb6](https://github.com/CloudPirates-io/helm-charts/commit/7d12ccb6))
