@@ -351,6 +351,9 @@
                 "httpsPort": {
                     "type": "integer"
                 },
+                "managementPort": {
+                    "type": "integer"
+                },
                 "production": {
                     "type": "boolean"
                 },
@@ -405,11 +408,25 @@
                         "database": {
                             "type": "string"
                         },
+                        "existingSecret": {
+                            "type": "string"
+                        },
                         "password": {
                             "type": "string"
                         },
                         "rootPassword": {
                             "type": "string"
+                        },
+                        "secretKeys": {
+                            "type": "object",
+                            "properties": {
+                                "rootPasswordKey": {
+                                    "type": "string"
+                                },
+                                "userPasswordKey": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "username": {
                             "type": "string"
@@ -539,6 +556,9 @@
                         "database": {
                             "type": "string"
                         },
+                        "existingSecret": {
+                            "type": "string"
+                        },
                         "password": {
                             "type": "string"
                         },
@@ -610,10 +630,16 @@
                 "annotations": {
                     "type": "object"
                 },
+                "httpNodePort": {
+                    "type": "integer"
+                },
                 "httpPort": {
                     "type": "integer"
                 },
                 "httpTargetPort": {
+                    "type": "integer"
+                },
+                "httpsNodePort": {
                     "type": "integer"
                 },
                 "httpsPort": {

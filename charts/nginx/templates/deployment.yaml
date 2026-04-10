@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ if .Values.daemonset.enabled }}DaemonSet{{ else }}Deployment{{ end }}
 metadata:
   name: {{ include "nginx.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
@@ -10,12 +10,16 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if and (not .Values.autoscaling.enabled) (not .Values.daemonset.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "nginx.selectorLabels" . | nindent 6 }}
+  {{- if and .Values.daemonset.enabled .Values.daemonset.updateStrategy }}
+  updateStrategy:
+    {{- toYaml .Values.daemonset.updateStrategy | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -263,10 +267,10 @@ spec:
         - name: static-site
           {{- include "nginx.staticSiteVolume" . | nindent 10 }}
         {{- end }}
-      {{- if or .Values.serverConfig .Values.streamServerConfig }}
+      {{- if or .Values.serverConfig .Values.streamServerConfig .Values.existingServerConfigConfigmap }}
         - name: nginx-server-config
           configMap:
-            name: {{ include "nginx.fullname" . }}
+            name: {{ include "nginx.serverConfigConfigmapName" . }}
             {{- if .Values.serverConfig }}
             items:
               - key: server-config.conf
@@ -285,14 +289,6 @@ spec:
             items:
               - key: nginx.conf
                 path: nginx.conf
-      {{- end }}
-      {{- if or .Values.serverConfig .Values.existingServerConfigConfigmap }}
-        - name: server-config
-          configMap:
-            name: {{ include "nginx.serverConfigConfigmapName" . }}
-            items:
-              - key: server-config.conf
-                path: server-config.conf
       {{- end }}
       {{- if or .Values.streamServerConfig .Values.existingStreamServerConfigConfigmap }}
         - name: stream-server-config

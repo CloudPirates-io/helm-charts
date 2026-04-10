@@ -142,6 +142,17 @@
                 }
             }
         },
+        "daemonset": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "updateStrategy": {
+                    "type": "object"
+                }
+            }
+        },
         "existingConfigConfigmap": {
             "type": "string"
         },
@@ -447,6 +458,9 @@
             "properties": {
                 "annotations": {
                     "type": "object"
+                },
+                "internalTrafficPolicy": {
+                    "type": "string"
                 },
                 "ports": {
                     "type": "array",

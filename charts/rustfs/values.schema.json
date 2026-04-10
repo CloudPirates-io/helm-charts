@@ -79,29 +79,7 @@
                     "type": "boolean"
                 },
                 "hosts": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "host": {
-                                "type": "string"
-                            },
-                            "paths": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string"
-                                        },
-                                        "pathType": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    "type": "array"
                 },
                 "tls": {
                     "type": "array"
@@ -113,9 +91,6 @@
             "properties": {
                 "annotations": {
                     "type": "object"
-                },
-                "consolePort": {
-                    "type": "integer"
                 },
                 "enabled": {
                     "type": "boolean"
@@ -244,29 +219,7 @@
                     "type": "boolean"
                 },
                 "hosts": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "host": {
-                                "type": "string"
-                            },
-                            "paths": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string"
-                                        },
-                                        "pathType": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    "type": "array"
                 },
                 "tls": {
                     "type": "array"
@@ -389,9 +342,6 @@
                 "annotations": {
                     "type": "object"
                 },
-                "consolePort": {
-                    "type": "integer"
-                },
                 "port": {
                     "type": "integer"
                 },
@@ -414,6 +364,40 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "setup": {
+            "type": "object",
+            "properties": {
+                "buckets": {
+                    "type": "array"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "imagePullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "policies": {
+                    "type": "array"
+                },
+                "users": {
+                    "type": "array"
                 }
             }
         },

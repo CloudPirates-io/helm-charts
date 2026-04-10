@@ -28,7 +28,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.1@sha256:1090bc3a8ccfb0b55f78a494d76f8d603434f7e4553543d6e807bc7bd6bbd17f"
+  tag: "18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
   ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18
@@ -199,6 +199,10 @@ service:
   nodePort: 30432
   ## @param service.annotations Service annotations
   annotations: {}
+  ## @param service.loadBalancerIP LoadBalancer IP if service type is `LoadBalancer`
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy External traffic policy for the service
+  externalTrafficPolicy: ""
 
 ## @section Ingress configuration
 ingress:
@@ -381,7 +385,7 @@ metrics:
     ## @param metrics.image.repository PostgreSQL exporter image repository
     repository: prometheuscommunity/postgres-exporter
     ## @param metrics.image.tag PostgreSQL exporter image tag
-    tag: "v0.19.0@sha256:e8a170b85eab07c75c2b0f3aa2806be5c2fe5bba46fd0336914e1f36572cde08"
+    tag: "v0.19.1@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f"
     ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container

@@ -1,0 +1,70 @@
+suite: Test service config
+templates:
+  - service.yaml
+tests:
+  - it: StatefulSet services should be present
+    set:
+      deploymentType: statefulset
+    template: service.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - documentIndex: 0
+        equal:
+          path: spec.ports[0].port
+          value: 9000
+      - documentIndex: 1
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-headless
+      - documentIndex: 1
+        equal:
+          path: spec.ports[0].port
+          value: 9000
+      - documentIndex: 2
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-console
+      - documentIndex: 2
+        equal:
+          path: spec.ports[0].port
+          value: 9001
+      - documentIndex: 2
+        equal:
+          path: spec.ports[0].name
+          value: console
+      - documentIndex: 2
+        equal:
+          path: spec.ports[0].targetPort
+          value: console
+  - it: Deployment services should be present
+    set:
+      deploymentType: deployment
+    template: service.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs
+      - documentIndex: 0
+        equal:
+          path: spec.ports[0].port
+          value: 9000
+      - documentIndex: 1
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-console
+      - documentIndex: 1
+        equal:
+          path: spec.ports[0].port
+          value: 9001
+      - documentIndex: 1
+        equal:
+          path: spec.ports[0].name
+          value: console
+      - documentIndex: 1
+        equal:
+          path: spec.ports[0].targetPort
+          value: console
