@@ -16,6 +16,8 @@ namespaceOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
+## @param clusterDomain Kubernetes cluster domain
+clusterDomain: cluster.local
 
 ## @section RustFS image configuration
 image:
