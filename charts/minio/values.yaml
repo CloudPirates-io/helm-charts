@@ -102,6 +102,8 @@ bucketInitJob:
   restartPolicy: OnFailure
   ## @param bucketInitJob.annotations Additional annotations for the bucket initialization job
   annotations: {}
+  ## @param bucketInitJob.podLabels Additional labels for the bucket initialization job pods
+  podLabels: {}
   ## @param bucketInitJob.podAnnotations Additional annotations for the bucket initialization job pods
   podAnnotations: {}
   ## @param bucketInitJob.resources Resource requests and limits for the bucket initialization job
