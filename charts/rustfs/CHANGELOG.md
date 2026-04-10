@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.7.1] - 2026-03-23
+
+- [rustfs/rc] Update image.repository to v0.1.8 (#1175) ([22c38e16](https://github.com/CloudPirates-io/helm-charts/commit/22c38e16))
+
 ## [0.7.0] - 2026-03-13
 
 - [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))

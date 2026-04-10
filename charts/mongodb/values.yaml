@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override mongodb.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -78,6 +80,8 @@ config:
       bindIpAll: true
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
+  ## param config.existingConfigmapKey Name of the key that will hold configuration
+  existingConfigmapKey: ""
 
 ## @section customUsers Optional users to be created at initialisation
 customUsers: []
@@ -180,6 +184,9 @@ livenessProbe:
   ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
+## @section Custom liveness probe configuration
+customLivenessProbe: {}
+
 readinessProbe:
   ## @param readinessProbe.enabled Enable readiness probe
   enabled: true
@@ -194,6 +201,9 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
+## @section Custom readiness probe configuration
+customReadinessProbe: {}
+
 startupProbe:
   ## @param startupProbe.enabled Enable startup probe
   enabled: true
@@ -207,6 +217,9 @@ startupProbe:
   successThreshold: 1
   ## @param startupProbe.periodSeconds How often to perform the probe
   periodSeconds: 5
+
+## @section Custom startup probe configuration
+customStartupProbe: {}
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -371,6 +384,9 @@ initContainer:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+
+## @section extraInitContainers Optional extra init containers configuration
+extraInitContainers: []
 
 ## @section replicaSet Parameters to build a MongoDB replica set (HA mode)
 replicaSet:

@@ -94,6 +94,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | `clusterDomain`        | Kubernetes cluster domain                                                                      | `cluster.local` |
 | `nameOverride`         | String to partially override valkey.fullname                                                   | `""`            |
 | `fullnameOverride`     | String to fully override valkey.fullname                                                       | `""`            |
+| `namespaceOverride`    | String to override the namespace for all resources                                             | `""`            |
 | `commonLabels`         | Labels to add to all deployed objects                                                          | `{}`            |
 | `commonAnnotations`    | Annotations to add to all deployed objects                                                     | `{}`            |
 

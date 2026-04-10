@@ -12,6 +12,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override zookeeper.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
 ## When migrating from Bitnami Zookeeper:
 ##   1. Set serverIdOffset: 1 (Bitnami uses 1-based myid: 1,2,3 vs default 0-based: 0,1,2)

@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mariadb.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "mariadb.labels" . | nindent 4 }}
   {{- with .Values.commonAnnotations }}

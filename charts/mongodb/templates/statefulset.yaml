@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     service-type: primary-secondary
