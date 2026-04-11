@@ -114,6 +114,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.standaloneEnabled`         | Enable standalone mode                              | `"false"`   |
 | `zookeeperConfig.adminServerEnabled`        | Enable admin server                                 | `"false"`   |
 | `zookeeperConfig.commandsWhitelist`         | 4-letter word commands whitelist                    | `srvr`      |
+| `zookeeperConfig.customServers`             | Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values | `[]`        |
 | `zookeeperConfig.autopurge.purgeInterval`   | Autopurge purge interval (hours)                    | `24`        |
 | `zookeeperConfig.autopurge.snapRetainCount` | Autopurge snapshot retain count                     | `3`         |
 | `zookeeperConfig.admin.enableServer`        | Enable the admin server                             | `"false"`   |

@@ -85,6 +85,13 @@ zookeeperConfig:
   ## possible values are: "srvr,ruok,conf,cons,dump,envi,ruok,mntr,stat" or "*" to allow all commands
   ## @see https://zookeeper.apache.org/doc/r3.5.9/zookeeperAdmin.html#sc_clusterOptions
   commandsWhitelist: "srvr"
+  ## @param zookeeperConfig.customServers Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values.
+  ## Example:
+  ##   zookeeperConfig:
+  ##     customServers:
+  ##       - "server.10=zk-external-0.example.com:2888:3888"
+  ##       - "server.11=zk-external-1.example.com:2888:3888"
+  customServers: []
   autopurge:
     ## @param zookeeperConfig.autopurge.purgeInterval Zookeeper autopurge purge interval (in hours)
     purgeInterval: 24
