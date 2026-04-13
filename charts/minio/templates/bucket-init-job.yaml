@@ -22,8 +22,8 @@ spec:
       labels:
         {{- include "minio.labels" . | nindent 8 }}
         app.kubernetes.io/component: bucket-init
-        {{- with .Values.bucketInitJob.podLabels }}
-        {{- toYaml . | nindent 8 }}
+        {{- with (include "minio.podLabels" (dict "local" .Values.bucketInitJob.podLabels "context" $)) }}
+        {{- . | nindent 8 }}
         {{- end }}
       {{- with .Values.bucketInitJob.podAnnotations }}
       annotations:

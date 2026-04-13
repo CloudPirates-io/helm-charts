@@ -4,6 +4,8 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  ## @param global.podLabels Labels merged into the Deployment and bucket-init Job pod templates. Useful when the chart is used as a subchart and the parent sets pod labels globally. Component-level `podLabels` / `bucketInitJob.podLabels` win on conflict.
+  podLabels: {}
 
 ## @section Common parameters
 ## @param nameOverride String to partially override minio.fullname

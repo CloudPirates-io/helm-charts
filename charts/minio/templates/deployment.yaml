@@ -25,8 +25,8 @@ spec:
       {{- end }}
       labels:
         {{- include "minio.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
+        {{- with (include "minio.podLabels" (dict "local" .Values.podLabels "context" $)) }}
+        {{- . | nindent 8 }}
         {{- end }}
     spec:
 {{- with (include "minio.imagePullSecrets" .) }}
