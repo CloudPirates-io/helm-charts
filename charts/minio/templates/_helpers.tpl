@@ -128,3 +128,17 @@ Returns MinIO serviceAccount name
         {{ default "default" .Values.serviceAccount.name }}
     {{- end -}}
 {{- end -}}
+
+{{/*
+Merge global.podLabels with a component-level podLabels map.
+Component-level values win over global values on conflict.
+Usage: {{ include "minio.podLabels" (dict "local" .Values.podLabels "context" $) }}
+*/}}
+{{- define "minio.podLabels" -}}
+{{- $global := (.context.Values.global).podLabels | default dict -}}
+{{- $local := .local | default dict -}}
+{{- $merged := merge (deepCopy $local) $global -}}
+{{- if $merged -}}
+{{- toYaml $merged }}
+{{- end -}}
+{{- end -}}

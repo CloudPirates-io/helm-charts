@@ -1,0 +1,68 @@
+suite: test minio global.podLabels propagation
+templates:
+  - deployment.yaml
+  - bucket-init-job.yaml
+  - bucket-init-configmap.yaml
+set:
+  image:
+    tag: RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+  defaultBuckets: "test-bucket"
+tests:
+  - it: should propagate global.podLabels to Deployment pod template
+    template: deployment.yaml
+    set:
+      global:
+        podLabels:
+          sidecar.istio.io/inject: "false"
+          team: "platform"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["sidecar.istio.io/inject"]
+          value: "false"
+      - equal:
+          path: spec.template.metadata.labels["team"]
+          value: "platform"
+
+  - it: should propagate global.podLabels to bucket-init Job pod template
+    template: bucket-init-job.yaml
+    set:
+      global:
+        podLabels:
+          sidecar.istio.io/inject: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["sidecar.istio.io/inject"]
+          value: "false"
+
+  - it: should prefer component-level podLabels over global.podLabels on conflict (Deployment)
+    template: deployment.yaml
+    set:
+      global:
+        podLabels:
+          env: "global-value"
+      podLabels:
+        env: "component-value"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["env"]
+          value: "component-value"
+
+  - it: should prefer component-level bucketInitJob.podLabels over global.podLabels on conflict
+    template: bucket-init-job.yaml
+    set:
+      global:
+        podLabels:
+          env: "global-value"
+      bucketInitJob:
+        podLabels:
+          env: "component-value"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["env"]
+          value: "component-value"
+
+  - it: should not add pod labels when neither global nor component set them
+    template: deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.metadata.labels["env"]
