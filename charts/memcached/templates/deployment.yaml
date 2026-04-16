@@ -6,7 +6,7 @@ kind: Deployment
 {{- end }}
 metadata:
   name: {{ include "memcached.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "memcached.labels" . | nindent 4 }}
   {{- with (include "memcached.annotations" .) }}

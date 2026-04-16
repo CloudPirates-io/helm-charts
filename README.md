@@ -15,6 +15,8 @@
 A curated collection of production-ready Helm charts for open-source cloud-native applications.
 This repository provides secure, well-documented, and configurable Helm charts following cloud-native best practices.
 
+**⚠️ IMPORTANT**: As of **April 15, 2026**, all changelogs only exist in the github release description. Old changelogs are kept for the sake of backwards compatiblity.
+
 ## Available Charts
 
 | Chart                                                          | Description                                                                                                                      | Version                                                                                                                                                                                                |
