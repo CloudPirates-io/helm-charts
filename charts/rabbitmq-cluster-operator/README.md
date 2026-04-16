@@ -78,6 +78,7 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `kubeVersion`            | Override Kubernetes version                          | `""`            |
 | `nameOverride`           | String to partially override common.names.fullname   | `""`            |
 | `fullnameOverride`       | String to fully override common.names.fullname       | `""`            |
+| `namespaceOverride`      | String to override the namespace for all resources   | `""`            |
 | `commonLabels`           | Labels to add to all deployed objects                | `{}`            |
 | `commonAnnotations`      | Annotations to add to all deployed objects           | `{}`            |
 | `clusterDomain`          | Kubernetes cluster domain name                       | `cluster.local` |

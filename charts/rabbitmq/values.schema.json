@@ -17,6 +17,9 @@
                 "erlangCookie": {
                     "type": "string"
                 },
+                "erlangCookiePermissions": {
+                    "type": "integer"
+                },
                 "existingErlangCookieKey": {
                     "type": "string"
                 },
@@ -512,6 +515,9 @@
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "nodeSelector": {

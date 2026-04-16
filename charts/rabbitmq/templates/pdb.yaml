@@ -3,7 +3,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ template "rabbitmq.fullname" . }}-pdb
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels: {{- include "rabbitmq.labels" . | nindent 4 }}
   {{- with (include "rabbitmq.annotations" .) }}
   annotations:

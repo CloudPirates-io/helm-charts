@@ -2,8 +2,8 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.26.5
-appVersion: "8.6.1"
+version: 0.26.9
+appVersion: "8.6.2"
 keywords:
   - redis
   - database
@@ -42,9 +42,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Update image.repository to a019c00"
+      description: "propagate priorityClassName to sentinel master-discovery deployment"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1146"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1188"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/redis/CHANGELOG.md"
