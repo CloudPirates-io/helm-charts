@@ -234,7 +234,7 @@ spec:
             - name: management
               containerPort: {{ .Values.keycloak.managementPort }}
               protocol: TCP
-            {{- if .Values.metrics.enabled }}
+            {{- if and .Values.metrics.enabled (ne (int .Values.metrics.service.port) (int .Values.keycloak.managementPort)) }}
             - name: {{ .Values.metrics.service.targetPort }}
               containerPort: {{ .Values.metrics.service.port }}
               protocol: TCP
