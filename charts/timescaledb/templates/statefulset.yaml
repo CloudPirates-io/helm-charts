@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "timescaledb.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "timescaledb.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}

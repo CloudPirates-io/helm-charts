@@ -2,7 +2,7 @@ apiVersion: v2
 name: rustfs
 description: (ALPHA) High-performance distributed object storage with S3-compatible API
 type: application
-version: 0.7.1
+version: 0.8.1
 appVersion: "1.0.0"
 keywords:
   - rustfs
@@ -43,9 +43,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "[rustfs/rc] Update image.repository to v0.1.8"
+      description: "[RustFS chart] custom clusterDomain"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1175"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1219"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rustfs/CHANGELOG.md"
