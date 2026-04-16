@@ -72,6 +72,7 @@ The following table lists the configurable parameters of the Memcached chart and
 | ------------------- | -------------------------------------------------------- | ------- |
 | `nameOverride`      | String to partially override memcached.fullname          | `""`    |
 | `fullnameOverride`  | String to fully override memcached.fullname              | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources       | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                    | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects               | `{}`    |
 | `podAnnotations`    | Annotations to add to the pods created by the deployment | `{}`    |

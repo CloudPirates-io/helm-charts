@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" . }}-mongos
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     service-type: mongos
@@ -78,7 +78,7 @@ spec:
               # Use isMaster which works without authentication
               echo "Waiting for config server replica set to be initialized..."
               while true; do
-                ISMASTER=$(mongosh --host {{ include "mongodb.fullname" . }}-configserver-0.{{ include "mongodb.fullname" . }}-configserver-headless.{{ .Release.Namespace }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('isMaster').setName" --quiet 2>&1 | grep -v "Defaulted" | grep -v "^$")
+                ISMASTER=$(mongosh --host {{ include "mongodb.fullname" . }}-configserver-0.{{ include "mongodb.fullname" . }}-configserver-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017 --eval "db.adminCommand('isMaster').setName" --quiet 2>&1 | grep -v "Defaulted" | grep -v "^$")
                 if [ ! -z "$ISMASTER" ] && [ "$ISMASTER" != "null" ]; then
                   echo "Config server replica set is initialized: $ISMASTER"
                   break
@@ -115,7 +115,7 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-          resources: {{ toYaml (coalesce .Values.shardedCluster.mongos.resources .Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce .Values.initContainer.resources .Values.shardedCluster.mongos.resources) | nindent 12 }}
       containers:
         - name: mongos
           image: {{ include "mongodb.image" . }}
@@ -123,7 +123,7 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
             - mongos
-            - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
+            - --configdb={{ include "mongodb.fullname" . }}-configserver-rs/{{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) }}{{ if gt $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-configserver-{{ $i }}.{{ include "mongodb.fullname" $ }}-configserver-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017{{- end }}
             - --port=27017
             {{- if .Values.auth.enabled }}
             {{- if or .Values.replicaSet.key .Values.replicaSet.keySecretName .Values.shardedCluster.keyFile .Values.shardedCluster.keySecretName }}
@@ -223,7 +223,7 @@ spec:
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
           command:
-            - mongodb_exporter
+            - /mongodb_exporter
             - --mongodb.uri=mongodb://{{ if .Values.auth.enabled }}$(MONGODB_METRICS_USERNAME):$(MONGODB_METRICS_PASSWORD)@{{ end }}localhost:27017{{ if .Values.auth.enabled }}/admin{{ end }}
             - --web.listen-address=:9216
             - --collect-all
