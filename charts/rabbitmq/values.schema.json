@@ -611,6 +611,14 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
