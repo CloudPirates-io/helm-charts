@@ -16652,6 +16652,54 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: "See CloudPirates-io/helm-charts@a1f62a0"
+        - kind: changed
+          description: "[mongodb]: Various mongodb sharded cluster fixes"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.2.6
+    created: "2026-04-16T12:52:30.628309921Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 88bd9df374a2568c2d7889a9253c0539f3aecd2a07790a0c5e81d7406ffd1e68
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.16.0/mongodb-0.16.0.tgz
+    version: 0.16.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: "[mongodb]: Fix unauthed metrics exporter"
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/links: |
@@ -42589,4 +42637,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-16T11:05:43.110555884Z"
+generated: "2026-04-16T12:52:30.62952365Z"
