@@ -88,18 +88,19 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Common Parameters
 
-| Parameter                            | Description                                                                             | Default |
-| ------------------------------------ | --------------------------------------------------------------------------------------- | ------- |
-| `nameOverride`                       | String to partially override fullname                                                   | `""`    |
-| `fullnameOverride`                   | String to fully override fullname                                                       | `""`    |
-| `commonLabels`                       | Labels to add to all deployed objects                                                   | `{}`    |
-| `commonAnnotations`                  | Annotations to add to all deployed objects                                              | `{}`    |
-| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                  | `3`     |
-| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions | `true`  |
-| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `networkPolicy.enabled`              | Enable network policies                                                                 | `true`  |
-| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]` |
+| Parameter                            | Description                                                                                  | Default |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- | ------- |
+| `nameOverride`                       | String to partially override fullname                                                        | `""`    |
+| `fullnameOverride`                   | String to fully override fullname                                                            | `""`    |
+| `namespaceOverride`                  | String to override the namespace for all resources                                           | `""`    |
+| `commonLabels`                       | Labels to add to all deployed objects                                                        | `{}`    |
+| `commonAnnotations`                  | Annotations to add to all deployed objects                                                   | `{}`    |
+| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                       | `3`     |
+| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions      | `true`  |
+| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `networkPolicy.enabled`              | Enable network policies                                                                      | `true`  |
+| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]`    |
 
 ### ZooKeeper Configuration
 

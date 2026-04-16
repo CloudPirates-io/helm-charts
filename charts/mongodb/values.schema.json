@@ -54,6 +54,9 @@
                 "existingConfigmap": {
                     "type": "string"
                 },
+                "existingConfigmapKey": {
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
                 }
@@ -73,10 +76,22 @@
                 }
             }
         },
+        "customLivenessProbe": {
+            "type": "object"
+        },
+        "customReadinessProbe": {
+            "type": "object"
+        },
+        "customStartupProbe": {
+            "type": "object"
+        },
         "customUsers": {
             "type": "array"
         },
         "extraEnvVars": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -335,12 +350,32 @@
                         }
                     }
                 },
+                "uriEncodeImage": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "username": {
                     "type": "string"
                 }
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "networkPolicy": {

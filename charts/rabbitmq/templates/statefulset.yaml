@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "rabbitmq.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- toYaml (merge (include "rabbitmq.labels" . | fromYaml) .Values.statefulsetLabels) | nindent 4 }}
   {{- if or (include "rabbitmq.annotations" .) .Values.statefulsetAnnotations }}
@@ -224,7 +224,7 @@ spec:
                   fieldPath: metadata.name
             {{- if .Values.peerDiscoveryK8sPlugin.useLongname }}
             - name: RABBITMQ_NODENAME
-              value: rabbit@$(NODE_NAME).{{ include "rabbitmq.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+              value: rabbit@$(NODE_NAME).{{ include "rabbitmq.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
             {{- else }}
             - name: RABBITMQ_NODENAME
               value: rabbit@$(NODE_NAME)

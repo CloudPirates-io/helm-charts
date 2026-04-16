@@ -163,7 +163,7 @@ Example: http://rfs-rustfs-{0...1}.rfs-rustfs-headless.rustfs.svc.cluster.local
          http://[NODE].[HEADLESS-SERVICE].[NAMESPACE].svc.cluster.local
 */}}
 {{- define "rustfs.statefulNodes" -}}
-{{- $namespace := .Release.Namespace }}
+{{- $namespace := include "cloudpirates.namespace" . }}
 {{- $name := include "rustfs.fullname" . -}}
 {{- $maxNode := sub (include "rustfs.replicaCount" . | int) 1 }}
 {{- printf "http://%s-{0...%d}.%s-headless.%s.svc.cluster.local" $name $maxNode $name $namespace -}}

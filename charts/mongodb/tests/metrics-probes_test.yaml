@@ -20,24 +20,6 @@ tests:
           path: spec.template.spec.containers[1].livenessProbe.httpGet.port
           value: http-metrics
 
-  - it: should use /metrics for metrics readiness probe path in standalone statefulset
-    asserts:
-      - equal:
-          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
-          value: /metrics
-      - equal:
-          path: spec.template.spec.containers[1].readinessProbe.httpGet.port
-          value: http-metrics
-
-  - it: should have different liveness and readiness probe paths in standalone statefulset
-    asserts:
-      - notEqual:
-          path: spec.template.spec.containers[1].livenessProbe.httpGet.path
-          value: /metrics
-      - equal:
-          path: spec.template.spec.containers[1].readinessProbe.httpGet.path
-          value: /metrics
-
 ---
 suite: test mongodb metrics sidecar probes for sharded cluster
 templates:

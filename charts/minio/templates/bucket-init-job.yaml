@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "minio.fullname" . }}-post-job
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "minio.labels" . | nindent 4 }}
   {{- $annotations := merge (include "minio.annotations" . | fromYaml) .Values.bucketInitJob.annotations }}

@@ -6,7 +6,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" $ }}
   labels:
     {{- include "mongodb.labels" $ | nindent 4 }}
     service-type: shard
@@ -361,7 +361,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" $ }}-shard-{{ $shardIndex }}-arbiter
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" $ }}
   labels:
     {{- include "mongodb.labels" $ | nindent 4 }}
     service-type: shard-arbiter

@@ -2,7 +2,7 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.14.6
+version: 0.15.0
 appVersion: "8.2.6"
 keywords:
   - mongodb
@@ -38,8 +38,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "Fix log spamming for error encoding in metrics server"
+    - kind: added
+      description: "Add namespaceOverride Value to all Charts that missing it"
       links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"
