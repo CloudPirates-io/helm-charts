@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "etcd.fullname" . }}
-  namespace: {{ default .Release.Namespace .Values.metrics.serviceMonitor.namespace }}
+  namespace: {{ default (include "cloudpirates.namespace" .) .Values.metrics.serviceMonitor.namespace }}
   labels:
     {{- include "etcd.labels" . | nindent 4 }}
     {{- with .Values.metrics.serviceMonitor.labels }}
@@ -38,5 +38,5 @@ spec:
       {{- end }}
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - {{ include "cloudpirates.namespace" . }}
 {{- end }}

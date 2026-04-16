@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override keycloak.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -483,6 +485,9 @@ extraObjects: []
 
 ## @section Init Container Configuration
 initContainers:
+  copyQuarkusLib:
+    ## @param initContainers.copyQuarkusLib.resources Resource requests and limits for the copy-quarkus-lib init container
+    resources: {}
   waitForPostgres:
     ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting (leave empty to use registry/repository/tag)
     image: ""
