@@ -54,6 +54,9 @@
                 "existingConfigmap": {
                     "type": "string"
                 },
+                "existingConfigmapKey": {
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
                 }
@@ -73,10 +76,22 @@
                 }
             }
         },
+        "customLivenessProbe": {
+            "type": "object"
+        },
+        "customReadinessProbe": {
+            "type": "object"
+        },
+        "customStartupProbe": {
+            "type": "object"
+        },
         "customUsers": {
             "type": "array"
         },
         "extraEnvVars": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -358,6 +373,9 @@
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "networkPolicy": {

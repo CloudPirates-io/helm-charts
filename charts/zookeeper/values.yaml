@@ -12,6 +12,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override zookeeper.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
 ## When migrating from Bitnami Zookeeper:
 ##   1. Set serverIdOffset: 1 (Bitnami uses 1-based myid: 1,2,3 vs default 0-based: 0,1,2)
@@ -83,6 +85,13 @@ zookeeperConfig:
   ## possible values are: "srvr,ruok,conf,cons,dump,envi,ruok,mntr,stat" or "*" to allow all commands
   ## @see https://zookeeper.apache.org/doc/r3.5.9/zookeeperAdmin.html#sc_clusterOptions
   commandsWhitelist: "srvr"
+  ## @param zookeeperConfig.customServers Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values.
+  ## Example:
+  ##   zookeeperConfig:
+  ##     customServers:
+  ##       - "server.10=zk-external-0.example.com:2888:3888"
+  ##       - "server.11=zk-external-1.example.com:2888:3888"
+  customServers: []
   autopurge:
     ## @param zookeeperConfig.autopurge.purgeInterval Zookeeper autopurge purge interval (in hours)
     purgeInterval: 24

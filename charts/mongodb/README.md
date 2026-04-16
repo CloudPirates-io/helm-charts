@@ -81,6 +81,7 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | ---------------------- | ---------------------------------------------------------- | --------------- |
 | `nameOverride`         | String to partially override mongodb.fullname              | `""`            |
 | `fullnameOverride`     | String to fully override mongodb.fullname                  | `""`            |
+| `namespaceOverride`    | String to override the namespace for all resources         | `""`            |
 | `commonLabels`         | Labels to add to all deployed objects                      | `{}`            |
 | `commonAnnotations`    | Annotations to add to all deployed objects                 | `{}`            |
 | `podAnnotations`       | Annotations to add to the pod created by the statefulset   | `{}`            |

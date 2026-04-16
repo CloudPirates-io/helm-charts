@@ -2,6 +2,25 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [cluster-operator-0.2.2] - 2026-03-27
+
+- Update image.repository to 23fe4f2 (#1181) ([bd28b2b5](https://github.com/CloudPirates-io/helm-charts/commit/bd28b2b5))
+- Update image.repository to cf33bc3 (#1180) ([69ba7e44](https://github.com/CloudPirates-io/helm-charts/commit/69ba7e44))
+- Update image.repository to 494bbcd (#1177) ([e1eb871d](https://github.com/CloudPirates-io/helm-charts/commit/e1eb871d))
+- Update image.repository to v4.2.5 (#1168) ([c75c03b2](https://github.com/CloudPirates-io/helm-charts/commit/c75c03b2))
+- [rabbitmq]: Erlang Cookie configurable permissions (#1142) ([f7783bb2](https://github.com/CloudPirates-io/helm-charts/commit/f7783bb2))
+- Update image.repository to aeee1db (#1162) ([c1b807f7](https://github.com/CloudPirates-io/helm-charts/commit/c1b807f7))
+- Update image.repository to 86b74e9 (#1157) ([b94d0cde](https://github.com/CloudPirates-io/helm-charts/commit/b94d0cde))
+- Update image.repository to 402d829 (#1155) ([0b66b6ab](https://github.com/CloudPirates-io/helm-charts/commit/0b66b6ab))
+- Update image.repository to 693b201 (#1140) ([d319df36](https://github.com/CloudPirates-io/helm-charts/commit/d319df36))
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+- Update image.repository to 4a2be7e (#1136) ([acb5c848](https://github.com/CloudPirates-io/helm-charts/commit/acb5c848))
+- Update image.repository to 81de74a (#1126) ([353c61f0](https://github.com/CloudPirates-io/helm-charts/commit/353c61f0))
+- Update image.repository to 068bba7 (#1107) ([e4d039f1](https://github.com/CloudPirates-io/helm-charts/commit/e4d039f1))
+- Add namespaceSelector to serviceMonitor (#1097) ([7be4cff6](https://github.com/CloudPirates-io/helm-charts/commit/7be4cff6))
+- Update image.repository to 1dd8956 (#1073) ([e7d3f268](https://github.com/CloudPirates-io/helm-charts/commit/e7d3f268))
+- Update charts/rabbitmq/values.yaml rabbitmq (#1060) ([4eb3c9a4](https://github.com/CloudPirates-io/helm-charts/commit/4eb3c9a4))
+
 ## [cluster-operator-0.2.1] - 2026-02-24
 
 - [rabbitmq]: Auto-inject missing vhosts and auth user into definitions to prevent boot failure (#1044) ([719a507a](https://github.com/CloudPirates-io/helm-charts/commit/719a507a))
@@ -72,6 +91,10 @@ All notable changes to this chart will be documented in this file.
 
 ## [cluster-operator-0.1.0] - 2025-12-01
 
+
+## [0.19.9] - 2026-03-25
+
+- Update image.repository to 23fe4f2 (#1181) ([bd28b2b5](https://github.com/CloudPirates-io/helm-charts/commit/bd28b2b5))
 
 ## [0.19.8] - 2026-03-24
 
