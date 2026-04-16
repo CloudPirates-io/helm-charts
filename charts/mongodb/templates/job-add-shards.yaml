@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "mongodb.fullname" . }}-add-shards
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     job-type: add-shards
@@ -66,7 +66,7 @@ spec:
 
               # Wait for all data pods in parallel (mongos will start after we initialize replica sets)
               echo "Waiting for data pods (configserver + shards): $PODS"
-              kubectl wait --for=condition=ready $PODS -n {{ .Release.Namespace }} --timeout=180s
+              kubectl wait --for=condition=ready $PODS -n {{ include "cloudpirates.namespace" . }} --timeout=180s
 
               echo "***** All pods are ready, proceeding with cluster initialization..."
 

@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "etcd.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "etcd.labels" . | nindent 4 }}
   {{- with (include "etcd.annotations" .) }}
@@ -53,8 +53,8 @@ spec:
             - --name=$(POD_NAME)
             - --listen-peer-urls={{ if .Values.auth.peer.enabled }}https{{ else }}http{{ end }}://{{ .Values.config.listenPeerIp }}:{{ .Values.service.peerPort }}
             - --listen-client-urls={{ if .Values.auth.enabled }}https{{ else }}http{{ end }}://{{ .Values.config.listenClientIp }}:{{ .Values.service.clientPort }}
-            - --advertise-client-urls={{ if .Values.auth.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.clientPort }}
-            - --initial-advertise-peer-urls={{ if .Values.auth.peer.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.peerPort }}
+            - --advertise-client-urls={{ if .Values.auth.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local:{{ .Values.service.clientPort }}
+            - --initial-advertise-peer-urls={{ if .Values.auth.peer.enabled }}https{{ else }}http{{ end }}://$(POD_NAME).{{ include "etcd.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.cluster.local:{{ .Values.service.peerPort }}
             - --initial-cluster={{ include "etcd.initialCluster" . }}
             - --initial-cluster-token={{ .Values.config.initialClusterToken }}
             - --initial-cluster-state={{ .Values.config.initialClusterState }}

@@ -76,12 +76,13 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Common parameters
 
-| Parameter           | Description                                    | Default |
-| ------------------- | ---------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override keycloak.fullname | `""`    |
-| `fullnameOverride`  | String to fully override keycloak.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects          | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects     | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override keycloak.fullname     | `""`    |
+| `fullnameOverride`  | String to fully override keycloak.fullname         | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 ### Keycloak image configuration
 
