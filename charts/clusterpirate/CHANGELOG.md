@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [1.4.1] - 2026-03-10
+
+- [helm] Update valkey Docker tag to v0.17.1 (#1102) ([d0e0ea05](https://github.com/CloudPirates-io/helm-charts/commit/d0e0ea05))
+
 ## [1.4.0] - 2026-02-17
 
 - [helm] Update valkey Docker tag to v0.17.0 (#1021) ([8330df5c](https://github.com/CloudPirates-io/helm-charts/commit/8330df5c))

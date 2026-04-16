@@ -2,6 +2,7 @@ suite: test rustfs common parameters
 templates:
   - deployment.yaml
   - statefulset.yaml
+  - configmap.yaml
 set:
   deploymentType: statefulset
   image:
@@ -205,3 +206,14 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: should respect clusterDomain when rendering stateful node volumes
+    set:
+      deploymentType: statefulset
+      clusterDomain: custom.internal
+      replicaCount: 4
+    template: configmap.yaml
+    asserts:
+      - equal:
+          path: data.RUSTFS_VOLUMES
+          value: http://RELEASE-NAME-rustfs-{0...3}.RELEASE-NAME-rustfs-headless.NAMESPACE.svc.custom.internal:9000/data
