@@ -108,7 +108,7 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-          resources: {{ toYaml (coalesce .Values.shardedCluster.configsvr.resources .Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce .Values.initContainer.resources .Values.shardedCluster.configsvr.resources) | nindent 12 }}
       containers:
         - name: mongodb-configserver
           image: {{ include "mongodb.image" . }}
@@ -243,7 +243,7 @@ spec:
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
           command:
-            - mongodb_exporter
+            - /mongodb_exporter
             - --mongodb.uri=mongodb://{{ if .Values.auth.enabled }}$(MONGODB_METRICS_USERNAME):$(MONGODB_METRICS_PASSWORD)@{{ end }}localhost:27017{{ if .Values.auth.enabled }}/admin{{ end }}
             - --web.listen-address=:9216
             - --collect-all
