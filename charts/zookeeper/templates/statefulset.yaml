@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- with (include "zookeeper.annotations" .) }}
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "zookeeper.selectorLabels" . | nindent 8 }}
+        {{- include "zookeeper.labels" . | nindent 8 }}
       annotations:
         {{- with (include "zookeeper.annotations" .) }}
         {{- . | nindent 8 }}

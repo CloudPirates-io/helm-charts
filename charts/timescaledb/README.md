@@ -90,6 +90,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `replicaCount`      | Number of TimescaleDB replicas to deploy (Note: TimescaleDB doesn't support multi-master replication by default) | `1`     |
 | `nameOverride`      | String to partially override timescaledb.fullname                                                                | `""`    |
 | `fullnameOverride`  | String to fully override timescaledb.fullname                                                                    | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources                                                               | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`    |
 

@@ -76,12 +76,13 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Common parameters
 
-| Parameter           | Description                                    | Default |
-| ------------------- | ---------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override keycloak.fullname | `""`    |
-| `fullnameOverride`  | String to fully override keycloak.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects          | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects     | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override keycloak.fullname     | `""`    |
+| `fullnameOverride`  | String to fully override keycloak.fullname         | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 ### Keycloak image configuration
 
@@ -125,7 +126,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter             | Description                                       | Default |
 | --------------------- | ------------------------------------------------- | ------- |
-| `extraInitContainers` | Array of initContainer to add to the keycloak pod | `[]`    |
+| `extraInitContainers` | Array of initContainer to add to the keycloak pod. Supports Helm template expressions (see [Template Expressions in Extra Fields](#template-expressions-in-extra-fields)). | `[]`    |
 
 ### Extra containers for Keycloak pod
 
@@ -264,7 +265,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter   | Description                                                                 | Default |
 | ----------- | --------------------------------------------------------------------------- | ------- |
-| `resources` | The resources to allocate for each container (including the InitContainers) | `{}`    |
+| `resources` | The resources to allocate for the main Keycloak container | `{}`    |
 
 ### Persistence
 
@@ -357,6 +358,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter                                   | Description                                                | Default                                                                            |
 | ------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `initContainers.copyQuarkusLib.resources`   | Resource requests and limits for the copy-quarkus-lib init container | `{}`                                                                               |
 | `initContainers.waitForPostgres.image`      | Full image override for PostgreSQL init container          | `""`                                                                               |
 | `initContainers.waitForPostgres.registry`   | PostgreSQL image registry (overrides global.imageRegistry) | `""`                                                                               |
 | `initContainers.waitForPostgres.repository` | PostgreSQL image repository                                | `postgres`                                                                         |
@@ -644,6 +646,41 @@ extraInitContainers:
       - name: keycloak-themes
         mountPath: /opt/keycloak/themes
 ```
+
+### Template Expressions in Extra Fields
+
+The `extraInitContainers`, `extraVolumes`, `extraVolumeMounts`, `extraEnvVars`, and `extraContainers` fields support Helm template expressions. This enables dynamic image references that respect `global.imageRegistry`, which is useful in air-gapped or on-premises environments where all images must come from an internal registry.
+
+```yaml
+extraInitContainers:
+  - name: custom-themes
+    image: '{{ printf "%s/%s:%s" .Values.global.imageRegistry "my-themes" "1.0.0" }}'
+    command: ["sh", "-c", "cp -r /themes/* /opt/keycloak/themes/"]
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
+```
+
+You can also use the built-in `keycloak.initContainerImage` helper for structured image configuration:
+
+```yaml
+customInit:
+  registry: ""
+  repository: my-themes
+  tag: "1.0.0"
+
+extraInitContainers:
+  - name: custom-themes
+    image: '{{ include "keycloak.initContainerImage" (dict "config" .Values.customInit "global" .Values.global) }}'
+    command: ["sh", "-c", "cp -r /themes/* /opt/keycloak/themes/"]
+    volumeMounts:
+      - name: keycloak-themes
+        mountPath: /opt/keycloak/themes
+```
+
+When `global.imageRegistry` is set, the image resolves to `<global.imageRegistry>/my-themes:1.0.0`. When not set, it uses the `customInit.registry` or just `my-themes:1.0.0`.
+
+> **Note:** Values without template syntax are rendered unchanged — this feature is fully backward-compatible.
 
 ### Using Custom TLS Certificates
 

@@ -11,6 +11,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override rabbitmq.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -23,7 +25,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.4-management@sha256:86b74e99dfc5694b7adbc6adb9496e73211430bfef1d308b5fe1dab83b0b888f"
+  tag: "4.2.5-management@sha256:23fe4f224d3d4d4e3c3904e82fb8a47824f0ee03412c33b7b21e6bf00b9852fa"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -76,6 +78,8 @@ auth:
   existingPasswordKey: "password"
   ## @param auth.existingErlangCookieKey Key in existing secret containing Erlang cookie
   existingErlangCookieKey: "erlang-cookie"
+  ## @param auth.erlangCookiePermissions [experimental] File permissions for the .erlang.cookie file. See https://github.com/CloudPirates-io/helm-charts/issues/1141
+  erlangCookiePermissions: 400
 
 ## @section RabbitMQ configuration
 config:

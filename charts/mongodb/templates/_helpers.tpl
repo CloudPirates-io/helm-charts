@@ -101,6 +101,10 @@ Return the proper MongoDB Exporter image name
 {{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
+{{- define "mongodb.metrics.uriEncodeImage" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.uriEncodeImage "global" .Values.global) -}}
+{{- end }}
+
 {{/*
 Return the MongoDB connection string for metrics
 */}}
@@ -204,7 +208,7 @@ Return config server connection string for mongos
 */}}
 {{- define "mongodb.configServerConnectionString" -}}
 {{- $configRsName := printf "%s-configserver-rs" (include "mongodb.fullname" .) -}}
-{{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) .Release.Namespace (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) (include "cloudpirates.namespace" .) (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $configServers := list -}}
 {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) -}}
 {{- $host := printf "%s-configserver-%d.%s:27017" (include "mongodb.fullname" $) $i $configService -}}
@@ -220,7 +224,7 @@ Return shard replica set connection string
 {{- $shardIndex := .shardIndex -}}
 {{- $context := .context -}}
 {{- $shardRsName := printf "%s-shard-%d-rs" (include "mongodb.fullname" $context) $shardIndex -}}
-{{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex $context.Release.Namespace ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex (include "cloudpirates.namespace" $context) ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $shardMembers := list -}}
 {{- range $i := until (int $context.Values.shardedCluster.shardsvr.dataNode.replicaCount) -}}
 {{- $host := printf "%s-shard-%d-%d.%s:27017" (include "mongodb.fullname" $context) $shardIndex $i $shardService -}}
