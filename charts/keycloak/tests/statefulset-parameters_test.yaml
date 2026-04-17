@@ -63,6 +63,39 @@ tests:
           path: spec.template.spec.containers[0].args[2]
           value: --hostname-admin=keycloak.mydomain.com
 
+  # init container resources
+  - it: copy-quarkus-lib should render resources when configured
+    set:
+      initContainers:
+        copyQuarkusLib:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: copy-quarkus-lib
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.requests.cpu
+          value: 50m
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.requests.memory
+          value: 32Mi
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.limits.memory
+          value: 64Mi
+
+  - it: copy-quarkus-lib should render empty resources by default
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: copy-quarkus-lib
+      - isEmpty:
+          path: spec.template.spec.initContainers[0].resources
+
   # extraInitContainers tpl support
   - it: extraInitContainers with static image should render unchanged
     set:
