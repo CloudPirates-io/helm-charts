@@ -133,7 +133,7 @@ Return the Keycloak hostname
 {{- else if .Values.ingress.enabled -}}
 {{- (index .Values.ingress.hosts 0).host -}}
 {{- else -}}
-{{- printf "%s.%s.svc.cluster.local" (include "keycloak.fullname" .) .Release.Namespace -}}
+{{- printf "%s.%s.svc.cluster.local" (include "keycloak.fullname" .) (include "cloudpirates.namespace" .) -}}
 {{- end -}}
 {{- end }}
 
@@ -155,7 +155,7 @@ Return the Keycloak backchannel hostname
 {{- if .Values.keycloak.hostnameBackchannel -}}
 {{- .Values.keycloak.hostnameBackchannel -}}
 {{- else -}}
-{{- printf "%s.%s.svc.cluster.local" (include "keycloak.fullname" .) .Release.Namespace -}}
+{{- printf "%s.%s.svc.cluster.local" (include "keycloak.fullname" .) (include "cloudpirates.namespace" .) -}}
 {{- end -}}
 {{- end }}
 

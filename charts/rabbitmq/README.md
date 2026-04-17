@@ -98,13 +98,14 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 
 ### Common parameters
 
-| Parameter           | Description                                    | Default         |
-| ------------------- | ---------------------------------------------- | --------------- |
-| `nameOverride`      | String to partially override rabbitmq.fullname | `""`            |
-| `fullnameOverride`  | String to fully override rabbitmq.fullname     | `""`            |
-| `commonLabels`      | Labels to add to all deployed objects          | `{}`            |
-| `commonAnnotations` | Annotations to add to all deployed objects     | `{}`            |
-| `clusterDomain`     | Kubernetes cluster domain                      | `cluster.local` |
+| Parameter           | Description                                        | Default         |
+| ------------------- | -------------------------------------------------- | --------------- |
+| `nameOverride`      | String to partially override rabbitmq.fullname     | `""`            |
+| `fullnameOverride`  | String to fully override rabbitmq.fullname         | `""`            |
+| `namespaceOverride` | String to override the namespace for all resources | `""`            |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`            |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`            |
+| `clusterDomain`     | Kubernetes cluster domain                          | `cluster.local` |
 
 ### RabbitMQ image parameters
 
@@ -311,16 +312,17 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 
 ### Security Context
 
-| Parameter                                           | Description                                       | Default   |
-| --------------------------------------------------- | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
-| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `containerSecurityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`     |
-| `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
-| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
-| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
-| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`      |
+| Parameter                                           | Description                                       | Default                  |
+| --------------------------------------------------- | ------------------------------------------------- | ------------------------ |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`                    |
+| `podSecurityContext.seccompProfile`                 | Seccomp profile for the pod                       | `{type: RuntimeDefault}` |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`                  |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`                   |
+| `containerSecurityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`                    |
+| `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`                    |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`                   |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]`                |
+| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`                     |
 
 ### Liveness and readiness probes
 
