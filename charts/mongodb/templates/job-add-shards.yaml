@@ -12,6 +12,7 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
+  ttlSecondsAfterFinished: 60
   backoffLimit: 10
   template:
     metadata:
