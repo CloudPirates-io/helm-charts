@@ -3,11 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "postgres.fullname" . }}-metrics
-  {{- if .Values.metrics.serviceMonitor.namespace }}
-  namespace: {{ .Values.metrics.serviceMonitor.namespace }}
-  {{- else }}
-  namespace: {{ .Release.Namespace }}
-  {{- end }}
+  namespace: {{ default (include "cloudpirates.namespace" .) .Values.metrics.serviceMonitor.namespace }}
   labels:
     {{- include "postgres.labels" . | nindent 4 }}
     app.kubernetes.io/component: metrics

@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.14.6
-appVersion: "8.2.6"
+version: 0.16.3
+appVersion: "8.2.7"
 keywords:
   - mongodb
   - database
@@ -39,7 +39,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: fixed
-      description: "Fix log spamming for error encoding in metrics server"
+      description: "Fix config duplication on init container restart"
       links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1223"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"

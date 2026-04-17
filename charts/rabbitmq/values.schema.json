@@ -517,6 +517,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "nodeSelector": {
             "type": "object"
         },
@@ -608,6 +611,14 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
