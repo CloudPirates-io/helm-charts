@@ -188,6 +188,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "networkPolicy": {
             "type": "object",
             "properties": {
@@ -395,6 +398,9 @@
                 },
                 "commandsWhitelist": {
                     "type": "string"
+                },
+                "customServers": {
+                    "type": "array"
                 },
                 "electionPortBindRetry": {
                     "type": "integer"
