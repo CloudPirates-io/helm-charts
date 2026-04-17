@@ -267,10 +267,6 @@ spec:
               fi
               {{- end }}
               {{- else if eq .Values.architecture "cluster" }}
-              {{- if gt (int .Values.cluster.startupSleepTime) 0 }}
-              echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
-              sleep {{ .Values.cluster.startupSleepTime }}
-              {{- end }}
               echo "" >> /tmp/redis.conf
               echo "# Default cluster settings" >> /tmp/redis.conf
               echo "cluster-enabled yes" >> /tmp/redis.conf
@@ -407,10 +403,6 @@ spec:
               fi
               {{- end }}
               {{- else if eq .Values.architecture "cluster" }}
-              {{- if gt (int .Values.cluster.startupSleepTime) 0 }}
-              echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
-              sleep {{ .Values.cluster.startupSleepTime }}
-              {{- end }}
               echo "" >> /tmp/redis.conf
               echo "# Redis Cluster Configuration" >> /tmp/redis.conf
               echo "cluster-enabled yes" >> /tmp/redis.conf
@@ -525,6 +517,10 @@ spec:
               CONFIG_FILE="/tmp/redis.conf"
               {{- else }}
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
+              {{- end }}
+              {{- if gt (int .Values.cluster.startupSleepTime) 0 }}
+              echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
+              sleep {{ .Values.cluster.startupSleepTime }}
               {{- end }}
 
               redis-server "$CONFIG_FILE" {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
