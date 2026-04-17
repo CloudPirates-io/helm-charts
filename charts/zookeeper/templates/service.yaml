@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
@@ -28,7 +28,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "zookeeper.fullname" . }}-headless
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
 spec:

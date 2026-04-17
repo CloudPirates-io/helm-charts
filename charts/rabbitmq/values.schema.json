@@ -17,6 +17,9 @@
                 "erlangCookie": {
                     "type": "string"
                 },
+                "erlangCookiePermissions": {
+                    "type": "integer"
+                },
                 "existingErlangCookieKey": {
                     "type": "string"
                 },
@@ -514,6 +517,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "nodeSelector": {
             "type": "object"
         },
@@ -605,6 +611,14 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },

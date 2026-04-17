@@ -1,4 +1,4 @@
-# Generated from: https://raw.githubusercontent.com/rabbitmq/cluster-operator/v2.19.0/config/crd/bases/rabbitmq.com_rabbitmqclusters.yaml
+# Generated from: https://raw.githubusercontent.com/rabbitmq/cluster-operator/v2.19.1/config/crd/bases/rabbitmq.com_rabbitmqclusters.yaml
 # RabbitMQ Cluster Operator
 #
 # Copyright 2020 VMware, Inc. All Rights Reserved.
@@ -4736,6 +4736,10 @@ spec:
                                                           type: integer
                                                         signerName:
                                                           type: string
+                                                        userAnnotations:
+                                                          additionalProperties:
+                                                            type: string
+                                                          type: object
                                                       required:
                                                         - keyType
                                                         - signerName
@@ -4930,6 +4934,18 @@ spec:
                                       x-kubernetes-list-map-keys:
                                         - name
                                       x-kubernetes-list-type: map
+                                    workloadRef:
+                                      properties:
+                                        name:
+                                          type: string
+                                        podGroup:
+                                          type: string
+                                        podGroupReplicaKey:
+                                          type: string
+                                      required:
+                                        - name
+                                        - podGroup
+                                      type: object
                                   required:
                                     - containers
                                   type: object
@@ -5394,9 +5410,10 @@ spec:
                       operator:
                         description: |-
                           Operator represents a key's relationship to the value.
-                          Valid operators are Exists and Equal. Defaults to Equal.
+                          Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
                           Exists is equivalent to wildcard for value, so that a pod can
                           tolerate all taints of a particular category.
+                          Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
                         type: string
                       tolerationSeconds:
                         description: |-
