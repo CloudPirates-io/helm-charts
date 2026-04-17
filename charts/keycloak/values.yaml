@@ -82,6 +82,9 @@ extraContainers: []
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
