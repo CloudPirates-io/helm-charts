@@ -691,41 +691,25 @@ data:
 
       log_shard "Initializing shard $shardIndex replica set: $shardRsName"
 
-      # Check if shard replica set is already initialized
+      # Check if shard replica set is already initialized (localhost exception works without auth)
       result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Shard $shardIndex replica set already initialized"
         return 0
       fi
-      {{- if .Values.auth.enabled }}
-      # Try with auth credentials (root user may already exist from init container)
-      result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
-      if [ "$result" = "1" ]; then
-        log_shard "Shard $shardIndex replica set already initialized"
-        return 0
-      fi
-      {{- end }}
 
       # Build shard members array (data nodes + arbiters)
       local members="[{{- range $i := until (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) }}{{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\"}{{- end }}{{- if gt (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) 0 }}{{- range $i := until (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) }}, {_id:{{ add (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\", arbiterOnly:true}{{- end }}{{- end }}]"
 
-      # Initialize shard replica set — use auth credentials since the init container
-      # pre-creates the root user (disabling the localhost exception on the shard).
-      {{- if .Values.auth.enabled }}
-      kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "
-        rs.initiate({
-          _id: '$shardRsName',
-          members: $members
-        })
-      " > /dev/null 2>&1
-      {{- else }}
+      # Initialize shard replica set via the localhost exception — no credentials needed
+      # since mongod runs directly (not via docker-entrypoint.sh), so MONGO_INITDB_ROOT_*
+      # env vars never fire and no users exist yet at this point.
       kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --eval "
         rs.initiate({
           _id: '$shardRsName',
           members: $members
         })
       " > /dev/null 2>&1
-      {{- end }}
       result=$?
       logErrorAndExitShard "Failed to initialize shard $shardIndex replica set" $result
 
@@ -734,11 +718,7 @@ data:
       local retries=30
       local delay=1
       while [ $retries -gt 0 ]; do
-        {{- if .Values.auth.enabled }}
-        result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
-        {{- else }}
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
-        {{- end }}
         if [ "$result" = "1" ]; then
           log_shard "Shard $shardIndex replica set is ready"
           break
