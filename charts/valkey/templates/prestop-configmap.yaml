@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "valkey.fullname" . }}-prestop-script
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "valkey.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}
@@ -23,8 +23,8 @@ data:
     VALKEY_PORT="{{ .Values.service.port }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
-    HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
-    VALKEY_SERVICE="{{ include "valkey.fullname" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+    HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+    VALKEY_SERVICE="{{ include "valkey.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
 
     # Set authentication if enabled
     {{- if .Values.auth.enabled }}

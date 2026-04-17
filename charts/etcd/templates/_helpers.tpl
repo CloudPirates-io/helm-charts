@@ -79,7 +79,7 @@ Validate etcd values
 Generate etcd initial cluster string
 */}}
 {{- define "etcd.initialCluster" -}}
-{{- $namespace := .Release.Namespace }}
+{{- $namespace := include "cloudpirates.namespace" . }}
 {{- $name := include "etcd.fullname" . -}}
 {{- $peerPort := .Values.service.peerPort -}}
 {{- $replicaCount := int .Values.replicaCount }}

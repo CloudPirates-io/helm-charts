@@ -106,7 +106,7 @@ Generate Galera cluster address list
 {{- define "mariadb.galeraClusterAddress" -}}
 {{- $fullname := include "mariadb.fullname" . -}}
 {{- $replicaCount := int .Values.galera.replicaCount -}}
-{{- $namespace := .Release.Namespace -}}
+{{- $namespace := include "cloudpirates.namespace" . -}}
 {{- $addresses := list -}}
 {{- range $i := until $replicaCount -}}
 {{- $addresses = append $addresses (printf "%s-%d.%s.%s.svc.cluster.local:4567" $fullname $i $fullname $namespace) -}}
@@ -132,7 +132,7 @@ Generate Galera node name with pod name
 Generate Galera node address
 */}}
 {{- define "mariadb.galeraNodeAddress" -}}
-{{- printf "%s-%s.%s.%s.svc.cluster.local" (include "mariadb.fullname" .) "REPLICA_NUM" (include "mariadb.fullname" .) .Release.Namespace -}}
+{{- printf "%s-%s.%s.%s.svc.cluster.local" (include "mariadb.fullname" .) "REPLICA_NUM" (include "mariadb.fullname" .) (include "cloudpirates.namespace" .) -}}
 {{- end }}
 
 {{/*

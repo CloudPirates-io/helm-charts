@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: {{ if .Values.daemonset.enabled }}DaemonSet{{ else }}Deployment{{ end }}
 metadata:
   name: {{ include "nginx.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
   {{- with (include "nginx.annotations" .) }}

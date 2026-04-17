@@ -518,6 +518,10 @@ spec:
               {{- else }}
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
               {{- end }}
+              {{- if gt (int .Values.cluster.startupSleepTime) 0 }}
+              echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
+              sleep {{ .Values.cluster.startupSleepTime }}
+              {{- end }}
 
               redis-server "$CONFIG_FILE" {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:

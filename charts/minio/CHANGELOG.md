@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.12.0] - 2026-04-10
+
+- [all]: Add namespaceOverride Value to all Charts that missing it (#1214) ([39a029c6](https://github.com/CloudPirates-io/helm-charts/commit/39a029c6))
+
+## [0.11.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
 ## [0.10.1] - 2026-02-18
 
 - [cloudpirates/image-minio] Update image to 8dc02a7 (#1025) ([c889b820](https://github.com/CloudPirates-io/helm-charts/commit/c889b820))

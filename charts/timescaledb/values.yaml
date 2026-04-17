@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override timescaledb.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -22,7 +24,7 @@ image:
   ## @param image.repository TimescaleDB image repository
   repository: timescale/timescaledb
   ## @param image.tag TimescaleDB image tag (immutable tags are recommended)
-  tag: "2.25.2-pg17@sha256:ec9366355ee5a42282006095a8677a042f7d3b0567a31777d77a6e7c9d6e0fdf"
+  tag: "2.26.1-pg17@sha256:87901ae7d81e3dc6d999ae002cc41ea4b31b34fa0e16ab466ee36ca251bd09e6"
   ## @param image.imagePullPolicy TimescaleDB image pull policy
   imagePullPolicy: Always
 
