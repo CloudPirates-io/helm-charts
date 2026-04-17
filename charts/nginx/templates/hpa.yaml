@@ -3,7 +3,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "nginx.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
   {{- with (include "nginx.annotations" .) }}

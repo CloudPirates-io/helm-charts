@@ -92,6 +92,7 @@ The following table lists the configurable parameters of the PostgreSQL chart an
 | `replicaCount`                  | Number of PostgreSQL replicas to deploy (Note: PostgreSQL doesn't support multi-master replication by default) | `1`     |
 | `nameOverride`                  | String to partially override postgres.fullname                                                                 | `""`    |
 | `fullnameOverride`              | String to fully override postgres.fullname                                                                     | `""`    |
+| `namespaceOverride`             | String to override the namespace for all resources                                                             | `""`    |
 | `commonLabels`                  | Labels to add to all deployed objects                                                                          | `{}`    |
 | `commonAnnotations`             | Annotations to add to all deployed objects                                                                     | `{}`    |
 | `priorityClassName`             | Priority class name to be used for the pods                                                                    | ``      |

@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.18.0] - 2026-03-13
+
+- [all]: Support gateway api in addition to ingress where applicable (#1132) ([540c70c6](https://github.com/CloudPirates-io/helm-charts/commit/540c70c6))
+
 ## [0.17.1] - 2026-03-09
 
 - [oliver006/redis_exporter] Update image to v1.82.0 (#1100) ([d506ea7a](https://github.com/CloudPirates-io/helm-charts/commit/d506ea7a))

@@ -2,8 +2,8 @@ apiVersion: v2
 name: mongodb
 description: MongoDB a flexible NoSQL database for scalable, real-time data management
 type: application
-version: 0.14.1
-appVersion: "8.2.5"
+version: 0.15.5
+appVersion: "8.2.6"
 keywords:
   - mongodb
   - database
@@ -38,10 +38,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: changed
-      description: "[mongo] Update image.repository to 60aa240"
+    - kind: fixed
+      description: "Fix config duplication on init container restart"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1150"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1223"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mongodb/CHANGELOG.md"

@@ -96,12 +96,13 @@ The following table lists the configurable parameters of the MariaDB chart and t
 
 ### Common Parameters
 
-| Parameter           | Description                                   | Default |
-| ------------------- | --------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override mariadb.fullname | `""`    |
-| `fullnameOverride`  | String to fully override mariadb.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects         | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects    | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override mariadb.fullname      | `""`    |
+| `fullnameOverride`  | String to fully override mariadb.fullname          | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 ### MariaDB Image Parameters
 
