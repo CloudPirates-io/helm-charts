@@ -436,6 +436,9 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 ## @param priorityClassName Priority class for the rabbitmq instance
 priorityClassName: ""
