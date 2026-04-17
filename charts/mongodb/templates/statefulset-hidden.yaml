@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mongodb.fullname" . }}-hidden
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     service-type: hidden-secondary
@@ -46,7 +46,7 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -79,7 +79,7 @@ spec:
               name: keyfile-secret
             {{- end }}
           command: [ "/scripts/init.sh" ]
-          {{- with .Values.initContainer.Resources }}
+          {{- with .Values.initContainer.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

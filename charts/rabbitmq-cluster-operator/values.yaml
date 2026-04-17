@@ -25,6 +25,8 @@ kubeVersion: ""
 nameOverride: ""
 ## @param fullnameOverride String to fully override cloudpirates.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects

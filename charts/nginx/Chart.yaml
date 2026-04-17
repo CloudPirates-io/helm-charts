@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: Nginx is a high-performance HTTP server and reverse proxy.
 type: application
-version: 0.9.1
-appVersion: "1.29.7"
+version: 0.10.1
+appVersion: "1.29.8"
 keywords:
   - nginx
   - web server
@@ -41,10 +41,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: changed
-      description: "Update image.repository to v1.29.7"
+    - kind: added
+      description: "Add namespaceOverride Value to all Charts that missing it"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1184"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/nginx/CHANGELOG.md"
