@@ -717,10 +717,10 @@ definitions:
       tag: "8.18.0"
       pullPolicy: IfNotPresent
     ## @param definitions.autoReload.resources Resource limits and requests for the config watcher sidecar
-    resources:
-      requests:
-        cpu: 10m
-        memory: 16Mi
-      limits:
-        cpu: 50m
-        memory: 32Mi
+    resources: {}
+      # requests:
+      #   cpu: 10m
+      #   memory: 16Mi
+      # limits:
+      #   cpu: 50m
+      #   memory: 32Mi

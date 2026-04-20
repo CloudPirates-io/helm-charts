@@ -238,13 +238,13 @@ persistentVolumeClaimRetentionPolicy:
   whenDeleted: Retain
 
 ## @param resources Resource limits and requests for Redis pod
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 50m
-    memory: 128Mi
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 128Mi
 
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
@@ -416,13 +416,13 @@ sentinel:
     ## @param sentinel.service.ipFamilyPolicy IP family policy for the sentinel service
     ipFamilyPolicy: ""
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      cpu: 200m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
   ## When true: On master termination, waits for failover to complete (zero-downtime)
   ## When false: Shuts down immediately without waiting for failover
@@ -449,13 +449,13 @@ sentinel:
       tag: "1.35.2"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
-    resources:
-      limits:
-        cpu: 25m
-        memory: 64Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 25m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
@@ -495,13 +495,13 @@ sentinel:
 
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @section Redis metrics parameters
 ## Prometheus metrics configuration
@@ -518,13 +518,13 @@ metrics:
     tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      cpu: 100m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for redis exporter, for example:
   ## extraArgs:
   ##   - --redis.addr=redis://localhost:6379
@@ -638,10 +638,10 @@ customScripts:
 ## @section clusterInitJob Configurations for the Job-Template
 clusterInitJob:
   ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
-  resources:
-    limits:
-      cpu: 25m
-      memory: 128Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 25m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
