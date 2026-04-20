@@ -90,10 +90,88 @@ spec:
               # Check if keyfile authentication is enabled
               if [ -f /opt/mongodb/keyfile ]; then
                 echo "Found keyfile, copying to writable location"
+                # Remove existing file first (may exist with chmod 400 from a previous restart)
+                rm -f /keyfile-data/keyfile 2>/dev/null || true
                 cp /opt/mongodb/keyfile /keyfile-data/keyfile
                 chmod 400 /keyfile-data/keyfile
-                chown mongodb:mongodb /keyfile-data/keyfile
+                chown mongodb:mongodb /keyfile-data/keyfile 2>/dev/null || true
               fi
+              {{- if and $.Values.metrics.enabled $.Values.auth.enabled $.Values.metrics.username }}
+
+              # Create metrics exporter user by starting a minimal standalone mongod (no --replSet,
+              # no --keyFile, no --auth). Without --replSet, MongoDB does not generate cluster-time
+              # signing keys, so the localhost exception works for unauthenticated createUser.
+              # The user is persisted to the data volume; the main container then starts mongod with
+              # --replSet/--keyFile/--auth and finds the user already present.
+              echo "Starting standalone mongod to create metrics user on shard {{ $shardIndex }}..."
+              # Remove any stale lock file from a previous abrupt shutdown
+              rm -f {{ $.Values.persistence.mountPath }}/mongod.lock 2>/dev/null || true
+              mongod \
+                --port=27017 \
+                --dbpath={{ $.Values.persistence.mountPath }} \
+                --bind_ip=127.0.0.1 \
+                {{- if $.Values.common.mongodbDirectoryPerDB }}
+                --directoryperdb \
+                {{- end }}
+                >/dev/null 2>&1 &
+              SETUP_PID=$!
+
+              retries=30
+              until mongosh 'mongodb://127.0.0.1:27017/?directConnection=true' --quiet \
+                  --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q 1; do
+                retries=$((retries-1))
+                if [ $retries -le 0 ]; then
+                  echo "ERROR: standalone mongod failed to start on shard {{ $shardIndex }}"
+                  kill $SETUP_PID 2>/dev/null || true
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              mongosh 'mongodb://127.0.0.1:27017/?directConnection=true' --eval "
+                // Create root user first — the presence of any user disables the localhost
+                // exception, so the add-shards job must authenticate for rs.initiate().
+                try {
+                  db.getSiblingDB('admin').createUser({
+                    user: '$MONGO_INITDB_ROOT_USERNAME',
+                    pwd: '$MONGO_INITDB_ROOT_PASSWORD',
+                    roles: [{ role: 'root', db: 'admin' }]
+                  });
+                  print('ROOT_USER_CREATED');
+                } catch (e) {
+                  if (e.code === 51003) {
+                    print('ROOT_USER_EXISTS');
+                  } else {
+                    print('ERROR: ' + e.message);
+                    throw e;
+                  }
+                }
+                try {
+                  db.getSiblingDB('admin').createUser({
+                    user: '$MONGO_METRICS_USERNAME',
+                    pwd: '$MONGO_METRICS_PASSWORD',
+                    roles: [
+                      { role: 'clusterMonitor', db: 'admin' },
+                      { role: 'readAnyDatabase', db: 'admin' },
+                      { role: 'read', db: 'local' }
+                    ]
+                  });
+                  print('METRICS_USER_CREATED');
+                } catch (e) {
+                  if (e.code === 51003) {
+                    print('METRICS_USER_EXISTS');
+                  } else {
+                    print('ERROR: ' + e.message);
+                    throw e;
+                  }
+                }
+              " 2>&1
+
+              echo "Shutting down standalone mongod..."
+              kill $SETUP_PID 2>/dev/null || true
+              wait $SETUP_PID 2>/dev/null || true
+              echo "Shard {{ $shardIndex }} metrics user setup complete"
+              {{- end }}
 
               echo "Shard {{ $shardIndex }} initialization completed"
           env:
@@ -103,6 +181,22 @@ spec:
                   fieldPath: metadata.name
             - name: SHARD_INDEX
               value: "{{ $shardIndex }}"
+            {{- if and $.Values.metrics.enabled $.Values.auth.enabled $.Values.metrics.username }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ $.Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" $ }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" $ }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ $.Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" $ }}
+                  key: {{ include "mongodb.secretPasswordKey" $ }}
+            {{- end }}
           volumeMounts:
             - name: mongodb-shard-{{ $shardIndex }}-volume
               mountPath: {{ $.Values.persistence.mountPath }}
@@ -119,7 +213,35 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-          resources: {{ toYaml (coalesce $.Values.shardedCluster.shardsvr.dataNode.resources $.Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce $.Values.initContainer.resources $.Values.shardedCluster.shardsvr.dataNode.resources) | nindent 12 }}
+        {{- if and $.Values.metrics.enabled $.Values.auth.enabled }}
+        - name: metrics-uri-init
+          image: {{ include "mongodb.metrics.uriEncodeImage" $ | quote }}
+          imagePullPolicy: {{ $.Values.metrics.uriEncodeImage.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cp /bin/busybox /metrics-config/busybox
+              chmod +x /metrics-config/busybox
+              urlencode() {
+                printf '%s' "$1" | od -An -tx1 | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F'
+              }
+              ENCODED_USER=$(urlencode "$MONGO_METRICS_USERNAME")
+              ENCODED_PASS=$(urlencode "$MONGO_METRICS_PASSWORD")
+              printf 'mongodb://%s:%s@127.0.0.1:27017/admin?authSource=admin' "$ENCODED_USER" "$ENCODED_PASS" > /metrics-config/uri
+          env:
+            - name: MONGO_METRICS_USERNAME
+              value: {{ $.Values.metrics.username | default $.Values.auth.rootUsername | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" $ }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" $ }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+        {{- end }}
       containers:
         - name: mongodb-shard-{{ $shardIndex }}
           image: {{ include "mongodb.image" $ }}
@@ -247,9 +369,6 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-            - name: mongodb-init-scripts
-              mountPath: /opt/mongodb/init-scripts
-              readOnly: true
             {{- with $.Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -259,27 +378,36 @@ spec:
           image: {{ include "mongodb.metrics.image" $ }}
           imagePullPolicy: {{ $.Values.metrics.image.pullPolicy }}
           securityContext: {{ toYaml $.Values.metrics.containerSecurityContext | nindent 12 }}
+          {{- if $.Values.auth.enabled }}
+          command: ["/metrics-config/busybox", "sh", "-c"]
+          args:
+            - |
+              exec /mongodb_exporter \
+                --mongodb.uri="$(/metrics-config/busybox cat /metrics-config/uri)" \
+                --web.listen-address=0.0.0.0:9216 \
+                --collect-all{{- range $.Values.metrics.extraArgs }} \
+                {{ . }}{{- end }}
+          {{- with $.Values.metrics.extraEnvVars }}
+          env:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+          {{- else }}
           command:
-            - mongodb_exporter
-            - --mongodb.uri=mongodb://{{ if $.Values.auth.enabled }}$(MONGODB_METRICS_USERNAME):$(MONGODB_METRICS_PASSWORD)@{{ end }}localhost:27017{{ if $.Values.auth.enabled }}/admin{{ end }}
+            - /mongodb_exporter
+            - --mongodb.uri=mongodb://localhost:27017
             - --web.listen-address=:9216
             - --collect-all
             {{- range $.Values.metrics.extraArgs }}
             - {{ . }}
             {{- end }}
+          {{- with $.Values.metrics.extraEnvVars }}
           env:
-            {{- if $.Values.auth.enabled }}
-            - name: MONGODB_METRICS_USERNAME
-              value: {{ $.Values.metrics.username | default $.Values.auth.rootUsername | quote }}
-            - name: MONGODB_METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mongodb.metrics.secretName" $ }}
-                  key: {{ include "mongodb.metricsSecretPasswordKey" $ }}
-            {{- end }}
-            {{- with $.Values.metrics.extraEnvVars }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: http-metrics
               containerPort: 9216
@@ -298,7 +426,7 @@ spec:
           {{- if $.Values.metrics.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /metrics
+              path: /
               port: http-metrics
             initialDelaySeconds: {{ $.Values.metrics.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ $.Values.metrics.readinessProbe.timeoutSeconds }}
@@ -322,10 +450,10 @@ spec:
         - name: mongodb-keyfile-data
           emptyDir: {}
         {{- end }}
-        - name: mongodb-init-scripts
-          configMap:
-            name: {{ include "mongodb.fullname" $ }}-init-scripts
-            defaultMode: 0755
+        {{- if and $.Values.metrics.enabled $.Values.auth.enabled }}
+        - name: metrics-config
+          emptyDir: {}
+        {{- end }}
         {{- with $.Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -468,7 +596,7 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-          resources: {{ toYaml (coalesce $.Values.shardedCluster.shardsvr.arbiter.resources $.Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce $.Values.initContainer.resources $.Values.shardedCluster.shardsvr.arbiter.resources) | nindent 12 }}
       containers:
         - name: mongodb-shard-{{ $shardIndex }}-arbiter
           image: {{ include "mongodb.image" $ }}
@@ -608,9 +736,6 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-            - name: mongodb-init-scripts
-              mountPath: /opt/mongodb/init-scripts
-              readOnly: true
             {{- with $.Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -632,10 +757,6 @@ spec:
         - name: mongodb-keyfile-data
           emptyDir: {}
         {{- end }}
-        - name: mongodb-init-scripts
-          configMap:
-            name: {{ include "mongodb.fullname" $ }}-init-scripts
-            defaultMode: 0755
         {{- with $.Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

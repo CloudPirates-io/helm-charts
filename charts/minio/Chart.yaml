@@ -2,7 +2,7 @@ apiVersion: v2
 name: minio
 description: High Performance Object Storage compatible with Amazon S3 APIs
 type: application
-version: 0.12.0
+version: 0.13.0
 appVersion: "2025.10.15"
 keywords:
   - minio
@@ -41,9 +41,9 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: added
-      description: "Add namespaceOverride Value to all Charts that missing it"
+      description: "add podLabels, serviceAccount and priorityClass to bucke…"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1218"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/minio/CHANGELOG.md"

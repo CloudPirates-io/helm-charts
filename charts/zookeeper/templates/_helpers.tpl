@@ -60,11 +60,19 @@ in a format like:
 - server.0=zkhost0:port:port
 - server.1=zkhost1:port:port
 
+If zookeeperConfig.customServers is set, generated servers are skipped and only
+custom server lines are rendered.
+
 serverIdOffset (default 0) allows shifting server IDs to match existing myid files.
 This is useful when migrating from Bitnami Zookeeper, which uses 1-based IDs (myid=1,2,3).
 Set serverIdOffset=1 to generate server.1, server.2, server.3 instead of server.0, server.1, server.2.
 */}}
 {{- define "zookeeper.servers" -}}
+{{- if .Values.zookeeperConfig.customServers }}
+{{- range .Values.zookeeperConfig.customServers }}
+{{ . }}
+{{- end }}
+{{- else }}
 {{- $namespace := include "cloudpirates.namespace" . }}
 {{- $name := include "zookeeper.fullname" . -}}
 {{- $peersPort := .Values.service.ports.quorum -}}
@@ -72,5 +80,6 @@ Set serverIdOffset=1 to generate server.1, server.2, server.3 instead of server.
 {{- $offset := int (default 0 .Values.serverIdOffset) -}}
 {{- range $idx, $v := until (int .Values.replicaCount) }}
 server.{{ add $idx $offset }}={{ printf "%s-%d.%s-headless.%s.svc.cluster.local:%d:%d" $name $idx $name $namespace (int $peersPort) (int $leaderElectionPort) }}
+{{- end }}
 {{- end }}
 {{- end -}}

@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.15.0] - 2026-04-10
+
+- [all]: Add namespaceOverride Value to all Charts that missing it (#1214) ([39a029c6](https://github.com/CloudPirates-io/helm-charts/commit/39a029c6))
+
 ## [0.14.7] - 2026-04-02
 
 - [mongo] Update image.repository to eea8506 (#1200) ([15467853](https://github.com/CloudPirates-io/helm-charts/commit/15467853))

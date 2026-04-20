@@ -24,7 +24,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.5.6@sha256:8d44614c74798322c4e07fbe0ecb15cfbb5879d69b484628555f58ade06f0d8c"
+  tag: "26.6.1@sha256:26ae26445475f7fac5f90ee138b1bdb64324f5815fb16133ffdbdb122d97c4d8"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -82,6 +82,9 @@ extraContainers: []
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
@@ -496,17 +499,17 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.3@sha256:a9abf4275f9e99bff8e6aed712b3b7dfec9cac1341bba01c1ffdfce9ff9fc34a"
+    tag: "18.3@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
-    resources:
-      limits:
-        cpu: 100m
-        memory: 64Mi
-      requests:
-        cpu: 100m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 32Mi
   waitForMariadb:
     ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
     image: ""
@@ -515,17 +518,17 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.2.2@sha256:e16f61b8f6ed25111adbb1c5c19bbc2904efc8ed14029999af0cbe1c7ae18bf1"
+    tag: "12.2.2@sha256:e0236fc6386e7eacd9359e59d0a078bd7aa0d18280d36d13061121bedeaee903"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container
-    resources:
-      limits:
-        cpu: 100m
-        memory: 64Mi
-      requests:
-        cpu: 100m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 32Mi
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
 ## @descriptionStart

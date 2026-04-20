@@ -277,19 +277,13 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.extraVolumeMounts`         | Additional volume mounts to add to the Sentinel container                           | `[]`                                                                                         |
 | `sentinel.service.type`              | Kubernetes service type for Sentinel                                                | `ClusterIP`                                                                                  |
 | `sentinel.service.port`              | Sentinel service port                                                               | `26379`                                                                                      |
-| `sentinel.resources.limits.memory`   | Memory limit for Sentinel container                                                 | `128Mi`                                                                                      |
-| `sentinel.resources.limits.cpu`      | CPU limit for Sentinel container                                                    | Not set                                                                                      |
-| `sentinel.resources.requests.cpu`    | CPU request for Sentinel container                                                  | `25m`                                                                                        |
-| `sentinel.resources.requests.memory` | Memory request for Sentinel container                                               | `64Mi`                                                                                       |
+| `sentinel.resources`                 | Resource limits and requests for Sentinel container                                 | `{}`                                                                                         |
 
 ### Init Container Configuration
 
-| Parameter                                 | Description                       | Default |
-| ----------------------------------------- | --------------------------------- | ------- |
-| `initContainer.resources.limits.cpu`      | CPU limit for init container      | `50m`   |
-| `initContainer.resources.limits.memory`   | Memory limit for init container   | `128Mi` |
-| `initContainer.resources.requests.cpu`    | CPU request for init container    | `25m`   |
-| `initContainer.resources.requests.memory` | Memory request for init container | `64Mi`  |
+| Parameter                 | Description                                            | Default |
+| ------------------------- | ------------------------------------------------------ | ------- |
+| `initContainer.resources` | Resource limits and requests for Valkey init container | `{}`    |
 
 ### Additional Configuration
 

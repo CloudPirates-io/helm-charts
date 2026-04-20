@@ -229,10 +229,7 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter` |
 | `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
-| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                      |
-| `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                     |
-| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                     | `nil`                      |
-| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                  | `64Mi`                     |
+| `metrics.resources`                        | Resource limits and requests for metrics container                                      | `{}`                       |
 | `metrics.extraArgs`                        | Extra arguments for Redis exporter (e.g. `--redis.addr`, `--web.listen-address`)        | `[]`                       |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
@@ -283,11 +280,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Resource Management
 
-| Parameter                   | Description    | Default |
-| --------------------------- | -------------- | ------- |
-| `resources.limits.memory`   | Memory limit   | `256Mi` |
-| `resources.requests.cpu`    | CPU request    | `50m`   |
-| `resources.requests.memory` | Memory request | `128Mi` |
+| Parameter   | Description                                | Default |
+| ----------- | ------------------------------------------ | ------- |
+| `resources` | Resource limits and requests for Redis pod | `{}`    |
 
 ### Pod Assignment / Eviction
 
@@ -359,9 +354,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.port`                               | Sentinel port                                                                                 | `26379`     |
 | `sentinel.service.type`                       | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
 | `sentinel.service.port`                       | Sentinel service port                                                                         | `26379`     |
-| `sentinel.resources.limits.memory`            | Memory limit for Sentinel pods                                                                | `128Mi`     |
-| `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
-| `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
+| `sentinel.resources`                          | Resource limits and requests for Sentinel pods                                                | `{}`        |
 | `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
 | `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
 | `sentinel.preStop.enabled`                    | Enable preStop hook for Sentinel container (waits for failover before terminating)            | `true`      |
@@ -411,9 +404,6 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | Parameter                                  | Description                                      | Default |
 | ------------------------------------------ | ------------------------------------------------ | ------- |
 | `clusterInitJob.resources`                 | Resource limits and requests for clusterInit Job | `{}`    |
-| `clusterInitJob.resources.limits.memory`   | Memory limit for clusterInit Job                 | `128Mi` |
-| `clusterInitJob.resources.requests.cpu`    | CPU request for clusterInit Job                  | `10m`   |
-| `clusterInitJob.resources.requests.memory` | Memory request for clusterInit Job               | `64Mi`  |
 
 #### Extra Objects
 

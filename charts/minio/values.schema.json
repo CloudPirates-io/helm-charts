@@ -46,6 +46,9 @@
                 "podAnnotations": {
                     "type": "object"
                 },
+                "podLabels": {
+                    "type": "object"
+                },
                 "resources": {
                     "type": "object"
                 },
@@ -467,14 +470,6 @@
                 },
                 "fsGroupChangePolicy": {
                     "type": "string"
-                }
-            }
-        },
-        "postJob": {
-            "type": "object",
-            "properties": {
-                "annotations": {
-                    "type": "object"
                 }
             }
         },
