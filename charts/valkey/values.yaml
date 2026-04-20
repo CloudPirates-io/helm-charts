@@ -225,12 +225,12 @@ gatewayAPI:
               value: /
 
 ## @section Resources
-resources:
-  limits:
-    memory: 64Mi
-  requests:
-    cpu: 10m
-    memory: 64Mi
+resources: {}
+  # limits:
+  #   memory: 64Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 64Mi
 
 ## @section Persistence
 persistence:
@@ -410,19 +410,19 @@ sentinel:
     ## @param sentinel.service.port Sentinel service port
     port: 26379
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
