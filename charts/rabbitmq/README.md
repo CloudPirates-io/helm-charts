@@ -164,7 +164,7 @@ The chart supports automatic reloading of definitions when the ConfigMap or Secr
 | `definitions.autoReload.image.repository` | Container image repository for the config watcher sidecar      | `curlimages/curl` |
 | `definitions.autoReload.image.tag`        | Container image tag for the config watcher sidecar             | `8.11.1`          |
 | `definitions.autoReload.image.pullPolicy` | Container image pull policy for the config watcher sidecar     | `IfNotPresent`    |
-| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | See values.yaml   |
+| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | `{}`              |
 
 **How it works:**
 

@@ -127,10 +127,9 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Resources Parameters
 
-| Parameter            | Description                                          | Default                        |
-| -------------------- | ---------------------------------------------------- | ------------------------------ |
-| `resources.limits`   | The resources limits for the Memcached containers    | `{memory: "128Mi"}`            |
-| `resources.requests` | The requested resources for the Memcached containers | `{cpu: "50m", memory: "64Mi"}` |
+| Parameter   | Description                                   | Default |
+| ----------- | --------------------------------------------- | ------- |
+| `resources` | Resource limits and requests for Memcached pod | `{}`    |
 
 ### Health Check Parameters
 
@@ -247,10 +246,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.image.repository`                 | Memcached exporter image repository                                                    | `prom/memcached-exporter` |
 | `metrics.image.tag`                        | Memcached exporter image tag                                                           | `v0.15.4@sha256...`       |
 | `metrics.image.pullPolicy`                 | Memcached exporter image pull policy                                                   | `Always`                  |
-| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                  | `50m`                     |
-| `metrics.resources.requests.memory`        | Memory request for the metrics container                                               | `64Mi`                    |
-| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                    | `nil`                     |
-| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                 | `64Mi`                    |
+| `metrics.resources`                        | Resource limits and requests for metrics container                                     | `{}`                      |
 | `metrics.extraArgs`                        | Extra arguments for Memcached exporter (e.g. `--log.level=debug`, `--log.format=json`) | `[]`                      |
 | `metrics.service.type`                     | Metrics service type                                                                   | `ClusterIP`               |
 | `metrics.service.port`                     | Metrics service port                                                                   | `9150`                    |

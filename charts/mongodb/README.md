@@ -202,7 +202,7 @@ customUsers:
 
 | Parameter      | Description                                  | Default                                                        |
 | -------------- | -------------------------------------------- | -------------------------------------------------------------- |
-| `resources`    | Resource limits and requests for MongoDB pod | `limits: {memory: 512Mi}, requests: {cpu: 50m, memory: 512Mi}` |
+| `resources`    | Resource limits and requests for MongoDB pod | `{}`                                                           |
 | `nodeSelector` | Node selector for pod assignment             | `{}`                                                           |
 | `tolerations`  | Tolerations for pod assignment               | `[]`                                                           |
 | `affinity`     | Affinity rules for pod assignment            | `{}`                                                           |
@@ -266,7 +266,7 @@ customUsers:
 | `metrics.image.repository`         | MongoDB Exporter image repository                                   | `percona/mongodb_exporter`                                                                                                           |
 | `metrics.image.tag`                | MongoDB Exporter image tag                                          | `0.47.2`                                                                                                                             |
 | `metrics.image.pullPolicy`         | MongoDB Exporter image pull policy                                  | `IfNotPresent`                                                                                                                       |
-| `metrics.resources`                | Resource limits and requests for metrics container                  | `limits: { memory: 256Mi }, requests: { cpu: 10m, memory: 64Mi }`                                                                    |
+| `metrics.resources`                | Resource limits and requests for metrics container                  | `{}`                                                                                                                                 |
 | `metrics.containerSecurityContext` | Security context for metrics container                              | `runAsUser: 65534, runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] }` |
 
 ### Metrics Service Parameters
@@ -424,7 +424,7 @@ For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead
 | `shardedCluster.configsvr.replicaCount`                                | Number of config server replicas (minimum 1, recommended 3 for production)                                   | `3`             |
 | `shardedCluster.configsvr.enableConfigShard`                           | Enable config shard mode (MongoDB 8.0+): config servers also store user data via `transitionFromDedicatedConfigServer` | `false` |
 | `shardedCluster.configsvr.priorityClassName`                           | Priority class name for config server pods                                                                   | `""`            |
-| `shardedCluster.configsvr.resources`                                   | Resource limits and requests for config server pods                                                          | `limits: {memory: 512Mi}, requests: {cpu: 100m, memory: 512Mi}` |
+| `shardedCluster.configsvr.resources`                                   | Resource limits and requests for config server pods                                                          | `{}`            |
 | `shardedCluster.configsvr.nodeSelector`                                | Node selector for config server pods                                                                         | `{}`            |
 | `shardedCluster.configsvr.tolerations`                                 | Tolerations for config server pods                                                                           | `[]`            |
 | `shardedCluster.configsvr.affinity`                                    | Affinity rules for config server pods                                                                        | `{}`            |
@@ -440,7 +440,7 @@ For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead
 | ------------------------------------------ | -------------------------------------------------------------------------------------- | --------------- |
 | `shardedCluster.mongos.replicaCount`       | Number of mongos router instances (minimum 1, recommended 2+ for production)          | `2`             |
 | `shardedCluster.mongos.priorityClassName`  | Priority class name for mongos router pods                                             | `""`            |
-| `shardedCluster.mongos.resources`          | Resource limits and requests for mongos router pods                                    | `limits: {memory: 256Mi}, requests: {cpu: 50m, memory: 256Mi}` |
+| `shardedCluster.mongos.resources`          | Resource limits and requests for mongos router pods                                    | `{}`            |
 | `shardedCluster.mongos.nodeSelector`       | Node selector for mongos router pods                                                   | `{}`            |
 | `shardedCluster.mongos.tolerations`        | Tolerations for mongos router pods                                                     | `[]`            |
 | `shardedCluster.mongos.affinity`           | Affinity rules for mongos router pods                                                  | `{}`            |
@@ -463,7 +463,7 @@ For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead
 | `shardedCluster.shardsvr.customInit`                                        | Custom shell commands run during shard initialisation (executed on each data node pod)                           | `""`            |
 | `shardedCluster.shardsvr.dataNode.replicaCount`                             | Number of data node replicas per shard (minimum 1, recommended 3 for production)                                 | `3`             |
 | `shardedCluster.shardsvr.dataNode.priorityClassName`                        | Priority class name for shard data node pods                                                                     | `""`            |
-| `shardedCluster.shardsvr.dataNode.resources`                                | Resource limits and requests for shard data node pods                                                            | `limits: {memory: 1Gi}, requests: {cpu: 100m, memory: 1Gi}` |
+| `shardedCluster.shardsvr.dataNode.resources`                                | Resource limits and requests for shard data node pods                                                            | `{}`            |
 | `shardedCluster.shardsvr.dataNode.nodeSelector`                             | Node selector for shard data node pods (overrides `shardsvr.nodeSelector`)                                       | `{}`            |
 | `shardedCluster.shardsvr.dataNode.tolerations`                              | Tolerations for shard data node pods (overrides `shardsvr.tolerations`)                                          | `[]`            |
 | `shardedCluster.shardsvr.dataNode.affinity`                                 | Affinity rules for shard data node pods (overrides `shardsvr.affinity`)                                          | `{}`            |
@@ -477,7 +477,7 @@ For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead
 | ------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------- |
 | `shardedCluster.shardsvr.arbiter.replicaCount`          | Number of arbiter replicas per shard (0 to disable, recommended 0)                 | `0`             |
 | `shardedCluster.shardsvr.arbiter.priorityClassName`     | Priority class name for arbiter pods                                               | `""`            |
-| `shardedCluster.shardsvr.arbiter.resources`             | Resource limits and requests for arbiter pods                                      | `limits: {memory: 256Mi}, requests: {cpu: 50m, memory: 256Mi}` |
+| `shardedCluster.shardsvr.arbiter.resources`             | Resource limits and requests for arbiter pods                                      | `{}`            |
 | `shardedCluster.shardsvr.arbiter.nodeSelector`          | Node selector for arbiter pods (overrides `shardsvr.nodeSelector`)                 | `{}`            |
 | `shardedCluster.shardsvr.arbiter.tolerations`           | Tolerations for arbiter pods (overrides `shardsvr.tolerations`)                    | `[]`            |
 | `shardedCluster.shardsvr.arbiter.affinity`              | Affinity rules for arbiter pods (overrides `shardsvr.affinity`)                    | `{}`            |
