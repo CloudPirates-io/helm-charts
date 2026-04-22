@@ -196,12 +196,15 @@ jobs:
             echo "Generating ArtifactHub annotation for $CHART_NAME ($COMMIT_RANGE)"
 
             # Generate changes YAML from commit messages
+            # Uses yaml.safe_dump to properly escape special characters
+            # in commit descriptions (fixes ArtifactHub parse errors).
             CHANGES_YAML=$(git log --pretty=format:"%s" "$COMMIT_RANGE" -- "$CHART_DIR/" | \
               grep -v "^Merge " | grep -v "^chore: update CHANGELOG" | \
-              python3 -c "
-          import sys, re
+              REPO_URL="$REPO_URL" python3 -c "
+          import os, sys, re, yaml
           kinds = {'feat': 'added', 'fix': 'fixed', 'chore': 'changed', 'refactor': 'changed', 'docs': 'changed', 'sec': 'security'}
-          lines = []
+          repo_url = os.environ['REPO_URL']
+          changes = []
           for msg in sys.stdin:
               msg = msg.strip()
               if not msg:
@@ -209,12 +212,13 @@ jobs:
               m = re.match(r'^(\w+)(?:\([^)]*\))?!?:\s*(.+)', msg)
               kind = kinds.get(m.group(1), 'changed') if m else 'changed'
               desc = m.group(2) if m else msg
+              entry = {'kind': kind, 'description': desc}
               pr = re.search(r'\(#(\d+)\)', desc)
-              links = ''
               if pr:
-                  links = f'\n    links:\n      - name: \"Pull Request\"\n        url: \"$REPO_URL/pull/{pr.group(1)}\"'
-              lines.append(f'- kind: {kind}\n  description: \"{desc}\"{links}')
-          print('\n'.join(lines))
+                  entry['links'] = [{'name': 'Pull Request', 'url': f'{repo_url}/pull/{pr.group(1)}'}]
+              changes.append(entry)
+          if changes:
+              print(yaml.safe_dump(changes, default_flow_style=False, allow_unicode=True, sort_keys=False).rstrip())
           ")
 
             if [ -n "$CHANGES_YAML" ]; then
