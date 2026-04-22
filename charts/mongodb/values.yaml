@@ -138,12 +138,12 @@ persistence:
   persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
-resources:
-  limits:
-    memory: 512Mi
-  requests:
-    cpu: 50m
-    memory: 512Mi
+resources: {}
+  # limits:
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 512Mi
 
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
@@ -278,12 +278,12 @@ metrics:
     tag: "musl"
     pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 256Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
   ## @param metrics.containerSecurityContext Security context for metrics container
   containerSecurityContext:
     runAsUser: 65534
@@ -557,12 +557,12 @@ shardedCluster:
     ## @param shardedCluster.configsvr.priorityClassName Priority class name for config server pods
     priorityClassName: ""
     ## @param shardedCluster.configsvr.resources Resource limits and requests for config server pods
-    resources:
-      limits:
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 512Mi
+    resources: {}
+      # limits:
+      #   memory: 512Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 512Mi
     ## @param shardedCluster.configsvr.nodeSelector Node selector for config server pods
     nodeSelector: {}
     ## @param shardedCluster.configsvr.tolerations Tolerations for config server pods
@@ -592,12 +592,12 @@ shardedCluster:
     ## @param shardedCluster.mongos.priorityClassName Priority class name for mongos router pods
     priorityClassName: ""
     ## @param shardedCluster.mongos.resources Resource limits and requests for mongos router pods
-    resources:
-      limits:
-        memory: 256Mi
-      requests:
-        cpu: 50m
-        memory: 256Mi
+    resources: {}
+      # limits:
+      #   memory: 256Mi
+      # requests:
+      #   cpu: 50m
+      #   memory: 256Mi
     ## @param shardedCluster.mongos.nodeSelector Node selector for mongos router pods
     nodeSelector: {}
     ## @param shardedCluster.mongos.tolerations Tolerations for mongos router pods
@@ -652,12 +652,12 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.dataNode.priorityClassName Priority class name for shard data node pods
       priorityClassName: ""
       ## @param shardedCluster.shardsvr.dataNode.resources Resource limits and requests for shard data node pods
-      resources:
-        limits:
-          memory: 1Gi
-        requests:
-          cpu: 100m
-          memory: 1Gi
+      resources: {}
+        # limits:
+        #   memory: 1Gi
+        # requests:
+        #   cpu: 100m
+        #   memory: 1Gi
       ## @param shardedCluster.shardsvr.dataNode.nodeSelector Node selector for shard data node pods (overrides shardsvr.nodeSelector)
       nodeSelector: {}
       ## @param shardedCluster.shardsvr.dataNode.tolerations Tolerations for shard data node pods (overrides shardsvr.tolerations)
@@ -675,12 +675,12 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.arbiter.priorityClassName Priority class name for arbiter pods
       priorityClassName: ""
       ## @param shardedCluster.shardsvr.arbiter.resources Resource limits and requests for arbiter pods
-      resources:
-        limits:
-          memory: 256Mi
-        requests:
-          cpu: 50m
-          memory: 256Mi
+      resources: {}
+        # limits:
+        #   memory: 256Mi
+        # requests:
+        #   cpu: 50m
+        #   memory: 256Mi
       ## @param shardedCluster.shardsvr.arbiter.nodeSelector Node selector for arbiter pods (overrides shardsvr.nodeSelector)
       nodeSelector: {}
       ## @param shardedCluster.shardsvr.arbiter.tolerations Tolerations for arbiter pods (overrides shardsvr.tolerations)

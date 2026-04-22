@@ -32,12 +32,12 @@ image:
 
 deployment:
   # Pod resource limits and requests
-  resources:
-    limits:
-      memory: 256Mi
-    requests:
-      memory: 256Mi
-      cpu: 10m
+  resources: {}
+    # limits:
+    #   memory: 256Mi
+    # requests:
+    #   memory: 256Mi
+    #   cpu: 10m
 
   # Additional environment variables (optional)
   # Example:
