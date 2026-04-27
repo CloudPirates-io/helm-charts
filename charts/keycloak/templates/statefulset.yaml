@@ -399,7 +399,7 @@ spec:
     - metadata:
         name: data
         labels:
-          {{- include "keycloak.labels" . | nindent 10 }}
+          {{- include "keycloak.selectorLabels" . | nindent 10 }}
         {{- $annotations := merge .Values.persistence.annotations .Values.commonAnnotations }}
         {{- with $annotations }}
         annotations:
