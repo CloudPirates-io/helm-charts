@@ -122,6 +122,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.admin.serverAddress`       | Admin server address                                | `0.0.0.0`   |
 | `zookeeperConfig.admin.idleTimeout`         | Admin server connection idle timeout (milliseconds) | `30000`     |
 | `zookeeperConfig.admin.commandUrl`          | Admin server command URL                            | `/commands` |
+| `zookeeperConfig.extraConfigs`              | Extra ZooKeeper configuration lines appended to zoo.cfg | `[]`    |
 
 ### Metrics
 
@@ -149,6 +150,7 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
+| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |
