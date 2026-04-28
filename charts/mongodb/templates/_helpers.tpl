@@ -150,7 +150,7 @@ Return ServiceMonitor labels
 Additional helper functions needed for sharded cluster
 */}}
 {{- define "mongodb.metricsSecretPasswordKey" -}}
-{{- if and .Values.metrics.username .Values.metrics.enabled }}
+{{- if and .Values.metrics.username .Values.metrics.enabled -}}
 mongodb-metrics-password
 {{- else }}
 {{- include "mongodb.secretPasswordKey" . -}}

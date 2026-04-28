@@ -26,7 +26,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.7-alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1"
+  tag: "1.30.0-alpine@sha256:0272e4604ed93c1792f03695a033a6e8546840f86e0de20a884bb17d2c924883"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -313,12 +313,12 @@ metrics:
     tag: "1.5@sha256:bf76e58df548a13e52bd543ac70f6d3d667e14884e8b51c149bd81994ca75ccd"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for nginx exporter, for example:
   ## extraArgs:
   ##   - --log.level=info

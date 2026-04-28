@@ -19,7 +19,7 @@ spec:
   type: {{ .Values.metrics.service.type }}
   ports:
     - port: {{ .Values.metrics.service.port }}
-      targetPort: {{ .Values.metrics.service.targetPort }}
+      targetPort: {{ if eq (int .Values.metrics.service.port) (int .Values.keycloak.managementPort) }}management{{ else }}{{ .Values.metrics.service.targetPort }}{{ end }}
       protocol: TCP
       name: {{ .Values.metrics.service.targetPort }}
   selector:

@@ -2,6 +2,9 @@ name: "Generate values.schema.json"
 
 on:
   pull_request_target:
+    types:
+      - opened
+      - reopened
     paths:
       - 'charts/**/values.yaml'
   workflow_dispatch:
@@ -21,7 +24,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'external' || '' }}
+    steps:
+      - run: true
+
   generate-schema:
+    needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Skip if the commit was made by github-actions bot to prevent infinite loops

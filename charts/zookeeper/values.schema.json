@@ -325,6 +325,9 @@
                         },
                         "quorum": {
                             "type": "integer"
+                        },
+                        "secureClient": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -400,13 +403,13 @@
                     "type": "string"
                 },
                 "customServers": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "array"
                 },
                 "electionPortBindRetry": {
                     "type": "integer"
+                },
+                "extraConfigs": {
+                    "type": "array"
                 },
                 "initLimit": {
                     "type": "integer"
