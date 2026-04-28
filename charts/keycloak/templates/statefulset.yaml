@@ -161,7 +161,7 @@ spec:
             - name: KC_HTTPS_TRUST_STORE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.tls.truststoreExistingSecret | default (include "keycloak.fullname" .) }}
+                  name: {{ include "keycloak.truststoreSecretName" . }}
                   key: {{ .Values.tls.truststoreExistingSecretKey }}
             {{- end }}
             {{- if .Values.database.type }}
@@ -367,10 +367,10 @@ spec:
         {{- if .Values.tls.truststoreEnabled }}
         - name: tls-truststore
           secret:
-            secretName: {{ .Values.tls.truststoreExistingSecret }}
+            secretName: {{ include "keycloak.truststoreSecretName" . }}
             items:
-              - key: truststore.jks
-                path: truststore.jks
+              - key: {{ .Values.tls.truststoreExistingSecretKey }}
+                path: {{ .Values.tls.truststoreExistingSecretKey }}
         {{- end }}
         {{- if .Values.extraVolumes }}
           {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
