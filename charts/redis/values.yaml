@@ -456,6 +456,8 @@ sentinel:
       # requests:
       #   cpu: 10m
       #   memory: 32Mi
+    ## @param sentinel.masterService.verbose Enable verbose logging for master discovery
+    verbose: false
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
