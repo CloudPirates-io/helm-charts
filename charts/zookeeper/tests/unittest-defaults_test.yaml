@@ -45,6 +45,21 @@ tests:
           path: data["zoo.cfg"]
           pattern: "tickTime=2000"
 
+  - it: should append extraConfigs to zoo.cfg
+    template: configmap.yaml
+    set:
+      zookeeperConfig:
+        extraConfigs:
+          - "secureClientPort=2281"
+          - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
+    asserts:
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort=2281"
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "authProvider\.sasl=org\.apache\.zookeeper\.server\.auth\.SASLAuthenticationProvider"
+
   - it: should create volumeClaimTemplates by default (persistence enabled)
     template: statefulset.yaml
     asserts:

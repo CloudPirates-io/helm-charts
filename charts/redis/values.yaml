@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.6.2@sha256:1f073813b641755b70b0200da64131bbeeb4ec5b633ca67772229b49820caafa"
+  tag: "8.6.2@sha256:832d7785830f3f4b559300e6191fc914b15642c1935252338825cf4332200148"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -456,6 +456,8 @@ sentinel:
       # requests:
       #   cpu: 10m
       #   memory: 32Mi
+    ## @param sentinel.masterService.verbose Enable verbose logging for master discovery
+    verbose: false
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe

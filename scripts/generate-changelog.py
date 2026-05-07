@@ -12,9 +12,11 @@ Generates scoped CHANGELOG.md files for each chart by:
 Adapted from https://github.com/ixxeL-DevOps/gha-templates/blob/main/changelog.py
 """
 
+import json
 import os
 import re
 import sys
+import urllib.request
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -166,14 +168,55 @@ def classify_commit(message: str, groups: list[dict]) -> Optional[str]:
     return None
 
 
-def format_author(name: str, email: str, repo_url: str) -> str:
+_github_username_cache: dict[str, Optional[str]] = {}
+
+
+def _resolve_github_username(sha: str, repo_url: str) -> Optional[str]:
+    """Resolve a commit SHA to a GitHub username via the commits API.
+
+    Uses GET /repos/{owner}/{repo}/commits/{sha} which returns
+    .author.login even when the committer uses a private email.
+    """
+    if sha in _github_username_cache:
+        return _github_username_cache[sha]
+
+    # Extract owner/repo from repo_url (e.g. https://github.com/Org/repo)
+    match = re.match(r"https?://github\.com/([^/]+/[^/]+)", repo_url)
+    if not match:
+        _github_username_cache[sha] = None
+        return None
+
+    owner_repo = match.group(1)
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+
+    try:
+        req = urllib.request.Request(
+            f"https://api.github.com/repos/{owner_repo}/commits/{sha}",
+            headers={
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                **({"Authorization": f"Bearer {token}"} if token else {}),
+            },
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read())
+            login = data.get("author", {}).get("login") if data.get("author") else None
+            _github_username_cache[sha] = login
+            return login
+    except Exception:
+        _github_username_cache[sha] = None
+        return None
+
+
+def format_author(name: str, email: str, repo_url: str, sha: str = "") -> str:
     """Format author as a GitHub-linkable mention.
 
     Resolution order:
     1. GitHub noreply email → extract username → @username
     2. Bot accounts → @name[bot]
     3. No spaces in name → assume username → @username
-    4. Fallback → link to GitHub commits by author email
+    4. GitHub API lookup by commit SHA → @username
+    5. Fallback → plain name (no broken link)
     """
     # GitHub noreply pattern: username@users.noreply.github.com
     # or: 12345+username@users.noreply.github.com
@@ -189,8 +232,14 @@ def format_author(name: str, email: str, repo_url: str) -> str:
     if " " not in name:
         return f"@{name}"
 
-    # Fallback: link to commits by this author in the repo
-    return f"[{name}]({repo_url}/commits?author={email})"
+    # Resolve via GitHub API using commit SHA
+    if sha:
+        login = _resolve_github_username(sha, repo_url)
+        if login:
+            return f"@{login}"
+
+    # Fallback: plain name (avoids generating broken links)
+    return name
 
 
 def format_commit_message(commit: git.Commit, repo_url: str) -> str:
@@ -207,7 +256,7 @@ def format_commit_message(commit: git.Commit, repo_url: str) -> str:
             msg,
         )
 
-    author = format_author(commit.author.name, commit.author.email, repo_url)
+    author = format_author(commit.author.name, commit.author.email, repo_url, sha=commit.hexsha)
 
     return f"- {msg} ([{sha_short}]({repo_url}/commit/{commit.hexsha})) — {author}"
 

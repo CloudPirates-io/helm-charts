@@ -16,6 +16,7 @@ data:
     initLimit={{ .Values.zookeeperConfig.initLimit | default 10 }}
     syncLimit={{ .Values.zookeeperConfig.syncLimit | default 5 }}
     clientPort={{ .Values.service.ports.client | default 2181 }}
+    secureClientPort={{ .Values.service.ports.secureClient | default 2281 }}
     electionPortBindRetry={{ .Values.zookeeperConfig.electionPortBindRetry | default 10 }}
     maxClientCnxns={{ .Values.zookeeperConfig.maxClientCnxns | default 60 }}
     #standaloneEnabled={{ .Values.zookeeperConfig.standaloneEnabled | default "false" }}
@@ -35,6 +36,9 @@ data:
     metricsProvider.httpHost=0.0.0.0
     metricsProvider.httpPort={{ .Values.metrics.service.port | default 7000 }}
     metricsProvider.exportJvmInfo=true
+    {{- end }}
+    {{- range .Values.zookeeperConfig.extraConfigs }}
+    {{ . }}
     {{- end }}
     {{- /* Add a line for each server in the ensemble */}}
     {{- include "zookeeper.servers" . | nindent 4 }}
