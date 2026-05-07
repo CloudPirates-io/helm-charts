@@ -88,18 +88,19 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Common Parameters
 
-| Parameter                            | Description                                                                             | Default |
-| ------------------------------------ | --------------------------------------------------------------------------------------- | ------- |
-| `nameOverride`                       | String to partially override fullname                                                   | `""`    |
-| `fullnameOverride`                   | String to fully override fullname                                                       | `""`    |
-| `commonLabels`                       | Labels to add to all deployed objects                                                   | `{}`    |
-| `commonAnnotations`                  | Annotations to add to all deployed objects                                              | `{}`    |
-| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                  | `3`     |
-| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions | `true`  |
-| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `networkPolicy.enabled`              | Enable network policies                                                                 | `true`  |
-| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]` |
+| Parameter                            | Description                                                                                  | Default |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- | ------- |
+| `nameOverride`                       | String to partially override fullname                                                        | `""`    |
+| `fullnameOverride`                   | String to fully override fullname                                                            | `""`    |
+| `namespaceOverride`                  | String to override the namespace for all resources                                           | `""`    |
+| `commonLabels`                       | Labels to add to all deployed objects                                                        | `{}`    |
+| `commonAnnotations`                  | Annotations to add to all deployed objects                                                   | `{}`    |
+| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                       | `3`     |
+| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions      | `true`  |
+| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `networkPolicy.enabled`              | Enable network policies                                                                      | `true`  |
+| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]`    |
 
 ### ZooKeeper Configuration
 
@@ -113,6 +114,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.standaloneEnabled`         | Enable standalone mode                              | `"false"`   |
 | `zookeeperConfig.adminServerEnabled`        | Enable admin server                                 | `"false"`   |
 | `zookeeperConfig.commandsWhitelist`         | 4-letter word commands whitelist                    | `srvr`      |
+| `zookeeperConfig.customServers`             | Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values | `[]`        |
 | `zookeeperConfig.autopurge.purgeInterval`   | Autopurge purge interval (hours)                    | `24`        |
 | `zookeeperConfig.autopurge.snapRetainCount` | Autopurge snapshot retain count                     | `3`         |
 | `zookeeperConfig.admin.enableServer`        | Enable the admin server                             | `"false"`   |
@@ -120,6 +122,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.admin.serverAddress`       | Admin server address                                | `0.0.0.0`   |
 | `zookeeperConfig.admin.idleTimeout`         | Admin server connection idle timeout (milliseconds) | `30000`     |
 | `zookeeperConfig.admin.commandUrl`          | Admin server command URL                            | `/commands` |
+| `zookeeperConfig.extraConfigs`              | Extra ZooKeeper configuration lines appended to zoo.cfg | `[]`    |
 
 ### Metrics
 
@@ -147,6 +150,7 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
+| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |

@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override memcached.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -28,7 +30,7 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.41@sha256:27db90ca1d538b8bb8dae861fac9a44b3857c54bd1b3a3bd809a45a7744eaae2"
+  tag: "1.6.41@sha256:277e0c4f249b118e95ab10e535bae2fa1af772271d9152f3468e58d59348db56"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
@@ -230,12 +232,12 @@ metrics:
     tag: "v0.15.5@sha256:92a6ad5a3d3e2dffc75efd4e18d1470fa5703dd79b6bace53fe11312b634578e"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for Memcached exporter, for example:
   ## extraArgs:
   ##   - --log.level=debug

@@ -118,12 +118,13 @@ The following table lists the configurable parameters of the Nginx chart and the
 
 ### Common Parameters
 
-| Parameter           | Description                                 | Default |
-| ------------------- | ------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override nginx.fullname | `""`    |
-| `fullnameOverride`  | String to fully override nginx.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override nginx.fullname        | `""`    |
+| `fullnameOverride`  | String to fully override nginx.fullname            | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 
 ### Nginx Image Parameters
@@ -205,6 +206,7 @@ containerPorts:
 | `service.type`                  | Nginx service type                                             | `ClusterIP` |
 | `service.ports`                 | Array of service ports (advanced configuration) - see examples | `[]`        |
 | `service.internalTrafficPolicy` | Kubernetes service internal traffic policy                     | `Cluster`   |
+| `service.trafficDistribution`   | Kubernetes service traffic distribution                        | `""`        |
 | `service.annotations`           | Additional annotations to add to the service                   | `{}`        |
 
 #### Service Ports Examples
@@ -317,9 +319,7 @@ readinessProbe:
 | `metrics.image.repository`                 | Nginx exporter image repository                                | `nginx/nginx-prometheus-exporter` |
 | `metrics.image.tag`                        | Nginx exporter image tag                                       | `"1.5@sha256:..."`                |
 | `metrics.image.pullPolicy`                 | Nginx exporter image pull policy                               | `Always`                          |
-| `metrics.resources.limits.memory`          | Memory limit for metrics container                             | `64Mi`                            |
-| `metrics.resources.requests.cpu`           | CPU request for metrics container                              | `50m`                             |
-| `metrics.resources.requests.memory`        | Memory request for metrics container                           | `64Mi`                            |
+| `metrics.resources`                        | Resource limits and requests for metrics container             | `{}`                              |
 | `metrics.extraArgs`                        | Extra arguments for nginx exporter                             | `[]`                              |
 | `metrics.service.type`                     | Metrics service type                                           | `ClusterIP`                       |
 | `metrics.service.port`                     | Metrics service port                                           | `9113`                            |

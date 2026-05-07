@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override ghost.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -24,7 +26,7 @@ image:
   ## @param image.repository Ghost image repository
   repository: ghost
   ## @param image.tag Ghost image tag
-  tag: "6.22.1@sha256:1582ff7d419839eea2d5d75867703a6344f0df818f1b31680fe68b2c77940ea7"
+  tag: "6.35.0@sha256:8e13245088912742b2ec78c539ed749fc79af7313b98e0e08318f4b44ed2cf71"
   ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 

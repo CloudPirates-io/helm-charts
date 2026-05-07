@@ -195,13 +195,14 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Common Parameters
 
-| Parameter           | Description                                 | Default |
-| ------------------- | ------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override ghost.fullname | `""`    |
-| `fullnameOverride`  | String to fully override ghost.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
-| `replicaCount`      | Number of Ghost replicas to deploy          | `1`     |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override ghost.fullname        | `""`    |
+| `fullnameOverride`  | String to fully override ghost.fullname            | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
+| `replicaCount`      | Number of Ghost replicas to deploy                 | `1`     |
 
 ### Image Parameters
 

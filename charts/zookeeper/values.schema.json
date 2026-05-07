@@ -188,6 +188,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "networkPolicy": {
             "type": "object",
             "properties": {
@@ -322,6 +325,9 @@
                         },
                         "quorum": {
                             "type": "integer"
+                        },
+                        "secureClient": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -396,8 +402,14 @@
                 "commandsWhitelist": {
                     "type": "string"
                 },
+                "customServers": {
+                    "type": "array"
+                },
                 "electionPortBindRetry": {
                     "type": "integer"
+                },
+                "extraConfigs": {
+                    "type": "array"
                 },
                 "initLimit": {
                     "type": "integer"

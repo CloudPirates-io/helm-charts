@@ -2,6 +2,14 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.8] - 2026-03-27
+
+- Add resource configuration for init containers (#1190) ([60393651](https://github.com/CloudPirates-io/helm-charts/commit/60393651))
+
+## [0.19.7] - 2026-03-20
+
+- Add tpl support for extra* fields to enable global.imageRegistry (#1173) ([551bcfe2](https://github.com/CloudPirates-io/helm-charts/commit/551bcfe2))
+
 ## [0.19.6] - 2026-03-20
 
 - [keycloak]: Make backend-protocol annotation always apply when HTTPS is enabled (#1172) ([cffac187](https://github.com/CloudPirates-io/helm-charts/commit/cffac187))
