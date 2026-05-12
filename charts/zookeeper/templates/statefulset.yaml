@@ -89,16 +89,24 @@ spec:
               exec /docker-entrypoint.sh zkServer.sh start-foreground
               {{- end }}
           livenessProbe:
+            {{- if .Values.livenessProbe.custom }}
+            {{- toYaml .Values.livenessProbe.custom | nindent 12 }}
+            {{- else }}
             tcpSocket:
               port: client
+            {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             successThreshold: {{ .Values.livenessProbe.successThreshold }}
           readinessProbe:
+            {{- if .Values.readinessProbe.custom }}
+            {{- toYaml .Values.readinessProbe.custom | nindent 12 }}
+            {{- else }}
             tcpSocket:
               port: client
+            {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}

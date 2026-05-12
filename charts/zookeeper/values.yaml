@@ -258,6 +258,8 @@ livenessProbe:
   failureThreshold: 6
   ## @param livenessProbe.successThreshold Success threshold for livenessProbe
   successThreshold: 1
+  ## @param livenessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 readinessProbe:
   ## @param readinessProbe.enabled Enable readinessProbe on zookeeper containers
@@ -272,6 +274,8 @@ readinessProbe:
   failureThreshold: 6
   ## @param readinessProbe.successThreshold Success threshold for readinessProbe
   successThreshold: 1
+  ## @param readinessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 
 startupProbe:

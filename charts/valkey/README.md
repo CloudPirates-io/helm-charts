@@ -231,6 +231,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `nodeSelector` | Node labels for pod assignment       | `{}`    |
 | `tolerations`  | Toleration labels for pod assignment | `[]`    |
 | `affinity`     | Affinity settings for pod assignment | `{}`    |
+| `hostAliases`  | Pod-level `hostAliases` entries (useful on IPv6-only clusters) | `[]` |
 
 ### Metrics configuration
 
