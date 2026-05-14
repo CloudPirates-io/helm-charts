@@ -35,7 +35,7 @@ spec:
   {{- if $hostnames }}
   hostnames:
     {{- range $hostnames }}
-    - {{ . | quote }}
+    - {{ tpl . $ | quote }}
     {{- end }}
   {{- end }}
   rules:

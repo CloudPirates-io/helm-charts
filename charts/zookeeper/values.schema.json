@@ -105,6 +105,9 @@
         "livenessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -262,6 +265,9 @@
         "readinessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -324,6 +330,9 @@
                             "type": "integer"
                         },
                         "quorum": {
+                            "type": "integer"
+                        },
+                        "secureClient": {
                             "type": "integer"
                         }
                     }
@@ -400,13 +409,13 @@
                     "type": "string"
                 },
                 "customServers": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "array"
                 },
                 "electionPortBindRetry": {
                     "type": "integer"
+                },
+                "extraConfigs": {
+                    "type": "array"
                 },
                 "initLimit": {
                     "type": "integer"

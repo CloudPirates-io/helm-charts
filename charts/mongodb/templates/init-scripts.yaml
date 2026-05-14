@@ -691,8 +691,7 @@ data:
 
       log_shard "Initializing shard $shardIndex replica set: $shardRsName"
 
-      # Check if shard replica set is already initialized
-      # Try without auth first (works for localhost exception or when RS is initialized without users)
+      # Check if shard replica set is already initialized (localhost exception works without auth)
       result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --quiet --eval "rs.status().ok" 2>/dev/null || echo "0")
       if [ "$result" = "1" ]; then
         log_shard "Shard $shardIndex replica set already initialized"
@@ -702,7 +701,9 @@ data:
       # Build shard members array (data nodes + arbiters)
       local members="[{{- range $i := until (int .Values.shardedCluster.shardsvr.dataNode.replicaCount) }}{{- if gt $i 0 }}, {{ end }}{_id:{{ $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\"}{{- end }}{{- if gt (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) 0 }}{{- range $i := until (int .Values.shardedCluster.shardsvr.arbiter.replicaCount) }}, {_id:{{ add (int $.Values.shardedCluster.shardsvr.dataNode.replicaCount) $i }}, host:\"{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${shardIndex}-arbiter-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.replicaSet.clusterDomain | default "cluster.local" }}:27017\", arbiterOnly:true}{{- end }}{{- end }}]"
 
-      # Initialize shard replica set using kubectl exec (localhost exception)
+      # Initialize shard replica set via the localhost exception — no credentials needed
+      # since mongod runs directly (not via docker-entrypoint.sh), so MONGO_INITDB_ROOT_*
+      # env vars never fire and no users exist yet at this point.
       kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --eval "
         rs.initiate({
           _id: '$shardRsName',
@@ -717,7 +718,6 @@ data:
       local retries=30
       local delay=1
       while [ $retries -gt 0 ]; do
-        # Try without auth (works after rs.initiate via localhost exception)
         result=$(kubectl exec {{ include "mongodb.fullname" . }}-shard-${shardIndex}-0 -n {{ include "cloudpirates.namespace" . }} -- mongosh --quiet --eval "rs.status().members.filter(m => m.state === 1).length" 2>/dev/null || echo "0")
         if [ "$result" = "1" ]; then
           log_shard "Shard $shardIndex replica set is ready"
@@ -923,6 +923,43 @@ data:
           ;;
       esac
       {{- end }}
+      {{- end }}
+
+      {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+      # Create metrics exporter user
+      log_shard "Creating metrics exporter user..."
+      result=$(mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "
+        try {
+          db.getSiblingDB('admin').createUser({
+            user: '$MONGO_METRICS_USERNAME',
+            pwd: '$MONGO_METRICS_PASSWORD',
+            roles: [
+              { role: 'clusterMonitor', db: 'admin' },
+              { role: 'readAnyDatabase', db: 'admin' },
+              { role: 'read', db: 'local' }
+            ]
+          });
+          print('METRICS_USER_CREATED');
+        } catch (e) {
+          if (e.code === 51003) {
+            print('METRICS_USER_EXISTS');
+          } else {
+            print('ERROR: ' + e.message);
+            throw e;
+          }
+        }
+      " 2>&1)
+      case "$result" in
+        *METRICS_USER_CREATED*)
+          log_shard "Metrics user created successfully"
+          ;;
+        *METRICS_USER_EXISTS*)
+          log_shard "Metrics user already exists"
+          ;;
+        *)
+          logErrorAndExitShard "Failed to create metrics user: $result" 1
+          ;;
+      esac
       {{- end }}
     }
 

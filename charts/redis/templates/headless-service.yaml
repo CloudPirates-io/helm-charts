@@ -25,7 +25,7 @@ spec:
   {{- if .Values.service.headless.ipFamilyPolicy }}
   ipFamilyPolicy: {{ .Values.service.headless.ipFamilyPolicy }}
   {{- end }}
-  {{- if or $useDeployment .Values.sentinel.enabled }}
+  {{- if or $useDeployment .Values.sentinel.enabled (eq .Values.architecture "cluster") }}
   publishNotReadyAddresses: true
   {{- end }}
   ports:

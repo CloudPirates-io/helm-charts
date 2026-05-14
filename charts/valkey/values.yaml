@@ -225,12 +225,12 @@ gatewayAPI:
               value: /
 
 ## @section Resources
-resources:
-  limits:
-    memory: 64Mi
-  requests:
-    cpu: 10m
-    memory: 64Mi
+resources: {}
+  # limits:
+  #   memory: 64Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 64Mi
 
 ## @section Persistence
 persistence:
@@ -303,6 +303,16 @@ tolerations: []
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
 
+## @param hostAliases Pod-level hostAliases (`spec.template.spec.hostAliases`).
+## Useful on IPv6-only clusters where BusyBox `hostname -i` cannot resolve the
+## pod's own name; injecting a loopback alias for each pod hostname makes the
+## init script tolerate `set -e`. Each entry is `{ ip, hostnames: [] }`.
+hostAliases: []
+  # - ip: "127.0.0.1"
+  #   hostnames:
+  #     - "valkey-0"
+  #     - "valkey-1"
+
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
   # - name: CUSTOM_VAR
@@ -333,7 +343,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
+    tag: "v1.83.0-alpine@sha256:7643b705adca0ef5c700cae28cfd8798c3d3b653ef17096084359d17b70ea5ca"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -410,19 +420,19 @@ sentinel:
     ## @param sentinel.service.port Sentinel service port
     port: 26379
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi

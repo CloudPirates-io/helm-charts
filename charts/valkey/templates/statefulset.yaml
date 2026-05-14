@@ -100,7 +100,10 @@ spec:
                 # Sentinel knows the master - configure accordingly
                 MY_HOSTNAME=$(hostname)
                 MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                MY_IP=$(hostname -i)
+                # `hostname -i` does AF_INET-only lookups in BusyBox/musl and exits
+                # non-zero on IPv6-only clusters; tolerate failure so `set -e`
+                # doesn't abort the script. The IP is one of three master checks.
+                MY_IP=$(hostname -i 2>/dev/null || echo "")
 
                 # Check if I am the master by hostname or IP
                 if [ "$MY_IP" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME_FQDN" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME" = "$CURRENT_MASTER" ]; then
@@ -399,7 +402,11 @@ spec:
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
-              # Get IP address based on ipFamily setting
+              {{- if not .Values.sentinel.config.announceHostnames }}
+              # Get IP address based on ipFamily setting.
+              # Only computed when announceHostnames is false; otherwise SENTINEL_IP is
+              # unused and `hostname -i` fails under `set -e` on IPv6-only clusters
+              # because BusyBox `hostname -i` does AF_INET-only lookups.
               {{- if eq .Values.ipFamily "ipv4" }}
               SENTINEL_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
               if [ -z "$SENTINEL_IP" ]; then
@@ -407,9 +414,9 @@ spec:
                 SENTINEL_IP=$(hostname -i | awk '{print $1}')
               fi
               {{- else if eq .Values.ipFamily "ipv6" }}
-              SENTINEL_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
+              SENTINEL_IP=$(getent ahostsv6 "$(hostname)" | awk '{print $1}' | head -1)
               if [ -z "$SENTINEL_IP" ]; then
-                echo "Warning: No IPv6 address found, falling back to first available IP"
+                echo "Warning: getent ahostsv6 returned no address, falling back to hostname -i"
                 SENTINEL_IP=$(hostname -i | awk '{print $1}')
               fi
               {{- else }}
@@ -417,6 +424,7 @@ spec:
               SENTINEL_IP=$(hostname -i | awk '{print $1}')
               {{- end }}
               echo "Sentinel using IP address: ${SENTINEL_IP}"
+              {{- end }}
 
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
@@ -586,6 +594,10 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hostAliases }}
+      hostAliases:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
