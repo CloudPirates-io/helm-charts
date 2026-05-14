@@ -29,6 +29,7 @@ spec:
     # Allow inbound connections to ZooKeeper
     - ports:
         - port: {{ .Values.service.ports.client | default 2181 }}
+        - port: {{ .Values.service.ports.secureClient | default 2281 }}
     # Allow internal communications between nodes
     - ports:
         - port: {{ .Values.service.ports.quorum | default 2888 }}

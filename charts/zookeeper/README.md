@@ -122,6 +122,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.admin.serverAddress`       | Admin server address                                | `0.0.0.0`   |
 | `zookeeperConfig.admin.idleTimeout`         | Admin server connection idle timeout (milliseconds) | `30000`     |
 | `zookeeperConfig.admin.commandUrl`          | Admin server command URL                            | `/commands` |
+| `zookeeperConfig.extraConfigs`              | Extra ZooKeeper configuration lines appended to zoo.cfg | `[]`    |
 
 ### Metrics
 
@@ -149,6 +150,7 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
+| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |
@@ -202,25 +204,27 @@ zkCli.sh -server my-zookeeper:2181
 
 #### Liveness Probe
 
-| Parameter                           | Description                     | Default |
-| ----------------------------------- | ------------------------------- | ------- |
-| `livenessProbe.enabled`             | Enable livenessProbe            | `true`  |
-| `livenessProbe.initialDelaySeconds` | LivenessProbe initial delay     | `30`    |
-| `livenessProbe.periodSeconds`       | LivenessProbe period seconds    | `10`    |
-| `livenessProbe.timeoutSeconds`      | LivenessProbe timeout seconds   | `5`     |
-| `livenessProbe.failureThreshold`    | LivenessProbe failure threshold | `6`     |
-| `livenessProbe.successThreshold`    | LivenessProbe success threshold | `1`     |
+| Parameter                           | Description                                                | Default |
+| ----------------------------------- | ---------------------------------------------------------- | ------- |
+| `livenessProbe.enabled`             | Enable livenessProbe                                       | `true`  |
+| `livenessProbe.initialDelaySeconds` | LivenessProbe initial delay                                | `30`    |
+| `livenessProbe.periodSeconds`       | LivenessProbe period seconds                               | `10`    |
+| `livenessProbe.timeoutSeconds`      | LivenessProbe timeout seconds                              | `5`     |
+| `livenessProbe.failureThreshold`    | LivenessProbe failure threshold                            | `6`     |
+| `livenessProbe.successThreshold`    | LivenessProbe success threshold                            | `1`     |
+| `livenessProbe.custom`              | Custom action handler; replaces default tcpSocket when set | `{}`    |
 
 #### Readiness Probe
 
-| Parameter                            | Description                      | Default |
-| ------------------------------------ | -------------------------------- | ------- |
-| `readinessProbe.enabled`             | Enable readinessProbe            | `true`  |
-| `readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay     | `5`     |
-| `readinessProbe.periodSeconds`       | ReadinessProbe period seconds    | `10`    |
-| `readinessProbe.timeoutSeconds`      | ReadinessProbe timeout seconds   | `5`     |
-| `readinessProbe.failureThreshold`    | ReadinessProbe failure threshold | `6`     |
-| `readinessProbe.successThreshold`    | ReadinessProbe success threshold | `1`     |
+| Parameter                            | Description                                                | Default |
+| ------------------------------------ | ---------------------------------------------------------- | ------- |
+| `readinessProbe.enabled`             | Enable readinessProbe                                      | `true`  |
+| `readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay                               | `5`     |
+| `readinessProbe.periodSeconds`       | ReadinessProbe period seconds                              | `10`    |
+| `readinessProbe.timeoutSeconds`      | ReadinessProbe timeout seconds                             | `5`     |
+| `readinessProbe.failureThreshold`    | ReadinessProbe failure threshold                           | `6`     |
+| `readinessProbe.successThreshold`    | ReadinessProbe success threshold                           | `1`     |
+| `readinessProbe.custom`              | Custom action handler; replaces default tcpSocket when set | `{}`    |
 
 #### Startup Probe
 

@@ -43,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:0598e33ed585128313125f9c36cce6c164f0f21224e4bb75ca5c30b34655a13e"
+  tag: "3.9.5@sha256:861113a4972110c2258ee3f62807c0eec33235ea3aa3d360da48211ce401e23d"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -108,6 +108,10 @@ zookeeperConfig:
     idleTimeout: 30000
     ## @param zookeeperConfig.admin.commandUrl Zookeeper Admin server command URL
     commandUrl: "/commands"
+  ## @param zookeeperConfig.extraConfigs Extra ZooKeeper configuration lines to append to zoo.cfg
+  extraConfigs: []
+  #  - "secureClientPort=2281"
+  #  - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
 
 
 ## @section Zookeeper Metrics configuration
@@ -184,6 +188,8 @@ service:
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
+    ## @param service.ports.secureClient Zookeeper secure client service port
+    secureClient: 2281
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
     ## @param service.ports.leaderElection Zookeeper leader election service port
@@ -252,6 +258,8 @@ livenessProbe:
   failureThreshold: 6
   ## @param livenessProbe.successThreshold Success threshold for livenessProbe
   successThreshold: 1
+  ## @param livenessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 readinessProbe:
   ## @param readinessProbe.enabled Enable readinessProbe on zookeeper containers
@@ -266,6 +274,8 @@ readinessProbe:
   failureThreshold: 6
   ## @param readinessProbe.successThreshold Success threshold for readinessProbe
   successThreshold: 1
+  ## @param readinessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 
 startupProbe:

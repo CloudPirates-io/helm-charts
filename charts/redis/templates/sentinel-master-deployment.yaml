@@ -49,14 +49,16 @@ spec:
         securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 10 }}
         resources:
           {{- toYaml .Values.sentinel.masterService.resources | nindent 10 }}
-        {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
         env:
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ include "redis.secretName" . }}
                 key: {{ include "redis.secretPasswordKey" . }}
-        {{- end }}
+          {{- end }}
+          - name: VERBOSE
+            value: "{{ .Values.sentinel.masterService.verbose }}"
         {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
         volumeMounts:
           - name: acl-file
@@ -99,7 +101,7 @@ spec:
                 continue
               fi
 
-              echo "Querying Sentinel via pod: $pod"
+              [ "${VERBOSE:-false}" = "true" ] && echo "Querying Sentinel via pod: $pod"
 
               # Query Sentinel for the current master hostname via the selected pod
               master_hostname=$(kubectl exec -n "$NAMESPACE" "$pod" -c sentinel -- \
@@ -116,20 +118,34 @@ spec:
                 continue
               fi
 
-              echo "Current master from Sentinel: $master"
+              [ "${VERBOSE:-false}" = "true" ] && echo "Current master from Sentinel: $master"
 
               # Check if master has changed
               if [ "$master" = "$oldmaster" ]; then
-                echo "Master unchanged, sleeping for ${CHECK_INTERVAL}s..."
+                [ "${VERBOSE:-false}" = "true" ] && echo "Master unchanged, sleeping for ${CHECK_INTERVAL}s..."
                 sleep "$CHECK_INTERVAL"
                 continue
               fi
 
               echo "Master changed from '$oldmaster' to '$master', updating service..."
 
-              # Update the service selector to point to the new master
-              if kubectl patch service "$MASTER_SERVICE" -n "$NAMESPACE" \
-                -p "{\"spec\": {\"selector\": {\"statefulset.kubernetes.io/pod-name\": \"$master\"}}}"; then
+              # Update the service selector via Server-Side Apply.
+              # Helm 4 uses SSA on `helm upgrade`, so we must apply with the same
+              # field manager ("helm") to avoid ownership conflicts on the selector.
+              # The selector field is atomic, so the full selector content must be
+              # included in every apply.
+              if kubectl apply --server-side --force-conflicts --field-manager=helm -f - <<EOF
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: $MASTER_SERVICE
+              namespace: $NAMESPACE
+            spec:
+              selector:
+                {{- include "redis.selectorLabels" . | nindent 16 }}
+                statefulset.kubernetes.io/pod-name: $master
+            EOF
+              then
                 echo "Successfully updated service to point to master: $master"
               else
                 echo "Error: Failed to update service, will retry..."

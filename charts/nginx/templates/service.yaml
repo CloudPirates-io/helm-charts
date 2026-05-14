@@ -22,3 +22,6 @@ spec:
   selector:
     {{- include "nginx.selectorLabels" . | nindent 4 }}
   internalTrafficPolicy: {{ .Values.service.internalTrafficPolicy | default "Cluster" }}
+  {{- if .Values.service.trafficDistribution }}
+  trafficDistribution: {{ .Values.service.trafficDistribution }}
+  {{- end }}
