@@ -24,12 +24,11 @@ rules:
   {{- end }}
   {{- end }}
   - apiGroups:
-      - ""
+      - events.k8s.io
     resources:
       - events
     verbs:
       - create
-      - get
       - patch
   - apiGroups:
       - ""
