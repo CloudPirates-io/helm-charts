@@ -403,6 +403,13 @@ sentinel:
     loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
+  ## @param sentinel.monitorTarget Override the Sentinel master discovery with an explicit hostname or IP
+  ## When unset (default), the chart's startup script discovers the master locally via the headless
+  ## service hostname (redis-X.redis-headless.<ns>.svc.cluster.local). In multi-region or multi-cluster
+  ## deployments that hostname only resolves inside the local cluster, preventing Sentinel quorum from
+  ## forming across clusters. Set this to an externally-resolvable hostname or IP (e.g., an internal
+  ## NLB DNS name or a Route53 record) that all Sentinels can reach to monitor a shared master.
+  monitorTarget: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
