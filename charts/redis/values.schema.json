@@ -564,9 +564,6 @@
                 "masterName": {
                     "type": "string"
                 },
-                "monitorTarget": {
-                    "type": "string"
-                },
                 "masterService": {
                     "type": "object",
                     "properties": {
@@ -609,6 +606,9 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "monitorTarget": {
+                    "type": "string"
                 },
                 "parallelSyncs": {
                     "type": "integer"
@@ -803,6 +803,22 @@
         },
         "topologySpreadConstraints": {
             "type": "array"
+        },
+        "updateStrategy": {
+            "type": "object",
+            "properties": {
+                "rollingUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "maxUnavailable": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         },
         "useDeployment": {
             "type": "boolean"
