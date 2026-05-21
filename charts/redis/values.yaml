@@ -239,6 +239,28 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
 
+## @section Volume Permissions
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner of the PV mount point
+  enabled: false
+  ## @param volumePermissions.image.registry Image registry
+  ## @param volumePermissions.image.repository Image repository
+  ## @param volumePermissions.image.tag Image tag
+  ## @param volumePermissions.image.pullPolicy Image pull policy
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: "1.36.1"
+    pullPolicy: IfNotPresent
+  ## @param volumePermissions.resources Resource limits and requests
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
+
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
   ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the Statefulset
