@@ -32,7 +32,7 @@ spec:
     - port: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
       targetPort: redis
       protocol: TCP
-      name: redis
+      name: tcp-redis
     {{- range .Values.extraPorts }}
     - port: {{ .port }}
       targetPort: {{ .targetPort | default .name }}
