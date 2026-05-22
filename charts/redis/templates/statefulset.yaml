@@ -525,7 +525,7 @@ spec:
             {{- end }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: redis
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
