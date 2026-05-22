@@ -54,6 +54,17 @@ clusterReplicaCount: 0
 ## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
 revisionHistoryLimit: 10
 
+## @param updateStrategy StatefulSet update strategy (RollingUpdate or OnDelete)
+## When set to OnDelete, pods must be manually deleted to trigger updates
+## This allows for controlled update sequencing in Redis clusters
+updateStrategy:
+  ## @param updateStrategy.type Update strategy type (RollingUpdate or OnDelete)
+  type: RollingUpdate
+  ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
+  rollingUpdate:
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update
+    maxUnavailable: 1
+
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
 ## When persistence.enabled=true, this value is ignored and StatefulSet is always used (required for PVCs).
@@ -228,6 +239,28 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
 
+## @section Volume Permissions
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner of the PV mount point
+  enabled: false
+  ## @param volumePermissions.image.registry Image registry
+  ## @param volumePermissions.image.repository Image repository
+  ## @param volumePermissions.image.tag Image tag
+  ## @param volumePermissions.image.pullPolicy Image pull policy
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: "1.36.1"
+    pullPolicy: IfNotPresent
+  ## @param volumePermissions.resources Resource limits and requests
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
+
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
   ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the Statefulset
@@ -392,6 +425,13 @@ sentinel:
     loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
+  ## @param sentinel.monitorTarget Override the Sentinel master discovery with an explicit hostname or IP
+  ## When unset (default), the chart's startup script discovers the master locally via the headless
+  ## service hostname (redis-X.redis-headless.<ns>.svc.cluster.local). In multi-region or multi-cluster
+  ## deployments that hostname only resolves inside the local cluster, preventing Sentinel quorum from
+  ## forming across clusters. Set this to an externally-resolvable hostname or IP (e.g., an internal
+  ## NLB DNS name or a Route53 record) that all Sentinels can reach to monitor a shared master.
+  monitorTarget: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down

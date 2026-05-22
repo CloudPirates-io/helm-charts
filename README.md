@@ -45,7 +45,7 @@ This repository provides secure, well-documented, and configurable Helm charts f
 ### Prerequisites
 
 - Kubernetes 1.24+
-- Helm 3.2.0+
+- Helm 4.0.0+ (some charts may work with lower versions, but no guarantee can be made here)
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
 ### Installing Charts

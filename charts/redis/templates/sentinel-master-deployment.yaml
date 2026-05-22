@@ -133,7 +133,8 @@ spec:
               # Helm 4 uses SSA on `helm upgrade`, so we must apply with the same
               # field manager ("helm") to avoid ownership conflicts on the selector.
               # The selector field is atomic, so the full selector content must be
-              # included in every apply.
+              # included in every apply. We also need to include spec.ports as it's
+              # a required field for Service objects.
               if kubectl apply --server-side --force-conflicts --field-manager=helm -f - <<EOF
             apiVersion: v1
             kind: Service
@@ -141,6 +142,16 @@ spec:
               name: $MASTER_SERVICE
               namespace: $NAMESPACE
             spec:
+              ports:
+                - port: {{ .Values.service.port }}
+                  targetPort: redis
+                  protocol: TCP
+                  name: redis
+                {{- range .Values.extraPorts }}
+                - port: {{ .port }}
+                  targetPort: {{ .targetPort | default .name }}
+                  name: {{ .name }}
+                {{- end }}
               selector:
                 {{- include "redis.selectorLabels" . | nindent 16 }}
                 statefulset.kubernetes.io/pod-name: $master

@@ -232,6 +232,15 @@ resources: {}
   #   cpu: 10m
   #   memory: 64Mi
 
+## @section Pod Disruption Budget
+pdb:
+  ## @param pdb.enabled Enable Pod Disruption Budget
+  enabled: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  maxUnavailable: ""
+
 ## @section Persistence
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
@@ -249,6 +258,15 @@ persistence:
   ## @param persistence.accessModes Persistent Volume access modes
   accessModes:
     - ReadWriteOnce
+
+## @section Persistent Volume Claim Retention Policy
+persistentVolumeClaimRetentionPolicy:
+  ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the StatefulSet
+  enabled: false
+  ## @param persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  whenScaled: Retain
+  ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  whenDeleted: Retain
 
 ## @section Liveness and readiness probes
 livenessProbe:
@@ -302,6 +320,9 @@ tolerations: []
 
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
 
 ## @param hostAliases Pod-level hostAliases (`spec.template.spec.hostAliases`).
 ## Useful on IPv6-only clusters where BusyBox `hostname -i` cannot resolve the
