@@ -601,8 +601,14 @@
                         },
                         "type": {
                             "type": "string"
+                        },
+                        "verbose": {
+                            "type": "boolean"
                         }
                     }
+                },
+                "monitorTarget": {
+                    "type": "string"
                 },
                 "parallelSyncs": {
                     "type": "integer"
@@ -797,6 +803,22 @@
         },
         "topologySpreadConstraints": {
             "type": "array"
+        },
+        "updateStrategy": {
+            "type": "object",
+            "properties": {
+                "rollingUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "maxUnavailable": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         },
         "useDeployment": {
             "type": "boolean"

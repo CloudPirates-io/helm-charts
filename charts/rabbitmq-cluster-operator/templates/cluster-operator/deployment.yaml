@@ -81,6 +81,7 @@ spec:
           {{- else }}
           args:
             - --metrics-bind-address=:{{ .Values.clusterOperator.containerPorts.metrics }}
+            - --health-probe-bind-address=:{{ .Values.clusterOperator.containerPorts.health }}
           {{- end }}
           env:
             - name: OPERATOR_NAMESPACE
@@ -120,24 +121,25 @@ spec:
           livenessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.clusterOperator.livenessProbe.enabled }}
           livenessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.clusterOperator.livenessProbe "enabled") "context" $) | nindent 12 }}
-            tcpSocket:
-              port: http
+            httpGet:
+              path: /healthz
+              port: health
           {{- end }}
           {{- if .Values.clusterOperator.customReadinessProbe }}
           readinessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.customReadinessProbe "context" $) | nindent 12 }}
           {{- else if .Values.clusterOperator.readinessProbe.enabled }}
           readinessProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.clusterOperator.readinessProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
-              path: /metrics
-              port: http
+              path: /readyz
+              port: health
           {{- end }}
           {{- if .Values.clusterOperator.customStartupProbe }}
           startupProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.customStartupProbe "context" $) | nindent 12 }}
           {{- else if .Values.clusterOperator.startupProbe.enabled }}
           startupProbe: {{- include "cloudpirates.tplvalues.render" (dict "value" (omit .Values.clusterOperator.startupProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
-              path: /metrics
-              port: http
+              path: /readyz
+              port: health
           {{- end }}
           {{- end }}
           {{- if .Values.clusterOperator.lifecycleHooks }}
@@ -149,6 +151,9 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.clusterOperator.containerPorts.metrics }}
+              protocol: TCP
+            - name: health
+              containerPort: {{ .Values.clusterOperator.containerPorts.health }}
               protocol: TCP
         {{- if .Values.clusterOperator.sidecars }}
         {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.clusterOperator.sidecars "context" $) | nindent 8 }}

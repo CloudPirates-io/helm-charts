@@ -13,10 +13,11 @@ metadata:
 spec:
   {{- if .Values.galera.enabled }}
   replicas: {{ .Values.galera.replicaCount }}
+  serviceName: {{ include "mariadb.fullname" . }}-headless
   {{- else }}
   replicas: 1
-  {{- end }}
   serviceName: {{ include "mariadb.fullname" . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "mariadb.selectorLabels" . | nindent 6 }}

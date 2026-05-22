@@ -346,6 +346,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.monitorTarget`                      | Override Sentinel master discovery with an explicit hostname or IP (multi-region/multi-cluster) | `""`        |
 | `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
 | `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
