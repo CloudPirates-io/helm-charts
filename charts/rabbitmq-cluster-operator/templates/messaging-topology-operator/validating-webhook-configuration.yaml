@@ -51,7 +51,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-binding
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vbinding.kb.io
+    name: vbinding-v1beta1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
@@ -120,7 +120,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-operatorpolicy
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: voperatorpolicy.kb.io
+    name: voperatorpolicy-v1beta1.kb.io
     rules:
     - apiGroups:
       - rabbitmq.com
@@ -144,7 +144,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1alpha1-superstream
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vsuperstream.kb.io
+    name: vsuperstream-v1alpha1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
@@ -168,7 +168,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-permission
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vpermission.kb.io
+    name: vpermission-v1beta1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
@@ -192,7 +192,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-topicpermission
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vtopicpermission.kb.io
+    name: vtopicpermission-v1beta1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
@@ -264,7 +264,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-schemareplication
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vschemareplication.kb.io
+    name: vschemareplication-v1beta1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
@@ -288,7 +288,7 @@ webhooks:
         path: /validate-rabbitmq-com-v1beta1-shovel
         port: {{ .Values.msgTopologyOperator.service.ports.webhook }}
     failurePolicy: Fail
-    name: vshovel.kb.io
+    name: vshovel-v1beta1.kb.io
     rules:
       - apiGroups:
           - rabbitmq.com
