@@ -2,6 +2,17 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.3.0] - 2026-05-16
+
+- [rabbitmq-cluster-operator] Move operator images to ghcr.io (rabbitmqoperator/* on Docker Hub is no longer published)
+- [rabbitmq-cluster-operator] Bump cluster-operator to v2.21.0 and messaging-topology-operator to v1.19.2
+- [rabbitmq-cluster-operator] Bump default-user-credential-updater to v1.0.14 and default RabbitMQ image to 4.2.6-management-alpine (matches cluster-operator v2.21.0 defaults)
+- [rabbitmq-cluster-operator] Switch operator probes to upstream /healthz and /readyz on a dedicated health port (containerPorts.health, default 8081); required by messaging-topology-operator v1.19.0+
+- [rabbitmq-cluster-operator] Messaging-topology-operator metrics now served over HTTPS on port 8443; PodMonitor / ServiceMonitor configured with scheme: https and insecureSkipVerify
+- [rabbitmq-cluster-operator] Rename ValidatingWebhookConfiguration webhook entries to upstream v1.19 names (e.g. vbinding-v1beta1.kb.io)
+- [rabbitmq-cluster-operator] Align messaging-topology-operator RBAC with upstream v1.19.1's events fix ([rabbitmq/messaging-topology-operator#1145](https://github.com/rabbitmq/messaging-topology-operator/pull/1145)): replace the legacy core API events rule on the ClusterRole with the `events.k8s.io` group, and add the `patch` verb on the namespaced Role's events rule
+- [rabbitmq-cluster-operator] Refresh CRDs from upstream cluster-operator v2.21.0 and messaging-topology-operator v1.19.2
+
 ## [0.2.2] - 2026-03-27
 
 - Update CRDs and remove ALPHA tag (#1191) ([3aa66d70](https://github.com/CloudPirates-io/helm-charts/commit/3aa66d70))

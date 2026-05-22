@@ -32,8 +32,10 @@ spec:
       {{- with .Values.metrics.serviceMonitor.honorLabels }}
       honorLabels: {{ . }}
       {{- end }}
-      {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
+        - targetLabel: scrape_target
+          replacement: redis
+      {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
@@ -52,8 +54,10 @@ spec:
       {{- with .Values.metrics.serviceMonitor.honorLabels }}
       honorLabels: {{ . }}
       {{- end }}
-      {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
+        - targetLabel: scrape_target
+          replacement: sentinel
+      {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
