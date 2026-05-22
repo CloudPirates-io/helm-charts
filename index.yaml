@@ -6296,6 +6296,69 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[postgres] Update initContainers.waitForPostgres.repository to v18.4
+            (#1333)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1333
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Keycloak
+          url: https://www.keycloak.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+        - name: Application
+          url: https://github.com/keycloak/keycloak
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 26.6.1
+    created: "2026-05-22T10:03:11.213172745Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.9.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: Open Source Identity and Access Management Solution
+    digest: 09810582f3f2f73365918f2e00a20e824cd95b1f5480194d31f0a18d64ac8ae7
+    home: https://www.keycloak.org
+    icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg
+    keywords:
+    - keycloak
+    - identity
+    - access-management
+    - authentication
+    - authorization
+    - oauth
+    - openid-connect
+    - saml
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: keycloak
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.21.8/keycloak-0.21.8.tgz
+    version: 0.21.8
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[postgres] Update initContainers.waitForPostgres.repository to 7e32e98'
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/links: |
@@ -47173,4 +47236,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-22T10:02:03.203621109Z"
+generated: "2026-05-22T10:03:11.371019223Z"
