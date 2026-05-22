@@ -189,6 +189,14 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
 
+### Pod Disruption Budget
+
+| Parameter            | Description                                                    | Default |
+| -------------------- | -------------------------------------------------------------- | ------- |
+| `pdb.enabled`        | Enable Pod Disruption Budget                                   | `false` |
+| `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `1`     |
+| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
+
 ### Persistence
 
 | Parameter                   | Description                                        | Default             |
@@ -200,6 +208,14 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
+
+### Persistent Volume Claim Retention Policy
+
+| Parameter                                          | Description                                                                    | Default    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the StatefulSet                  | `false`    |
+| `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
+| `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
 
 ### Liveness and readiness probes
 
@@ -226,12 +242,13 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 
 ### Node Selection
 
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
-| `hostAliases`  | Pod-level `hostAliases` entries (useful on IPv6-only clusters) | `[]` |
+| Parameter                   | Description                                                    | Default |
+| --------------------------- | -------------------------------------------------------------- | ------- |
+| `nodeSelector`              | Node labels for pod assignment                                 | `{}`    |
+| `tolerations`               | Toleration labels for pod assignment                           | `[]`    |
+| `affinity`                  | Affinity settings for pod assignment                           | `{}`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment                 | `[]`    |
+| `hostAliases`               | Pod-level `hostAliases` entries (useful on IPv6-only clusters) | `[]`    |
 
 ### Metrics configuration
 
