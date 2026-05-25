@@ -86,7 +86,6 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
         {{- end }}
         {{- if (list "replication" "cluster" | has .Values.architecture) }}
-      initContainers:
         - name: redis-init
           image: {{ include "redis.image" . | quote }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -523,6 +522,7 @@ spec:
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
