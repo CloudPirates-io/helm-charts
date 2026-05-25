@@ -12,7 +12,7 @@ metadata:
 {{ toYaml . | indent 4 }}
   {{- end }}
 spec:
-  {{- if not (kindIs "invalid" .Values.bucketInitJob.ttlSecondsAfterFinished) }}
+  {{- if ne .Values.bucketInitJob.ttlSecondsAfterFinished nil }}
   ttlSecondsAfterFinished: {{ .Values.bucketInitJob.ttlSecondsAfterFinished }}
   {{- end }}
   activeDeadlineSeconds: {{ .Values.bucketInitJob.activeDeadlineSeconds }}
