@@ -12,7 +12,9 @@ metadata:
 {{ toYaml . | indent 4 }}
   {{- end }}
 spec:
+  {{- if not (kindIs "invalid" .Values.bucketInitJob.ttlSecondsAfterFinished) }}
   ttlSecondsAfterFinished: {{ .Values.bucketInitJob.ttlSecondsAfterFinished }}
+  {{- end }}
   activeDeadlineSeconds: {{ .Values.bucketInitJob.activeDeadlineSeconds }}
   completions: {{ .Values.bucketInitJob.completions }}
   parallelism: {{ .Values.bucketInitJob.parallelism }}

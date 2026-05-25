@@ -85,7 +85,8 @@ defaultBuckets: ""
 
 ## @section Bucket Initialization Job
 bucketInitJob:
-  ## @param bucketInitJob.ttlSecondsAfterFinished Seconds after which the job is automatically deleted after completion (success or failure)
+  ## @param bucketInitJob.ttlSecondsAfterFinished Seconds after which the job is automatically deleted after completion (success or failure). Set to `null` to omit the field and keep the job indefinitely (e.g. when Argo CD tracks the resource).
+  # @schema type:[integer, null]
   ttlSecondsAfterFinished: 30
   ## @param bucketInitJob.activeDeadlineSeconds Maximum duration in seconds for the job execution before it is terminated
   activeDeadlineSeconds: 300
