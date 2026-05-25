@@ -510,9 +510,6 @@
                 "internalTrafficPolicy": {
                     "type": "string"
                 },
-                "trafficDistribution": {
-                    "type": "string"
-                },
                 "ports": {
                     "type": "array",
                     "items": {
@@ -532,6 +529,9 @@
                             }
                         }
                     }
+                },
+                "trafficDistribution": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
