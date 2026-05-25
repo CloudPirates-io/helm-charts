@@ -23,11 +23,12 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - ""
+      - events.k8s.io
     resources:
       - events
     verbs:
       - create
+      - patch
   - apiGroups:
       - ""
     resources:

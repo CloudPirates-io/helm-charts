@@ -4,7 +4,6 @@ on:
     types:
       - opened
       - reopened
-      - synchronize
     branches:
       - main
 
@@ -13,7 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'external' || '' }}
+    steps:
+      - run: true
+
   lint-test:
+    needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -90,11 +98,11 @@ jobs:
           ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
+    needs: [authorize, lint-test]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
-    needs: [lint-test]
     if: needs.lint-test.outputs.changed == 'true'
     steps:
       - name: Checkout pull request branch

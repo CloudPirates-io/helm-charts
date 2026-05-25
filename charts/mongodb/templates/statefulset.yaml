@@ -172,7 +172,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "mongodb.metrics.secretName" . }}
-                  key: {{ include "mongodb.secretPasswordKey" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
             {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}

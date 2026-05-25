@@ -1,0 +1,20 @@
+suite: test nginx service
+templates:
+  - service.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+tests:
+  - it: should not set trafficDistribution by default
+    asserts:
+      - isNull:
+          path: spec.trafficDistribution
+
+  - it: should set trafficDistribution when configured
+    set:
+      service:
+        trafficDistribution: PreferClose
+    asserts:
+      - equal:
+          path: spec.trafficDistribution
+          value: PreferClose

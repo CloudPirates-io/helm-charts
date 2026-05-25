@@ -49,6 +49,8 @@ This will apply the CHANGELOG.md merge policy defined in `.gitattributes`
 A curated collection of production-ready Helm charts for open-source cloud-native applications.
 This repository provides secure, well-documented, and configurable Helm charts following cloud-native best practices.
 
+**⚠️ IMPORTANT**: As of **April 15, 2026**, all changelogs only exist in the github release description. Old changelogs are kept for the sake of backwards compatiblity.
+
 ## Available Charts
 
 | Chart                                                          | Description                                                                                                                      | Version                                                                                                                                                                                                |
@@ -77,7 +79,7 @@ This repository provides secure, well-documented, and configurable Helm charts f
 ### Prerequisites
 
 - Kubernetes 1.24+
-- Helm 3.2.0+
+- Helm 4.0.0+ (some charts may work with lower versions, but no guarantee can be made here)
 - PV provisioner support in the underlying infrastructure (if persistence is enabled)
 
 ### Installing Charts

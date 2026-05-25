@@ -115,7 +115,35 @@ spec:
             - name: mongodb-keyfile-data
               mountPath: /keyfile-data
             {{- end }}
-          resources: {{ toYaml (coalesce .Values.shardedCluster.mongos.resources .Values.initContainer.resources) | nindent 12 }}
+          resources: {{ toYaml (coalesce .Values.initContainer.resources .Values.shardedCluster.mongos.resources) | nindent 12 }}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-uri-init
+          image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cp /bin/busybox /metrics-config/busybox
+              chmod +x /metrics-config/busybox
+              urlencode() {
+                printf '%s' "$1" | od -An -tx1 | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F'
+              }
+              ENCODED_USER=$(urlencode "$MONGO_METRICS_USERNAME")
+              ENCODED_PASS=$(urlencode "$MONGO_METRICS_PASSWORD")
+              printf 'mongodb://%s:%s@127.0.0.1:27017/admin?authSource=admin' "$ENCODED_USER" "$ENCODED_PASS" > /metrics-config/uri
+          env:
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+        {{- end }}
       containers:
         - name: mongos
           image: {{ include "mongodb.image" . }}
@@ -222,27 +250,36 @@ spec:
           image: {{ include "mongodb.metrics.image" . }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           securityContext: {{ toYaml .Values.metrics.containerSecurityContext | nindent 12 }}
+          {{- if .Values.auth.enabled }}
+          command: ["/metrics-config/busybox", "sh", "-c"]
+          args:
+            - |
+              exec /mongodb_exporter \
+                --mongodb.uri="$(/metrics-config/busybox cat /metrics-config/uri)" \
+                --web.listen-address=0.0.0.0:9216 \
+                --collect-all{{- range .Values.metrics.extraArgs }} \
+                {{ . }}{{- end }}
+          {{- with .Values.metrics.extraEnvVars }}
+          env:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: metrics-config
+              mountPath: /metrics-config
+          {{- else }}
           command:
-            - mongodb_exporter
-            - --mongodb.uri=mongodb://{{ if .Values.auth.enabled }}$(MONGODB_METRICS_USERNAME):$(MONGODB_METRICS_PASSWORD)@{{ end }}localhost:27017{{ if .Values.auth.enabled }}/admin{{ end }}
+            - /mongodb_exporter
+            - --mongodb.uri=mongodb://localhost:27017
             - --web.listen-address=:9216
             - --collect-all
             {{- range .Values.metrics.extraArgs }}
             - {{ . }}
             {{- end }}
+          {{- with .Values.metrics.extraEnvVars }}
           env:
-            {{- if .Values.auth.enabled }}
-            - name: MONGODB_METRICS_USERNAME
-              value: {{ .Values.metrics.username | default .Values.auth.rootUsername | quote }}
-            - name: MONGODB_METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mongodb.metrics.secretName" . }}
-                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
-            {{- end }}
-            {{- with .Values.metrics.extraEnvVars }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: http-metrics
               containerPort: 9216
@@ -261,7 +298,7 @@ spec:
           {{- if .Values.metrics.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-              path: /metrics
+              path: /
               port: http-metrics
             initialDelaySeconds: {{ .Values.metrics.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.metrics.readinessProbe.timeoutSeconds }}
@@ -283,6 +320,10 @@ spec:
             secretName: {{ include "mongodb.keyfileSecretName" . }}
             defaultMode: 0400
         - name: mongodb-keyfile-data
+          emptyDir: {}
+        {{- end }}
+        {{- if and .Values.metrics.enabled .Values.auth.enabled }}
+        - name: metrics-config
           emptyDir: {}
         {{- end }}
         {{- with .Values.extraVolumes }}
