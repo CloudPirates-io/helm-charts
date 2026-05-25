@@ -56,7 +56,10 @@
                     "type": "string"
                 },
                 "ttlSecondsAfterFinished": {
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
                 }
             }
         },

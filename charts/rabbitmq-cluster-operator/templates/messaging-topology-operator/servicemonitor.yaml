@@ -27,7 +27,10 @@ spec:
     matchNames:
       - {{ include "cloudpirates.namespace" . }}
   endpoints:
-    - port: http
+    - port: https-metrics
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
       {{- if .Values.msgTopologyOperator.metrics.serviceMonitor.interval }}
       interval: {{ .Values.msgTopologyOperator.metrics.serviceMonitor.interval }}
       {{- end }}

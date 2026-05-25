@@ -15,6 +15,28 @@ tests:
       - equal:
           path: metadata.name
           value: RELEASE-NAME-minio-bucket-init
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 30
+
+  - it: should set custom ttlSecondsAfterFinished
+    template: bucket-init-job.yaml
+    set:
+      bucketInitJob:
+        ttlSecondsAfterFinished: 3600
+    asserts:
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 3600
+
+  - it: should omit ttlSecondsAfterFinished when set to null
+    template: bucket-init-job.yaml
+    set:
+      bucketInitJob:
+        ttlSecondsAfterFinished: null
+    asserts:
+      - notExists:
+          path: spec.ttlSecondsAfterFinished
 
   - it: should add podLabels to bucket-init job pods
     template: bucket-init-job.yaml
