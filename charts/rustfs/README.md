@@ -99,6 +99,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `namespaceOverride` | String to override the namespace for all resources | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
+| `clusterDomain`     | Kubernetes cluster domain                          | `cluster.local` |
 
 ### RustFS image configuration
 
