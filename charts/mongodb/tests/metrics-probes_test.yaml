@@ -46,7 +46,7 @@ set:
     readinessProbe:
       enabled: true
 tests:
-  - it: should use / for metrics liveness probe and /metrics for readiness probe in configserver
+  - it: should use / for metrics liveness probe and / for readiness probe in configserver
     template: statefulset-configserver.yaml
     asserts:
       - equal:
@@ -54,9 +54,9 @@ tests:
           value: /
       - equal:
           path: spec.template.spec.containers[1].readinessProbe.httpGet.path
-          value: /metrics
+          value: /
 
-  - it: should use / for metrics liveness probe and /metrics for readiness probe in mongos
+  - it: should use / for metrics liveness probe and / for readiness probe in mongos
     template: statefulset-mongos.yaml
     asserts:
       - equal:
@@ -64,9 +64,9 @@ tests:
           value: /
       - equal:
           path: spec.template.spec.containers[1].readinessProbe.httpGet.path
-          value: /metrics
+          value: /
 
-  - it: should use / for metrics liveness probe and /metrics for readiness probe in shard
+  - it: should use / for metrics liveness probe and / for readiness probe in shard
     template: statefulset-shard.yaml
     documentIndex: 0
     asserts:
@@ -75,4 +75,4 @@ tests:
           value: /
       - equal:
           path: spec.template.spec.containers[1].readinessProbe.httpGet.path
-          value: /metrics
+          value: /

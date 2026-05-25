@@ -23,6 +23,9 @@
                 "containerPorts": {
                     "type": "object",
                     "properties": {
+                        "health": {
+                            "type": "integer"
+                        },
                         "metrics": {
                             "type": "integer"
                         }
@@ -592,6 +595,9 @@
                 "containerPorts": {
                     "type": "object",
                     "properties": {
+                        "health": {
+                            "type": "integer"
+                        },
                         "metrics": {
                             "type": "integer"
                         }
@@ -787,6 +793,9 @@
                                     "type": "object",
                                     "properties": {
                                         "prometheus.io/port": {
+                                            "type": "string"
+                                        },
+                                        "prometheus.io/scheme": {
                                             "type": "string"
                                         },
                                         "prometheus.io/scrape": {

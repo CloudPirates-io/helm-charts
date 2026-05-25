@@ -1,0 +1,142 @@
+name: Generate Per-Chart Changelog
+description: |
+  Generate scoped changelog for Helm charts in a monorepo.
+  Supports two modes:
+    - generate: write CHANGELOG.md files per chart
+    - release-notes: output release notes for a single chart version (for GitHub Releases)
+
+inputs:
+  mode:
+    description: "'generate' for CHANGELOG.md files, 'release-notes' for single-version output"
+    required: false
+    default: "release-notes"
+  charts:
+    description: "Space-separated list of charts to process (default: all)"
+    required: false
+    default: ""
+  chart:
+    description: "Single chart name (for release-notes mode)"
+    required: false
+    default: ""
+  max-versions:
+    description: "Maximum number of versions per chart (generate mode)"
+    required: false
+    default: "20"
+  max-commits:
+    description: "Maximum commits to scan per chart"
+    required: false
+    default: "500"
+  repo-url:
+    description: "GitHub repository URL (auto-detected if empty)"
+    required: false
+    default: ""
+  config-file:
+    description: "Path to optional YAML config file"
+    required: false
+    default: ".changelog-config.yml"
+  output-file:
+    description: "Output file path (release-notes mode)"
+    required: false
+    default: "/tmp/release-notes.md"
+  dry-run:
+    description: "Print to stdout instead of writing files (generate mode)"
+    required: false
+    default: "false"
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.12"
+
+outputs:
+  changed-charts:
+    description: "Comma-separated list of charts whose CHANGELOG.md was updated (generate mode)"
+    value: ${{ steps.generate.outputs.changed-charts }}
+  release-notes-file:
+    description: "Path to the generated release notes file (release-notes mode)"
+    value: ${{ steps.release-notes.outputs.file }}
+  version:
+    description: "Chart version detected (release-notes mode)"
+    value: ${{ steps.release-notes.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install gitpython pyyaml click
+
+    - name: Fetch full git history
+      shell: bash
+      run: |
+        if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+          echo "Shallow clone detected — fetching full history..."
+          git fetch --unshallow
+        fi
+        git fetch --tags
+
+    - name: Determine repo URL
+      id: repo-url
+      shell: bash
+      env:
+        INPUT_REPO_URL: ${{ inputs.repo-url }}
+        GITHUB_REPO: ${{ github.repository }}
+      run: |
+        if [ -n "$INPUT_REPO_URL" ]; then
+          echo "url=$INPUT_REPO_URL" >> "$GITHUB_OUTPUT"
+        else
+          echo "url=https://github.com/${GITHUB_REPO}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Generate changelogs (file mode)
+      id: generate
+      if: inputs.mode == 'generate'
+      shell: bash
+      env:
+        REPO_URL: ${{ steps.repo-url.outputs.url }}
+        MAX_VERSIONS: ${{ inputs.max-versions }}
+        MAX_COMMITS: ${{ inputs.max-commits }}
+        CONFIG_FILE: ${{ inputs.config-file }}
+        DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_CHARTS: ${{ inputs.charts }}
+      run: |
+        ARGS="generate --repo-url $REPO_URL --max-versions $MAX_VERSIONS --max-commits $MAX_COMMITS --config $CONFIG_FILE"
+
+        if [ "$DRY_RUN" = "true" ]; then
+          ARGS="$ARGS --dry-run"
+        fi
+
+        for chart in $INPUT_CHARTS; do
+          ARGS="$ARGS -c $chart"
+        done
+
+        python scripts/generate-changelog.py $ARGS
+
+        CHANGED=$(git diff --name-only -- 'charts/*/CHANGELOG.md' | sed 's|charts/||;s|/CHANGELOG.md||' | paste -sd,)
+        echo "changed-charts=$CHANGED" >> "$GITHUB_OUTPUT"
+
+    - name: Generate release notes (single version)
+      id: release-notes
+      if: inputs.mode == 'release-notes'
+      shell: bash
+      env:
+        REPO_URL: ${{ steps.repo-url.outputs.url }}
+        MAX_COMMITS: ${{ inputs.max-commits }}
+        CONFIG_FILE: ${{ inputs.config-file }}
+        CHART_NAME: ${{ inputs.chart }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+      run: |
+        python scripts/generate-changelog.py release-notes "$CHART_NAME" \
+          --repo-url "$REPO_URL" \
+          --max-commits "$MAX_COMMITS" \
+          --config "$CONFIG_FILE" \
+          -o "$OUTPUT_FILE"
+
+        echo "file=$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+
+        VERSION=$(yq eval '.version' "charts/${CHART_NAME}/Chart.yaml")
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"

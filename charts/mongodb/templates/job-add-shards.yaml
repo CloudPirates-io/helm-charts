@@ -84,6 +84,15 @@ spec:
                   name: {{ include "mongodb.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
             {{- end }}
+            {{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+            {{- end }}
             {{- if $.Values.customUsers }}
             {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
             {{- end }}
