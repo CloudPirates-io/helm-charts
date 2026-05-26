@@ -2,7 +2,7 @@ apiVersion: v2
 name: etcd
 description: etcd is a distributed reliable key-value store for the most critical data of a distributed system
 type: application
-version: 0.7.1
+version: 0.8.0
 appVersion: "3.6.11"
 keywords:
   - etcd
@@ -34,7 +34,7 @@ annotations:
     - name: etcd
       url: https://etcd.io/
     - name: Helm Chart
-      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/etcd
     - name: Application
       url: https://github.com/etcd-io/etcd
     - name: Maintainer CloudPirates
