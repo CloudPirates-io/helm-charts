@@ -2,7 +2,7 @@ apiVersion: v2
 name: rabbitmq-cluster-operator
 description: Kubernetes operator to deploy and manage RabbitMQ clusters.
 type: application
-version: 0.3.0
+version: 0.3.1
 appVersion: "2.21.0"
 keywords:
   - rabbitmq-cluster-operator
@@ -45,11 +45,4 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: changed
-      description: "Move operator images to ghcr.io and bump to upstream latest (cluster-operator 2.21.0, messaging-topology-operator 1.19.2, default-user-credential-updater 1.0.14, RabbitMQ 4.2.6)"
-      links:
-        - name: "Changelog"
-          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq-cluster-operator/CHANGELOG.md"
-    - kind: changed
-      description: "Switch operator probes to upstream /healthz and /readyz endpoints on a dedicated health port; required for messaging-topology-operator v1.19.0+"
-    - kind: changed
-      description: "Refresh CRDs from upstream cluster-operator v2.21.0 and messaging-topology-operator v1.19.2"
+      description: "Match messaging-topology-operator roles to upstream"
