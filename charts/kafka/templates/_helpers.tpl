@@ -107,3 +107,71 @@ Returns an empty string when none is set (cluster default).
 {{- define "kafka.storageClass" -}}
 {{- .Values.persistence.storageClass | default (.Values.global).defaultStorageClass -}}
 {{- end -}}
+
+{{/*
+Return true (as a non-empty string) when SASL is enabled on at least one listener.
+*/}}
+{{- define "kafka.auth.enabled" -}}
+{{- if or .Values.auth.client.enabled .Values.auth.interBroker.enabled .Values.auth.controller.enabled -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Name of the Secret holding the SASL passwords: the user-provided existingSecret, or the chart-managed one.
+*/}}
+{{- define "kafka.secretName" -}}
+{{- .Values.auth.existingSecret | default (include "kafka.fullname" .) -}}
+{{- end -}}
+
+{{/*
+Return true (as a non-empty string) when TLS is enabled.
+*/}}
+{{- define "kafka.tls.enabled" -}}
+{{- if .Values.tls.enabled -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Name of the Secret holding the TLS PEM material.
+- existing-secret: the user-provided Secret
+- self-signed / cert-manager: a chart-managed "<fullname>-tls" Secret
+*/}}
+{{- define "kafka.tlsSecretName" -}}
+{{- if eq .Values.tls.source "existing-secret" -}}
+{{- required "tls.existingSecret is required when tls.source=existing-secret" .Values.tls.existingSecret -}}
+{{- else -}}
+{{- printf "%s-tls" (include "kafka.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve a listener's security protocol from the auth + tls flags.
+Usage: include "kafka.listenerProtocol" (dict "auth" <bool> "tls" <truthy>)
+*/}}
+{{- define "kafka.listenerProtocol" -}}
+{{- if and .tls .auth -}}SASL_SSL
+{{- else if .tls -}}SSL
+{{- else if .auth -}}SASL_PLAINTEXT
+{{- else -}}PLAINTEXT
+{{- end -}}
+{{- end -}}
+
+{{/*
+Subject Alternative Names for the generated/self-signed server certificate.
+Covers the per-pod headless FQDNs (wildcard), the client Service FQDN, and short forms.
+*/}}
+{{- define "kafka.tls.altNames" -}}
+{{- $name := include "kafka.fullname" . -}}
+{{- $namespace := include "cloudpirates.namespace" . -}}
+{{- $domain := .Values.clusterDomain | default "cluster.local" -}}
+{{- $names := list -}}
+{{- $names = append $names (printf "*.%s-headless.%s.svc.%s" $name $namespace $domain) -}}
+{{- $names = append $names (printf "%s-headless.%s.svc.%s" $name $namespace $domain) -}}
+{{- $names = append $names (printf "%s.%s.svc.%s" $name $namespace $domain) -}}
+{{- $names = append $names (printf "%s.%s.svc" $name $namespace) -}}
+{{- $names = append $names $name -}}
+{{- $names = append $names "localhost" -}}
+{{- $names | toYaml -}}
+{{- end -}}

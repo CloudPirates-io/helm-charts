@@ -27,7 +27,7 @@ spec:
         {{- with (include "kafka.annotations" .) }}
         {{- . | nindent 8 }}
         {{- end }}
-        checksum/config: {{ printf "%s-%s-%v-%s-%s" (toYaml .Values.kafkaConfig) (toYaml .Values.service.ports) .Values.replicaCount .Values.clusterId (toYaml .Values.logging) | sha256sum }}
+        checksum/config: {{ printf "%s-%s-%v-%s-%s-%s-%s" (toYaml .Values.kafkaConfig) (toYaml .Values.service.ports) .Values.replicaCount .Values.clusterId (toYaml .Values.logging) (toYaml .Values.auth) (toYaml .Values.tls) | sha256sum }}
     spec:
 {{- with (include "kafka.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -42,6 +42,9 @@ spec:
           ports:
             - name: client
               containerPort: {{ .Values.service.ports.client }}
+              protocol: TCP
+            - name: internal
+              containerPort: {{ .Values.service.ports.internal }}
               protocol: TCP
             - name: controller
               containerPort: {{ .Values.service.ports.controller }}
@@ -62,6 +65,33 @@ spec:
             {{- end }}
             - name: NODE_ID_OFFSET
               value: {{ .Values.nodeIdOffset | default 0 | quote }}
+            {{- if .Values.auth.client.enabled }}
+            - name: KAFKA_CLIENT_USER
+              value: {{ .Values.auth.clientUser | quote }}
+            - name: KAFKA_CLIENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: client-password
+            {{- end }}
+            {{- if .Values.auth.interBroker.enabled }}
+            - name: KAFKA_INTER_BROKER_USER
+              value: {{ .Values.auth.interBrokerUser | quote }}
+            - name: KAFKA_INTER_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: inter-broker-password
+            {{- end }}
+            {{- if .Values.auth.controller.enabled }}
+            - name: KAFKA_CONTROLLER_USER
+              value: {{ .Values.auth.controllerUser | quote }}
+            - name: KAFKA_CONTROLLER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: controller-password
+            {{- end }}
           command: ["/bin/sh", "-ec"]
           args:
             - |
@@ -74,8 +104,32 @@ spec:
               cp /mnt/kafka/config/server.properties "$RUNTIME_CONFIG"
               {
                 echo "node.id=${NODE_ID}"
-                echo "advertised.listeners=PLAINTEXT://${ADVERTISED_HOST}:{{ .Values.service.ports.client }}"
+                echo "advertised.listeners=CLIENT://${ADVERTISED_HOST}:{{ .Values.service.ports.client }},INTERNAL://${ADVERTISED_HOST}:{{ .Values.service.ports.internal }}"
+                {{- if .Values.auth.client.enabled }}
+                # SASL/PLAIN credentials for the client listener (validated server-side via user_<name> entries)
+                echo "listener.name.client.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required user_${KAFKA_CLIENT_USER}=\"${KAFKA_CLIENT_PASSWORD}\";"
+                {{- end }}
+                {{- if .Values.auth.interBroker.enabled }}
+                echo "listener.name.internal.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KAFKA_INTER_BROKER_USER}\" password=\"${KAFKA_INTER_BROKER_PASSWORD}\" user_${KAFKA_INTER_BROKER_USER}=\"${KAFKA_INTER_BROKER_PASSWORD}\";"
+                {{- end }}
+                {{- if .Values.auth.controller.enabled }}
+                echo "listener.name.controller.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KAFKA_CONTROLLER_USER}\" password=\"${KAFKA_CONTROLLER_PASSWORD}\" user_${KAFKA_CONTROLLER_USER}=\"${KAFKA_CONTROLLER_PASSWORD}\";"
+                {{- end }}
               } >> "$RUNTIME_CONFIG"
+              {{- if include "kafka.tls.enabled" . }}
+
+              # Kafka's PEM keystore expects the private key in PKCS#8 plus the cert chain in one file,
+              # built in a writable dir since the cert Secret is mounted read-only. Helm's genSignedCert
+              # emits a PKCS#1 key ("BEGIN RSA PRIVATE KEY") that Kafka cannot parse, so convert it with
+              # openssl ONLY when needed. PKCS#8 keys (cert-manager with encoding=PKCS8, or a PKCS#8
+              # existingSecret) are copied as-is, so TLS works on minimal/hardened images without openssl.
+              if grep -q "BEGIN RSA PRIVATE KEY" /mnt/kafka/certs/{{ .Values.tls.keyFilename }}; then
+                openssl pkcs8 -topk8 -nocrypt -in /mnt/kafka/certs/{{ .Values.tls.keyFilename }} -out /opt/kafka/tls-runtime/keystore.pem
+              else
+                cp /mnt/kafka/certs/{{ .Values.tls.keyFilename }} /opt/kafka/tls-runtime/keystore.pem
+              fi
+              cat /mnt/kafka/certs/{{ .Values.tls.certFilename }} >> /opt/kafka/tls-runtime/keystore.pem
+              {{- end }}
 
               echo "Formatting KRaft storage (idempotent) for node ${NODE_ID}..."
               /opt/kafka/bin/kafka-storage.sh format -t "${KAFKA_CLUSTER_ID}" -c "$RUNTIME_CONFIG" --ignore-formatted
@@ -132,6 +186,13 @@ spec:
               subPath: server.properties
             - name: runtime-config
               mountPath: /opt/kafka/config-runtime
+            {{- if include "kafka.tls.enabled" . }}
+            - name: certs
+              mountPath: /mnt/kafka/certs
+              readOnly: true
+            - name: tls-runtime
+              mountPath: /opt/kafka/tls-runtime
+            {{- end }}
             - name: logs
               mountPath: /tmp/kafka-logs
             # Writable log dir for images (e.g. Docker Hardened Images) whose log4j config
@@ -159,6 +220,13 @@ spec:
             name: {{ include "kafka.fullname" . }}-config
         - name: runtime-config
           emptyDir: {}
+        {{- if include "kafka.tls.enabled" . }}
+        - name: certs
+          secret:
+            secretName: {{ include "kafka.tlsSecretName" . }}
+        - name: tls-runtime
+          emptyDir: {}
+        {{- end }}
         - name: logs
           emptyDir: {}
         - name: app-logs

@@ -36,6 +36,10 @@ spec:
       targetPort: client
       protocol: TCP
       name: client
+    - port: {{ .Values.service.ports.internal }}
+      targetPort: internal
+      protocol: TCP
+      name: internal
     - port: {{ .Values.service.ports.controller }}
       targetPort: controller
       protocol: TCP

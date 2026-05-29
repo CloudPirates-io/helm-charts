@@ -15,14 +15,17 @@ tests:
           path: spec.template.spec.containers[0].image
           pattern: "docker.io/apache/kafka"
 
-  - it: should expose client and controller ports
+  - it: should expose client, internal and controller ports
     template: statefulset.yaml
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].ports[0].containerPort
+          path: spec.template.spec.containers[0].ports[?(@.name=="client")].containerPort
           value: 9092
       - equal:
-          path: spec.template.spec.containers[0].ports[1].containerPort
+          path: spec.template.spec.containers[0].ports[?(@.name=="internal")].containerPort
+          value: 9094
+      - equal:
+          path: spec.template.spec.containers[0].ports[?(@.name=="controller")].containerPort
           value: 9093
 
   - it: should create a normal client service (not headless)
@@ -140,6 +143,8 @@ tests:
     set:
       metrics:
         enabled: true
+      auth:
+        client: { enabled: false }
     asserts:
       - isKind:
           of: Deployment
@@ -155,6 +160,19 @@ tests:
       - equal:
           path: spec.selector.matchLabels["app.kubernetes.io/name"]
           value: kafka-metrics
+
+  - it: should make the kafka-exporter authenticate when client auth is enabled
+    template: metrics-deployment.yaml
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_PASSWORD")].valueFrom.secretKeyRef.key
+          value: client-password
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "--sasl.enabled"
 
   - it: should not render the kafka-exporter Deployment by default
     template: metrics-deployment.yaml
