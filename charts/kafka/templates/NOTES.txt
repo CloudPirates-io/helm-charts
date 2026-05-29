@@ -1,0 +1,28 @@
+Apache Kafka has been deployed in KRaft mode!
+
+**Bootstrap servers (from inside the cluster):**
+
+  {{ include "kafka.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain | default "cluster.local" }}:{{ .Values.service.ports.client }}
+
+**Test your cluster with a client pod:**
+
+  kubectl run kafka-client --rm -it --restart='Never' \
+    --namespace {{ include "cloudpirates.namespace" . }} \
+    --image {{ include "kafka.image" . }} -- bash
+
+  # Inside the pod, create a topic:
+  /opt/kafka/bin/kafka-topics.sh --create --topic demo \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }} \
+    --partitions {{ .Values.kafkaConfig.numPartitions }} --replication-factor {{ min (int .Values.kafkaConfig.defaultReplicationFactor) (int .Values.replicaCount) }}
+
+  # List topics:
+  /opt/kafka/bin/kafka-topics.sh --list \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }}
+
+**To upgrade this release:**
+
+  helm upgrade <RELEASE_NAME> ./charts/kafka
+
+**To uninstall/delete the release:**
+
+  helm delete <RELEASE_NAME>

@@ -1,0 +1,57 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kafka.fullname" . }}-metrics
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.metrics.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "kafka.metrics.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kafka.metrics.labels" . | nindent 8 }}
+    spec:
+{{- with (include "kafka.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      automountServiceAccountToken: false
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      containers:
+        - name: kafka-exporter
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "kafka.metrics.image" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.image.imagePullPolicy | default "Always" | quote }}
+          args:
+            - --kafka.server={{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }}
+            - --web.listen-address=:{{ .Values.metrics.containerPort }}
+            {{- with .Values.metrics.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+{{- end }}
