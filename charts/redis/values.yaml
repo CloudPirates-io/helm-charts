@@ -498,6 +498,8 @@ sentinel:
       #   memory: 32Mi
     ## @param sentinel.masterService.verbose Enable verbose logging for master discovery
     verbose: false
+    ## @param sentinel.masterService.affinity Affinity rules for the master discovery deployment (defaults to .Values.affinity if not set)
+    affinity: {}
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
