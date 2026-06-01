@@ -371,6 +371,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
 | `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
 
 ### ServiceAccount
 

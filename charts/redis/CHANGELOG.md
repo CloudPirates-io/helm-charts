@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.29.4] - 2026-05-29
+
+- Add `sentinel.masterService.affinity` to allow the master discovery deployment to use affinity rules independent from the main Redis workload. Defaults to `.Values.affinity` when unset, so existing behavior is unchanged (#1213).
+
 ## [0.28.0] - 2026-05-20
 
 - Add `sentinel.monitorTarget` to override the Sentinel master discovery with an explicit hostname or IP, enabling multi-region and multi-cluster deployments where the chart's default local headless discovery does not work.

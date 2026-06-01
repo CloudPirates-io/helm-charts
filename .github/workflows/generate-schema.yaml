@@ -23,14 +23,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
+
 jobs:
   authorize:
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'pull_request_target' &&
       github.event.pull_request.head.repo.full_name != github.repository &&
       'external' || '' }}
-    steps:
-      - run: true
 
   generate-schema:
     needs: authorize
