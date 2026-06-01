@@ -238,6 +238,8 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param Map of labels to add to the Persistent Volume Claims (PVCs)
+  labels: {}
 
 ## @section Volume Permissions
 volumePermissions:
