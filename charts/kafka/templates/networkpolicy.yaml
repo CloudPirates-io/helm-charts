@@ -23,8 +23,9 @@ spec:
     # Allow client connections to Kafka brokers (includes the kafka-exporter metrics Deployment)
     - ports:
         - port: {{ .Values.service.ports.client }}
-    # Allow internal controller communication between nodes
+    # Allow inter-broker (INTERNAL listener) and controller (KRaft) traffic between nodes
     - ports:
+        - port: {{ .Values.service.ports.internal }}
         - port: {{ .Values.service.ports.controller }}
       from:
         - podSelector:
