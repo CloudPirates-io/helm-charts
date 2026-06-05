@@ -1306,7 +1306,7 @@ spec:
         name: data
         labels:
           {{- include "redis.selectorLabels" . | nindent 10 }}
-          {{- with .Values.podLabels }}
+          {{- with .Values.persistence.labels }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- with .Values.persistence.annotations }}

@@ -507,16 +507,7 @@ spec:
         - name: metrics
           image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            privileged: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 65534
-            runAsGroup: 65534
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           env:
             {{- if .Values.auth.enabled }}
             - name: REDIS_PASSWORD
