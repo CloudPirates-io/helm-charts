@@ -133,11 +133,10 @@ spec:
 
               echo "Formatting KRaft storage (idempotent) for node ${NODE_ID}..."
               /opt/kafka/bin/kafka-storage.sh format -t "${KAFKA_CLUSTER_ID}" -c "$RUNTIME_CONFIG" --ignore-formatted
-
-              {{- if .Values.command }}
-              {{- range $i, $c := .Values.command -}}{{ if $i }} {{ end }}{{ $c | quote }}{{- end }}
-              {{- else }}
-              exec /opt/kafka/bin/kafka-server-start.sh "$RUNTIME_CONFIG"
+              {{ if .Values.command -}}
+              {{ range $i, $c := .Values.command }}{{ if $i }} {{ end }}{{ $c | quote }}{{- end }}
+              {{- else -}}
+              exec /opt/kafka/bin/kafka-server-start.sh "$RUNTIME_CONFIG"{{ range .Values.extraArgs }} {{ . | quote }}{{ end }}
               {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:

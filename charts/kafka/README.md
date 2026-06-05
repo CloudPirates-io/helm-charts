@@ -89,6 +89,25 @@ kubectl run kafka-client --rm -it --restart='Never' \
 
 > **Note**: `replicaCount` controls both the number of brokers and the size of the KRaft controller quorum. Use an odd number (3 or 5) for production to keep a healthy quorum. Changing `replicaCount` after the cluster has been formatted requires care — see the [Kafka KRaft docs](https://kafka.apache.org/documentation/#kraft).
 
+## Cluster sizing (replicas & replication)
+
+In KRaft combined mode each pod is both a broker and a controller, so `replicaCount` is your
+broker count **and** your controller quorum size. Two rules drive sizing:
+
+- **A replication factor can never exceed the number of brokers** — you can't keep 3 copies of data on 1 broker. This chart automatically caps the replication factors to `replicaCount`, so smaller clusters just work (see [Kafka Configuration](#kafka-configuration)).
+- **The controller quorum needs a majority to stay available** — `N` controllers tolerate `(N-1)/2` failures, so only an **odd** count gives you fault tolerance.
+
+Match `replicaCount` to your number of **independent nodes** (extra replicas on the same node share its fate and add no real availability):
+
+| Independent nodes | `replicaCount` | Replication factor | Survives a node failure? | Use case |
+| ----------------- | -------------- | ------------------ | ------------------------ | -------- |
+| 1                 | `1`            | 1                  | No                       | dev / CI / local, non-HA |
+| 2                 | `1` (or `2` for a second data copy) | 1–2 | No (even quorum tolerates 0 failures) | small, non-HA |
+| 3                 | `3` (default)  | 3                  | Yes (tolerates 1)        | production HA |
+| 5                 | `5`            | 3 (capped)         | Yes (tolerates 2)        | larger production |
+
+> Two nodes is the awkward case: a 2-node quorum still tolerates **zero** failures, so it costs double without buying availability. Jump straight from 1 → 3 for fault tolerance.
+
 ## Configuration
 
 ### Global parameters
@@ -127,20 +146,27 @@ kubectl run kafka-client --rm -it --restart='Never' \
 | `podDisruptionBudget.maxUnavailable` | maxUnavailable for Pod Disruption Budget                                                 | `""`                         |
 | `networkPolicy.enabled`              | Enable network policies                                                                  | `false`                      |
 | `heapOpts`                           | Kafka JVM heap options (`KAFKA_HEAP_OPTS`)                                                | `-Xmx1G -Xms1G`              |
-| `command`                            | Override default container command                                                       | `[]`                         |
+| `command`                            | Command run after storage formatting, instead of `kafka-server-start.sh` (does not override the container command) | `[]`     |
+| `extraArgs`                          | Extra arguments appended to `kafka-server-start.sh` (ignored when `command` is set), e.g. `--override key=value` | `[]`     |
 
 ### Kafka Configuration
 
 | Parameter                                          | Description                                                       | Default |
 | -------------------------------------------------- | ----------------------------------------------------------------- | ------- |
 | `kafkaConfig.numPartitions`                        | Default number of log partitions per topic                        | `3`     |
-| `kafkaConfig.defaultReplicationFactor`             | Default replication factor for automatically created topics       | `3`     |
-| `kafkaConfig.offsetsTopicReplicationFactor`        | Replication factor for the offsets topic                          | `3`     |
-| `kafkaConfig.transactionStateLogReplicationFactor` | Replication factor for the transaction state log topic            | `3`     |
-| `kafkaConfig.transactionStateLogMinIsr`            | Minimum in-sync replicas for the transaction state log topic      | `2`     |
+| `kafkaConfig.defaultReplicationFactor`             | Default replication factor for automatically created topics (capped to `replicaCount`) | `3` |
+| `kafkaConfig.offsetsTopicReplicationFactor`        | Replication factor for the offsets topic (capped to `replicaCount`) | `3`   |
+| `kafkaConfig.transactionStateLogReplicationFactor` | Replication factor for the transaction state log topic (capped to `replicaCount`) | `3` |
+| `kafkaConfig.transactionStateLogMinIsr`            | Minimum in-sync replicas for the transaction state log topic (capped to the effective transaction-log replication factor) | `2` |
 | `kafkaConfig.autoCreateTopicsEnable`               | Enable auto creation of topics on the server                      | `true`  |
 | `kafkaConfig.logRetentionHours`                    | Number of hours to keep a log file before deleting it             | `168`   |
 | `kafkaConfig.extraConfig`                          | Extra Kafka configuration lines appended to `server.properties`   | `[]`    |
+
+> **Replication factors are capped to `replicaCount`.** A replication factor can never exceed the
+> number of brokers, so the factors above are automatically clamped — a 1- or 2-node cluster works
+> without lowering them by hand, while a 3+ node cluster keeps the full `3`/`2` values. Note that
+> Kafka does **not** re-replicate already-created internal topics (e.g. `__consumer_offsets`) when
+> you later scale up, so the effective replication of existing topics won't increase on its own.
 
 ### Service
 
@@ -235,6 +261,7 @@ sidecar. Metrics are **disabled by default**; the exporter image is fully config
 | `metrics.image.repository`             | kafka-exporter image repository                                    | `danielqsj/kafka-exporter` |
 | `metrics.image.tag`                    | kafka-exporter image tag                                           | `v1.9.0@sha256:…`        |
 | `metrics.containerPort`                | Port the kafka-exporter listens on                                 | `9308`                   |
+| `metrics.podAnnotations`               | Annotations for the kafka-exporter pod (e.g. Prometheus scrape annotations) | `{}`            |
 | `metrics.extraArgs`                    | Additional command-line flags passed to kafka-exporter             | `[]`                     |
 | `metrics.resources`                    | Resource requests and limits for the exporter                      | `{}`                     |
 | `metrics.service.type`                 | Metrics service type                                               | `ClusterIP`              |
@@ -336,9 +363,10 @@ is used as-is; a PKCS#1 key (`-----BEGIN RSA PRIVATE KEY-----`) is converted to 
 
 ## Example: production-like values
 
+A 3-node HA cluster with persistent storage and explicit resources, suitable for production.
+
 ```yaml
 replicaCount: 3
-clusterId: "M2tjWlpQVFJUR2ktZ0t3UQ"   # generate with: kafka-storage.sh random-uuid
 persistence:
   size: 50Gi
   storageClass: fast-ssd
@@ -349,10 +377,29 @@ resources:
   limits:
     memory: 4Gi
 kafkaConfig:
-  defaultReplicationFactor: 3
-  minInsyncReplicas: 2
   extraConfig:
-    - "min.insync.replicas=2"
+    - "min.insync.replicas=2"   # require 2 in-sync replicas for acks=all writes
+```
+
+## Example: single-node (non-HA) values
+
+A single combined broker + controller node, sized small for local development, CI, and
+other non-critical workloads (it cannot survive a node failure, so it is **not** for production).
+The replication factors are automatically capped to `replicaCount`, so you only need to set
+`replicaCount: 1`; the PodDisruptionBudget is disabled since it is meaningless with one replica.
+
+```yaml
+replicaCount: 1
+persistence:
+  size: 8Gi
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    memory: 1Gi
+podDisruptionBudget:
+  enabled: false
 ```
 
 ## Upgrading

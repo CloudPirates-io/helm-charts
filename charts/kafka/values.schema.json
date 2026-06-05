@@ -115,6 +115,9 @@
                 }
             }
         },
+        "extraArgs": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -247,6 +250,9 @@
                 },
                 "extraArgs": {
                     "type": "array"
+                },
+                "podAnnotations": {
+                    "type": "object"
                 },
                 "image": {
                     "type": "object",

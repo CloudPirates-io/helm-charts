@@ -20,6 +20,11 @@ spec:
     metadata:
       labels:
         {{- include "kafka.metrics.labels" . | nindent 8 }}
+      {{- $annotations := mergeOverwrite (deepCopy (.Values.commonAnnotations | default dict)) (.Values.metrics.podAnnotations | default dict) }}
+      {{- with $annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
 {{- with (include "kafka.imagePullSecrets" .) }}
 {{ . | nindent 6 }}

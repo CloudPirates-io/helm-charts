@@ -48,11 +48,17 @@ data:
     log.dirs={{ .Values.persistence.dataDir | default "/var/lib/kafka/data" }}
 
     # --- Topic defaults ---
+    {{- /* Replication can never exceed the broker count, so clamp every factor to
+           replicaCount (floored at 1). This keeps single/2-node clusters valid out of
+           the box while leaving the production-sized (>=3) case untouched. minIsr is
+           additionally clamped to the effective transaction-log replication factor. */}}
+    {{- $replicas := int .Values.replicaCount }}
+    {{- $txnRf := max 1 (min (int .Values.kafkaConfig.transactionStateLogReplicationFactor) $replicas) }}
     num.partitions={{ .Values.kafkaConfig.numPartitions }}
-    default.replication.factor={{ .Values.kafkaConfig.defaultReplicationFactor }}
-    offsets.topic.replication.factor={{ .Values.kafkaConfig.offsetsTopicReplicationFactor }}
-    transaction.state.log.replication.factor={{ .Values.kafkaConfig.transactionStateLogReplicationFactor }}
-    transaction.state.log.min.isr={{ .Values.kafkaConfig.transactionStateLogMinIsr }}
+    default.replication.factor={{ max 1 (min (int .Values.kafkaConfig.defaultReplicationFactor) $replicas) }}
+    offsets.topic.replication.factor={{ max 1 (min (int .Values.kafkaConfig.offsetsTopicReplicationFactor) $replicas) }}
+    transaction.state.log.replication.factor={{ $txnRf }}
+    transaction.state.log.min.isr={{ max 1 (min (int .Values.kafkaConfig.transactionStateLogMinIsr) $txnRf) }}
     auto.create.topics.enable={{ .Values.kafkaConfig.autoCreateTopicsEnable }}
     log.retention.hours={{ .Values.kafkaConfig.logRetentionHours }}
     {{- range .Values.kafkaConfig.extraConfig }}

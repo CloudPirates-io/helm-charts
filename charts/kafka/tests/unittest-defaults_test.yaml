@@ -69,6 +69,73 @@ tests:
           path: data["server.properties"]
           pattern: "2@RELEASE-NAME-kafka-2.RELEASE-NAME-kafka-headless"
 
+  - it: should keep the full replication factors at 3 replicas (production unchanged)
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*offsets\.topic\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.min\.isr=2$'
+
+  - it: should clamp all replication factors to replicaCount on a single node
+    template: configmap.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*offsets\.topic\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.min\.isr=1$'
+
+  - it: should cap the replication factor at 3 for large clusters
+    template: configmap.yaml
+    set:
+      replicaCount: 5
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+
+  - it: should respect an explicit replication factor below the broker count
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+      kafkaConfig:
+        defaultReplicationFactor: 2
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=2$'
+
+  - it: should clamp an explicit replication factor that exceeds the broker count
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+      kafkaConfig:
+        defaultReplicationFactor: 5
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+
   - it: should use a custom clusterDomain in the quorum voters
     template: configmap.yaml
     set:
@@ -373,3 +440,49 @@ tests:
           content:
             name: KAFKA_CLUSTER_ID
             value: test-cluster-id
+
+  - it: should exec kafka-server-start on its own line by default
+    template: statefulset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted\s+exec /opt/kafka/bin/kafka-server-start\.sh'
+
+  - it: should place a command override on its own line, not glued to the format command
+    template: statefulset.yaml
+    set:
+      command:
+        - sleep 3600
+    asserts:
+      # Regression: the override must start on a new line after --ignore-formatted,
+      # not be concatenated onto it (previously rendered `--ignore-formatted"sleep 3600"`).
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted\s+"sleep 3600"'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted"'
+
+  - it: should append extraArgs to the kafka-server-start command
+    template: statefulset.yaml
+    set:
+      extraArgs:
+        - --override
+        - num.io.threads=16
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'kafka-server-start\.sh "\$RUNTIME_CONFIG" "--override" "num.io.threads=16"'
+
+  - it: should ignore extraArgs when command is overridden
+    template: statefulset.yaml
+    set:
+      command:
+        - sleep 3600
+      extraArgs:
+        - --override
+        - num.io.threads=16
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'num\.io\.threads'

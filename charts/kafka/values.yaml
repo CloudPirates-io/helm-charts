@@ -131,16 +131,19 @@ tls:
 
 ## @section Kafka configuration parameters
 ## @see https://kafka.apache.org/documentation/#brokerconfigs
+## The replication factors below are automatically capped to replicaCount (a factor can never
+## exceed the number of brokers), so a 1- or 2-node cluster works without lowering these by hand.
+## Note: Kafka does not re-replicate already-created internal topics when you scale up later.
 kafkaConfig:
   ## @param kafkaConfig.numPartitions Default number of log partitions per topic
   numPartitions: 3
-  ## @param kafkaConfig.defaultReplicationFactor Default replication factor for automatically created topics
+  ## @param kafkaConfig.defaultReplicationFactor Default replication factor for automatically created topics (capped to replicaCount)
   defaultReplicationFactor: 3
-  ## @param kafkaConfig.offsetsTopicReplicationFactor Replication factor for the offsets topic
+  ## @param kafkaConfig.offsetsTopicReplicationFactor Replication factor for the offsets topic (capped to replicaCount)
   offsetsTopicReplicationFactor: 3
-  ## @param kafkaConfig.transactionStateLogReplicationFactor Replication factor for the transaction state log topic
+  ## @param kafkaConfig.transactionStateLogReplicationFactor Replication factor for the transaction state log topic (capped to replicaCount)
   transactionStateLogReplicationFactor: 3
-  ## @param kafkaConfig.transactionStateLogMinIsr Minimum in-sync replicas for the transaction state log topic
+  ## @param kafkaConfig.transactionStateLogMinIsr Minimum in-sync replicas for the transaction state log topic (capped to the effective transaction-log replication factor)
   transactionStateLogMinIsr: 2
   ## @param kafkaConfig.autoCreateTopicsEnable Enable auto creation of topics on the server
   autoCreateTopicsEnable: true
@@ -187,6 +190,10 @@ metrics:
     imagePullPolicy: Always
   ## @param metrics.containerPort Port the kafka-exporter listens on
   containerPort: 9308
+  ## @param metrics.podAnnotations Annotations to add to the kafka-exporter pod (e.g. Prometheus scrape annotations to scrape without a ServiceMonitor)
+  podAnnotations: {}
+  #  prometheus.io/scrape: "true"
+  #  prometheus.io/port: "9308"
   ## @param metrics.extraArgs Additional command-line flags passed to kafka-exporter
   extraArgs: []
   #  - --topic.filter=.*
@@ -361,8 +368,12 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
-## @param command Override default container command (useful when the default entrypoint needs to be replaced)
+## @param command Command run after storage formatting, instead of `kafka-server-start.sh` (does not override the container command)
 command: []
+## @param extraArgs Extra arguments appended to `kafka-server-start.sh` (ignored when `command` is set). Each item is a separate argument, e.g. `--override key=value`.
+extraArgs: []
+#  - --override
+#  - num.io.threads=16
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
