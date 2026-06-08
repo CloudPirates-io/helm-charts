@@ -1743,6 +1743,58 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[etcd] Update image.repository to v3.6.12 (#1361)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1361
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: etcd
+          url: https://etcd.io/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/etcd
+        - name: Application
+          url: https://github.com/etcd-io/etcd
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.6.12
+    created: "2026-06-08T06:38:17.705175969Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: etcd is a distributed reliable key-value store for the most critical
+      data of a distributed system
+    digest: 899213787c3883a032a6c3563b3d5ab6d81d266aab08ea0fc3dee08455e8f223
+    home: https://etcd.io/
+    icon: https://a.storyblok.com/f/143071/513x513/36b7a72378/etcd-logo.svg
+    keywords:
+    - etcd
+    - distributed
+    - key-value
+    - consensus
+    - raft
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: etcd
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+    - https://github.com/etcd-io/etcd
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/etcd-0.8.1/etcd-0.8.1.tgz
+    version: 0.8.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[etcd] Add clusterDomain to define custom dns suffix (#1344)'
           links:
           - name: Pull Request
@@ -6507,6 +6559,74 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.1.0/ghost-0.1.0.tgz
     version: 0.1.0
   keycloak:
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: '[keycloak/keycloak] Update image.repository to v26.6.3 (#1362)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1362
+        - kind: changed
+          description: '[mariadb] Update initContainers.waitForMariadb.repository to v12.3.2
+            (#1367)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1367
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Keycloak
+          url: https://www.keycloak.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+        - name: Application
+          url: https://github.com/keycloak/keycloak
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 26.6.3
+    created: "2026-06-08T06:38:17.890323688Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.9.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: Open Source Identity and Access Management Solution
+    digest: 6d569f7ec2928b5fb075287a6cf47a36a6941e2824fcda2ada6b29b1464ff6a4
+    home: https://www.keycloak.org
+    icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg
+    keywords:
+    - keycloak
+    - identity
+    - access-management
+    - authentication
+    - authorization
+    - oauth
+    - openid-connect
+    - saml
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: keycloak
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.21.10/keycloak-0.21.10.tgz
+    version: 0.21.10
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |-
@@ -34356,6 +34476,59 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[redis] Update image.repository to v8.6.4 (#1363)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1363
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Redis
+          url: https://redis.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+        - name: Application
+          url: https://github.com/redis/redis
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.6.4
+    created: "2026-06-08T06:38:18.221027995Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: An open source, in-memory data structure store used as a database,
+      cache, and message broker.
+    digest: 5760ddbb2919fd944fcf099debe87cb2440100aec1880facf0815cd7fe225cfd
+    home: https://www.redis.io
+    icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+    keywords:
+    - redis
+    - database
+    - cache
+    - in-memory
+    - key-value
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: redis
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - https://github.com/redis/redis
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/redis-0.30.1/redis-0.30.1.tgz
+    version: 0.30.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[redis]: Fix use of podLabels for sts volumeClaimTemplates.labels
             (#1353)'
           links:
@@ -48514,4 +48687,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-08T06:36:04.936720626Z"
+generated: "2026-06-08T06:38:18.222533625Z"
