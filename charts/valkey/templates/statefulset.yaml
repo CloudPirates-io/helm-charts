@@ -602,7 +602,9 @@ spec:
   {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         {{- with $labels := merge (include "valkey.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
         labels:
