@@ -18789,6 +18789,55 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[mongo] Update image.repository to 8dbb3db (#1360)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1360
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.3.2
+    created: "2026-06-08T06:46:57.455398703Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: c7ba2e0a99e35cb599d09749c279d63906e52d7ee38d386ae2181772ac499297
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.17.4/mongodb-0.17.4.tgz
+    version: 0.17.4
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[mongo] Update image.repository to v8.3.2 (#1310)'
           links:
           - name: Pull Request
@@ -28388,6 +28437,58 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[rabbitmq] Update image.repository to v4.3.1 (#1345)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1345
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RabbitMQ
+          url: https://www.rabbitmq.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
+        - name: Application
+          url: https://github.com/rabbitmq/rabbitmq-server
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 4.3.1
+    created: "2026-06-08T06:46:57.596234309Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: A messaging broker that implements the Advanced Message Queuing Protocol
+      (AMQP)
+    digest: e263518fadd824c6378d891e216c04b03993841eaee7cd5a01091074a2d702eb
+    home: https://www.rabbitmq.com
+    icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+    keywords:
+    - rabbitmq
+    - message broker
+    - amqp
+    - messaging
+    - queue
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: rabbitmq
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq
+    - https://github.com/rabbitmq/rabbitmq-server
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-0.21.6/rabbitmq-0.21.6.tgz
+    version: 0.21.6
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[rabbitmq] Apply global.imageRegistry to init and definitions-reload
             images (#1352)'
           links:
@@ -34472,6 +34573,59 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-cluster-operator-0.1.0/rabbitmq-cluster-operator-0.1.0.tgz
     version: 0.1.0
   redis:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: '[redis] Update image.repository to v8.8.0 (#1346)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1346
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Redis
+          url: https://redis.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+        - name: Application
+          url: https://github.com/redis/redis
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.8.8
+    created: "2026-06-08T06:46:57.761709119Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: An open source, in-memory data structure store used as a database,
+      cache, and message broker.
+    digest: 553c245a835642de76b66b8258c259e26cece296a4124a42b6248e76f85a9f5d
+    home: https://www.redis.io
+    icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+    keywords:
+    - redis
+    - database
+    - cache
+    - in-memory
+    - key-value
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: redis
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - https://github.com/redis/redis
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/redis-0.30.2/redis-0.30.2.tgz
+    version: 0.30.2
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
@@ -48687,4 +48841,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-08T06:38:18.222533625Z"
+generated: "2026-06-08T06:46:57.763324636Z"
