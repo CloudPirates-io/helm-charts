@@ -120,6 +120,7 @@ spec:
         - name: metrics-uri-init
           image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
           imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -329,4 +330,4 @@ spec:
         {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-{{- end }}
+{{- end }
