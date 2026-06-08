@@ -55,6 +55,8 @@ spec:
     {{- end }}
   {{- end }}
   ingress:
+    - ports:
+        - port: {{ .Values.clusterOperator.containerPorts.health }}
     {{- if .Values.clusterOperator.metrics.service.enabled }}
     - ports:
         - port: {{ .Values.clusterOperator.containerPorts.metrics }}

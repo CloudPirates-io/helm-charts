@@ -259,16 +259,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Persistence
 
-| Parameter                   | Description                                        | Default         |
-| --------------------------- | -------------------------------------------------- | --------------- |
-| `persistence.enabled`       | Enable persistent storage                          | `true`          |
-| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
-| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
-| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
-| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
-| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
-| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
-| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
+| Parameter                   | Description                                                 | Default         |
+| --------------------------- | ----------------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                                   | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                         | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                           | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                                   | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                                   | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims                    | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence          | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to                  | `""`            |
+| `persistence.labels`        | Map of labels to add to the Persistent Volume Claims (PVCs) | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -346,6 +347,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.monitorTarget`                      | Override Sentinel master discovery with an explicit hostname or IP (multi-region/multi-cluster) | `""`        |
 | `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
 | `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
@@ -370,6 +372,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
 | `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
 
 ### ServiceAccount
 
