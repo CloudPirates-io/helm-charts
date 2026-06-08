@@ -1,4 +1,4 @@
-# Generated from: https://raw.githubusercontent.com/rabbitmq/cluster-operator/v2.19.1/config/crd/bases/rabbitmq.com_rabbitmqclusters.yaml
+# Generated from: https://raw.githubusercontent.com/rabbitmq/cluster-operator/v2.21.0/config/crd/bases/rabbitmq.com_rabbitmqclusters.yaml
 # RabbitMQ Cluster Operator
 #
 # Copyright 2020 VMware, Inc. All Rights Reserved.
@@ -11,13 +11,12 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.19.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: rabbitmqclusters.rabbitmq.com
 spec:
   group: rabbitmq.com
   names:
     categories:
-      - all
       - rabbitmq
     kind: RabbitmqCluster
     listKind: RabbitmqClusterList
@@ -3960,6 +3959,11 @@ spec:
                                       x-kubernetes-list-map-keys:
                                         - name
                                       x-kubernetes-list-type: map
+                                    schedulingGroup:
+                                      properties:
+                                        podGroupName:
+                                          type: string
+                                      type: object
                                     securityContext:
                                       properties:
                                         appArmorProfile:
@@ -4934,18 +4938,6 @@ spec:
                                       x-kubernetes-list-map-keys:
                                         - name
                                       x-kubernetes-list-type: map
-                                    workloadRef:
-                                      properties:
-                                        name:
-                                          type: string
-                                        podGroup:
-                                          type: string
-                                        podGroupReplicaKey:
-                                          type: string
-                                      required:
-                                        - name
-                                        - podGroup
-                                      type: object
                                   required:
                                     - containers
                                   type: object
@@ -5153,6 +5145,9 @@ spec:
                         For more information on env config, see https://www.rabbitmq.com/man/rabbitmq-env.conf.5.html
                       maxLength: 100000
                       type: string
+                      x-kubernetes-validations:
+                        - message: envConfig must not contain shell command substitution ('$(...)' or backticks)
+                          rule: '!self.contains(''$('') && !self.contains(''`'')'
                     erlangInetConfig:
                       description: |-
                         Erlang Inet configuration to apply to the Erlang VM running rabbit.
@@ -5376,11 +5371,11 @@ spec:
                         Name of a Secret in the same Namespace as the RabbitmqCluster, containing the Certificate Authority's public certificate for TLS.
                         The Secret must store this as ca.crt.
                         This Secret can be created by running `kubectl create secret generic ca-secret --from-file=ca.crt=path/to/ca.crt`
-                        Used for mTLS, and TLS for rabbitmq_web_stomp and rabbitmq_web_mqtt.
+                        Used for mTLS.
                       type: string
                     disableNonTLSListeners:
                       description: |-
-                        When set to true, the RabbitmqCluster disables non-TLS listeners for RabbitMQ, management plugin and for any enabled plugins in the following list: stomp, mqtt, web_stomp, web_mqtt.
+                        When set to true, the RabbitmqCluster disables non-TLS listeners for RabbitMQ, management plugin and for any enabled plugins in the following list: stomp, mqtt, web_stomp, web_mqtt, web_amqp.
                         Only TLS-enabled clients will be able to connect.
                       type: boolean
                     secretName:

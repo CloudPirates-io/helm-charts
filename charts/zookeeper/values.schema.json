@@ -105,6 +105,9 @@
         "livenessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -262,6 +265,9 @@
         "readinessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },

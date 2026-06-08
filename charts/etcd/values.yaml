@@ -37,6 +37,9 @@ podLabels: {}
 ## @param podAnnotations Additional annotations for etcd pods
 podAnnotations: {}
 
+## @param clusterDomain DNS suffix for internal service discovery
+clusterDomain: cluster.local
+
 ## @section Service configuration
 service:
   ## @param service.type Kubernetes service type
