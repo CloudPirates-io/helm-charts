@@ -12,6 +12,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override zookeeper.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param serverIdOffset Offset for server IDs in zoo.cfg (set to 1 for Bitnami migration where myid starts at 1)
 ## When migrating from Bitnami Zookeeper:
 ##   1. Set serverIdOffset: 1 (Bitnami uses 1-based myid: 1,2,3 vs default 0-based: 0,1,2)
@@ -41,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:fc17a45b74b4330fe2a02c1f0f1790696cc097695a967a32a203875814d44c17"
+  tag: "3.9.5@sha256:e12cace7b5fcfaadf17d6532e83fd8fe71fdf40ab73f22370ccc314bcf7a38b4"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -83,6 +85,13 @@ zookeeperConfig:
   ## possible values are: "srvr,ruok,conf,cons,dump,envi,ruok,mntr,stat" or "*" to allow all commands
   ## @see https://zookeeper.apache.org/doc/r3.5.9/zookeeperAdmin.html#sc_clusterOptions
   commandsWhitelist: "srvr"
+  ## @param zookeeperConfig.customServers Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values.
+  ## Example:
+  ##   zookeeperConfig:
+  ##     customServers:
+  ##       - "server.10=zk-external-0.example.com:2888:3888"
+  ##       - "server.11=zk-external-1.example.com:2888:3888"
+  customServers: []
   autopurge:
     ## @param zookeeperConfig.autopurge.purgeInterval Zookeeper autopurge purge interval (in hours)
     purgeInterval: 24
@@ -99,6 +108,10 @@ zookeeperConfig:
     idleTimeout: 30000
     ## @param zookeeperConfig.admin.commandUrl Zookeeper Admin server command URL
     commandUrl: "/commands"
+  ## @param zookeeperConfig.extraConfigs Extra ZooKeeper configuration lines to append to zoo.cfg
+  extraConfigs: []
+  #  - "secureClientPort=2281"
+  #  - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
 
 
 ## @section Zookeeper Metrics configuration
@@ -175,6 +188,8 @@ service:
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
+    ## @param service.ports.secureClient Zookeeper secure client service port
+    secureClient: 2281
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
     ## @param service.ports.leaderElection Zookeeper leader election service port
@@ -243,6 +258,8 @@ livenessProbe:
   failureThreshold: 6
   ## @param livenessProbe.successThreshold Success threshold for livenessProbe
   successThreshold: 1
+  ## @param livenessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 readinessProbe:
   ## @param readinessProbe.enabled Enable readinessProbe on zookeeper containers
@@ -257,6 +274,8 @@ readinessProbe:
   failureThreshold: 6
   ## @param readinessProbe.successThreshold Success threshold for readinessProbe
   successThreshold: 1
+  ## @param readinessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
 
 
 startupProbe:

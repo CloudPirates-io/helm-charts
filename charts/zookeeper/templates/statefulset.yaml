@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- with (include "zookeeper.annotations" .) }}
@@ -42,6 +42,9 @@ spec:
           ports:
             - name: client
               containerPort: {{ .Values.service.ports.client | default 2181 }}
+              protocol: TCP
+            - name: secure-client
+              containerPort: {{ .Values.service.ports.secureClient | default 2281 }}
               protocol: TCP
             - name: quorum
               containerPort: {{ .Values.service.ports.quorum | default 2888 }}
@@ -86,16 +89,24 @@ spec:
               exec /docker-entrypoint.sh zkServer.sh start-foreground
               {{- end }}
           livenessProbe:
+            {{- if .Values.livenessProbe.custom }}
+            {{- toYaml .Values.livenessProbe.custom | nindent 12 }}
+            {{- else }}
             tcpSocket:
               port: client
+            {{- end }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             successThreshold: {{ .Values.livenessProbe.successThreshold }}
           readinessProbe:
+            {{- if .Values.readinessProbe.custom }}
+            {{- toYaml .Values.readinessProbe.custom | nindent 12 }}
+            {{- else }}
             tcpSocket:
               port: client
+            {{- end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -148,7 +159,7 @@ spec:
       metadata:
         name: data
         labels:
-          {{- include "zookeeper.labels" . | nindent 10 }}
+          {{- include "zookeeper.selectorLabels" . | nindent 10 }}
         {{- with .Values.persistence.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}

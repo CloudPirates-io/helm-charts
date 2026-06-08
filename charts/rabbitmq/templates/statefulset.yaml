@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "rabbitmq.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- toYaml (merge (include "rabbitmq.labels" . | fromYaml) .Values.statefulsetLabels) | nindent 4 }}
   {{- if or (include "rabbitmq.annotations" .) .Values.statefulsetAnnotations }}
@@ -40,7 +40,7 @@ spec:
       {{- end }}
       initContainers:
         - name: init-erlang-cookie
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -71,7 +71,7 @@ spec:
           {{- end }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -224,7 +224,7 @@ spec:
                   fieldPath: metadata.name
             {{- if .Values.peerDiscoveryK8sPlugin.useLongname }}
             - name: RABBITMQ_NODENAME
-              value: rabbit@$(NODE_NAME).{{ include "rabbitmq.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+              value: rabbit@$(NODE_NAME).{{ include "rabbitmq.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
             {{- else }}
             - name: RABBITMQ_NODENAME
               value: rabbit@$(NODE_NAME)
@@ -294,7 +294,7 @@ spec:
             {{- end }}
         {{- if and .Values.definitions.enabled .Values.definitions.autoReload.enabled }}
         - name: definitions-reloader
-          image: "{{ .Values.definitions.autoReload.image.registry }}/{{ .Values.definitions.autoReload.image.repository }}:{{ .Values.definitions.autoReload.image.tag }}"
+          image: {{ include "rabbitmq.definitions.autoReload.image" . | quote }}
           imagePullPolicy: {{ .Values.definitions.autoReload.image.pullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:

@@ -105,6 +105,9 @@
         "livenessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -188,6 +191,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "networkPolicy": {
             "type": "object",
             "properties": {
@@ -259,6 +265,9 @@
         "readinessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -321,6 +330,9 @@
                             "type": "integer"
                         },
                         "quorum": {
+                            "type": "integer"
+                        },
+                        "secureClient": {
                             "type": "integer"
                         }
                     }
@@ -396,8 +408,14 @@
                 "commandsWhitelist": {
                     "type": "string"
                 },
+                "customServers": {
+                    "type": "array"
+                },
                 "electionPortBindRetry": {
                     "type": "integer"
+                },
+                "extraConfigs": {
+                    "type": "array"
                 },
                 "initLimit": {
                     "type": "integer"

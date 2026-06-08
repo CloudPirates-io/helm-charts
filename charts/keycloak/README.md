@@ -76,12 +76,13 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Common parameters
 
-| Parameter           | Description                                    | Default |
-| ------------------- | ---------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override keycloak.fullname | `""`    |
-| `fullnameOverride`  | String to fully override keycloak.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects          | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects     | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override keycloak.fullname     | `""`    |
+| `fullnameOverride`  | String to fully override keycloak.fullname         | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
 ### Keycloak image configuration
 
@@ -135,15 +136,16 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Security
 
-| Parameter                                           | Description                                       | Default   |
-| --------------------------------------------------- | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1001`    |
-| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `containerSecurityContext.runAsUser`                | User ID for the Keycloak container                | `1001`    |
-| `containerSecurityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`    |
-| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`   |
-| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
+| Parameter                                           | Description                                       | Default                  |
+| --------------------------------------------------- | ------------------------------------------------- | ------------------------ |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `1001`                   |
+| `podSecurityContext.seccompProfile`                 | Seccomp profile for the pod                       | `{type: RuntimeDefault}` |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`                  |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`                   |
+| `containerSecurityContext.runAsUser`                | User ID for the Keycloak container                | `1001`                   |
+| `containerSecurityContext.runAsGroup`               | Group ID for the Keycloak container               | `1001`                   |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `false`                  |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]`                |
 
 ### Keycloak Configuration
 

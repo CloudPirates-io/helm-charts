@@ -26,6 +26,8 @@ spec:
     {{- end }}
   {{- else }}
   serviceName: {{ include "redis.fullname" . }}-headless
+  updateStrategy:
+    {{- toYaml .Values.updateStrategy | nindent 4 }}
   {{- end }}
   replicas: {{ if eq .Values.architecture "standalone" }}1{{ else }}{{ .Values.replicaCount }}{{ end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
@@ -65,8 +67,25 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if (list "replication" "cluster" | has .Values.architecture) }}
+      {{- if or (list "replication" "cluster" | has .Values.architecture) .Values.volumePermissions.enabled }}
       initContainers:
+        {{- if .Values.volumePermissions.enabled }}
+        - name: volume-permissions
+          image: "{{ .Values.volumePermissions.image.registry | default .Values.global.imageRegistry }}/{{ .Values.volumePermissions.image.repository }}:{{ .Values.volumePermissions.image.tag }}"
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.volumePermissions.image) }}
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              chown -R {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} {{ .Values.persistence.mountPath }}
+          securityContext:
+            runAsUser: 0
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+        {{- end }}
+        {{- if (list "replication" "cluster" | has .Values.architecture) }}
         - name: redis-init
           image: {{ include "redis.image" . | quote }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -503,9 +522,10 @@ spec:
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
+        {{- end }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: redis
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
@@ -517,6 +537,10 @@ spec:
               CONFIG_FILE="/tmp/redis.conf"
               {{- else }}
               CONFIG_FILE="{{ include "redis.configFullName" . }}"
+              {{- end }}
+              {{- if gt (int .Values.cluster.startupSleepTime) 0 }}
+              echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
+              sleep {{ .Values.cluster.startupSleepTime }}
               {{- end }}
 
               redis-server "$CONFIG_FILE" {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }} --requirepass "${REDIS_PASSWORD}" {{- end }} {{- range .Values.extraFlags }} {{ . }}{{- end }}
@@ -856,7 +880,7 @@ spec:
               bind * -::*
               sentinel resolve-hostnames yes
               sentinel announce-hostnames no
-              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }}{{- else }} ${MASTER_HOST}{{- end }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
@@ -1019,7 +1043,7 @@ spec:
               # Enable hostname resolution for Redis Sentinel
               sentinel resolve-hostnames yes
               sentinel announce-hostnames yes
-              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }}{{- else }} ${MASTER_HOST}{{- end }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
@@ -1282,7 +1306,7 @@ spec:
         name: data
         labels:
           {{- include "redis.selectorLabels" . | nindent 10 }}
-          {{- with .Values.podLabels }}
+          {{- with .Values.persistence.labels }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- with .Values.persistence.annotations }}

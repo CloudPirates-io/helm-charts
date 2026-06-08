@@ -229,10 +229,7 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter` |
 | `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
-| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                      |
-| `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                     |
-| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                     | `nil`                      |
-| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                  | `64Mi`                     |
+| `metrics.resources`                        | Resource limits and requests for metrics container                                      | `{}`                       |
 | `metrics.extraArgs`                        | Extra arguments for Redis exporter (e.g. `--redis.addr`, `--web.listen-address`)        | `[]`                       |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
@@ -262,16 +259,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Persistence
 
-| Parameter                   | Description                                        | Default         |
-| --------------------------- | -------------------------------------------------- | --------------- |
-| `persistence.enabled`       | Enable persistent storage                          | `true`          |
-| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
-| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
-| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
-| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
-| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
-| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
-| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
+| Parameter                   | Description                                                 | Default         |
+| --------------------------- | ----------------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                                   | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                         | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                           | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                                   | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                                   | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims                    | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence          | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to                  | `""`            |
+| `persistence.labels`        | Map of labels to add to the Persistent Volume Claims (PVCs) | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -283,11 +281,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Resource Management
 
-| Parameter                   | Description    | Default |
-| --------------------------- | -------------- | ------- |
-| `resources.limits.memory`   | Memory limit   | `256Mi` |
-| `resources.requests.cpu`    | CPU request    | `50m`   |
-| `resources.requests.memory` | Memory request | `128Mi` |
+| Parameter   | Description                                | Default |
+| ----------- | ------------------------------------------ | ------- |
+| `resources` | Resource limits and requests for Redis pod | `{}`    |
 
 ### Pod Assignment / Eviction
 
@@ -351,6 +347,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.monitorTarget`                      | Override Sentinel master discovery with an explicit hostname or IP (multi-region/multi-cluster) | `""`        |
 | `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
 | `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
@@ -359,9 +356,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.port`                               | Sentinel port                                                                                 | `26379`     |
 | `sentinel.service.type`                       | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
 | `sentinel.service.port`                       | Sentinel service port                                                                         | `26379`     |
-| `sentinel.resources.limits.memory`            | Memory limit for Sentinel pods                                                                | `128Mi`     |
-| `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
-| `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
+| `sentinel.resources`                          | Resource limits and requests for Sentinel pods                                                | `{}`        |
 | `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
 | `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
 | `sentinel.preStop.enabled`                    | Enable preStop hook for Sentinel container (waits for failover before terminating)            | `true`      |
@@ -377,6 +372,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
 | `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
 
 ### ServiceAccount
 
@@ -411,9 +407,6 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | Parameter                                  | Description                                      | Default |
 | ------------------------------------------ | ------------------------------------------------ | ------- |
 | `clusterInitJob.resources`                 | Resource limits and requests for clusterInit Job | `{}`    |
-| `clusterInitJob.resources.limits.memory`   | Memory limit for clusterInit Job                 | `128Mi` |
-| `clusterInitJob.resources.requests.cpu`    | CPU request for clusterInit Job                  | `10m`   |
-| `clusterInitJob.resources.requests.memory` | Memory request for clusterInit Job               | `64Mi`  |
 
 #### Extra Objects
 
