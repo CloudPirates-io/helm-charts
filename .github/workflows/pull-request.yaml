@@ -81,7 +81,7 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: |
           if ! helm plugin list | grep -q unittest; then
-            helm plugin install https://github.com/helm-unittest/helm-unittest
+            helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
           else
             echo "helm-unittest plugin already installed"
           fi
@@ -127,7 +127,7 @@ jobs:
       - name: Installing plugin helm-unittest
         run: |
           if ! helm plugin list | grep -q unittest; then
-            helm plugin install https://github.com/helm-unittest/helm-unittest
+            helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
           else
             echo "helm-unittest plugin already installed"
           fi
