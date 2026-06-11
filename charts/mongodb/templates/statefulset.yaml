@@ -304,6 +304,9 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
 {{- end }}
+        {{- with .Values.global.dataNodes.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: extrainitscripts
           emptyDir: {}
@@ -347,6 +350,9 @@ spec:
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+        {{- with .Values.global.dataNodes.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

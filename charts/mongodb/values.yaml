@@ -4,6 +4,12 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  ## @section global.dataNodes Global settings applied to all data node statefulsets
+  dataNodes:
+    ## @param global.dataNodes.extraContainers Additional containers to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraContainers: []
+    ## @param global.dataNodes.extraVolumes Additional volumes to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraVolumes: []
 
 ## @section Common parameters
 ## @param nameOverride String to partially override mongodb.fullname
@@ -82,6 +88,27 @@ config:
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key that will hold configuration
   existingConfigmapKey: ""
+
+## @section customRoles Optional roles to be created at initialisation (before customUsers)
+customRoles: []
+  ## Each entry supports the following fields:
+  ## @param customRoles[].role Role name to create
+  ## @param customRoles[].database Database where the role is created (default: admin)
+  ## @param customRoles[].privileges List of privilege objects with resource and actions
+  ## @param customRoles[].roles List of inherited roles (strings apply to same database, objects with {role, db} for cross-database)
+  ## Example:
+  # - role: myCustomRole
+  #   database: admin
+  #   privileges:
+  #     - resource: { cluster: true }
+  #       actions: ["find"]
+  #     - resource: { db: "", collection: "" }
+  #       actions: ["find", "listCollections", "listIndexes"]
+  #   roles:
+  #     - backup
+  #     - restore
+  #     - clusterMonitor
+  #     - { role: "read", db: "reporting" }
 
 ## @section customUsers Optional users to be created at initialisation
 customUsers: []
