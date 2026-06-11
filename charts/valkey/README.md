@@ -260,6 +260,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Valkey exporter image pull policy                                               | `Always`                   |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                       |
+| `metrics.extraEnvVars`                     | Additional environment variables to set for the metrics exporter container      | `[]`                       |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                       |
 | `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                       |
 | `metrics.service.port`                     | Metrics service port                                                            | `9121`                     |
