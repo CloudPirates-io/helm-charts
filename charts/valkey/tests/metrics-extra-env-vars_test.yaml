@@ -1,0 +1,58 @@
+suite: test valkey metrics exporter extra env vars
+templates:
+  - statefulset.yaml
+set:
+  metrics:
+    enabled: true
+tests:
+  - it: should only set REDIS_PASSWORD on the metrics container by default
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers[1].env
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[1].env[0].name
+          value: REDIS_PASSWORD
+
+  - it: should render metrics.extraEnvVars on the metrics container
+    set:
+      metrics:
+        enabled: true
+        extraEnvVars:
+          - name: REDIS_EXPORTER_CHECK_KEYS
+            value: "sessions*,tokens*"
+          - name: REDIS_EXPORTER_INCL_SYSTEM_METRICS
+            value: "true"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_EXPORTER_CHECK_KEYS
+            value: "sessions*,tokens*"
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_EXPORTER_INCL_SYSTEM_METRICS
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[1].env
+          any: true
+          content:
+            name: REDIS_PASSWORD
+
+  - it: should render metrics.extraEnvVars when auth is disabled
+    set:
+      auth:
+        enabled: false
+      metrics:
+        enabled: true
+        extraEnvVars:
+          - name: REDIS_EXPORTER_CHECK_KEYS
+            value: "sessions*"
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers[1].env
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[1].env[0].name
+          value: REDIS_EXPORTER_CHECK_KEYS

@@ -516,6 +516,9 @@ spec:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
             {{- end }}
+            {{- with .Values.metrics.extraEnvVars }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
           ports:
             - name: metrics
               containerPort: 9121

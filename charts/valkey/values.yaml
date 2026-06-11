@@ -369,6 +369,8 @@ metrics:
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
+  ## @param metrics.extraEnvVars Additional environment variables to set on the metrics exporter container
+  extraEnvVars: []
   ## Metrics service configuration
   service:
     ## @param metrics.service.annotations Additional custom annotations for Metrics service
