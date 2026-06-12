@@ -6558,6 +6558,58 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.1.0/ghost-0.1.0.tgz
     version: 0.1.0
+  kafka:
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Kafka
+          url: https://kafka.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+        - name: Application
+          url: https://github.com/apache/kafka
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 4.2.1
+    created: "2026-06-12T12:18:08.955753238Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: Apache Kafka is a distributed event streaming platform used for high-performance
+      data pipelines, streaming analytics, and data integration. This chart deploys
+      Kafka in KRaft mode (no ZooKeeper required).
+    digest: d4454a8a0d987139fe7501093bbfe37b4e7ac5ee2075883a09c6cbb3ae2f82ea
+    home: https://kafka.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/a5d4be1ea1/kafka-logo.svg
+    keywords:
+    - kafka
+    - streaming
+    - messaging
+    - event-streaming
+    - kraft
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: vaggelis.vk@gmail.com
+      name: vaggeliskls
+      url: https://github.com/vaggeliskls
+    name: kafka
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+    - https://github.com/apache/kafka
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/kafka-0.1.0/kafka-0.1.0.tgz
+    version: 0.1.0
   keycloak:
   - annotations:
       artifacthub.io/category: security
@@ -48999,4 +49051,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-09T11:41:00.800429434Z"
+generated: "2026-06-12T12:18:09.169620149Z"
