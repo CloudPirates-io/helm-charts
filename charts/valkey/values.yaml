@@ -369,6 +369,14 @@ metrics:
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
+  ## @param metrics.extraEnvVars Additional environment variables to set for the metrics exporter container
+  ## Can be used to pass redis_exporter command line flags as environment variables, e.g.:
+  ## extraEnvVars:
+  ##   - name: REDIS_EXPORTER_CHECK_KEYS
+  ##     value: "db0=mykey*"
+  ##   - name: REDIS_EXPORTER_IS_CLUSTER
+  ##     value: "true"
+  extraEnvVars: []
   ## Metrics service configuration
   service:
     ## @param metrics.service.annotations Additional custom annotations for Metrics service
