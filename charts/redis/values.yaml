@@ -200,6 +200,8 @@ cluster:
 
 ## @param extraConfig Additional Redis configuration to be appended to the generated config
 ## This provides flexibility to add any Redis configuration directives
+## Note: in standalone architecture this is appended to the chart-managed ConfigMap, so it has
+## no effect when config.existingConfigmap is set (add the directives to your own ConfigMap instead)
 ## Example:
 ## extraConfig: |
 ##   # Custom memory policy
