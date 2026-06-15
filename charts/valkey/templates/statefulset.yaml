@@ -183,6 +183,15 @@ spec:
               fi
               {{- end }}
 
+              {{- if and .Values.auth.enabled (ne .Values.architecture "standalone") }}
+              # IMPORTANT: Always add masterauth for non-standalone architectures
+              # Even if this pod starts as master, it may become a replica after failover
+              # Without masterauth, REPLICAOF commands from sentinel will fail with NOAUTH
+              echo "" >> /tmp/valkey/valkey.conf
+              echo "# Authentication for replication (required for failover scenarios)" >> /tmp/valkey/valkey.conf
+              echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
+              {{- end }}
+
               # Add user provided settings at the end of file to ensure their precedence
               echo "" >> /tmp/valkey/valkey.conf
               # If there is existing config map or .Values.config value provided - use it
