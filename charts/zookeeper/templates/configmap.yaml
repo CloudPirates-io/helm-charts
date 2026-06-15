@@ -16,7 +16,9 @@ data:
     initLimit={{ .Values.zookeeperConfig.initLimit | default 10 }}
     syncLimit={{ .Values.zookeeperConfig.syncLimit | default 5 }}
     clientPort={{ .Values.service.ports.client | default 2181 }}
-    secureClientPort={{ .Values.service.ports.secureClient | default 2281 }}
+    {{- if .Values.service.ports.secureClient }}
+    secureClientPort={{ .Values.service.ports.secureClient }}
+    {{- end }}
     electionPortBindRetry={{ .Values.zookeeperConfig.electionPortBindRetry | default 10 }}
     maxClientCnxns={{ .Values.zookeeperConfig.maxClientCnxns | default 60 }}
     #standaloneEnabled={{ .Values.zookeeperConfig.standaloneEnabled | default "false" }}
