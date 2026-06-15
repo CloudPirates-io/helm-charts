@@ -150,7 +150,7 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
-| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
+| `service.ports.secureClient`   | TLS client port. Set to null to disable (default). When set, also configure SSL via zookeeperConfig.extraConfigs and mount keystore files with extraVolumes/extraVolumeMounts. Setting the port without SSL config will cause startup failure.     | `null`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |

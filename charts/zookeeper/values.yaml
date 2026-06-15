@@ -188,8 +188,8 @@ service:
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
-    ## @param service.ports.secureClient Zookeeper secure client service port
-    secureClient: 2281
+    ## @param service.ports.secureClient TLS client port (e.g. 2281). Set to null to disable.
+    secureClient: null
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
     ## @param service.ports.leaderElection Zookeeper leader election service port
