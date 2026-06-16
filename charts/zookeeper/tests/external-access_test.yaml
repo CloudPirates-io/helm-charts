@@ -1,0 +1,47 @@
+suite: test zookeeper external access
+
+tests:
+  - it: should not create external access services by default
+    template: svc-external-access.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should create one external service per replica
+    template: svc-external-access.yaml
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: should target a single pod per external service
+    template: svc-external-access.yaml
+    documentIndex: 0
+    set:
+      externalAccess:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.selector["statefulset.kubernetes.io/pod-name"]
+          value: RELEASE-NAME-zookeeper-0
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: spec.ports[0].targetPort
+          value: client
+
+  - it: should apply external traffic policy for LoadBalancer
+    template: svc-external-access.yaml
+    set:
+      externalAccess:
+        enabled: true
+        service:
+          externalTrafficPolicy: Local
+    asserts:
+      - equal:
+          path: spec.externalTrafficPolicy
+          value: Local
