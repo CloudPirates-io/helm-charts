@@ -295,6 +295,16 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | `ingress.hosts`       | Ingress hosts configuration            | `[{"host": "rabbitmq.local", "paths": [{"path": "/", "pathType": "Prefix"}]}]` |
 | `ingress.tls`         | Ingress TLS configuration              | `[]`                                                                           |
 
+### Gateway API parameters
+
+| Parameter                         | Description                                                     | Default                                      |
+| --------------------------------- | --------------------------------------------------------------- | -------------------------------------------- |
+| `gatewayAPI.httpRoute.enabled`    | Enable Gateway API HTTPRoute generation for RabbitMQ management | `false`                                      |
+| `gatewayAPI.httpRoute.annotations` | Additional annotations for the HTTPRoute resource               | `{}`                                         |
+| `gatewayAPI.httpRoute.parentRefs` | References to the parent Gateways or ListenerSets               | `[{"name": "gateway", "group": "", "kind": "", "namespace": "", "sectionName": ""}]` |
+| `gatewayAPI.httpRoute.hostnames`  | List of hostnames to match                                      | `["rabbitmq.local"]`                       |
+| `gatewayAPI.httpRoute.rules`      | HTTPRoute rules                                                 | `[{"matches": [{"path": {"type": "PathPrefix", "value": "/"}}]}]` |
+
 ### Resources
 
 | Parameter   | Description                                    | Default |

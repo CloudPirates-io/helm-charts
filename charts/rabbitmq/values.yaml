@@ -368,6 +368,14 @@ ingress:
 ##     - name: my-gateway
 ##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
 ##
+## To attach to another parent type, such as ListenerSet, set group and kind:
+##
+##   parentRefs:
+##     - group: gateway.networking.k8s.io
+##       kind: ListenerSet
+##       name: my-listenerset
+##       sectionName: https
+##
 ## The backend always receives plain HTTP traffic regardless of the listener protocol.
 gatewayAPI:
   httpRoute:
@@ -375,9 +383,11 @@ gatewayAPI:
     enabled: false
     ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
     annotations: {}
-    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways or ListenerSets
     parentRefs:
       - name: gateway
+        group: ""
+        kind: ""
         namespace: ""
         sectionName: ""
     ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
