@@ -37,6 +37,9 @@
                 "existingSecretPasswordKey": {
                     "type": "string"
                 },
+                "metrics": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -285,6 +288,9 @@
                         }
                     }
                 },
+                "port": {
+                    "type": "integer"
+                },
                 "resources": {
                     "type": "object"
                 },
@@ -357,6 +363,9 @@
                             "type": "object"
                         }
                     }
+                },
+                "tls": {
+                    "type": "boolean"
                 }
             }
         },
