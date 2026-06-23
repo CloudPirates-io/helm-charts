@@ -292,6 +292,28 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+externalAccess:
+  ## @param externalAccess.enabled Enable per-pod external LoadBalancer services
+  enabled: false
+  service:
+    ## @param externalAccess.service.type Service type (LoadBalancer for NLB/ELB)
+    type: LoadBalancer
+    ## @param externalAccess.service.port External client port
+    port: 2181
+    ## @param externalAccess.service.annotations Annotations per service (e.g. AWS NLB)
+    annotations: {}
+    #  service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    #  service.beta.kubernetes.io/aws-load-balancer-scheme: "internal" # or "internet-facing"
+    #  service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+    ## @param externalAccess.service.loadBalancerIPs Static LB IPs/hostnames per replica (length must match replicaCount)
+    loadBalancerIPs: []
+    ## @param externalAccess.service.loadBalancerSourceRanges Restrict source CIDRs
+    loadBalancerSourceRanges: []
+    ## @param externalAccess.service.externalTrafficPolicy External traffic policy (Local recommended for per-pod LBs)
+    externalTrafficPolicy: Local
+    ## @param externalAccess.service.labels Extra labels for external services
+    labels: {}
 
 ## @param command Override default container command (useful when the default entrypoint needs to be replaced)
 command: []

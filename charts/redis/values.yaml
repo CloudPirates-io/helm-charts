@@ -108,8 +108,10 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.enabled Enable Sentinel authentication
+  ## @param auth.sentinel Enable Sentinel authentication
   sentinel: true
+  ## @param auth.metrics Enable Metrics authentication
+  metrics: true
   ## @param auth.password Redis password (if empty, random password will be generated)
   password: ""
   ## @param auth.existingSecret Name of existing secret containing Redis password
@@ -556,6 +558,8 @@ initContainer:
 metrics:
   ## @param metrics.enabled Start a sidecar prometheus exporter to expose Redis metrics
   enabled: false
+  ## @param metrics.tls.enabled Enable TLS for the metrics exporter endpoint
+  tls: false
   ## @param metrics.image.registry Redis exporter image registry
   ## @param metrics.image.repository Redis exporter image repository
   ## @param metrics.image.tag Redis exporter image tag
@@ -565,6 +569,8 @@ metrics:
     repository: oliver006/redis_exporter
     tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
     pullPolicy: Always
+  ## @param metrics.port Metrics exporter port
+  port: 9121
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
     # limits:
@@ -575,11 +581,11 @@ metrics:
     #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for redis exporter, for example:
   ## extraArgs:
-  ##   - --redis.addr=redis://localhost:6379
-  ##   - --web.listen-address=0.0.0.0:9121
+  ##   can be found on https://github.com/oliver006/redis_exporter
   extraArgs: []
   ## Metrics service configuration
   service:
+    enabled: true
     ## @param metrics.service.type Metrics service type
     type: ClusterIP
     ## @param metrics.service.port Metrics service port

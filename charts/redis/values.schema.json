@@ -37,6 +37,9 @@
                 "existingSecretPasswordKey": {
                     "type": "string"
                 },
+                "metrics": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -285,6 +288,9 @@
                         }
                     }
                 },
+                "port": {
+                    "type": "integer"
+                },
                 "resources": {
                     "type": "object"
                 },
@@ -296,6 +302,9 @@
                         },
                         "clusterIP": {
                             "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
                         },
                         "ipFamilies": {
                             "type": "array"
@@ -354,6 +363,9 @@
                             "type": "object"
                         }
                     }
+                },
+                "tls": {
+                    "type": "boolean"
                 }
             }
         },
