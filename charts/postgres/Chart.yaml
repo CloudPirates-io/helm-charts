@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.19.5
+version: 0.19.6
 appVersion: "18.4.0"
 keywords:
   - postgres
@@ -42,10 +42,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: added
-      description: "Add namespaceOverride Value to all Charts that missing it"
+    - kind: fixed
+      description: "Use shared security context helper for metrics sidecar on OpenShift"
       links:
-        - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
+        - name: "Issue"
+          url: "https://github.com/CloudPirates-io/helm-charts/issues/1399"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/postgres/CHANGELOG.md"
