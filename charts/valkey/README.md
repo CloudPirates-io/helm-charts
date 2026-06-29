@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `image.registry`   | Valkey image registry                             | `docker.io`                                                                                  |
 | `image.repository` | Valkey image repository                           | `valkey/valkey`                                                                              |
-| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `image.pullPolicy` | Valkey image pull policy                          | `IfNotPresent`                                                                               |
 
 ### Common configuration
@@ -284,7 +284,7 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
 | `sentinel.image.registry`            | Valkey Sentinel image registry                                                      | `docker.io`                                                                                  |
 | `sentinel.image.repository`          | Valkey Sentinel image repository                                                    | `valkey/valkey`                                                                              |
-| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `sentinel.image.pullPolicy`          | Valkey Sentinel image pull policy                                                   | `Always`                                                                                     |
 | `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                       | `true`                                                                                       |
 | `sentinel.masterName`                | Name of the master server                                                           | `mymaster`                                                                                   |
@@ -488,7 +488,7 @@ When Sentinel is enabled, your application should use a Sentinel-aware client to
 
 ```bash
 # Get the current master from Sentinel
-kubectl run -it --rm valkey-client --image=valkey/valkey:9.0.0-alpine3.22 --restart=Never -- sh
+kubectl run -it --rm valkey-client --image=valkey/valkey:9.1.0-alpine3.23 --restart=Never -- sh
 valkey-cli -h my-valkey-sentinel -p 26379 SENTINEL get-master-addr-by-name mymaster
 ```
 
