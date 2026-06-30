@@ -16,6 +16,10 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- $annotations := merge $.Values.externalAccess.service.annotations $.Values.commonAnnotations }}
+  {{- if $.Values.externalAccess.service.hostnameDomain }}
+  {{- $hostname := printf "%s-%d.%s" $fullname $i $.Values.externalAccess.service.hostnameDomain }}
+  {{- $annotations = merge (dict "external-dns.alpha.kubernetes.io/hostname" $hostname) $annotations }}
+  {{- end }}
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
