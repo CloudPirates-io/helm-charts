@@ -45,3 +45,40 @@ tests:
       - equal:
           path: spec.externalTrafficPolicy
           value: Local
+
+  - it: should set external-dns hostname when hostnameDomain is set
+    template: svc-external-access.yaml
+    documentIndex: 0
+    set:
+      externalAccess:
+        enabled: true
+        service:
+          hostnameDomain: int.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: RELEASE-NAME-zookeeper-0.int.example.com
+
+  - it: should set distinct hostnames per replica
+    template: svc-external-access.yaml
+    documentIndex: 2
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+        service:
+          hostnameDomain: int.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: RELEASE-NAME-zookeeper-2.int.example.com
+
+  - it: should not set external-dns hostname when hostnameDomain is empty
+    template: svc-external-access.yaml
+    documentIndex: 0
+    set:
+      externalAccess:
+        enabled: true
+    asserts:
+      - isNull:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
