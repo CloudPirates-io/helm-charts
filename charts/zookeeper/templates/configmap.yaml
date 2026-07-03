@@ -16,7 +16,11 @@ data:
     initLimit={{ .Values.zookeeperConfig.initLimit | default 10 }}
     syncLimit={{ .Values.zookeeperConfig.syncLimit | default 5 }}
     clientPort={{ .Values.service.ports.client | default 2181 }}
+    {{- if .Values.tls.enabled }}
     secureClientPort={{ .Values.service.ports.secureClient | default 2281 }}
+    {{- /* TLS requires the Netty connection factory; the default NIO factory refuses to start with a secure port */}}
+    serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
+    {{- end }}
     electionPortBindRetry={{ .Values.zookeeperConfig.electionPortBindRetry | default 10 }}
     maxClientCnxns={{ .Values.zookeeperConfig.maxClientCnxns | default 60 }}
     #standaloneEnabled={{ .Values.zookeeperConfig.standaloneEnabled | default "false" }}

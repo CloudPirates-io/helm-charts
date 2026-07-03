@@ -45,6 +45,71 @@ tests:
           path: data["zoo.cfg"]
           pattern: "tickTime=2000"
 
+  - it: should not configure the secure client port by default
+    templates:
+      - configmap.yaml
+      - service.yaml
+      - statefulset.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort"
+        template: configmap.yaml
+      - notMatchRegex:
+          path: data["zoo.cfg"]
+          pattern: "serverCnxnFactory"
+        template: configmap.yaml
+      - notContains:
+          path: spec.ports
+          content:
+            port: 2281
+            targetPort: secure-client
+            protocol: TCP
+            name: secure-client
+        template: service.yaml
+        documentIndex: 0
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: secure-client
+            containerPort: 2281
+            protocol: TCP
+        template: statefulset.yaml
+
+  - it: should configure the secure client port and Netty factory when TLS is enabled
+    templates:
+      - configmap.yaml
+      - service.yaml
+      - statefulset.yaml
+    set:
+      tls:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort=2281"
+        template: configmap.yaml
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "serverCnxnFactory=org\\.apache\\.zookeeper\\.server\\.NettyServerCnxnFactory"
+        template: configmap.yaml
+      - contains:
+          path: spec.ports
+          content:
+            port: 2281
+            targetPort: secure-client
+            protocol: TCP
+            name: secure-client
+        template: service.yaml
+        documentIndex: 0
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: secure-client
+            containerPort: 2281
+            protocol: TCP
+        template: statefulset.yaml
+
   - it: should append extraConfigs to zoo.cfg
     template: configmap.yaml
     set:

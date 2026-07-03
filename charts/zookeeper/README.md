@@ -124,6 +124,25 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.admin.commandUrl`          | Admin server command URL                            | `/commands` |
 | `zookeeperConfig.extraConfigs`              | Extra ZooKeeper configuration lines appended to zoo.cfg | `[]`    |
 
+### TLS Configuration
+
+| Parameter     | Description                                                | Default |
+| ------------- | ---------------------------------------------------------- | ------- |
+| `tls.enabled` | Expose the ZooKeeper secure client port for TLS connections | `false` |
+
+Enabling TLS opens the secure client port (`service.ports.secureClient`) and switches ZooKeeper to the Netty connection factory, which is required for TLS. Supply the certificate configuration via `zookeeperConfig.extraConfigs` and mount the keystore files with `extraVolumes` / `extraVolumeMounts`, for example:
+
+```yaml
+tls:
+  enabled: true
+zookeeperConfig:
+  extraConfigs:
+    - "ssl.keyStore.location=/certs/keystore.jks"
+    - "ssl.keyStore.password=changeit"
+    - "ssl.trustStore.location=/certs/truststore.jks"
+    - "ssl.trustStore.password=changeit"
+```
+
 ### Metrics
 
 | Parameter                                  | Description                                                                      | Default     |
@@ -150,7 +169,7 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
-| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
+| `service.ports.secureClient`   | ZooKeeper secure client service port (exposed only when `tls.enabled` is set) | `2281`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |

@@ -110,9 +110,17 @@ zookeeperConfig:
     commandUrl: "/commands"
   ## @param zookeeperConfig.extraConfigs Extra ZooKeeper configuration lines to append to zoo.cfg
   extraConfigs: []
-  #  - "secureClientPort=2281"
+  #  - "ssl.keyStore.location=/certs/keystore.jks"
   #  - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
 
+## @section TLS configuration
+## Enabling TLS opens the secure client port (service.ports.secureClient) and switches
+## ZooKeeper to the Netty connection factory, which is required for TLS.
+## Supply the certificate configuration (ssl.keyStore.location, ssl.trustStore.location, ...)
+## via zookeeperConfig.extraConfigs and mount the keystore files with extraVolumes/extraVolumeMounts.
+tls:
+  ## @param tls.enabled Expose the ZooKeeper secure client port for TLS connections
+  enabled: false
 
 ## @section Zookeeper Metrics configuration
 metrics:
