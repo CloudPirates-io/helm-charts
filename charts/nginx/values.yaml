@@ -228,6 +228,12 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param dnsPolicy DNS policy for the pod
+dnsPolicy: ""
+
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 101
