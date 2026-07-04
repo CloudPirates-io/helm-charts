@@ -168,6 +168,7 @@ zkCli.sh -server my-zookeeper:2181
 | `externalAccess.service.loadBalancerSourceRanges`   | Source CIDR ranges allowed to reach the external LoadBalancers                                    | `[]`             |
 | `externalAccess.service.externalTrafficPolicy`      | External traffic policy for LoadBalancer/NodePort services (`Local` recommended for per-pod LBs)    | `Local`          |
 | `externalAccess.service.labels`                     | Extra labels applied to each external service                                                     | `{}`             |
+| `externalAccess.service.hostnameDomain` | Extra annotation `external-dns.alpha.kubernetes.io/hostname` per replica: `{release}-{ordinal}.{domain}`. Requires External-DNS with that zone in domainFilters  | `""`             |
 
 When enabled, the chart creates one external service per ZooKeeper pod (e.g. `release-zookeeper-0-external`). Clients outside the cluster should use the LoadBalancer hostnames and client port in their connection string. Quorum traffic remains on the internal headless service; `zoo.cfg` server entries are not changed.
 
@@ -177,6 +178,7 @@ When enabled, the chart creates one external service per ZooKeeper pod (e.g. `re
 externalAccess:
   enabled: true
   service:
+    hostnameDomain: int.example.com
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: "external"
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"

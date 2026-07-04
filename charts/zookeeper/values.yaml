@@ -314,6 +314,9 @@ externalAccess:
     externalTrafficPolicy: Local
     ## @param externalAccess.service.labels Extra labels for external services
     labels: {}
+    ## @param externalAccess.service.hostnameDomain DNS suffix for External-DNS hostname annotation per replica (e.g. int.example.com).
+    ## When set, each external service gets external-dns.alpha.kubernetes.io/hostname: {release}-{ordinal}.{hostnameDomain}
+    hostnameDomain: ""    
 
 ## @param command Override default container command (useful when the default entrypoint needs to be replaced)
 command: []
