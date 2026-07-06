@@ -156,33 +156,11 @@
                 }
             }
         },
+        "dnsConfig": {
+            "type": "object"
+        },
         "dnsPolicy": {
             "type": "string"
-        },
-        "dnsConfig": {
-            "type": "object",
-            "properties": {
-                "nameservers": {
-                    "type": "array"
-                },
-                "searches": {
-                    "type": "array"
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string"
-                            },
-                            "value": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
         },
         "existingConfigConfigmap": {
             "type": "string"
@@ -538,10 +516,10 @@
                 "annotations": {
                     "type": "object"
                 },
-                "internalTrafficPolicy": {
+                "clusterIP": {
                     "type": "string"
                 },
-                "trafficDistribution": {
+                "internalTrafficPolicy": {
                     "type": "string"
                 },
                 "ports": {
@@ -563,6 +541,9 @@
                             }
                         }
                     }
+                },
+                "trafficDistribution": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
