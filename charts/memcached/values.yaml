@@ -43,6 +43,10 @@ deploymentType: Deployment
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
+  ## @param service.clusterIP Static cluster IP or "None" for a headless service (recommended when deploymentType is StatefulSet)
+  clusterIP: ""
+  ## @param service.publishNotReadyAddresses Publish pod DNS names before pods are ready (recommended for StatefulSet peer discovery)
+  publishNotReadyAddresses: false
   ## @param service.port Memcached service port
   port: 11211
 
