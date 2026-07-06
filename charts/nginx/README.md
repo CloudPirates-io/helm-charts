@@ -205,6 +205,7 @@ containerPorts:
 | ------------------------------- | -------------------------------------------------------------- | ----------- |
 | `service.type`                  | Nginx service type                                             | `ClusterIP` |
 | `service.ports`                 | Array of service ports (advanced configuration) - see examples | `[]`        |
+| `service.clusterIP`             | Kubernetes service static ClusterIP                            | `""`        |
 | `service.internalTrafficPolicy` | Kubernetes service internal traffic policy                     | `Cluster`   |
 | `service.trafficDistribution`   | Kubernetes service traffic distribution                        | `""`        |
 | `service.annotations`           | Additional annotations to add to the service                   | `{}`        |

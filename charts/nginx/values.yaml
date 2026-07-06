@@ -67,6 +67,8 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.clusterIP Kubernetes service static ClusterIP
+  clusterIP: ""
   ## @param service.internalTrafficPolicy Kubernetes service internal traffic policy
   internalTrafficPolicy: ""
   ## @param service.trafficDistribution Kubernetes service traffic distribution
