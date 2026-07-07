@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @skip rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: 4.2.6-management-alpine
+  tag: 4.3.2-management-alpine
   ## @param rabbitmqImage.digest RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   digest: ""
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
@@ -68,7 +68,7 @@ credentialUpdaterImage:
   ## @param credentialUpdaterImage.repository [default: REPOSITORY_NAME/rmq-default-credential-updater] RabbitMQ Default User Credential Updater image repository
   repository: rabbitmq/default-user-credential-updater
   ## @skip credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
-  tag: 1.0.14
+  tag: 1.0.15
   ## @param credentialUpdaterImage.digest RabbitMQ Default User Credential Updater image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   digest: ""
   ## @param credentialUpdaterImage.pullSecrets RabbitMQ Default User Credential Updater image pull secrets
@@ -90,7 +90,7 @@ clusterOperator:
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
     repository: rabbitmq/cluster-operator
     ## @skip clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
-    tag: 2.21.0
+    tag: 2.22.1
     ## @param clusterOperator.image.digest RabbitMQ Cluster Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
     digest: ""
     ## @param clusterOperator.image.pullPolicy RabbitMQ Cluster Operator image pull policy
@@ -298,6 +298,25 @@ clusterOperator:
   ##    imagePullPolicy: Always
   ##    command: ['sh', '-c', 'echo "hello world"']
   initContainers: []
+  ## RabbitmqCluster admission webhook (cluster-operator v2.22.0+)
+  ## The cluster operator can run mutating (defaulting) and validating admission webhooks for RabbitmqCluster
+  ## resources. It is DISABLED by default: enabling it requires TLS serving certificates. When disabled, the
+  ## operator is started with ENABLE_WEBHOOKS=false (matching the chart's behavior prior to v2.22.0). When
+  ## enabled, provide certificates via a chart-generated self-signed secret (default), an existing secret, or
+  ## cert-manager (useCertManager=true). See the README for enablement instructions.
+  webhook:
+    ## @param clusterOperator.webhook.enabled Enable the RabbitmqCluster admission webhook (requires TLS serving certificates)
+    enabled: false
+    ## @param clusterOperator.webhook.existingWebhookCertSecret Name of an existing secret containing the webhook certificates (use it to avoid the chart generating one)
+    existingWebhookCertSecret: ""
+    ## @param clusterOperator.webhook.existingWebhookCertCABundle PEM-encoded CA Bundle of the existing secret provided in existingWebhookCertSecret (only if useCertManager=false)
+    existingWebhookCertCABundle: ""
+    ## Webhook service parameters
+    service:
+      ## @param clusterOperator.webhook.service.type RabbitMQ Cluster Operator webhook service type
+      type: ClusterIP
+      ## @param clusterOperator.webhook.service.port RabbitMQ Cluster Operator webhook service port
+      port: 443
   ## Network Policies
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
   networkPolicy:
@@ -504,7 +523,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmq/messaging-topology-operator
     ## @skip msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: 1.19.2
+    tag: 1.19.3
     ## @param msgTopologyOperator.image.digest RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
     digest: ""
     ## Specify a imagePullPolicy
