@@ -315,7 +315,7 @@ spec:
             preStop:
               exec:
                 command:
-                  - /bin/bash
+                  - /bin/sh
                   - /scripts/prestop.sh
           {{- end }}
           resources:
