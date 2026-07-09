@@ -239,6 +239,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `startupProbe.timeoutSeconds`        | Timeout seconds for startupProbe           | `1`     |
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe         | `30`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe         | `1`     |
+| `terminationGracePeriodSeconds`      | Seconds Kubernetes waits for the pod to terminate gracefully (raise to ~60 for Sentinel) | `30` |
 
 ### Node Selection
 
@@ -297,6 +298,8 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.service.type`              | Kubernetes service type for Sentinel                                                | `ClusterIP`                                                                                  |
 | `sentinel.service.port`              | Sentinel service port                                                               | `26379`                                                                                      |
 | `sentinel.resources`                 | Resource limits and requests for Sentinel container                                 | `{}`                                                                                         |
+| `sentinel.valkeyShutdownWaitFailover` | Whether the Valkey container waits for Sentinel failover before shutting down       | `true`                                                                                       |
+| `sentinel.preStop.enabled`           | Enable the preStop hook on the Sentinel container                                    | `true`                                                                                       |
 
 ### Init Container Configuration
 
@@ -424,12 +427,22 @@ sentinel:
   downAfterMilliseconds: 1500
   failoverTimeout: 15000
   parallelSyncs: 1
+  # Graceful master handoff on planned shutdown / rolling updates:
+  # the Valkey container triggers a failover and waits for it, and the
+  # Sentinel container stays up until failover completes so clients can
+  # still discover the new master while the pod terminates.
+  valkeyShutdownWaitFailover: true
+  preStop:
+    enabled: true
   resources:
     limits:
       memory: 128Mi
     requests:
       cpu: 25m
       memory: 64Mi
+
+# Give the preStop failover hook enough time to finish before SIGKILL
+terminationGracePeriodSeconds: 60
 
 # Enable authentication
 auth:

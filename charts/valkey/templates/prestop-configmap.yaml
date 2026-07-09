@@ -90,8 +90,11 @@ data:
 
     echo "Valkey preStop hook starting for pod: $HOSTNAME"
 
+    # Whether to wait for failover on master shutdown (sentinel.valkeyShutdownWaitFailover)
+    WAIT_FOR_FAILOVER="{{ .Values.sentinel.valkeyShutdownWaitFailover }}"
+
     # Only proceed with failover if this instance is the master
-    if is_master; then
+    if is_master && [ "$WAIT_FOR_FAILOVER" = "true" ]; then
         echo "I am the master pod and I'm being stopped. Initiating graceful failover."
 
         # Pause client write connections to prevent data loss during failover
@@ -122,10 +125,112 @@ data:
         echo "Allowing additional time for new master to stabilize..."
         sleep 3
 
+    elif is_master; then
+        echo "I am the master but sentinel.valkeyShutdownWaitFailover is disabled, skipping failover wait"
     else
         echo "I am not the master, no failover needed"
     fi
 
     echo "Valkey preStop hook completed"
     exit 0
+  {{- if .Values.sentinel.preStop.enabled }}
+  prestop-sentinel.sh: |
+    #!/bin/sh
+
+    # Valkey Sentinel preStop hook for graceful shutdown during rolling updates.
+    # Keeps the local Sentinel alive until failover completes, so clients can
+    # still use it to discover the new master while this pod is terminating.
+
+    set -e
+
+    # Configuration
+    VALKEY_PORT="{{ .Values.service.port }}"
+    SENTINEL_PORT="{{ .Values.sentinel.port }}"
+    MASTER_NAME="{{ .Values.sentinel.masterName }}"
+    HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+
+    # Set authentication if enabled
+    {{- if .Values.auth.enabled }}
+    export REDISCLI_AUTH="${VALKEY_PASSWORD}"
+    {{- end }}
+
+    # Set loopback address based on ipFamily configuration
+    {{- if eq .Values.ipFamily "ipv6" }}
+    VALKEY_LOOPBACK="::1"
+    {{- else }}
+    VALKEY_LOOPBACK="127.0.0.1"
+    {{- end }}
+
+    # Function to run Valkey commands against the local instance
+    run_valkey_command() {
+        valkey-cli -h "$VALKEY_LOOPBACK" -p "$VALKEY_PORT" "$@"
+    }
+
+    # Function to run Sentinel commands against the local Sentinel sidecar
+    run_sentinel_command() {
+        valkey-cli -h "$VALKEY_LOOPBACK" -p "$SENTINEL_PORT" {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} sentinel "$@"
+    }
+
+    # Function to get full hostname for a pod
+    get_full_hostname() {
+        echo "${1}.${HEADLESS_SERVICE}"
+    }
+
+    # Function to check if the local Valkey instance is master
+    is_valkey_master() {
+        VALKEY_ROLE=$(run_valkey_command role 2>/dev/null | head -1 || echo "")
+        [ "$VALKEY_ROLE" = "master" ]
+    }
+
+    # Function to check if sentinel failover has finished
+    sentinel_failover_finished() {
+        VALKEY_MASTER_HOST=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>/dev/null | head -1 || echo "")
+        if [ -n "$VALKEY_MASTER_HOST" ]; then
+            [ "$VALKEY_MASTER_HOST" != "$(get_full_hostname "$HOSTNAME")" ]
+        else
+            # Could not verify, assume failover is not finished yet and keep waiting
+            return 1
+        fi
+    }
+
+    # Function to wait with retries
+    retry_while() {
+        condition="$1"
+        max_attempts="$2"
+        sleep_time="$3"
+        attempt=0
+
+        while [ "$attempt" -lt "$max_attempts" ]; do
+            if $condition; then
+                return 0
+            fi
+            sleep "$sleep_time"
+            attempt=$((attempt + 1))
+        done
+        return 1
+    }
+
+    echo "Valkey Sentinel preStop hook starting for pod: $HOSTNAME"
+
+    # If the local Valkey is master, keep Sentinel up until failover completes so
+    # clients can still discover the new master through it.
+    if is_valkey_master; then
+        echo "Local Valkey is master. Waiting for failover to complete before Sentinel shuts down..."
+        if retry_while "sentinel_failover_finished" "25" "1"; then
+            echo "Failover completed, new master elected"
+        else
+            echo "Warning: Failover may still be in progress"
+        fi
+
+        # Additional delay to give clients time to discover the new master
+        echo "Allowing additional time for client discovery..."
+        sleep 5
+    else
+        echo "Local Valkey is replica, waiting briefly for stability..."
+        sleep 2
+    fi
+
+    echo "Valkey Sentinel preStop hook completed"
+    exit 0
+  {{- end }}
 {{- end }}

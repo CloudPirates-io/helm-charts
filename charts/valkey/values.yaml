@@ -311,6 +311,12 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully
+## When Sentinel is enabled this must be high enough for the preStop failover to
+## finish (the hook can take ~45s: 20s failover wait + Sentinel preStop wait).
+## Recommended: 60 for Sentinel setups.
+terminationGracePeriodSeconds: 30
+
 ## @section Node Selection
 ## @param nodeSelector Node labels for pod assignment
 nodeSelector: {}
@@ -455,6 +461,17 @@ sentinel:
     # requests:
     #   cpu: 25m
     #   memory: 64Mi
+  ## @param sentinel.valkeyShutdownWaitFailover Whether the Valkey container should wait for Sentinel failover before shutting down
+  ## When true: on master termination the preStop hook triggers a failover and
+  ## waits for it to complete (graceful, near zero-downtime handoff).
+  ## When false: the Valkey container shuts down immediately without waiting.
+  valkeyShutdownWaitFailover: true
+  ## Sentinel container preStop hook for zero-downtime rolling updates.
+  ## Keeps the local Sentinel alive until failover completes so clients can still
+  ## use it to discover the new master while the pod is terminating.
+  preStop:
+    ## @param sentinel.preStop.enabled Enable the preStop hook on the Sentinel container
+    enabled: true
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:

@@ -542,6 +542,14 @@
                 "port": {
                     "type": "integer"
                 },
+                "preStop": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "quorum": {
                     "type": "integer"
                 },
@@ -558,6 +566,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "valkeyShutdownWaitFailover": {
+                    "type": "boolean"
                 }
             }
         },
@@ -617,6 +628,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tls": {
             "type": "object",
