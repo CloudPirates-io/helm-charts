@@ -315,7 +315,7 @@ spec:
             preStop:
               exec:
                 command:
-                  - /bin/bash
+                  - /bin/sh
                   - /scripts/prestop.sh
           {{- end }}
           resources:
@@ -350,6 +350,11 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+            {{- if .Values.sentinel.preStop.enabled }}
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
+            {{- end }}
           {{- if .Values.sentinel.extraVolumeMounts }}
             {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
           {{- end }}
@@ -510,6 +515,14 @@ spec:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
           {{- end }}
+          {{- if .Values.sentinel.preStop.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - /scripts/prestop-sentinel.sh
+          {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.metrics.enabled }}
@@ -607,6 +620,7 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
   {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
