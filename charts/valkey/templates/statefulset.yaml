@@ -250,7 +250,7 @@ spec:
               CONFIG_FILE="{{ include "valkey.configFullName" . }}"
               {{- end }}
 
-              valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
+              exec valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
           ports:
             - name: valkey
               containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.targetPort }}{{ end }}
@@ -487,7 +487,7 @@ spec:
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
 
-              valkey-sentinel /tmp/sentinel.conf
+              exec valkey-sentinel /tmp/sentinel.conf
           ports:
             - name: sentinel
               containerPort: {{ .Values.sentinel.port }}
