@@ -22780,6 +22780,58 @@ entries:
       artifacthub.io/category: networking
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[nginx] Update image.repository to v1.31.2 (#1338)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1338
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Nginx
+          url: https://www.nginx.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+        - name: Application
+          url: https://github.com/nginx/nginx
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.31.2
+    created: "2026-07-13T09:16:11.858194438Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: Nginx is a high-performance HTTP server and reverse proxy.
+    digest: ae99bd5f997d65b5641a041682a73ab82283687c2280c921e8f0b5e384bf5ffc
+    home: https://www.nginx.com
+    icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg
+    keywords:
+    - nginx
+    - web server
+    - http
+    - reverse proxy
+    - load balancer
+    - proxy
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: nginx
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+    - https://github.com/nginx/nginx
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/nginx-0.15.1/nginx-0.15.1.tgz
+    version: 0.15.1
+  - annotations:
+      artifacthub.io/category: networking
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[nginx] Add clusterIP to service (#1412)'
           links:
           - name: Pull Request
@@ -51468,4 +51520,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-13T09:14:39.670570802Z"
+generated: "2026-07-13T09:16:12.036853693Z"
