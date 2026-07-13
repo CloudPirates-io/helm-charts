@@ -435,7 +435,43 @@ spec:
               {{- end }}
               echo "databases 1" >> /tmp/redis.conf
 
-              {{- if .Values.cluster.announceHostnames }}
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              {{- if ne (len $ea.addresses) (int .Values.replicaCount) }}
+              {{- fail "cluster.externalAccess.addresses must have exactly replicaCount entries (one external address per pod)" }}
+              {{- end }}
+              {{- $defClientPort := int (default .Values.service.port $ea.port) }}
+              {{- $defBusPort := int (default .Values.service.clusterPort $ea.busPort) }}
+              # External-access announcements: each node advertises an externally-reachable address so
+              # external clients get reachable endpoints back from CLUSTER NODES / CLUSTER SLOTS.
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              EXTERNAL_ADDR=""; EXTERNAL_PORT=""; EXTERNAL_BUS=""
+              case "$POD_ORDINAL" in
+              {{- range $i := until (int .Values.replicaCount) }}
+              {{- $port := $defClientPort }}
+              {{- $bus := $defBusPort }}
+              {{- if eq $ea.service.type "NodePort" }}
+              {{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}
+              {{- if gt (len $ea.service.busNodePorts) $i }}{{- $bus = int (index $ea.service.busNodePorts $i) }}{{- end }}
+              {{- end }}
+                {{ $i }}) EXTERNAL_ADDR="{{ index $ea.addresses $i }}"; EXTERNAL_PORT="{{ $port }}"; EXTERNAL_BUS="{{ $bus }}" ;;
+              {{- end }}
+              esac
+              if [ -z "$EXTERNAL_ADDR" ]; then
+                echo "ERROR: no external address configured for pod ordinal ${POD_ORDINAL} (cluster.externalAccess.addresses)" >&2
+                exit 1
+              fi
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster external-access announcements" >> /tmp/redis.conf
+              if echo "$EXTERNAL_ADDR" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|^[0-9a-fA-F:]+$'; then
+                echo "cluster-announce-ip ${EXTERNAL_ADDR}" >> /tmp/redis.conf
+              else
+                echo "cluster-preferred-endpoint-type hostname" >> /tmp/redis.conf
+                echo "cluster-announce-hostname ${EXTERNAL_ADDR}" >> /tmp/redis.conf
+              fi
+              echo "cluster-announce-port ${EXTERNAL_PORT}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port ${EXTERNAL_BUS}" >> /tmp/redis.conf
+              {{- else if .Values.cluster.announceHostnames }}
               # Hostname-based cluster announcements (recommended for Kubernetes)
               MY_HOSTNAME=$(hostname)
               MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"

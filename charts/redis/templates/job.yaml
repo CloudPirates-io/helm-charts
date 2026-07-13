@@ -79,14 +79,34 @@ spec:
               PORT={{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
               FIRST_NODE="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
 
-              # Wait for every Redis pod to be reachable before deciding what to do
-              echo "Waiting for all Redis pods to be reachable..."
+              # Wait for every Redis node to be reachable before deciding what to do.
+              echo "Waiting for all Redis nodes to be reachable..."
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              # With external access, wait on the external endpoints used by "cluster create". These only
+              # route to Ready pods (unlike the headless service), so this also ensures each node is ready.
+              for endpoint in \
+              {{- range $i := until (int .Values.replicaCount) }}
+              {{- $port := int (default $.Values.service.port $ea.port) }}
+              {{- if eq $ea.service.type "NodePort" }}{{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}{{- end }}
+                "{{ index $ea.addresses $i }}:{{ $port }}" \
+              {{- end }}
+                ; do
+                EP_HOST="${endpoint%:*}"
+                EP_PORT="${endpoint##*:}"
+                until redis-cli -h "$EP_HOST" -p "$EP_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
+                  echo "Waiting for node ${endpoint} to be ready..."
+                  sleep 3
+                done
+              done
+              {{- else }}
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
                   echo "Waiting for pod {{ include "redis.fullname" . }}-${i}..."
                   sleep 3
                 done
               done
+              {{- end }}
 
               # If the cluster is already healthy there is nothing to do
               if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
@@ -138,15 +158,33 @@ spec:
 
               # All nodes are empty: create a brand new cluster
               echo "All nodes are empty, creating a new Redis cluster..."
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              {{- $createHost := "" }}
+              {{- $createPort := 0 }}
+              # External access: create the cluster using the externally-announced addresses so nodes MEET
+              # each other on the same addresses they advertise, avoiding an unstable pod-IP -> external flip.
+              NODES="
+              {{- range $i := until (int .Values.replicaCount) -}}
+              {{- $port := int (default $.Values.service.port $ea.port) }}
+              {{- if eq $ea.service.type "NodePort" }}{{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}{{- end }}
+              {{- if eq $i 0 }}{{- $createHost = index $ea.addresses $i }}{{- $createPort = $port }}{{- end }} {{ index $ea.addresses $i }}:{{ $port }}
+              {{- end }}"
+              CREATE_HOST="{{ $createHost }}"
+              CREATE_PORT="{{ $createPort }}"
+              {{- else }}
               NODES=""
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:$PORT"
               done
+              CREATE_HOST="$FIRST_NODE"
+              CREATE_PORT="$PORT"
+              {{- end }}
 
               echo "Creating Redis cluster with nodes: $NODES"
               redis-cli \
-                -h "$FIRST_NODE" \
-                -p "$PORT" \
+                -h "$CREATE_HOST" \
+                -p "$CREATE_PORT" \
                 {{- if .Values.tls.enabled }}
                 {{ include "redis.tls.probeArgs" . }} \
                 {{- end }}

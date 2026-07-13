@@ -201,6 +201,39 @@ cluster:
     nodeTimeout: 15000
     ## @param cluster.config.requireFullCoverage Require full coverage to accept queries
     requireFullCoverage: true
+  ## External access to the Redis cluster from outside Kubernetes.
+  ## A Redis Cluster client (e.g. redis-cli -c, Redis for VS Code) connects to any node and is then
+  ## redirected to other nodes using the addresses returned by CLUSTER NODES / CLUSTER SLOTS. Those must
+  ## be reachable by the client. Inside Kubernetes the chart announces pod hostnames/IPs, which external
+  ## clients cannot reach. Enabling externalAccess makes each node announce an externally-reachable
+  ## address instead, and (optionally) creates one Service per pod to expose the nodes.
+  externalAccess:
+    ## @param cluster.externalAccess.enabled Enable external access to the Redis cluster from outside the Kubernetes cluster
+    enabled: false
+    ## @param cluster.externalAccess.addresses External address (IP or hostname) announced by each node, one entry per pod ordinal (pod-0 first)
+    ## For service.type=LoadBalancer, pre-allocate static IPs/hostnames and list them here. For NodePort, list the nodes' external IPs/hostnames.
+    ## Required when externalAccess.enabled=true. The number of entries must match replicaCount.
+    addresses: []
+    ## @param cluster.externalAccess.port External client port announced by each node (defaults to service.port)
+    port: ""
+    ## @param cluster.externalAccess.busPort External cluster bus port announced by each node (defaults to service.clusterPort)
+    busPort: ""
+    ## Per-pod Service used to expose each node externally
+    service:
+      ## @param cluster.externalAccess.service.enabled Create one Service per pod to expose the nodes externally
+      enabled: true
+      ## @param cluster.externalAccess.service.type Service type for the per-pod external services (LoadBalancer or NodePort)
+      type: LoadBalancer
+      ## @param cluster.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod ordinal (used when service.type=LoadBalancer)
+      loadBalancerIPs: []
+      ## @param cluster.externalAccess.service.loadBalancerSourceRanges Source ranges allowed on the per-pod LoadBalancer services
+      loadBalancerSourceRanges: []
+      ## @param cluster.externalAccess.service.nodePorts Client nodePort per pod ordinal (used when service.type=NodePort)
+      nodePorts: []
+      ## @param cluster.externalAccess.service.busNodePorts Cluster bus nodePort per pod ordinal (used when service.type=NodePort)
+      busNodePorts: []
+      ## @param cluster.externalAccess.service.annotations Annotations for the per-pod external services
+      annotations: {}
 
 ## @param extraConfig Additional Redis configuration to be appended to the generated config
 ## This provides flexibility to add any Redis configuration directives
