@@ -1057,8 +1057,6 @@ spec:
               sentinel deny-scripts-reconfig yes
               # Fix leader election issues during force deletions
               protected-mode no
-              # CRITICAL: Track disconnected slaves for force deletion tolerance
-              sentinel_link_buffer_size 32768
               # Allow sentinels to discover each other
               {{ if .Values.sentinel.config.announceHostnames }}
               sentinel announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
