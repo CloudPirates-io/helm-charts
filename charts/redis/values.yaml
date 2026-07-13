@@ -185,8 +185,10 @@ config:
 cluster:
   ## @param cluster.announceHostnames Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes)
   ## When enabled, Redis will announce pod hostnames instead of IPs, making cluster more resilient to pod restarts
-  ## This addresses the issue where pod IP changes on restart cause connection errors
-  announceHostnames: false
+  ## This addresses the issue where pod IP changes on restart cause connection errors and, crucially, lets the
+  ## cluster re-form via gossip after all pods are deleted and recreated (persisted nodes.conf keeps resolvable
+  ## hostnames instead of stale IPs). Disable only if your clients cannot resolve the headless service hostnames.
+  announceHostnames: true
   ## @param cluster.startupSleepTime Seconds to sleep in the init container before configuring Redis Cluster
   ## Useful when persistence is disabled: gives the cluster time to detect a failed master and elect
   ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
@@ -705,3 +707,9 @@ clusterInitJob:
   tolerations: []
   ## @param clusterInitJob.affinity Affinity rules for the clusterInit Job (defaults to .Values.affinity if not set)
   affinity: {}
+  ## @param clusterInitJob.recoveryTimeout Seconds the Job waits for an existing cluster to re-form via gossip before failing
+  ## When the cluster already holds state (e.g. all pods were deleted and recreated), the Job waits for the nodes to
+  ## re-form the cluster instead of running "cluster create" on non-empty nodes (which fails with "Node is not empty"
+  ## and would destroy the topology). If the cluster is still not healthy after this timeout, the Job fails instead of
+  ## recreating the cluster, preserving data for manual intervention.
+  recoveryTimeout: 120
