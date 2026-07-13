@@ -11,6 +11,12 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.service.type }}
+  {{- with .Values.service.clusterIP }}
+  clusterIP: {{ . | quote }}
+  {{- end }}
+  {{- if .Values.service.publishNotReadyAddresses }}
+  publishNotReadyAddresses: true
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: memcached

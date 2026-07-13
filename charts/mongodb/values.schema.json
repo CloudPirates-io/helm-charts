@@ -85,6 +85,55 @@
         "customStartupProbe": {
             "type": "object"
         },
+        "customRoles": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["role"],
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "description": "Name of the custom role to create"
+                    },
+                    "database": {
+                        "type": "string",
+                        "description": "Database where the role is created (default: admin)"
+                    },
+                    "privileges": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "resource": {
+                                    "type": "object"
+                                },
+                                "actions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                { "type": "string" },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "role": { "type": "string" },
+                                        "db": { "type": "string" }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "customUsers": {
             "type": "array"
         },
@@ -114,6 +163,23 @@
                 },
                 "imageRegistry": {
                     "type": "string"
+                },
+                "dataNodes": {
+                    "type": "object",
+                    "properties": {
+                        "extraContainers": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        },
+                        "extraVolumes": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -272,28 +338,7 @@
                     }
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -664,28 +709,7 @@
             }
         },
         "resources": {
-            "type": "object",
-            "properties": {
-                "limits": {
-                    "type": "object",
-                    "properties": {
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "requests": {
-                    "type": "object",
-                    "properties": {
-                        "cpu": {
-                            "type": "string"
-                        },
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
+            "type": "object"
         },
         "revisionHistoryLimit": {
             "type": "integer"
@@ -799,28 +823,7 @@
                             "type": "integer"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "tolerations": {
                             "type": "array"
@@ -878,28 +881,7 @@
                             "type": "integer"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "service": {
                             "type": "object",
@@ -951,28 +933,7 @@
                                     "type": "integer"
                                 },
                                 "resources": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limits": {
-                                            "type": "object",
-                                            "properties": {
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "requests": {
-                                            "type": "object",
-                                            "properties": {
-                                                "cpu": {
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "type": "object"
                                 },
                                 "tolerations": {
                                     "type": "array"
@@ -998,28 +959,7 @@
                                     "type": "integer"
                                 },
                                 "resources": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limits": {
-                                            "type": "object",
-                                            "properties": {
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "requests": {
-                                            "type": "object",
-                                            "properties": {
-                                                "cpu": {
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "type": "object"
                                 },
                                 "tolerations": {
                                     "type": "array"

@@ -164,7 +164,7 @@ The chart supports automatic reloading of definitions when the ConfigMap or Secr
 | `definitions.autoReload.image.repository` | Container image repository for the config watcher sidecar      | `curlimages/curl` |
 | `definitions.autoReload.image.tag`        | Container image tag for the config watcher sidecar             | `8.11.1`          |
 | `definitions.autoReload.image.pullPolicy` | Container image pull policy for the config watcher sidecar     | `IfNotPresent`    |
-| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | See values.yaml   |
+| `definitions.autoReload.resources`        | Resource limits and requests for the config watcher sidecar    | `{}`              |
 
 **How it works:**
 
@@ -295,6 +295,16 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | `ingress.hosts`       | Ingress hosts configuration            | `[{"host": "rabbitmq.local", "paths": [{"path": "/", "pathType": "Prefix"}]}]` |
 | `ingress.tls`         | Ingress TLS configuration              | `[]`                                                                           |
 
+### Gateway API parameters
+
+| Parameter                         | Description                                                     | Default                                      |
+| --------------------------------- | --------------------------------------------------------------- | -------------------------------------------- |
+| `gatewayAPI.httpRoute.enabled`    | Enable Gateway API HTTPRoute generation for RabbitMQ management | `false`                                      |
+| `gatewayAPI.httpRoute.annotations` | Additional annotations for the HTTPRoute resource               | `{}`                                         |
+| `gatewayAPI.httpRoute.parentRefs` | References to the parent Gateways or ListenerSets               | `[{"name": "gateway", "group": "", "kind": "", "namespace": "", "sectionName": ""}]` |
+| `gatewayAPI.httpRoute.hostnames`  | List of hostnames to match                                      | `["rabbitmq.local"]`                       |
+| `gatewayAPI.httpRoute.rules`      | HTTPRoute rules                                                 | `[{"matches": [{"path": {"type": "PathPrefix", "value": "/"}}]}]` |
+
 ### Resources
 
 | Parameter   | Description                                    | Default |
@@ -312,16 +322,18 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 
 ### Security Context
 
-| Parameter                                           | Description                                       | Default   |
-| --------------------------------------------------- | ------------------------------------------------- | --------- |
-| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
-| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
-| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
-| `containerSecurityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`     |
-| `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`     |
-| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`    |
-| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]` |
-| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`      |
+| Parameter                                           | Description                                       | Default                  |
+| --------------------------------------------------- | ------------------------------------------------- | ------------------------ |
+| `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`                    |
+| `podSecurityContext.fsGroupChangePolicy`            | When kubelet recursively changes volume ownership; `OnRootMismatch` preserves the `.erlang.cookie` permissions across container restarts | `OnRootMismatch` |
+| `podSecurityContext.seccompProfile`                 | Seccomp profile for the pod                       | `{type: RuntimeDefault}` |
+| `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`                  |
+| `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`                   |
+| `containerSecurityContext.runAsUser`                | User ID for the RabbitMQ container                | `999`                    |
+| `containerSecurityContext.runAsGroup`               | Group ID for the RabbitMQ container               | `999`                    |
+| `containerSecurityContext.readOnlyRootFilesystem`   | Mount container root filesystem as read-only      | `true`                   |
+| `containerSecurityContext.capabilities.drop`        | Linux capabilities to be dropped                  | `["ALL"]`                |
+| `priorityClassName`                                 | Priority class for the rabbitmq instance          | `""`                     |
 
 ### Liveness and readiness probes
 

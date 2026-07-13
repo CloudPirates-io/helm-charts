@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.6.2@sha256:009cc37796fbdbe1b631b4cc0582bed167e5e403ed8bcd06f77eb6cb5aeb6f93"
+  tag: "8.8.0@sha256:aa049e689e141a4358ad1d4562dc49c88a89fbab711fd8fcc33f684c80b26301"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -53,6 +53,17 @@ clusterReplicaCount: 0
 
 ## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
 revisionHistoryLimit: 10
+
+## @param updateStrategy StatefulSet update strategy (RollingUpdate or OnDelete)
+## When set to OnDelete, pods must be manually deleted to trigger updates
+## This allows for controlled update sequencing in Redis clusters
+updateStrategy:
+  ## @param updateStrategy.type Update strategy type (RollingUpdate or OnDelete)
+  type: RollingUpdate
+  ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
+  rollingUpdate:
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update
+    maxUnavailable: 1
 
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
@@ -97,8 +108,10 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.enabled Enable Sentinel authentication
+  ## @param auth.sentinel Enable Sentinel authentication
   sentinel: true
+  ## @param auth.metrics Enable Metrics authentication
+  metrics: true
   ## @param auth.password Redis password (if empty, random password will be generated)
   password: ""
   ## @param auth.existingSecret Name of existing secret containing Redis password
@@ -172,8 +185,15 @@ config:
 cluster:
   ## @param cluster.announceHostnames Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes)
   ## When enabled, Redis will announce pod hostnames instead of IPs, making cluster more resilient to pod restarts
-  ## This addresses the issue where pod IP changes on restart cause connection errors
-  announceHostnames: false
+  ## This addresses the issue where pod IP changes on restart cause connection errors and, crucially, lets the
+  ## cluster re-form via gossip after all pods are deleted and recreated (persisted nodes.conf keeps resolvable
+  ## hostnames instead of stale IPs). Disable only if your clients cannot resolve the headless service hostnames.
+  announceHostnames: true
+  ## @param cluster.startupSleepTime Seconds to sleep in the init container before configuring Redis Cluster
+  ## Useful when persistence is disabled: gives the cluster time to detect a failed master and elect
+  ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
+  ## with an empty dataset. Set to 0 to disable (default).
+  startupSleepTime: 0
   ## @param cluster.config Additional cluster-specific configuration settings
   ## These settings are automatically applied when architecture=cluster
   config:
@@ -181,9 +201,44 @@ cluster:
     nodeTimeout: 15000
     ## @param cluster.config.requireFullCoverage Require full coverage to accept queries
     requireFullCoverage: true
+  ## External access to the Redis cluster from outside Kubernetes.
+  ## A Redis Cluster client (e.g. redis-cli -c, Redis for VS Code) connects to any node and is then
+  ## redirected to other nodes using the addresses returned by CLUSTER NODES / CLUSTER SLOTS. Those must
+  ## be reachable by the client. Inside Kubernetes the chart announces pod hostnames/IPs, which external
+  ## clients cannot reach. Enabling externalAccess makes each node announce an externally-reachable
+  ## address instead, and (optionally) creates one Service per pod to expose the nodes.
+  externalAccess:
+    ## @param cluster.externalAccess.enabled Enable external access to the Redis cluster from outside the Kubernetes cluster
+    enabled: false
+    ## @param cluster.externalAccess.addresses External address (IP or hostname) announced by each node, one entry per pod ordinal (pod-0 first)
+    ## For service.type=LoadBalancer, pre-allocate static IPs/hostnames and list them here. For NodePort, list the nodes' external IPs/hostnames.
+    ## Required when externalAccess.enabled=true. The number of entries must match replicaCount.
+    addresses: []
+    ## @param cluster.externalAccess.port External client port announced by each node (defaults to service.port)
+    port: ""
+    ## @param cluster.externalAccess.busPort External cluster bus port announced by each node (defaults to service.clusterPort)
+    busPort: ""
+    ## Per-pod Service used to expose each node externally
+    service:
+      ## @param cluster.externalAccess.service.enabled Create one Service per pod to expose the nodes externally
+      enabled: true
+      ## @param cluster.externalAccess.service.type Service type for the per-pod external services (LoadBalancer or NodePort)
+      type: LoadBalancer
+      ## @param cluster.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod ordinal (used when service.type=LoadBalancer)
+      loadBalancerIPs: []
+      ## @param cluster.externalAccess.service.loadBalancerSourceRanges Source ranges allowed on the per-pod LoadBalancer services
+      loadBalancerSourceRanges: []
+      ## @param cluster.externalAccess.service.nodePorts Client nodePort per pod ordinal (used when service.type=NodePort)
+      nodePorts: []
+      ## @param cluster.externalAccess.service.busNodePorts Cluster bus nodePort per pod ordinal (used when service.type=NodePort)
+      busNodePorts: []
+      ## @param cluster.externalAccess.service.annotations Annotations for the per-pod external services
+      annotations: {}
 
 ## @param extraConfig Additional Redis configuration to be appended to the generated config
 ## This provides flexibility to add any Redis configuration directives
+## Note: in standalone architecture this is appended to the chart-managed ConfigMap, so it has
+## no effect when config.existingConfigmap is set (add the directives to your own ConfigMap instead)
 ## Example:
 ## extraConfig: |
 ##   # Custom memory policy
@@ -222,6 +277,30 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param Map of labels to add to the Persistent Volume Claims (PVCs)
+  labels: {}
+
+## @section Volume Permissions
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner of the PV mount point
+  enabled: false
+  ## @param volumePermissions.image.registry Image registry
+  ## @param volumePermissions.image.repository Image repository
+  ## @param volumePermissions.image.tag Image tag
+  ## @param volumePermissions.image.pullPolicy Image pull policy
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: "1.36.1"
+    pullPolicy: IfNotPresent
+  ## @param volumePermissions.resources Resource limits and requests
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -233,13 +312,13 @@ persistentVolumeClaimRetentionPolicy:
   whenDeleted: Retain
 
 ## @param resources Resource limits and requests for Redis pod
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 50m
-    memory: 128Mi
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 128Mi
 
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
@@ -387,6 +466,13 @@ sentinel:
     loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
+  ## @param sentinel.monitorTarget Override the Sentinel master discovery with an explicit hostname or IP
+  ## When unset (default), the chart's startup script discovers the master locally via the headless
+  ## service hostname (redis-X.redis-headless.<ns>.svc.cluster.local). In multi-region or multi-cluster
+  ## deployments that hostname only resolves inside the local cluster, preventing Sentinel quorum from
+  ## forming across clusters. Set this to an externally-resolvable hostname or IP (e.g., an internal
+  ## NLB DNS name or a Route53 record) that all Sentinels can reach to monitor a shared master.
+  monitorTarget: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
@@ -411,13 +497,13 @@ sentinel:
     ## @param sentinel.service.ipFamilyPolicy IP family policy for the sentinel service
     ipFamilyPolicy: ""
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      cpu: 200m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
   ## When true: On master termination, waits for failover to complete (zero-downtime)
   ## When false: Shuts down immediately without waiting for failover
@@ -444,13 +530,17 @@ sentinel:
       tag: "1.35.2"
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
-    resources:
-      limits:
-        cpu: 25m
-        memory: 64Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 25m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    ## @param sentinel.masterService.verbose Enable verbose logging for master discovery
+    verbose: false
+    ## @param sentinel.masterService.affinity Affinity rules for the master discovery deployment (defaults to .Values.affinity if not set)
+    affinity: {}
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
@@ -490,19 +580,21 @@ sentinel:
 
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @section Redis metrics parameters
 ## Prometheus metrics configuration
 metrics:
   ## @param metrics.enabled Start a sidecar prometheus exporter to expose Redis metrics
   enabled: false
+  ## @param metrics.tls.enabled Enable TLS for the metrics exporter endpoint
+  tls: false
   ## @param metrics.image.registry Redis exporter image registry
   ## @param metrics.image.repository Redis exporter image repository
   ## @param metrics.image.tag Redis exporter image tag
@@ -512,21 +604,23 @@ metrics:
     repository: oliver006/redis_exporter
     tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
     pullPolicy: Always
+  ## @param metrics.port Metrics exporter port
+  port: 9121
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      cpu: 100m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for redis exporter, for example:
   ## extraArgs:
-  ##   - --redis.addr=redis://localhost:6379
-  ##   - --web.listen-address=0.0.0.0:9121
+  ##   can be found on https://github.com/oliver006/redis_exporter
   extraArgs: []
   ## Metrics service configuration
   service:
+    enabled: true
     ## @param metrics.service.type Metrics service type
     type: ClusterIP
     ## @param metrics.service.port Metrics service port
@@ -633,10 +727,22 @@ customScripts:
 ## @section clusterInitJob Configurations for the Job-Template
 clusterInitJob:
   ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
-  resources:
-    limits:
-      cpu: 25m
-      memory: 128Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 25m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
+  ## @param clusterInitJob.nodeSelector Node selector for the clusterInit Job (defaults to .Values.nodeSelector if not set)
+  nodeSelector: {}
+  ## @param clusterInitJob.tolerations Tolerations for the clusterInit Job (defaults to .Values.tolerations if not set)
+  tolerations: []
+  ## @param clusterInitJob.affinity Affinity rules for the clusterInit Job (defaults to .Values.affinity if not set)
+  affinity: {}
+  ## @param clusterInitJob.recoveryTimeout Seconds the Job waits for an existing cluster to re-form via gossip before failing
+  ## When the cluster already holds state (e.g. all pods were deleted and recreated), the Job waits for the nodes to
+  ## re-form the cluster instead of running "cluster create" on non-empty nodes (which fails with "Node is not empty"
+  ## and would destroy the topology). If the cluster is still not healthy after this timeout, the Job fails instead of
+  ## recreating the cluster, preserving data for manual intervention.
+  recoveryTimeout: 120

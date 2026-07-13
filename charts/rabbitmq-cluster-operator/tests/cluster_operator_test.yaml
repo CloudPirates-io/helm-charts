@@ -11,6 +11,9 @@ templates:
   - templates/cluster-operator/metrics-service.yaml
   - templates/cluster-operator/podmonitor.yaml
   - templates/cluster-operator/servicemonitor.yaml
+  - templates/cluster-operator/webhook-service.yaml
+  - templates/cluster-operator/webhook-configuration.yaml
+  - templates/cluster-operator/certificate.yaml
 
 tests:
   - it: should render cluster operator deployment with default values
@@ -28,7 +31,7 @@ tests:
         template: templates/cluster-operator/deployment.yaml
       - matchRegex:
           path: spec.template.spec.containers[0].image
-          pattern: ^docker\.io/rabbitmqoperator/cluster-operator:.*$
+          pattern: ^ghcr\.io/rabbitmq/cluster-operator:.*$
         template: templates/cluster-operator/deployment.yaml
       - equal:
           path: spec.template.spec.serviceAccountName
@@ -286,6 +289,85 @@ tests:
       - isNull:
           path: spec.template.spec.securityContext.enabled
         template: templates/cluster-operator/deployment.yaml
+
+  - it: should disable the webhook by default (ENABLE_WEBHOOKS=false, no webhook resources)
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ENABLE_WEBHOOKS
+            value: "false"
+        template: templates/cluster-operator/deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: webhook-server
+            containerPort: 9443
+            protocol: TCP
+        template: templates/cluster-operator/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/webhook-service.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/webhook-configuration.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/cluster-operator/certificate.yaml
+
+  - it: should render the webhook when enabled
+    set:
+      clusterOperator.webhook.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ENABLE_WEBHOOKS
+            value: "false"
+        template: templates/cluster-operator/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: webhook-server
+            containerPort: 9443
+            protocol: TCP
+        template: templates/cluster-operator/deployment.yaml
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: cert
+            secret:
+              defaultMode: 420
+              secretName: RELEASE-NAME-rabbitmq-cluster-operator-webhook
+        template: templates/cluster-operator/deployment.yaml
+      - isKind:
+          of: Service
+        template: templates/cluster-operator/webhook-service.yaml
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rabbitmq-cluster-operator-webhook
+        template: templates/cluster-operator/webhook-service.yaml
+      - documentIndex: 1
+        isKind:
+          of: MutatingWebhookConfiguration
+        template: templates/cluster-operator/webhook-configuration.yaml
+      - documentIndex: 2
+        isKind:
+          of: ValidatingWebhookConfiguration
+        template: templates/cluster-operator/webhook-configuration.yaml
+
+  - it: should not generate a self-signed secret when using cert-manager
+    set:
+      clusterOperator.webhook.enabled: true
+      useCertManager: true
+    asserts:
+      - isKind:
+          of: Certificate
+        template: templates/cluster-operator/certificate.yaml
+      - documentIndex: 0
+        isKind:
+          of: MutatingWebhookConfiguration
+        template: templates/cluster-operator/webhook-configuration.yaml
 
   - it: should render cluster operator deployment with containerSecurityContext
     set:

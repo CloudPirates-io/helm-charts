@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.21.5] - 2026-06-01
+
+- Fix `global.imageRegistry` not being applied to the init container and definitions auto-reload sidecar images (#1342).
+
 ## [cluster-operator-0.2.2] - 2026-03-27
 
 - Update image.repository to 23fe4f2 (#1181) ([bd28b2b5](https://github.com/CloudPirates-io/helm-charts/commit/bd28b2b5))
