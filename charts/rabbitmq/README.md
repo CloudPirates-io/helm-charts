@@ -325,6 +325,7 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | Parameter                                           | Description                                       | Default                  |
 | --------------------------------------------------- | ------------------------------------------------- | ------------------------ |
 | `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`                    |
+| `podSecurityContext.fsGroupChangePolicy`            | When kubelet recursively changes volume ownership; `OnRootMismatch` preserves the `.erlang.cookie` permissions across container restarts | `OnRootMismatch` |
 | `podSecurityContext.seccompProfile`                 | Seccomp profile for the pod                       | `{type: RuntimeDefault}` |
 | `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`                  |
 | `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`                   |
