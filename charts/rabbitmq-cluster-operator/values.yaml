@@ -230,6 +230,10 @@ clusterOperator:
   command: []
   ## @param clusterOperator.args Override default container args (useful when using custom images)
   args: []
+  ## @param clusterOperator.logLevel Log level for the Cluster Operator. When set, adds `--zap-log-level=<value>` to the default args. Allowed values: debug, info, error. Ignored when `clusterOperator.args` is set.
+  logLevel: ""
+  ## @param clusterOperator.extraArgs Additional container args appended to the default args (ignored when `clusterOperator.args` is set)
+  extraArgs: []
   ## @param clusterOperator.automountServiceAccountToken Mount Service Account token in pod
   automountServiceAccountToken: true
   ## @param clusterOperator.hostAliases RabbitMQ Cluster Operator pods host aliases
@@ -675,6 +679,10 @@ msgTopologyOperator:
   command: []
   ## @param msgTopologyOperator.args Override default container args (useful when using custom images)
   args: []
+  ## @param msgTopologyOperator.logLevel Log level for the Messaging Topology Operator. Adds `--zap-log-level=<value>` to the default args. Defaults to `info` because the operator binary logs at debug level by default. Allowed values: debug, info, error. Set to "" to keep the operator's built-in default. Ignored when `msgTopologyOperator.args` is set.
+  logLevel: "info"
+  ## @param msgTopologyOperator.extraArgs Additional container args appended to the default args (ignored when `msgTopologyOperator.args` is set)
+  extraArgs: []
   ## @param msgTopologyOperator.automountServiceAccountToken Mount Service Account token in pod
   automountServiceAccountToken: true
   ## @param msgTopologyOperator.hostAliases RabbitMQ Messaging Topology Operator pods host aliases

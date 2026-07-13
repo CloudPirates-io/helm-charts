@@ -82,6 +82,12 @@ spec:
           args:
             - --metrics-bind-address=:{{ .Values.clusterOperator.containerPorts.metrics }}
             - --health-probe-bind-address=:{{ .Values.clusterOperator.containerPorts.health }}
+            {{- if .Values.clusterOperator.logLevel }}
+            - --zap-log-level={{ .Values.clusterOperator.logLevel }}
+            {{- end }}
+            {{- if .Values.clusterOperator.extraArgs }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraArgs "context" $) | nindent 12 }}
+            {{- end }}
           {{- end }}
           env:
             - name: OPERATOR_NAMESPACE
