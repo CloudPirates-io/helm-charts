@@ -43,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:861113a4972110c2258ee3f62807c0eec33235ea3aa3d360da48211ce401e23d"
+  tag: "3.9.5@sha256:e12cace7b5fcfaadf17d6532e83fd8fe71fdf40ab73f22370ccc314bcf7a38b4"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -188,8 +188,8 @@ service:
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
-    ## @param service.ports.secureClient Zookeeper secure client service port
-    secureClient: 2281
+    ## @param service.ports.secureClient TLS client port (e.g. 2281). Set to null to disable.
+    secureClient: null
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
     ## @param service.ports.leaderElection Zookeeper leader election service port
@@ -292,6 +292,31 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+externalAccess:
+  ## @param externalAccess.enabled Enable per-pod external LoadBalancer services
+  enabled: false
+  service:
+    ## @param externalAccess.service.type Service type (LoadBalancer for NLB/ELB)
+    type: LoadBalancer
+    ## @param externalAccess.service.port External client port
+    port: 2181
+    ## @param externalAccess.service.annotations Annotations per service (e.g. AWS NLB)
+    annotations: {}
+    #  service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    #  service.beta.kubernetes.io/aws-load-balancer-scheme: "internal" # or "internet-facing"
+    #  service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+    ## @param externalAccess.service.loadBalancerIPs Static LB IPs/hostnames per replica (length must match replicaCount)
+    loadBalancerIPs: []
+    ## @param externalAccess.service.loadBalancerSourceRanges Restrict source CIDRs
+    loadBalancerSourceRanges: []
+    ## @param externalAccess.service.externalTrafficPolicy External traffic policy (Local recommended for per-pod LBs)
+    externalTrafficPolicy: Local
+    ## @param externalAccess.service.labels Extra labels for external services
+    labels: {}
+    ## @param externalAccess.service.hostnameDomain DNS suffix for External-DNS hostname annotation per replica (e.g. int.example.com).
+    ## When set, each external service gets external-dns.alpha.kubernetes.io/hostname: {release}-{ordinal}.{hostnameDomain}
+    hostnameDomain: ""    
 
 ## @param command Override default container command (useful when the default entrypoint needs to be replaced)
 command: []

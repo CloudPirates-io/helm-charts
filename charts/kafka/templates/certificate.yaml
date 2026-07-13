@@ -1,0 +1,33 @@
+{{- if and .Values.tls.enabled (eq .Values.tls.source "cert-manager") }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "kafka.fullname" . }}-tls
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ include "kafka.fullname" . }}-tls
+  commonName: {{ printf "%s.%s.svc.%s" (include "kafka.fullname" .) (include "cloudpirates.namespace" .) (.Values.clusterDomain | default "cluster.local") }}
+  dnsNames:
+    {{- include "kafka.tls.altNames" . | nindent 4 }}
+  {{- with .Values.tls.certManager.duration }}
+  duration: {{ . }}
+  {{- end }}
+  {{- with .Values.tls.certManager.renewBefore }}
+  renewBefore: {{ . }}
+  {{- end }}
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    # PKCS8 so Kafka can read the key directly (cert-manager defaults to PKCS1, which would need openssl).
+    encoding: PKCS8
+  issuerRef:
+    name: {{ required "tls.certManager.issuerRef.name is required when tls.source=cert-manager" .Values.tls.certManager.issuerRef.name }}
+    kind: {{ .Values.tls.certManager.issuerRef.kind }}
+    group: {{ .Values.tls.certManager.issuerRef.group }}
+{{- end }}

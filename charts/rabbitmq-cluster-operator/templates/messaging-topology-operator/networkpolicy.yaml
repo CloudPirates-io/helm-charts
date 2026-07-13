@@ -61,6 +61,7 @@ spec:
     - ports:
         {{/* Webhook port is hardcoded in the operator code */}}
         - port: 9443
+        - port: {{ .Values.msgTopologyOperator.containerPorts.health }}
         {{- if .Values.msgTopologyOperator.metrics.service.enabled }}
         - port: {{ .Values.msgTopologyOperator.containerPorts.metrics }}
         {{- end }}
