@@ -205,7 +205,9 @@ containerPorts:
 | ------------------------------- | -------------------------------------------------------------- | ----------- |
 | `service.type`                  | Nginx service type                                             | `ClusterIP` |
 | `service.ports`                 | Array of service ports (advanced configuration) - see examples | `[]`        |
+| `service.clusterIP`             | Kubernetes service static ClusterIP                            | `""`        |
 | `service.internalTrafficPolicy` | Kubernetes service internal traffic policy                     | `Cluster`   |
+| `service.trafficDistribution`   | Kubernetes service traffic distribution                        | `""`        |
 | `service.annotations`           | Additional annotations to add to the service                   | `{}`        |
 
 #### Service Ports Examples
@@ -318,9 +320,7 @@ readinessProbe:
 | `metrics.image.repository`                 | Nginx exporter image repository                                | `nginx/nginx-prometheus-exporter` |
 | `metrics.image.tag`                        | Nginx exporter image tag                                       | `"1.5@sha256:..."`                |
 | `metrics.image.pullPolicy`                 | Nginx exporter image pull policy                               | `Always`                          |
-| `metrics.resources.limits.memory`          | Memory limit for metrics container                             | `64Mi`                            |
-| `metrics.resources.requests.cpu`           | CPU request for metrics container                              | `50m`                             |
-| `metrics.resources.requests.memory`        | Memory request for metrics container                           | `64Mi`                            |
+| `metrics.resources`                        | Resource limits and requests for metrics container             | `{}`                              |
 | `metrics.extraArgs`                        | Extra arguments for nginx exporter                             | `[]`                              |
 | `metrics.service.type`                     | Metrics service type                                           | `ClusterIP`                       |
 | `metrics.service.port`                     | Metrics service port                                           | `9113`                            |
@@ -457,6 +457,8 @@ All containers in `sidecars` will be added to the pod and run alongside the main
 | `priorityClassName` | Priority class for pod eviction   | `""`    |
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
 | `affinity`          | Affinity rules for pod assignment | `{}`    |
+| `dnsPolicy`         | DNS policy for the pod            | `""`    |
+| `dnsConfig`         | DNS configuration for the pod     | `{}`    |
 
 ### DaemonSet Configuration Parameters
 

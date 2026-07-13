@@ -45,6 +45,84 @@ tests:
           path: data["zoo.cfg"]
           pattern: "tickTime=2000"
 
+  - it: should not set secureClientPort in configmap by default
+    template: configmap.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort="
+
+  - it: should set secureClientPort when secureClient is configured
+    template: configmap.yaml
+    set:
+      service:
+        ports:
+          secureClient: 2281
+    asserts:
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort=2281"
+
+  - it: should not expose secure-client port on service by default
+    template: service.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.ports
+          content:
+            name: secure-client
+  - it: should not expose secure-client port on statefulset by default
+    template: statefulset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: secure-client
+
+  - it: should expose secure-client port when configured
+    template: service.yaml
+    documentIndex: 0
+    set:
+      service:
+        ports:
+          secureClient: 2281
+    asserts:
+      - equal:
+          path: spec.ports[1].name
+          value: secure-client
+      - equal:
+          path: spec.ports[1].port
+          value: 2281
+
+  - it: should expose secure-client container port when configured
+    template: statefulset.yaml
+    set:
+      service:
+        ports:
+          secureClient: 2281
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].name
+          value: secure-client
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 2281
+
+  - it: should append extraConfigs to zoo.cfg
+    template: configmap.yaml
+    set:
+      zookeeperConfig:
+        extraConfigs:
+          - "secureClientPort=2281"
+          - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
+    asserts:
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "secureClientPort=2281"
+      - matchRegex:
+          path: data["zoo.cfg"]
+          pattern: "authProvider\.sasl=org\.apache\.zookeeper\.server\.auth\.SASLAuthenticationProvider"
+
   - it: should create volumeClaimTemplates by default (persistence enabled)
     template: statefulset.yaml
     asserts:

@@ -26,7 +26,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.29.8-alpine@sha256:8aa63af009a39ecd6c28d61da578a5447378c10bb097a069e3a3e0fb42bb6b19"
+  tag: "1.31.0-alpine@sha256:2f07d83bf561b506400dc183b1b2003803e39efbd22451f848adaba14d28c7c7"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -67,8 +67,12 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.clusterIP Kubernetes service static ClusterIP
+  clusterIP: ""
   ## @param service.internalTrafficPolicy Kubernetes service internal traffic policy
   internalTrafficPolicy: ""
+  ## @param service.trafficDistribution Kubernetes service traffic distribution
+  trafficDistribution: ""
   ## @param service.annotations Additional annotations to add to the service
   annotations: {}
 
@@ -176,6 +180,10 @@ cloneStaticSiteFromGit:
 
   ## Additional configuration for git-repo-syncer sidecar container
   gitSync:
+    ## @param cloneStaticSiteFromGit.gitSync.enabled Deploy the git-repo-syncer sidecar to periodically pull updates.
+    ## Disable to clone the repository only once at startup via the init container (e.g. for immutable PROD deployments).
+    ##
+    enabled: true
     command: []
     args: []
     resourcesPreset: "nano"
@@ -222,6 +230,12 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param dnsPolicy DNS policy for the pod
+dnsPolicy: ""
+
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 101
@@ -235,7 +249,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
 
-## @param initContainerSecurityContext Security context for init containers (useful for Istio sidecar scenarios)
+## @param initContainerSecurityContext Security context for the git init container and git-repo-syncer sidecar (useful for Istio sidecar scenarios)
+## Applied to both the git-clone-repository init container and the git-repo-syncer sidecar so the cloned
+## repository and subsequent `git pull`s run as the same user (avoids "dubious ownership"/permission errors).
 ## When using Istio, init containers may need to run as the Istio proxy user (1337) to access external network
 ## Example for Istio:
 ## initContainerSecurityContext:
@@ -313,12 +329,12 @@ metrics:
     tag: "1.5@sha256:bf76e58df548a13e52bd543ac70f6d3d667e14884e8b51c149bd81994ca75ccd"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for nginx exporter, for example:
   ## extraArgs:
   ##   - --log.level=info

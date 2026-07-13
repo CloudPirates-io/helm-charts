@@ -25,6 +25,12 @@ spec:
   parentRefs:
     {{- range $httpRoute.parentRefs }}
     - name: {{ .name }}
+      {{- if .group }}
+      group: {{ .group }}
+      {{- end }}
+      {{- if .kind }}
+      kind: {{ .kind }}
+      {{- end }}
       {{- if .namespace }}
       namespace: {{ .namespace }}
       {{- end }}
@@ -35,7 +41,7 @@ spec:
   {{- if $hostnames }}
   hostnames:
     {{- range $hostnames }}
-    - {{ . | quote }}
+    - {{ tpl . $ | quote }}
     {{- end }}
   {{- end }}
   rules:

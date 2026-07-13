@@ -24,7 +24,7 @@ image:
   ## @param image.repository TimescaleDB image repository
   repository: timescale/timescaledb
   ## @param image.tag TimescaleDB image tag (immutable tags are recommended)
-  tag: "2.26.3-pg17@sha256:54b5ad8328e2ec9a576d4ccdbaeeb790c0319fa65e3fccdd5df887ff3bc8de91"
+  tag: "2.27.2-pg17@sha256:526d01720f91772948d1ddd90601bd3d96cfa7e6afa3f3af87d4f0638c6e4d1a"
   ## @param image.imagePullPolicy TimescaleDB image pull policy
   imagePullPolicy: Always
 
@@ -36,6 +36,9 @@ replicaCount: 1
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 ## @section Pod labels
 podLabels: {}
