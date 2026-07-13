@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kafka.fullname" . }}-config
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+data:
+  server.properties: |
+    {{- $tls := include "kafka.tls.enabled" . }}
+    # --- KRaft (combined broker + controller) ---
+    process.roles=broker,controller
+    controller.listener.names=CONTROLLER
+    inter.broker.listener.name=INTERNAL
+    listener.security.protocol.map=CLIENT:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.client.enabled "tls" $tls) }},INTERNAL:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.interBroker.enabled "tls" $tls) }},CONTROLLER:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.controller.enabled "tls" $tls) }}
+    listeners=CLIENT://:{{ .Values.service.ports.client }},INTERNAL://:{{ .Values.service.ports.internal }},CONTROLLER://:{{ .Values.service.ports.controller }}
+    controller.quorum.voters={{ include "kafka.quorumVoters" . }}
+    {{- if include "kafka.auth.enabled" . }}
+
+    # --- SASL ---
+    # JAAS configs carry credentials and are appended at runtime from the Secret (see statefulset).
+    sasl.enabled.mechanisms=PLAIN
+    {{- if .Values.auth.interBroker.enabled }}
+    sasl.mechanism.inter.broker.protocol=PLAIN
+    {{- end }}
+    {{- if .Values.auth.controller.enabled }}
+    sasl.mechanism.controller.protocol=PLAIN
+    {{- end }}
+    {{- end }}
+    {{- if $tls }}
+
+    # --- TLS ---
+    # keystore.pem (key + cert chain) is assembled at runtime into a writable dir (see statefulset).
+    ssl.keystore.type=PEM
+    ssl.keystore.location=/opt/kafka/tls-runtime/keystore.pem
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/kafka/certs/{{ .Values.tls.caFilename }}
+    {{- if ne .Values.tls.clientAuth "none" }}
+    ssl.client.auth={{ .Values.tls.clientAuth }}
+    {{- end }}
+    {{- end }}
+
+    # --- Storage ---
+    log.dirs={{ .Values.persistence.dataDir | default "/var/lib/kafka/data" }}
+
+    # --- Topic defaults ---
+    {{- /* Replication can never exceed the broker count, so clamp every factor to
+           replicaCount (floored at 1). This keeps single/2-node clusters valid out of
+           the box while leaving the production-sized (>=3) case untouched. minIsr is
+           additionally clamped to the effective transaction-log replication factor. */}}
+    {{- $replicas := int .Values.replicaCount }}
+    {{- $txnRf := max 1 (min (int .Values.kafkaConfig.transactionStateLogReplicationFactor) $replicas) }}
+    num.partitions={{ .Values.kafkaConfig.numPartitions }}
+    default.replication.factor={{ max 1 (min (int .Values.kafkaConfig.defaultReplicationFactor) $replicas) }}
+    offsets.topic.replication.factor={{ max 1 (min (int .Values.kafkaConfig.offsetsTopicReplicationFactor) $replicas) }}
+    transaction.state.log.replication.factor={{ $txnRf }}
+    transaction.state.log.min.isr={{ max 1 (min (int .Values.kafkaConfig.transactionStateLogMinIsr) $txnRf) }}
+    auto.create.topics.enable={{ .Values.kafkaConfig.autoCreateTopicsEnable }}
+    log.retention.hours={{ .Values.kafkaConfig.logRetentionHours }}
+    {{- range .Values.kafkaConfig.extraConfig }}
+    {{ . }}
+    {{- end }}

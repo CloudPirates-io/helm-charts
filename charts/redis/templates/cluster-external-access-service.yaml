@@ -1,0 +1,50 @@
+{{- if and (eq .Values.architecture "cluster") .Values.cluster.externalAccess.enabled .Values.cluster.externalAccess.service.enabled }}
+{{- $fullname := include "redis.fullname" . }}
+{{- $ea := .Values.cluster.externalAccess }}
+{{- $svc := $ea.service }}
+{{- $clientPort := int (default .Values.service.port $ea.port) }}
+{{- $busPort := int (default .Values.service.clusterPort $ea.busPort) }}
+{{- range $i := until (int $.Values.replicaCount) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%d-external" $fullname $i }}
+  namespace: {{ include "cloudpirates.namespace" $ }}
+  labels:
+    {{- include "redis.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: cluster-external
+  {{- $annotations := merge (deepCopy $svc.annotations) (include "redis.annotations" $ | fromYaml) }}
+  {{- with $annotations }}
+  annotations:
+    {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $svc.type }}
+  {{- if and (eq $svc.type "LoadBalancer") (gt (len $svc.loadBalancerIPs) $i) }}
+  loadBalancerIP: {{ index $svc.loadBalancerIPs $i | quote }}
+  {{- end }}
+  {{- if and (eq $svc.type "LoadBalancer") $svc.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml $svc.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  ports:
+    - port: {{ $clientPort }}
+      targetPort: redis
+      protocol: TCP
+      name: tcp-redis
+      {{- if and (eq $svc.type "NodePort") (gt (len $svc.nodePorts) $i) }}
+      nodePort: {{ index $svc.nodePorts $i }}
+      {{- end }}
+    - port: {{ $busPort }}
+      targetPort: cluster
+      protocol: TCP
+      name: cluster
+      {{- if and (eq $svc.type "NodePort") (gt (len $svc.busNodePorts) $i) }}
+      nodePort: {{ index $svc.busNodePorts $i }}
+      {{- end }}
+  selector:
+    {{- include "redis.selectorLabels" $ | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ printf "%s-%d" $fullname $i }}
+{{- end }}
+{{- end }}

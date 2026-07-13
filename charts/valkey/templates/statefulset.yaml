@@ -183,6 +183,15 @@ spec:
               fi
               {{- end }}
 
+              {{- if and .Values.auth.enabled (ne .Values.architecture "standalone") }}
+              # IMPORTANT: Always add masterauth for non-standalone architectures
+              # Even if this pod starts as master, it may become a replica after failover
+              # Without masterauth, REPLICAOF commands from sentinel will fail with NOAUTH
+              echo "" >> /tmp/valkey/valkey.conf
+              echo "# Authentication for replication (required for failover scenarios)" >> /tmp/valkey/valkey.conf
+              echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
+              {{- end }}
+
               # Add user provided settings at the end of file to ensure their precedence
               echo "" >> /tmp/valkey/valkey.conf
               # If there is existing config map or .Values.config value provided - use it
@@ -241,7 +250,7 @@ spec:
               CONFIG_FILE="{{ include "valkey.configFullName" . }}"
               {{- end }}
 
-              valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
+              exec valkey-server "$CONFIG_FILE" {{- if .Values.auth.enabled }} --requirepass "${VALKEY_PASSWORD}" {{- end }}
           ports:
             - name: valkey
               containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.targetPort }}{{ end }}
@@ -306,7 +315,7 @@ spec:
             preStop:
               exec:
                 command:
-                  - /bin/bash
+                  - /bin/sh
                   - /scripts/prestop.sh
           {{- end }}
           resources:
@@ -341,6 +350,11 @@ spec:
           volumeMounts:
             - name: sentinel-config
               mountPath: /tmp
+            {{- if .Values.sentinel.preStop.enabled }}
+            - name: prestop-script
+              mountPath: /scripts
+              readOnly: true
+            {{- end }}
           {{- if .Values.sentinel.extraVolumeMounts }}
             {{- toYaml .Values.sentinel.extraVolumeMounts | nindent 12 }}
           {{- end }}
@@ -473,7 +487,7 @@ spec:
               echo "Starting Sentinel with config:"
               cat /tmp/sentinel.conf
 
-              valkey-sentinel /tmp/sentinel.conf
+              exec valkey-sentinel /tmp/sentinel.conf
           ports:
             - name: sentinel
               containerPort: {{ .Values.sentinel.port }}
@@ -501,6 +515,14 @@ spec:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
           {{- end }}
+          {{- if .Values.sentinel.preStop.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - /scripts/prestop-sentinel.sh
+          {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.metrics.enabled }}
@@ -515,6 +537,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "valkey.secretName" . }}
                   key: {{ include "valkey.passwordKey" . }}
+            {{- end }}
+            {{- with .Values.metrics.extraEnvVars }}
+{{ toYaml . | indent 12 }}
             {{- end }}
           ports:
             - name: metrics
@@ -595,6 +620,7 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
   {{- if .Values.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: {{ .Values.persistentVolumeClaimRetentionPolicy.whenDeleted }}
@@ -602,7 +628,9 @@ spec:
   {{- end }}
   {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         {{- with $labels := merge (include "valkey.selectorLabels" . | fromYaml) .Values.persistence.labels .Values.podLabels }}
         labels:

@@ -67,6 +67,8 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.clusterIP Kubernetes service static ClusterIP
+  clusterIP: ""
   ## @param service.internalTrafficPolicy Kubernetes service internal traffic policy
   internalTrafficPolicy: ""
   ## @param service.trafficDistribution Kubernetes service traffic distribution
@@ -178,6 +180,10 @@ cloneStaticSiteFromGit:
 
   ## Additional configuration for git-repo-syncer sidecar container
   gitSync:
+    ## @param cloneStaticSiteFromGit.gitSync.enabled Deploy the git-repo-syncer sidecar to periodically pull updates.
+    ## Disable to clone the repository only once at startup via the init container (e.g. for immutable PROD deployments).
+    ##
+    enabled: true
     command: []
     args: []
     resourcesPreset: "nano"
@@ -224,6 +230,12 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param dnsPolicy DNS policy for the pod
+dnsPolicy: ""
+
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 101
@@ -237,7 +249,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
 
-## @param initContainerSecurityContext Security context for init containers (useful for Istio sidecar scenarios)
+## @param initContainerSecurityContext Security context for the git init container and git-repo-syncer sidecar (useful for Istio sidecar scenarios)
+## Applied to both the git-clone-repository init container and the git-repo-syncer sidecar so the cloned
+## repository and subsequent `git pull`s run as the same user (avoids "dubious ownership"/permission errors).
 ## When using Istio, init containers may need to run as the Istio proxy user (1337) to access external network
 ## Example for Istio:
 ## initContainerSecurityContext:

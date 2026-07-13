@@ -25,7 +25,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.3.0-management@sha256:8f3ab1dc6fb3b17ff59ba4e9ceed187c1711a4af831242b733b1e6949625b315"
+  tag: "4.3.1-management@sha256:261d0262cae01a375f9778a2a373d4f796dadaede341d5cbabf5ef9d25ae0045"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -368,6 +368,14 @@ ingress:
 ##     - name: my-gateway
 ##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
 ##
+## To attach to another parent type, such as ListenerSet, set group and kind:
+##
+##   parentRefs:
+##     - group: gateway.networking.k8s.io
+##       kind: ListenerSet
+##       name: my-listenerset
+##       sectionName: https
+##
 ## The backend always receives plain HTTP traffic regardless of the listener protocol.
 gatewayAPI:
   httpRoute:
@@ -375,9 +383,11 @@ gatewayAPI:
     enabled: false
     ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
     annotations: {}
-    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways or ListenerSets
     parentRefs:
       - name: gateway
+        group: ""
+        kind: ""
         namespace: ""
         sectionName: ""
     ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
@@ -436,6 +446,12 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+  ## @param podSecurityContext.fsGroupChangePolicy When kubelet should recursively change ownership/permissions of the volume
+  ## Set to "OnRootMismatch" so the kubelet only re-applies fsGroup ownership when the volume root does not already match.
+  ## This prevents Kubernetes from relaxing the .erlang.cookie file permissions (e.g. from 0400 to 0660) on container/kubelet
+  ## restarts, which would otherwise make RabbitMQ crash-loop with "Cookie file ... must be accessible by owner only" because
+  ## init containers do not re-run on a plain container restart. See https://github.com/CloudPirates-io/helm-charts/issues/1397
+  fsGroupChangePolicy: OnRootMismatch
   ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
   seccompProfile:
     type: RuntimeDefault

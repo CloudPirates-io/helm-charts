@@ -1,0 +1,33 @@
+{{- if and .Values.logging.consoleOnly (not .Values.logging.existingConfigMap) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kafka.fullname" . }}-log4j
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+data:
+  log4j2.yaml: |
+    Configuration:
+      Appenders:
+        Console:
+          name: STDOUT
+          target: SYSTEM_OUT
+          PatternLayout:
+            Pattern: {{ .Values.logging.pattern | quote }}
+      Loggers:
+        Root:
+          level: {{ .Values.logging.level }}
+          AppenderRef:
+            - ref: STDOUT
+        Logger:
+          # Keep the per-request loggers quiet, matching Kafka's upstream defaults
+          - name: kafka.request.logger
+            level: WARN
+          - name: org.apache.kafka.network.RequestChannel$
+            level: WARN
+{{- end }}

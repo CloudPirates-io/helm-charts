@@ -33,7 +33,8 @@ spec:
       honorLabels: {{ . }}
       {{- end }}
       relabelings:
-        - targetLabel: scrape_target
+        - action: replace
+          targetLabel: scrape_target
           replacement: redis
       {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
@@ -55,7 +56,8 @@ spec:
       honorLabels: {{ . }}
       {{- end }}
       relabelings:
-        - targetLabel: scrape_target
+        - action: replace
+          targetLabel: scrape_target
           replacement: sentinel
       {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
