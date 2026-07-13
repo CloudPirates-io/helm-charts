@@ -65,6 +65,21 @@ tests:
           path: spec.template.spec.containers[0].args
           content: "--listen-client-urls=http://127.0.0.1:2379"
 
+  - it: should configure cluster domain
+    template: statefulset.yaml
+    set:
+      clusterDomain: "unit.test"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--advertise-client-urls=http://$(POD_NAME).RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2379"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--initial-advertise-peer-urls=http://$(POD_NAME).RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--initial-cluster=RELEASE-NAME-etcd-0=http://RELEASE-NAME-etcd-0.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380,RELEASE-NAME-etcd-1=http://RELEASE-NAME-etcd-1.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380,RELEASE-NAME-etcd-2=http://RELEASE-NAME-etcd-2.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380"
+
   - it: should add extraArgs
     template: statefulset.yaml
     set:

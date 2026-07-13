@@ -176,8 +176,11 @@ spec:
           {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
           {{- end }}
-        {{- if .Values.cloneStaticSiteFromGit.enabled }}
+        {{- if and .Values.cloneStaticSiteFromGit.enabled .Values.cloneStaticSiteFromGit.gitSync.enabled }}
         - name: git-repo-syncer
+          {{- if .Values.initContainerSecurityContext }}
+          securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitSync.command }}
@@ -314,5 +317,12 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}

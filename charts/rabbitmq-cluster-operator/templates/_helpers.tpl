@@ -29,6 +29,31 @@ Common labels for rmq-cluster-operator
 {{- end }}
 
 {{/*
+Return the proper RabbitMQ Cluster Operator webhook fullname
+*/}}
+{{- define "rmqco.clusterOperator.webhook.fullname" -}}
+{{- printf "%s-%s" (include "rmqco.clusterOperator.fullname" .) "webhook" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Return the proper RabbitMQ Cluster Operator webhook fullname adding the installation's namespace.
+*/}}
+{{- define "rmqco.clusterOperator.webhook.fullname.namespace" -}}
+{{- printf "%s-%s" (include "rmqco.clusterOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Return the name of the secret holding the RabbitMQ Cluster Operator webhook certificates.
+*/}}
+{{- define "rmqco.clusterOperator.webhook.secretName" -}}
+{{- if .Values.clusterOperator.webhook.existingWebhookCertSecret -}}
+    {{- .Values.clusterOperator.webhook.existingWebhookCertSecret -}}
+{{- else -}}
+    {{- include "rmqco.clusterOperator.webhook.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Common labels for rmq-messaging-topology-operator
 */}}
 {{- define "rmqmto.labels" -}}

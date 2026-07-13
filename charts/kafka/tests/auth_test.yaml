@@ -1,0 +1,128 @@
+suite: test kafka authentication (SASL/PLAIN)
+
+tests:
+  - it: should enable SASL_PLAINTEXT on all listeners by default
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:SASL_PLAINTEXT,INTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "inter.broker.listener.name=INTERNAL"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "sasl.enabled.mechanisms=PLAIN"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "sasl.mechanism.inter.broker.protocol=PLAIN"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "sasl.mechanism.controller.protocol=PLAIN"
+
+  - it: should never put passwords or JAAS config in the ConfigMap
+    template: configmap.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["server.properties"]
+          pattern: "jaas.config"
+
+  - it: should create a Secret with one key per enabled boundary by default
+    template: secret.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Secret
+      - exists:
+          path: data["client-password"]
+      - exists:
+          path: data["inter-broker-password"]
+      - exists:
+          path: data["controller-password"]
+
+  - it: should wire credential env vars from the Secret in the statefulset
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_USER")].value
+          value: user
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_PASSWORD")].valueFrom.secretKeyRef.name
+          value: RELEASE-NAME-kafka
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_PASSWORD")].valueFrom.secretKeyRef.key
+          value: client-password
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_INTER_BROKER_PASSWORD")].valueFrom.secretKeyRef.key
+          value: inter-broker-password
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CONTROLLER_PASSWORD")].valueFrom.secretKeyRef.key
+          value: controller-password
+
+  - it: should expose the internal listener port on the container and headless service
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[?(@.name=="internal")].containerPort
+          value: 9094
+
+  - it: should fall back to PLAINTEXT on all listeners when auth is disabled
+    template: configmap.yaml
+    set:
+      auth:
+        client: { enabled: false }
+        interBroker: { enabled: false }
+        controller: { enabled: false }
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      - notMatchRegex:
+          path: data["server.properties"]
+          pattern: "sasl.enabled.mechanisms"
+
+  - it: should not render a Secret when auth is disabled
+    template: secret.yaml
+    set:
+      auth:
+        client: { enabled: false }
+        interBroker: { enabled: false }
+        controller: { enabled: false }
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render a Secret when an existingSecret is provided
+    template: secret.yaml
+    set:
+      auth:
+        existingSecret: my-creds
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should reference the existingSecret in credential env vars
+    template: statefulset.yaml
+    set:
+      auth:
+        existingSecret: my-creds
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_PASSWORD")].valueFrom.secretKeyRef.name
+          value: my-creds
+
+  - it: should omit client credentials when only the client listener is open
+    template: statefulset.yaml
+    set:
+      auth:
+        client: { enabled: false }
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KAFKA_CLIENT_USER
+            value: user
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_INTER_BROKER_USER")].value
+          value: inter_broker

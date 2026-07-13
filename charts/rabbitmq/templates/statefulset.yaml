@@ -40,7 +40,7 @@ spec:
       {{- end }}
       initContainers:
         - name: init-erlang-cookie
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -71,7 +71,7 @@ spec:
           {{- end }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -294,7 +294,7 @@ spec:
             {{- end }}
         {{- if and .Values.definitions.enabled .Values.definitions.autoReload.enabled }}
         - name: definitions-reloader
-          image: "{{ .Values.definitions.autoReload.image.registry }}/{{ .Values.definitions.autoReload.image.repository }}:{{ .Values.definitions.autoReload.image.tag }}"
+          image: {{ include "rabbitmq.definitions.autoReload.image" . | quote }}
           imagePullPolicy: {{ .Values.definitions.autoReload.image.pullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
