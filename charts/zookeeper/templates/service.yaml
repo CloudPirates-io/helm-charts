@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
@@ -17,6 +17,12 @@ spec:
       targetPort: client
       protocol: TCP
       name: client
+    {{- if .Values.service.ports.secureClient }}
+    - port: {{ .Values.service.ports.secureClient }}
+      targetPort: secure-client
+      protocol: TCP
+      name: secure-client
+    {{- end }}
     - port: {{ .Values.service.ports.admin | default 8080 }}
       targetPort: admin
       protocol: TCP
@@ -28,7 +34,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "zookeeper.fullname" . }}-headless
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
 spec:
@@ -40,6 +46,12 @@ spec:
       targetPort: client
       protocol: TCP
       name: client
+    {{- if .Values.service.ports.secureClient }}
+    - port: {{ .Values.service.ports.secureClient }}
+      targetPort: secure-client
+      protocol: TCP
+      name: secure-client
+    {{- end }}
     - port: {{ .Values.service.ports.quorum | default 2888 }}
       targetPort: quorum
       protocol: TCP

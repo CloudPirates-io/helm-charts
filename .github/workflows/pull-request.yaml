@@ -4,7 +4,6 @@ on:
     types:
       - opened
       - reopened
-      - synchronize
     branches:
       - main
 
@@ -12,8 +11,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions: # added using https://github.com/step-security/secure-repo
+  contents: read
+
 jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'external' || '' }}
+    steps:
+      - run: "true"
+
   lint-test:
+    needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -66,20 +77,11 @@ jobs:
             echo "No chart changes detected"
           fi
 
-      - name: Cache Helm plugins
-        if: steps.list-changed.outputs.changed == 'true'
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: ~/.local/share/helm/plugins
-          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-helm-plugins-
-
       - name: Installing plugin helm-unittest
         if: steps.list-changed.outputs.changed == 'true'
         run: |
           if ! helm plugin list | grep -q unittest; then
-            helm plugin install https://github.com/helm-unittest/helm-unittest
+            helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
           else
             echo "helm-unittest plugin already installed"
           fi
@@ -90,11 +92,11 @@ jobs:
           ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
+    needs: [authorize, lint-test]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
-    needs: [lint-test]
     if: needs.lint-test.outputs.changed == 'true'
     steps:
       - name: Checkout pull request branch
@@ -122,18 +124,10 @@ jobs:
           cluster_name: helm-chart-test
           wait: 300s
 
-      - name: Cache Helm plugins
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        with:
-          path: ~/.local/share/helm/plugins
-          key: ${{ runner.os }}-helm-plugins-${{ hashFiles('**/plugin.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-helm-plugins-
-
       - name: Installing plugin helm-unittest
         run: |
           if ! helm plugin list | grep -q unittest; then
-            helm plugin install https://github.com/helm-unittest/helm-unittest
+            helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
           else
             echo "helm-unittest plugin already installed"
           fi

@@ -1,0 +1,102 @@
+suite: test minio bucket-init-job
+templates:
+  - bucket-init-job.yaml
+  - bucket-init-configmap.yaml
+set:
+  image:
+    tag: RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+  defaultBuckets: "test-bucket"
+tests:
+  - it: should render bucket-init job when defaultBuckets is set
+    template: bucket-init-job.yaml
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-minio-bucket-init
+
+  - it: should add podLabels to bucket-init job pods
+    template: bucket-init-job.yaml
+    set:
+      bucketInitJob:
+        podLabels:
+          sidecar.istio.io/inject: "false"
+          custom-label: "custom-value"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["sidecar.istio.io/inject"]
+          value: "false"
+      - equal:
+          path: spec.template.metadata.labels["custom-label"]
+          value: "custom-value"
+
+  - it: should have selector labels and component label by default
+    template: bucket-init-job.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: minio
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: bucket-init
+
+  - it: should propagate commonLabels to pod template
+    template: bucket-init-job.yaml
+    set:
+      commonLabels:
+        environment: "production"
+        team: "platform"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.environment
+          value: production
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: platform
+
+  - it: should add podAnnotations to bucket-init job pods
+    template: bucket-init-job.yaml
+    set:
+      bucketInitJob:
+        podAnnotations:
+          prometheus.io/scrape: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "false"
+
+  - it: should use default serviceAccountName
+    template: bucket-init-job.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-minio
+
+  - it: should use custom serviceAccountName
+    template: bucket-init-job.yaml
+    set:
+      serviceAccount:
+        name: custom-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: custom-sa
+
+  - it: should set priorityClassName when specified
+    template: bucket-init-job.yaml
+    set:
+      priorityClassName: high-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: high-priority
+
+  - it: should not set priorityClassName when not specified
+    template: bucket-init-job.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.priorityClassName

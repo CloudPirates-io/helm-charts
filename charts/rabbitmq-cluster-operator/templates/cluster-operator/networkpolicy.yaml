@@ -55,6 +55,13 @@ spec:
     {{- end }}
   {{- end }}
   ingress:
+    - ports:
+        - port: {{ .Values.clusterOperator.containerPorts.health }}
+    {{- if .Values.clusterOperator.webhook.enabled }}
+    # Allow the kube-apiserver to reach the admission webhook server
+    - ports:
+        - port: 9443
+    {{- end }}
     {{- if .Values.clusterOperator.metrics.service.enabled }}
     - ports:
         - port: {{ .Values.clusterOperator.containerPorts.metrics }}

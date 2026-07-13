@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "timescaledb.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "timescaledb.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}

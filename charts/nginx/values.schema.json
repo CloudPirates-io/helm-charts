@@ -63,6 +63,9 @@
                         "command": {
                             "type": "array"
                         },
+                        "enabled": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object"
                         },
@@ -152,6 +155,12 @@
                     "type": "object"
                 }
             }
+        },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "dnsPolicy": {
+            "type": "string"
         },
         "existingConfigConfigmap": {
             "type": "string"
@@ -375,28 +384,7 @@
                     }
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -464,6 +452,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "nodeSelector": {
             "type": "object"
         },
@@ -525,6 +516,9 @@
                 "annotations": {
                     "type": "object"
                 },
+                "clusterIP": {
+                    "type": "string"
+                },
                 "internalTrafficPolicy": {
                     "type": "string"
                 },
@@ -547,6 +541,9 @@
                             }
                         }
                     }
+                },
+                "trafficDistribution": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"

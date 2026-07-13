@@ -88,18 +88,19 @@ zkCli.sh -server my-zookeeper:2181
 
 ### Common Parameters
 
-| Parameter                            | Description                                                                             | Default |
-| ------------------------------------ | --------------------------------------------------------------------------------------- | ------- |
-| `nameOverride`                       | String to partially override fullname                                                   | `""`    |
-| `fullnameOverride`                   | String to fully override fullname                                                       | `""`    |
-| `commonLabels`                       | Labels to add to all deployed objects                                                   | `{}`    |
-| `commonAnnotations`                  | Annotations to add to all deployed objects                                              | `{}`    |
-| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                  | `3`     |
-| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions | `true`  |
-| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                         | `""`    |
-| `networkPolicy.enabled`              | Enable network policies                                                                 | `true`  |
-| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]` |
+| Parameter                            | Description                                                                                  | Default |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- | ------- |
+| `nameOverride`                       | String to partially override fullname                                                        | `""`    |
+| `fullnameOverride`                   | String to fully override fullname                                                            | `""`    |
+| `namespaceOverride`                  | String to override the namespace for all resources                                           | `""`    |
+| `commonLabels`                       | Labels to add to all deployed objects                                                        | `{}`    |
+| `commonAnnotations`                  | Annotations to add to all deployed objects                                                   | `{}`    |
+| `replicaCount`                       | Number of ZooKeeper replicas to deploy                                                       | `3`     |
+| `podDisruptionBudget.enabled`        | Create a Pod Disruption Budget to ensure high availability during voluntary disruptions      | `true`  |
+| `podDisruptionBudget.minAvailable`   | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `podDisruptionBudget.maxUnavailable` | minAvailable for Pod Disruption Budget. Value is not mandatory.                              | `""`    |
+| `networkPolicy.enabled`              | Enable network policies                                                                      | `true`  |
+| `command`                            | Override default container command (useful when the default entrypoint needs to be replaced) | `[]`    |
 
 ### ZooKeeper Configuration
 
@@ -113,6 +114,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.standaloneEnabled`         | Enable standalone mode                              | `"false"`   |
 | `zookeeperConfig.adminServerEnabled`        | Enable admin server                                 | `"false"`   |
 | `zookeeperConfig.commandsWhitelist`         | 4-letter word commands whitelist                    | `srvr`      |
+| `zookeeperConfig.customServers`             | Custom zoo.cfg server lines. When set, generated `server.N` entries are replaced by these values | `[]`        |
 | `zookeeperConfig.autopurge.purgeInterval`   | Autopurge purge interval (hours)                    | `24`        |
 | `zookeeperConfig.autopurge.snapRetainCount` | Autopurge snapshot retain count                     | `3`         |
 | `zookeeperConfig.admin.enableServer`        | Enable the admin server                             | `"false"`   |
@@ -120,6 +122,7 @@ zkCli.sh -server my-zookeeper:2181
 | `zookeeperConfig.admin.serverAddress`       | Admin server address                                | `0.0.0.0`   |
 | `zookeeperConfig.admin.idleTimeout`         | Admin server connection idle timeout (milliseconds) | `30000`     |
 | `zookeeperConfig.admin.commandUrl`          | Admin server command URL                            | `/commands` |
+| `zookeeperConfig.extraConfigs`              | Extra ZooKeeper configuration lines appended to zoo.cfg | `[]`    |
 
 ### Metrics
 
@@ -147,10 +150,42 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
+| `service.ports.secureClient`   | TLS client port. Set to null to disable (default). When set, also configure SSL via zookeeperConfig.extraConfigs and mount keystore files with extraVolumes/extraVolumeMounts. Setting the port without SSL config will cause startup failure.     | `null`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |
 | `service.annotations`          | Additional annotations to add to the service | `{}`        |
+
+### External Access
+
+| Parameter                                           | Description                                                                                       | Default          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------- |
+| `externalAccess.enabled`                            | Enable per-pod external LoadBalancer services for client access from outside the cluster          | `false`          |
+| `externalAccess.service.type`                       | Kubernetes service type for external access services                                              | `LoadBalancer`   |
+| `externalAccess.service.port`                       | External client port exposed on each LoadBalancer                                                 | `2181`           |
+| `externalAccess.service.annotations`                | Annotations applied to each external service (e.g. AWS NLB settings)                              | `{}`             |
+| `externalAccess.service.loadBalancerIPs`            | Static LoadBalancer IP per replica; list length must match `replicaCount`                         | `[]`             |
+| `externalAccess.service.loadBalancerSourceRanges`   | Source CIDR ranges allowed to reach the external LoadBalancers                                    | `[]`             |
+| `externalAccess.service.externalTrafficPolicy`      | External traffic policy for LoadBalancer/NodePort services (`Local` recommended for per-pod LBs)    | `Local`          |
+| `externalAccess.service.labels`                     | Extra labels applied to each external service                                                     | `{}`             |
+| `externalAccess.service.hostnameDomain` | Extra annotation `external-dns.alpha.kubernetes.io/hostname` per replica: `{release}-{ordinal}.{domain}`. Requires External-DNS with that zone in domainFilters  | `""`             |
+
+When enabled, the chart creates one external service per ZooKeeper pod (e.g. `release-zookeeper-0-external`). Clients outside the cluster should use the LoadBalancer hostnames and client port in their connection string. Quorum traffic remains on the internal headless service; `zoo.cfg` server entries are not changed.
+
+**Example for AWS NLBs:**
+
+```yaml
+externalAccess:
+  enabled: true
+  service:
+    hostnameDomain: int.example.com
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "external"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+```
+Use aws-load-balancer-scheme internal if clients are in the VPC, internet-facing if they're on the public internet.
 
 ### Persistence
 
@@ -200,25 +235,27 @@ zkCli.sh -server my-zookeeper:2181
 
 #### Liveness Probe
 
-| Parameter                           | Description                     | Default |
-| ----------------------------------- | ------------------------------- | ------- |
-| `livenessProbe.enabled`             | Enable livenessProbe            | `true`  |
-| `livenessProbe.initialDelaySeconds` | LivenessProbe initial delay     | `30`    |
-| `livenessProbe.periodSeconds`       | LivenessProbe period seconds    | `10`    |
-| `livenessProbe.timeoutSeconds`      | LivenessProbe timeout seconds   | `5`     |
-| `livenessProbe.failureThreshold`    | LivenessProbe failure threshold | `6`     |
-| `livenessProbe.successThreshold`    | LivenessProbe success threshold | `1`     |
+| Parameter                           | Description                                                | Default |
+| ----------------------------------- | ---------------------------------------------------------- | ------- |
+| `livenessProbe.enabled`             | Enable livenessProbe                                       | `true`  |
+| `livenessProbe.initialDelaySeconds` | LivenessProbe initial delay                                | `30`    |
+| `livenessProbe.periodSeconds`       | LivenessProbe period seconds                               | `10`    |
+| `livenessProbe.timeoutSeconds`      | LivenessProbe timeout seconds                              | `5`     |
+| `livenessProbe.failureThreshold`    | LivenessProbe failure threshold                            | `6`     |
+| `livenessProbe.successThreshold`    | LivenessProbe success threshold                            | `1`     |
+| `livenessProbe.custom`              | Custom action handler; replaces default tcpSocket when set | `{}`    |
 
 #### Readiness Probe
 
-| Parameter                            | Description                      | Default |
-| ------------------------------------ | -------------------------------- | ------- |
-| `readinessProbe.enabled`             | Enable readinessProbe            | `true`  |
-| `readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay     | `5`     |
-| `readinessProbe.periodSeconds`       | ReadinessProbe period seconds    | `10`    |
-| `readinessProbe.timeoutSeconds`      | ReadinessProbe timeout seconds   | `5`     |
-| `readinessProbe.failureThreshold`    | ReadinessProbe failure threshold | `6`     |
-| `readinessProbe.successThreshold`    | ReadinessProbe success threshold | `1`     |
+| Parameter                            | Description                                                | Default |
+| ------------------------------------ | ---------------------------------------------------------- | ------- |
+| `readinessProbe.enabled`             | Enable readinessProbe                                      | `true`  |
+| `readinessProbe.initialDelaySeconds` | ReadinessProbe initial delay                               | `5`     |
+| `readinessProbe.periodSeconds`       | ReadinessProbe period seconds                              | `10`    |
+| `readinessProbe.timeoutSeconds`      | ReadinessProbe timeout seconds                             | `5`     |
+| `readinessProbe.failureThreshold`    | ReadinessProbe failure threshold                           | `6`     |
+| `readinessProbe.successThreshold`    | ReadinessProbe success threshold                           | `1`     |
+| `readinessProbe.custom`              | Custom action handler; replaces default tcpSocket when set | `{}`    |
 
 #### Startup Probe
 

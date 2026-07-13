@@ -90,6 +90,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | `replicaCount`      | Number of TimescaleDB replicas to deploy (Note: TimescaleDB doesn't support multi-master replication by default) | `1`     |
 | `nameOverride`      | String to partially override timescaledb.fullname                                                                | `""`    |
 | `fullnameOverride`  | String to fully override timescaledb.fullname                                                                    | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources                                                               | `""`    |
 | `commonLabels`      | Labels to add to all deployed objects                                                                            | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects                                                                       | `{}`    |
 
@@ -104,6 +105,7 @@ The following table lists the configurable parameters of the TimescaleDB chart a
 | Parameter                                           | Description                                       | Default   |
 | --------------------------------------------------- | ------------------------------------------------- | --------- |
 | `podSecurityContext.fsGroup`                        | Group ID for the volumes of the pod               | `999`     |
+| `podSecurityContext.seccompProfile`                 | Seccomp profile for the pod                       | `{type: RuntimeDefault}` |
 | `containerSecurityContext.allowPrivilegeEscalation` | Enable container privilege escalation             | `false`   |
 | `containerSecurityContext.runAsNonRoot`             | Configure the container to run as a non-root user | `true`    |
 | `containerSecurityContext.runAsUser`                | User ID for the TimescaleDB container             | `999`     |

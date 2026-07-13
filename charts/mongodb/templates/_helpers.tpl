@@ -101,6 +101,10 @@ Return the proper MongoDB Exporter image name
 {{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
+{{- define "mongodb.metrics.uriEncodeImage" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.uriEncodeImage "global" .Values.global) -}}
+{{- end }}
+
 {{/*
 Return the MongoDB connection string for metrics
 */}}
@@ -146,7 +150,7 @@ Return ServiceMonitor labels
 Additional helper functions needed for sharded cluster
 */}}
 {{- define "mongodb.metricsSecretPasswordKey" -}}
-{{- if and .Values.metrics.username .Values.metrics.enabled }}
+{{- if and .Values.metrics.username .Values.metrics.enabled -}}
 mongodb-metrics-password
 {{- else }}
 {{- include "mongodb.secretPasswordKey" . -}}
@@ -204,7 +208,7 @@ Return config server connection string for mongos
 */}}
 {{- define "mongodb.configServerConnectionString" -}}
 {{- $configRsName := printf "%s-configserver-rs" (include "mongodb.fullname" .) -}}
-{{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) .Release.Namespace (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $configService := printf "%s-configserver-headless.%s.svc.%s" (include "mongodb.fullname" .) (include "cloudpirates.namespace" .) (.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $configServers := list -}}
 {{- range $i := until (int .Values.shardedCluster.configsvr.replicaCount) -}}
 {{- $host := printf "%s-configserver-%d.%s:27017" (include "mongodb.fullname" $) $i $configService -}}
@@ -220,7 +224,7 @@ Return shard replica set connection string
 {{- $shardIndex := .shardIndex -}}
 {{- $context := .context -}}
 {{- $shardRsName := printf "%s-shard-%d-rs" (include "mongodb.fullname" $context) $shardIndex -}}
-{{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex $context.Release.Namespace ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
+{{- $shardService := printf "%s-shard-%d-headless.%s.svc.%s" (include "mongodb.fullname" $context) $shardIndex (include "cloudpirates.namespace" $context) ($context.Values.replicaSet.clusterDomain | default "cluster.local") -}}
 {{- $shardMembers := list -}}
 {{- range $i := until (int $context.Values.shardedCluster.shardsvr.dataNode.replicaCount) -}}
 {{- $host := printf "%s-shard-%d-%d.%s:27017" (include "mongodb.fullname" $context) $shardIndex $i $shardService -}}
@@ -303,6 +307,36 @@ Produces MONGO_CUSTOM_USER_<i>_NAME, _PASSWORD, _DATABASE for each user.
       key: CUSTOM_DB
       {{- end }}
 {{ end }}
+{{- end -}}
+
+{{/*
+Render a resource object for a customRoles privilege entry as JS.
+Input: a privilege map with .resource (map) and .actions (list)
+Example resource: { cluster: true } → { cluster: true }
+Example resource: { db: "", collection: "" } → { db: "", collection: "" }
+*/}}
+{{- define "mongodb.customRoles.resourceJs" -}}
+{{- $parts := list -}}
+{{- range $k, $v := .resource -}}
+  {{- if kindIs "bool" $v -}}
+    {{- $parts = append $parts (printf "%s: %t" $k $v) -}}
+  {{- else -}}
+    {{- $parts = append $parts (printf "%s: '%s'" $k $v) -}}
+  {{- end -}}
+{{- end -}}
+{{ printf "{ %s }" (join ", " $parts) }}
+{{- end -}}
+
+{{/*
+Render the actions array for a customRoles privilege entry as JS.
+Input: a privilege map with .actions (list of strings)
+*/}}
+{{- define "mongodb.customRoles.actionsJs" -}}
+{{- $actions := list -}}
+{{- range .actions -}}
+  {{- $actions = append $actions (printf "'%s'" .) -}}
+{{- end -}}
+{{ join ", " $actions }}
 {{- end -}}
 
 {{/*

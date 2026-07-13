@@ -2,6 +2,22 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.29.4] - 2026-05-29
+
+- Add `sentinel.masterService.affinity` to allow the master discovery deployment to use affinity rules independent from the main Redis workload. Defaults to `.Values.affinity` when unset, so existing behavior is unchanged (#1213).
+
+## [0.28.0] - 2026-05-20
+
+- Add `sentinel.monitorTarget` to override the Sentinel master discovery with an explicit hostname or IP, enabling multi-region and multi-cluster deployments where the chart's default local headless discovery does not work.
+
+## [0.26.7] - 2026-03-25
+
+- Update image.repository to v8.6.2 (#1183) ([30f53b10](https://github.com/CloudPirates-io/helm-charts/commit/30f53b10))
+
+## [0.26.6] - 2026-03-19
+
+- Update image.repository to 315270d (#1166) ([d7d835e6](https://github.com/CloudPirates-io/helm-charts/commit/d7d835e6))
+
 ## [0.26.5] - 2026-03-17
 
 - Update image.repository to a019c00 (#1146) ([9e1d0494](https://github.com/CloudPirates-io/helm-charts/commit/9e1d0494))

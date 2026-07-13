@@ -13,6 +13,8 @@ clusterDomain: cluster.local
 nameOverride: ""
 ## @param fullnameOverride String to fully override valkey.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -25,7 +27,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
+  tag: "9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -223,12 +225,21 @@ gatewayAPI:
               value: /
 
 ## @section Resources
-resources:
-  limits:
-    memory: 64Mi
-  requests:
-    cpu: 10m
-    memory: 64Mi
+resources: {}
+  # limits:
+  #   memory: 64Mi
+  # requests:
+  #   cpu: 10m
+  #   memory: 64Mi
+
+## @section Pod Disruption Budget
+pdb:
+  ## @param pdb.enabled Enable Pod Disruption Budget
+  enabled: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  maxUnavailable: ""
 
 ## @section Persistence
 persistence:
@@ -247,6 +258,15 @@ persistence:
   ## @param persistence.accessModes Persistent Volume access modes
   accessModes:
     - ReadWriteOnce
+
+## @section Persistent Volume Claim Retention Policy
+persistentVolumeClaimRetentionPolicy:
+  ## @param persistentVolumeClaimRetentionPolicy.enabled Enable Persistent volume retention policy for the StatefulSet
+  enabled: false
+  ## @param persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  whenScaled: Retain
+  ## @param persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  whenDeleted: Retain
 
 ## @section Liveness and readiness probes
 livenessProbe:
@@ -291,6 +311,12 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully
+## When Sentinel is enabled this must be high enough for the preStop failover to
+## finish (the hook can take ~45s: 20s failover wait + Sentinel preStop wait).
+## Recommended: 60 for Sentinel setups.
+terminationGracePeriodSeconds: 30
+
 ## @section Node Selection
 ## @param nodeSelector Node labels for pod assignment
 nodeSelector: {}
@@ -300,6 +326,19 @@ tolerations: []
 
 ## @param affinity Affinity settings for pod assignment
 affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
+## @param hostAliases Pod-level hostAliases (`spec.template.spec.hostAliases`).
+## Useful on IPv6-only clusters where BusyBox `hostname -i` cannot resolve the
+## pod's own name; injecting a loopback alias for each pod hostname makes the
+## init script tolerate `set -e`. Each entry is `{ ip, hostnames: [] }`.
+hostAliases: []
+  # - ip: "127.0.0.1"
+  #   hostnames:
+  #     - "valkey-0"
+  #     - "valkey-1"
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -331,11 +370,19 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
+    tag: "v1.86.0-alpine@sha256:755a0b4cbcc86c4843b167c830674e52b63f9467c934b8ccb811b4f506e197f0"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
+  ## @param metrics.extraEnvVars Additional environment variables to set for the metrics exporter container
+  ## Can be used to pass redis_exporter command line flags as environment variables, e.g.:
+  ## extraEnvVars:
+  ##   - name: REDIS_EXPORTER_CHECK_KEYS
+  ##     value: "db0=mykey*"
+  ##   - name: REDIS_EXPORTER_IS_CLUSTER
+  ##     value: "true"
+  extraEnvVars: []
   ## Metrics service configuration
   service:
     ## @param metrics.service.annotations Additional custom annotations for Metrics service
@@ -382,7 +429,7 @@ sentinel:
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
-    tag: "9.0.0-alpine3.22@sha256:bef37d06d4856710973ee31dd1eac1482e4c8e6e7b847f999ad25433e646587b"
+    tag: "9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
@@ -408,19 +455,30 @@ sentinel:
     ## @param sentinel.service.port Sentinel service port
     port: 26379
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
+  ## @param sentinel.valkeyShutdownWaitFailover Whether the Valkey container should wait for Sentinel failover before shutting down
+  ## When true: on master termination the preStop hook triggers a failover and
+  ## waits for it to complete (graceful, near zero-downtime handoff).
+  ## When false: the Valkey container shuts down immediately without waiting.
+  valkeyShutdownWaitFailover: true
+  ## Sentinel container preStop hook for zero-downtime rolling updates.
+  ## Keeps the local Sentinel alive until failover completes so clients can still
+  ## use it to discover the new master while the pod is terminating.
+  preStop:
+    ## @param sentinel.preStop.enabled Enable the preStop hook on the Sentinel container
+    enabled: true
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi

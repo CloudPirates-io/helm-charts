@@ -3,7 +3,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "rabbitmq.fullname" . }}-peer-discovery
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels: {{- include "rabbitmq.labels" . | nindent 4 }}
   {{- with (include "rabbitmq.annotations" .) }}
   annotations:

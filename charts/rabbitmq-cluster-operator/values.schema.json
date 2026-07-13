@@ -25,6 +25,9 @@
                     "properties": {
                         "metrics": {
                             "type": "integer"
+                        },
+                        "health": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -594,6 +597,9 @@
                     "properties": {
                         "metrics": {
                             "type": "integer"
+                        },
+                        "health": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -1128,6 +1134,9 @@
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "rabbitmqImage": {

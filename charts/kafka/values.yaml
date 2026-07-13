@@ -1,0 +1,402 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+  #  - my-secret-1
+  #  - my-secret-2
+  ## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s). Used when persistence.storageClass is empty.
+  defaultStorageClass: ""
+
+## @section Common parameters
+## @param nameOverride String to partially override kafka.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override kafka.fullname
+fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
+## @param clusterDomain Kubernetes cluster domain used to build internal service FQDNs
+clusterDomain: cluster.local
+## @param clusterId The KRaft cluster ID used to format storage. Must be a valid base64-encoded UUID (22 chars) and identical across all nodes of the same cluster. Override with your own per cluster; generate one with `kafka-storage.sh random-uuid`. Keep this value stable across upgrades and scale-ups.
+clusterId: "oUl0u_8RQBym0t93b891HA"
+## @param nodeIdOffset Offset added to the pod ordinal to compute each node's `node.id` (e.g. set to 1 to start node IDs at 1 instead of 0)
+nodeIdOffset: 0
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+## @param selectorLabels Override selector labels (app.kubernetes.io/name and app.kubernetes.io/instance)
+selectorLabels:
+  ## @param selectorLabels.name Override app.kubernetes.io/name selector label
+  name: ""
+  ## @param selectorLabels.instance Override app.kubernetes.io/instance selector label
+  instance: ""
+
+## @section Kafka image parameters
+image:
+  ## @param image.registry Kafka image registry
+  registry: docker.io
+  ## @param image.repository Kafka image repository
+  repository: apache/kafka
+  ## @param image.tag Kafka image tag
+  tag: "4.2.1@sha256:9916d60eca5d599550e2c320230808fda342124ba550bb4ac4ea8591803262a0"
+  ## @param image.imagePullPolicy Kafka image pull policy
+  imagePullPolicy: Always
+
+## @param replicaCount Number of Kafka nodes to deploy. In KRaft combined mode each node acts as both broker and controller.
+replicaCount: 3
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
+revisionHistoryLimit: 10
+
+podDisruptionBudget:
+  ## @param podDisruptionBudget.enabled Create a Pod Disruption Budget to ensure high availability during voluntary disruptions
+  enabled: true
+  ## @param podDisruptionBudget.minAvailable minAvailable for Pod Disruption Budget. Value is not mandatory.
+  minAvailable: "51%"
+  ## @param podDisruptionBudget.maxUnavailable maxUnavailable for Pod Disruption Budget. Value is not mandatory.
+  maxUnavailable: ""
+
+networkPolicy:
+  ## @param networkPolicy.enabled Enable network policies
+  enabled: false
+
+## @section Authentication
+## SASL/PLAIN authentication for the client, inter-broker, and controller listeners.
+## Each boundary can be toggled independently. When a boundary is enabled, clients on that
+## listener must present credentials. Passwords are read from a Secret (auto-generated and
+## persisted across upgrades when not provided). NOTE: SASL/PLAIN authenticates but does NOT
+## encrypt traffic; use it on a trusted network or layer TLS on top.
+auth:
+  client:
+    ## @param auth.client.enabled Require SASL/PLAIN authentication on the client listener (applications must send credentials)
+    enabled: true
+  interBroker:
+    ## @param auth.interBroker.enabled Require SASL/PLAIN authentication on the inter-broker listener (broker-to-broker)
+    enabled: true
+  controller:
+    ## @param auth.controller.enabled Require SASL/PLAIN authentication on the KRaft controller listener (controller quorum)
+    enabled: true
+  ## @param auth.clientUser Username applications use to connect on the client listener
+  clientUser: user
+  ## @param auth.clientPassword Password for clientUser. Auto-generated and stored in a Secret if left empty.
+  clientPassword: ""
+  ## @param auth.interBrokerUser Username brokers use to authenticate to each other
+  interBrokerUser: inter_broker
+  ## @param auth.interBrokerPassword Password for interBrokerUser. Auto-generated and stored in a Secret if left empty.
+  interBrokerPassword: ""
+  ## @param auth.controllerUser Username controller nodes use to authenticate to each other
+  controllerUser: controller
+  ## @param auth.controllerPassword Password for controllerUser. Auto-generated and stored in a Secret if left empty.
+  controllerPassword: ""
+  ## @param auth.existingSecret Name of an existing Secret holding the passwords. Expected keys (only for enabled boundaries): `client-password`, `inter-broker-password`, `controller-password`.
+  existingSecret: ""
+
+## @section TLS / encryption
+## When enabled, listeners become SSL (or SASL_SSL when the matching auth boundary is also on),
+## so traffic between clients, brokers, and the KRaft controller quorum is encrypted in transit.
+## Certificates are supplied as PEM files (tls.crt / tls.key / ca.crt) and mounted from a Secret.
+tls:
+  ## @param tls.enabled Enable TLS on all listeners (client, inter-broker, controller)
+  enabled: false
+  ## @param tls.source Where certificates come from: `self-signed` (chart-generated CA+cert), `existing-secret` (bring your own), or `cert-manager`
+  source: self-signed
+  ## @param tls.existingSecret Name of an existing Secret with PEM certificate material (required when tls.source=existing-secret)
+  existingSecret: ""
+  ## @param tls.certFilename Key in the Secret holding the server certificate (PEM)
+  certFilename: tls.crt
+  ## @param tls.keyFilename Key in the Secret holding the private key (PEM)
+  keyFilename: tls.key
+  ## @param tls.caFilename Key in the Secret holding the CA certificate (PEM), used as the truststore
+  caFilename: ca.crt
+  ## @param tls.clientAuth Mutual TLS / client-certificate authentication: `none`, `requested`, or `required`
+  clientAuth: none
+  autoGenerated:
+    ## @param tls.autoGenerated.caCommonName Common Name for the generated CA (defaults to "<release>-ca" when empty)
+    caCommonName: ""
+    ## @param tls.autoGenerated.daysValid Validity period in days for the generated CA and certificate
+    daysValid: 3650
+  certManager:
+    ## @param tls.certManager.duration Requested certificate validity (e.g. 2160h). Empty uses the issuer default.
+    duration: ""
+    ## @param tls.certManager.renewBefore How long before expiry to renew (e.g. 360h). Empty uses the issuer default.
+    renewBefore: ""
+    issuerRef:
+      ## @param tls.certManager.issuerRef.name Name of the cert-manager Issuer/ClusterIssuer (required when tls.source=cert-manager)
+      name: ""
+      ## @param tls.certManager.issuerRef.kind Issuer kind: `ClusterIssuer` or `Issuer`
+      kind: ClusterIssuer
+      ## @param tls.certManager.issuerRef.group API group of the issuer
+      group: cert-manager.io
+
+## @section Kafka configuration parameters
+## @see https://kafka.apache.org/documentation/#brokerconfigs
+## The replication factors below are automatically capped to replicaCount (a factor can never
+## exceed the number of brokers), so a 1- or 2-node cluster works without lowering these by hand.
+## Note: Kafka does not re-replicate already-created internal topics when you scale up later.
+kafkaConfig:
+  ## @param kafkaConfig.numPartitions Default number of log partitions per topic
+  numPartitions: 3
+  ## @param kafkaConfig.defaultReplicationFactor Default replication factor for automatically created topics (capped to replicaCount)
+  defaultReplicationFactor: 3
+  ## @param kafkaConfig.offsetsTopicReplicationFactor Replication factor for the offsets topic (capped to replicaCount)
+  offsetsTopicReplicationFactor: 3
+  ## @param kafkaConfig.transactionStateLogReplicationFactor Replication factor for the transaction state log topic (capped to replicaCount)
+  transactionStateLogReplicationFactor: 3
+  ## @param kafkaConfig.transactionStateLogMinIsr Minimum in-sync replicas for the transaction state log topic (capped to the effective transaction-log replication factor)
+  transactionStateLogMinIsr: 2
+  ## @param kafkaConfig.autoCreateTopicsEnable Enable auto creation of topics on the server
+  autoCreateTopicsEnable: true
+  ## @param kafkaConfig.logRetentionHours The number of hours to keep a log file before deleting it
+  logRetentionHours: 168
+  ## @param kafkaConfig.extraConfig Extra Kafka configuration lines appended verbatim to server.properties
+  extraConfig: []
+  #  - "message.max.bytes=1048588"
+  #  - "compression.type=producer"
+
+## @param heapOpts Kafka JVM heap options (sets the KAFKA_HEAP_OPTS environment variable)
+heapOpts: "-Xmx1G -Xms1G"
+
+## @section Logging
+## By default Kafka images log to BOTH stdout and rotating files under $KAFKA_HOME/logs.
+## For Kubernetes, logging only to stdout is recommended (captured by `kubectl logs` / log
+## shippers, no files to lose on restart, and no writes needed on a read-only root filesystem).
+logging:
+  ## @param logging.consoleOnly Route all Kafka logs to stdout only via a generated log4j2 config (recommended). Set to false to keep the image's default file + console logging.
+  consoleOnly: true
+  ## @param logging.level Root log level for the generated console config (e.g. INFO, WARN, DEBUG, ERROR)
+  level: INFO
+  ## @param logging.pattern log4j2 PatternLayout for the generated console config
+  pattern: "[%d] %p %m (%c)%n"
+  ## @param logging.existingConfigMap Use an existing ConfigMap (key `log4j2.yaml`) as the log4j2 config instead of the generated one. Takes precedence over consoleOnly.
+  existingConfigMap: ""
+
+## @section Kafka Metrics configuration
+## Metrics are exposed by a standalone kafka-exporter (https://github.com/danielqsj/kafka_exporter)
+## Deployment that connects to the cluster over the broker protocol and exposes cluster-level
+## Prometheus metrics (consumer-group lag, topic/partition offsets, under-replicated partitions, ...).
+## A single replica covers the whole cluster, so this is a Deployment rather than a per-broker sidecar.
+metrics:
+  ## @param metrics.enabled Enable the kafka-exporter metrics Deployment
+  enabled: false
+  image:
+    ## @param metrics.image.registry kafka-exporter image registry
+    registry: docker.io
+    ## @param metrics.image.repository kafka-exporter image repository
+    repository: danielqsj/kafka-exporter
+    ## @param metrics.image.tag kafka-exporter image tag
+    tag: "v1.9.0@sha256:4150e46b2e9697ac30e4be8de03ec1704b4bdc7037577b83b8d35a32be298c16"
+    ## @param metrics.image.imagePullPolicy kafka-exporter image pull policy
+    imagePullPolicy: Always
+  ## @param metrics.containerPort Port the kafka-exporter listens on
+  containerPort: 9308
+  ## @param metrics.podAnnotations Annotations to add to the kafka-exporter pod (e.g. Prometheus scrape annotations to scrape without a ServiceMonitor)
+  podAnnotations: {}
+  #  prometheus.io/scrape: "true"
+  #  prometheus.io/port: "9308"
+  ## @param metrics.extraArgs Additional command-line flags passed to kafka-exporter
+  extraArgs: []
+  #  - --topic.filter=.*
+  #  - --group.filter=.*
+  ## @param metrics.resources Resource requests and limits for the kafka-exporter Deployment
+  resources: {}
+  service:
+    ## @param metrics.service.type Kafka metrics service type
+    type: ClusterIP
+    ## @param metrics.service.port Kafka metrics service port
+    port: 9308
+    ## @param metrics.service.annotations Additional annotations for metrics service
+    annotations: {}
+    ## @param metrics.service.labels Additional labels for metrics service
+    labels: {}
+  ## Prometheus ServiceMonitor configuration
+  serviceMonitor:
+    ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator
+    enabled: false
+    ## @param metrics.serviceMonitor.namespace Namespace in which to create ServiceMonitor resource(s)
+    namespace: ""
+    ## @param metrics.serviceMonitor.interval Interval at which metrics should be scraped
+    interval: 30s
+    ## @param metrics.serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+    scrapeTimeout: ""
+    ## @param metrics.serviceMonitor.relabelings Specify additional relabeling of metrics
+    relabelings: []
+    ## @param metrics.serviceMonitor.metricRelabelings Specify additional metric relabeling of metrics
+    metricRelabelings: []
+    ## @param metrics.serviceMonitor.honorLabels Honor metrics labels
+    honorLabels: false
+    ## @param metrics.serviceMonitor.selector Prometheus instance selector labels
+    selector: {}
+    ## @param metrics.serviceMonitor.annotations Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
+    namespaceSelector: {}
+
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @section Kafka Container Security Context
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser Set Kafka container's Security Context runAsUser
+  runAsUser: 1000
+  ## @param containerSecurityContext.runAsGroup Set Kafka container's Security Context runAsGroup
+  runAsGroup: 1000
+  ## @param containerSecurityContext.seLinuxOptions Set container's Security Context seLinuxOptions
+  seLinuxOptions: {}
+  ## @param containerSecurityContext.runAsNonRoot Set Kafka container's Security Context runAsNonRoot
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set Kafka container's privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.privileged Set container's privileged mode
+  privileged: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount container root filesystem as read-only
+  readOnlyRootFilesystem: true
+  ## @param containerSecurityContext.capabilities Linux capabilities to drop or add for the container
+  capabilities:
+    drop:
+    - ALL
+  ## @param containerSecurityContext.seccompProfile Seccomp profile for the container
+  seccompProfile:
+    type: RuntimeDefault
+
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @section Security Context
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
+  fsGroup: 1000
+
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ports:
+    ## @param service.ports.client Kafka client (broker) service port
+    client: 9092
+    ## @param service.ports.internal Kafka inter-broker listener port (pod-to-pod only, exposed on the headless Service)
+    internal: 9094
+    ## @param service.ports.controller Kafka controller (KRaft) port
+    controller: 9093
+  ## @param service.annotations Additional annotations to add to the service
+  annotations: {}
+
+## @section Resources
+resources:
+  {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 2Gi
+  # requests:
+  #   cpu: 250m
+  #   memory: 1Gi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param priorityClassName for pod eviction
+priorityClassName: ""
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+## @section Persistence
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  enabled: true
+  ## @param persistence.storageClass Persistent Volume storage class. Empty = use global.defaultStorageClass (then the cluster default). Set to "-" to disable dynamic provisioning (storageClassName: "").
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  annotations: {}
+  ## @param persistence.size Persistent Volume size
+  size: 8Gi
+  ## @param persistence.accessModes Persistent Volume access modes
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  existingClaim: ""
+  ## @param persistence.mountPath The path where to mount the data volume
+  mountPath: /var/lib/kafka
+  ## @param persistence.dataDir The directory where Kafka stores its log segments (log.dirs)
+  dataDir: /var/lib/kafka/data
+
+## @section Liveness and readiness probes
+livenessProbe:
+  ## @param livenessProbe.enabled Enable livenessProbe on kafka containers
+  enabled: true
+  ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+  failureThreshold: 6
+  ## @param livenessProbe.successThreshold Success threshold for livenessProbe
+  successThreshold: 1
+  ## @param livenessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readinessProbe on kafka containers
+  enabled: true
+  ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  initialDelaySeconds: 10
+  ## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+  periodSeconds: 10
+  ## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+  failureThreshold: 6
+  ## @param readinessProbe.successThreshold Success threshold for readinessProbe
+  successThreshold: 1
+  ## @param readinessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
+  custom: {}
+
+startupProbe:
+  ## @param startupProbe.enabled Enable startupProbe on kafka containers. Enabled by default to give the cluster time to form the KRaft quorum on cold starts before the liveness probe begins.
+  enabled: true
+  ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  initialDelaySeconds: 10
+  ## @param startupProbe.periodSeconds Period seconds for startupProbe
+  periodSeconds: 10
+  ## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  timeoutSeconds: 5
+  ## @param startupProbe.failureThreshold Failure threshold for startupProbe
+  failureThreshold: 30
+  ## @param startupProbe.successThreshold Success threshold for startupProbe
+  successThreshold: 1
+
+## @param command Command run after storage formatting, instead of `kafka-server-start.sh` (does not override the container command)
+command: []
+## @param extraArgs Extra arguments appended to `kafka-server-start.sh` (ignored when `command` is set). Each item is a separate argument, e.g. `--override key=value`.
+extraArgs: []
+#  - --override
+#  - num.io.threads=16
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the kafka container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: extra-config
+#     namespace: "{{ .Release.Namespace }}"
+#   data:
+#     key: value
