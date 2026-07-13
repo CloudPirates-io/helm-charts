@@ -435,7 +435,43 @@ spec:
               {{- end }}
               echo "databases 1" >> /tmp/redis.conf
 
-              {{- if .Values.cluster.announceHostnames }}
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              {{- if ne (len $ea.addresses) (int .Values.replicaCount) }}
+              {{- fail "cluster.externalAccess.addresses must have exactly replicaCount entries (one external address per pod)" }}
+              {{- end }}
+              {{- $defClientPort := int (default .Values.service.port $ea.port) }}
+              {{- $defBusPort := int (default .Values.service.clusterPort $ea.busPort) }}
+              # External-access announcements: each node advertises an externally-reachable address so
+              # external clients get reachable endpoints back from CLUSTER NODES / CLUSTER SLOTS.
+              POD_ORDINAL=$(hostname | sed 's/.*-//')
+              EXTERNAL_ADDR=""; EXTERNAL_PORT=""; EXTERNAL_BUS=""
+              case "$POD_ORDINAL" in
+              {{- range $i := until (int .Values.replicaCount) }}
+              {{- $port := $defClientPort }}
+              {{- $bus := $defBusPort }}
+              {{- if eq $ea.service.type "NodePort" }}
+              {{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}
+              {{- if gt (len $ea.service.busNodePorts) $i }}{{- $bus = int (index $ea.service.busNodePorts $i) }}{{- end }}
+              {{- end }}
+                {{ $i }}) EXTERNAL_ADDR="{{ index $ea.addresses $i }}"; EXTERNAL_PORT="{{ $port }}"; EXTERNAL_BUS="{{ $bus }}" ;;
+              {{- end }}
+              esac
+              if [ -z "$EXTERNAL_ADDR" ]; then
+                echo "ERROR: no external address configured for pod ordinal ${POD_ORDINAL} (cluster.externalAccess.addresses)" >&2
+                exit 1
+              fi
+              echo "" >> /tmp/redis.conf
+              echo "# Cluster external-access announcements" >> /tmp/redis.conf
+              if echo "$EXTERNAL_ADDR" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$|^[0-9a-fA-F:]+$'; then
+                echo "cluster-announce-ip ${EXTERNAL_ADDR}" >> /tmp/redis.conf
+              else
+                echo "cluster-preferred-endpoint-type hostname" >> /tmp/redis.conf
+                echo "cluster-announce-hostname ${EXTERNAL_ADDR}" >> /tmp/redis.conf
+              fi
+              echo "cluster-announce-port ${EXTERNAL_PORT}" >> /tmp/redis.conf
+              echo "cluster-announce-bus-port ${EXTERNAL_BUS}" >> /tmp/redis.conf
+              {{- else if .Values.cluster.announceHostnames }}
               # Hostname-based cluster announcements (recommended for Kubernetes)
               MY_HOSTNAME=$(hostname)
               MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -1057,8 +1093,6 @@ spec:
               sentinel deny-scripts-reconfig yes
               # Fix leader election issues during force deletions
               protected-mode no
-              # CRITICAL: Track disconnected slaves for force deletion tolerance
-              sentinel_link_buffer_size 32768
               # Allow sentinels to discover each other
               {{ if .Values.sentinel.config.announceHostnames }}
               sentinel announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
@@ -1157,12 +1191,39 @@ spec:
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
         {{- if .Values.metrics.enabled }}
+        {{- $hasTLS := .Values.tls.enabled }}
         - name: metrics
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.metrics.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
-          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
+            - name: REDIS_EXPORTER_WEB_LISTEN_ADDRESS
+              value: "0.0.0.0:{{ .Values.metrics.port }}"
+            - name: REDIS_ADDR
+            {{- if $hasTLS }}
+              value: "rediss://localhost:{{ .Values.tls.port }}"
+            {{- else }}
+              value: "redis://localhost:{{ .Values.service.port }}"
+            {{- end }}
+            {{- if $hasTLS }}
+            - name: REDIS_EXPORTER_TLS_CA_CERT_FILE
+              value: /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+            {{- if .Values.metrics.tls }}
+            - name: REDIS_EXPORTER_TLS_SERVER_CERT_FILE
+              value: /etc/redis/tls/{{ .Values.tls.certFilename }}
+            - name: REDIS_EXPORTER_TLS_SERVER_KEY_FILE
+              value: /etc/redis/tls/{{ .Values.tls.certKeyFilename }}
+            - name: REDIS_EXPORTER_TLS_SERVER_CA_CERT_FILE
+              value: /etc/redis/tls/{{ .Values.tls.certCAFilename }}
+            {{- end }}
+            {{- if .Values.tls.client.existingSecret }}
+            - name: REDIS_EXPORTER_TLS_CLIENT_CERT_FILE
+              value: /etc/redis/tls-client/{{ .Values.tls.client.certFilename }}
+            - name: REDIS_EXPORTER_TLS_CLIENT_KEY_FILE
+              value: /etc/redis/tls-client/{{ .Values.tls.client.certKeyFilename }}
+            {{- end }}
+            {{- end }}
+            {{- if and (or .Values.auth.enabled .Values.auth.metrics) (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -1186,7 +1247,7 @@ spec:
           {{- end }}
           ports:
             - name: metrics
-              containerPort: 9121
+              containerPort: {{ .Values.metrics.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -1207,12 +1268,25 @@ spec:
             failureThreshold: 3
             successThreshold: 1
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
-          {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+          {{- $hasACLs := and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+          {{- if or $hasTLS $hasACLs }}
           volumeMounts:
+            {{- if $hasTLS }}
+            - name: tls-certs
+              mountPath: /etc/redis/tls
+              readOnly: true
+            {{- if .Values.tls.client.existingSecret }}
+            - name: tls-client-certs
+              mountPath: /etc/redis/tls-client
+              readOnly: true
+            {{- end }}
+            {{- end }}
+          {{- if $hasACLs }}
             - name: acl-file
               mountPath: {{ include "redis.auth.acl.path" . }}
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
+          {{- end }}
           {{- end }}
         {{- end }}
       volumes:

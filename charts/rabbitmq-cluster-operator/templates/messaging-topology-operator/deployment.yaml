@@ -89,6 +89,12 @@ spec:
             - --leader-elect
             - --metrics-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.metrics }}
             - --health-probe-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.health }}
+            {{- if .Values.msgTopologyOperator.logLevel }}
+            - --zap-log-level={{ .Values.msgTopologyOperator.logLevel }}
+            {{- end }}
+            {{- if .Values.msgTopologyOperator.extraArgs }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.extraArgs "context" $) | nindent 12 }}
+            {{- end }}
           {{- end }}
           env:
             - name: OPERATOR_NAMESPACE

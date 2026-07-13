@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+  {{- $annotations := merge .Values.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.ports.client }}
+      targetPort: client
+      protocol: TCP
+      name: client
+  selector:
+    {{- include "kafka.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.fullname" . }}-headless
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - port: {{ .Values.service.ports.client }}
+      targetPort: client
+      protocol: TCP
+      name: client
+    - port: {{ .Values.service.ports.internal }}
+      targetPort: internal
+      protocol: TCP
+      name: internal
+    - port: {{ .Values.service.ports.controller }}
+      targetPort: controller
+      protocol: TCP
+      name: controller
+  selector:
+    {{- include "kafka.selectorLabels" . | nindent 4 }}

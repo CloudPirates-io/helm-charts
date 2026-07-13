@@ -25,7 +25,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.3.1-management@sha256:261d0262cae01a375f9778a2a373d4f796dadaede341d5cbabf5ef9d25ae0045"
+  tag: "4.3.2-management@sha256:c1e33461287f4c53049ce525575f0df77b2a00a88e2593776afbb6c1489bdb81"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -109,7 +109,7 @@ config:
     ##   value: "8GB"            # absolute: 8 gigabytes
     ##   value: "8590000000"     # absolute: 8590000000 bytes (use string for large numbers)
     ##
-    value: 0.4  # @schema type:[number, string]
+    value: 0.4 # @schema type:[number, string]
   ## Logging configuration
   ## ref: https://www.rabbitmq.com/docs/logging
   ##
@@ -164,7 +164,7 @@ queueBalancing:
   ## Helps RabbitMQ make better decisions during cluster formation and queue placement
   ## Leave empty/null to use RabbitMQ's default
   clusterFormation:
-    targetClusterSizeHint: null  # @schema type:[integer,null]
+    targetClusterSizeHint: null # @schema type:[integer,null]
 
   ## Quorum queue reconciliation settings (for RabbitMQ 3.10+)
   ## Helps ensure quorum queues have the correct number of replicas across cluster nodes
@@ -175,13 +175,13 @@ queueBalancing:
       enabled: false
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.targetGroupSize Target number of members per quorum queue (integer)
       ## Set to cluster size for full replication, or leave empty/null to use cluster_formation.target_cluster_size_hint
-      targetGroupSize: null  # @schema type:[integer,null]
+      targetGroupSize: null # @schema type:[integer,null]
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.interval Reconciliation check interval in milliseconds
       ## Default: 3600000 (1 hour) to match RabbitMQ's default
       interval: 3600000
       ## @param queueBalancing.quorumQueues.continuousMembershipReconciliation.triggerInterval How often to trigger reconciliation in milliseconds (integer)
       ## Leave empty/null to use RabbitMQ's default
-      triggerInterval: null  # @schema type:[integer,null]
+      triggerInterval: null # @schema type:[integer,null]
 
   ## Automatic queue rebalancing
   ## @param queueBalancing.autoRebalance.enabled Enable automatic queue rebalancing on pod startup
@@ -368,6 +368,14 @@ ingress:
 ##     - name: my-gateway
 ##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
 ##
+## To attach to another parent type, such as ListenerSet, set group and kind:
+##
+##   parentRefs:
+##     - group: gateway.networking.k8s.io
+##       kind: ListenerSet
+##       name: my-listenerset
+##       sectionName: https
+##
 ## The backend always receives plain HTTP traffic regardless of the listener protocol.
 gatewayAPI:
   httpRoute:
@@ -375,9 +383,11 @@ gatewayAPI:
     enabled: false
     ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
     annotations: {}
-    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways or ListenerSets
     parentRefs:
       - name: gateway
+        group: ""
+        kind: ""
         namespace: ""
         sectionName: ""
     ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
@@ -436,6 +446,12 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+  ## @param podSecurityContext.fsGroupChangePolicy When kubelet should recursively change ownership/permissions of the volume
+  ## Set to "OnRootMismatch" so the kubelet only re-applies fsGroup ownership when the volume root does not already match.
+  ## This prevents Kubernetes from relaxing the .erlang.cookie file permissions (e.g. from 0400 to 0660) on container/kubelet
+  ## restarts, which would otherwise make RabbitMQ crash-loop with "Cookie file ... must be accessible by owner only" because
+  ## init containers do not re-run on a plain container restart. See https://github.com/CloudPirates-io/helm-charts/issues/1397
+  fsGroupChangePolicy: OnRootMismatch
   ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
   seccompProfile:
     type: RuntimeDefault

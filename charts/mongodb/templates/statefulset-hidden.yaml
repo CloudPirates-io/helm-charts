@@ -232,6 +232,9 @@ spec:
             - mountPath: /replicaset
               name: keyfile
             {{- end }}
+        {{- with .Values.global.dataNodes.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.replicaSet.hiddenSecondaries.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -268,6 +271,9 @@ spec:
           secret:
             secretName: {{ .Values.replicaSet.keySecretName }}
             defaultMode: 0400
+        {{- end }}
+        {{- with .Values.global.dataNodes.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
 {{- with .Values.replicaSet.hiddenSecondaries.storage }}
   {{- $createPvc := and (empty .persistentVolumeClaimName) .requestedSize }}

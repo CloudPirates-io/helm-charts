@@ -138,6 +138,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | -------------------------------- | ------------------------------------------------------------ | ------- |
 | `auth.enabled`                   | Enable Redis authentication                                  | `true`  |
 | `auth.sentinel`                  | Enable authentication for Redis sentinels                    | `true`  |
+| `auth.metrics`                   | Enable authentication for Redis metrics sidecar              | `true`  |
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing Redis password             | `""`    |
@@ -231,6 +232,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
 | `metrics.resources`                        | Resource limits and requests for metrics container                                      | `{}`                       |
 | `metrics.extraArgs`                        | Extra arguments for Redis exporter (e.g. `--redis.addr`, `--web.listen-address`)        | `[]`                       |
+| `metrics.tls`                              | Enable TLS for Redis metrics exporter endpoints                                         | `false`                    |
+| `metrics.port`                             | Port that the metrics server and endpoint is running on                                 | `9121`                     |
+| `metrics.service.enabled`                  | Enable the dedicated metrics service                                                    | `true`                     |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                       |
@@ -404,9 +408,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Configurations for the Job-Template
 
-| Parameter                                  | Description                                      | Default |
-| ------------------------------------------ | ------------------------------------------------ | ------- |
-| `clusterInitJob.resources`                 | Resource limits and requests for clusterInit Job | `{}`    |
+| Parameter                     | Description                                                                        | Default |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| `clusterInitJob.resources`    | Resource limits and requests for clusterInit Job                                   | `{}`    |
+| `clusterInitJob.nodeSelector` | Node selector for the clusterInit Job (defaults to `.Values.nodeSelector` if unset)| `{}`    |
+| `clusterInitJob.tolerations`  | Tolerations for the clusterInit Job (defaults to `.Values.tolerations` if unset)   | `[]`    |
+| `clusterInitJob.affinity`     | Affinity rules for the clusterInit Job (defaults to `.Values.affinity` if unset)   | `{}`    |
 
 #### Extra Objects
 
@@ -561,6 +568,43 @@ helm install my-redis ./charts/redis -f values-cluster.yaml
 - Redis Cluster supports single database only
 - Data is automatically divided across multiple nodes for improved performance
 - With cluster-aware client, user can connect to any node (directly or via service) and requests will be automatically redirected, based on MOVED response
+
+#### External access
+
+A Redis Cluster client connects to one node and is then redirected to the others using the addresses returned by `CLUSTER NODES` / `CLUSTER SLOTS`. Inside Kubernetes the chart announces pod hostnames/IPs, which clients outside the cluster cannot reach. Enable `cluster.externalAccess` so each node announces an externally-reachable address and (optionally) gets its own Service.
+
+Because a Redis node must announce a fixed address, the external addresses have to be known up front — pre-allocate one static `LoadBalancer` IP per pod (or use `NodePort` with the nodes' external IPs). Provide exactly one entry per pod in `cluster.externalAccess.addresses` (ordinal `0` first).
+
+```yaml
+# values-cluster-external.yaml
+architecture: cluster
+replicaCount: 6
+clusterReplicaCount: 1
+cluster:
+  externalAccess:
+    enabled: true
+    # One externally-reachable address per pod (pod-0 first). IPs use cluster-announce-ip,
+    # hostnames use cluster-announce-hostname.
+    addresses:
+      - 203.0.113.10
+      - 203.0.113.11
+      - 203.0.113.12
+      - 203.0.113.13
+      - 203.0.113.14
+      - 203.0.113.15
+    service:
+      type: LoadBalancer
+      # Pre-allocated static LoadBalancer IPs, matching the addresses above
+      loadBalancerIPs:
+        - 203.0.113.10
+        - 203.0.113.11
+        - 203.0.113.12
+        - 203.0.113.13
+        - 203.0.113.14
+        - 203.0.113.15
+```
+
+Each per-pod Service exposes both the client port (`service.port`) and the cluster bus port (`service.clusterPort`); both must be reachable by clients and by the other nodes.
 
 ## Upgrading
 

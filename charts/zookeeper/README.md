@@ -150,11 +150,42 @@ zkCli.sh -server my-zookeeper:2181
 | ------------------------------ | -------------------------------------------- | ----------- |
 | `service.type`                 | Kubernetes service type                      | `ClusterIP` |
 | `service.ports.client`         | ZooKeeper client service port                | `2181`      |
-| `service.ports.secureClient`   | ZooKeeper secure client service port         | `2281`      |
+| `service.ports.secureClient`   | TLS client port. Set to null to disable (default). When set, also configure SSL via zookeeperConfig.extraConfigs and mount keystore files with extraVolumes/extraVolumeMounts. Setting the port without SSL config will cause startup failure.     | `null`      |
 | `service.ports.quorum`         | ZooKeeper quorum service port                | `2888`      |
 | `service.ports.leaderElection` | ZooKeeper leader election service port       | `3888`      |
 | `service.ports.admin`          | ZooKeeper admin service port                 | `8080`      |
 | `service.annotations`          | Additional annotations to add to the service | `{}`        |
+
+### External Access
+
+| Parameter                                           | Description                                                                                       | Default          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------- |
+| `externalAccess.enabled`                            | Enable per-pod external LoadBalancer services for client access from outside the cluster          | `false`          |
+| `externalAccess.service.type`                       | Kubernetes service type for external access services                                              | `LoadBalancer`   |
+| `externalAccess.service.port`                       | External client port exposed on each LoadBalancer                                                 | `2181`           |
+| `externalAccess.service.annotations`                | Annotations applied to each external service (e.g. AWS NLB settings)                              | `{}`             |
+| `externalAccess.service.loadBalancerIPs`            | Static LoadBalancer IP per replica; list length must match `replicaCount`                         | `[]`             |
+| `externalAccess.service.loadBalancerSourceRanges`   | Source CIDR ranges allowed to reach the external LoadBalancers                                    | `[]`             |
+| `externalAccess.service.externalTrafficPolicy`      | External traffic policy for LoadBalancer/NodePort services (`Local` recommended for per-pod LBs)    | `Local`          |
+| `externalAccess.service.labels`                     | Extra labels applied to each external service                                                     | `{}`             |
+| `externalAccess.service.hostnameDomain` | Extra annotation `external-dns.alpha.kubernetes.io/hostname` per replica: `{release}-{ordinal}.{domain}`. Requires External-DNS with that zone in domainFilters  | `""`             |
+
+When enabled, the chart creates one external service per ZooKeeper pod (e.g. `release-zookeeper-0-external`). Clients outside the cluster should use the LoadBalancer hostnames and client port in their connection string. Quorum traffic remains on the internal headless service; `zoo.cfg` server entries are not changed.
+
+**Example for AWS NLBs:**
+
+```yaml
+externalAccess:
+  enabled: true
+  service:
+    hostnameDomain: int.example.com
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "external"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+```
+Use aws-load-balancer-scheme internal if clients are in the VPC, internet-facing if they're on the public internet.
 
 ### Persistence
 
