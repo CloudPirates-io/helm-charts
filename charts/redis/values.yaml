@@ -699,3 +699,9 @@ clusterInitJob:
     # requests:
     #   cpu: 10m
     #   memory: 64Mi
+  ## @param clusterInitJob.nodeSelector Node selector for the clusterInit Job (defaults to .Values.nodeSelector if not set)
+  nodeSelector: {}
+  ## @param clusterInitJob.tolerations Tolerations for the clusterInit Job (defaults to .Values.tolerations if not set)
+  tolerations: []
+  ## @param clusterInitJob.affinity Affinity rules for the clusterInit Job (defaults to .Values.affinity if not set)
+  affinity: {}

@@ -408,9 +408,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Configurations for the Job-Template
 
-| Parameter                                  | Description                                      | Default |
-| ------------------------------------------ | ------------------------------------------------ | ------- |
-| `clusterInitJob.resources`                 | Resource limits and requests for clusterInit Job | `{}`    |
+| Parameter                     | Description                                                                        | Default |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| `clusterInitJob.resources`    | Resource limits and requests for clusterInit Job                                   | `{}`    |
+| `clusterInitJob.nodeSelector` | Node selector for the clusterInit Job (defaults to `.Values.nodeSelector` if unset)| `{}`    |
+| `clusterInitJob.tolerations`  | Tolerations for the clusterInit Job (defaults to `.Values.tolerations` if unset)   | `[]`    |
+| `clusterInitJob.affinity`     | Affinity rules for the clusterInit Job (defaults to `.Values.affinity` if unset)   | `{}`    |
 
 #### Extra Objects
 
