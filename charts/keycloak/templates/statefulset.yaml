@@ -162,7 +162,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "keycloak.truststoreSecretName" . }}
-                  key: {{ .Values.tls.truststoreExistingSecretKey }}
+                  key: {{ .Values.tls.truststoreExistingSecretPasswordKey }}
             {{- end }}
             {{- if .Values.database.type }}
             - name: KC_DB

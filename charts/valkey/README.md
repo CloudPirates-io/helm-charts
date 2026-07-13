@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `image.registry`   | Valkey image registry                             | `docker.io`                                                                                  |
 | `image.repository` | Valkey image repository                           | `valkey/valkey`                                                                              |
-| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `image.pullPolicy` | Valkey image pull policy                          | `IfNotPresent`                                                                               |
 
 ### Common configuration
@@ -189,6 +189,14 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | ----------- | ------------------------------------------- | ------- |
 | `resources` | The resources to allocate for the container | `{}`    |
 
+### Pod Disruption Budget
+
+| Parameter            | Description                                                    | Default |
+| -------------------- | -------------------------------------------------------------- | ------- |
+| `pdb.enabled`        | Enable Pod Disruption Budget                                   | `false` |
+| `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `1`     |
+| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
+
 ### Persistence
 
 | Parameter                   | Description                                        | Default             |
@@ -200,6 +208,14 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `persistence.size`          | Persistent Volume size                             | `8Gi`               |
 | `persistence.accessModes`   | Persistent Volume access modes                     | `["ReadWriteOnce"]` |
 | `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`                |
+
+### Persistent Volume Claim Retention Policy
+
+| Parameter                                          | Description                                                                    | Default    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------- |
+| `persistentVolumeClaimRetentionPolicy.enabled`     | Enable Persistent volume retention policy for the StatefulSet                  | `false`    |
+| `persistentVolumeClaimRetentionPolicy.whenDeleted` | Volume retention behavior that applies when the StatefulSet is deleted         | `"Retain"` |
+| `persistentVolumeClaimRetentionPolicy.whenScaled`  | Volume retention behavior when the replica count of the StatefulSet is reduced | `"Retain"` |
 
 ### Liveness and readiness probes
 
@@ -223,14 +239,17 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `startupProbe.timeoutSeconds`        | Timeout seconds for startupProbe           | `1`     |
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe         | `30`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe         | `1`     |
+| `terminationGracePeriodSeconds`      | Seconds Kubernetes waits for the pod to terminate gracefully (raise to ~60 for Sentinel) | `30` |
 
 ### Node Selection
 
-| Parameter      | Description                          | Default |
-| -------------- | ------------------------------------ | ------- |
-| `nodeSelector` | Node labels for pod assignment       | `{}`    |
-| `tolerations`  | Toleration labels for pod assignment | `[]`    |
-| `affinity`     | Affinity settings for pod assignment | `{}`    |
+| Parameter                   | Description                                                    | Default |
+| --------------------------- | -------------------------------------------------------------- | ------- |
+| `nodeSelector`              | Node labels for pod assignment                                 | `{}`    |
+| `tolerations`               | Toleration labels for pod assignment                           | `[]`    |
+| `affinity`                  | Affinity settings for pod assignment                           | `{}`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment                 | `[]`    |
+| `hostAliases`               | Pod-level `hostAliases` entries (useful on IPv6-only clusters) | `[]`    |
 
 ### Metrics configuration
 
@@ -242,6 +261,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Valkey exporter image pull policy                                               | `Always`                   |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                       |
+| `metrics.extraEnvVars`                     | Additional environment variables to set for the metrics exporter container      | `[]`                       |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                       |
 | `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                       |
 | `metrics.service.port`                     | Metrics service port                                                            | `9121`                     |
@@ -265,7 +285,7 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
 | `sentinel.image.registry`            | Valkey Sentinel image registry                                                      | `docker.io`                                                                                  |
 | `sentinel.image.repository`          | Valkey Sentinel image repository                                                    | `valkey/valkey`                                                                              |
-| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `sentinel.image.pullPolicy`          | Valkey Sentinel image pull policy                                                   | `Always`                                                                                     |
 | `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                       | `true`                                                                                       |
 | `sentinel.masterName`                | Name of the master server                                                           | `mymaster`                                                                                   |
@@ -278,6 +298,8 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.service.type`              | Kubernetes service type for Sentinel                                                | `ClusterIP`                                                                                  |
 | `sentinel.service.port`              | Sentinel service port                                                               | `26379`                                                                                      |
 | `sentinel.resources`                 | Resource limits and requests for Sentinel container                                 | `{}`                                                                                         |
+| `sentinel.valkeyShutdownWaitFailover` | Whether the Valkey container waits for Sentinel failover before shutting down       | `true`                                                                                       |
+| `sentinel.preStop.enabled`           | Enable the preStop hook on the Sentinel container                                    | `true`                                                                                       |
 
 ### Init Container Configuration
 
@@ -405,12 +427,22 @@ sentinel:
   downAfterMilliseconds: 1500
   failoverTimeout: 15000
   parallelSyncs: 1
+  # Graceful master handoff on planned shutdown / rolling updates:
+  # the Valkey container triggers a failover and waits for it, and the
+  # Sentinel container stays up until failover completes so clients can
+  # still discover the new master while the pod terminates.
+  valkeyShutdownWaitFailover: true
+  preStop:
+    enabled: true
   resources:
     limits:
       memory: 128Mi
     requests:
       cpu: 25m
       memory: 64Mi
+
+# Give the preStop failover hook enough time to finish before SIGKILL
+terminationGracePeriodSeconds: 60
 
 # Enable authentication
 auth:
@@ -469,7 +501,7 @@ When Sentinel is enabled, your application should use a Sentinel-aware client to
 
 ```bash
 # Get the current master from Sentinel
-kubectl run -it --rm valkey-client --image=valkey/valkey:9.0.0-alpine3.22 --restart=Never -- sh
+kubectl run -it --rm valkey-client --image=valkey/valkey:9.1.0-alpine3.23 --restart=Never -- sh
 valkey-cli -h my-valkey-sentinel -p 26379 SENTINEL get-master-addr-by-name mymaster
 ```
 

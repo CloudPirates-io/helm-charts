@@ -59,6 +59,43 @@
                 }
             }
         },
+        "externalAccess": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "externalTrafficPolicy": {
+                            "type": "string"
+                        },
+                        "labels": {
+                            "type": "object"
+                        },
+                        "loadBalancerIPs": {
+                            "type": "array"
+                        },
+                        "loadBalancerSourceRanges": {
+                            "type": "array"
+                        },
+                        "port": {
+                            "type": "integer"
+                        },
+                        "type": {
+                            "type": "string"
+                        },
+                        "hostnameDomain": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -105,6 +142,9 @@
         "livenessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -262,6 +302,9 @@
         "readinessProbe": {
             "type": "object",
             "properties": {
+                "custom": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 },
@@ -327,7 +370,7 @@
                             "type": "integer"
                         },
                         "secureClient": {
-                            "type": "integer"
+                            "type": ["integer", "null"]
                         }
                     }
                 },

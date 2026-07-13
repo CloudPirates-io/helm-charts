@@ -1,0 +1,128 @@
+suite: test pdb, persistentVolumeClaimRetentionPolicy, topologySpreadConstraints
+set:
+  image:
+    tag: 8.1.3@sha256:5b8f8c333bef895c925f56629d6ba90aea95a4f7391f62411e625267c600b19c
+tests:
+  - it: should not render PodDisruptionBudget when pdb.enabled is false
+    template: pdb.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render PodDisruptionBudget with minAvailable by default when enabled
+    template: pdb.yaml
+    set:
+      pdb:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: apiVersion
+          value: policy/v1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-valkey
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - notExists:
+          path: spec.maxUnavailable
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: valkey
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+
+  - it: should render PodDisruptionBudget with maxUnavailable when minAvailable is zero
+    template: pdb.yaml
+    set:
+      pdb:
+        enabled: true
+        minAvailable: 0
+        maxUnavailable: "25%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "25%"
+      - notExists:
+          path: spec.minAvailable
+
+  - it: should propagate commonAnnotations to the PodDisruptionBudget
+    template: pdb.yaml
+    set:
+      pdb:
+        enabled: true
+      commonAnnotations:
+        example.com/owner: "team-platform"
+    asserts:
+      - equal:
+          path: metadata.annotations["example.com/owner"]
+          value: team-platform
+
+  - it: should not render persistentVolumeClaimRetentionPolicy by default
+    template: statefulset.yaml
+    asserts:
+      - notExists:
+          path: spec.persistentVolumeClaimRetentionPolicy
+
+  - it: should render persistentVolumeClaimRetentionPolicy when enabled
+    template: statefulset.yaml
+    set:
+      persistentVolumeClaimRetentionPolicy:
+        enabled: true
+        whenDeleted: Delete
+        whenScaled: Delete
+    asserts:
+      - equal:
+          path: spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Delete
+      - equal:
+          path: spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Delete
+
+  - it: should default persistentVolumeClaimRetentionPolicy values to Retain
+    template: statefulset.yaml
+    set:
+      persistentVolumeClaimRetentionPolicy:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Retain
+      - equal:
+          path: spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Retain
+
+  - it: should not render topologySpreadConstraints by default
+    template: statefulset.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.topologySpreadConstraints
+
+  - it: should render topologySpreadConstraints when provided
+    template: statefulset.yaml
+    set:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: valkey
+    asserts:
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].maxSkew
+          value: 1
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].topologyKey
+          value: topology.kubernetes.io/zone
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].whenUnsatisfiable
+          value: DoNotSchedule
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].labelSelector.matchLabels["app.kubernetes.io/name"]
+          value: valkey
