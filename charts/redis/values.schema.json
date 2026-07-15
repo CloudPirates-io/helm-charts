@@ -65,6 +65,49 @@
                         }
                     }
                 },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "addresses": {
+                            "type": "array"
+                        },
+                        "busPort": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "port": {
+                            "type": "string"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "busNodePorts": {
+                                    "type": "array"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "nodePorts": {
+                                    "type": "array"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
                 "startupSleepTime": {
                     "type": "integer"
                 }
@@ -76,8 +119,20 @@
         "clusterInitJob": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object"
+                },
+                "nodeSelector": {
+                    "type": "object"
+                },
+                "recoveryTimeout": {
+                    "type": "integer"
+                },
                 "resources": {
                     "type": "object"
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             }
         },
@@ -405,10 +460,10 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": ["integer", "string"]
+                    "type": "string"
                 },
                 "minAvailable": {
-                    "type": ["integer", "string"]
+                    "type": "integer"
                 }
             }
         },

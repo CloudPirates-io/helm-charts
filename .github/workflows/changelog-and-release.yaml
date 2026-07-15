@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'charts/**'
+      - "charts/**"
   workflow_dispatch:
     inputs:
       chart_name:
@@ -13,12 +13,12 @@ on:
         required: false
         type: string
       force_release:
-        description: 'Force re-release of the specified chart (deletes existing tag)'
+        description: "Force re-release of the specified chart (deletes existing tag)"
         required: false
         type: boolean
         default: false
       skip_release:
-        description: 'Skip release step completely'
+        description: "Skip release step completely"
         required: false
         type: boolean
         default: false
@@ -27,7 +27,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:  # added using https://github.com/step-security/secure-repo
+permissions: # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           ref: main
@@ -66,14 +66,14 @@ jobs:
           fi
 
       - name: Login to Registry
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ${{ vars.REGISTRY }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Login to GHCR
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
