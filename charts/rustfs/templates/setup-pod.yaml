@@ -24,6 +24,10 @@ spec:
         {{- else }}
         secretName: {{ include "rustfs.fullname" . }}-setup
         {{- end }}
+    # Writable HOME/tmp so the rc CLI can persist its config even when running
+    # with a random non-root UID (e.g. OpenShift SCCs) and no writable HOME.
+    - name: home
+      emptyDir: {}
   initContainers:
     - name: waiting-for-service
       image: {{ include "rustfs-setup.image" . }}
@@ -129,7 +133,13 @@ spec:
       volumeMounts:
         - mountPath: /setup
           name: setup
+        - mountPath: /tmp
+          name: home
       env:
+        # Point HOME at the writable emptyDir so the rc CLI can write its
+        # config/XDG files without a writable HOME (OpenShift random UID).
+        - name: HOME
+          value: /tmp
         - name: RUSTFS_ACCESS_KEY
           valueFrom:
             secretKeyRef:
