@@ -109,9 +109,11 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Pod configuration
 
-| Parameter               | Description                                                    | Default |
-| ----------------------- | -------------------------------------------------------------- | ------- |
-| `shareProcessNamespace` | Enable process namespace sharing between containers in the pod | `false` |
+| Parameter                       | Description                                                                                         | Default |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | ------- |
+| `shareProcessNamespace`         | Enable process namespace sharing between containers in the pod                                      | `false` |
+| `terminationGracePeriodSeconds` | Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default | `""`    |
+| `lifecycle`                     | Lifecycle hooks for the Keycloak container                                                            | `{}`    |
 
 ### Extra volumes and volumes mount
 
