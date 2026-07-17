@@ -501,7 +501,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.4@sha256:48ebba8b80dc3be58b5ae431f47a33535289959cddfe13f5f887298de959fae0"
+    tag: "18.4@sha256:b913fd5699b8bd23fa4b06d72ecdd939fad43b80fb8651bac06caa0e6d135cac"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
