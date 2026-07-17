@@ -42,6 +42,7 @@ jobs:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
+          allow-unsafe-pr-checkout: true
 
       - name: Fetch upstream main branch
         run: |
@@ -105,6 +106,7 @@ jobs:
           ref: ${{ github.head_ref }}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
+          allow-unsafe-pr-checkout: true
 
       - name: Setup Helm
         uses: Azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
