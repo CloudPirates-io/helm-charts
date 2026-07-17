@@ -37,6 +37,9 @@ spec:
       {{- with .Values.shareProcessNamespace }}
       shareProcessNamespace: {{ . }}
       {{- end }}
+      {{- if ne (toString .Values.terminationGracePeriodSeconds) "" }}
+      terminationGracePeriodSeconds: {{ int .Values.terminationGracePeriodSeconds }}
+      {{- end }}
       initContainers:
         - name: copy-quarkus-lib
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
@@ -73,6 +76,10 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- with .Values.lifecycle }}
+          lifecycle:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
           command:
             - {{ .Values.image.command }}
           args:
