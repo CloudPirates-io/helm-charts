@@ -25869,6 +25869,59 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[postgres] Update image.repository to 32ca0af (#1463)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1463
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: PostgreSQL
+          url: https://www.postgresql.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+        - name: Application
+          url: https://github.com/postgres/postgres
+        - name: Docker Image
+          url: https://hub.docker.com/_/postgres
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 18.4.0
+    created: "2026-07-17T06:28:54.48223127Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: The World's Most Advanced Open Source Relational Database
+    digest: 048bf78892d6309fbdf03415ab9a138212c7f1fe6d9c913feb354a67f040be0a
+    home: https://www.postgresql.org
+    icon: https://a.storyblok.com/f/143071/512x512/95e7f13e62/postgres-logo.svg
+    keywords:
+    - postgres
+    - postgresql
+    - database
+    - sql
+    - relational
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: postgres
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres
+    - https://github.com/postgres/postgres
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/postgres-0.19.10/postgres-0.19.10.tgz
+    version: 0.19.10
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[postgres] Update image.repository to b913fd5 (#1456)'
           links:
           - name: Pull Request
@@ -52511,4 +52564,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-17T06:26:47.348674407Z"
+generated: "2026-07-17T06:28:54.483801347Z"
