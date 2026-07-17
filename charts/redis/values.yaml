@@ -62,8 +62,8 @@ updateStrategy:
   type: RollingUpdate
   ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
   rollingUpdate:
-    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update
-    maxUnavailable: 1
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update. Left unset by default since the `MaxUnavailableStatefulSet` feature gate is disabled on some managed Kubernetes offerings (e.g. GKE), which silently strips this field and causes a permanent GitOps diff
+    maxUnavailable: ""
 
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
