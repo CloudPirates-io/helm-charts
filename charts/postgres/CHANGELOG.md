@@ -2,6 +2,10 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.19.6] - 2026-06-25
+
+- [postgres] Use shared helper for metrics container securityContext on OpenShift (#1399)
+
 ## [0.18.3] - 2026-03-18
 
 - Update image.repository to a9abf42 (#1164) ([3d4a6b9b](https://github.com/CloudPirates-io/helm-charts/commit/3d4a6b9b))

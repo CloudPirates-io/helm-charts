@@ -10,6 +10,46 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
 data:
+{{- if .Values.customRoles }}
+  init-custom-roles.sh: |
+    #!/bin/sh
+    set -e
+    {{- range $i, $role := .Values.customRoles }}
+    mongosh --eval "
+      try {
+        db.getSiblingDB('{{ $role.database | default "admin" }}').createRole({
+          role: '{{ $role.role }}',
+          privileges: [
+            {{- $privs := list -}}
+            {{- range $role.privileges -}}
+              {{- $privs = append $privs (printf "{ resource: %s, actions: [%s] }" (include "mongodb.customRoles.resourceJs" .) (include "mongodb.customRoles.actionsJs" .)) -}}
+            {{- end -}}
+            {{ join ", " $privs }}
+          ],
+          roles: [
+            {{- $roles := list -}}
+            {{- range $role.roles -}}
+              {{- if kindIs "string" . -}}
+                {{- $roles = append $roles (printf "{ role: '%s', db: '%s' }" . ($role.database | default "admin")) -}}
+              {{- else -}}
+                {{- $roles = append $roles (printf "{ role: '%s', db: '%s' }" .role (.db | default ($role.database | default "admin"))) -}}
+              {{- end -}}
+            {{- end -}}
+            {{ join ", " $roles }}
+          ]
+        });
+        print('CUSTOM_ROLE_CREATED: {{ $role.role }}');
+      } catch (e) {
+        if (e.code === 51002) {
+          print('CUSTOM_ROLE_EXISTS: {{ $role.role }}');
+        } else {
+          print('ERROR: ' + e.message);
+          throw e;
+        }
+      }
+    "
+    {{- end }}
+{{- end }}
 {{- if .Values.customUsers }}
   init-custom-user.sh: |
     #!/bin/sh
@@ -889,6 +929,57 @@ data:
       {{- end }}
 
       log_shard "All shards added to cluster successfully"
+
+      {{- if .Values.customRoles }}
+      {{- range $i, $role := .Values.customRoles }}
+      # Create custom role {{ $role.role }}
+      log_shard "Creating custom role '{{ $role.role }}' in database '{{ $role.database | default "admin" }}'..."
+      result=$({{- if $.Values.auth.enabled }}mongosh --host $mongosHost --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin{{- else }}mongosh --host $mongosHost{{- end }} --eval "
+        try {
+          db.getSiblingDB('{{ $role.database | default "admin" }}').createRole({
+            role: '{{ $role.role }}',
+            privileges: [
+              {{- $privs := list -}}
+              {{- range $role.privileges -}}
+                {{- $privs = append $privs (printf "{ resource: %s, actions: [%s] }" (include "mongodb.customRoles.resourceJs" .) (include "mongodb.customRoles.actionsJs" .)) -}}
+              {{- end -}}
+              {{ join ", " $privs }}
+            ],
+            roles: [
+              {{- $roles := list -}}
+              {{- range $role.roles -}}
+                {{- if kindIs "string" . -}}
+                  {{- $roles = append $roles (printf "{ role: '%s', db: '%s' }" . ($role.database | default "admin")) -}}
+                {{- else -}}
+                  {{- $roles = append $roles (printf "{ role: '%s', db: '%s' }" .role (.db | default ($role.database | default "admin"))) -}}
+                {{- end -}}
+              {{- end -}}
+              {{ join ", " $roles }}
+            ]
+          });
+          print('CUSTOM_ROLE_CREATED');
+        } catch (e) {
+          if (e.code === 51002) {
+            print('CUSTOM_ROLE_EXISTS');
+          } else {
+            print('ERROR: ' + e.message);
+            throw e;
+          }
+        }
+      " 2>&1)
+      case "$result" in
+        *CUSTOM_ROLE_CREATED*)
+          log_shard "Custom role '{{ $role.role }}' created successfully"
+          ;;
+        *CUSTOM_ROLE_EXISTS*)
+          log_shard "Custom role '{{ $role.role }}' already exists"          
+          ;;
+        *)
+          logErrorAndExitShard "Failed to create custom role '{{ $role.role }}': $result" 1
+          ;;
+      esac
+      {{- end }}
+      {{- end }}
 
       {{- if .Values.customUsers }}
       {{- range $i, $user := .Values.customUsers }}

@@ -70,10 +70,12 @@ The following table lists the configurable parameters of the MongoDB chart and t
 
 ### Global Parameters
 
-| Parameter                 | Description                                     | Default |
-| ------------------------- | ----------------------------------------------- | ------- |
-| `global.imageRegistry`    | Global Docker Image registry                    | `""`    |
-| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`    |
+| Parameter                          | Description                                                                                              | Default |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- | ------- |
+| `global.imageRegistry`             | Global Docker Image registry                                                                             | `""`    |
+| `global.imagePullSecrets`          | Global Docker registry secret names as an array                                                          | `[]`    |
+| `global.dataNodes.extraContainers` | Additional containers to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver) | `[]`    |
+| `global.dataNodes.extraVolumes`    | Additional volumes to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)    | `[]`    |
 
 ### Common Parameters
 
@@ -133,6 +135,39 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `config.content`              | Include your custom MongoDB configurations here as string    | `systemLog:\n  quiet: true\n  verbosity: 0\nnet:\n  bindIpAll: true` |
 | `config.existingConfigmap`    | Name of an existing Configmap to use instead of creating one | `""`                                                                 |
 | `config.existingConfigmapKey` | Name of the key in the Configmap that should be used         | `""`                                                                 |
+
+### Custom Role Configuration
+
+Custom MongoDB roles can be created at initialisation time via the `customRoles` array. Roles are created **before** custom users, so you can reference custom roles in `customUsers[].roles`. If a role already exists, it will be skipped (not updated).
+
+This works in standalone, replica set, and sharded cluster modes.
+
+| Parameter                              | Description                                                                                              | Default  |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------- |
+| `customRoles[].role`                   | Role name to create (required)                                                                           |          |
+| `customRoles[].database`               | Database where the role is created                                                                       | `admin`  |
+| `customRoles[].privileges`             | List of privilege objects with `resource` and `actions`                                                   | `[]`     |
+| `customRoles[].privileges[].resource`  | MongoDB resource document (e.g. `{ db: "", collection: "" }` or `{ cluster: true }`)                    |          |
+| `customRoles[].privileges[].actions`   | List of MongoDB privilege actions (e.g. `["find", "insert"]`)                                            |          |
+| `customRoles[].roles`                  | Inherited roles. Strings apply to the same database; use `{ role, db }` for cross-database inheritance   | `[]`     |
+
+**Example:**
+
+```yaml
+customRoles:
+  - role: myCustomRole
+    database: admin
+    privileges:
+      - resource: { cluster: true }
+        actions: ["find"]
+      - resource: { db: "", collection: "" }
+        actions: ["find", "listCollections", "listIndexes"]
+    roles:
+      - backup
+      - restore
+      - clusterMonitor
+      - { role: "read", db: "reporting" }
+```
 
 ### Custom User Configuration
 

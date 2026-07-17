@@ -43,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:e12cace7b5fcfaadf17d6532e83fd8fe71fdf40ab73f22370ccc314bcf7a38b4"
+  tag: "3.9.5@sha256:4c6f15fbd5491a3e01b0108c046891125553329a4956848ba3014cedff5386ee"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -113,7 +113,6 @@ zookeeperConfig:
   #  - "secureClientPort=2281"
   #  - "authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider"
 
-
 ## @section Zookeeper Metrics configuration
 metrics:
   ## @param metrics.enabled Enable Prometheus metrics exporter
@@ -150,7 +149,6 @@ metrics:
     ## @param metrics.serviceMonitor.namespaceSelector Namespace selector for ServiceMonitor
     namespaceSelector: {}
 
-
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @section Zookeeper Container Security Context
 containerSecurityContext:
@@ -171,7 +169,7 @@ containerSecurityContext:
   ## @param containerSecurityContext.capabilities Linux capabilities to drop or add for the container
   capabilities:
     drop:
-    - ALL
+      - ALL
   ## @param containerSecurityContext.seccompProfile Seccomp profile for the container
   seccompProfile:
     type: RuntimeDefault
@@ -188,8 +186,8 @@ service:
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
-    ## @param service.ports.secureClient Zookeeper secure client service port
-    secureClient: 2281
+    ## @param service.ports.secureClient TLS client port (e.g. 2281). Set to null to disable.
+    secureClient: null
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
     ## @param service.ports.leaderElection Zookeeper leader election service port
@@ -200,8 +198,7 @@ service:
   annotations: {}
 
 ## @section Resources
-resources:
-  {}
+resources: {}
   ## We usually recommend not to specify default resources and to leave this as a conscious
   ## choice for the user. This also increases chances charts run on environments with little
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -277,7 +274,6 @@ readinessProbe:
   ## @param readinessProbe.custom Custom probe action handler; when set, replaces the default tcpSocket on client port. Use exec/httpGet/etc.
   custom: {}
 
-
 startupProbe:
   ## @param startupProbe.enabled Enable startupProbe on zookeeper containers
   enabled: false
@@ -292,6 +288,31 @@ startupProbe:
   ## @param startupProbe.successThreshold Success threshold for startupProbe
   successThreshold: 1
 
+externalAccess:
+  ## @param externalAccess.enabled Enable per-pod external LoadBalancer services
+  enabled: false
+  service:
+    ## @param externalAccess.service.type Service type (LoadBalancer for NLB/ELB)
+    type: LoadBalancer
+    ## @param externalAccess.service.port External client port
+    port: 2181
+    ## @param externalAccess.service.annotations Annotations per service (e.g. AWS NLB)
+    annotations: {}
+    #  service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    #  service.beta.kubernetes.io/aws-load-balancer-scheme: "internal" # or "internet-facing"
+    #  service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "preserve_client_ip.enabled=true"
+    ## @param externalAccess.service.loadBalancerIPs Static LB IPs/hostnames per replica (length must match replicaCount)
+    loadBalancerIPs: []
+    ## @param externalAccess.service.loadBalancerSourceRanges Restrict source CIDRs
+    loadBalancerSourceRanges: []
+    ## @param externalAccess.service.externalTrafficPolicy External traffic policy (Local recommended for per-pod LBs)
+    externalTrafficPolicy: Local
+    ## @param externalAccess.service.labels Extra labels for external services
+    labels: {}
+    ## @param externalAccess.service.hostnameDomain DNS suffix for External-DNS hostname annotation per replica (e.g. int.example.com).
+    ## When set, each external service gets external-dns.alpha.kubernetes.io/hostname: {release}-{ordinal}.{hostnameDomain}
+    hostnameDomain: ""
 
 ## @param command Override default container command (useful when the default entrypoint needs to be replaced)
 command: []

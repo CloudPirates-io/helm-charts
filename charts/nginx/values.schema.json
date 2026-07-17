@@ -63,6 +63,9 @@
                         "command": {
                             "type": "array"
                         },
+                        "enabled": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object"
                         },
@@ -152,6 +155,12 @@
                     "type": "object"
                 }
             }
+        },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "dnsPolicy": {
+            "type": "string"
         },
         "existingConfigConfigmap": {
             "type": "string"
@@ -507,10 +516,10 @@
                 "annotations": {
                     "type": "object"
                 },
-                "internalTrafficPolicy": {
+                "clusterIP": {
                     "type": "string"
                 },
-                "trafficDistribution": {
+                "internalTrafficPolicy": {
                     "type": "string"
                 },
                 "ports": {
@@ -532,6 +541,9 @@
                             }
                         }
                     }
+                },
+                "trafficDistribution": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"

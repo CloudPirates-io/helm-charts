@@ -2,6 +2,19 @@
 
 All notable changes to this chart will be documented in this file.
 
+## [0.4.0] - 2026-07-06
+
+- [rabbitmq-cluster-operator] Bump cluster-operator to v2.22.1 and messaging-topology-operator to v1.19.3
+- [rabbitmq-cluster-operator] Bump default RabbitMQ image to 4.3.2-management-alpine and default-user-credential-updater to v1.0.15
+- [rabbitmq-cluster-operator] Align cluster-operator RBAC with upstream v2.22.x: add the `patch` verb on `rabbitmqclusters/status`, and add the `configmaps` rule plus the `patch` verb on `events` to the namespaced leader-election Role
+- [rabbitmq-cluster-operator] Add an optional RabbitmqCluster admission webhook (mutating + validating) for the cluster operator, introduced upstream in v2.22.0. It is **disabled by default** (`clusterOperator.webhook.enabled=false`); when disabled the operator is started with `ENABLE_WEBHOOKS=false`, preserving the chart's pre-v2.22.0 behavior. See the "RabbitmqCluster admission webhook" section of the README for enablement instructions
+- [rabbitmq-cluster-operator] Refresh CRDs from upstream cluster-operator v2.22.1 (new `status.deprecatedFeaturesUsed` field) and messaging-topology-operator v1.19.3
+
+> [!IMPORTANT]
+> Upgrading the cluster operator to v2.22.1 causes a **rolling restart of the underlying StatefulSets** of every managed RabbitmqCluster. To control the timing, pause reconciliation before upgrading and resume it once the operator is ready.
+>
+> v2.22.0 also switched the RabbitMQ startup probe from an exec check to an HTTP check, which requires RabbitMQ `4.2.4+` or `4.3.0+`. The chart default (`4.3.2-management-alpine`) satisfies this; clusters pinned to older RabbitMQ versions must set the `rabbitmq.com/legacy-startup-probe: "true"` annotation.
+
 ## [0.3.0] - 2026-05-16
 
 - [rabbitmq-cluster-operator] Move operator images to ghcr.io (rabbitmqoperator/* on Docker Hub is no longer published)
