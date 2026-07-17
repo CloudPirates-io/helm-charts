@@ -402,6 +402,9 @@
                 }
             }
         },
+        "lifecycle": {
+            "type": "object"
+        },
         "livenessProbe": {
             "type": "object",
             "properties": {
@@ -735,6 +738,14 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": [
+                "integer",
+                "string"
+            ],
+            "minimum": 0,
+            "pattern": "^$"
         },
         "tls": {
             "type": "object",
