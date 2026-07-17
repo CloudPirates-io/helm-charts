@@ -1,6 +1,6 @@
 suite: Test setup
 templates:
-  - setup-pod.yaml
+  - setup-job.yaml
   - setup-secret.yaml
 
 tests:
@@ -35,14 +35,36 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: Setup pod should be present
+  - it: Setup job should be present
     set:
       setup:
         buckets:
           - name: test
-    template: setup-pod.yaml
+    template: setup-job.yaml
     asserts:
       - documentIndex: 0
         equal:
           path: kind
-          value: Pod
+          value: Job
+
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-setup
+
+  - it: Setup job should be a post-install/post-upgrade hook
+    set:
+      setup:
+        buckets:
+          - name: test
+    template: setup-job.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: post-install,post-upgrade
+
+      - documentIndex: 0
+        equal:
+          path: metadata.annotations["helm.sh/hook-delete-policy"]
+          value: before-hook-creation,hook-succeeded
