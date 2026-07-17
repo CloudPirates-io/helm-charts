@@ -99,6 +99,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | Parameter      | Description                           | Default |
 | -------------- | ------------------------------------- | ------- |
 | `replicaCount` | Number of Keycloak replicas to deploy | `1`     |
+| `revisionHistoryLimit` | Number of old StatefulSet revisions to retain for rollback | `10`    |
 
 ### Pod annotations and labels
 
