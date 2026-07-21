@@ -24,7 +24,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.6.3@sha256:5fdbf2dbb5897cc34e82de49d13e23db011f9925089dbc555fc095f2c8bc1dac"
+  tag: "26.7.0@sha256:2eb3cd316835c990e69e26ade292ffa78f6fb0db7d5fc6377463c162e1979ac0"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -33,6 +33,8 @@ image:
 ## @section Deployment configuration
 ## @param replicaCount Number of Keycloak replicas to deploy
 replicaCount: 1
+## @param revisionHistoryLimit Number of old StatefulSet revisions to retain for rollback
+revisionHistoryLimit: 10
 
 ## @section Pod annotations and labels
 ## @param podAnnotations Map of annotations to add to the pods
@@ -43,6 +45,10 @@ podLabels: {}
 ## @section Pod configuration
 ## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
 shareProcessNamespace: false
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default
+terminationGracePeriodSeconds: "" # @schema type:[integer, string]; minimum:0; pattern:^$
+## @param lifecycle Lifecycle hooks for the Keycloak container
+lifecycle: {}
 
 ## @section extra volumes and volumes mount
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
@@ -501,7 +507,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.4@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39"
+    tag: "18.4@sha256:32ca0af8e77bfb8c6610c488e4691f83f972a3e9e64d3b02facf3ab111ad5500"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
@@ -520,7 +526,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.3.2@sha256:b1c7bf836e64ed9406a8984af29509f40089d55cea14b32f12c4726a1f17104b"
+    tag: "12.3.2@sha256:628f228f0fd5913a220438693576b29b6fe4dc1fa0a1298c0e98579fae28635f"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container
