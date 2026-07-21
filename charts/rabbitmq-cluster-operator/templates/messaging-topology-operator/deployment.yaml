@@ -1,4 +1,8 @@
 {{- if .Values.msgTopologyOperator.enabled }}
+{{- $metricsContainerPort := .Values.msgTopologyOperator.containerPorts.metricsHttp }}
+{{- if .Values.msgTopologyOperator.metrics.service.secure }}
+{{- $metricsContainerPort = .Values.msgTopologyOperator.containerPorts.metrics }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -87,7 +91,8 @@ spec:
           {{- else }}
           args:
             - --leader-elect
-            - --metrics-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.metrics }}
+            - --metrics-bind-address=:{{ $metricsContainerPort }}
+            - --metrics-secure={{ .Values.msgTopologyOperator.metrics.service.secure }}
             - --health-probe-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.health }}
             {{- if .Values.msgTopologyOperator.logLevel }}
             - --zap-log-level={{ .Values.msgTopologyOperator.logLevel }}
@@ -125,8 +130,8 @@ spec:
             - name: https-webhook
               containerPort: 9443
               protocol: TCP
-            - name: https-metrics
-              containerPort: {{ .Values.msgTopologyOperator.containerPorts.metrics }}
+            - name: metrics
+              containerPort: {{ $metricsContainerPort }}
               protocol: TCP
             - name: health
               containerPort: {{ .Values.msgTopologyOperator.containerPorts.health }}

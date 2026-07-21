@@ -238,7 +238,7 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -806,6 +806,9 @@
                                 "enabled": {
                                     "type": "boolean"
                                 },
+                                "secure": {
+                                    "type": "boolean"
+                                },
                                 "externalTrafficPolicy": {
                                     "type": "string"
                                 },
@@ -822,7 +825,10 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
+                                        },
+                                        "https": {
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -830,6 +836,9 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
+                                            "type": "integer"
+                                        },
+                                        "https": {
                                             "type": "integer"
                                         }
                                     }
@@ -1039,7 +1048,7 @@
                             "type": "object",
                             "properties": {
                                 "http": {
-                                    "type": "string"
+                                    "type": "integer"
                                 }
                             }
                         },

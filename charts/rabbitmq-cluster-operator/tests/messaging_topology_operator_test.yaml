@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
 suite: rabbitmq-messaging-topology-operator-tests
 templates:
   - templates/messaging-topology-operator/deployment.yaml
@@ -221,6 +222,98 @@ tests:
           value: RELEASE-NAME-rabbitmq-messaging-topology-operator-metrics
         template: templates/messaging-topology-operator/metrics-service.yaml
 
+  - it: should bind deployment metrics to https port when secure metrics are enabled
+    set:
+      msgTopologyOperator.metrics.service.secure: true
+      msgTopologyOperator.containerPorts.metrics: 8443
+      msgTopologyOperator.containerPorts.metricsHttp: 8080
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --metrics-bind-address=:8443
+        template: templates/messaging-topology-operator/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --metrics-secure=true
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 8443
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should bind deployment metrics to http port when secure metrics are disabled
+    set:
+      msgTopologyOperator.metrics.service.secure: false
+      msgTopologyOperator.containerPorts.metrics: 8443
+      msgTopologyOperator.containerPorts.metricsHttp: 8080
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --metrics-bind-address=:8080
+        template: templates/messaging-topology-operator/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --metrics-secure=false
+        template: templates/messaging-topology-operator/deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 8080
+        template: templates/messaging-topology-operator/deployment.yaml
+
+  - it: should expose https metrics NodePort and annotations when secure metrics are enabled
+    set:
+      msgTopologyOperator.metrics.service.enabled: true
+      msgTopologyOperator.metrics.service.type: NodePort
+      msgTopologyOperator.metrics.service.secure: true
+      msgTopologyOperator.metrics.service.ports.http: 8080
+      msgTopologyOperator.metrics.service.ports.https: 8443
+      msgTopologyOperator.metrics.service.nodePorts.http: 31500
+      msgTopologyOperator.metrics.service.nodePorts.https: 31501
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 8443
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 31501
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: metadata.annotations["prometheus.io/scheme"]
+          value: https
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: metadata.annotations["prometheus.io/port"]
+          value: "8443"
+        template: templates/messaging-topology-operator/metrics-service.yaml
+
+  - it: should expose http metrics NodePort and annotations when secure metrics are disabled
+    set:
+      msgTopologyOperator.metrics.service.enabled: true
+      msgTopologyOperator.metrics.service.type: NodePort
+      msgTopologyOperator.metrics.service.secure: false
+      msgTopologyOperator.metrics.service.ports.http: 8080
+      msgTopologyOperator.metrics.service.ports.https: 8443
+      msgTopologyOperator.metrics.service.nodePorts.http: 31500
+      msgTopologyOperator.metrics.service.nodePorts.https: 31501
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 31500
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: metadata.annotations["prometheus.io/scheme"]
+          value: http
+        template: templates/messaging-topology-operator/metrics-service.yaml
+      - equal:
+          path: metadata.annotations["prometheus.io/port"]
+          value: "8080"
+        template: templates/messaging-topology-operator/metrics-service.yaml
+
   - it: should not create podmonitor by default
     asserts:
       - hasDocuments:
@@ -327,7 +420,7 @@ tests:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: Always
         template: templates/messaging-topology-operator/deployment.yaml
-      - isNull:
+      - notExists:
           path: spec.template.spec.securityContext.enabled
         template: templates/messaging-topology-operator/deployment.yaml
 
@@ -363,6 +456,6 @@ tests:
           path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
           value: false
         template: templates/messaging-topology-operator/deployment.yaml
-      - isNull:
+      - notExists:
           path: spec.template.spec.containers[0].securityContext.enabled
         template: templates/messaging-topology-operator/deployment.yaml

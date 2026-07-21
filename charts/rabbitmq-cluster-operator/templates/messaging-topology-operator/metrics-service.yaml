@@ -32,16 +32,20 @@ spec:
   sessionAffinityConfig: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.metrics.service.sessionAffinityConfig "context" $) | nindent 4 }}
   {{- end }}
   ports:
-    - name: https-metrics
-      port: {{ .Values.msgTopologyOperator.metrics.service.ports.http }}
-      targetPort: https-metrics
-      protocol: TCP
-      appProtocol: https
-      {{- if (and (or (eq .Values.msgTopologyOperator.metrics.service.type "NodePort") (eq .Values.msgTopologyOperator.metrics.service.type "LoadBalancer")) (not (empty .Values.msgTopologyOperator.metrics.service.nodePorts.http))) }}
-      nodePort: {{ .Values.msgTopologyOperator.metrics.service.nodePorts.http }}
-      {{- else if eq .Values.msgTopologyOperator.metrics.service.type "ClusterIP" }}
-      nodePort: null
+    - name: metrics
+      {{- if .Values.msgTopologyOperator.metrics.service.secure }}
+      port: {{ .Values.msgTopologyOperator.metrics.service.ports.https }}
+      {{- if (or (eq .Values.msgTopologyOperator.metrics.service.type "NodePort") (eq .Values.msgTopologyOperator.metrics.service.type "LoadBalancer")) }}
+      nodePort: {{ .Values.msgTopologyOperator.metrics.service.nodePorts.https }}
       {{- end }}
+      {{- else }}
+      port: {{ .Values.msgTopologyOperator.metrics.service.ports.http }}
+      {{- if (or (eq .Values.msgTopologyOperator.metrics.service.type "NodePort") (eq .Values.msgTopologyOperator.metrics.service.type "LoadBalancer")) }}
+      nodePort: {{ .Values.msgTopologyOperator.metrics.service.nodePorts.http }}
+      {{- end }}      
+      {{- end }}      
+      targetPort: metrics
+      protocol: TCP
     {{- if .Values.msgTopologyOperator.metrics.service.extraPorts }}
     {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.metrics.service.extraPorts "context" $) | nindent 4 }}
     {{- end }}
