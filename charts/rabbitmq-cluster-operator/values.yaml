@@ -917,12 +917,7 @@ msgTopologyOperator:
       ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
       externalTrafficPolicy: Cluster
       ## @param msgTopologyOperator.metrics.service.annotations [object] Additional custom annotations for RabbitMQ Messaging Topology Operator metrics service
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/scheme: >-
-          {{ .Values.msgTopologyOperator.metrics.service.secure | ternary "https" "http" }}
-        prometheus.io/port: >-
-          {{ .Values.msgTopologyOperator.metrics.service.secure | ternary .Values.msgTopologyOperator.metrics.service.ports.https .Values.msgTopologyOperator.metrics.service.ports.http }}
+      annotations: {}
       ## @param msgTopologyOperator.metrics.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
       ## If "ClientIP", consecutive client requests will be directed to the same Pod
       ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies

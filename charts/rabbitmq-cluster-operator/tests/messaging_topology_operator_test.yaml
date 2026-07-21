@@ -260,14 +260,12 @@ tests:
           value: 8080
         template: templates/messaging-topology-operator/deployment.yaml
 
-  - it: should expose https metrics NodePort and annotations when secure metrics are enabled
+  - it: should expose https metrics NodePort when secure metrics are enabled
     set:
       msgTopologyOperator.metrics.service.enabled: true
       msgTopologyOperator.metrics.service.type: NodePort
       msgTopologyOperator.metrics.service.secure: true
-      msgTopologyOperator.metrics.service.ports.http: 8080
       msgTopologyOperator.metrics.service.ports.https: 8443
-      msgTopologyOperator.metrics.service.nodePorts.http: 31500
       msgTopologyOperator.metrics.service.nodePorts.https: 31501
     asserts:
       - equal:
@@ -278,24 +276,14 @@ tests:
           path: spec.ports[0].nodePort
           value: 31501
         template: templates/messaging-topology-operator/metrics-service.yaml
-      - equal:
-          path: metadata.annotations["prometheus.io/scheme"]
-          value: https
-        template: templates/messaging-topology-operator/metrics-service.yaml
-      - equal:
-          path: metadata.annotations["prometheus.io/port"]
-          value: "8443"
-        template: templates/messaging-topology-operator/metrics-service.yaml
 
-  - it: should expose http metrics NodePort and annotations when secure metrics are disabled
+  - it: should expose http metrics NodePort when secure metrics are disabled
     set:
       msgTopologyOperator.metrics.service.enabled: true
       msgTopologyOperator.metrics.service.type: NodePort
       msgTopologyOperator.metrics.service.secure: false
       msgTopologyOperator.metrics.service.ports.http: 8080
-      msgTopologyOperator.metrics.service.ports.https: 8443
       msgTopologyOperator.metrics.service.nodePorts.http: 31500
-      msgTopologyOperator.metrics.service.nodePorts.https: 31501
     asserts:
       - equal:
           path: spec.ports[0].port
@@ -304,14 +292,6 @@ tests:
       - equal:
           path: spec.ports[0].nodePort
           value: 31500
-        template: templates/messaging-topology-operator/metrics-service.yaml
-      - equal:
-          path: metadata.annotations["prometheus.io/scheme"]
-          value: http
-        template: templates/messaging-topology-operator/metrics-service.yaml
-      - equal:
-          path: metadata.annotations["prometheus.io/port"]
-          value: "8080"
         template: templates/messaging-topology-operator/metrics-service.yaml
 
   - it: should not create podmonitor by default
