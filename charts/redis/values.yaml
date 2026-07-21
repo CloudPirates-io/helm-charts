@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.8.0@sha256:0b13f549ab871acafaa84b673c4e29bd7dce8d12526aaafe3b4ea3366c322daf"
+  tag: "8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -62,8 +62,8 @@ updateStrategy:
   type: RollingUpdate
   ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
   rollingUpdate:
-    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update
-    maxUnavailable: 1
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update. Left unset by default since the `MaxUnavailableStatefulSet` feature gate is disabled on some managed Kubernetes offerings (e.g. GKE), which silently strips this field and causes a permanent GitOps diff
+    maxUnavailable: ""
 
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
