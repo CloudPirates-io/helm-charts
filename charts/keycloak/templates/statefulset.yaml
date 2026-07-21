@@ -13,6 +13,7 @@ spec:
   serviceName: {{ include "keycloak.fullname" . }}-headless
   podManagementPolicy: OrderedReady
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
@@ -36,6 +37,9 @@ spec:
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- with .Values.shareProcessNamespace }}
       shareProcessNamespace: {{ . }}
+      {{- end }}
+      {{- if ne (toString .Values.terminationGracePeriodSeconds) "" }}
+      terminationGracePeriodSeconds: {{ int .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
         - name: copy-quarkus-lib
@@ -73,6 +77,10 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- with .Values.lifecycle }}
+          lifecycle:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
           command:
             - {{ .Values.image.command }}
           args:

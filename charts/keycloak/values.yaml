@@ -33,6 +33,8 @@ image:
 ## @section Deployment configuration
 ## @param replicaCount Number of Keycloak replicas to deploy
 replicaCount: 1
+## @param revisionHistoryLimit Number of old StatefulSet revisions to retain for rollback
+revisionHistoryLimit: 10
 
 ## @section Pod annotations and labels
 ## @param podAnnotations Map of annotations to add to the pods
@@ -43,6 +45,10 @@ podLabels: {}
 ## @section Pod configuration
 ## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
 shareProcessNamespace: false
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default
+terminationGracePeriodSeconds: "" # @schema type:[integer, string]; minimum:0; pattern:^$
+## @param lifecycle Lifecycle hooks for the Keycloak container
+lifecycle: {}
 
 ## @section extra volumes and volumes mount
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
@@ -501,7 +507,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.4@sha256:32ca0af8e77bfb8c6610c488e4691f83f972a3e9e64d3b02facf3ab111ad5500"
+    tag: "18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
