@@ -161,6 +161,9 @@
                 "metrics": {
                     "type": "object",
                     "properties": {
+                        "secure": {
+                            "type": "boolean"
+                        },
                         "podMonitor": {
                             "type": "object",
                             "properties": {
@@ -804,9 +807,6 @@
                                     "type": "string"
                                 },
                                 "enabled": {
-                                    "type": "boolean"
-                                },
-                                "secure": {
                                     "type": "boolean"
                                 },
                                 "externalTrafficPolicy": {

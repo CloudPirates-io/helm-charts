@@ -880,13 +880,13 @@ msgTopologyOperator:
     automountServiceAccountToken: false
   ## @section RabbitMQ Messaging Topology Operator parameters
   metrics:
+    ## Metrics endpoint authentication and transport settings.
+    ## @param msgTopologyOperator.metrics.secure Enable authentication/authorization on metrics endpoint
+    secure: true
     ## Metrics service parameters
     service:
       ## @param msgTopologyOperator.metrics.service.enabled Create a service for accessing the metrics endpoint
       enabled: false
-      ## Metrics endpoint authentication and transport settings.
-      ## @param msgTopologyOperator.metrics.service.secure Enable authentication/authorization on metrics endpoint
-      secure: true
       ## @param msgTopologyOperator.metrics.service.type RabbitMQ Messaging Topology Operator metrics service type
       type: ClusterIP
       ## RabbitMQ Messaging Topology Operator metrics service ports (if target is HTTPS; metrics endpoint requires TLS as of v1.19.0)

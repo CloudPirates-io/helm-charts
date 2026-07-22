@@ -63,7 +63,7 @@ spec:
         - port: 9443
         - port: {{ .Values.msgTopologyOperator.containerPorts.health }}
         {{- if .Values.msgTopologyOperator.metrics.service.enabled }}
-        {{- if .Values.msgTopologyOperator.metrics.service.secure }}
+        {{- if .Values.msgTopologyOperator.metrics.secure }}
         - port: {{ .Values.msgTopologyOperator.containerPorts.metrics }}
         {{- else }}
         - port: {{ .Values.msgTopologyOperator.containerPorts.metricsHttp }}

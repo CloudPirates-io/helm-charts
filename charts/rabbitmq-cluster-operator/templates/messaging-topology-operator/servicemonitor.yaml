@@ -28,7 +28,7 @@ spec:
       - {{ include "cloudpirates.namespace" . }}
   endpoints:
     - port: metrics
-      {{- if .Values.msgTopologyOperator.metrics.service.secure }}
+      {{- if .Values.msgTopologyOperator.metrics.secure }}
       scheme: https
       {{- else }}
       scheme: http

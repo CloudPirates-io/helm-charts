@@ -26,7 +26,7 @@ spec:
       - {{ include "cloudpirates.namespace" . }}
   podMetricsEndpoints:
     - port: metrics
-      {{- if .Values.msgTopologyOperator.metrics.service.secure }}
+      {{- if .Values.msgTopologyOperator.metrics.secure }}
       scheme: https
       {{- else }}
       scheme: http

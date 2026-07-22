@@ -1,6 +1,6 @@
 {{- if .Values.msgTopologyOperator.enabled }}
 {{- $metricsContainerPort := .Values.msgTopologyOperator.containerPorts.metricsHttp }}
-{{- if .Values.msgTopologyOperator.metrics.service.secure }}
+{{- if .Values.msgTopologyOperator.metrics.secure }}
 {{- $metricsContainerPort = .Values.msgTopologyOperator.containerPorts.metrics }}
 {{- end }}
 apiVersion: apps/v1
@@ -92,7 +92,7 @@ spec:
           args:
             - --leader-elect
             - --metrics-bind-address=:{{ $metricsContainerPort }}
-            - --metrics-secure={{ .Values.msgTopologyOperator.metrics.service.secure }}
+            - --metrics-secure={{ .Values.msgTopologyOperator.metrics.secure }}
             - --health-probe-bind-address=:{{ .Values.msgTopologyOperator.containerPorts.health }}
             {{- if .Values.msgTopologyOperator.logLevel }}
             - --zap-log-level={{ .Values.msgTopologyOperator.logLevel }}

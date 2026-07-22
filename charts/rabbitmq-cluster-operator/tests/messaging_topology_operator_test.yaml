@@ -224,7 +224,7 @@ tests:
 
   - it: should bind deployment metrics to https port when secure metrics are enabled
     set:
-      msgTopologyOperator.metrics.service.secure: true
+      msgTopologyOperator.metrics.secure: true
       msgTopologyOperator.containerPorts.metrics: 8443
       msgTopologyOperator.containerPorts.metricsHttp: 8080
     asserts:
@@ -243,7 +243,7 @@ tests:
 
   - it: should bind deployment metrics to http port when secure metrics are disabled
     set:
-      msgTopologyOperator.metrics.service.secure: false
+      msgTopologyOperator.metrics.secure: false
       msgTopologyOperator.containerPorts.metrics: 8443
       msgTopologyOperator.containerPorts.metricsHttp: 8080
     asserts:
@@ -264,7 +264,7 @@ tests:
     set:
       msgTopologyOperator.metrics.service.enabled: true
       msgTopologyOperator.metrics.service.type: NodePort
-      msgTopologyOperator.metrics.service.secure: true
+      msgTopologyOperator.metrics.secure: true
       msgTopologyOperator.metrics.service.ports.https: 8443
       msgTopologyOperator.metrics.service.nodePorts.https: 31501
     asserts:
@@ -281,7 +281,7 @@ tests:
     set:
       msgTopologyOperator.metrics.service.enabled: true
       msgTopologyOperator.metrics.service.type: NodePort
-      msgTopologyOperator.metrics.service.secure: false
+      msgTopologyOperator.metrics.secure: false
       msgTopologyOperator.metrics.service.ports.http: 8080
       msgTopologyOperator.metrics.service.nodePorts.http: 31500
     asserts:
