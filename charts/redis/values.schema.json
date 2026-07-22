@@ -54,6 +54,18 @@
                 "announceHostnames": {
                     "type": "boolean"
                 },
+                "announceHostnamesOverride": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "announceIpsOverride": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {
