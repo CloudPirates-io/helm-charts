@@ -28,6 +28,8 @@ spec:
     - port: metrics
       {{- if .Values.msgTopologyOperator.metrics.secure }}
       scheme: https
+      tlsConfig:
+        insecureSkipVerify: true      
       {{- else }}
       scheme: http
       {{- end }}
