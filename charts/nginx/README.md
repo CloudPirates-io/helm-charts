@@ -457,6 +457,7 @@ All containers in `sidecars` will be added to the pod and run alongside the main
 | `priorityClassName` | Priority class for pod eviction   | `""`    |
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
 | `affinity`          | Affinity rules for pod assignment | `{}`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
 | `dnsPolicy`         | DNS policy for the pod            | `""`    |
 | `dnsConfig`         | DNS configuration for the pod     | `{}`    |
 
