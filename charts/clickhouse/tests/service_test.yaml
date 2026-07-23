@@ -1,0 +1,77 @@
+suite: test clickhouse service
+templates:
+  - service.yaml
+tests:
+  - it: should create ClusterIP service by default
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-clickhouse
+
+  - it: should expose HTTP port 8123
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            port: 8123
+            targetPort: http
+            protocol: TCP
+            name: http
+
+  - it: should expose TCP port 9000
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            port: 9000
+            targetPort: tcp
+            protocol: TCP
+            name: tcp
+
+  - it: should create headless service
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-clickhouse-headless
+      - equal:
+          path: spec.clusterIP
+          value: None
+
+  - it: should support custom service ports
+    set:
+      service:
+        httpPort: 8124
+        tcpPort: 9001
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            port: 8124
+            targetPort: http
+            protocol: TCP
+            name: http
+      - contains:
+          path: spec.ports
+          content:
+            port: 9001
+            targetPort: tcp
+            protocol: TCP
+            name: tcp
+
+  - it: should support LoadBalancer service type
+    set:
+      service:
+        type: LoadBalancer
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer

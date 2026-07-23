@@ -1,0 +1,71 @@
+{{- if not .Values.config.existingConfigmap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "clickhouse.configmapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "clickhouse.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  kubernetes.xml: |
+    <?xml version="1.0"?>
+    <clickhouse>
+      <listen_host>{{ .Values.config.listenHost }}</listen_host>
+      <http_port>{{ .Values.service.httpPort }}</http_port>
+      <tcp_port>{{ .Values.service.tcpPort }}</tcp_port>
+      <max_connections>{{ .Values.config.maxConnections }}</max_connections>
+      <max_concurrent_queries>{{ .Values.config.maxConcurrentQueries }}</max_concurrent_queries>
+      <timezone>{{ .Values.config.timezone }}</timezone>
+      <logger>
+        <level>{{ .Values.config.logLevel }}</level>
+        <console>1</console>
+      </logger>
+      {{- if .Values.config.extraConfig }}
+      {{ .Values.config.extraConfig | nindent 6 }}
+      {{- end }}
+    </clickhouse>
+{{- end }}
+---
+{{- if not .Values.config.existingUsersConfigmap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "clickhouse.usersConfigmapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "clickhouse.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  kubernetes.xml: |
+    <?xml version="1.0"?>
+    <clickhouse>
+      <users>
+        <{{ .Values.auth.username }}>
+          <password replace="replace" from_env="CLICKHOUSE_PASSWORD"></password>
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>default</profile>
+          <quota>default</quota>
+          <access_management>1</access_management>
+        </{{ .Values.auth.username }}>
+      </users>
+      {{- if gt (.Values.config.maxMemoryUsage | int) 0 }}
+      <profiles>
+        <default>
+          <max_memory_usage>{{ .Values.config.maxMemoryUsage }}</max_memory_usage>
+        </default>
+      </profiles>
+      {{- end }}
+      {{- if .Values.config.extraUsersConfig }}
+      {{ .Values.config.extraUsersConfig | nindent 6 }}
+      {{- end }}
+    </clickhouse>
+{{- end }}

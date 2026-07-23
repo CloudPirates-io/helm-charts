@@ -1,0 +1,131 @@
+suite: test clickhouse common parameters
+templates:
+  - statefulset.yaml
+tests:
+  - it: should use default values when nothing is overridden
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-clickhouse
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: clickhouse
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should respect global.imageRegistry override
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: "^my-registry.com/clickhouse/clickhouse-server:.*"
+
+  - it: should respect global.imagePullSecrets
+    set:
+      global:
+        imagePullSecrets:
+          - name: my-secret-1
+          - name: my-secret-2
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: my-secret-1
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: my-secret-2
+
+  - it: should respect nameOverride
+    set:
+      nameOverride: "custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-name
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-name
+
+  - it: should respect fullnameOverride
+    set:
+      fullnameOverride: "completely-custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-name
+
+  - it: should add commonLabels to all resources
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: metadata.labels.team
+          value: platform
+
+  - it: should add commonAnnotations to all resources
+    set:
+      commonAnnotations:
+        deployment.kubernetes.io/revision: "1"
+        prometheus.io/scrape: "true"
+    asserts:
+      - equal:
+          path: metadata.annotations["deployment.kubernetes.io/revision"]
+          value: "1"
+      - equal:
+          path: metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  - it: should respect image.imagePullPolicy override
+    set:
+      image:
+        imagePullPolicy: "IfNotPresent"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should set CLICKHOUSE_USER env var from values
+    set:
+      auth:
+        username: "myadmin"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CLICKHOUSE_USER
+            value: "myadmin"
+
+  - it: should set CLICKHOUSE_DB env var from values
+    set:
+      auth:
+        database: "mydb"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CLICKHOUSE_DB
+            value: "mydb"
+
+  - it: should set replicaCount
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should set the headless service name
+    asserts:
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-clickhouse-headless

@@ -1,0 +1,18 @@
+{{- if and .Values.initdb.scripts (not .Values.initdb.scriptsConfigMap) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "clickhouse.initdb.scriptsCM" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "clickhouse.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $key, $value := .Values.initdb.scripts }}
+  {{ $key }}: |
+    {{- $value | nindent 4 }}
+  {{- end }}
+{{- end }}
