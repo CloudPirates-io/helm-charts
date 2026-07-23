@@ -477,8 +477,17 @@ spec:
               echo "cluster-announce-bus-port ${EXTERNAL_BUS}" >> /tmp/redis.conf
               {{- else if .Values.cluster.announceHostnames }}
               # Hostname-based cluster announcements (recommended for Kubernetes)
+              {{- if .Values.cluster.announceHostnamesOverride }}
+              declare -A clusterAnnounceHostnameOverrides=(
+              {{- range $k, $v := .Values.cluster.announceHostnamesOverride }}
+                [{{ $k | quote }}]={{ $v | quote }}
+              {{- end }}
+              )
+              MY_HOSTNAME_FQDN="${clusterAnnounceHostnameOverrides[$POD_ORDINAL]}"
+              {{- else }}
               MY_HOSTNAME=$(hostname)
               MY_HOSTNAME_FQDN="${MY_HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
+              {{- end }}
               echo "" >> /tmp/redis.conf
               echo "# Cluster hostname-based announcements for Kubernetes resilience" >> /tmp/redis.conf
               echo "cluster-preferred-endpoint-type hostname" >> /tmp/redis.conf
@@ -489,12 +498,21 @@ spec:
               # IP-based cluster announcements (default Redis behavior)
               echo "" >> /tmp/redis.conf
               echo "# Cluster IP-based announcements (default behavior)" >> /tmp/redis.conf
+              {{- if .Values.cluster.announceIpsOverride }}
+              declare -A clusterAnnounceIpOverrides=(
+              {{- range $k, $v := .Values.cluster.announceIpsOverride }}
+                [{{ $k | quote }}]={{ $v | quote }}
+              {{- end }}
+              )
+              MY_IP="${clusterAnnounceIpOverrides[$POD_ORDINAL]}"
+              {{- else }}
               {{- if eq .Values.ipFamily "ipv4" }}
               MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
               {{- else if eq .Values.ipFamily "ipv6" }}
               MY_IP=$(hostname -i | awk '{print $1}' | grep -E '^[0-9a-fA-F:]+$' | head -n1)
               {{- else }}
               MY_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
               {{- end }}
               echo "cluster-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "cluster-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf

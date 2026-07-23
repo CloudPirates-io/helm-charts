@@ -189,6 +189,16 @@ cluster:
   ## cluster re-form via gossip after all pods are deleted and recreated (persisted nodes.conf keeps resolvable
   ## hostnames instead of stale IPs). Disable only if your clients cannot resolve the headless service hostnames.
   announceHostnames: true
+  ## @param cluster.announceHostnamesOverride Map of hostnames to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is true.
+  ## Example: 0: foo-bar-0
+  announceHostnamesOverride: {}
+  ## @param cluster.announceIpsOverride Map of IPs to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is false.
+  ## Example: 0: 1.2.3.4
+  announceIpsOverride: {}
   ## @param cluster.startupSleepTime Seconds to sleep in the init container before configuring Redis Cluster
   ## Useful when persistence is disabled: gives the cluster time to detect a failed master and elect
   ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
