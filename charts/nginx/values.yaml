@@ -230,6 +230,9 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
 ## @param dnsPolicy DNS policy for the pod
 dnsPolicy: ""
 
