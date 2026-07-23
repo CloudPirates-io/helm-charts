@@ -161,6 +161,9 @@
                 "metrics": {
                     "type": "object",
                     "properties": {
+                        "secure": {
+                            "type": "boolean"
+                        },
                         "podMonitor": {
                             "type": "object",
                             "properties": {
@@ -238,7 +241,7 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -822,7 +825,10 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
+                                        },
+                                        "https": {
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -830,6 +836,9 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
+                                            "type": "integer"
+                                        },
+                                        "https": {
                                             "type": "integer"
                                         }
                                     }
@@ -1039,7 +1048,7 @@
                             "type": "object",
                             "properties": {
                                 "http": {
-                                    "type": "string"
+                                    "type": "integer"
                                 }
                             }
                         },

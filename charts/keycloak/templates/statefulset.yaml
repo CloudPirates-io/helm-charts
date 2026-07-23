@@ -13,6 +13,7 @@ spec:
   serviceName: {{ include "keycloak.fullname" . }}-headless
   podManagementPolicy: OrderedReady
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
