@@ -57,6 +57,10 @@ To run Nginx on port 8080 with matching health checks:
 
 ```yaml
 # my-values.yaml
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
 serverConfig: |
   server {
     listen 0.0.0.0:8080;
