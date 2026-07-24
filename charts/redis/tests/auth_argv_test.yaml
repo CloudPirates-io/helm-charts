@@ -78,9 +78,14 @@ tests:
       - notMatchRegex:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
-      - matchRegex:
-          path: spec.template.spec.initContainers[0].command[2]
-          pattern: 'export REDISCLI_AUTH="\$REDIS_PASSWORD"'
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
 
   - it: should keep sentinel startup and probes free of password arguments
     template: statefulset.yaml
@@ -240,4 +245,4 @@ tests:
           path: spec.template.spec.containers[0].env
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
-          pattern: 'CONFIG_FILE="/etc/redis/redis.conf"'
+          pattern: 'CONFIG_FILE="/usr/local/etc/redis/redis.conf"'
