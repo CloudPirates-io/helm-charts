@@ -271,7 +271,6 @@ if [ -z "$ACL_PASSWORD" ]; then
   exit 1
 fi
 REDIS_PASSWORD="$ACL_PASSWORD"
-export REDISCLI_AUTH="$REDIS_PASSWORD"
 {{- end -}}
 {{- end -}}
 {{- end -}}
