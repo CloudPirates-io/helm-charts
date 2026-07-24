@@ -236,6 +236,7 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.port`                             | Port that the metrics server and endpoint is running on                                 | `9121`                     |
 | `metrics.service.enabled`                  | Enable the dedicated metrics service                                                    | `true`                     |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
+| `metrics.service.name`                     | Metrics service name                                                                    | `http-metrics`             |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                       |
 | `metrics.service.loadBalancerIP`           | LoadBalancer IP if metrics service type is `LoadBalancer`                               | `""`                       |
