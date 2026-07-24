@@ -123,7 +123,7 @@ tests:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
 
-  - it: should pass sentinel master discovery authentication over stdin
+  - it: should inherit sentinel master discovery authentication
     template: sentinel-master-deployment.yaml
     set:
       architecture: replication
@@ -132,12 +132,17 @@ tests:
       sentinel.masterService.enabled: true
       auth.sentinel: true
     asserts:
-      - matchRegex:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+      - notMatchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: 'printf .*"\$REDIS_PASSWORD".*kubectl exec -i'
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[0]
-          pattern: 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH'
+          pattern: 'kubectl exec -i'
       - notMatchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'

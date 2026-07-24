@@ -109,7 +109,7 @@ spec:
               [ "${VERBOSE:-false}" = "true" ] && echo "Querying Sentinel via pod: $pod"
 
               # Query Sentinel for the current master hostname via the selected pod
-              {{- if .Values.auth.sentinel }}
+              {{- if and .Values.auth.sentinel .Values.auth.acl.enabled }}
               master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
                 /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli "$@"' sh \
                 --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
