@@ -56,6 +56,11 @@ spec:
               secretKeyRef:
                 name: {{ include "redis.secretName" . }}
                 key: {{ include "redis.secretPasswordKey" . }}
+          - name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "redis.secretName" . }}
+                key: {{ include "redis.secretPasswordKey" . }}
           {{- end }}
           - name: VERBOSE
             value: "{{ .Values.sentinel.masterService.verbose }}"
@@ -104,10 +109,18 @@ spec:
               [ "${VERBOSE:-false}" = "true" ] && echo "Querying Sentinel via pod: $pod"
 
               # Query Sentinel for the current master hostname via the selected pod
-              master_hostname=$(kubectl exec -n "$NAMESPACE" "$pod" -c sentinel -- \
-                redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.auth.sentinel }} -a "$REDIS_PASSWORD"{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
+              {{- if .Values.auth.sentinel }}
+              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
+                /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli "$@"' sh \
+                --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
                 sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
                 | head -n1 || echo "")
+              {{- else }}
+              master_hostname=$(kubectl exec -n "$NAMESPACE" "$pod" -c sentinel -- \
+                redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
+                sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
+                | head -n1 || echo "")
+              {{- end }}
 
               # Extract just the pod name from the hostname (e.g., test-redis-0 from test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
               master=$(echo "$master_hostname" | cut -d'.' -f1)

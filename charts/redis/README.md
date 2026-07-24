@@ -60,7 +60,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
     --image redis:8.2.0 -- bash
 
 # Inside the pod:
-redis-cli -h my-redis -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h my-redis
 ```
 
 ## Security & Signature Verification
@@ -530,7 +530,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
 redis-cli -h my-redis-sentinel -p 26379 sentinel get-master-addr-by-name mymaster
 
 # Connect to the current master (address from previous command)
-redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h <master-ip> -p 6379
 ```
 
 ### Master-Replica without Sentinel
