@@ -47,7 +47,7 @@ rabbitmqImage:
   registry: docker.io
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
-  ## @skip rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
+  ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
   tag: 4.3.2-management-alpine
   ## @param rabbitmqImage.digest RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   digest: ""
@@ -67,7 +67,7 @@ credentialUpdaterImage:
   registry: ghcr.io
   ## @param credentialUpdaterImage.repository [default: REPOSITORY_NAME/rmq-default-credential-updater] RabbitMQ Default User Credential Updater image repository
   repository: rabbitmq/default-user-credential-updater
-  ## @skip credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
+  ## @param credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
   tag: 1.0.15
   ## @param credentialUpdaterImage.digest RabbitMQ Default User Credential Updater image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   digest: ""
@@ -89,7 +89,7 @@ clusterOperator:
     registry: ghcr.io
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
     repository: rabbitmq/cluster-operator
-    ## @skip clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
+    ## @param clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
     tag: 2.22.1
     ## @param clusterOperator.image.digest RabbitMQ Cluster Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
     digest: ""
@@ -526,7 +526,7 @@ msgTopologyOperator:
     registry: ghcr.io
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmq/messaging-topology-operator
-    ## @skip msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
+    ## @param msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
     tag: 1.19.3
     ## @param msgTopologyOperator.image.digest RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
     digest: ""
