@@ -27,7 +27,7 @@ image:
   ## @param image.repository Valkey image repository
   repository: valkey/valkey
   ## @param image.tag Valkey image tag (immutable tags are recommended)
-  tag: "9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"
+  tag: "9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02"
   ## @param image.imagePullPolicy Valkey image pull policy
   imagePullPolicy: Always
 
@@ -370,7 +370,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.86.0-alpine@sha256:755a0b4cbcc86c4843b167c830674e52b63f9467c934b8ccb811b4f506e197f0"
+    tag: "v1.87.0-alpine@sha256:1a286dba9547b0aa3ebd4e4106fa52ad67c754dcd7cb744eb745e41d48b252ad"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -429,7 +429,7 @@ sentinel:
     ## @param sentinel.image.repository Valkey Sentinel image repository
     repository: valkey/valkey
     ## @param sentinel.image.tag Valkey Sentinel image tag
-    tag: "9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"
+    tag: "9.1.0-alpine3.23@sha256:c9b77919daeba2c02ad954d0c844cc4e7142069d177b89c5fd771f405daf9e02"
     ## @param sentinel.image.pullPolicy Valkey Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
