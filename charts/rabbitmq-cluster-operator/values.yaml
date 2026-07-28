@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: 4.3.2-management-alpine
+  tag: 4.3.4-management-alpine
   ## @param rabbitmqImage.digest RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   digest: ""
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
