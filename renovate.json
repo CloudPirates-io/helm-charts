@@ -19,23 +19,26 @@
         "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
       "matchStrings": [
-        "## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<packageName>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*(?<registryValue>[^\\s]+)\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
-      "versioningTemplate": "docker"
+      "versioningTemplate": "docker",
+      "packageNameTemplate": "{{#if registryValue}}{{{registryValue}}}/{{{repositoryValue}}}{{else}}{{{repositoryValue}}}{{/if}}"
     }
   ],
   "packageRules": [
     {
-      "description": "Use gcr.io registry for etcd image",
+      "description": "Use ghcr.io registry for the RabbitMQ operator images",
       "matchDatasources": [
         "docker"
       ],
       "matchPackageNames": [
-        "etcd-development/etcd"
+        "rabbitmq/cluster-operator",
+        "rabbitmq/messaging-topology-operator",
+        "rabbitmq/default-user-credential-updater"
       ],
       "registryUrls": [
-        "https://gcr.io"
+        "https://ghcr.io"
       ]
     },
     {
@@ -93,7 +96,7 @@
         "docker"
       ],
       "matchPackageNames": [
-        "etcd-development/etcd"
+        "gcr.io/etcd-development/etcd"
       ],
       "labels": [
         "dependencies",
