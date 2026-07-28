@@ -221,6 +221,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `config.existingConfigmap`    | Name of existing ConfigMap to use    | `""`                   |
 | `config.existingConfigmapKey` | Key in existing ConfigMap            | `""`                   |
 
+### Redis Cluster Configuration (only applicable when `architecture=cluster`)
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `cluster.announceHostnames` | Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes). When enabled, Redis announces pod hostnames instead of IPs, making the cluster more resilient to pod restarts | `false` |
+| `cluster.announceHostnamesOverride` | Map of hostnames to announce for Redis Cluster topology. Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `true` (e.g. `0: foo-bar-0`) | `{}` |
+| `cluster.announceIpsOverride` | Map of IPs to announce for Redis Cluster topology. Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `false` (e.g. `0: 1.2.3.4`) | `{}` |
+| `cluster.startupSleepTime` | Seconds to sleep in the init container before configuring Redis Cluster. Useful when persistence is disabled: gives the cluster time to detect a failed master and elect a new one before the restarting pod rejoins, preventing the old master from re-entering as master with an empty dataset. Set to `0` to disable | `0` |
+| `cluster.config.nodeTimeout` | Cluster node timeout in milliseconds | `15000` |
+| `cluster.config.requireFullCoverage` | Require full coverage to accept queries | `true` |
+
 ### Metrics
 
 | Parameter                                  | Description                                                                             | Default                    |
@@ -236,6 +247,7 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.port`                             | Port that the metrics server and endpoint is running on                                 | `9121`                     |
 | `metrics.service.enabled`                  | Enable the dedicated metrics service                                                    | `true`                     |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
+| `metrics.service.name`                     | Metrics service name                                                                    | `http-metrics`             |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                       |
 | `metrics.service.loadBalancerIP`           | LoadBalancer IP if metrics service type is `LoadBalancer`                               | `""`                       |
