@@ -159,6 +159,20 @@ Validate ACL configuration - ensure existingSecret and existingFilePath are mutu
 {{- end -}}
 
 {{/*
+Validate externalMaster configuration - only supported for architecture=replication, and requires a host
+*/}}
+{{- define "redis.externalMaster.validate" -}}
+{{- if .Values.externalMaster.enabled -}}
+{{- if ne .Values.architecture "replication" -}}
+{{- fail "externalMaster.enabled is only supported when architecture=replication." -}}
+{{- end -}}
+{{- if not .Values.externalMaster.host -}}
+{{- fail "externalMaster.enabled is true but externalMaster.host is not set. Please provide the external master's hostname or IP." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the ACL file name
 */}}
 {{- define "redis.auth.acl.file" -}}
