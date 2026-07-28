@@ -39,6 +39,20 @@
       ]
     },
     {
+      "description": "Use ghcr.io registry for the RabbitMQ operator images",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "rabbitmq/cluster-operator",
+        "rabbitmq/messaging-topology-operator",
+        "rabbitmq/default-user-credential-updater"
+      ],
+      "registryUrls": [
+        "https://ghcr.io"
+      ]
+    },
+    {
       "matchManagers": [
         "custom.regex"
       ],

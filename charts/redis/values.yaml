@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.8.0@sha256:0b13f549ab871acafaa84b673c4e29bd7dce8d12526aaafe3b4ea3366c322daf"
+  tag: "8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -62,8 +62,8 @@ updateStrategy:
   type: RollingUpdate
   ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
   rollingUpdate:
-    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update
-    maxUnavailable: 1
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update. Left unset by default since the `MaxUnavailableStatefulSet` feature gate is disabled on some managed Kubernetes offerings (e.g. GKE), which silently strips this field and causes a permanent GitOps diff
+    maxUnavailable: ""
 
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
@@ -189,6 +189,16 @@ cluster:
   ## cluster re-form via gossip after all pods are deleted and recreated (persisted nodes.conf keeps resolvable
   ## hostnames instead of stale IPs). Disable only if your clients cannot resolve the headless service hostnames.
   announceHostnames: true
+  ## @param cluster.announceHostnamesOverride Map of hostnames to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is true.
+  ## Example: 0: foo-bar-0
+  announceHostnamesOverride: {}
+  ## @param cluster.announceIpsOverride Map of IPs to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is false.
+  ## Example: 0: 1.2.3.4
+  announceIpsOverride: {}
   ## @param cluster.startupSleepTime Seconds to sleep in the init container before configuring Redis Cluster
   ## Useful when persistence is disabled: gives the cluster time to detect a failed master and elect
   ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
@@ -623,6 +633,8 @@ metrics:
     enabled: true
     ## @param metrics.service.type Metrics service type
     type: ClusterIP
+    ## @param metrics.service.name Metrics service name
+    name: http-metrics
     ## @param metrics.service.port Metrics service port
     port: 9121
     ## @param metrics.service.annotations Additional custom annotations for Metrics service
