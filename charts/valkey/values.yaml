@@ -472,6 +472,58 @@ sentinel:
   preStop:
     ## @param sentinel.preStop.enabled Enable the preStop hook on the Sentinel container
     enabled: true
+  masterProxy:
+    ## @param sentinel.masterProxy.enabled Enable a stable master endpoint for non-Sentinel-aware clients
+    ## Adds an HAProxy sidecar to every Valkey pod (alongside the existing Sentinel sidecar) that
+    ## determines the master by checking INFO replication on each backend directly, instead of
+    ## trusting a Kubernetes Service selector patched from Sentinel's opinion. It also closes
+    ## client connections to a demoted master, forcing an immediate reconnect instead of leaving
+    ## clients writing against a stale socket. Because it's bundled into the StatefulSet, proxy
+    ## redundancy scales automatically with replicaCount and needs no separate RBAC, ServiceAccount,
+    ## affinity, or PodDisruptionBudget.
+    enabled: false
+    image:
+      ## @param sentinel.masterProxy.image.registry HAProxy image registry
+      registry: docker.io
+      ## @param sentinel.masterProxy.image.repository HAProxy image repository
+      repository: haproxy
+      ## @param sentinel.masterProxy.image.tag HAProxy image tag
+      tag: "3.0-alpine"
+      ## @param sentinel.masterProxy.image.pullPolicy HAProxy image pull policy
+      pullPolicy: IfNotPresent
+    ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on (must differ from service.port, which the Valkey container in the same pod already uses)
+    containerPort: 6380
+    ## @param sentinel.masterProxy.checkInterval Health check interval (HAProxy `inter`, e.g. "1s")
+    checkInterval: "1s"
+    ## @param sentinel.masterProxy.checkRise Consecutive successful checks before a backend is marked master-eligible
+    checkRise: 2
+    ## @param sentinel.masterProxy.checkFall Consecutive failed checks before a backend is marked down
+    checkFall: 2
+    ## @param sentinel.masterProxy.requireConnectedReplica Also require connected_slaves > 0 on the candidate master
+    ## Plain `role:master` is not sufficient on its own: a pod that restarts with empty/ephemeral
+    ## storage can come back up self-declared as master (see the sentinel container's bootstrap
+    ## logic) before Sentinel has finished failing over, producing two backends that both report
+    ## role:master at once - confirmed in testing. Requiring at least one attached replica excludes
+    ## the orphaned one.
+    ## Trade-off: right after a fresh install, or right after a replica restarts and starts
+    ## resyncing, the real master can transiently show connected_slaves:0 too - with this enabled,
+    ## the master endpoint is unavailable for that window rather than risking a split-brain read.
+    ## Defaults to false (matching plain role:master, like the reference design) until there's a
+    ## safer way to bound that window; enable it if you'd rather fail closed than risk split-brain.
+    requireConnectedReplica: false
+    ## @param sentinel.masterProxy.resources Resource limits and requests for the HAProxy sidecar
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    service:
+      ## @param sentinel.masterProxy.service.type Kubernetes service type for the master proxy service
+      type: ""
+      ## @param sentinel.masterProxy.service.annotations Additional custom annotations for the master proxy service
+      annotations: {}
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:

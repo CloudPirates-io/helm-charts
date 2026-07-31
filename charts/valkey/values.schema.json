@@ -536,6 +536,60 @@
                 "masterName": {
                     "type": "string"
                 },
+                "masterProxy": {
+                    "type": "object",
+                    "properties": {
+                        "checkFall": {
+                            "type": "integer"
+                        },
+                        "checkInterval": {
+                            "type": "string"
+                        },
+                        "checkRise": {
+                            "type": "integer"
+                        },
+                        "containerPort": {
+                            "type": "integer"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "pullPolicy": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requireConnectedReplica": {
+                            "type": "boolean"
+                        },
+                        "resources": {
+                            "type": "object"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
                 "parallelSyncs": {
                     "type": "integer"
                 },

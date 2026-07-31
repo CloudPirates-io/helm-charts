@@ -1,0 +1,103 @@
+suite: test sentinel.masterProxy
+set:
+  architecture: replication
+  sentinel:
+    enabled: true
+  auth:
+    password: testpass123
+tests:
+  - it: should not render the haproxy sidecar by default
+    template: statefulset.yaml
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 2
+      - notExists:
+          path: spec.template.spec.containers[2]
+
+  - it: should not render the master-proxy service when masterProxy is disabled
+    template: sentinel-master-proxy-service.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render the haproxy sidecar when masterProxy is enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: haproxy
+      - equal:
+          path: spec.template.spec.containers[2].ports[0].containerPort
+          value: 6380
+      - equal:
+          path: spec.template.spec.containers[2].readinessProbe.tcpSocket.port
+          value: haproxy
+      - equal:
+          path: spec.template.spec.containers[2].livenessProbe.tcpSocket.port
+          value: haproxy
+
+  - it: should render a static master service selecting all StatefulSet pods when masterProxy is enabled
+    template: sentinel-master-proxy-service.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-valkey-master
+      - equal:
+          path: spec.ports[0].targetPort
+          value: haproxy
+      - notExists:
+          path: spec.selector["app.kubernetes.io/component"]
+
+  - it: should fail when masterProxy and tls are both enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.masterProxy is not yet supported together with tls.enabled"
+
+  - it: should not require an attached replica by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "connected_slaves:0"
+
+  - it: should require an attached replica when requireConnectedReplica is true
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          requireConnectedReplica: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "connected_slaves:0"
