@@ -56,6 +56,7 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }} 
