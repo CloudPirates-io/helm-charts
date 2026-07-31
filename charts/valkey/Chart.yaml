@@ -45,6 +45,8 @@ annotations:
     - kind: added
       description: "Add sentinel.masterProxy: an HAProxy sidecar bundled into each Valkey pod that gives non-Sentinel-aware clients a stable master endpoint, determined from INFO replication on the data plane instead of a Kubernetes Service selector patched via kubectl/RBAC"
       links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1523"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/valkey/CHANGELOG.md"
     - kind: added
