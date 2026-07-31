@@ -197,6 +197,9 @@ podSecurityContext:
 ## @param priorityClassName Priority class for the mongodb instance
 priorityClassName: ""
 
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
+terminationGracePeriodSeconds: 30
+
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
