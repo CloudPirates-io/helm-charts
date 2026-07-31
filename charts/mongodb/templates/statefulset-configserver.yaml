@@ -208,6 +208,10 @@ spec:
             - name: mongodb
               containerPort: 27017
               protocol: TCP
+          {{- if .Values.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.customLivenessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             exec:
@@ -221,6 +225,11 @@ spec:
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.customReadinessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             exec:
@@ -234,6 +243,11 @@ spec:
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.customStartupProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.startupProbe.enabled }}
           startupProbe:
             exec:
@@ -246,6 +260,7 @@ spec:
             successThreshold: {{ .Values.startupProbe.successThreshold }}
             failureThreshold: {{ .Values.startupProbe.failureThreshold }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+          {{- end }}
           {{- end }}
           volumeMounts:
             - name: mongodb-configserver-volume

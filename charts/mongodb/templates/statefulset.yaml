@@ -178,6 +178,10 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+          {{- if .Values.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.customLivenessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             exec:
@@ -198,6 +202,11 @@ spec:
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             successThreshold: {{ .Values.livenessProbe.successThreshold }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.customReadinessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             exec:
@@ -217,6 +226,7 @@ spec:
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
