@@ -262,18 +262,21 @@ customUsers:
 | `livenessProbe.timeoutSeconds`       | Timeout for each probe attempt                  | `5`     |
 | `livenessProbe.failureThreshold`     | Number of failures before pod is restarted      | `6`     |
 | `livenessProbe.successThreshold`     | Number of successes to mark probe as successful | `1`     |
+| `customLivenessProbe`                | Custom liveness probe configuration             | `{}`    |
 | `readinessProbe.enabled`             | Enable readiness probe                          | `true`  |
 | `readinessProbe.initialDelaySeconds` | Initial delay before starting probes            | `5`     |
 | `readinessProbe.periodSeconds`       | How often to perform the probe                  | `10`    |
 | `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                  | `5`     |
 | `readinessProbe.failureThreshold`    | Number of failures before pod is marked unready | `6`     |
 | `readinessProbe.successThreshold`    | Number of successes to mark probe as successful | `1`     |
+| `customReadinessProbe`               | Custom readiness probe configuration            | `{}`    |
 | `startupProbe.enabled`               | Enable startup probe                            | `true`  |
 | `startupProbe.initialDelaySeconds`   | Initial delay before starting probes            | `10`    |
 | `startupProbe.timeoutSeconds`        | Timeout for each probe attempt                  | `5`     |
 | `startupProbe.failureThreshold`      | Number of failures before pod is marked unready | `30`    |
 | `startupProbe.successThreshold`      | Number of successes to mark probe as successful | `1`     |
 | `startupProbe.periodSeconds`         | How often to perform the probe                  | `10`    |
+| `customStartupProbe`                 | Custom startup probe configuration              | `{}`    |
 
 ### Additional Parameters
 
