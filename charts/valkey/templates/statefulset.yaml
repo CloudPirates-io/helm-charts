@@ -570,9 +570,14 @@ spec:
 
               frontend valkey_master_fe
                   bind *:{{ .Values.sentinel.masterProxy.containerPort }}
-                  default_backend valkey_master_be
+                  use_backend valkey_master_strict if { nbsrv(valkey_master_strict) gt 0 }
+                  default_backend valkey_master_any
 
-              backend valkey_master_be
+              # Preferred: role:master, an attached replica, and not mid-failover.
+              # Excludes a pod that self-declared master on restart before Sentinel
+              # finished failing over (no replica ever attached to it), and one that
+              # knows it's still in the middle of a handoff.
+              backend valkey_master_strict
                   mode tcp
                   option tcp-check
                   tcp-check connect
@@ -584,9 +589,30 @@ spec:
                   tcp-check expect string +PONG
                   tcp-check send "INFO replication\r\n"
                   tcp-check expect string role:master min-recv 100
-                  {{- if .Values.sentinel.masterProxy.requireConnectedReplica }}
                   tcp-check expect ! string connected_slaves:0
+                  tcp-check expect string master_failover_state:no-failover
+                  tcp-check send "QUIT\r\n"
+                  tcp-check expect string +OK
+                  {{- range $i := until (int $.Values.replicaCount) }}
+                  server {{ include "valkey.fullname" $ }}-{{ $i }} {{ include "valkey.fullname" $ }}-{{ $i }}.{{ include "valkey.fullname" $ }}-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.clusterDomain }}:{{ $.Values.service.port }} check inter {{ $.Values.sentinel.masterProxy.checkInterval }} rise {{ $.Values.sentinel.masterProxy.checkRise }} fall {{ $.Values.sentinel.masterProxy.checkFall }} resolvers cluster_dns resolve-prefer ipv4 init-addr none
                   {{- end }}
+
+              # Fallback used only when no server qualifies for valkey_master_strict
+              # (e.g. right after a fresh install, or a replica mid-resync). Keeps the
+              # endpoint available instead of going dark, at the cost of trusting a
+              # role:master answer on its own.
+              backend valkey_master_any
+                  mode tcp
+                  option tcp-check
+                  tcp-check connect
+                  {{- if .Values.auth.enabled }}
+                  tcp-check send "AUTH __VALKEY_PASSWORD__\r\n"
+                  tcp-check expect string +OK
+                  {{- end }}
+                  tcp-check send "PING\r\n"
+                  tcp-check expect string +PONG
+                  tcp-check send "INFO replication\r\n"
+                  tcp-check expect string role:master min-recv 100
                   tcp-check send "QUIT\r\n"
                   tcp-check expect string +OK
                   {{- range $i := until (int $.Values.replicaCount) }}
