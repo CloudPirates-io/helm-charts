@@ -251,6 +251,7 @@ customUsers:
 | `containerSecurityContext.allowPrivilegeEscalation` | Set MongoDB container's privilege escalation | `false` |
 | `podSecurityContext.fsGroup`                        | Set MongoDB pod's Security Context fsGroup   | `999`   |
 | `priorityClassName`                                 | Priority class for the mongodb instance      | `""`    |
+| `terminationGracePeriodSeconds`                     | Seconds Kubernetes waits for graceful pod termination before SIGKILL | `30` |
 
 ### Health Check Parameters
 
