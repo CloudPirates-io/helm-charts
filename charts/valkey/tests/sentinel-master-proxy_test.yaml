@@ -102,13 +102,13 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[2].command[2]
-          pattern: "(?ms)^backend valkey_master_strict$.*?connected_slaves:0.*?^backend valkey_master_any$"
+          pattern: "(?ms)^backend valkey_master_strict$.*?connected_slaves:\\[1-9\\].*?^backend valkey_master_any$"
       - matchRegex:
           path: spec.template.spec.containers[2].command[2]
           pattern: "(?ms)^backend valkey_master_strict$.*?master_failover_state:no-failover.*?^backend valkey_master_any$"
       - notMatchRegex:
           path: spec.template.spec.containers[2].command[2]
-          pattern: "(?ms)^backend valkey_master_any$.*?connected_slaves:0"
+          pattern: "(?ms)^backend valkey_master_any$.*?connected_slaves:"
       - notMatchRegex:
           path: spec.template.spec.containers[2].command[2]
           pattern: "(?ms)^backend valkey_master_any$.*?master_failover_state:no-failover"

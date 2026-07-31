@@ -589,7 +589,7 @@ spec:
                   tcp-check expect string +PONG
                   tcp-check send "INFO replication\r\n"
                   tcp-check expect string role:master min-recv 100
-                  tcp-check expect ! string connected_slaves:0
+                  tcp-check expect rstring connected_slaves:[1-9][0-9]*
                   tcp-check expect string master_failover_state:no-failover
                   tcp-check send "QUIT\r\n"
                   tcp-check expect string +OK
