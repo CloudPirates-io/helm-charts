@@ -359,7 +359,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
 | `sentinel.image.registry`                     | Redis Sentinel image registry                                                                 | `docker.io` |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.8.1`     |
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
