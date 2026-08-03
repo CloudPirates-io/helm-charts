@@ -491,7 +491,9 @@ sentinel:
       tag: "3.0-alpine"
       ## @param sentinel.masterProxy.image.pullPolicy HAProxy image pull policy
       pullPolicy: IfNotPresent
-    ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on (must differ from service.port, which the Valkey container in the same pod already uses)
+    ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on
+    ## Must differ from service.port, which the Valkey container in the same pod already uses -
+    ## enforced at render time with a `fail` if they collide.
     containerPort: 6380
     ## @param sentinel.masterProxy.checkInterval Health check interval (HAProxy `inter`, e.g. "1s")
     checkInterval: "1s"

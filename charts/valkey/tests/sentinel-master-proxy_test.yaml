@@ -112,3 +112,58 @@ tests:
       - notMatchRegex:
           path: spec.template.spec.containers[2].command[2]
           pattern: "(?ms)^backend valkey_master_any$.*?master_failover_state:no-failover"
+
+  - it: should fail when containerPort collides with service.port
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          containerPort: 6379
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.masterProxy.containerPort must differ from service.port"
+
+  - it: should prefer ipv6 DNS resolution when ipFamily is ipv6
+    template: statefulset.yaml
+    set:
+      ipFamily: ipv6
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv6"
+      - notMatchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv4"
+
+  - it: should default to ipv4 DNS resolution when ipFamily is auto
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv4"
+
+  - it: should escape sed-special characters in the password before substitution
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "ESCAPED_PASSWORD=.*sed -e '[^']*\\\\\\\\[^']*' -e '[^']*&[^']*'"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "sed -i \"s/__VALKEY_PASSWORD__/\\$\\{ESCAPED_PASSWORD\\}/\" /tmp/haproxy\\.cfg"
