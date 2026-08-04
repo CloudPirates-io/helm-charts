@@ -121,11 +121,7 @@ Generate Redis CLI ping command with automated auth
 Generate Sentinel CLI command with automated auth and connection info
 */}}
 {{- define "redis.sentinelCli" -}}
-{{- if .auth -}}
-redis-cli -h {{ include "redis.fullname" .context }}-sentinel -p {{ .context.Values.sentinel.port }} -a "${REDIS_PASSWORD}"
-{{- else -}}
 redis-cli -h {{ include "redis.fullname" .context }}-sentinel -p {{ .context.Values.sentinel.port }}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -226,6 +222,7 @@ if [ -z "$REDIS_PASSWORD" ]; then
   echo "ERROR: ACL is enabled but no password found for 'user default' in '{{ $aclPath }}'"
   exit 1
 fi
+export REDISCLI_AUTH="$REDIS_PASSWORD"
 REDIS_SENTINEL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "sentinel" "context" .context) }})
 if ! echo "$REDIS_SENTINEL_PASSWORD" | grep -q '[^[:space:]]'; then REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"; fi
 {{- else if eq .type "sentinel" -}}
@@ -234,6 +231,7 @@ if [ -z "$REDIS_PASSWORD" ]; then
   echo "ERROR: ACL is enabled but no password found for 'user default' in '{{ $aclPath }}'"
   exit 1
 fi
+export REDISCLI_AUTH="$REDIS_PASSWORD"
 REDIS_SENTINEL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "sentinel" "context" .context) }})
 [ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
 {{- else if eq .type "metrics" -}}
@@ -278,6 +276,7 @@ if [ -z "$REDIS_PASSWORD" ]; then
   echo "ERROR: ACL is enabled but no password found for 'user default' or 'user sentinel' in '{{ $aclPath }}'"
   exit 1
 fi
+export REDISCLI_AUTH="$REDIS_PASSWORD"
 {{- else if eq .type "master-discovery" -}}
 ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "sentinel" "context" .context) }})
 [ -z "$ACL_PASSWORD" ] && ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" "default" "context" .context) }})

@@ -62,7 +62,11 @@ data:
     # Function to run Sentinel commands
     # NOTE: Sentinel runs in the same Pod, so we connect via localhost (REDIS_LOOPBACK)
     run_sentinel_command() {
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        {{- if .Values.auth.sentinel }}
+        REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- else }}
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- end }}
     }
 
     # Function to check if sentinel failover has finished
@@ -203,6 +207,8 @@ data:
     export REDISCLI_AUTH="${REDIS_PASSWORD}"
     {{- end }}
 
+    {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -220,7 +226,11 @@ data:
 
     # Function to run local Sentinel commands
     run_sentinel_command() {
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" {{- if .Values.auth.sentinel }} -a "${REDIS_PASSWORD}"{{- end }} sentinel "$@"
+        {{- if .Values.auth.sentinel }}
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- else }}
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- end }}
     }
 
     # Function to check if current Redis instance is master
