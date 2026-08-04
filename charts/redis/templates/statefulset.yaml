@@ -1,5 +1,6 @@
 {{- /* This template renders either a Deployment or a StatefulSet depending on useDeployment and persistence settings. */ -}}
 {{- include "redis.auth.acl.validate" . -}}
+{{- include "redis.externalMaster.validate" . -}}
 {{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: apps/v1
 {{- if $useDeployment }}
@@ -161,6 +162,13 @@ spec:
                   {{- end }}
                 fi
               else
+              {{- if .Values.externalMaster.enabled }}
+                echo "Configuring as replica of external master {{ .Values.externalMaster.host }}"
+                echo "replicaof {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- end }}
+              {{- else }}
                 # No sentinel found: check for existing Redis master, then elect by lowest IP
                 echo "No sentinel found, discovering peers..."
                 for i in $(seq 1 10); do
@@ -211,6 +219,7 @@ spec:
                     fi
                   fi
                 fi
+              {{- end }}
               fi
 
               # Announce by IP (deployment mode: pods have no stable DNS names)
@@ -233,6 +242,14 @@ spec:
               echo "replica-announce-ip ${MY_IP}" >> /tmp/redis.conf
               echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
               echo "replica-priority 100" >> /tmp/redis.conf
+              echo "replica-read-only yes" >> /tmp/redis.conf
+              {{- else if .Values.externalMaster.enabled }}
+              # Replication without Sentinel, migrating from an external master
+              echo "Configuring as replica of external master {{ .Values.externalMaster.host }}"
+              echo "replicaof {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}" >> /tmp/redis.conf
+              {{- if .Values.auth.enabled }}
+              echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+              {{- end }}
               echo "replica-read-only yes" >> /tmp/redis.conf
               {{- else }}
               # Replication without Sentinel: IP-based deterministic master election
@@ -365,6 +382,13 @@ spec:
                 fi
               else
                 # No sentinel available - use bootstrap logic
+                {{- if .Values.externalMaster.enabled }}
+                echo "Bootstrap mode: configuring as replica of external master {{ .Values.externalMaster.host }}"
+                echo "replicaof {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- end }}
+                {{- else }}
                 if [ "$POD_ORDINAL" != "0" ]; then
                   echo "Bootstrap mode: configuring as replica of pod-0"
                   # Use hostname-based replication for better resilience
@@ -377,6 +401,7 @@ spec:
                 else
                   echo "Bootstrap mode: pod-0 starting as initial master"
                 fi
+                {{- end }}
               fi
 
               {{ if not .Values.sentinel.config.announceHostnames }}
@@ -425,9 +450,19 @@ spec:
                 echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
                 {{- end }}
                 echo "replica-read-only yes" >> /tmp/redis.conf
+              {{- if .Values.externalMaster.enabled }}
+              else
+                echo "Pod-0: configuring as replica of external master {{ .Values.externalMaster.host }}"
+                echo "replicaof {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- end }}
+              fi
+              {{- else }}
               else
                 echo "Pod-0: Configuring as master"
               fi
+              {{- end }}
               {{- end }}
               {{- else if eq .Values.architecture "cluster" }}
               echo "" >> /tmp/redis.conf
@@ -951,7 +986,7 @@ spec:
               bind * -::*
               sentinel resolve-hostnames yes
               sentinel announce-hostnames no
-              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }}{{- else }} ${MASTER_HOST}{{- end }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- else if .Values.externalMaster.enabled }} {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}{{- else }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
@@ -1118,7 +1153,7 @@ spec:
               # Enable hostname resolution for Redis Sentinel
               sentinel resolve-hostnames yes
               sentinel announce-hostnames yes
-              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }}{{- else }} ${MASTER_HOST}{{- end }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} {{- if .Values.sentinel.monitorTarget }} {{ .Values.sentinel.monitorTarget }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- else if .Values.externalMaster.enabled }} {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}{{- else }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
