@@ -525,6 +525,129 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
         {{- end }}
+        {{- if and .Values.sentinel.enabled .Values.sentinel.masterProxy.enabled (eq .Values.architecture "replication") }}
+        {{- if .Values.tls.enabled }}
+        {{- fail "sentinel.masterProxy is not yet supported together with tls.enabled" }}
+        {{- end }}
+        {{- if eq (int .Values.sentinel.masterProxy.containerPort) (int .Values.service.port) }}
+        {{- fail "sentinel.masterProxy.containerPort must differ from service.port" }}
+        {{- end }}
+        - name: haproxy
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "valkey.masterProxy.image" . }}
+          imagePullPolicy: {{ .Values.sentinel.masterProxy.image.pullPolicy }}
+          {{- if .Values.auth.enabled }}
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "valkey.secretName" . }}
+                  key: {{ include "valkey.passwordKey" . }}
+          {{- end }}
+          volumeMounts:
+            - name: haproxy-config
+              mountPath: /tmp
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              cat > /tmp/haproxy.cfg << 'EOF'
+              global
+                  maxconn 2000
+
+              defaults
+                  mode tcp
+                  timeout connect 2s
+                  timeout client 30s
+                  timeout server 30s
+
+              resolvers cluster_dns
+                  parse-resolv-conf
+                  hold valid 10s
+                  hold other 30s
+                  hold refused 30s
+                  hold nx 30s
+                  hold timeout 30s
+                  hold obsolete 30s
+
+              frontend valkey_master_fe
+                  bind *:{{ .Values.sentinel.masterProxy.containerPort }}
+                  use_backend valkey_master_strict if { nbsrv(valkey_master_strict) gt 0 }
+                  default_backend valkey_master_any
+
+              # Preferred: role:master, an attached replica, and not mid-failover.
+              # Excludes a pod that self-declared master on restart before Sentinel
+              # finished failing over (no replica ever attached to it), and one that
+              # knows it's still in the middle of a handoff.
+              backend valkey_master_strict
+                  mode tcp
+                  option tcp-check
+                  tcp-check connect
+                  {{- if .Values.auth.enabled }}
+                  tcp-check send "AUTH __VALKEY_PASSWORD__\r\n"
+                  tcp-check expect string +OK
+                  {{- end }}
+                  tcp-check send "PING\r\n"
+                  tcp-check expect string +PONG
+                  tcp-check send "INFO replication\r\n"
+                  tcp-check expect string role:master min-recv 100
+                  tcp-check expect rstring connected_slaves:[1-9][0-9]*
+                  tcp-check expect string master_failover_state:no-failover
+                  tcp-check send "QUIT\r\n"
+                  tcp-check expect string +OK
+                  {{- range $i := until (int $.Values.replicaCount) }}
+                  server {{ include "valkey.fullname" $ }}-{{ $i }} {{ include "valkey.fullname" $ }}-{{ $i }}.{{ include "valkey.fullname" $ }}-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.clusterDomain }}:{{ $.Values.service.port }} check inter {{ $.Values.sentinel.masterProxy.checkInterval }} rise {{ $.Values.sentinel.masterProxy.checkRise }} fall {{ $.Values.sentinel.masterProxy.checkFall }} resolvers cluster_dns resolve-prefer {{ if eq $.Values.ipFamily "ipv6" }}ipv6{{ else }}ipv4{{ end }} init-addr none
+                  {{- end }}
+
+              # Fallback used only when no server qualifies for valkey_master_strict
+              # (e.g. right after a fresh install, or a replica mid-resync). Keeps the
+              # endpoint available instead of going dark, at the cost of trusting a
+              # role:master answer on its own.
+              backend valkey_master_any
+                  mode tcp
+                  option tcp-check
+                  tcp-check connect
+                  {{- if .Values.auth.enabled }}
+                  tcp-check send "AUTH __VALKEY_PASSWORD__\r\n"
+                  tcp-check expect string +OK
+                  {{- end }}
+                  tcp-check send "PING\r\n"
+                  tcp-check expect string +PONG
+                  tcp-check send "INFO replication\r\n"
+                  tcp-check expect string role:master min-recv 100
+                  tcp-check send "QUIT\r\n"
+                  tcp-check expect string +OK
+                  {{- range $i := until (int $.Values.replicaCount) }}
+                  server {{ include "valkey.fullname" $ }}-{{ $i }} {{ include "valkey.fullname" $ }}-{{ $i }}.{{ include "valkey.fullname" $ }}-headless.{{ include "cloudpirates.namespace" $ }}.svc.{{ $.Values.clusterDomain }}:{{ $.Values.service.port }} check inter {{ $.Values.sentinel.masterProxy.checkInterval }} rise {{ $.Values.sentinel.masterProxy.checkRise }} fall {{ $.Values.sentinel.masterProxy.checkFall }} resolvers cluster_dns resolve-prefer {{ if eq $.Values.ipFamily "ipv6" }}ipv6{{ else }}ipv4{{ end }} init-addr none
+                  {{- end }}
+              EOF
+              {{- if .Values.auth.enabled }}
+              ESCAPED_PASSWORD=$(printf '%s' "$VALKEY_PASSWORD" | sed -e 's/\\/\\\\/g' -e 's/[/&]/\\&/g')
+              sed -i "s/__VALKEY_PASSWORD__/${ESCAPED_PASSWORD}/" /tmp/haproxy.cfg
+              {{- end }}
+              exec haproxy -f /tmp/haproxy.cfg -db
+          ports:
+            - name: haproxy
+              containerPort: {{ .Values.sentinel.masterProxy.containerPort }}
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: haproxy
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: haproxy
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.sentinel.masterProxy.resources | nindent 12 }}
+        {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
           image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
@@ -581,6 +704,10 @@ spec:
           configMap:
             name: {{ include "valkey.fullname" . }}-prestop-script
             defaultMode: 0755
+        {{- if .Values.sentinel.masterProxy.enabled }}
+        - name: haproxy-config
+          emptyDir: {}
+        {{- end }}
         {{- end }}
         {{- end }}
         - name: config
