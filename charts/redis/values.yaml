@@ -265,8 +265,10 @@ pdb:
   ## @param pdb.enabled Enable Pod Disruption Budget
   enabled: false
   ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  # @schema type:[integer, string]
   minAvailable: 1
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  # @schema type:[integer, string]
   maxUnavailable: ""
 
 persistence:
@@ -449,6 +451,24 @@ extraVolumes: []
 
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
+
+## @section External master (migration)
+## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
+## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
+## master instead of electing one of themselves. Once the external master's data has fully replicated,
+## decommission it — with sentinel.enabled and sentinel.monitorTarget left unset, Sentinel automatically
+## monitors the same external host and promotes one of the chart-managed pods once it goes away.
+## Only affects the initial bootstrap: once a chart-managed master or Sentinel is already found, that
+## takes precedence over this setting.
+## NOTE: the external instance must accept the same password as auth.password/auth.existingSecret (or have
+## authentication disabled).
+externalMaster:
+  ## @param externalMaster.enabled Bootstrap Redis pods as replicas of an external master (architecture=replication only)
+  enabled: false
+  ## @param externalMaster.host Hostname or IP of the external Redis master to replicate from
+  host: ""
+  ## @param externalMaster.port Port of the external Redis master (defaults to service.port)
+  port: ""
 
 ## @section Redis Sentinel configuration
 ## This section configures Redis Sentinel for high availability in replication mode
