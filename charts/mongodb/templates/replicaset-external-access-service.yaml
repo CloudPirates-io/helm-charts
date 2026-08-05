@@ -1,0 +1,45 @@
+{{- if and .Values.replicaSet.enabled .Values.replicaSet.externalAccess.enabled .Values.replicaSet.externalAccess.service.enabled }}
+{{- $fullname := include "mongodb.fullname" . }}
+{{- $ea := .Values.replicaSet.externalAccess }}
+{{- $svc := $ea.service }}
+{{- $port := int (default .Values.service.port $ea.port) }}
+{{- range $i := until (int (add1 (int $.Values.replicaSet.secondaries))) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%d-external" $fullname $i }}
+  namespace: {{ include "cloudpirates.namespace" $ }}
+  labels:
+    {{- include "mongodb.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: replicaset-external
+  {{- if or (include "mongodb.annotations" $) $svc.annotations }}
+  annotations:
+{{- (include "mongodb.annotations" $) | indent 4 }}
+  {{- if $svc.annotations }}
+{{ toYaml $svc.annotations | indent 4 }}
+  {{- end }}
+  {{- end }}
+spec:
+  type: {{ $svc.type }}
+  {{- if and (eq $svc.type "LoadBalancer") (gt (len $svc.loadBalancerIPs) $i) }}
+  loadBalancerIP: {{ index $svc.loadBalancerIPs $i | quote }}
+  {{- end }}
+  {{- if and (eq $svc.type "LoadBalancer") $svc.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml $svc.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  ports:
+    - port: {{ $port }}
+      targetPort: mongodb
+      protocol: TCP
+      name: mongodb
+      {{- if and (eq $svc.type "NodePort") (gt (len $svc.nodePorts) $i) }}
+      nodePort: {{ index $svc.nodePorts $i }}
+      {{- end }}
+  selector:
+    {{- include "mongodb.selectorLabels" $ | nindent 4 }}
+    service-type: primary-secondary
+    statefulset.kubernetes.io/pod-name: {{ printf "%s-%d" $fullname $i }}
+{{- end }}
+{{- end }}
