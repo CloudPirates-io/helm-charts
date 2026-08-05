@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.8.0@sha256:234c902a2db49461a129e2d4aeff85b28cf20187ed274a67f6e50995fa713c7b"
+  tag: "8.8.1@sha256:c88d347edef6249a6d2293f926f1eeb48bd40c57cbcd02c07f52e7f1fd2cb46b"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -265,8 +265,10 @@ pdb:
   ## @param pdb.enabled Enable Pod Disruption Budget
   enabled: false
   ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  # @schema type:[integer, string]
   minAvailable: 1
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  # @schema type:[integer, string]
   maxUnavailable: ""
 
 persistence:
@@ -294,14 +296,14 @@ persistence:
 volumePermissions:
   ## @param volumePermissions.enabled Enable init container that changes the owner of the PV mount point
   enabled: false
-  ## @param volumePermissions.image.registry Image registry
-  ## @param volumePermissions.image.repository Image repository
-  ## @param volumePermissions.image.tag Image tag
-  ## @param volumePermissions.image.pullPolicy Image pull policy
   image:
+    ## @param volumePermissions.image.registry Image registry
     registry: docker.io
+    ## @param volumePermissions.image.repository Image repository
     repository: busybox
+    ## @param volumePermissions.image.tag Image tag
     tag: "1.36.1"
+    ## @param volumePermissions.image.pullPolicy Image pull policy
     pullPolicy: IfNotPresent
   ## @param volumePermissions.resources Resource limits and requests
   resources: {}
@@ -450,6 +452,24 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
 
+## @section External master (migration)
+## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
+## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
+## master instead of electing one of themselves. Once the external master's data has fully replicated,
+## decommission it — with sentinel.enabled and sentinel.monitorTarget left unset, Sentinel automatically
+## monitors the same external host and promotes one of the chart-managed pods once it goes away.
+## Only affects the initial bootstrap: once a chart-managed master or Sentinel is already found, that
+## takes precedence over this setting.
+## NOTE: the external instance must accept the same password as auth.password/auth.existingSecret (or have
+## authentication disabled).
+externalMaster:
+  ## @param externalMaster.enabled Bootstrap Redis pods as replicas of an external master (architecture=replication only)
+  enabled: false
+  ## @param externalMaster.host Hostname or IP of the external Redis master to replicate from
+  host: ""
+  ## @param externalMaster.port Port of the external Redis master (defaults to service.port)
+  port: ""
+
 ## @section Redis Sentinel configuration
 ## This section configures Redis Sentinel for high availability in replication mode
 ## When enabled, Redis instances use dynamic master/replica role assignment managed by Sentinel
@@ -459,14 +479,14 @@ sentinel:
   ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
-  ## @param sentinel.image.registry Redis Sentinel image registry
-  ## @param sentinel.image.repository Redis Sentinel image repository
-  ## @param sentinel.image.tag Redis Sentinel image tag
-  ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
   image:
+    ## @param sentinel.image.registry Redis Sentinel image registry
     registry: docker.io
+    ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
-    tag: "8.6.1@sha256:1c054d54ecd1597bba52f4304bca5afbc5565ebe614c5b3d7dc5b7f8a0cd768d"
+    ## @param sentinel.image.tag Redis Sentinel image tag
+    tag: "8.8.1@sha256:c88d347edef6249a6d2293f926f1eeb48bd40c57cbcd02c07f52e7f1fd2cb46b"
+    ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
@@ -534,10 +554,12 @@ sentinel:
     ipFamilyPolicy: ""
     ## @param sentinel.masterService.checkInterval Interval in seconds to check for master changes
     checkInterval: 60
-    ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
+      ## @param sentinel.masterService.image.repository Image for master discovery deployment
       repository: alpine/kubectl
+      ## @param sentinel.masterService.image.tag Image tag for master discovery deployment
       tag: "1.35.2"
+      ## @param sentinel.masterService.image.pullPolicy Image pull policy for master discovery deployment
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
     resources: {}
@@ -605,14 +627,14 @@ metrics:
   enabled: false
   ## @param metrics.tls.enabled Enable TLS for the metrics exporter endpoint
   tls: false
-  ## @param metrics.image.registry Redis exporter image registry
-  ## @param metrics.image.repository Redis exporter image repository
-  ## @param metrics.image.tag Redis exporter image tag
-  ## @param metrics.image.pullPolicy Redis exporter image pull policy
   image:
+    ## @param metrics.image.registry Redis exporter image registry
     registry: docker.io
+    ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
-    tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
+    ## @param metrics.image.tag Redis exporter image tag
+    tag: "v1.88.0-alpine@sha256:db6df2026585151c2209aa1f21c8856da883cf933b0943c0e51d1f4b3acf1a8d"
+    ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
   port: 9121

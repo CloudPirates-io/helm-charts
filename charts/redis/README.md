@@ -60,7 +60,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
     --image redis:8.2.0 -- bash
 
 # Inside the pod:
-redis-cli -h my-redis -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h my-redis
 ```
 
 ## Security & Signature Verification
@@ -359,7 +359,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
 | `sentinel.image.registry`                     | Redis Sentinel image registry                                                                 | `docker.io` |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.8.1`     |
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
@@ -530,7 +530,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
 redis-cli -h my-redis-sentinel -p 26379 sentinel get-master-addr-by-name mymaster
 
 # Connect to the current master (address from previous command)
-redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h <master-ip> -p 6379
 ```
 
 ### Master-Replica without Sentinel
