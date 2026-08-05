@@ -618,8 +618,10 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.initContainer.resources | nindent 12 }}
           volumeMounts:
+            {{- if or .Values.config.content .Values.config.existingConfigmap }}
             - name: config
               mountPath: {{ .Values.config.mountPath }}
+            {{- end }}
             - name: redis-config
               mountPath: /tmp
             {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
