@@ -379,3 +379,44 @@ tests:
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
           pattern: 'CONFIG_FILE="/usr/local/etc/redis/redis.conf"'
+
+  - it: should avoid metrics authentication environment when auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.enabled: false
+      metrics.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+
+  - it: should avoid sentinel authentication environment when auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.enabled: false
+      architecture: replication
+      sentinel.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[1].env
+
+  - it: should keep sentinel authentication environment when only sentinel auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.sentinel: false
+      architecture: replication
+      sentinel.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password

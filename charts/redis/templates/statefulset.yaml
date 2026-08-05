@@ -1246,7 +1246,7 @@ spec:
             failureThreshold: {{ .Values.sentinel.livenessProbe.failureThreshold }}
             successThreshold: {{ .Values.sentinel.livenessProbe.successThreshold }}
           {{- end }}
-          {{- if and (or .Values.auth.enabled .Values.auth.sentinel) (not .Values.auth.acl.enabled) }}
+          {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -1302,7 +1302,7 @@ spec:
               value: /etc/redis/tls-client/{{ .Values.tls.client.certKeyFilename }}
             {{- end }}
             {{- end }}
-            {{- if and (or .Values.auth.enabled .Values.auth.metrics) (not .Values.auth.acl.enabled) }}
+            {{- if and .Values.auth.enabled (not .Values.auth.acl.enabled) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
