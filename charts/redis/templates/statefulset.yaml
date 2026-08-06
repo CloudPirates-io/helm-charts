@@ -654,7 +654,7 @@ spec:
               redis-server "$CONFIG_FILE" {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:
             - name: redis
-              containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}6379{{ end }}
+              containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
               protocol: TCP
             {{- if eq .Values.architecture "cluster" }}
             - name: cluster
@@ -691,7 +691,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -706,7 +706,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -721,7 +721,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }}{{- if .Values.tls.enabled }} -p {{ .Values.tls.port }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
