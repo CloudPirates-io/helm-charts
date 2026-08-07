@@ -120,7 +120,7 @@ jobs:
             CHART_VERSION=$(yq eval '.version' "charts/$INPUT_CHART_NAME/Chart.yaml")
             echo "🚀 Force releasing: $INPUT_CHART_NAME-$CHART_VERSION"
 
-            if git tag -l | grep -q "^${INPUT_CHART_NAME}-${CHART_VERSION}$"; then
+            if git rev-parse -q --verify "refs/tags/${INPUT_CHART_NAME}-${CHART_VERSION}" >/dev/null; then
               echo "Deleting existing tag: ${INPUT_CHART_NAME}-${CHART_VERSION}"
               git tag -d "${INPUT_CHART_NAME}-${CHART_VERSION}" || true
               git push origin ":refs/tags/${INPUT_CHART_NAME}-${CHART_VERSION}" || true
@@ -146,7 +146,7 @@ jobs:
             CHART_NAME=$(basename "$chart_dir")
             CHART_VERSION=$(yq eval '.version' "$chart_dir/Chart.yaml")
 
-            if git tag -l | grep -q "^${CHART_NAME}-${CHART_VERSION}$"; then
+            if git rev-parse -q --verify "refs/tags/${CHART_NAME}-${CHART_VERSION}" >/dev/null; then
               echo "✓ $CHART_NAME-$CHART_VERSION already released"
               continue
             fi
