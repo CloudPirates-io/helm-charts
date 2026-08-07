@@ -651,7 +651,7 @@ spec:
               sleep {{ .Values.cluster.startupSleepTime }}
               {{- end }}
 
-              redis-server "$CONFIG_FILE" {{- range .Values.extraFlags }} {{ . }}{{- end }}
+              exec redis-server "$CONFIG_FILE" {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:
             - name: redis
               containerPort: {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
