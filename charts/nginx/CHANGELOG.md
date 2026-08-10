@@ -1,5 +1,8 @@
 # Changelog
 
+> [!CAUTION]
+> This file is kept for backwards compatibility only and is no longer updated. See the [GitHub Releases](https://github.com/CloudPirates-io/helm-charts/releases) page to view changes for each version.
+
 All notable changes to this chart will be documented in this file.
 
 ## [0.9.2] - 2026-03-25

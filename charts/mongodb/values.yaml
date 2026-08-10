@@ -42,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.2@sha256:8dbb3db48a72084457272d33d398ae0ef7db8e7c9e12815a295c3417c8df6d38"
+  tag: "8.3.7@sha256:2f02e2184c6d91c3208e5ab75a0707d1386a05377b20fdaf49a314815774d863"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -196,6 +196,9 @@ podSecurityContext:
 
 ## @param priorityClassName Priority class for the mongodb instance
 priorityClassName: ""
+
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
+terminationGracePeriodSeconds: 30
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe

@@ -25,10 +25,14 @@ spec:
     matchNames:
       - {{ include "cloudpirates.namespace" . }}
   podMetricsEndpoints:
-    - port: https-metrics
+    - port: metrics
+      {{- if .Values.msgTopologyOperator.metrics.secure }}
       scheme: https
       tlsConfig:
-        insecureSkipVerify: true
+        insecureSkipVerify: true      
+      {{- else }}
+      scheme: http
+      {{- end }}
       {{- if .Values.msgTopologyOperator.metrics.podMonitor.interval }}
       interval: {{ .Values.msgTopologyOperator.metrics.podMonitor.interval }}
       {{- end }}
