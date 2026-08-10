@@ -19,7 +19,20 @@
         "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
       "matchStrings": [
-        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?(?=\\n)(?!\\n\\s+## @param \\S+\\.digest )"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker",
+      "packageNameTemplate": "{{#if registryValue}}{{{registryValue}}}/{{{repositoryValue}}}{{else}}{{{repositoryValue}}}{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Match Docker images using separate tag/digest fields (e.g. rabbitmq-cluster-operator)",
+      "managerFilePatterns": [
+        "/(^|/)charts/.+/values\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)['\"]?\\n\\s+## @param \\S+\\.digest .+?\\n\\s+digest:\\s*[\"']?(?<currentDigest>sha256:[a-f0-9]{64})?[\"']?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
