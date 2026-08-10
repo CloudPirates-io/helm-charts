@@ -5,8 +5,9 @@ metadata:
   name: {{ template "rmqco.msgTopologyOperator.fullname" . }}
   labels:
     {{- include "rmqmto.labels" . | nindent 4 }}
-    {{- if .Values.msgTopologyOperator.metrics.serviceMonitor.additionalLabels }}
-    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.msgTopologyOperator.metrics.serviceMonitor.additionalLabels "context" $) | nindent 4 }}
+    {{- $smLabels := merge (deepCopy (.Values.msgTopologyOperator.metrics.serviceMonitor.labels | default dict)) (.Values.msgTopologyOperator.metrics.serviceMonitor.additionalLabels | default dict) }}
+    {{- if $smLabels }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" $smLabels "context" $) | nindent 4 }}
     {{- end }}
   namespace: {{ default (include "cloudpirates.namespace" .) .Values.msgTopologyOperator.metrics.serviceMonitor.namespace | quote }}
   {{- if .Values.commonAnnotations }}
