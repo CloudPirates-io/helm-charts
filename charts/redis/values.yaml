@@ -302,7 +302,7 @@ volumePermissions:
     ## @param volumePermissions.image.repository Image repository
     repository: busybox
     ## @param volumePermissions.image.tag Image tag
-    tag: "1.38.0"
+    tag: "1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616"
     ## @param volumePermissions.image.pullPolicy Image pull policy
     pullPolicy: IfNotPresent
   ## @param volumePermissions.resources Resource limits and requests
@@ -558,7 +558,7 @@ sentinel:
       ## @param sentinel.masterService.image.repository Image for master discovery deployment
       repository: alpine/kubectl
       ## @param sentinel.masterService.image.tag Image tag for master discovery deployment
-      tag: "1.36.3"
+      tag: "1.36.3@sha256:5d380d18d2509483aef3df54d676c767d798d55ec9f3e02dabfa4c88fe6559bd"
       ## @param sentinel.masterService.image.pullPolicy Image pull policy for master discovery deployment
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
