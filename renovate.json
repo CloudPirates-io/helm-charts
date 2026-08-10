@@ -16,10 +16,10 @@
       "customType": "regex",
       "description": "Match Docker images in all charts",
       "managerFilePatterns": [
-        "/(^|/)charts/.+/values\\.ya?ml$/"
+        "charts/!(rabbitmq-cluster-operator)/values.yaml"
       ],
       "matchStrings": [
-        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?(?=\\n)(?!\\n\\s+## @param \\S+\\.digest )"
+        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
@@ -29,7 +29,7 @@
       "customType": "regex",
       "description": "Match Docker images using separate tag/digest fields (e.g. rabbitmq-cluster-operator)",
       "managerFilePatterns": [
-        "/(^|/)charts/.+/values\\.ya?ml$/"
+        "charts/rabbitmq-cluster-operator/values.yaml"
       ],
       "matchStrings": [
         "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)['\"]?\\n\\s+## @param \\S+\\.digest .+?\\n\\s+digest:\\s*[\"']?(?<currentDigest>sha256:[a-f0-9]{64})?[\"']?"
