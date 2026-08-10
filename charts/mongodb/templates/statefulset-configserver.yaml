@@ -54,6 +54,7 @@ spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       {{- with (coalesce .Values.shardedCluster.configsvr.nodeSelector .Values.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

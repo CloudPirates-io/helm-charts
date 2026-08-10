@@ -186,9 +186,9 @@ spec:
           {{- end }}
           ports:
             - name: amqp
-              containerPort: 5672
+              containerPort: {{ .Values.service.amqpPort }}
             - name: mgmt
-              containerPort: 15672
+              containerPort: {{ .Values.service.managementPort }}
             - name: epmd
               containerPort: 4369
             - name: dist
@@ -309,7 +309,7 @@ spec:
 
               # Wait for RabbitMQ to be ready
               echo "Waiting for RabbitMQ management API to be ready..."
-              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:15672/ 2>/dev/null)" = "200" ]; do
+              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:{{ .Values.service.managementPort }}/ 2>/dev/null)" = "200" ]; do
                 echo "RabbitMQ not ready yet, waiting..."
                 sleep 5
               done
@@ -332,13 +332,13 @@ spec:
                       -H "Content-Type: application/json" \
                       -u "{{ .Values.auth.username }}:$RABBITMQ_PASSWORD" \
                       --data-binary @"$DEFINITIONS_FILE" \
-                      http://localhost:15672/api/definitions)
+                      http://localhost:{{ .Values.service.managementPort }}/api/definitions)
                     {{- else }}
                     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
                       -X POST \
                       -H "Content-Type: application/json" \
                       --data-binary @"$DEFINITIONS_FILE" \
-                      http://localhost:15672/api/definitions)
+                      http://localhost:{{ .Values.service.managementPort }}/api/definitions)
                     {{- end }}
 
                     if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then

@@ -54,6 +54,12 @@
                 "announceHostnames": {
                     "type": "boolean"
                 },
+                "announceHostnamesOverride": {
+                    "type": "object"
+                },
+                "announceIpsOverride": {
+                    "type": "object"
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -231,6 +237,20 @@
                 }
             }
         },
+        "externalMaster": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
         "extraConfig": {
             "type": "string"
         },
@@ -373,6 +393,9 @@
                         "loadBalancerSourceRanges": {
                             "type": "array"
                         },
+                        "name": {
+                            "type": "string"
+                        },
                         "nodePort": {
                             "type": "string"
                         },
@@ -460,10 +483,16 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "minAvailable": {
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
