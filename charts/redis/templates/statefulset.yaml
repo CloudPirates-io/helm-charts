@@ -1317,14 +1317,14 @@ spec:
             - -c
             - |
               {{- include "redis.auth.acl.setupScript" (dict "type" "metrics" "context" .) | nindent 14 }}
-              /redis_exporter {{- range .Values.metrics.extraArgs }} {{ . }}{{- end }}
+              exec /redis_exporter {{- range .Values.metrics.extraArgs }} {{ . }}{{- end }}
           {{- else }}
           command:
             - /bin/sh
             - -c
             - |
               {{- include "redis.auth.acl.setupScript" (dict "type" "metrics" "context" .) | nindent 14 }}
-              /redis_exporter
+              exec /redis_exporter
           {{- end }}
           ports:
             - name: metrics
