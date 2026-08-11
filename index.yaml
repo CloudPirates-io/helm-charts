@@ -17569,6 +17569,56 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[memcached] Apply namespaceOverride to the metrics Service (#1578)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1578
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Memcached
+          url: https://memcached.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.6.45
+    created: "2026-08-11T07:59:12.827828981Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: Memcached is an in-memory key-value store for small chunks of arbitrary
+      data (strings, objects) from results of database calls, API calls, or page rendering.
+    digest: 0695c6a9f20a7fdaea766d597b483fcee0287d620d4878220cb38338587ba999
+    home: https://memcached.org
+    icon: https://a.storyblok.com/f/143071/512x512/0faa83eb34/memcached-logo.svg
+    keywords:
+    - memcached
+    - cache
+    - in-memory
+    - key-value
+    - distributed
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: memcached
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/memcached
+    - https://github.com/memcached/memcached
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/memcached-0.14.6/memcached-0.14.6.tgz
+    version: 0.14.6
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[memcached] Update image.repository to eeb9eaa (#1554)'
           links:
           - name: Pull Request
@@ -58101,4 +58151,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-11T07:57:55.250890395Z"
+generated: "2026-08-11T07:59:12.829587727Z"
