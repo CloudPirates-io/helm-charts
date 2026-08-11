@@ -46,7 +46,7 @@ podLabels: {}
 ## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
 shareProcessNamespace: false
 ## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default
-terminationGracePeriodSeconds: "" # @schema type:[integer, string]; minimum:0; pattern:^$
+terminationGracePeriodSeconds: ""  # @schema type:[integer, string]; minimum:0; pattern:^$
 ## @param lifecycle Lifecycle hooks for the Keycloak container
 lifecycle: {}
 
