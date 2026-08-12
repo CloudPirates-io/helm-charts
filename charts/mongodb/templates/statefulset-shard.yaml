@@ -60,6 +60,7 @@ spec:
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds | default 30 }}
       {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.dataNode.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
       {{- with $nodeSelector }}
       nodeSelector:
@@ -546,6 +547,7 @@ spec:
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds | default 30 }}
       {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.arbiter.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
       {{- with $nodeSelector }}
       nodeSelector:

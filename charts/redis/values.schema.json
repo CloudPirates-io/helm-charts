@@ -237,6 +237,20 @@
                 }
             }
         },
+        "externalMaster": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
         "extraConfig": {
             "type": "string"
         },
@@ -469,10 +483,16 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": ["integer", "string"]
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "minAvailable": {
-                    "type": ["integer", "string"]
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
