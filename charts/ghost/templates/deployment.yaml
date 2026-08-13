@@ -64,7 +64,7 @@ spec:
             - >
               retries=0;
               max_retries=15;
-              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "ghost.fullname" . }}-mariadb
+              until [ $retries -ge $max_retries ] || mariadb-admin ping -h {{ include "mariadb.fullname" .Subcharts.mariadb }}
               -P {{ .Values.mariadb.service.port }}
               -u${MARIADB_USER}
               -p${MARIADB_PASSWORD}
