@@ -117,7 +117,7 @@ Get PostgreSQL database name
 {{- if .Values.auth.database -}}
 {{- .Values.auth.database -}}
 {{- else -}}
-postgres
+{{- include "postgres.username" . -}}
 {{- end -}}
 {{- end }}
 
