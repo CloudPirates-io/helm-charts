@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres
 description: The World's Most Advanced Open Source Relational Database
 type: application
-version: 0.19.14
+version: 0.19.15
 appVersion: "18.4.0"
 keywords:
   - postgres
@@ -43,9 +43,7 @@ annotations:
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
     - kind: fixed
-      description: "Use shared security context helper for metrics sidecar on OpenShift"
+      description: "Default auth.database to auth.username so the published connection details match the database the image creates"
       links:
-        - name: "Issue"
-          url: "https://github.com/CloudPirates-io/helm-charts/issues/1399"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/postgres/CHANGELOG.md"
