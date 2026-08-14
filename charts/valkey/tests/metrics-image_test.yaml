@@ -1,0 +1,59 @@
+suite: test valkey exporter image
+templates:
+  - statefulset.yaml
+set:
+  metrics:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: oliver006/redis_exporter
+      tag: v1.89.0-alpine
+tests:
+  - it: should use the chart registry when no global registry is set
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: docker.io/oliver006/redis_exporter:v1.89.0-alpine
+          any: true
+
+  - it: should use global.imageRegistry for the exporter image
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: myregistry.example.com/oliver006/redis_exporter:v1.89.0-alpine
+          any: true
+
+  - it: should let global.imageRegistry override the image registry
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+      metrics:
+        image:
+          registry: quay.io
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: myregistry.example.com/oliver006/redis_exporter:v1.89.0-alpine
+          any: true
+
+  - it: should omit the registry prefix when both registries are empty
+    set:
+      metrics:
+        image:
+          registry: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: oliver006/redis_exporter:v1.89.0-alpine
+          any: true
