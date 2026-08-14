@@ -3556,6 +3556,63 @@ entries:
   - annotations:
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[mariadb] Update initContainers.waitForMariadb.repository to v12.3.2
+            (#1604)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1604
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Ghost
+          url: https://ghost.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+        - name: Application
+          url: https://github.com/TryGhost/Ghost
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 6.57.1
+    created: "2026-08-14T05:53:10.990222375Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: A simple, powerful publishing platform that allows you to share your
+      stories with the world.
+    digest: 0aed5502e23fd4d4551af602e6b17aa837edbed9a63264b2a5cf7fb1c8d7d56a
+    home: https://ghost.org
+    icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+    keywords:
+    - ghost
+    - blogging
+    - content management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: ghost
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - https://github.com/TryGhost/Ghost
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.20.10/ghost-0.20.10.tgz
+    version: 0.20.10
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[ghost] Honor global.imageRegistry for the MariaDB init container
             (#1598)'
           links:
@@ -58980,4 +59037,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-14T05:46:15.314825153Z"
+generated: "2026-08-14T05:53:10.991759639Z"
