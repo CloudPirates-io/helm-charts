@@ -53,7 +53,7 @@ spec:
           {{- if .Values.initContainerSecurityContext }}
           securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
+          image: {{ include "nginx.cloneStaticSiteFromGit.image" . | quote }}
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.command }}
           command: {{- toYaml .Values.cloneStaticSiteFromGit.gitClone.command | nindent 12 }}
@@ -182,7 +182,7 @@ spec:
           {{- if .Values.initContainerSecurityContext }}
           securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
+          image: {{ include "nginx.cloneStaticSiteFromGit.image" . | quote }}
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitSync.command }}
           command: {{- toYaml .Values.cloneStaticSiteFromGit.gitSync.command | nindent 12 }}
