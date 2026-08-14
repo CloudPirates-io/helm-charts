@@ -231,6 +231,18 @@ Return TLS truststore secret name
 {{- end }}
 
 {{/*
+Return the secret holding the truststore password. Without an existing truststore
+secret the password is stored alongside the admin credentials.
+*/}}
+{{- define "keycloak.truststorePasswordSecretName" -}}
+{{- if .Values.tls.truststoreExistingSecret -}}
+    {{- .Values.tls.truststoreExistingSecret -}}
+{{- else -}}
+    {{- include "keycloak.secretName" . -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Return metrics service name
 */}}
 {{- define "keycloak.metrics.fullname" -}}
