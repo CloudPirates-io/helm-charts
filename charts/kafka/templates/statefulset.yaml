@@ -1,0 +1,284 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "kafka.fullname" . }}-headless
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "kafka.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kafka.labels" . | nindent 8 }}
+      annotations:
+        {{- with (include "kafka.annotations" .) }}
+        {{- . | nindent 8 }}
+        {{- end }}
+        checksum/config: {{ printf "%s-%s-%v-%s-%s-%s-%s" (toYaml .Values.kafkaConfig) (toYaml .Values.service.ports) .Values.replicaCount .Values.clusterId (toYaml .Values.logging) (toYaml .Values.auth) (toYaml .Values.tls) | sha256sum }}
+    spec:
+{{- with (include "kafka.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      automountServiceAccountToken: false
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "kafka.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy | default "Always" | quote }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.service.ports.client }}
+              protocol: TCP
+            - name: internal
+              containerPort: {{ .Values.service.ports.internal }}
+              protocol: TCP
+            - name: controller
+              containerPort: {{ .Values.service.ports.controller }}
+              protocol: TCP
+          env:
+          {{- with .Values.extraEnvVars }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
+            - name: KAFKA_CLUSTER_ID
+              value: {{ .Values.clusterId | quote }}
+            - name: KAFKA_HEAP_OPTS
+              value: {{ .Values.heapOpts | quote }}
+            - name: LOG_DIR
+              value: /tmp/kafka-logs
+            {{- if or .Values.logging.consoleOnly .Values.logging.existingConfigMap }}
+            - name: KAFKA_LOG4J_OPTS
+              value: "-Dlog4j2.configurationFile=file:/mnt/kafka/log4j/log4j2.yaml"
+            {{- end }}
+            - name: NODE_ID_OFFSET
+              value: {{ .Values.nodeIdOffset | default 0 | quote }}
+            {{- if .Values.auth.client.enabled }}
+            - name: KAFKA_CLIENT_USER
+              value: {{ .Values.auth.clientUser | quote }}
+            - name: KAFKA_CLIENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: client-password
+            {{- end }}
+            {{- if .Values.auth.interBroker.enabled }}
+            - name: KAFKA_INTER_BROKER_USER
+              value: {{ .Values.auth.interBrokerUser | quote }}
+            - name: KAFKA_INTER_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: inter-broker-password
+            {{- end }}
+            {{- if .Values.auth.controller.enabled }}
+            - name: KAFKA_CONTROLLER_USER
+              value: {{ .Values.auth.controllerUser | quote }}
+            - name: KAFKA_CONTROLLER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: controller-password
+            {{- end }}
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              # Derive node.id and advertised.listeners from the pod ordinal
+              ORDINAL="${HOSTNAME##*-}"
+              NODE_ID=$((ORDINAL + NODE_ID_OFFSET))
+              RUNTIME_CONFIG=/opt/kafka/config-runtime/server.properties
+              ADVERTISED_HOST="{{ include "kafka.fullname" . }}-${ORDINAL}.{{ include "kafka.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain | default "cluster.local" }}"
+
+              cp /mnt/kafka/config/server.properties "$RUNTIME_CONFIG"
+              {
+                echo "node.id=${NODE_ID}"
+                echo "advertised.listeners=CLIENT://${ADVERTISED_HOST}:{{ .Values.service.ports.client }},INTERNAL://${ADVERTISED_HOST}:{{ .Values.service.ports.internal }}"
+                {{- if .Values.auth.client.enabled }}
+                # SASL/PLAIN credentials for the client listener (validated server-side via user_<name> entries)
+                echo "listener.name.client.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required user_${KAFKA_CLIENT_USER}=\"${KAFKA_CLIENT_PASSWORD}\";"
+                {{- end }}
+                {{- if .Values.auth.interBroker.enabled }}
+                echo "listener.name.internal.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KAFKA_INTER_BROKER_USER}\" password=\"${KAFKA_INTER_BROKER_PASSWORD}\" user_${KAFKA_INTER_BROKER_USER}=\"${KAFKA_INTER_BROKER_PASSWORD}\";"
+                {{- end }}
+                {{- if .Values.auth.controller.enabled }}
+                echo "listener.name.controller.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KAFKA_CONTROLLER_USER}\" password=\"${KAFKA_CONTROLLER_PASSWORD}\" user_${KAFKA_CONTROLLER_USER}=\"${KAFKA_CONTROLLER_PASSWORD}\";"
+                {{- end }}
+              } >> "$RUNTIME_CONFIG"
+              {{- if include "kafka.tls.enabled" . }}
+
+              # Kafka's PEM keystore expects the private key in PKCS#8 plus the cert chain in one file,
+              # built in a writable dir since the cert Secret is mounted read-only. Helm's genSignedCert
+              # emits a PKCS#1 key ("BEGIN RSA PRIVATE KEY") that Kafka cannot parse, so convert it with
+              # openssl ONLY when needed. PKCS#8 keys (cert-manager with encoding=PKCS8, or a PKCS#8
+              # existingSecret) are copied as-is, so TLS works on minimal/hardened images without openssl.
+              if grep -q "BEGIN RSA PRIVATE KEY" /mnt/kafka/certs/{{ .Values.tls.keyFilename }}; then
+                openssl pkcs8 -topk8 -nocrypt -in /mnt/kafka/certs/{{ .Values.tls.keyFilename }} -out /opt/kafka/tls-runtime/keystore.pem
+              else
+                cp /mnt/kafka/certs/{{ .Values.tls.keyFilename }} /opt/kafka/tls-runtime/keystore.pem
+              fi
+              cat /mnt/kafka/certs/{{ .Values.tls.certFilename }} >> /opt/kafka/tls-runtime/keystore.pem
+              {{- end }}
+
+              echo "Formatting KRaft storage (idempotent) for node ${NODE_ID}..."
+              /opt/kafka/bin/kafka-storage.sh format -t "${KAFKA_CLUSTER_ID}" -c "$RUNTIME_CONFIG" --ignore-formatted
+              {{ if .Values.command -}}
+              {{ range $i, $c := .Values.command }}{{ if $i }} {{ end }}{{ $c | quote }}{{- end }}
+              {{- else -}}
+              exec /opt/kafka/bin/kafka-server-start.sh "$RUNTIME_CONFIG"{{ range .Values.extraArgs }} {{ . | quote }}{{ end }}
+              {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            {{- if .Values.livenessProbe.custom }}
+            {{- toYaml .Values.livenessProbe.custom | nindent 12 }}
+            {{- else }}
+            tcpSocket:
+              port: client
+            {{- end }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            {{- if .Values.readinessProbe.custom }}
+            {{- toYaml .Values.readinessProbe.custom | nindent 12 }}
+            {{- else }}
+            tcpSocket:
+              port: client
+            {{- end }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            tcpSocket:
+              port: client
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            - name: config
+              mountPath: /mnt/kafka/config/server.properties
+              subPath: server.properties
+            - name: runtime-config
+              mountPath: /opt/kafka/config-runtime
+            {{- if include "kafka.tls.enabled" . }}
+            - name: certs
+              mountPath: /mnt/kafka/certs
+              readOnly: true
+            - name: tls-runtime
+              mountPath: /opt/kafka/tls-runtime
+            {{- end }}
+            - name: logs
+              mountPath: /tmp/kafka-logs
+            # Writable log dir for images (e.g. Docker Hardened Images) whose log4j config
+            # targets $KAFKA_HOME/logs; harmless for the stock image which uses LOG_DIR.
+            - name: app-logs
+              mountPath: /opt/kafka/logs
+            {{- if or .Values.logging.consoleOnly .Values.logging.existingConfigMap }}
+            - name: log4j
+              mountPath: /mnt/kafka/log4j
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        {{- if not .Values.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "kafka.fullname" . }}-config
+        - name: runtime-config
+          emptyDir: {}
+        {{- if include "kafka.tls.enabled" . }}
+        - name: certs
+          secret:
+            secretName: {{ include "kafka.tlsSecretName" . }}
+        - name: tls-runtime
+          emptyDir: {}
+        {{- end }}
+        - name: logs
+          emptyDir: {}
+        - name: app-logs
+          emptyDir: {}
+        {{- if or .Values.logging.consoleOnly .Values.logging.existingConfigMap }}
+        - name: log4j
+          configMap:
+            name: {{ .Values.logging.existingConfigMap | default (printf "%s-log4j" (include "kafka.fullname" .)) }}
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+        labels:
+          {{- include "kafka.selectorLabels" . | nindent 10 }}
+        {{- with .Values.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- with .Values.persistence.accessModes }}
+          {{- toYaml . | nindent 10 }}
+        {{- end}}
+        {{- $storageClass := include "kafka.storageClass" . }}
+        {{- if $storageClass }}
+        {{- if eq "-" $storageClass }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: {{ $storageClass | quote }}
+        {{- end }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+  {{- end }}

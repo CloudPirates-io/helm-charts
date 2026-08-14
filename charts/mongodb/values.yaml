@@ -4,6 +4,12 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  ## @section global.dataNodes Global settings applied to all data node statefulsets
+  dataNodes:
+    ## @param global.dataNodes.extraContainers Additional containers to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraContainers: []
+    ## @param global.dataNodes.extraVolumes Additional volumes to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraVolumes: []
 
 ## @section Common parameters
 ## @param nameOverride String to partially override mongodb.fullname
@@ -36,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.2@sha256:94b405c5aa83d5160e6dd97383c4687d471f8a6bd247ed3ff6463c092ebf7a8c"
+  tag: "8.3.8@sha256:4e81cd5857d7a087db95c6c1c2d8fd9feddfef58d1bf5b754356d20f583744d1"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -82,6 +88,27 @@ config:
   existingConfigmap: ""
   ## param config.existingConfigmapKey Name of the key that will hold configuration
   existingConfigmapKey: ""
+
+## @section customRoles Optional roles to be created at initialisation (before customUsers)
+customRoles: []
+  ## Each entry supports the following fields:
+  ## @param customRoles[].role Role name to create
+  ## @param customRoles[].database Database where the role is created (default: admin)
+  ## @param customRoles[].privileges List of privilege objects with resource and actions
+  ## @param customRoles[].roles List of inherited roles (strings apply to same database, objects with {role, db} for cross-database)
+  ## Example:
+  # - role: myCustomRole
+  #   database: admin
+  #   privileges:
+  #     - resource: { cluster: true }
+  #       actions: ["find"]
+  #     - resource: { db: "", collection: "" }
+  #       actions: ["find", "listCollections", "listIndexes"]
+  #   roles:
+  #     - backup
+  #     - restore
+  #     - clusterMonitor
+  #     - { role: "read", db: "reporting" }
 
 ## @section customUsers Optional users to be created at initialisation
 customUsers: []
@@ -135,6 +162,7 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
   ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  # @schema type:[null, object]
   persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
@@ -169,6 +197,9 @@ podSecurityContext:
 
 ## @param priorityClassName Priority class for the mongodb instance
 priorityClassName: ""
+
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
+terminationGracePeriodSeconds: 30
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
@@ -430,6 +461,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-hidden-volume"
@@ -474,6 +506,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-arbiter-volume"
@@ -578,6 +611,7 @@ shardedCluster:
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
     ## Example: customInit: |
@@ -638,6 +672,7 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
     ## Example: customInit: |

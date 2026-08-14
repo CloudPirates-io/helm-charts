@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the Valkey chart and th
 | ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `image.registry`   | Valkey image registry                             | `docker.io`                                                                                  |
 | `image.repository` | Valkey image repository                           | `valkey/valkey`                                                                              |
-| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `image.tag`        | Valkey image tag (immutable tags are recommended) | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `image.pullPolicy` | Valkey image pull policy                          | `IfNotPresent`                                                                               |
 
 ### Common configuration
@@ -239,6 +239,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `startupProbe.timeoutSeconds`        | Timeout seconds for startupProbe           | `1`     |
 | `startupProbe.failureThreshold`      | Failure threshold for startupProbe         | `30`    |
 | `startupProbe.successThreshold`      | Success threshold for startupProbe         | `1`     |
+| `terminationGracePeriodSeconds`      | Seconds Kubernetes waits for the pod to terminate gracefully (raise to ~60 for Sentinel) | `30` |
 
 ### Node Selection
 
@@ -260,6 +261,7 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 | `metrics.image.tag`                        | Valkey exporter image tag                                                       | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Valkey exporter image pull policy                                               | `Always`                   |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                       |
+| `metrics.extraEnvVars`                     | Additional environment variables to set for the metrics exporter container      | `[]`                       |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                       |
 | `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                       |
 | `metrics.service.port`                     | Metrics service port                                                            | `9121`                     |
@@ -278,12 +280,14 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 
 Sentinel provides high availability for Valkey replication. When enabled, Sentinel monitors the master and automatically promotes a replica to master if the master fails.
 
+When `sentinel.masterProxy.enabled` is set, the `<release>-master` Service always selects every Valkey pod rather than just the current master, since any pod's HAProxy sidecar can forward a connection to whichever one is actually master - so `kubectl get endpoints <release>-master` won't tell you who that is. To check, look at the HAProxy sidecar's own logs on any pod: `kubectl logs <pod> -c haproxy`, which reports every time a backend transitions `UP`/`DOWN`.
+
 | Parameter                            | Description                                                                         | Default                                                                                      |
 | ------------------------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
 | `sentinel.image.registry`            | Valkey Sentinel image registry                                                      | `docker.io`                                                                                  |
 | `sentinel.image.repository`          | Valkey Sentinel image repository                                                    | `valkey/valkey`                                                                              |
-| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"` |
+| `sentinel.image.tag`                 | Valkey Sentinel image tag                                                           | `"9.1.0-alpine3.23@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd"` |
 | `sentinel.image.pullPolicy`          | Valkey Sentinel image pull policy                                                   | `Always`                                                                                     |
 | `sentinel.config.announceHostnames`  | Use the hostnames instead of the IP in "announce-ip" commands                       | `true`                                                                                       |
 | `sentinel.masterName`                | Name of the master server                                                           | `mymaster`                                                                                   |
@@ -296,6 +300,20 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.service.type`              | Kubernetes service type for Sentinel                                                | `ClusterIP`                                                                                  |
 | `sentinel.service.port`              | Sentinel service port                                                               | `26379`                                                                                      |
 | `sentinel.resources`                 | Resource limits and requests for Sentinel container                                 | `{}`                                                                                         |
+| `sentinel.valkeyShutdownWaitFailover` | Whether the Valkey container waits for Sentinel failover before shutting down       | `true`                                                                                       |
+| `sentinel.preStop.enabled`           | Enable the preStop hook on the Sentinel container                                    | `true`                                                                                       |
+| `sentinel.masterProxy.enabled`             | Enable a stable master endpoint for non-Sentinel-aware clients via an HAProxy sidecar | `false`     |
+| `sentinel.masterProxy.image.registry`      | HAProxy image registry                                                                | `docker.io` |
+| `sentinel.masterProxy.image.repository`    | HAProxy image repository                                                              | `haproxy`   |
+| `sentinel.masterProxy.image.tag`           | HAProxy image tag                                                                     | `3.0-alpine`|
+| `sentinel.masterProxy.image.pullPolicy`    | HAProxy image pull policy                                                             | `IfNotPresent` |
+| `sentinel.masterProxy.containerPort`       | Port the HAProxy sidecar listens on                                                   | `6380`      |
+| `sentinel.masterProxy.checkInterval`       | Health check interval (HAProxy `inter`)                                               | `"1s"`      |
+| `sentinel.masterProxy.checkRise`           | Consecutive successful checks before a backend is marked master-eligible             | `2`         |
+| `sentinel.masterProxy.checkFall`           | Consecutive failed checks before a backend is marked down                            | `2`         |
+| `sentinel.masterProxy.resources`           | Resource limits and requests for the HAProxy sidecar                                  | `{}`        |
+| `sentinel.masterProxy.service.type`        | Kubernetes service type for the master proxy service                                  | `""`        |
+| `sentinel.masterProxy.service.annotations` | Additional custom annotations for the master proxy service                            | `{}`        |
 
 ### Init Container Configuration
 
@@ -423,12 +441,22 @@ sentinel:
   downAfterMilliseconds: 1500
   failoverTimeout: 15000
   parallelSyncs: 1
+  # Graceful master handoff on planned shutdown / rolling updates:
+  # the Valkey container triggers a failover and waits for it, and the
+  # Sentinel container stays up until failover completes so clients can
+  # still discover the new master while the pod terminates.
+  valkeyShutdownWaitFailover: true
+  preStop:
+    enabled: true
   resources:
     limits:
       memory: 128Mi
     requests:
       cpu: 25m
       memory: 64Mi
+
+# Give the preStop failover hook enough time to finish before SIGKILL
+terminationGracePeriodSeconds: 60
 
 # Enable authentication
 auth:
@@ -487,7 +515,7 @@ When Sentinel is enabled, your application should use a Sentinel-aware client to
 
 ```bash
 # Get the current master from Sentinel
-kubectl run -it --rm valkey-client --image=valkey/valkey:9.0.0-alpine3.22 --restart=Never -- sh
+kubectl run -it --rm valkey-client --image=valkey/valkey:9.1.0-alpine3.23 --restart=Never -- sh
 valkey-cli -h my-valkey-sentinel -p 26379 SENTINEL get-master-addr-by-name mymaster
 ```
 

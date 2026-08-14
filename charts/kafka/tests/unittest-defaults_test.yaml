@@ -1,0 +1,488 @@
+suite: test kafka specific parameters
+
+tests:
+  - it: should set the correct replica count
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should use the apache/kafka image
+    template: statefulset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: "docker.io/apache/kafka"
+
+  - it: should expose client, internal and controller ports
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[?(@.name=="client")].containerPort
+          value: 9092
+      - equal:
+          path: spec.template.spec.containers[0].ports[?(@.name=="internal")].containerPort
+          value: 9094
+      - equal:
+          path: spec.template.spec.containers[0].ports[?(@.name=="controller")].containerPort
+          value: 9093
+
+  - it: should create a normal client service (not headless)
+    template: service.yaml
+    documentIndex: 0
+    asserts:
+      - notEqual:
+          path: spec.clusterIP
+          value: None
+      - equal:
+          path: spec.ports[0].port
+          value: 9092
+
+  - it: should create a headless service
+    template: service.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - equal:
+          path: spec.publishNotReadyAddresses
+          value: true
+
+  - it: should configure KRaft combined roles in server.properties
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "process.roles=broker,controller"
+
+  - it: should build controller.quorum.voters for all replicas
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "controller.quorum.voters=0@RELEASE-NAME-kafka-0.RELEASE-NAME-kafka-headless"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "2@RELEASE-NAME-kafka-2.RELEASE-NAME-kafka-headless"
+
+  - it: should keep the full replication factors at 3 replicas (production unchanged)
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*offsets\.topic\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.replication\.factor=3$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.min\.isr=2$'
+
+  - it: should clamp all replication factors to replicaCount on a single node
+    template: configmap.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*offsets\.topic\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.replication\.factor=1$'
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*transaction\.state\.log\.min\.isr=1$'
+
+  - it: should cap the replication factor at 3 for large clusters
+    template: configmap.yaml
+    set:
+      replicaCount: 5
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+
+  - it: should respect an explicit replication factor below the broker count
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+      kafkaConfig:
+        defaultReplicationFactor: 2
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=2$'
+
+  - it: should clamp an explicit replication factor that exceeds the broker count
+    template: configmap.yaml
+    set:
+      replicaCount: 3
+      kafkaConfig:
+        defaultReplicationFactor: 5
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: '(?m)^\s*default\.replication\.factor=3$'
+
+  - it: should use a custom clusterDomain in the quorum voters
+    template: configmap.yaml
+    set:
+      clusterDomain: my.cluster.example
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "svc\\.my\\.cluster\\.example:9093"
+
+  - it: should apply nodeIdOffset to the quorum voters
+    template: configmap.yaml
+    set:
+      replicaCount: 1
+      nodeIdOffset: 5
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "controller.quorum.voters=5@RELEASE-NAME-kafka-0"
+
+  - it: should append extraConfig to server.properties
+    template: configmap.yaml
+    set:
+      kafkaConfig:
+        extraConfig:
+          - "message.max.bytes=1048588"
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "message.max.bytes=1048588"
+
+  - it: should set log.dirs from persistence.dataDir
+    template: configmap.yaml
+    set:
+      persistence:
+        dataDir: /custom/data
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "log.dirs=/custom/data"
+
+  - it: should not render a PodDisruptionBudget with a single replica
+    template: poddisruptionbudget.yaml
+    set:
+      replicaCount: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render a PodDisruptionBudget with multiple replicas
+    template: poddisruptionbudget.yaml
+    set:
+      replicaCount: 3
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.minAvailable
+          value: "51%"
+
+  - it: should never add a metrics sidecar to the broker pods
+    template: statefulset.yaml
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+
+  - it: should render the kafka-exporter Deployment when metrics enabled
+    template: metrics-deployment.yaml
+    set:
+      metrics:
+        enabled: true
+      auth:
+        client: { enabled: false }
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kafka-metrics
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: kafka-exporter
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --kafka.server=RELEASE-NAME-kafka:9092
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: kafka-metrics
+
+  - it: should make the kafka-exporter authenticate when client auth is enabled
+    template: metrics-deployment.yaml
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="KAFKA_CLIENT_PASSWORD")].valueFrom.secretKeyRef.key
+          value: client-password
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "--sasl.enabled"
+
+  - it: should not render the kafka-exporter Deployment by default
+    template: metrics-deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not let the broker client service select the exporter pods
+    template: service.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/name"]
+          value: kafka
+
+  - it: should mount data volume at persistence.mountPath
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/kafka
+
+  - it: should mount a writable emptyDir at /opt/kafka/logs (hardened-image log dir)
+    template: statefulset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: app-logs
+            mountPath: /opt/kafka/logs
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: app-logs
+            emptyDir: {}
+
+  - it: should create a volumeClaimTemplate when persistence is enabled
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 8Gi
+
+  - it: should omit storageClassName by default (cluster default)
+    template: statefulset.yaml
+    asserts:
+      - isNull:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+
+  - it: should use persistence.storageClass when set
+    template: statefulset.yaml
+    set:
+      persistence:
+        storageClass: fast-ssd
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: fast-ssd
+
+  - it: should fall back to global.defaultStorageClass
+    template: statefulset.yaml
+    set:
+      global:
+        defaultStorageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: should let persistence.storageClass override the global default
+    template: statefulset.yaml
+    set:
+      global:
+        defaultStorageClass: global-sc
+      persistence:
+        storageClass: chart-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: chart-sc
+
+  - it: should render an empty storageClassName when set to '-'
+    template: statefulset.yaml
+    set:
+      persistence:
+        storageClass: "-"
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ""
+
+  - it: should enable the startup probe by default to gate liveness on cold starts
+    template: statefulset.yaml
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.containers[0].startupProbe
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.tcpSocket.port
+          value: client
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.failureThreshold
+          value: 30
+
+  - it: should wire console-only logging by default (env + mount)
+    template: statefulset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KAFKA_LOG4J_OPTS
+            value: "-Dlog4j2.configurationFile=file:/mnt/kafka/log4j/log4j2.yaml"
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: log4j
+            mountPath: /mnt/kafka/log4j
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: log4j
+            configMap:
+              name: RELEASE-NAME-kafka-log4j
+
+  - it: should render a console-only log4j2 ConfigMap by default
+    template: logging-configmap.yaml
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kafka-log4j
+      - matchRegex:
+          path: data["log4j2.yaml"]
+          pattern: "target: SYSTEM_OUT"
+      - matchRegex:
+          path: data["log4j2.yaml"]
+          pattern: "level: INFO"
+
+  - it: should not wire log4j when consoleOnly is disabled
+    template: statefulset.yaml
+    set:
+      logging:
+        consoleOnly: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KAFKA_LOG4J_OPTS
+            value: "-Dlog4j2.configurationFile=file:/mnt/kafka/log4j/log4j2.yaml"
+
+  - it: should not render the log4j ConfigMap when consoleOnly is disabled
+    template: logging-configmap.yaml
+    set:
+      logging:
+        consoleOnly: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use an existing log4j ConfigMap when provided
+    template: statefulset.yaml
+    set:
+      logging:
+        existingConfigMap: my-log4j
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: log4j
+            configMap:
+              name: my-log4j
+
+  - it: should not render the generated log4j ConfigMap when existingConfigMap is set
+    template: logging-configmap.yaml
+    set:
+      logging:
+        existingConfigMap: my-log4j
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should set the cluster id env var
+    template: statefulset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KAFKA_CLUSTER_ID
+            value: oUl0u_8RQBym0t93b891HA
+
+  - it: should respect a user-provided clusterId
+    template: statefulset.yaml
+    set:
+      clusterId: "test-cluster-id"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KAFKA_CLUSTER_ID
+            value: test-cluster-id
+
+  - it: should exec kafka-server-start on its own line by default
+    template: statefulset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted\s+exec /opt/kafka/bin/kafka-server-start\.sh'
+
+  - it: should place a command override on its own line, not glued to the format command
+    template: statefulset.yaml
+    set:
+      command:
+        - sleep 3600
+    asserts:
+      # Regression: the override must start on a new line after --ignore-formatted,
+      # not be concatenated onto it (previously rendered `--ignore-formatted"sleep 3600"`).
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted\s+"sleep 3600"'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '--ignore-formatted"'
+
+  - it: should append extraArgs to the kafka-server-start command
+    template: statefulset.yaml
+    set:
+      extraArgs:
+        - --override
+        - num.io.threads=16
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'kafka-server-start\.sh "\$RUNTIME_CONFIG" "--override" "num.io.threads=16"'
+
+  - it: should ignore extraArgs when command is overridden
+    template: statefulset.yaml
+    set:
+      command:
+        - sleep 3600
+      extraArgs:
+        - --override
+        - num.io.threads=16
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'num\.io\.threads'

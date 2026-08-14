@@ -82,6 +82,12 @@ spec:
           args:
             - --metrics-bind-address=:{{ .Values.clusterOperator.containerPorts.metrics }}
             - --health-probe-bind-address=:{{ .Values.clusterOperator.containerPorts.health }}
+            {{- if .Values.clusterOperator.logLevel }}
+            - --zap-log-level={{ .Values.clusterOperator.logLevel }}
+            {{- end }}
+            {{- if .Values.clusterOperator.extraArgs }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraArgs "context" $) | nindent 12 }}
+            {{- end }}
           {{- end }}
           env:
             - name: OPERATOR_NAMESPACE
@@ -92,6 +98,10 @@ spec:
             {{- $watchNamespaces := default (list (include "cloudpirates.namespace" .)) .Values.clusterOperator.watchNamespaces }}
             - name: OPERATOR_SCOPE_NAMESPACE
               value: {{ join "," $watchNamespaces | quote }}
+            {{- end }}
+            {{- if not .Values.clusterOperator.webhook.enabled }}
+            - name: ENABLE_WEBHOOKS
+              value: "false"
             {{- end }}
             - name: DEFAULT_RABBITMQ_IMAGE
               value: {{ include "rmqco.rabbitmq.image" . }}
@@ -145,8 +155,16 @@ spec:
           {{- if .Values.clusterOperator.lifecycleHooks }}
           lifecycle: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
-          {{- if .Values.clusterOperator.extraVolumeMounts }}
-          volumeMounts: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- if or .Values.clusterOperator.webhook.enabled .Values.clusterOperator.extraVolumeMounts }}
+          volumeMounts:
+            {{- if .Values.clusterOperator.webhook.enabled }}
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+            {{- end }}
+            {{- if .Values.clusterOperator.extraVolumeMounts }}
+            {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
           {{- end }}
           ports:
             - name: http
@@ -155,9 +173,23 @@ spec:
             - name: health
               containerPort: {{ .Values.clusterOperator.containerPorts.health }}
               protocol: TCP
+            {{- if .Values.clusterOperator.webhook.enabled }}
+            - name: webhook-server
+              containerPort: 9443
+              protocol: TCP
+            {{- end }}
         {{- if .Values.clusterOperator.sidecars }}
         {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.clusterOperator.sidecars "context" $) | nindent 8 }}
         {{- end }}
-      {{- if .Values.clusterOperator.extraVolumes }}
-      volumes: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraVolumes "context" $) | nindent 8 }}
+      {{- if or .Values.clusterOperator.webhook.enabled .Values.clusterOperator.extraVolumes }}
+      volumes:
+        {{- if .Values.clusterOperator.webhook.enabled }}
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: {{ template "rmqco.clusterOperator.webhook.secretName" . }}
+        {{- end }}
+        {{- if .Values.clusterOperator.extraVolumes }}
+        {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
       {{- end }}

@@ -1,0 +1,59 @@
+suite: test nginx clone static site from git
+templates:
+  - deployment.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+  cloneStaticSiteFromGit:
+    enabled: true
+    repository: https://github.com/example/static-site
+tests:
+  - it: should deploy the git-clone-repository init container when enabled
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: git-clone-repository
+          any: true
+
+  - it: should deploy the git-repo-syncer sidecar by default
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: git-repo-syncer
+          any: true
+
+  - it: should not deploy the git-repo-syncer sidecar when gitSync is disabled
+    set:
+      cloneStaticSiteFromGit:
+        gitSync:
+          enabled: false
+    asserts:
+      # init container still clones the repository once at startup
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: git-clone-repository
+          any: true
+      # but the periodic syncer sidecar is gone
+      - notContains:
+          path: spec.template.spec.containers
+          content:
+            name: git-repo-syncer
+          any: true
+
+  - it: should apply initContainerSecurityContext to the git-repo-syncer sidecar
+    set:
+      initContainerSecurityContext:
+        runAsUser: 1337
+        runAsNonRoot: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: git-repo-syncer
+            securityContext:
+              runAsUser: 1337
+              runAsNonRoot: true
+          any: true

@@ -91,15 +91,15 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `rabbitmqImage.registry`                                            | RabbitMQ Image registry                                                                                                                                                                                                                           | `REGISTRY_NAME`                                  |
 | `rabbitmqImage.repository`                                          | RabbitMQ Image repository                                                                                                                                                                                                                         | `REPOSITORY_NAME/rabbitmq`                       |
-| `rabbitmqImage.digest`                                              | RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                                                                                                                                          | `""`                                             |
+| `rabbitmqImage.tag`                                                 | RabbitMQ Image tag (immutable tags are recommended)                                                                                                                                                                                               | `4.3.2-management-alpine`                        |
 | `rabbitmqImage.pullSecrets`                                         | RabbitMQ Image pull secrets                                                                                                                                                                                                                       | `[]`                                             |
 | `credentialUpdaterImage.registry`                                   | RabbitMQ Default User Credential Updater image registry                                                                                                                                                                                           | `REGISTRY_NAME`                                  |
 | `credentialUpdaterImage.repository`                                 | RabbitMQ Default User Credential Updater image repository                                                                                                                                                                                         | `REPOSITORY_NAME/rmq-default-credential-updater` |
-| `credentialUpdaterImage.digest`                                     | RabbitMQ Default User Credential Updater image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                                                                                                          | `""`                                             |
+| `credentialUpdaterImage.tag`                                        | RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)                                                                                                                                                               | `1.0.15`                                         |
 | `credentialUpdaterImage.pullSecrets`                                | RabbitMQ Default User Credential Updater image pull secrets                                                                                                                                                                                       | `[]`                                             |
 | `clusterOperator.image.registry`                                    | RabbitMQ Cluster Operator image registry                                                                                                                                                                                                          | `REGISTRY_NAME`                                  |
 | `clusterOperator.image.repository`                                  | RabbitMQ Cluster Operator image repository                                                                                                                                                                                                        | `REPOSITORY_NAME/rabbitmq-cluster-operator`      |
-| `clusterOperator.image.digest`                                      | RabbitMQ Cluster Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                                                                                                                         | `""`                                             |
+| `clusterOperator.image.tag`                                         | RabbitMQ Cluster Operator image tag (immutable tags are recommended)                                                                                                                                                                              | `2.22.1`                                         |
 | `clusterOperator.image.pullPolicy`                                  | RabbitMQ Cluster Operator image pull policy                                                                                                                                                                                                       | `IfNotPresent`                                   |
 | `clusterOperator.image.pullSecrets`                                 | RabbitMQ Cluster Operator image pull secrets                                                                                                                                                                                                      | `[]`                                             |
 | `clusterOperator.revisionHistoryLimit`                              | sets number of replicaset to keep in k8s                                                                                                                                                                                                          | `10`                                             |
@@ -151,6 +151,8 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `clusterOperator.containerSecurityContext.seccompProfile.type`      | Set container's Security Context seccomp profile                                                                                                                                                                                                  | `RuntimeDefault`                                 |
 | `clusterOperator.command`                                           | Override default container command (useful when using custom images)                                                                                                                                                                              | `[]`                                             |
 | `clusterOperator.args`                                              | Override default container args (useful when using custom images)                                                                                                                                                                                 | `[]`                                             |
+| `clusterOperator.logLevel`                                          | Log level for the Cluster Operator. When set, adds `--zap-log-level=<value>` to the default args (debug, info, error). Ignored when `clusterOperator.args` is set.                                                                                 | `""`                                             |
+| `clusterOperator.extraArgs`                                         | Additional container args appended to the default args (ignored when `clusterOperator.args` is set)                                                                                                                                               | `[]`                                             |
 | `clusterOperator.automountServiceAccountToken`                      | Mount Service Account token in pod                                                                                                                                                                                                                | `true`                                           |
 | `clusterOperator.hostAliases`                                       | RabbitMQ Cluster Operator pods host aliases                                                                                                                                                                                                       | `[]`                                             |
 | `clusterOperator.podLabels`                                         | Extra labels for RabbitMQ Cluster Operator pods                                                                                                                                                                                                   | `{}`                                             |
@@ -170,6 +172,11 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `clusterOperator.extraVolumeMounts`                                 | Optionally specify extra list of additional volumeMounts for the RabbitMQ Cluster Operator container(s)                                                                                                                                           | `[]`                                             |
 | `clusterOperator.sidecars`                                          | Add additional sidecar containers to the RabbitMQ Cluster Operator pod(s)                                                                                                                                                                         | `[]`                                             |
 | `clusterOperator.initContainers`                                    | Add additional init containers to the RabbitMQ Cluster Operator pod(s)                                                                                                                                                                            | `[]`                                             |
+| `clusterOperator.webhook.enabled`                                   | Enable the RabbitmqCluster admission webhook (requires TLS serving certificates)                                                                                                                                                                  | `false`                                          |
+| `clusterOperator.webhook.existingWebhookCertSecret`                 | Name of an existing secret containing the webhook certificates (use it to avoid the chart generating one)                                                                                                                                         | `""`                                             |
+| `clusterOperator.webhook.existingWebhookCertCABundle`               | PEM-encoded CA Bundle of the existing secret provided in existingWebhookCertSecret (only if useCertManager=false)                                                                                                                                 | `""`                                             |
+| `clusterOperator.webhook.service.type`                              | RabbitMQ Cluster Operator webhook service type                                                                                                                                                                                                    | `ClusterIP`                                      |
+| `clusterOperator.webhook.service.port`                              | RabbitMQ Cluster Operator webhook service port                                                                                                                                                                                                    | `443`                                            |
 | `clusterOperator.networkPolicy.enabled`                             | Specifies whether a NetworkPolicy should be created                                                                                                                                                                                               | `true`                                           |
 | `clusterOperator.networkPolicy.kubeAPIServerPorts`                  | List of possible endpoints to kube-apiserver (limit to your cluster settings to increase security)                                                                                                                                                | `[]`                                             |
 | `clusterOperator.networkPolicy.allowExternal`                       | Don't require injector label for connections                                                                                                                                                                                                      | `true`                                           |
@@ -234,7 +241,7 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.enabled`                                           | Deploy RabbitMQ Messaging Topology Operator as part of the installation                                                                                                                                                                                   | `true`                                            |
 | `msgTopologyOperator.image.registry`                                    | RabbitMQ Messaging Topology Operator image registry                                                                                                                                                                                                       | `REGISTRY_NAME`                                   |
 | `msgTopologyOperator.image.repository`                                  | RabbitMQ Messaging Topology Operator image repository                                                                                                                                                                                                     | `REPOSITORY_NAME/rmq-messaging-topology-operator` |
-| `msgTopologyOperator.image.digest`                                      | RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                                                                                                                      | `""`                                              |
+| `msgTopologyOperator.image.tag`                                         | RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)                                                                                                                                                                           | `1.19.3`                                          |
 | `msgTopologyOperator.image.pullPolicy`                                  | RabbitMQ Messaging Topology Operator image pull policy                                                                                                                                                                                                    | `IfNotPresent`                                    |
 | `msgTopologyOperator.image.pullSecrets`                                 | RabbitMQ Messaging Topology Operator image pull secrets                                                                                                                                                                                                   | `[]`                                              |
 | `msgTopologyOperator.revisionHistoryLimit`                              | sets number of replicaset to keep in k8s                                                                                                                                                                                                                  | `10`                                              |
@@ -292,6 +299,8 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.fullnameOverride`                                  | String to fully override rmqco.msgTopologyOperator.fullname template                                                                                                                                                                                      | `""`                                              |
 | `msgTopologyOperator.command`                                           | Override default container command (useful when using custom images)                                                                                                                                                                                      | `[]`                                              |
 | `msgTopologyOperator.args`                                              | Override default container args (useful when using custom images)                                                                                                                                                                                         | `[]`                                              |
+| `msgTopologyOperator.logLevel`                                          | Log level for the Messaging Topology Operator. Adds `--zap-log-level=<value>` to the default args (debug, info, error). Defaults to `info` because the operator logs at debug by default; set to `""` to keep the built-in default. Ignored when `msgTopologyOperator.args` is set. | `"info"`                                          |
+| `msgTopologyOperator.extraArgs`                                         | Additional container args appended to the default args (ignored when `msgTopologyOperator.args` is set)                                                                                                                                                    | `[]`                                              |
 | `msgTopologyOperator.automountServiceAccountToken`                      | Mount Service Account token in pod                                                                                                                                                                                                                        | `true`                                            |
 | `msgTopologyOperator.hostAliases`                                       | RabbitMQ Messaging Topology Operator pods host aliases                                                                                                                                                                                                    | `[]`                                              |
 | `msgTopologyOperator.podLabels`                                         | Extra labels for RabbitMQ Messaging Topology Operator pods                                                                                                                                                                                                | `{}`                                              |
@@ -374,3 +383,74 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.metrics.podMonitor.additionalLabels`      | Additional labels that can be used so PodMonitors will be discovered by Prometheus | `{}`                     |
 | `msgTopologyOperator.metrics.podMonitor.relabelings`           | Specify general relabeling                                                         | `[]`                     |
 | `msgTopologyOperator.metrics.podMonitor.metricRelabelings`     | Specify additional relabeling of metrics                                           | `[]`                     |
+
+## RabbitmqCluster admission webhook
+
+Starting with cluster-operator `v2.22.0`, the operator ships mutating (defaulting) and validating admission
+webhooks for `RabbitmqCluster` resources. This chart keeps them **disabled by default**: the operator is
+started with `ENABLE_WEBHOOKS=false`, which preserves the behavior of chart versions prior to `0.4.0`.
+
+Enabling the webhook adds server-side defaulting and validation (for example, rejecting unsafe
+`spec.override.statefulSet` fields such as `hostNetwork` or `serviceAccountName`). Because the webhook is
+served over TLS, enabling it requires serving certificates.
+
+### Option 1 — chart-generated self-signed certificate (default when enabled)
+
+The chart generates a self-signed CA and certificate and stores them in a `Secret`, injecting the CA into the
+webhook configurations' `caBundle`. On a subsequent `helm upgrade` the existing `Secret` is read back from the
+cluster (via Helm's `lookup`) and reused, so the certificate stays stable and the `Secret` and `caBundle`
+remain mutually consistent.
+
+```bash
+helm upgrade --install my-rabbitmq-operator \
+  oci://registry-1.docker.io/cloudpirates/rabbitmq-cluster-operator \
+  --set clusterOperator.webhook.enabled=true
+```
+
+> [!WARNING]
+> The `genCA`/`genSignedCert` template functions are **not** deterministic — they produce a new certificate on
+> every render. Stability comes solely from Helm's `lookup` reading the previously created `Secret`, which only
+> works when the render has live cluster access (a real `helm install`/`helm upgrade`). Tools that render
+> client-side without cluster access — `helm template`, or **Argo CD / Flux in their default rendering mode** —
+> cannot see the existing `Secret` and will regenerate the certificate on every sync. For GitOps workflows use
+> Option 2 (cert-manager) or Option 3 (bring your own secret) instead.
+
+### Option 2 — cert-manager
+
+If cert-manager is installed in the cluster, set `useCertManager=true`. The chart creates a self-signed
+`Issuer` and a `Certificate`, and relies on cert-manager's CA injector for the webhook `caBundle`.
+
+```bash
+helm upgrade --install my-rabbitmq-operator \
+  oci://registry-1.docker.io/cloudpirates/rabbitmq-cluster-operator \
+  --set clusterOperator.webhook.enabled=true \
+  --set useCertManager=true
+```
+
+### Option 3 — bring your own certificate
+
+Provide an existing TLS secret (and, when not using cert-manager, its CA bundle):
+
+```bash
+helm upgrade --install my-rabbitmq-operator \
+  oci://registry-1.docker.io/cloudpirates/rabbitmq-cluster-operator \
+  --set clusterOperator.webhook.enabled=true \
+  --set clusterOperator.webhook.existingWebhookCertSecret=my-webhook-cert \
+  --set-file clusterOperator.webhook.existingWebhookCertCABundle=ca.pem
+```
+
+> [!NOTE]
+> When the webhook is disabled the operator still applies the default RabbitMQ image via the
+> `DEFAULT_RABBITMQ_IMAGE` environment variable; only admission-time defaulting and validation are skipped.
+
+## Upgrading
+
+### To 0.4.0
+
+Upgrading the cluster operator to `v2.22.1` triggers a **rolling restart of the StatefulSets** of every
+managed `RabbitmqCluster`. To control the timing, pause reconciliation before upgrading and resume it once
+the operator is ready.
+
+`v2.22.0` also switched the RabbitMQ startup probe from an exec check to an HTTP check, which requires
+RabbitMQ `4.2.4+` or `4.3.0+`. The chart default (`4.3.2-management-alpine`) satisfies this; clusters pinned
+to older RabbitMQ versions must set the `rabbitmq.com/legacy-startup-probe: "true"` annotation.

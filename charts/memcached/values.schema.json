@@ -382,8 +382,14 @@
         "service": {
             "type": "object",
             "properties": {
+                "clusterIP": {
+                    "type": "string"
+                },
                 "port": {
                     "type": "integer"
+                },
+                "publishNotReadyAddresses": {
+                    "type": "boolean"
                 },
                 "type": {
                     "type": "string"

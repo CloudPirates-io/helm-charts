@@ -1,0 +1,107 @@
+{{- if .Values.clusterOperator.webhook.enabled }}
+{{/*
+    If the user does not have cert-manager and is not providing a secret with the certificates, the chart needs to generate the secret
+  */}}
+{{- $secretName := printf "%s" (include "rmqco.clusterOperator.webhook.secretName" .) }}
+{{- $ca := genCA "rmq-cluster-operator-ca" 365 }}
+{{- $cert := genSignedCert (include "rmqco.clusterOperator.webhook.fullname" .) nil (list (printf "%s.%s.svc" (include "rmqco.clusterOperator.webhook.fullname" .) (include "cloudpirates.namespace" .)) (printf "%s.%s.svc.%s" (include "rmqco.clusterOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) .Values.clusterDomain)) 365 $ca }}
+{{- if and (not .Values.useCertManager) (not .Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $secretName }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ include "cloudpirates.secrets.lookup" (dict "secret" $secretName "key" "tls.crt" "defaultValue" $cert.Cert "context" $) }}
+  tls.key: {{ include "cloudpirates.secrets.lookup" (dict "secret" $secretName "key" "tls.key" "defaultValue" $cert.Key "context" $) }}
+  ca.crt: {{ include "cloudpirates.secrets.lookup" (dict "secret" $secretName "key" "ca.crt" "defaultValue" $ca.Cert "context" $) }}
+{{- end }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  annotations:
+    {{- if and (.Values.useCertManager) (not .Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" (include "cloudpirates.namespace" .) ( include "rmqco.clusterOperator.webhook.secretName" . ) }}
+    {{- else if and (.Values.useCertManager) (.Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+    cert-manager.io/inject-ca-from-secret: {{ printf "%s/%s" (include "cloudpirates.namespace" .) ( include "rmqco.clusterOperator.webhook.secretName" . ) }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  name: {{ printf "%s-mutating" (include "rmqco.clusterOperator.webhook.fullname.namespace" .) }}
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      {{- if not .Values.useCertManager }}
+      caBundle: {{ include "cloudpirates.secrets.lookup" (dict "secret" $secretName "key" "ca.crt" "defaultValue" (default $ca.Cert .Values.clusterOperator.webhook.existingWebhookCertCABundle) "context" $) }}
+      {{- end }}
+      service:
+        name: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+        namespace: {{ include "cloudpirates.namespace" . }}
+        path: /mutate-rabbitmq-com-v1beta1-rabbitmqcluster
+        port: {{ .Values.clusterOperator.webhook.service.port }}
+    failurePolicy: Fail
+    name: mrabbitmqcluster-v1beta1.kb.io
+    rules:
+      - apiGroups:
+          - rabbitmq.com
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - rabbitmqclusters
+    sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  annotations:
+    {{- if and (.Values.useCertManager) (not .Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" (include "cloudpirates.namespace" .) ( include "rmqco.clusterOperator.webhook.secretName" . ) }}
+    {{- else if and (.Values.useCertManager) (.Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+    cert-manager.io/inject-ca-from-secret: {{ printf "%s/%s" (include "cloudpirates.namespace" .) ( include "rmqco.clusterOperator.webhook.secretName" . ) }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  name: {{ printf "%s-validating" (include "rmqco.clusterOperator.webhook.fullname.namespace" .) }}
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      {{- if not .Values.useCertManager }}
+      caBundle: {{ include "cloudpirates.secrets.lookup" (dict "secret" $secretName "key" "ca.crt" "defaultValue" (default $ca.Cert .Values.clusterOperator.webhook.existingWebhookCertCABundle) "context" $) }}
+      {{- end }}
+      service:
+        name: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+        namespace: {{ include "cloudpirates.namespace" . }}
+        path: /validate-rabbitmq-com-v1beta1-rabbitmqcluster
+        port: {{ .Values.clusterOperator.webhook.service.port }}
+    failurePolicy: Fail
+    name: vrabbitmqcluster-v1beta1.kb.io
+    rules:
+      - apiGroups:
+          - rabbitmq.com
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - rabbitmqclusters
+    sideEffects: None
+{{- end }}

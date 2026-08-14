@@ -145,6 +145,7 @@ rules:
       - rabbitmqclusters/status
     verbs:
       - get
+      - patch
       - update
   - apiGroups:
       - rbac.authorization.k8s.io

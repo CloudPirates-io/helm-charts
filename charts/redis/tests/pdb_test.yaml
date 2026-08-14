@@ -1,0 +1,55 @@
+suite: test redis pod disruption budget
+templates:
+  - pdb.yaml
+tests:
+  - it: should not render PDB when disabled
+    set:
+      pdb:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render integer minAvailable
+    set:
+      pdb:
+        enabled: true
+        minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: should render percentage string minAvailable
+    set:
+      pdb:
+        enabled: true
+        minAvailable: "51%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "51%"
+
+  - it: should render percentage string maxUnavailable
+    set:
+      pdb:
+        enabled: true
+        minAvailable: null
+        maxUnavailable: "51%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "51%"
+
+  - it: should render integer maxUnavailable
+    set:
+      pdb:
+        enabled: true
+        minAvailable: null
+        maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2

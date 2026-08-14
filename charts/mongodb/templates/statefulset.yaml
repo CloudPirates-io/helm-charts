@@ -56,6 +56,7 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }} 
@@ -91,6 +92,7 @@ spec:
         - name: metrics-uri-init
           image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
           imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -177,6 +179,31 @@ spec:
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
+          {{- if .Values.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.customStartupProbe | nindent 12 }}
+          {{- else }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - |
+                  mongosh \
+                  {{- if .Values.auth.enabled }}
+                  --username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --password "${MONGO_INITDB_ROOT_PASSWORD}" \
+                  --authenticationDatabase admin \
+                  {{- end }}
+                  --eval "db.adminCommand('ping')" --quiet
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+          {{- end }}
+          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             exec:
@@ -303,6 +330,9 @@ spec:
           {{- end }}
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
 {{- end }}
+        {{- with .Values.global.dataNodes.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         - name: extrainitscripts
           emptyDir: {}
@@ -346,6 +376,9 @@ spec:
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
+        {{- with .Values.global.dataNodes.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -1,0 +1,106 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kafka.fullname" . }}-metrics
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "kafka.metrics.labels" . | nindent 4 }}
+  {{- with (include "kafka.annotations" .) }}
+  annotations:
+{{- . | indent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "kafka.metrics.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kafka.metrics.labels" . | nindent 8 }}
+      {{- $annotations := mergeOverwrite (deepCopy (.Values.commonAnnotations | default dict)) (.Values.metrics.podAnnotations | default dict) }}
+      {{- with $annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+{{- with (include "kafka.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      automountServiceAccountToken: false
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      containers:
+        - name: kafka-exporter
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "kafka.metrics.image" . | quote }}
+          imagePullPolicy: {{ .Values.metrics.image.imagePullPolicy | default "Always" | quote }}
+          {{- if .Values.auth.client.enabled }}
+          # The client listener requires SASL/PLAIN, so the exporter authenticates too.
+          # Password is read from the Secret via env and expanded by the shell (not baked into args).
+          env:
+            - name: KAFKA_CLIENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: client-password
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              exec /bin/kafka_exporter \
+                --kafka.server={{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }} \
+                --web.listen-address=:{{ .Values.metrics.containerPort }} \
+                --sasl.enabled \
+                --sasl.mechanism=plain \
+                --sasl.username={{ .Values.auth.clientUser | quote }} \
+                --sasl.password="${KAFKA_CLIENT_PASSWORD}" \
+                {{- if include "kafka.tls.enabled" . }}
+                --tls.enabled \
+                --tls.ca-file=/mnt/kafka/certs/{{ .Values.tls.caFilename }} \
+                {{- end }}
+                {{- range .Values.metrics.extraArgs }}
+                {{ . }} \
+                {{- end }}
+          {{- else }}
+          args:
+            - --kafka.server={{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }}
+            - --web.listen-address=:{{ .Values.metrics.containerPort }}
+            {{- if include "kafka.tls.enabled" . }}
+            - --tls.enabled
+            - --tls.ca-file=/mnt/kafka/certs/{{ .Values.tls.caFilename }}
+            {{- end }}
+            {{- with .Values.metrics.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if include "kafka.tls.enabled" . }}
+          volumeMounts:
+            - name: certs
+              mountPath: /mnt/kafka/certs
+              readOnly: true
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+      {{- if include "kafka.tls.enabled" . }}
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ include "kafka.tlsSecretName" . }}
+      {{- end }}
+{{- end }}
