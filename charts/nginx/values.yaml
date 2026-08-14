@@ -154,11 +154,15 @@ cloneStaticSiteFromGit:
   ## Git image settings
   ##
   image:
+    ## @param cloneStaticSiteFromGit.image.registry Git image registry
     registry: docker.io
+    ## @param cloneStaticSiteFromGit.image.repository Git image repository
     repository: alpine/git
-    tag: v2.52.0
-    digest: "sha256:9c9c6debba3eac25c9230db4bbd1e17d0c27efffdb93e502a47f6f447ab90ac4"
+    ## @param cloneStaticSiteFromGit.image.tag Git image tag
+    tag: "v2.52.0"
+    ## @param cloneStaticSiteFromGit.image.pullPolicy Git image pull policy
     pullPolicy: IfNotPresent
+    ## @param cloneStaticSiteFromGit.image.pullSecrets Git image pull secrets
     pullSecrets: []
 
   ## @param cloneStaticSiteFromGit.repository Git Repository to clone static content from
