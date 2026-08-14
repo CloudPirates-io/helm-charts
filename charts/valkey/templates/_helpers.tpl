@@ -136,3 +136,10 @@ Return the proper master-proxy (HAProxy) image name
 {{- define "valkey.masterProxy.image" -}}
 {{- include "cloudpirates.image" (dict "image" .Values.sentinel.masterProxy.image "global" .Values.global) -}}
 {{- end }}
+
+{{/*
+Return the proper Valkey exporter image name
+*/}}
+{{- define "valkey.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}

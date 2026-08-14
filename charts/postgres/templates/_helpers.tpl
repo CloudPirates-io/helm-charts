@@ -52,6 +52,13 @@ Return the proper PostgreSQL image name
 {{- end }}
 
 {{/*
+Return the proper PostgreSQL exporter image name
+*/}}
+{{- define "postgres.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return PostgreSQL credentials secret name
 */}}
 {{- define "postgres.secretName" -}}
