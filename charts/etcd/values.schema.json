@@ -27,6 +27,9 @@
                 }
             }
         },
+        "clusterDomain": {
+            "type": "string"
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -288,7 +291,10 @@
                     "type": "integer"
                 },
                 "minAvailable": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },

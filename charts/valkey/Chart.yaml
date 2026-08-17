@@ -2,8 +2,8 @@ apiVersion: v2
 name: valkey
 description: High performance in-memory data structure store, fork of Redis. Valkey is an open-source, high-performance key/value datastore that supports a variety of workloads such as caching, message queues, and can act as a primary database.
 type: application
-version: 0.21.1
-appVersion: "9.0.0"
+version: 0.25.5
+appVersion: "9.1.0"
 home: https://www.valkey.io
 sources:
   - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
@@ -42,6 +42,13 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
+    - kind: added
+      description: "Add sentinel.masterProxy: an HAProxy sidecar bundled into each Valkey pod that gives non-Sentinel-aware clients a stable master endpoint, determined from INFO replication on the data plane instead of a Kubernetes Service selector patched via kubectl/RBAC"
+      links:
+        - name: "Pull Request"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1523"
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/valkey/CHANGELOG.md"
     - kind: added
       description: "Add namespaceOverride Value to all Charts that missing it"
       links:

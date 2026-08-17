@@ -40,7 +40,7 @@ spec:
       {{- end }}
       initContainers:
         - name: init-erlang-cookie
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -71,7 +71,7 @@ spec:
           {{- end }}
         {{- if .Values.installPlugins }}
         - name: download-plugins
-          image: "{{ .Values.initContainer.image.registry | default .Values.global.imageRegistry }}/{{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}"
+          image: {{ include "rabbitmq.initContainer.image" . | quote }}
           imagePullPolicy: "{{ .Values.initContainer.image.pullPolicy }}"
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -186,9 +186,9 @@ spec:
           {{- end }}
           ports:
             - name: amqp
-              containerPort: 5672
+              containerPort: {{ .Values.service.amqpPort }}
             - name: mgmt
-              containerPort: 15672
+              containerPort: {{ .Values.service.managementPort }}
             - name: epmd
               containerPort: 4369
             - name: dist
@@ -294,7 +294,7 @@ spec:
             {{- end }}
         {{- if and .Values.definitions.enabled .Values.definitions.autoReload.enabled }}
         - name: definitions-reloader
-          image: "{{ .Values.definitions.autoReload.image.registry }}/{{ .Values.definitions.autoReload.image.repository }}:{{ .Values.definitions.autoReload.image.tag }}"
+          image: {{ include "rabbitmq.definitions.autoReload.image" . | quote }}
           imagePullPolicy: {{ .Values.definitions.autoReload.image.pullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command:
@@ -309,7 +309,7 @@ spec:
 
               # Wait for RabbitMQ to be ready
               echo "Waiting for RabbitMQ management API to be ready..."
-              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:15672/ 2>/dev/null)" = "200" ]; do
+              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:{{ .Values.service.managementPort }}/ 2>/dev/null)" = "200" ]; do
                 echo "RabbitMQ not ready yet, waiting..."
                 sleep 5
               done
@@ -332,13 +332,13 @@ spec:
                       -H "Content-Type: application/json" \
                       -u "{{ .Values.auth.username }}:$RABBITMQ_PASSWORD" \
                       --data-binary @"$DEFINITIONS_FILE" \
-                      http://localhost:15672/api/definitions)
+                      http://localhost:{{ .Values.service.managementPort }}/api/definitions)
                     {{- else }}
                     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
                       -X POST \
                       -H "Content-Type: application/json" \
                       --data-binary @"$DEFINITIONS_FILE" \
-                      http://localhost:15672/api/definitions)
+                      http://localhost:{{ .Values.service.managementPort }}/api/definitions)
                     {{- end }}
 
                     if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then

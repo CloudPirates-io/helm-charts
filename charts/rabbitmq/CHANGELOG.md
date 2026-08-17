@@ -1,7 +1,15 @@
 # Changelog
 
+> [!CAUTION]
+> This file is kept for backwards compatibility only and is no longer updated. See the [GitHub Releases](https://github.com/CloudPirates-io/helm-charts/releases) page to view changes for each version.
 
-## 0.3.4 (2025-10-09)
+All notable changes to this chart will be documented in this file.
+
+## [0.21.5] - 2026-06-01
+
+- Fix `global.imageRegistry` not being applied to the init container and definitions auto-reload sidecar images (#1342).
+
+## [cluster-operator-0.2.2] - 2026-03-27
 
 * [redis , rabbitmq]: Add podAnnotations (#294) ([6d78869](https://github.com/GitGuardian/gitguardian-helm-charts/commit/6d78869))
 

@@ -95,3 +95,31 @@ tests:
           path: spec.replicas
           value: 3
         template: templates/statefulset.yaml
+
+  - it: should apply global.imageRegistry to all images
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+      installPlugins:
+        - rabbitmq_shovel
+      definitions:
+        enabled: true
+        autoReload:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="init-erlang-cookie")].image
+          pattern: ^myregistry\.example\.com/
+        template: templates/statefulset.yaml
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="download-plugins")].image
+          pattern: ^myregistry\.example\.com/
+        template: templates/statefulset.yaml
+      - matchRegex:
+          path: spec.template.spec.containers[?(@.name=="rabbitmq")].image
+          pattern: ^myregistry\.example\.com/
+        template: templates/statefulset.yaml
+      - matchRegex:
+          path: spec.template.spec.containers[?(@.name=="definitions-reloader")].image
+          pattern: ^myregistry\.example\.com/
+        template: templates/statefulset.yaml

@@ -1,0 +1,64 @@
+suite: test redis master discovery affinity
+templates:
+  - sentinel-master-deployment.yaml
+set:
+  architecture: replication
+  sentinel:
+    enabled: true
+    masterService:
+      enabled: true
+  config:
+    content: |
+      # Redis configuration
+      port 6379
+tests:
+  - it: should inherit global affinity when masterService.affinity is not set
+    set:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                      - ssd
+    asserts:
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: disktype
+
+  - it: should use masterService.affinity when set, overriding the global affinity
+    set:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                      - ssd
+      sentinel:
+        masterService:
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  preference:
+                    matchExpressions:
+                      - key: role
+                        operator: In
+                        values:
+                          - helper
+    asserts:
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].preference.matchExpressions[0].key
+          value: role
+      - notExists:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
+
+  - it: should render no affinity when neither global nor masterService affinity is set
+    asserts:
+      - notExists:
+          path: spec.template.spec.affinity

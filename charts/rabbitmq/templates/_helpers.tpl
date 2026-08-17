@@ -79,6 +79,20 @@ Return the proper RabbitMQ image name
 {{- end }}
 
 {{/*
+Return the proper RabbitMQ init container image name
+*/}}
+{{- define "rabbitmq.initContainer.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.initContainer.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
+Return the proper RabbitMQ definitions auto-reload image name
+*/}}
+{{- define "rabbitmq.definitions.autoReload.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.definitions.autoReload.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "rabbitmq.imagePullSecrets" -}}
@@ -86,7 +100,7 @@ Return the proper Docker Image Registry Secret Names
 {{- end -}}
 
 {{- define "rabbitmq.serviceAccountName" -}}
-    {{- if or .Values.peerDiscoveryK8sPlugin.enabled -}}
+    {{- if .Values.serviceAccount.create -}}
         {{- default (include "rabbitmq.fullname" .) .Values.serviceAccount.name }}
     {{- else -}}
         {{- default "default" .Values.serviceAccount.name -}}

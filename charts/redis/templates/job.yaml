@@ -76,31 +76,115 @@ spec:
 
               {{- include "redis.auth.acl.setupScript" (dict "type" "job" "context" .) | nindent 14 }}
 
-              # Check if cluster is already initialized
+              PORT={{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}
               FIRST_NODE="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless"
-              if redis-cli -h "$FIRST_NODE" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
-                echo "Redis cluster is already initialized, skipping creation..."
-                exit 0
-              fi
 
-              echo "Building list of Redis nodes..."
-              NODES=""
-              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
+              # Wait for every Redis node to be reachable before deciding what to do.
+              echo "Waiting for all Redis nodes to be reachable..."
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              # With external access, wait on the external endpoints used by "cluster create". These only
+              # route to Ready pods (unlike the headless service), so this also ensures each node is ready.
+              for endpoint in \
+              {{- range $i := until (int .Values.replicaCount) }}
+              {{- $port := int (default $.Values.service.port $ea.port) }}
+              {{- if eq $ea.service.type "NodePort" }}{{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}{{- end }}
+                "{{ index $ea.addresses $i }}:{{ $port }}" \
+              {{- end }}
+                ; do
+                EP_HOST="${endpoint%:*}"
+                EP_PORT="${endpoint##*:}"
+                until redis-cli -h "$EP_HOST" -p "$EP_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
+                  echo "Waiting for node ${endpoint} to be ready..."
+                  sleep 3
+                done
               done
-
-              echo "Waiting for all Redis pods to be reachable..."
+              {{- else }}
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null ; do
+                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
                   echo "Waiting for pod {{ include "redis.fullname" . }}-${i}..."
                   sleep 3
                 done
               done
+              {{- end }}
+
+              # If the cluster is already healthy there is nothing to do
+              if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+                echo "Redis cluster is already initialized and healthy, skipping creation..."
+                exit 0
+              fi
+
+              # Detect whether any node already holds cluster state. After all pods are deleted
+              # and recreated, nodes reload their persisted nodes.conf and must re-form the cluster
+              # via gossip. Running "cluster create" against those non-empty nodes fails with
+              # "Node is not empty" and would destroy the existing topology, so we only create a
+              # brand new cluster when every node is genuinely empty.
+              EXISTING_STATE=false
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                INFO=$(redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null || echo "")
+                KNOWN=$(echo "$INFO" | awk -F: '/cluster_known_nodes:/ {print $2}' | tr -d '\r\n ')
+                SLOTS=$(echo "$INFO" | awk -F: '/cluster_slots_assigned:/ {print $2}' | tr -d '\r\n ')
+                case "$KNOWN" in ''|*[!0-9]*) KNOWN=0 ;; esac
+                case "$SLOTS" in ''|*[!0-9]*) SLOTS=0 ;; esac
+                if [ "$KNOWN" -gt 1 ] || [ "$SLOTS" -gt 0 ]; then
+                  EXISTING_STATE=true
+                  echo "Node {{ include "redis.fullname" . }}-${i} already holds cluster state (known_nodes=$KNOWN, slots_assigned=$SLOTS)"
+                  break
+                fi
+              done
+
+              if [ "$EXISTING_STATE" = "true" ]; then
+                # Recovery scenario: let the nodes re-form the cluster via gossip instead of
+                # recreating it. This relies on stable peer addressing (cluster.announceHostnames)
+                # so nodes.conf entries still resolve after the pods come back with new IPs.
+                echo "Existing cluster state detected, waiting up to {{ .Values.clusterInitJob.recoveryTimeout }}s for the cluster to recover..."
+                RECOVERY_TIMEOUT={{ .Values.clusterInitJob.recoveryTimeout }}
+                elapsed=0
+                while [ "$elapsed" -lt "$RECOVERY_TIMEOUT" ]; do
+                  if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+                    echo "Redis cluster recovered successfully (cluster_state:ok)."
+                    exit 0
+                  fi
+                  echo "Cluster not healthy yet, retrying in 5s... (${elapsed}s/${RECOVERY_TIMEOUT}s)"
+                  sleep 5
+                  elapsed=$((elapsed + 5))
+                done
+                echo "ERROR: Redis cluster did not recover within ${RECOVERY_TIMEOUT}s and nodes still hold stale state." >&2
+                echo "Refusing to run 'cluster create' on non-empty nodes to avoid destroying data." >&2
+                echo "Ensure cluster.announceHostnames is enabled so nodes can rejoin after IP changes, or, if the" >&2
+                echo "data can be discarded, reset the nodes manually (redis-cli -h <node> -p $PORT cluster reset hard)." >&2
+                exit 1
+              fi
+
+              # All nodes are empty: create a brand new cluster
+              echo "All nodes are empty, creating a new Redis cluster..."
+              {{- if .Values.cluster.externalAccess.enabled }}
+              {{- $ea := .Values.cluster.externalAccess }}
+              {{- $createHost := "" }}
+              {{- $createPort := 0 }}
+              # External access: create the cluster using the externally-announced addresses so nodes MEET
+              # each other on the same addresses they advertise, avoiding an unstable pod-IP -> external flip.
+              NODES="
+              {{- range $i := until (int .Values.replicaCount) -}}
+              {{- $port := int (default $.Values.service.port $ea.port) }}
+              {{- if eq $ea.service.type "NodePort" }}{{- if gt (len $ea.service.nodePorts) $i }}{{- $port = int (index $ea.service.nodePorts $i) }}{{- end }}{{- end }}
+              {{- if eq $i 0 }}{{- $createHost = index $ea.addresses $i }}{{- $createPort = $port }}{{- end }} {{ index $ea.addresses $i }}:{{ $port }}
+              {{- end }}"
+              CREATE_HOST="{{ $createHost }}"
+              CREATE_PORT="{{ $createPort }}"
+              {{- else }}
+              NODES=""
+              for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
+                NODES="$NODES {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless:$PORT"
+              done
+              CREATE_HOST="$FIRST_NODE"
+              CREATE_PORT="$PORT"
+              {{- end }}
 
               echo "Creating Redis cluster with nodes: $NODES"
               redis-cli \
-                -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless \
-                -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} \
+                -h "$CREATE_HOST" \
+                -p "$CREATE_PORT" \
                 {{- if .Values.tls.enabled }}
                 {{ include "redis.tls.probeArgs" . }} \
                 {{- end }}
@@ -139,5 +223,17 @@ spec:
                 path: {{ .Values.tls.client.certKeyFilename }}
         {{- end }}
         {{- end }}
+      {{- end }}
+      {{- with (.Values.clusterInitJob.nodeSelector | default .Values.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (.Values.clusterInitJob.affinity | default .Values.affinity) }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (.Values.clusterInitJob.tolerations | default .Values.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
 {{- end }}

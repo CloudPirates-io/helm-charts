@@ -50,6 +50,7 @@ spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       {{- with (coalesce .Values.shardedCluster.mongos.nodeSelector .Values.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -120,6 +121,7 @@ spec:
         - name: metrics-uri-init
           image: {{ include "mongodb.metrics.uriEncodeImage" . | quote }}
           imagePullPolicy: {{ .Values.metrics.uriEncodeImage.pullPolicy }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           command: ["/bin/sh", "-c"]
           args:
             - |

@@ -84,10 +84,11 @@ Generate etcd initial cluster string
 {{- $peerPort := .Values.service.peerPort -}}
 {{- $replicaCount := int .Values.replicaCount }}
 {{- $protocol := "http" }}
+{{- $clusterDomain := .Values.clusterDomain }}
 {{- if .Values.auth.peer.enabled }}
 {{- $protocol = "https" }}
 {{- end }}
 {{- range $i := until $replicaCount }}
-{{- if $i }},{{ end -}}{{ $name }}-{{ $i }}={{ $protocol }}://{{ $name }}-{{ $i }}.{{ $name }}-headless.{{ $namespace }}.svc.cluster.local:{{ $peerPort }}
+{{- if $i }},{{ end -}}{{ $name }}-{{ $i }}={{ $protocol }}://{{ $name }}-{{ $i }}.{{ $name }}-headless.{{ $namespace }}.svc.{{ $clusterDomain }}:{{ $peerPort }}
 {{- end }}
 {{- end }}

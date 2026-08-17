@@ -18,3 +18,12 @@ tests:
       - equal:
           path: spec.trafficDistribution
           value: PreferClose
+
+  - it: should set clusterIP when configured
+    set:
+      service:
+        clusterIP: 99.99.99.99
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: 99.99.99.99

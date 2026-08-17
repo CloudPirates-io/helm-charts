@@ -26,7 +26,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.31.0-alpine@sha256:2f07d83bf561b506400dc183b1b2003803e39efbd22451f848adaba14d28c7c7"
+  tag: "1.31.3-alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -67,6 +67,8 @@ service:
       targetPort: http
       protocol: TCP
       name: http
+  ## @param service.clusterIP Kubernetes service static ClusterIP
+  clusterIP: ""
   ## @param service.internalTrafficPolicy Kubernetes service internal traffic policy
   internalTrafficPolicy: ""
   ## @param service.trafficDistribution Kubernetes service traffic distribution
@@ -152,11 +154,15 @@ cloneStaticSiteFromGit:
   ## Git image settings
   ##
   image:
+    ## @param cloneStaticSiteFromGit.image.registry Git image registry
     registry: docker.io
+    ## @param cloneStaticSiteFromGit.image.repository Git image repository
     repository: alpine/git
-    tag: v2.52.0
-    digest: "sha256:9c9c6debba3eac25c9230db4bbd1e17d0c27efffdb93e502a47f6f447ab90ac4"
+    ## @param cloneStaticSiteFromGit.image.tag Git image tag
+    tag: "v2.54.0"
+    ## @param cloneStaticSiteFromGit.image.pullPolicy Git image pull policy
     pullPolicy: IfNotPresent
+    ## @param cloneStaticSiteFromGit.image.pullSecrets Git image pull secrets
     pullSecrets: []
 
   ## @param cloneStaticSiteFromGit.repository Git Repository to clone static content from
@@ -178,6 +184,10 @@ cloneStaticSiteFromGit:
 
   ## Additional configuration for git-repo-syncer sidecar container
   gitSync:
+    ## @param cloneStaticSiteFromGit.gitSync.enabled Deploy the git-repo-syncer sidecar to periodically pull updates.
+    ## Disable to clone the repository only once at startup via the init container (e.g. for immutable PROD deployments).
+    ##
+    enabled: true
     command: []
     args: []
     resourcesPreset: "nano"
@@ -224,6 +234,15 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
+## @param dnsPolicy DNS policy for the pod
+dnsPolicy: ""
+
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
 containerSecurityContext:
   ## @param containerSecurityContext.runAsUser User ID to run the container
   runAsUser: 101
@@ -237,7 +256,9 @@ podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
 
-## @param initContainerSecurityContext Security context for init containers (useful for Istio sidecar scenarios)
+## @param initContainerSecurityContext Security context for the git init container and git-repo-syncer sidecar (useful for Istio sidecar scenarios)
+## Applied to both the git-clone-repository init container and the git-repo-syncer sidecar so the cloned
+## repository and subsequent `git pull`s run as the same user (avoids "dubious ownership"/permission errors).
 ## When using Istio, init containers may need to run as the Istio proxy user (1337) to access external network
 ## Example for Istio:
 ## initContainerSecurityContext:

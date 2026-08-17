@@ -1,7 +1,15 @@
 # Changelog
 
+> [!CAUTION]
+> This file is kept for backwards compatibility only and is no longer updated. See the [GitHub Releases](https://github.com/CloudPirates-io/helm-charts/releases) page to view changes for each version.
 
-## 0.8.1 (2025-10-09)
+All notable changes to this chart will be documented in this file.
+
+## [0.19.6] - 2026-06-25
+
+- [postgres] Use shared helper for metrics container securityContext on OpenShift (#1399)
+
+## [0.18.3] - 2026-03-18
 
 * Sync upstream 09 oct (#17) ([ca43479](https://github.com/GitGuardian/gitguardian-helm-charts/commit/ca43479))
 

@@ -63,6 +63,9 @@
                         "command": {
                             "type": "array"
                         },
+                        "enabled": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object"
                         },
@@ -74,9 +77,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -152,6 +152,12 @@
                     "type": "object"
                 }
             }
+        },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "dnsPolicy": {
+            "type": "string"
         },
         "existingConfigConfigmap": {
             "type": "string"
@@ -507,6 +513,9 @@
                 "annotations": {
                     "type": "object"
                 },
+                "clusterIP": {
+                    "type": "string"
+                },
                 "internalTrafficPolicy": {
                     "type": "string"
                 },
@@ -565,6 +574,9 @@
             "type": "string"
         },
         "tolerations": {
+            "type": "array"
+        },
+        "topologySpreadConstraints": {
             "type": "array"
         }
     }

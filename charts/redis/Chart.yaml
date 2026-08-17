@@ -2,8 +2,8 @@ apiVersion: v2
 name: redis
 description: An open source, in-memory data structure store used as a database, cache, and message broker.
 type: application
-version: 0.29.1
-appVersion: "8.6.3"
+version: 0.34.17
+appVersion: "8.10.0"
 keywords:
   - redis
   - database
@@ -41,8 +41,8 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: added
-      description: "expose sentinel.monitorTarget to support multi-region/multi-cluster Sentinel quorum"
+    - kind: fixed
+      description: "Redis Cluster now recovers after all pods are deleted/recreated: the init Job waits for the cluster to re-form via gossip instead of running 'cluster create' on non-empty nodes (which failed with 'Node is not empty'), and cluster.announceHostnames now defaults to true so nodes.conf survives pod IP changes"
       links:
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/redis/CHANGELOG.md"

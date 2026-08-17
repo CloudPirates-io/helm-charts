@@ -1,7 +1,15 @@
 # Changelog
 
+> [!CAUTION]
+> This file is kept for backwards compatibility only and is no longer updated. See the [GitHub Releases](https://github.com/CloudPirates-io/helm-charts/releases) page to view changes for each version.
 
-## 0.6.1 (2025-10-09)
+All notable changes to this chart will be documented in this file.
+
+## [0.29.4] - 2026-05-29
+
+- Add `sentinel.masterService.affinity` to allow the master discovery deployment to use affinity rules independent from the main Redis workload. Defaults to `.Values.affinity` when unset, so existing behavior is unchanged (#1213).
+
+## [0.28.0] - 2026-05-20
 
 * [redis , rabbitmq]: Add podAnnotations (#294) ([6d78869](https://github.com/GitGuardian/gitguardian-helm-charts/commit/6d78869))
 * add tests for openshift (#226) ([c80c98a](https://github.com/GitGuardian/gitguardian-helm-charts/commit/c80c98a))

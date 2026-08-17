@@ -278,6 +278,12 @@
                             "items": {
                                 "type": "object",
                                 "properties": {
+                                    "group": {
+                                        "type": "string"
+                                    },
+                                    "kind": {
+                                        "type": "string"
+                                    },
                                     "name": {
                                         "type": "string"
                                     },
@@ -587,6 +593,9 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "fsGroupChangePolicy": {
+                    "type": "string"
                 },
                 "seccompProfile": {
                     "type": "object",
