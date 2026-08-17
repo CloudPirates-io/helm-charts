@@ -76,7 +76,7 @@ spec:
       initContainers:
         {{- if .Values.volumePermissions.enabled }}
         - name: volume-permissions
-          image: "{{ .Values.volumePermissions.image.registry | default .Values.global.imageRegistry }}/{{ .Values.volumePermissions.image.repository }}:{{ .Values.volumePermissions.image.tag }}"
+          image: {{ include "redis.volumePermissions.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.volumePermissions.image) }}
           command:
             - /bin/sh
