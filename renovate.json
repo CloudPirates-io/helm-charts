@@ -19,7 +19,7 @@
         "/(^|/)charts/.+/values\\.ya?ml$/"
       ],
       "matchStrings": [
-        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*(?<registryValue>[^\\s]+)\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
+        "(?:## @param \\S+\\.registry .+?\\n\\s+registry:\\s*[\"']?(?<registryValue>[^\"'\\s]*)[\"']?\\n\\s+)?## @param (?<depName>\\S+\\.repository) .+?\\n\\s+repository:\\s*(?<repositoryValue>[^\\s]+)\\n\\s+## @param \\S+\\.tag .+?\\n\\s+tag:\\s*['\"]?(?<currentValue>[^@'\"\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
@@ -73,7 +73,7 @@
         "docker"
       ],
       "matchPackageNames": [
-        "koperator-internal/services/clusterpirate"
+        "harbor.cloudpirates.io/koperator-internal/services/clusterpirate"
       ],
       "enabled": false,
       "pinDigests": false,
