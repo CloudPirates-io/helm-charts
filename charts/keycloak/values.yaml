@@ -46,7 +46,7 @@ podLabels: {}
 ## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
 shareProcessNamespace: false
 ## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default
-terminationGracePeriodSeconds: "" # @schema type:[integer, string]; minimum:0; pattern:^$
+terminationGracePeriodSeconds: ""  # @schema type:[integer, string]; minimum:0; pattern:^$
 ## @param lifecycle Lifecycle hooks for the Keycloak container
 lifecycle: {}
 
@@ -507,7 +507,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636"
+    tag: "18.6@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
@@ -526,7 +526,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.3.2@sha256:759869cb6f003234a95c6384cdee245b4bce7de26913fe607a8110362c0c007d"
+    tag: "12.3.2@sha256:c237fd50cc48d6f2b87c4ca66d52f3b5eef7271b3bea7aee586c0be19d5b460d"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container

@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.10.0@sha256:39353c6a2f310da333374e1290c91805d15a85def073b5090f58e4ac646d284c"
+  tag: "8.10.0@sha256:344e3945a0b431c8ff1eecd58c5573538126bd756f02fc7e218ddf1fc2546366"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -302,7 +302,7 @@ volumePermissions:
     ## @param volumePermissions.image.repository Image repository
     repository: busybox
     ## @param volumePermissions.image.tag Image tag
-    tag: "1.38.0"
+    tag: "1.38.0@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616"
     ## @param volumePermissions.image.pullPolicy Image pull policy
     pullPolicy: IfNotPresent
   ## @param volumePermissions.resources Resource limits and requests
@@ -558,7 +558,7 @@ sentinel:
       ## @param sentinel.masterService.image.repository Image for master discovery deployment
       repository: alpine/kubectl
       ## @param sentinel.masterService.image.tag Image tag for master discovery deployment
-      tag: "1.36.3"
+      tag: "1.36.3@sha256:dae261106d5555008acede256b7102c8a6decde7209198434f5999f051460f57"
       ## @param sentinel.masterService.image.pullPolicy Image pull policy for master discovery deployment
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
@@ -633,7 +633,7 @@ metrics:
     ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Redis exporter image tag
-    tag: "v1.88.0-alpine@sha256:db6df2026585151c2209aa1f21c8856da883cf933b0943c0e51d1f4b3acf1a8d"
+    tag: "v1.89.0-alpine@sha256:d4e0a0ad55fa4f968eea4519b518b16dac887debd06c790a6be2f60940538d82"
     ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
