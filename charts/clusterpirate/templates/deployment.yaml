@@ -104,8 +104,8 @@ spec:
               secretKeyRef:
                 {{- if and .Values.valkey.enabled (not .Values.valkey.auth.existingSecret) }}
                 # Use auto-generated password from Valkey subchart
-                name: {{ include "clusterpirate.fullname" . }}-valkey
-                key: password
+                name: {{ include "valkey.secretName" .Subcharts.valkey }}
+                key: {{ include "valkey.passwordKey" .Subcharts.valkey }}
                 {{- else if .Values.valkey.auth.existingSecret }}
                 # Use existing secret specified for Valkey
                 name: {{ include "cloudpirates.tplvalues.render" (dict "value" .Values.valkey.auth.existingSecret "context" .) }}
