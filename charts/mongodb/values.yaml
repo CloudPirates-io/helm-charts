@@ -42,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.7@sha256:2f02e2184c6d91c3208e5ab75a0707d1386a05377b20fdaf49a314815774d863"
+  tag: "8.3.8@sha256:44dce4b1688969ff3fdbfc438fd6113f734140ad96e3639ef17ee26a162dfb58"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -162,6 +162,7 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
   ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  # @schema type:[null, object]
   persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
@@ -460,6 +461,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-hidden-volume"
@@ -504,6 +506,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-arbiter-volume"
@@ -608,6 +611,7 @@ shardedCluster:
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
     ## Example: customInit: |
@@ -668,6 +672,7 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
     ## Example: customInit: |
