@@ -18,13 +18,13 @@ commonLabels: {}
 commonAnnotations: {}
 
 ## @section MinIO image configuration
+## IMPORTANT: We are using a, by default, hardened image provided by us, which patches cve´s but does not in any way modify the behavior of minio. You are free to switch over to vanilla versions if this concerns you.
 image:
   ## @param image.registry MinIO image registry
   registry: docker.io
   ## @param image.repository MinIO image repository
   repository: cloudpirates/image-minio
   ## @param image.tag MinIO image tag (immutable tags are recommended)
-  ## IMPORTANT: We are using a, by default, hardened image provided by us, which patches cve´s but does not in any way modify the behavior of minio. You are free to switch over to vanilla versions if this concerns you.
   tag: "RELEASE.2025-10-15T17-29-55Z-hardened@sha256:8dc02a7e509336c8bbb67962086d691bdcde20a2c9327ed68e5081a681f6dbfc"
   ## @param image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)
   useCpuV1: false
