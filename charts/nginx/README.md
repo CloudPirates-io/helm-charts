@@ -57,6 +57,10 @@ To run Nginx on port 8080 with matching health checks:
 
 ```yaml
 # my-values.yaml
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
 serverConfig: |
   server {
     listen 0.0.0.0:8080;
@@ -135,6 +139,18 @@ The following table lists the configurable parameters of the Nginx chart and the
 | `image.repository` | Nginx image repository  | `nginx`                                                                                   |
 | `image.tag`        | Nginx image tag         | `"1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e"` |
 | `image.pullPolicy` | Nginx image pull policy | `Always`                                                                                  |
+
+### Git Image Parameters
+
+Used by the `git-clone-repository` init container and the `git-repo-syncer` sidecar when `cloneStaticSiteFromGit.enabled` is set.
+
+| Parameter                                    | Description            | Default       |
+| -------------------------------------------- | ---------------------- | ------------- |
+| `cloneStaticSiteFromGit.image.registry`      | Git image registry     | `docker.io`   |
+| `cloneStaticSiteFromGit.image.repository`    | Git image repository   | `alpine/git`  |
+| `cloneStaticSiteFromGit.image.tag`           | Git image tag          | `v2.52.0`     |
+| `cloneStaticSiteFromGit.image.pullPolicy`    | Git image pull policy  | `IfNotPresent`|
+| `cloneStaticSiteFromGit.image.pullSecrets`   | Git image pull secrets | `[]`          |
 
 
 ### Nginx Configuration Parameters
@@ -457,6 +473,7 @@ All containers in `sidecars` will be added to the pod and run alongside the main
 | `priorityClassName` | Priority class for pod eviction   | `""`    |
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
 | `affinity`          | Affinity rules for pod assignment | `{}`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
 | `dnsPolicy`         | DNS policy for the pod            | `""`    |
 | `dnsConfig`         | DNS configuration for the pod     | `{}`    |
 

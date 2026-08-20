@@ -23,10 +23,10 @@
                 "containerPorts": {
                     "type": "object",
                     "properties": {
-                        "metrics": {
+                        "health": {
                             "type": "integer"
                         },
-                        "health": {
+                        "metrics": {
                             "type": "integer"
                         }
                     }
@@ -88,6 +88,9 @@
                 "customStartupProbe": {
                     "type": "object"
                 },
+                "extraArgs": {
+                    "type": "array"
+                },
                 "extraEnvVars": {
                     "type": "array"
                 },
@@ -109,9 +112,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -157,6 +157,9 @@
                             "type": "integer"
                         }
                     }
+                },
+                "logLevel": {
+                    "type": "string"
                 },
                 "metrics": {
                     "type": "object",
@@ -238,7 +241,7 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -501,6 +504,31 @@
                 },
                 "watchNamespaces": {
                     "type": "array"
+                },
+                "webhook": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingWebhookCertCABundle": {
+                            "type": "string"
+                        },
+                        "existingWebhookCertSecret": {
+                            "type": "string"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "type": "integer"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -513,9 +541,6 @@
         "credentialUpdaterImage": {
             "type": "object",
             "properties": {
-                "digest": {
-                    "type": "string"
-                },
                 "pullSecrets": {
                     "type": "array"
                 },
@@ -595,10 +620,13 @@
                 "containerPorts": {
                     "type": "object",
                     "properties": {
+                        "health": {
+                            "type": "integer"
+                        },
                         "metrics": {
                             "type": "integer"
                         },
-                        "health": {
+                        "metricsHttp": {
                             "type": "integer"
                         }
                     }
@@ -672,6 +700,9 @@
                 "existingWebhookCertSecret": {
                     "type": "string"
                 },
+                "extraArgs": {
+                    "type": "array"
+                },
                 "extraEnvVars": {
                     "type": "array"
                 },
@@ -699,9 +730,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -748,6 +776,9 @@
                         }
                     }
                 },
+                "logLevel": {
+                    "type": "string"
+                },
                 "metrics": {
                     "type": "object",
                     "properties": {
@@ -786,19 +817,14 @@
                                 }
                             }
                         },
+                        "secure": {
+                            "type": "boolean"
+                        },
                         "service": {
                             "type": "object",
                             "properties": {
                                 "annotations": {
-                                    "type": "object",
-                                    "properties": {
-                                        "prometheus.io/port": {
-                                            "type": "string"
-                                        },
-                                        "prometheus.io/scrape": {
-                                            "type": "string"
-                                        }
-                                    }
+                                    "type": "object"
                                 },
                                 "clusterIP": {
                                     "type": "string"
@@ -822,7 +848,10 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
-                                            "type": "string"
+                                            "type": "integer"
+                                        },
+                                        "https": {
+                                            "type": "integer"
                                         }
                                     }
                                 },
@@ -830,6 +859,9 @@
                                     "type": "object",
                                     "properties": {
                                         "http": {
+                                            "type": "integer"
+                                        },
+                                        "https": {
                                             "type": "integer"
                                         }
                                     }
@@ -1039,7 +1071,7 @@
                             "type": "object",
                             "properties": {
                                 "http": {
-                                    "type": "string"
+                                    "type": "integer"
                                 }
                             }
                         },
@@ -1142,9 +1174,6 @@
         "rabbitmqImage": {
             "type": "object",
             "properties": {
-                "digest": {
-                    "type": "string"
-                },
                 "pullSecrets": {
                     "type": "array"
                 },

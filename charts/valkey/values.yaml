@@ -370,7 +370,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.87.0-alpine@sha256:1a286dba9547b0aa3ebd4e4106fa52ad67c754dcd7cb744eb745e41d48b252ad"
+    tag: "v1.89.0-alpine@sha256:d4e0a0ad55fa4f968eea4519b518b16dac887debd06c790a6be2f60940538d82"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -472,6 +472,59 @@ sentinel:
   preStop:
     ## @param sentinel.preStop.enabled Enable the preStop hook on the Sentinel container
     enabled: true
+  masterProxy:
+    ## @param sentinel.masterProxy.enabled Enable a stable master endpoint for non-Sentinel-aware clients
+    ## Adds an HAProxy sidecar to every Valkey pod (alongside the existing Sentinel sidecar) that
+    ## determines the master by checking INFO replication on each backend directly, instead of
+    ## trusting a Kubernetes Service selector patched from Sentinel's opinion. It also closes
+    ## client connections to a demoted master, forcing an immediate reconnect instead of leaving
+    ## clients writing against a stale socket. Because it's bundled into the StatefulSet, proxy
+    ## redundancy scales automatically with replicaCount and needs no separate RBAC, ServiceAccount,
+    ## affinity, or PodDisruptionBudget.
+    enabled: false
+    image:
+      ## @param sentinel.masterProxy.image.registry HAProxy image registry
+      registry: docker.io
+      ## @param sentinel.masterProxy.image.repository HAProxy image repository
+      repository: haproxy
+      ## @param sentinel.masterProxy.image.tag HAProxy image tag
+      tag: "3.4-alpine@sha256:fb87fc81943143b9acaea7442973e6ba654035fff76ffe7af6829dd1bcb0f7a5"
+      ## @param sentinel.masterProxy.image.pullPolicy HAProxy image pull policy
+      pullPolicy: IfNotPresent
+    ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on
+    ## Must differ from service.port, which the Valkey container in the same pod already uses -
+    ## enforced at render time with a `fail` if they collide.
+    containerPort: 6380
+    ## @param sentinel.masterProxy.checkInterval Health check interval (HAProxy `inter`, e.g. "1s")
+    checkInterval: "1s"
+    ## @param sentinel.masterProxy.checkRise Consecutive successful checks before a backend is marked master-eligible
+    checkRise: 2
+    ## @param sentinel.masterProxy.checkFall Consecutive failed checks before a backend is marked down
+    checkFall: 2
+    ## Plain `role:master` is not sufficient on its own: a pod that restarts with empty/ephemeral
+    ## storage can come back up self-declared as master (see the sentinel container's bootstrap
+    ## logic) before Sentinel has finished failing over, producing two backends that both report
+    ## role:master at once - confirmed in testing. To guard against this, the proxy prefers a
+    ## candidate with an attached replica and no failover in progress (connected_slaves > 0 and
+    ## master_failover_state:no-failover), falling back to plain role:master only when no
+    ## candidate satisfies that stricter check - e.g. right after a fresh install, or right after
+    ## a replica restarts and is still resyncing, so the endpoint never goes fully unavailable.
+    ## This narrows split-brain exposure but doesn't eliminate it: if two candidates satisfy the
+    ## stricter check at the same instant (a replica split 1:1 across the old and new master), the
+    ## proxy can still round-robin between both until one drops out.
+    ## @param sentinel.masterProxy.resources Resource limits and requests for the HAProxy sidecar
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    service:
+      ## @param sentinel.masterProxy.service.type Kubernetes service type for the master proxy service
+      type: ""
+      ## @param sentinel.masterProxy.service.annotations Additional custom annotations for the master proxy service
+      annotations: {}
 
 ## @param resources Resource limits and requests for Valkey init container pod
 initContainer:
