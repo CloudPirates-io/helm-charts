@@ -8,7 +8,7 @@ metadata:
     {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.metrics.podMonitor.additionalLabels "context" $) | nindent 4 }}
     {{- end }}
   name: {{ printf "%s-metrics" (include "rmqco.clusterOperator.fullname" .) }}
-  namespace: {{ default (include "cloudpirates.namespace" .) .Values.msgTopologyOperator.metrics.podMonitor.namespace | quote }}
+  namespace: {{ default (include "cloudpirates.namespace" .) .Values.clusterOperator.metrics.podMonitor.namespace | quote }}
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
