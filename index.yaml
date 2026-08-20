@@ -5,6 +5,58 @@ entries:
       artifacthub.io/category: monitoring-logging
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[clusterpirate] Render labels on every object without breaking YAML
+            (#1631)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1631
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.0.1
+    created: "2026-08-20T11:19:09.955208601Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.25.5
+    description: Client agent for the CloudPirates Managed Observability Platform
+      to connect your Kubernetes cluster to our infrastructure
+    digest: 1903c5413539c05addff189ff1ddcf82e6ddbc63d4b090fafc182413bb70422f
+    home: https://www.cloudpirates.io
+    icon: https://a.storyblok.com/f/143071/512x512/88dc07809a/cluster-pirate-logo.svg
+    keywords:
+    - kubernetes
+    - clusterpirate
+    - cloudpirates
+    - observability
+    - agent
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: clusterpirate
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/clusterpirate
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/clusterpirate-1.5.12/clusterpirate-1.5.12.tgz
+    version: 1.5.12
+  - annotations:
+      artifacthub.io/category: monitoring-logging
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[helm] Update valkey Docker tag to v0.25.5 (#1605)'
           links:
           - name: Pull Request
@@ -60778,4 +60830,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-20T11:15:42.124567895Z"
+generated: "2026-08-20T11:19:09.957204258Z"
