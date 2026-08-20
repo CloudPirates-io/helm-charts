@@ -1,0 +1,62 @@
+suite: test zookeeper probes
+templates:
+  - statefulset.yaml
+tests:
+  - it: should render liveness and readiness probes by default
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - isNull:
+          path: spec.template.spec.containers[0].startupProbe
+
+  - it: should drop the liveness probe when disabled
+    set:
+      livenessProbe:
+        enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+
+  - it: should drop the readiness probe when disabled
+    set:
+      readinessProbe:
+        enabled: false
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - isNotNull:
+          path: spec.template.spec.containers[0].livenessProbe
+
+  - it: should render the startup probe when enabled
+    set:
+      startupProbe:
+        enabled: true
+        failureThreshold: 42
+        periodSeconds: 7
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.tcpSocket.port
+          value: client
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.failureThreshold
+          value: 42
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.periodSeconds
+          value: 7
+
+  - it: should use a custom liveness handler when given
+    set:
+      livenessProbe:
+        custom:
+          exec:
+            command: ["/bin/sh", "-c", "zkServer.sh status"]
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          value: zkServer.sh status
+      - isNull:
+          path: spec.template.spec.containers[0].livenessProbe.tcpSocket
