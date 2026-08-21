@@ -222,6 +222,9 @@ resources:
   #   cpu: 50m
   #   memory: 64Mi
 
+## @param lifecycleHooks for the Nginx container to automate configuration before or after startup
+lifecycleHooks: {}
+
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
 
