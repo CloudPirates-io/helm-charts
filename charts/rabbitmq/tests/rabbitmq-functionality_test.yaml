@@ -218,19 +218,21 @@ tests:
   - it: should configure security contexts correctly
     set:
       podSecurityContext:
-        fsGroup: 999
-      securityContext:
-        runAsUser: 999
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
+        fsGroup: 2000
+      containerSecurityContext:
+        runAsUser: 1234
+        runAsGroup: 4321
     template: templates/statefulset.yaml
     asserts:
       - equal:
           path: spec.template.spec.securityContext.fsGroup
-          value: 999
+          value: 2000
       - equal:
           path: spec.template.spec.containers[0].securityContext.runAsUser
-          value: 999
+          value: 1234
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 4321
       - equal:
           path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
           value: false

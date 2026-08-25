@@ -1,0 +1,26 @@
+{{- if and .Values.sentinel.enabled .Values.sentinel.masterProxy.enabled (eq .Values.architecture "replication") (not .Values.tls.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valkey.fullname" . }}-master
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "valkey.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master-proxy
+  {{- $annotations := merge .Values.sentinel.masterProxy.service.annotations .Values.commonAnnotations }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Selects every StatefulSet pod: the HAProxy sidecar runs in each one and forwards
+  # to whichever pod is currently master, so any pod can answer this Service.
+  type: {{ .Values.sentinel.masterProxy.service.type | default .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: haproxy
+      protocol: TCP
+      name: valkey
+  selector:
+    {{- include "valkey.selectorLabels" . | nindent 4 }}
+{{- end }}
