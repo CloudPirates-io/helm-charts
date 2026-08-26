@@ -1161,7 +1161,7 @@ spec:
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
               {{- if .Values.auth.acl.enabled }}
-              sentinel auth-user {{ .Values.sentinel.masterName }} {{ include "redis.auth.acl.sentinelUsername" . }}
+              sentinel auth-user {{ .Values.sentinel.masterName }} ${REDIS_SENTINEL_USERNAME}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_SENTINEL_PASSWORD}"
               {{- else }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
