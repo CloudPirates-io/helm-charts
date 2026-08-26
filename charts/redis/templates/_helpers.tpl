@@ -238,7 +238,8 @@ Usage: {{ include "redis.auth.acl.setupScript" (dict "type" "init|sentinel|metri
 {{- $defaultUser := include "redis.auth.acl.defaultUsername" .context -}}
 {{- $sentinelUser := include "redis.auth.acl.sentinelUsername" .context -}}
 {{ include "redis.auth.acl.checkFile" .context }}
-{{- else if eq .type "init" -}}
+{{- end -}}
+{{- if eq .type "init" -}}
 echo "aclfile {{ $aclPath }}" >> /tmp/redis.conf
 REDIS_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
 if [ -z "$REDIS_PASSWORD" ]; then
@@ -246,14 +247,8 @@ if [ -z "$REDIS_PASSWORD" ]; then
   exit 1
 fi
 export REDISCLI_AUTH="$REDIS_PASSWORD"
-REDIS_SENTINEL_USERNAME="{{ $sentinelUser }}"
 REDIS_SENTINEL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $sentinelUser "context" .context) }})
-if ! echo "$REDIS_SENTINEL_PASSWORD" | grep -q '[^[:space:]]'; then
-  REDIS_SENTINEL_USERNAME="{{ $defaultUser }}"
-  REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
-fi
-export REDIS_SENTINEL_USERNAME
-export REDIS_SENTINEL_PASSWORD
+if ! echo "$REDIS_SENTINEL_PASSWORD" | grep -q '[^[:space:]]'; then REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"; fi
 {{- else if eq .type "sentinel" -}}
 REDIS_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
 if [ -z "$REDIS_PASSWORD" ]; then
@@ -261,14 +256,8 @@ if [ -z "$REDIS_PASSWORD" ]; then
   exit 1
 fi
 export REDISCLI_AUTH="$REDIS_PASSWORD"
-REDIS_SENTINEL_USERNAME="{{ $sentinelUser }}"
 REDIS_SENTINEL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $sentinelUser "context" .context) }})
-if [ -z "$REDIS_SENTINEL_PASSWORD" ]; then
-  REDIS_SENTINEL_USERNAME="{{ $defaultUser }}"
-  REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
-fi
-export REDIS_SENTINEL_USERNAME
-export REDIS_SENTINEL_PASSWORD
+[ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
 {{- else if eq .type "metrics" -}}
 ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
 if [ -z "$ACL_PASSWORD" ]; then
@@ -320,6 +309,7 @@ if [ -z "$ACL_PASSWORD" ]; then
   exit 1
 fi
 REDIS_PASSWORD="$ACL_PASSWORD"
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
