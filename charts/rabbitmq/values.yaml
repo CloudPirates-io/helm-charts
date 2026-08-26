@@ -61,6 +61,14 @@ service:
   annotations: {}
   ## @param service.annotationsHeadless Kubernetes service-headless annotations
   annotationsHeadless: {}
+  ## @param service.nodePorts Node ports to expose, only used if service.type is NodePort
+  nodePorts:
+    ## @param service.nodePorts.amqp Node port for the AMQP service port
+    amqp: ""
+    ## @param service.nodePorts.mgmt Node port for the management UI service port
+    mgmt: ""
+    ## @param service.nodePorts.metrics Node port for the Prometheus metrics service port
+    metrics: ""
 
 ## @section RabbitMQ Authentication
 auth:
