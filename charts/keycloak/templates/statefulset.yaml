@@ -154,9 +154,6 @@ spec:
             {{- end }}
             {{- if .Values.tls.truststoreEnabled }}
             - --https-trust-store-file={{ .Values.tls.truststoreFile }}
-            {{- if .Values.tls.truststorePassword }}
-            - --https-trust-store-password={{ .Values.tls.truststorePassword }}
-            {{- end }}
             {{- end }}
           env:
             - name: KC_HTTP_RELATIVE_PATH
@@ -172,7 +169,7 @@ spec:
             - name: KC_HTTPS_TRUST_STORE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "keycloak.truststoreSecretName" . }}
+                  name: {{ include "keycloak.truststorePasswordSecretName" . }}
                   key: {{ .Values.tls.truststoreExistingSecretPasswordKey }}
             {{- end }}
             {{- if .Values.database.type }}
