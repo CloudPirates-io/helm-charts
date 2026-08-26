@@ -1160,7 +1160,12 @@ spec:
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
+              {{- if .Values.auth.acl.enabled }}
+              sentinel auth-user {{ .Values.sentinel.masterName }} {{ include "redis.auth.acl.sentinelUsername" . }}
+              sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_SENTINEL_PASSWORD}"
+              {{- else }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              {{- end }}
               {{- end }}
               {{- if .Values.auth.sentinel }}
               requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"

@@ -135,6 +135,10 @@ auth:
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
     ## Example: "/vault/secrets/redis-acl"
     existingFilePath: ""
+    ## @param auth.acl.defaultUsername ACL username used as the 'default' Redis user. Must match a user defined in the ACL file.
+    defaultUsername: "default"
+    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file.
+    sentinelUsername: "sentinel"
 
 ## @section TLS/SSL configuration
 tls:
