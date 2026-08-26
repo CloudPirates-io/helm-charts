@@ -322,7 +322,6 @@ fi
 REDIS_PASSWORD="$ACL_PASSWORD"
 {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Generate TLS certificate arguments for redis-cli probes
