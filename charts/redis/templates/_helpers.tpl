@@ -233,10 +233,10 @@ Script block to setup ACL passwords in shell scripts
 Usage: {{ include "redis.auth.acl.setupScript" (dict "type" "init|sentinel|metrics|job|prestop|probe" "context" $) }}
 */}}
 {{- define "redis.auth.acl.setupScript" -}}
-{{- if .context.Values.auth.acl.enabled }}
 {{- $aclPath := include "redis.auth.acl.path" .context -}}
 {{- $defaultUser := include "redis.auth.acl.defaultUsername" .context -}}
 {{- $sentinelUser := include "redis.auth.acl.sentinelUsername" .context -}}
+{{- if .context.Values.auth.acl.enabled }}
 {{ include "redis.auth.acl.checkFile" .context }}
 {{- end -}}
 {{- if eq .type "init" -}}
