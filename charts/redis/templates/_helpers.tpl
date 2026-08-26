@@ -238,7 +238,6 @@ Usage: {{ include "redis.auth.acl.setupScript" (dict "type" "init|sentinel|metri
 {{- $sentinelUser := include "redis.auth.acl.sentinelUsername" .context -}}
 {{- if .context.Values.auth.acl.enabled }}
 {{ include "redis.auth.acl.checkFile" .context }}
-{{- end -}}
 {{- if eq .type "init" -}}
 echo "aclfile {{ $aclPath }}" >> /tmp/redis.conf
 REDIS_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
