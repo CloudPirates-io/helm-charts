@@ -1,0 +1,45 @@
+suite: test etcd service account token mounting
+templates:
+  - statefulset.yaml
+  - serviceaccount.yaml
+tests:
+  - it: should set automountServiceAccountToken on the pod spec by default
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: false
+
+  - it: should set it on the pod spec when the chart does not create the ServiceAccount
+    template: statefulset.yaml
+    set:
+      serviceAccount:
+        create: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: default
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: false
+
+  - it: should follow the value when token mounting is enabled
+    template: statefulset.yaml
+    set:
+      serviceAccount:
+        create: false
+        automountServiceAccountToken: true
+    asserts:
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: true
+
+  - it: should keep setting it on the created ServiceAccount
+    template: serviceaccount.yaml
+    set:
+      serviceAccount:
+        automountServiceAccountToken: true
+    asserts:
+      - equal:
+          path: automountServiceAccountToken
+          value: true

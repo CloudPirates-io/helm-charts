@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: "4.3.4-management-alpine@sha256:44bf7eb50fe1765885659e49ccfdc775f8e531964d979321aee380a071f49f94"
+  tag: "4.3.5-management-alpine@sha256:a1a5dd841347af3e32355fd58ac530e831fd394c49e299f862e2fd4ab331cd79"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -66,7 +66,7 @@ credentialUpdaterImage:
   ## @param credentialUpdaterImage.repository [default: REPOSITORY_NAME/rmq-default-credential-updater] RabbitMQ Default User Credential Updater image repository
   repository: rabbitmq/default-user-credential-updater
   ## @param credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
-  tag: "1.0.16@sha256:ecfcbe3465bf4ae0ce5846e556b103f62d3344c1bfcb787e65749c16d8906b19"
+  tag: "1.0.17@sha256:3f5335baf93c302ccb1054481eb422fb6d2e494c216f6a3bbdd414c6e4e2cf04"
   ## @param credentialUpdaterImage.pullSecrets RabbitMQ Default User Credential Updater image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -86,7 +86,7 @@ clusterOperator:
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
     repository: rabbitmq/cluster-operator
     ## @param clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
-    tag: "2.22.3@sha256:d0fb3cf372285ba76b0b1051751991a497b6c23d9bbf067533a4add894ac7a2c"
+    tag: "2.22.5@sha256:2727b84b835ada97247bbb65ebfa6998168b4e8ee11b0e6cece56ac2c9c4f0fb"
     ## @param clusterOperator.image.pullPolicy RabbitMQ Cluster Operator image pull policy
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -521,7 +521,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmq/messaging-topology-operator
     ## @param msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: "1.20.1@sha256:7b72a3f78b96270a2b20bdebfd76b626f5cb8f68ff8745c162cdd1dcb2bea0c5"
+    tag: "1.20.2@sha256:29174b668012d7a8cea8d30ee4acc80b0283911624564b604c344820cac3370d"
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ## @param msgTopologyOperator.image.pullPolicy RabbitMQ Messaging Topology Operator image pull policy
