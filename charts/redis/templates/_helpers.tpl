@@ -317,7 +317,13 @@ if [ -z "$REDIS_PASSWORD" ]; then
 fi
 export REDISCLI_AUTH="$REDIS_PASSWORD"
 REDIS_SENTINEL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $sentinelUser "context" .context) }})
-[ -z "$REDIS_SENTINEL_PASSWORD" ] && REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
+if [ -z "$REDIS_SENTINEL_PASSWORD" ]; then
+  REDIS_SENTINEL_PASSWORD="$REDIS_PASSWORD"
+  REDIS_SENTINEL_USERNAME="{{ $defaultUser }}"
+else
+  REDIS_SENTINEL_USERNAME="{{ $sentinelUser }}"
+fi
+export REDIS_SENTINEL_USERNAME
 {{- else if eq .type "metrics" -}}
 ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
 if [ -z "$ACL_PASSWORD" ]; then
