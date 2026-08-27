@@ -209,7 +209,11 @@ Return the full path to the Sentinel ACL file
 Return the ACL username for the 'default' Sentinel user
 */}}
 {{- define "redis.sentinel.acl.defaultUsername" -}}
-{{- default "default" .Values.sentinel.acl.defaultUsername -}}
+{{- $u := default "default" .Values.sentinel.acl.defaultUsername -}}
+{{- if not (regexMatch "^[A-Za-z0-9._-]+$" $u) -}}
+{{- fail (printf "sentinel.acl.defaultUsername must match ^[A-Za-z0-9._-]+$ (got %q)" $u) -}}
+{{- end -}}
+{{- $u -}}
 {{- end -}}
 
 {{/*
@@ -232,14 +236,22 @@ Return the ACL file name
 Return the ACL username for the 'default' Redis user
 */}}
 {{- define "redis.auth.acl.defaultUsername" -}}
-{{- default "default" .Values.auth.acl.defaultUsername -}}
+{{- $u := default "default" .Values.auth.acl.defaultUsername -}}
+{{- if not (regexMatch "^[A-Za-z0-9._-]+$" $u) -}}
+{{- fail (printf "auth.acl.defaultUsername must match ^[A-Za-z0-9._-]+$ (got %q)" $u) -}}
+{{- end -}}
+{{- $u -}}
 {{- end -}}
 
 {{/*
 Return the ACL username Sentinel uses to authenticate to the monitored Redis instances
 */}}
 {{- define "redis.auth.acl.sentinelUsername" -}}
-{{- default "sentinel" .Values.auth.acl.sentinelUsername -}}
+{{- $u := default "sentinel" .Values.auth.acl.sentinelUsername -}}
+{{- if not (regexMatch "^[A-Za-z0-9._-]+$" $u) -}}
+{{- fail (printf "auth.acl.sentinelUsername must match ^[A-Za-z0-9._-]+$ (got %q)" $u) -}}
+{{- end -}}
+{{- $u -}}
 {{- end -}}
 
 {{/*
