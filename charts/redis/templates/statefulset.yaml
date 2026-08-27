@@ -1,5 +1,6 @@
 {{- /* This template renders either a Deployment or a StatefulSet depending on useDeployment and persistence settings. */ -}}
 {{- include "redis.auth.acl.validate" . -}}
+{{- include "redis.sentinel.acl.validate" . -}}
 {{- include "redis.externalMaster.validate" . -}}
 {{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: apps/v1
@@ -805,6 +806,12 @@ spec:
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
+            {{- if and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret }}
+            - name: sentinel-acl-file
+              mountPath: {{ include "redis.sentinel.acl.path" . }}
+              subPath: {{ include "redis.sentinel.acl.file" . }}
+              readOnly: true
+            {{- end }}
           {{- if .Values.tls.enabled }}
             - name: tls-certs
               mountPath: /etc/redis/tls
@@ -995,7 +1002,9 @@ spec:
               {{- if .Values.auth.enabled }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
               {{- end }}
-              {{- if .Values.auth.sentinel }}
+              {{- if .Values.sentinel.acl.enabled }}
+              aclfile {{ include "redis.sentinel.acl.path" . }}
+              {{- else if .Values.auth.sentinel }}
               requirepass "${REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
@@ -1167,7 +1176,9 @@ spec:
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
               {{- end }}
               {{- end }}
-              {{- if .Values.auth.sentinel }}
+              {{- if .Values.sentinel.acl.enabled }}
+              aclfile {{ include "redis.sentinel.acl.path" . }}
+              {{- else if .Values.auth.sentinel }}
               requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
@@ -1432,6 +1443,11 @@ spec:
         - name: acl-file
           secret:
             secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+        {{- end }}
+        {{- if and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret }}
+        - name: sentinel-acl-file
+          secret:
+            secretName: {{ required "Sentinel ACL secret name is required when sentinel.acl is enabled" .Values.sentinel.acl.existingSecret }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- toYaml .Values.extraVolumes | nindent 8 }}

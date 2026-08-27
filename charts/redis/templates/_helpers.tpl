@@ -176,6 +176,52 @@ Validate externalMaster configuration - only supported for architecture=replicat
 {{- end -}}
 
 {{/*
+Validate Sentinel ACL configuration - ensure existingSecret and existingFilePath are mutually exclusive
+*/}}
+{{- define "redis.sentinel.acl.validate" -}}
+{{- if and .Values.sentinel.acl.existingSecret .Values.sentinel.acl.existingFilePath -}}
+{{- fail "sentinel.acl.existingSecret and sentinel.acl.existingFilePath are mutually exclusive. Please use only one of them." -}}
+{{- end -}}
+{{- if and .Values.sentinel.acl.enabled (not .Values.sentinel.acl.existingSecret) (not .Values.sentinel.acl.existingFilePath) -}}
+{{- fail "sentinel.acl.enabled is true but neither sentinel.acl.existingSecret nor sentinel.acl.existingFilePath is set. Please provide a Sentinel ACL source." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the Sentinel ACL file name
+*/}}
+{{- define "redis.sentinel.acl.file" -}}
+{{- default "sentinel-users.acl" .Values.sentinel.acl.existingSecretACLKey -}}
+{{- end -}}
+
+{{/*
+Return the full path to the Sentinel ACL file
+*/}}
+{{- define "redis.sentinel.acl.path" -}}
+{{- if .Values.sentinel.acl.existingFilePath -}}
+{{- .Values.sentinel.acl.existingFilePath -}}
+{{- else -}}
+{{- printf "/etc/redis/sentinel/%s" (include "redis.sentinel.acl.file" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the ACL username for the 'default' Sentinel user
+*/}}
+{{- define "redis.sentinel.acl.defaultUsername" -}}
+{{- default "default" .Values.sentinel.acl.defaultUsername -}}
+{{- end -}}
+
+{{/*
+Shell command to extract password for a user from the Sentinel ACL file
+Usage: {{ include "redis.sentinel.acl.awkCommand" (dict "user" "default" "context" $) }}
+*/}}
+{{- define "redis.sentinel.acl.awkCommand" -}}
+{{- $aclPath := include "redis.sentinel.acl.path" .context -}}
+awk '$1=="user" && $2=="{{ .user }}" { for (i=3; i<=NF; i++) if ($i ~ /^>/) { print substr($i,2); break } }' '{{ $aclPath }}'
+{{- end -}}
+
+{{/*
 Return the ACL file name
 */}}
 {{- define "redis.auth.acl.file" -}}
@@ -236,7 +282,22 @@ Usage: {{ include "redis.auth.acl.setupScript" (dict "type" "init|sentinel|metri
 {{- $aclPath := include "redis.auth.acl.path" .context -}}
 {{- $defaultUser := include "redis.auth.acl.defaultUsername" .context -}}
 {{- $sentinelUser := include "redis.auth.acl.sentinelUsername" .context -}}
-{{- if .context.Values.auth.acl.enabled }}
+{{- $sentinelAclUser := include "redis.sentinel.acl.defaultUsername" .context -}}
+{{- if and (eq .type "sentinel-probe") .context.Values.sentinel.acl.enabled }}
+export REDISCLI_AUTH=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" $sentinelAclUser "context" .context) }})
+if [ -z "$REDISCLI_AUTH" ]; then
+  echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ $sentinelAclUser }}' in '{{ include "redis.sentinel.acl.path" .context }}'"
+  exit 1
+fi
+export REDIS_PASSWORD="$REDISCLI_AUTH"
+{{- else if and (eq .type "master-discovery") .context.Values.sentinel.acl.enabled }}
+ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" $sentinelAclUser "context" .context) }})
+if [ -z "$ACL_PASSWORD" ]; then
+  echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ $sentinelAclUser }}' in '{{ include "redis.sentinel.acl.path" .context }}'"
+  exit 1
+fi
+REDIS_PASSWORD="$ACL_PASSWORD"
+{{- else if .context.Values.auth.acl.enabled }}
 {{ include "redis.auth.acl.checkFile" .context }}
 {{- if eq .type "init" -}}
 echo "aclfile {{ $aclPath }}" >> /tmp/redis.conf
