@@ -25,7 +25,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.3.5-management@sha256:397fde82bc04522d88680b57cbf5d70caae715a76c957404e52e3f0fa056b8f3"
+  tag: "4.3.5-management@sha256:06fb591136a49e861e01aaaf9ce45085839ca23c35913d45a1e83519bb9778ca"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -61,6 +61,14 @@ service:
   annotations: {}
   ## @param service.annotationsHeadless Kubernetes service-headless annotations
   annotationsHeadless: {}
+  ## @param service.nodePorts Node ports to expose, only used if service.type is NodePort
+  nodePorts:
+    ## @param service.nodePorts.amqp Node port for the AMQP service port
+    amqp: ""
+    ## @param service.nodePorts.mgmt Node port for the management UI service port
+    mgmt: ""
+    ## @param service.nodePorts.metrics Node port for the Prometheus metrics service port
+    metrics: ""
 
 ## @section RabbitMQ Authentication
 auth:
