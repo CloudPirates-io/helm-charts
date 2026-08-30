@@ -452,6 +452,12 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
 
+## @param extraInitContainers Additional init containers to add to the pod
+extraInitContainers: []
+
+## @param extraVolumeMounts Additional containers to add to the pod
+extraContainers: []
+
 ## @section External master (migration)
 ## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
 ## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
