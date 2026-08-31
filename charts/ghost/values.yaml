@@ -26,7 +26,7 @@ image:
   ## @param image.repository Ghost image repository
   repository: ghost
   ## @param image.tag Ghost image tag
-  tag: "6.57.1@sha256:33843de136a4629cad2e3bc5b3e5b5b932186e2d998a8cd4423f2717eb447e3f"
+  tag: "6.60.0@sha256:3ed903b0b1ac0e98e82a818f544d6c46edbfa5de23c95e7fb5980ff193d9911b"
   ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 
@@ -241,7 +241,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB init container image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB init container image tag
-    tag: "12.3.2@sha256:759869cb6f003234a95c6384cdee245b4bce7de26913fe607a8110362c0c007d"
+    tag: "12.3.3@sha256:dd9b303aed4f4890ed09f766d8ca9ddfd176c0c6f6267feff53b3192ec65a979"
 
 config:
   database:

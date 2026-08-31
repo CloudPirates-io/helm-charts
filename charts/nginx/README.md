@@ -255,9 +255,10 @@ service:
 
 ### Resources Parameters
 
-| Parameter   | Description                                | Default |
-| ----------- | ------------------------------------------ | ------- |
-| `resources` | Resource limits and requests for Nginx pod | `{}`    |
+| Parameter        | Description                                                                | Default |
+| ---------------- | --------------------------------------------------------------------------- | ------- |
+| `resources`      | Resource limits and requests for Nginx pod                                | `{}`    |
+| `lifecycleHooks` | for the Nginx container to automate configuration before or after startup | `{}`    |
 
 
 ### Health Check Parameters
