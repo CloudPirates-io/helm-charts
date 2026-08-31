@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: "4.3.5-management-alpine@sha256:a1a5dd841347af3e32355fd58ac530e831fd394c49e299f862e2fd4ab331cd79"
+  tag: "4.3.5-management-alpine@sha256:e2f08f846de10bb09649a8b020f286ed362a8f72ee45e5a8d043851f1533fda8"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -521,7 +521,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmq/messaging-topology-operator
     ## @param msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: "1.20.1@sha256:7b72a3f78b96270a2b20bdebfd76b626f5cb8f68ff8745c162cdd1dcb2bea0c5"
+    tag: "1.20.2@sha256:29174b668012d7a8cea8d30ee4acc80b0283911624564b604c344820cac3370d"
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ## @param msgTopologyOperator.image.pullPolicy RabbitMQ Messaging Topology Operator image pull policy
