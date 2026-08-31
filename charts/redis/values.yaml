@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.10.1@sha256:691577adaf11927f4bb8871d40a5dd69a5c300d4453b742e8f6383c3e6e8d2e1"
+  tag: "8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -452,6 +452,12 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
 
+## @param extraInitContainers Additional init containers to add to the pod
+extraInitContainers: []
+
+## @param extraVolumeMounts Additional containers to add to the pod
+extraContainers: []
+
 ## @section External master (migration)
 ## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
 ## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
@@ -485,7 +491,7 @@ sentinel:
     ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
     ## @param sentinel.image.tag Redis Sentinel image tag
-    tag: "8.10.1@sha256:691577adaf11927f4bb8871d40a5dd69a5c300d4453b742e8f6383c3e6e8d2e1"
+    tag: "8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5"
     ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
@@ -633,7 +639,7 @@ metrics:
     ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Redis exporter image tag
-    tag: "v1.89.0-alpine@sha256:d4e0a0ad55fa4f968eea4519b518b16dac887debd06c790a6be2f60940538d82"
+    tag: "v1.90.0-alpine@sha256:136a6aac1258bcb41449272fe0de1d71e65f8cd69514efb2a410b2fd2239a3ba"
     ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
