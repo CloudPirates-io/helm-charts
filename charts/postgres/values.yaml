@@ -273,6 +273,16 @@ resources: {}
   #   cpu: 250m
   #   memory: 256Mi
 
+## @param initContainer.resources Resource limits and requests for the replication-standby-init init container
+initContainer:
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
+
 ## @section Persistence
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims

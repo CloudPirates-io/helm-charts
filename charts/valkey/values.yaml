@@ -370,7 +370,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.89.0-alpine@sha256:d4e0a0ad55fa4f968eea4519b518b16dac887debd06c790a6be2f60940538d82"
+    tag: "v1.90.0-alpine@sha256:136a6aac1258bcb41449272fe0de1d71e65f8cd69514efb2a410b2fd2239a3ba"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -488,7 +488,7 @@ sentinel:
       ## @param sentinel.masterProxy.image.repository HAProxy image repository
       repository: haproxy
       ## @param sentinel.masterProxy.image.tag HAProxy image tag
-      tag: "3.4-alpine@sha256:ac78ddd4921742360f533c28d24ecd0a003ea8065e2bfd5697c565ce1427f4b0"
+      tag: "3.4-alpine@sha256:c0afc4864dca9c68694cd1290433f0ee79b5c55be80f6745a165ffe373b9a564"
       ## @param sentinel.masterProxy.image.pullPolicy HAProxy image pull policy
       pullPolicy: IfNotPresent
     ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on
