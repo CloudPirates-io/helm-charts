@@ -95,6 +95,13 @@ Return the proper Redis metrics image name
 {{- end }}
 
 {{/*
+Return the proper Redis volume permissions image name
+*/}}
+{{- define "redis.volumePermissions.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.volumePermissions.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Sentinel selector labels
 */}}
 {{- define "redis.sentinel.selectorLabels" -}}
