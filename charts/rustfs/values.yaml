@@ -70,6 +70,11 @@ config:
 
 # -- Setups RustFS via CLI
 setup:
+  job:
+    ## @param setup.job.ttlSecondsAfterFinished TTL for completed setup job
+    ttlSecondsAfterFinished: 300
+    ## @param setup.job.backoffLimit Backoff limit for setup job
+    backoffLimit: 3
   image:
     ## @param image.registry RustFS CLI image registry
     registry: docker.io
@@ -100,6 +105,7 @@ setup:
   # -- Bucket definitions
   buckets: []
 #    - name: test
+#      versioning: true
 
 ## @section Deployment configuration
 replicaCount: 1
