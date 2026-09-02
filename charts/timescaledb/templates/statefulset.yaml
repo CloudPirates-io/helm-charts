@@ -41,6 +41,16 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "timescaledb.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          # Points postgres at the rendered postgresql.conf ConfigMap (mounted below at
+          # timescaledb.configDir). Without this, postgres falls back to the default
+          # $PGDATA/postgresql.conf written by initdb/timescaledb-tune, so every
+          # config.postgresql* value below is rendered into a ConfigMap that is mounted
+          # but never actually read. hba_file/ident_file/data_directory are unaffected --
+          # postgres resolves those from PGDATA regardless of config_file.
+          args:
+            - postgres
+            - -c
+            - {{ printf "config_file=%s/postgresql.conf" (include "timescaledb.configDir" .) | quote }}
           env:
             # Default PostgreSQL environment variables
             - name: PGDATA
@@ -50,19 +60,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "timescaledb.secretName" . }}
                   key: {{ include "timescaledb.adminPasswordKey" . }}
-            # PostgreSQL configuration
-            {{- if .Values.config.postgresqlMaxConnections }}
-            - name: POSTGRES_MAX_CONNECTIONS
-              value: {{ .Values.config.postgresqlMaxConnections | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlSharedBuffers }}
-            - name: POSTGRES_SHARED_BUFFERS
-              value: {{ .Values.config.postgresqlSharedBuffers | quote }}
-            {{- end }}
-            {{- if .Values.config.postgresqlEffectiveCacheSize }}
-            - name: POSTGRES_EFFECTIVE_CACHE_SIZE
-              value: {{ .Values.config.postgresqlEffectiveCacheSize | quote }}
-            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}

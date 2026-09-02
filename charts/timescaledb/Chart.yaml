@@ -2,7 +2,7 @@ apiVersion: v2
 name: timescaledb
 description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
 type: application
-version: 0.13.6
+version: 0.13.7
 appVersion: "2.29.2"
 keywords:
   - timescaledb
@@ -41,10 +41,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: added
-      description: "Add namespaceOverride Value to all Charts that missing it"
+    - kind: fixed
+      description: "Wire up config_file so config.postgresql* values actually reach postgres, and fix listen_addresses/quoting bugs that wiring it exposed"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/TODO"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/timescaledb/CHANGELOG.md"
