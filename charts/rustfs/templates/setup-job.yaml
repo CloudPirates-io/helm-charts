@@ -14,12 +14,13 @@ metadata:
     # Run as a post-install/post-upgrade hook so a successfully completed setup
     # task does not block `helm --wait` (a Completed Pod never becomes Ready).
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation
     {{- with (include "rustfs.annotations" .) }}
     {{- . | nindent 4 }}
     {{- end }}
 spec:
   backoffLimit: 3
+  ttlSecondsAfterFinished: {{ .Values.setup.job.ttlSecondsAfterFinished }}
   template:
     metadata:
       labels:

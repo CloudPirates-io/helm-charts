@@ -70,6 +70,9 @@ config:
 
 # -- Setups RustFS via CLI
 setup:
+  job:
+    ## @param setup.job.ttlSecondsAfterFinished TTL for completed setup job
+    ttlSecondsAfterFinished: 300
   image:
     ## @param image.registry RustFS CLI image registry
     registry: docker.io
