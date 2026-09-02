@@ -75,6 +75,9 @@ spec:
       {{- end }}
       {{- if or (list "replication" "cluster" | has .Values.architecture) .Values.volumePermissions.enabled (and .Values.auth.enabled (not .Values.auth.acl.enabled)) }}
       initContainers:
+        {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.volumePermissions.enabled }}
         - name: volume-permissions
           image: {{ include "redis.volumePermissions.image" . | quote }}
@@ -639,6 +642,9 @@ spec:
         {{- end }}
       {{- end }}
       containers:
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         - name: redis
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "redis.image" . | quote }}

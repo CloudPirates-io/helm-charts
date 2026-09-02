@@ -261,9 +261,10 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 
 ### Resources
 
-| Parameter   | Description                                 | Default |
-| ----------- | ------------------------------------------- | ------- |
-| `resources` | The resources to allocate for the container | `{}`    |
+| Parameter                 | Description                                                                   | Default |
+| ------------------------- | ------------------------------------------------------------------------------ | ------- |
+| `resources`               | The resources to allocate for the container                                    | `{}`    |
+| `initContainer.resources` | Resource limits and requests for the replication-standby-init init container   | `{}`    |
 
 ### Persistence
 
