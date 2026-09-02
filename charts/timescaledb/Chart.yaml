@@ -1,4 +1,4 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: timescaledb
 description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
 type: application
@@ -45,6 +45,6 @@ annotations:
       description: "Wire up config_file so config.postgresql* values actually reach postgres, and fix listen_addresses/quoting bugs that wiring it exposed"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/TODO"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1692"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/timescaledb/CHANGELOG.md"
