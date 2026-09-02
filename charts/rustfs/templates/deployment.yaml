@@ -11,9 +11,7 @@ metadata:
     {{- include "rustfs.annotations" . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
-  strategy:
-    type: Recreate
+  replicas: {{ .Values.replicaCount | default 1 }}″
   selector:
     matchLabels:
       {{- include "rustfs.selectorLabels" . | nindent 6 }}
