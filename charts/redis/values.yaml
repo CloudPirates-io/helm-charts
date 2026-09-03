@@ -338,6 +338,9 @@ nodeSelector: {}
 ## @param priorityClassName for pod eviction
 priorityClassName: ""
 
+## @param runtimeClassName Runtime class for pods (leave empty to use cluster default)
+runtimeClassName: ""
+
 ## @param tolerations Tolerations for pod assignment
 tolerations: []
 
@@ -780,6 +783,8 @@ clusterInitJob:
   tolerations: []
   ## @param clusterInitJob.affinity Affinity rules for the clusterInit Job (defaults to .Values.affinity if not set)
   affinity: {}
+  ## @param clusterInitJob.runtimeClassName Runtime class for the clusterInit Job pod (defaults to .Values.runtimeClassName if not set)
+  runtimeClassName: ""
   ## @param clusterInitJob.recoveryTimeout Seconds the Job waits for an existing cluster to re-form via gossip before failing
   ## When the cluster already holds state (e.g. all pods were deleted and recreated), the Job waits for the nodes to
   ## re-form the cluster instead of running "cluster create" on non-empty nodes (which fails with "Node is not empty"
