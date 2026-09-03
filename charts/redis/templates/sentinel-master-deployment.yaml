@@ -1,5 +1,6 @@
 {{- if and .Values.sentinel.enabled .Values.sentinel.masterService.enabled (eq .Values.architecture "replication") }}
 {{- include "redis.auth.acl.validate" . -}}
+{{- include "redis.sentinel.acl.validate" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,12 +65,20 @@ spec:
           {{- end }}
           - name: VERBOSE
             value: "{{ .Values.sentinel.masterService.verbose }}"
-        {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+        {{- if or (and .Values.auth.acl.enabled .Values.auth.acl.existingSecret) (and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret) }}
         volumeMounts:
+          {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
           - name: acl-file
             mountPath: {{ include "redis.auth.acl.path" . }}
             subPath: {{ include "redis.auth.acl.file" . }}
             readOnly: true
+          {{- end }}
+          {{- if and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret }}
+          - name: sentinel-acl-file
+            mountPath: {{ include "redis.sentinel.acl.path" . }}
+            subPath: {{ include "redis.sentinel.acl.file" . }}
+            readOnly: true
+          {{- end }}
         {{- end }}
         command: ["/bin/sh", "-c"]
         args:
@@ -109,7 +118,13 @@ spec:
               [ "${VERBOSE:-false}" = "true" ] && echo "Querying Sentinel via pod: $pod"
 
               # Query Sentinel for the current master hostname via the selected pod
-              {{- if and .Values.auth.sentinel .Values.auth.acl.enabled }}
+              {{- if .Values.sentinel.acl.enabled }}
+              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
+                /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} "$@"' sh \
+                --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
+                sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
+                | head -n1 || echo "")
+              {{- else if and .Values.auth.sentinel .Values.auth.acl.enabled }}
               master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
                 /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli "$@"' sh \
                 --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
@@ -179,10 +194,17 @@ spec:
 
               sleep "$CHECK_INTERVAL"
             done
-      {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
+      {{- if or (and .Values.auth.acl.enabled .Values.auth.acl.existingSecret) (and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret) }}
       volumes:
+        {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
         - name: acl-file
           secret:
             secretName: {{ required "ACL secret name is required when ACL is enabled" .Values.auth.acl.existingSecret }}
+        {{- end }}
+        {{- if and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret }}
+        - name: sentinel-acl-file
+          secret:
+            secretName: {{ required "Sentinel ACL secret name is required when sentinel.acl is enabled" .Values.sentinel.acl.existingSecret }}
+        {{- end }}
       {{- end }}
 {{- end }}

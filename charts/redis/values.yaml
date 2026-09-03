@@ -108,7 +108,7 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.sentinel Enable Sentinel authentication
+  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
   sentinel: true
   ## @param auth.metrics Enable Metrics authentication
   metrics: true
@@ -135,6 +135,10 @@ auth:
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
     ## Example: "/vault/secrets/redis-acl"
     existingFilePath: ""
+    ## @param auth.acl.defaultUsername ACL username used as the 'default' Redis user. Must match a user defined in the ACL file.
+    defaultUsername: "default"
+    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file.
+    sentinelUsername: "sentinel"
 
 ## @section TLS/SSL configuration
 tls:
@@ -523,6 +527,24 @@ sentinel:
   discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
+  ## @param sentinel.acl Custom ACL rules for the Sentinel process itself (clients connecting to the Sentinel port), fully independent of the Redis ACL configured under auth.acl.
+  acl:
+    ## @param sentinel.acl.enabled Enable a dedicated ACL for the Sentinel port. When enabled, Sentinel loads its own `aclfile` instead of relying on `requirepass`/auth.sentinel, so Sentinel clients can be managed independently of the monitored Redis instances' ACL.
+    enabled: false
+    ## @param sentinel.acl.existingSecret Name of existing secret containing the Sentinel ACL rules
+    existingSecret: ""
+    ## @param sentinel.acl.existingSecretACLKey Key in existing secret containing the Sentinel ACL rules
+    ## Key should represent an ACL file content, e.g.:
+    ##
+    ## user default >sentinelpassword ~* +@all
+    ## user monitoring >monitoringpassword ~* +client +info +ping +subscribe +psubscribe
+    existingSecretACLKey: ""
+    ## @param sentinel.acl.existingFilePath Path to existing Sentinel ACL file injected by Vault Agent Injector or similar tools
+    ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
+    ## Example: "/vault/secrets/sentinel-acl"
+    existingFilePath: ""
+    ## @param sentinel.acl.defaultUsername ACL username used as the 'default' user for clients connecting to the Sentinel port. Must match a user defined in the Sentinel ACL file.
+    defaultUsername: "default"
   service:
     ## @param sentinel.service.type Kubernetes service type for Sentinel
     type: ClusterIP
