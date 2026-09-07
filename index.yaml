@@ -43610,6 +43610,60 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[oliver006/redis_exporter] Update metrics.image.repository to v1.91.0
+            (#1696)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1696
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Redis
+          url: https://redis.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+        - name: Application
+          url: https://github.com/redis/redis
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.10.1
+    created: "2026-09-07T10:21:37.09582854Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: An open source, in-memory data structure store used as a database,
+      cache, and message broker.
+    digest: 3806555de60a78e109ce786303eb00a6178c5e82f3b37b8cfcb408bff05547c0
+    home: https://www.redis.io
+    icon: https://a.storyblok.com/f/143071/512x512/32c74816d1/redis-logo.svg
+    keywords:
+    - redis
+    - database
+    - cache
+    - in-memory
+    - key-value
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: redis
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis
+    - https://github.com/redis/redis
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/redis-0.34.28/redis-0.34.28.tgz
+    version: 0.34.28
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: 'charts/redis: allow setting runtimeclass (#1693)'
           links:
           - name: Pull Request
@@ -57079,6 +57133,62 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[oliver006/redis_exporter] Update metrics.image.repository to v1.91.0
+            (#1696)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1696
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Valkey
+          url: https://valkey.io
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+        - name: Application
+          url: https://github.com/valkey-io/valkey
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 9.1.0
+    created: "2026-09-07T10:21:37.290237326Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.0
+    description: High performance in-memory data structure store, fork of Redis. Valkey
+      is an open-source, high-performance key/value datastore that supports a variety
+      of workloads such as caching, message queues, and can act as a primary database.
+    digest: 5b3a1bec30f5e4b5ec2bc3d3605c788df5698c189e88a76a33d433a24fd58036
+    home: https://www.valkey.io
+    icon: https://a.storyblok.com/f/143071/512x512/5242c0e31a/valkey-logo.svg
+    keywords:
+    - valkey
+    - redis
+    - cache
+    - database
+    - key-value
+    - in-memory
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: valkey
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/valkey
+    - https://github.com/valkey-io/valkey
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/valkey-0.25.9/valkey-0.25.9.tgz
+    version: 0.25.9
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[haproxy] Update sentinel.masterProxy.image.repository to c0afc48
             (#1683)'
           links:
@@ -63310,4 +63420,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-07T05:48:31.625844337Z"
+generated: "2026-09-07T10:21:37.291992446Z"
