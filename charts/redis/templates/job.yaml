@@ -236,4 +236,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with (.Values.clusterInitJob.runtimeClassName | default .Values.runtimeClassName) }}
+      runtimeClassName: {{ . }}
+      {{- end }}
 {{- end }}

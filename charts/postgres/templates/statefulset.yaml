@@ -48,6 +48,10 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "postgres.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- with .Values.initContainer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: PGDATA
               value: {{ include "postgres.pgdataPath" . }}
