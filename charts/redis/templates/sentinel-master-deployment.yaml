@@ -41,6 +41,9 @@ spec:
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
+      {{- with .Values.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
       - name: master-discovery
