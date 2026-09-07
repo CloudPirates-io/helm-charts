@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: "4.3.5-management-alpine@sha256:e2f08f846de10bb09649a8b020f286ed362a8f72ee45e5a8d043851f1533fda8"
+  tag: "4.3.5-management-alpine@sha256:ac1201d1dc227779d93c607f976e7f9156fd5b551ee5ff7946cab6c242091bf3"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
