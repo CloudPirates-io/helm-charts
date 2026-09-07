@@ -309,7 +309,7 @@ spec:
 
               # Wait for RabbitMQ to be ready
               echo "Waiting for RabbitMQ management API to be ready..."
-              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:{{ .Values.service.managementPort }}/ 2>/dev/null)" = "200" ]; do
+              until [ "$(curl -s -L -o /dev/null -w '%{http_code}' http://localhost:{{ .Values.service.managementPort }}/ 2>/dev/null)" = "200" ]; do
                 echo "RabbitMQ not ready yet, waiting..."
                 sleep 5
               done

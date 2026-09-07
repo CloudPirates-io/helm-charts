@@ -7,16 +7,18 @@ metadata:
   annotations:
 {{- include "clusterpirate.annotations" . | indent 4 }}
   {{- end }}
-  {{- if .Values.commonLabels }}
   labels:
-{{- include "clusterpirate.labels" . | indent 4 }}
-  {{- end }}
+    {{- include "clusterpirate.labels" . | nindent 4 }}
 data:
   logLevel: {{ .Values.clusterPirate.logLevel | quote }}
   healthPort: {{ .Values.clusterPirate.healthPort | quote }}
   metricsEnabled: {{ .Values.clusterPirate.metrics.enabled | quote }}
   metricsUpdateIntervalSeconds: {{ .Values.clusterPirate.metrics.updateIntervalSeconds | quote }}
-  valkeyHost: {{ .Values.clusterPirate.metrics.cache.host | default (printf "%s-valkey" (include "clusterpirate.fullname" .)) | quote }}
+  {{- if .Values.clusterPirate.metrics.cache.host }}
+  valkeyHost: {{ .Values.clusterPirate.metrics.cache.host | quote }}
+  {{- else }}
+  valkeyHost: {{ include "valkey.fullname" .Subcharts.valkey | quote }}
+  {{- end }}
   valkeyPort: {{ .Values.clusterPirate.metrics.cache.port | quote }}
   valkeyTtl: {{ .Values.clusterPirate.metrics.cache.ttl | quote }}
   monitoringResourceEventsEnabled: {{ .Values.clusterPirate.monitoring.resourceEventsEnabled | quote }}

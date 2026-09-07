@@ -401,13 +401,15 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts for Redis container                            | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
-| `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| Parameter             | Description                                                             | Default |
+| --------------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars`        | Additional environment variables to set                                 | `[]`    |
+| `extraVolumes`        | Additional volumes to add to the pod                                    | `[]`    |
+| `extraVolumeMounts`   | Additional volume mounts for Redis container                            | `[]`    |
+| `extraObjects`        | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| `extraPorts`          | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| `extraInitContainers` | Additional init containers to add to the pod                            | `[]`    |
+| `extraContainers`     | Additional containers to add to the pod                                 | `[]`    |
 
 ### Custom Scripts and Hooks
 

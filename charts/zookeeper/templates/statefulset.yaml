@@ -85,8 +85,7 @@ spec:
               echo "Calculated ZOO_MY_ID=$ZOO_MY_ID (pod-index=$POD_INDEX + offset=$SERVER_ID_OFFSET)"
               
               {{- if .Values.command }}
-              {{- /* user-supplied full command */ -}}
-              {{- range $i, $c := .Values.command -}}{{ if $i }} {{ end }}{{ $c | quote }}{{- end -}}
+              exec {{ range $i, $c := .Values.command }}{{ if $i }} {{ end }}{{ $c | quote }}{{ end }}
               {{- else }}
               exec /docker-entrypoint.sh zkServer.sh start-foreground
               {{- end }}

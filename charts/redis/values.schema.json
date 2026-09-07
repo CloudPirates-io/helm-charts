@@ -137,6 +137,9 @@
                 "resources": {
                     "type": "object"
                 },
+                "runtimeClassName": {
+                    "type": "string"
+                },
                 "tolerations": {
                     "type": "array"
                 }
@@ -254,10 +257,16 @@
         "extraConfig": {
             "type": "string"
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
         "extraFlags": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -590,6 +599,9 @@
         },
         "revisionHistoryLimit": {
             "type": "integer"
+        },
+        "runtimeClassName": {
+            "type": "string"
         },
         "sentinel": {
             "type": "object",

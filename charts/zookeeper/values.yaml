@@ -43,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:4c6f15fbd5491a3e01b0108c046891125553329a4956848ba3014cedff5386ee"
+  tag: "3.9.5@sha256:f258365d4882440a55dbedf8ee379152ed0be8006cc3641b81e6c1c1745c976b"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -187,6 +187,7 @@ service:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
     ## @param service.ports.secureClient TLS client port (e.g. 2281). Set to null to disable.
+    # @schema type:[null, integer]
     secureClient: null
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888

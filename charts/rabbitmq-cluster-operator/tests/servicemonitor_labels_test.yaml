@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: rabbitmq-cluster-operator-servicemonitor-labels-tests
+templates:
+  - templates/cluster-operator/servicemonitor.yaml
+  - templates/messaging-topology-operator/servicemonitor.yaml
+set:
+  clusterOperator.metrics.service.enabled: true
+  clusterOperator.metrics.serviceMonitor.enabled: true
+  msgTopologyOperator.metrics.service.enabled: true
+  msgTopologyOperator.metrics.serviceMonitor.enabled: true
+
+tests:
+  - it: should not add extra labels when neither labels nor additionalLabels are set
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+        template: templates/cluster-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.release
+        template: templates/cluster-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.legacy
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: rabbitmq-operator
+        template: templates/cluster-operator/servicemonitor.yaml
+      - isKind:
+          of: ServiceMonitor
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.release
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.legacy
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: messaging-topology-operator
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should render serviceMonitor labels on both servicemonitors
+    set:
+      clusterOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+      msgTopologyOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should render templated serviceMonitor labels on both servicemonitors
+    set:
+      clusterOperator.metrics.serviceMonitor.labels:
+        release: "{{ .Release.Name }}-prometheus"
+      msgTopologyOperator.metrics.serviceMonitor.labels:
+        release: "{{ .Release.Name }}-prometheus"
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: RELEASE-NAME-prometheus
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.release
+          value: RELEASE-NAME-prometheus
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should keep rendering the deprecated additionalLabels on both servicemonitors
+    set:
+      clusterOperator.metrics.serviceMonitor.additionalLabels:
+        legacy: old
+      msgTopologyOperator.metrics.serviceMonitor.additionalLabels:
+        legacy: old
+    asserts:
+      - equal:
+          path: metadata.labels.legacy
+          value: old
+        template: templates/cluster-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.release
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.legacy
+          value: old
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - notExists:
+          path: metadata.labels.release
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should merge labels and the deprecated additionalLabels on both servicemonitors
+    set:
+      clusterOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+      clusterOperator.metrics.serviceMonitor.additionalLabels:
+        legacy: old
+      msgTopologyOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+      msgTopologyOperator.metrics.serviceMonitor.additionalLabels:
+        legacy: old
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.legacy
+          value: old
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.legacy
+          value: old
+        template: templates/messaging-topology-operator/servicemonitor.yaml
+
+  - it: should let labels win over the deprecated additionalLabels on key collision
+    set:
+      clusterOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+      clusterOperator.metrics.serviceMonitor.additionalLabels:
+        release: stale
+      msgTopologyOperator.metrics.serviceMonitor.labels:
+        release: kube-prometheus
+      msgTopologyOperator.metrics.serviceMonitor.additionalLabels:
+        release: stale
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/cluster-operator/servicemonitor.yaml
+      - equal:
+          path: metadata.labels.release
+          value: kube-prometheus
+        template: templates/messaging-topology-operator/servicemonitor.yaml

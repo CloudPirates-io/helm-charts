@@ -228,7 +228,60 @@ tests:
     asserts:
       - equal:
           path: spec.minAvailable
-          value: "2"
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set integer minAvailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set percentage minAvailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: "50%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "50%"
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set maxUnavailable in PDB by default
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - isNull:
+          path: spec.minAvailable
+
+  - it: should set maxUnavailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2
+      - isNull:
+          path: spec.minAvailable
 
   # NetworkPolicy
   - it: should create NetworkPolicy when enabled
