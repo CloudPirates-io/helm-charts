@@ -14,12 +14,13 @@ metadata:
     # Run as a post-install/post-upgrade hook so a successfully completed setup
     # task does not block `helm --wait` (a Completed Pod never becomes Ready).
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation
     {{- with (include "rustfs.annotations" .) }}
     {{- . | nindent 4 }}
     {{- end }}
 spec:
-  backoffLimit: 3
+  backoffLimit: {{ .Values.setup.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.setup.job.ttlSecondsAfterFinished }}
   template:
     metadata:
       labels:
@@ -97,12 +98,9 @@ spec:
                 name=$(echo "${policy}" | jq -r '.name')
                 echo "${policy}" | jq -r '.spec' > /tmp/policy.json
 
-                rc admin policy create local "${name}" /tmp/policy.json
-
-                ret=$?
-                if [ ${ret} -ne 0 ]; then
-                  exit ${ret}
-                fi
+                rc admin policy create local "${name}" /tmp/policy.json || {
+                  exit $?
+                }
               done
 
               # Read, add users and assign policies
@@ -110,36 +108,30 @@ spec:
                 name=$(echo "${user}" | jq -r '.name')
                 password=$(echo "${user}" | jq -r '.password')
 
-                rc admin user add local "${name}" "${password}"
-
-                ret=$?
-                if [ ${ret} -ne 0 ]; then
-                  exit ${ret}
-                fi
+                rc admin user add local "${name}" "${password}" || {
+                  exit $?
+                }
 
                 echo "${user}" | jq -r '.policies[]' | while read -r policy; do
-                  rc admin policy attach local "${policy}" --user "${name}"
-
-                  ret=$?
-                  if [ ${ret} -ne 0 ]; then
-                    exit ${ret}
-                  fi
+                  rc admin policy attach local "${policy}" --user "${name}" || {
+                    exit $?
+                  }
                 done
               done
 
-              # Create buckets
+              # Create or update buckets
               jq -c '.[]' /setup/buckets | while read -r bucket; do
                 name=$(echo "${bucket}" | jq -r '.name')
 
-                rc mb "local/${name}"
+                rc bucket create --ignore-existing "local/${name}" || {
+                  exit $?
+                }
 
-                ret=$?
-                if [ ${ret} -ne 0 ]; then
-                  if [ ${ret} -eq 3 ]; then
-                    echo "Bucket '${name}' seems to exist already"
-                  else
-                    exit ${ret}
-                  fi
+                versioning=$(echo "${bucket}" | jq -r '.versioning')
+                if [ "${versioning}" == "true" ]; then
+                  rc bucket version enable "local/${name}"
+                else
+                  rc bucket version suspend "local/${name}"
                 fi
               done
           volumeMounts:
