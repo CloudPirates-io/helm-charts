@@ -2081,6 +2081,30 @@ entries:
     version: 1.0.6
   common:
   - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: Release common 2.21 - Credit to https://github.com/HoaMi
+        - kind: changed
+          description: Add decommission note to changelog.md´s
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.2.1
+    created: "2026-09-08T06:49:42.478630407Z"
+    description: A library chart for common templates and helper functions
+    digest: a55b4c22b13fe07b98010b3e3eb624ea3a91225c662a03022ffc7f80c306c7fe
+    home: https://www.cloudpirates.io
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: common
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/common
+    type: library
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/common-2.2.1/common-2.2.1.tgz
+    version: 2.2.1
+  - annotations:
       artifacthub.io/changes: |2
             - kind: changed
               description: "Fix YAML parse error caused by whitespace control in selectorLabels (#919)"
@@ -63819,4 +63843,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-07T10:33:12.152525449Z"
+generated: "2026-09-08T06:49:42.480553596Z"
