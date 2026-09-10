@@ -8778,6 +8778,64 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[danielqsj/kafka-exporter] Update metrics.image.repository to v1.10.0
+            (#1702)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1702
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Kafka
+          url: https://kafka.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+        - name: Application
+          url: https://github.com/apache/kafka
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 4.3.1
+    created: "2026-09-10T07:03:41.319618425Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: Apache Kafka is a distributed event streaming platform used for high-performance
+      data pipelines, streaming analytics, and data integration. This chart deploys
+      Kafka in KRaft mode (no ZooKeeper required).
+    digest: 6430694fe150b79bb9fba158841a85c772b360a5d15811007e7615f3feb245c2
+    home: https://kafka.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/a5d4be1ea1/kafka-logo.svg
+    keywords:
+    - kafka
+    - streaming
+    - messaging
+    - event-streaming
+    - kraft
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: vaggelis.vk@gmail.com
+      name: vaggeliskls
+      url: https://github.com/vaggeliskls
+    name: kafka
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+    - https://github.com/apache/kafka
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/kafka-0.1.6/kafka-0.1.6.tgz
+    version: 0.1.6
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[common, clusterpirate, etcd, ghost, kafka, keycloak, mariadb, memcached,
             minio, mongodb, nginx, postgres, rabbitmq, rabbitmq-cluster-operator, redis, rustfs,
             timescaledb, valkey, zookeeper] Render templated values in commonLabels and commonAnnotations
@@ -65595,4 +65653,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-10T06:59:38.518206465Z"
+generated: "2026-09-10T07:03:41.321413777Z"
