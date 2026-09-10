@@ -140,6 +140,18 @@ The following table lists the configurable parameters of the Nginx chart and the
 | `image.tag`        | Nginx image tag         | `"1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e"` |
 | `image.pullPolicy` | Nginx image pull policy | `Always`                                                                                  |
 
+### Git Image Parameters
+
+Used by the `git-clone-repository` init container and the `git-repo-syncer` sidecar when `cloneStaticSiteFromGit.enabled` is set.
+
+| Parameter                                    | Description            | Default       |
+| -------------------------------------------- | ---------------------- | ------------- |
+| `cloneStaticSiteFromGit.image.registry`      | Git image registry     | `docker.io`   |
+| `cloneStaticSiteFromGit.image.repository`    | Git image repository   | `alpine/git`  |
+| `cloneStaticSiteFromGit.image.tag`           | Git image tag          | `v2.52.0`     |
+| `cloneStaticSiteFromGit.image.pullPolicy`    | Git image pull policy  | `IfNotPresent`|
+| `cloneStaticSiteFromGit.image.pullSecrets`   | Git image pull secrets | `[]`          |
+
 
 ### Nginx Configuration Parameters
 
@@ -243,9 +255,10 @@ service:
 
 ### Resources Parameters
 
-| Parameter   | Description                                | Default |
-| ----------- | ------------------------------------------ | ------- |
-| `resources` | Resource limits and requests for Nginx pod | `{}`    |
+| Parameter        | Description                                                                | Default |
+| ---------------- | --------------------------------------------------------------------------- | ------- |
+| `resources`      | Resource limits and requests for Nginx pod                                | `{}`    |
+| `lifecycleHooks` | for the Nginx container to automate configuration before or after startup | `{}`    |
 
 
 ### Health Check Parameters

@@ -43,6 +43,13 @@ Return the proper MariaDB image name
 {{- end }}
 
 {{/*
+Return the proper MariaDB exporter image name
+*/}}
+{{- define "mariadb.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "mariadb.imagePullSecrets" -}}
