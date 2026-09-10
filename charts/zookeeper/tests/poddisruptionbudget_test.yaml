@@ -1,0 +1,50 @@
+suite: test zookeeper pod disruption budget
+
+tests:
+  - it: should render only minAvailable by default
+    template: poddisruptionbudget.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.minAvailable
+          value: "51%"
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should render only maxUnavailable when it is set
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        maxUnavailable: "30%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "30%"
+      - isNull:
+          path: spec.minAvailable
+
+  - it: should render only maxUnavailable when both are set
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        minAvailable: "80%"
+        maxUnavailable: "25%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "25%"
+      - isNull:
+          path: spec.minAvailable
+
+  - it: should render an explicitly set minAvailable
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        minAvailable: "75%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "75%"
+      - isNull:
+          path: spec.maxUnavailable

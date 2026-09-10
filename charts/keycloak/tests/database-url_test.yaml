@@ -1,0 +1,73 @@
+suite: test keycloak database url
+templates:
+  - templates/statefulset.yaml
+tests:
+  - it: should point at the embedded postgres service by default
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:postgresql://RELEASE-NAME-postgres:5432/keycloak
+
+  - it: should follow the postgres subchart fullnameOverride
+    set:
+      postgres:
+        fullnameOverride: my-pg
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:postgresql://my-pg:5432/keycloak
+      - equal:
+          path: spec.template.spec.initContainers[1].command[2]
+          value: "until pg_isready -h my-pg -p 5432 -U postgres; do echo waiting for database; sleep 2; done;"
+
+  - it: should follow the postgres subchart nameOverride
+    set:
+      postgres:
+        nameOverride: pgx
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:postgresql://RELEASE-NAME-pgx:5432/keycloak
+
+  - it: should point at the embedded mariadb service by default
+    set:
+      database:
+        type: mariadb
+      postgres:
+        enabled: false
+      mariadb:
+        enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:mariadb://RELEASE-NAME-mariadb:3306/keycloak
+
+  - it: should follow the mariadb subchart fullnameOverride
+    set:
+      database:
+        type: mariadb
+      postgres:
+        enabled: false
+      mariadb:
+        enabled: true
+        fullnameOverride: my-maria
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:mariadb://my-maria:3306/keycloak
+      - equal:
+          path: spec.template.spec.initContainers[1].command[2]
+          value: "until mariadb-admin ping -h my-maria -P 3306 --silent; do echo waiting for database; sleep 2; done;"
+
+  - it: should use the external database host when the subchart is disabled
+    set:
+      postgres:
+        enabled: false
+      database:
+        host: pg.example.com
+        port: "5433"
+        name: kc
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --db-url=jdbc:postgresql://pg.example.com:5433/kc

@@ -112,9 +112,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -544,9 +541,6 @@
         "credentialUpdaterImage": {
             "type": "object",
             "properties": {
-                "digest": {
-                    "type": "string"
-                },
                 "pullSecrets": {
                     "type": "array"
                 },
@@ -736,9 +730,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -1183,9 +1174,6 @@
         "rabbitmqImage": {
             "type": "object",
             "properties": {
-                "digest": {
-                    "type": "string"
-                },
                 "pullSecrets": {
                     "type": "array"
                 },

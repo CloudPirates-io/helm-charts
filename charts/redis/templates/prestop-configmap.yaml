@@ -150,7 +150,7 @@ data:
     echo "Redis preStop hook starting for pod: $HOSTNAME"
 
     # Check if we should wait for failover (controlled by sentinel.redisShutdownWaitFailover)
-    WAIT_FOR_FAILOVER={{ .Values.sentinel.redisShutdownWaitFailover | default true }}
+    WAIT_FOR_FAILOVER={{ if .Values.sentinel.redisShutdownWaitFailover }}true{{ else }}false{{ end }}
 
     # Only proceed with failover if this instance is the master
     if is_master && [ "$WAIT_FOR_FAILOVER" = "true" ]; then

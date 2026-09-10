@@ -4,8 +4,10 @@
 # The common chart is a library chart and doesn't have dependencies
 
 charts=(
+  "clusterpirate"
   "etcd"
   "ghost"
+  "kafka"
   "keycloak"
   "mariadb"
   "memcached"
@@ -13,14 +15,13 @@ charts=(
   "mongodb"
   "nginx"
   "postgres"
-  "rabbitmq-cluster-operator"
   "rabbitmq"
+  "rabbitmq-cluster-operator"
   "redis"
   "rustfs"
   "timescaledb"
   "valkey"
   "zookeeper"
-  "clusterpirate"
 )
 
 echo "Updating Helm chart dependencies..."

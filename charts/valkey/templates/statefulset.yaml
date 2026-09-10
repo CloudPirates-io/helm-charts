@@ -110,7 +110,7 @@ spec:
                   echo "I am the current master according to Sentinel"
                 else
                   echo "Configuring as replica of current master: $CURRENT_MASTER"
-                  echo "replicaof $CURRENT_MASTER {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                  echo "replicaof $CURRENT_MASTER {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
                   {{- if .Values.auth.enabled }}
                   echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
                   {{- end }}
@@ -121,7 +121,7 @@ spec:
                   echo "Bootstrap mode: configuring as replica of pod-0"
                   # Use hostname-based replication for better resilience
                   MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless"
-                  echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                  echo "replicaof $MASTER_HOSTNAME {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
                   echo "Bootstrap replica using pod-0 hostname: $MASTER_HOSTNAME"
                   {{- if .Values.auth.enabled }}
                   echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
@@ -160,9 +160,9 @@ spec:
               {{- else }}
               echo "Using hostname: ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
               echo "replica-announce-ip ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}" >> /tmp/valkey/valkey.conf
-              echo "replica-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              echo "replica-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
               echo "slave-announce-ip ${HOSTNAME}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}" >> /tmp/valkey/valkey.conf
-              echo "slave-announce-port {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+              echo "slave-announce-port {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
               {{- end }}
 
               # Make slaves more eligible for promotion during force deletions
@@ -173,7 +173,7 @@ spec:
               if [ "$POD_ORDINAL" != "0" ]; then
                 echo "Configuring as replica of pod-0 (master)"
                 MASTER_HOSTNAME="{{ include "valkey.fullname" . }}-0.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                echo "replicaof $MASTER_HOSTNAME {{ .Values.service.port }}" >> /tmp/valkey/valkey.conf
+                echo "replicaof $MASTER_HOSTNAME {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/valkey/valkey.conf
                 {{- if .Values.auth.enabled }}
                 echo "masterauth ${VALKEY_PASSWORD}" >> /tmp/valkey/valkey.conf
                 {{- end }}
@@ -371,7 +371,7 @@ spec:
               {{- else }}
               VALKEY_HOST="127.0.0.1"
               {{- end }}
-              while ! valkey-cli {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} -h "${VALKEY_HOST}" -p {{ .Values.service.port }} ping >/dev/null 2>&1; do
+              while ! valkey-cli {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} -h "${VALKEY_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} ping >/dev/null 2>&1; do
                 sleep 1
               done
               echo "Valkey is ready"
@@ -401,7 +401,7 @@ spec:
                 echo "No Sentinels available, checking Valkey instances directly..."
                 for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                   VALKEY_HOST="{{ include "valkey.fullname" . }}-${i}.{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
-                  ROLE_INFO=$(valkey-cli -h "${VALKEY_HOST}" -p {{ .Values.service.port }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
+                  ROLE_INFO=$(valkey-cli -h "${VALKEY_HOST}" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} {{- if .Values.auth.enabled }} -a "${VALKEY_PASSWORD}"{{- end }} info replication 2>/dev/null | grep "role:master" || echo "")
                   if [ -n "$ROLE_INFO" ]; then
                     MASTER_HOST="$VALKEY_HOST"
                     echo "Found current master by role check: $MASTER_HOST"
@@ -447,7 +447,7 @@ spec:
               # Enable hostname resolution for Valkey Sentinel
               sentinel resolve-hostnames yes
               sentinel announce-hostnames yes
-              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ .Values.service.port }} {{ .Values.sentinel.quorum }}
+              sentinel monitor {{ .Values.sentinel.masterName }} ${MASTER_HOST} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }} {{ .Values.sentinel.quorum }}
               sentinel down-after-milliseconds {{ .Values.sentinel.masterName }} {{ .Values.sentinel.downAfterMilliseconds }}
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
@@ -650,7 +650,7 @@ spec:
         {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
-          image: "{{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}"
+          image: {{ include "valkey.metrics.image" . | quote }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           env:

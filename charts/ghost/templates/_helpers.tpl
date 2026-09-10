@@ -48,6 +48,18 @@ Return the proper Ghost image name
 {{- end }}
 
 {{/*
+Return the proper MariaDB init container image name
+*/}}
+{{- define "ghost.initContainers.waitForMariadb.image" -}}
+{{- $config := .Values.initContainers.waitForMariadb -}}
+{{- if $config.image -}}
+{{- $config.image -}}
+{{- else -}}
+{{- include "cloudpirates.image" (dict "image" $config "global" .Values.global) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "ghost.imagePullSecrets" -}}

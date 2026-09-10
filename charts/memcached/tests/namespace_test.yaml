@@ -1,0 +1,51 @@
+suite: test Memcached service namespace
+templates:
+  - service.yaml
+release:
+  name: release-name
+  namespace: release-ns
+set:
+  metrics.enabled: true
+
+tests:
+  - it: should use the release namespace when namespaceOverride is not set
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.namespace
+          value: release-ns
+        documentIndex: 0
+      - equal:
+          path: metadata.namespace
+          value: release-ns
+        documentIndex: 1
+
+  - it: should respect namespaceOverride on both services
+    set:
+      namespaceOverride: custom-ns
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+        documentIndex: 0
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+        documentIndex: 1
+
+  - it: should respect namespaceOverride on the metrics service
+    set:
+      namespaceOverride: custom-ns
+    documentSelector:
+      path: metadata.name
+      value: release-name-memcached-metrics
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: metrics

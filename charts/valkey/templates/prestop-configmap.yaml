@@ -20,7 +20,7 @@ data:
     set -e
 
     # Configuration
-    VALKEY_PORT="{{ .Values.service.port }}"
+    VALKEY_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -39,7 +39,7 @@ data:
 
     # Function to run Valkey commands
     run_valkey_command() {
-        valkey-cli -h "$VALKEY_LOOPBACK" -p "$VALKEY_PORT" "$@"
+        valkey-cli -h "$VALKEY_LOOPBACK" -p "$VALKEY_PORT"{{- if .Values.tls.enabled }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} "$@"
     }
 
     # Function to check if current instance is master
@@ -144,7 +144,7 @@ data:
     set -e
 
     # Configuration
-    VALKEY_PORT="{{ .Values.service.port }}"
+    VALKEY_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "valkey.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -163,7 +163,7 @@ data:
 
     # Function to run Valkey commands against the local instance
     run_valkey_command() {
-        valkey-cli -h "$VALKEY_LOOPBACK" -p "$VALKEY_PORT" "$@"
+        valkey-cli -h "$VALKEY_LOOPBACK" -p "$VALKEY_PORT"{{- if .Values.tls.enabled }} --tls --cert /etc/valkey/tls/{{ .Values.tls.certFilename }} --key /etc/valkey/tls/{{ .Values.tls.certKeyFilename }} --cacert /etc/valkey/tls/{{ .Values.tls.certCAFilename }}{{- end }} "$@"
     }
 
     # Function to run Sentinel commands against the local Sentinel sidecar

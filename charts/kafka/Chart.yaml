@@ -2,7 +2,7 @@ apiVersion: v2
 name: kafka
 description: Apache Kafka is a distributed event streaming platform used for high-performance data pipelines, streaming analytics, and data integration. This chart deploys Kafka in KRaft mode (no ZooKeeper required).
 type: application
-version: 0.1.2
+version: 0.1.5
 appVersion: "4.3.1"
 keywords:
   - kafka
@@ -24,7 +24,7 @@ maintainers:
     url: https://github.com/vaggeliskls
 dependencies:
   - name: common
-    version: "2.2.0"
+    version: "2.2.1"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/a5d4be1ea1/kafka-logo.svg
 annotations:
