@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "keycloak.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{- toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
