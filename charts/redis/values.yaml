@@ -461,6 +461,9 @@ extraInitContainers: []
 ## @param extraVolumeMounts Additional containers to add to the pod
 extraContainers: []
 
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
 ## @section External master (migration)
 ## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
 ## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
