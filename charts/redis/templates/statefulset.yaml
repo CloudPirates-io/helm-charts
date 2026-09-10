@@ -65,6 +65,10 @@ spec:
 {{- with (include "redis.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "redis.serviceAccountName" . }}
