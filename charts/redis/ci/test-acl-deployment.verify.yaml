@@ -1,0 +1,43 @@
+# Functional verification for ci/test-acl-deployment.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves both the Redis-side
+# ACL (auth.acl) and the Sentinel-side ACL (sentinel.acl) actually authenticate,
+# and that Sentinel is really monitoring the master via the custom
+# sentinelUsername wired up by "sentinel auth-user"/"auth-pass".
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Redis: authenticating as 'default' (auth.acl.defaultUsername) should succeed"
+              redis-cli -h test-redis-test-acl-deployment --user default -a 'DefaultPass123!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Sentinel: authenticating as the Sentinel ACL user (sentineladmin) should succeed"
+              redis-cli -h test-redis-test-acl-deployment-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Sentinel: must report a master address (proves it is actually monitoring, i.e. sentinel auth-user/auth-pass against Redis is correct)"
+              MASTER_ADDR=$(redis-cli -h test-redis-test-acl-deployment-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning sentinel get-master-addr-by-name mymaster 2>/dev/null | head -1)
+              if [ -z "$MASTER_ADDR" ]; then
+                echo "ERROR: Sentinel could not report a master address for 'mymaster' - it is not successfully monitoring Redis"
+                exit 1
+              fi
+              echo "   Sentinel reports master at: $MASTER_ADDR"
+
+              echo "OK: replication ACL auth (Redis + Sentinel) verified"

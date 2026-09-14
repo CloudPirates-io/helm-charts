@@ -146,6 +146,8 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
 | `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 | `auth.acl.existingFilePath`      | Path to existing ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""`    |
+| `auth.acl.defaultUsername`       | ACL username in the ACL file used as the main/default Redis user (e.g. for probes and clients) | `default` |
+| `auth.acl.sentinelUsername`      | ACL username in the ACL file Sentinel uses to authenticate to the monitored Redis instances | `sentinel` |
 
 #### Connection Details Secret
 
@@ -194,8 +196,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - When using `existingFilePath`, no volume mounting is performed - the file must be available at the specified path
-- The ACL file must contain at least a 'default' user
-- For Sentinel deployments, include a 'sentinel' user or the 'default' user password will be used
+- The ACL file must contain at least the user named by `auth.acl.defaultUsername` (`default` unless overridden)
+- For Sentinel deployments, include a user named by `auth.acl.sentinelUsername` (`sentinel` unless overridden), or the `defaultUsername` user's password will be used instead
+- This is separate from Sentinel's own ACL, which secures connections *to* the Sentinel process itself - see [Sentinel ACL Configuration](#sentinel-acl-configuration)
 
 ### TLS/SSL Configuration
 
@@ -389,6 +392,40 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
 | `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
+
+### Sentinel ACL Configuration
+
+Sentinel can run its own independent ACL, securing connections *to* the Sentinel process itself (e.g. `redis-cli` clients, the preStop failover hook, and the master-discovery controller). This is separate from `auth.acl`, which secures the monitored Redis instances - the two can be enabled independently or together.
+
+| Parameter                            | Description                                                        | Default              |
+| ------------------------------------- | ------------------------------------------------------------------- | --------------------- |
+| `sentinel.acl.enabled`                | Enable custom ACL rules for Sentinel from a secret file            | `false`                |
+| `sentinel.acl.existingSecret`         | Name of existing secret containing the Sentinel ACL rules          | `""`                    |
+| `sentinel.acl.existingSecretACLKey`   | Key in existing secret containing the Sentinel ACL rules           | `""`                    |
+| `sentinel.acl.existingFilePath`       | Path to existing Sentinel ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""` |
+| `sentinel.acl.defaultUsername`        | ACL username in the Sentinel ACL file used to authenticate to Sentinel | `default`           |
+
+**Using Kubernetes Secret (existingSecret):**
+
+```yaml
+sentinel:
+  acl:
+    enabled: true
+    existingSecret: "my-sentinel-acl"
+    existingSecretACLKey: "sentinel-users.acl"
+```
+
+**ACL File Format Example:**
+
+```
+user default >sentinelpassword ~* +@all
+```
+
+**Notes:**
+
+- `existingSecret` and `existingFilePath` are mutually exclusive
+- The ACL file must contain at least the user named by `sentinel.acl.defaultUsername`
+- Setting the `aclfile` directive alone is what enables ACL auth on the Sentinel process; no other configuration is needed for clients to authenticate with the users it defines
 
 ### ServiceAccount
 

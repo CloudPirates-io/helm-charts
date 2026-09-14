@@ -37,6 +37,10 @@ data:
     # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
     {{- if .Values.sentinel.acl.enabled }}
     export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
     {{- end }}
 
     # Set loopback address based on ipFamily configuration
@@ -219,6 +223,10 @@ data:
     # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
     {{- if .Values.sentinel.acl.enabled }}
     export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
     {{- end }}
 
     # Set loopback address based on ipFamily configuration

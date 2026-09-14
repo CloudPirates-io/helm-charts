@@ -110,6 +110,17 @@ spec:
               touch /tmp/redis.conf
               echo "Deployment mode: hostname=$MY_HOSTNAME, IP=$MY_IP"
 
+              # Check if we are using ACL authentication
+              {{- include "redis.auth.acl.setupScript" (dict "type" "init" "context" .) | nindent 14 }}
+              {{- if .Values.sentinel.acl.enabled }}
+              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
+              SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
+                exit 1
+              fi
+              {{- end }}
+
               {{- if eq .Values.architecture "replication" }}
               {{- if .Values.sentinel.enabled }}
               HEADLESS_SVC="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -336,7 +347,12 @@ spec:
               # Check if we are using ACL authentication
               {{- include "redis.auth.acl.setupScript" (dict "type" "init" "context" .) | nindent 14 }}
               {{- if .Values.sentinel.acl.enabled }}
+              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
               SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
+                exit 1
+              fi
               {{- end }}
 
               echo "Pod ordinal: $POD_ORDINAL, hostname: $MY_HOSTNAME"
@@ -639,6 +655,12 @@ spec:
               subPath: {{ include "redis.auth.acl.file" . }}
               readOnly: true
             {{- end }}
+            {{- if and .Values.sentinel.acl.enabled .Values.sentinel.acl.existingSecret }}
+            - name: sentinel-acl-file
+              mountPath: {{ include "redis.sentinel.acl.path" . }}
+              subPath: {{ include "redis.sentinel.acl.file" . }}
+              readOnly: true
+            {{- end }}
         {{- end }}
       {{- end }}
       containers:
@@ -703,7 +725,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -718,7 +740,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping {{ if and .Values.sentinel.enabled (eq .Values.architecture "replication") }} | grep -q PONG{{ end }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -733,7 +755,7 @@ spec:
                 - -c
                 - |
                   {{- include "redis.auth.acl.setupScript" (dict "type" "probe" "context" .) | nindent 18 }}
-                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
+                  redis-cli -h {{ if eq .Values.ipFamily "ipv6" }}"::1"{{ else }}"127.0.0.1"{{ end }} -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -842,6 +864,16 @@ spec:
             - |
               {{- if $useDeployment }}
               set -e
+
+              {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel" "context" .) | nindent 14 }}
+              {{- if .Values.sentinel.acl.enabled }}
+              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
+              SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
+                exit 1
+              fi
+              {{- end }}
 
               # Wait for Redis to be ready
               echo "Waiting for Redis to start..."
@@ -985,15 +1017,6 @@ spec:
               {{- end }}
               echo "Sentinel using IP address: ${SENTINEL_IP}"
 
-              {{- if .Values.sentinel.acl.enabled }}
-              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
-              SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
-              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
-                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
-                exit 1
-              fi
-              {{- end }}
-
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
               # Enable TLS in Sentinel
@@ -1020,14 +1043,17 @@ spec:
               sentinel failover-timeout {{ .Values.sentinel.masterName }} {{ .Values.sentinel.failoverTimeout }}
               sentinel parallel-syncs {{ .Values.sentinel.masterName }} {{ .Values.sentinel.parallelSyncs }}
               {{- if .Values.auth.enabled }}
+              {{- if .Values.auth.acl.enabled }}
+              sentinel auth-user {{ .Values.sentinel.masterName }} ${REDIS_SENTINEL_USERNAME}
+              sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_SENTINEL_PASSWORD}"
+              {{- else }}
               sentinel auth-pass {{ .Values.sentinel.masterName }} "${REDIS_PASSWORD}"
+              {{- end }}
               {{- end }}
               {{- if .Values.sentinel.acl.enabled }}
               aclfile {{ include "redis.sentinel.acl.path" . }}
-              sentinel sentinel-user {{ .Values.sentinel.masterName }} ${SENTINEL_ACL_USER}
-              sentinel sentinel-pass {{ .Values.sentinel.masterName }} "${SENTINEL_ACL_PASSWORD}"
               {{- else if .Values.auth.sentinel }}
-              requirepass "${REDIS_PASSWORD}"
+              requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"
               {{- end }}
               # Make automatic failover more aggressive for Kubernetes force deletions
               sentinel deny-scripts-reconfig yes
@@ -1089,7 +1115,12 @@ spec:
 
               {{- include "redis.auth.acl.setupScript" (dict "type" "sentinel" "context" .) | nindent 14 }}
               {{- if .Values.sentinel.acl.enabled }}
+              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
               SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
+                exit 1
+              fi
               {{- end }}
 
               # Wait for Redis to be ready
@@ -1169,15 +1200,6 @@ spec:
               {{- end }}
               echo "Sentinel using IP address: ${SENTINEL_IP}"
 
-              {{- if .Values.sentinel.acl.enabled }}
-              SENTINEL_ACL_USER="{{ include "redis.sentinel.acl.defaultUsername" . }}"
-              SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
-              if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
-                echo "ERROR: Sentinel ACL is enabled but no password found for 'user ${SENTINEL_ACL_USER}' in '{{ include "redis.sentinel.acl.path" . }}'"
-                exit 1
-              fi
-              {{- end }}
-
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
               # Enable TLS in Sentinel
@@ -1214,8 +1236,6 @@ spec:
               {{- end }}
               {{- if .Values.sentinel.acl.enabled }}
               aclfile {{ include "redis.sentinel.acl.path" . }}
-              sentinel sentinel-user {{ .Values.sentinel.masterName }} ${SENTINEL_ACL_USER}
-              sentinel sentinel-pass {{ .Values.sentinel.masterName }} "${SENTINEL_ACL_PASSWORD}"
               {{- else if .Values.auth.sentinel }}
               requirepass "${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}"
               {{- end }}
