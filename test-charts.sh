@@ -240,7 +240,7 @@ print_restart_summary() {
 get_restart_counts() {
     local namespace=$1
     kubectl get pods -n "$namespace" \
-        -o jsonpath='{range .items[*]}{range .status.containerStatuses[*]}{.name}={.restartCount}{"\n"}{end}{end}' \
+        -o jsonpath='{range .items[*]}{.metadata.uid}{range .status.containerStatuses[*]}/{.name}={.restartCount}{"\n"}{end}{end}' \
         2>/dev/null | sort
 }
 

@@ -137,7 +137,11 @@ spec:
               for retry in $(seq 1 5); do
                 for SENTINEL_IP in $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u); do
                   [ "$SENTINEL_IP" = "$MY_IP" ] && continue
+                  {{- if .Values.sentinel.acl.enabled }}
+                  MASTER_INFO=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user "${SENTINEL_ACL_USER}" -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else }}
                   MASTER_INFO=$(redis-cli --no-auth-warning -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- end }}
                   # Validate response is an IP address (reject error messages like "NOAUTH Authentication required.")
                   # Supports both IPv4 (1.2.3.4) and IPv6 (fd00::1). Valid IPs never contain spaces.
                   if [ -n "$MASTER_INFO" ] && echo "$MASTER_INFO" | grep -qE '^[0-9a-f.:]+$'; then
@@ -900,7 +904,11 @@ spec:
               for retry in $(seq 1 5); do
                 for SENTINEL_IP in $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u); do
                   [ "$SENTINEL_IP" = "$MY_IP" ] && continue
+                  {{- if .Values.sentinel.acl.enabled }}
+                  EXISTING_MASTER=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user "${SENTINEL_ACL_USER}" -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else }}
                   EXISTING_MASTER=$(redis-cli --no-auth-warning -h "${SENTINEL_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- end }}
                   # Validate response is an IP address (reject error messages like "NOAUTH Authentication required.")
                   # Supports both IPv4 (1.2.3.4) and IPv6 (fd00::1). Valid IPs never contain spaces.
                   if [ -n "$EXISTING_MASTER" ] && echo "$EXISTING_MASTER" | grep -qE '^[0-9a-f.:]+$'; then
@@ -962,7 +970,11 @@ spec:
                     echo "Bootstrap: waiting for sentinel at lowest-IP pod ${LOWEST_IP}..."
                     _wait=0
                     while true; do
+                      {{- if .Values.sentinel.acl.enabled }}
+                      MASTER_HOST=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user "${SENTINEL_ACL_USER}" -h "${LOWEST_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                      {{- else }}
                       MASTER_HOST=$(redis-cli --no-auth-warning -h "${LOWEST_IP}" -p {{ .Values.sentinel.port }} {{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                      {{- end }}
                       # Validate response is an IP address (IPv4 or IPv6)
                       if [ -n "$MASTER_HOST" ] && echo "$MASTER_HOST" | grep -qE '^[0-9a-f.:]+$'; then
                         break
@@ -1083,7 +1095,7 @@ spec:
 
               # Wait for sentinel to be ready
               _sentinel_wait=0
-              while ! redis-cli --no-auth-warning  -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} PING 2>/dev/null | grep -q PONG; do
+              while ! {{ if .Values.sentinel.acl.enabled }}REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" {{ end }}redis-cli --no-auth-warning{{- if .Values.sentinel.acl.enabled }} --user "${SENTINEL_ACL_USER}"{{- end }}  -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} PING 2>/dev/null | grep -q PONG; do
                 _sentinel_wait=$((_sentinel_wait + 1))
                 [ $_sentinel_wait -ge 30 ] && break
                 sleep 1
@@ -1098,11 +1110,11 @@ spec:
                 sleep 10
                 echo "Running one-time stale sentinel cleanup..."
                 for TARGET in 127.0.0.1 $(getent hosts "${HEADLESS_SVC}" 2>/dev/null | awk '{print $1}' | sort -u | grep -v "^${MY_IP}$"); do
-                  HAS_STALE=$(redis-cli --no-auth-warning --raw  -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
+                  HAS_STALE=$({{ if .Values.sentinel.acl.enabled }}REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" {{ end }}redis-cli --no-auth-warning{{- if .Values.sentinel.acl.enabled }} --user "${SENTINEL_ACL_USER}"{{- end }} --raw  -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel sentinels {{ .Values.sentinel.masterName }} 2>/dev/null | tr -d '\r' | awk '
                     /^flags$/ { getline; if ($0 ~ /s_down/) { print "yes"; exit } }
                   ')
                   if [ "$HAS_STALE" = "yes" ]; then
-                    redis-cli --no-auth-warning  -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} SENTINEL RESET {{ .Values.sentinel.masterName }} >/dev/null 2>&1 && echo "Reset sentinel state on $TARGET (had stale peers)"
+                    {{ if .Values.sentinel.acl.enabled }}REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" {{ end }}redis-cli --no-auth-warning{{- if .Values.sentinel.acl.enabled }} --user "${SENTINEL_ACL_USER}"{{- end }}  -h "$TARGET" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} SENTINEL RESET {{ .Values.sentinel.masterName }} >/dev/null 2>&1 && echo "Reset sentinel state on $TARGET (had stale peers)"
                   fi
                 done
                 echo "Stale sentinel cleanup complete"
