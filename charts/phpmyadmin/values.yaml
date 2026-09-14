@@ -1,0 +1,304 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override phpmyadmin.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override phpmyadmin.fullname
+fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @param podAnnotations Annotations to add to the pods created by the deployment
+podAnnotations: {}
+
+## @param podLabels Labels to add to the pods created by the deployment
+podLabels: {}
+
+## @section phpMyAdmin image parameters
+image:
+  ## @param image.registry phpMyAdmin image registry
+  registry: docker.io
+  ## @param image.repository phpMyAdmin image repository
+  repository: phpmyadmin
+  ## @param image.tag phpMyAdmin image tag
+  tag: "5.2.3-apache"
+  ## @param image.pullPolicy phpMyAdmin image pull policy
+  pullPolicy: Always
+
+## @param replicaCount Number of phpMyAdmin replicas to deploy
+replicaCount: 1
+
+## @section Service parameters
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.port phpMyAdmin service port
+  port: 80
+  ## @param service.targetPort Target port for the service
+  targetPort: 80
+  ## @param service.annotations Additional custom annotations for Service
+  annotations: {}
+
+## @section Ingress parameters
+ingress:
+  ## @param ingress.enabled Enable ingress record generation
+  enabled: false
+  ## @param ingress.className IngressClass that will be be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+  ## @param ingress.hosts An array with hosts and paths
+  hosts:
+    - host: phpmyadmin.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  ## @param ingress.tls An array with the tls configuration
+  tls: []
+
+## @section Traefik IngressRoute parameters
+traefik:
+  ingressRoute:
+    ## @param traefik.ingressRoute.enabled Enable Traefik IngressRoute generation
+    enabled: false
+    ## @param traefik.ingressRoute.annotations Additional annotations for the IngressRoute resource
+    annotations: {}
+    ## @param traefik.ingressRoute.entryPoints Traefik entry points
+    entryPoints:
+      - web
+    ## @param traefik.ingressRoute.hosts List of hosts for the IngressRoute
+    hosts:
+      - phpmyadmin.local
+    ## @param traefik.ingressRoute.tls TLS configuration for Traefik
+    tls:
+      enabled: false
+      ## @param traefik.ingressRoute.tls.secretName TLS certificate secret name
+      secretName: ""
+      ## @param traefik.ingressRoute.tls.certResolver Certificate resolver to use
+      certResolver: ""
+    ## @param traefik.ingressRoute.middlewares List of Traefik middlewares to apply
+    middlewares: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - phpmyadmin.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+## @section Service Account parameters
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: true
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automatically mount service account token
+  automountServiceAccountToken: false
+
+## @section ConfigMap parameters
+configMap:
+  ## @param configMap.create Create a ConfigMap for phpMyAdmin configuration
+  create: true
+  ## @param configMap.data ConfigMap data (custom PHP configuration as raw string)
+  data: ""
+
+## @section phpMyAdmin configuration parameters
+config:
+  ## @param config.pmaHost Database host (if not set, connection dialog will be shown)
+  pmaHost: ""
+  ## @param config.pmaPort Database port
+  pmaPort: 3306
+  ## @param config.pmaUser Database default user
+  pmaUser: ""
+  ## @param config.pmaAbsoluteUri Absolute URI of phpMyAdmin installation (required for single signon)
+  pmaAbsoluteUri: ""
+  ## @param config.pmaArbitrary Allow arbitrary server connection (enable server selection dropdown)
+  pmaArbitrary: false
+  ## @param config.pmaCookieAuth Use cookie-based authentication
+  pmaCookieAuth: true
+  ## @param config.pmaControlUser Control user for advanced phpMyAdmin features
+  pmaControlUser: ""
+  ## @param config.pmaControlPass Control user password (should use secrets in real deployments)
+  pmaControlPass: ""
+  ## @param config.pmaPmadb Database for phpMyAdmin configuration storage
+  pmaPmadb: ""
+  ## @param config.pmaVerbose Display verbose error messages
+  pmaVerbose: false
+  ## @param config.pmaVerboseCheck Verify MySQL connection details
+  pmaVerboseCheck: false
+
+## @section PHP Configuration parameters
+php:
+  ## @param php.maxExecutionTime Maximum script execution time (seconds)
+  maxExecutionTime: 300
+  ## @param php.memoryLimit PHP memory limit
+  memoryLimit: 256M
+  ## @param php.postMaxSize Maximum size of POST data
+  postMaxSize: 16M
+  ## @param php.uploadMaxFilesize Maximum file upload size
+  uploadMaxFilesize: 16M
+  ## @param php.displayErrors Display PHP errors
+  displayErrors: "Off"
+  ## @param php.displayStartupErrors Display PHP startup errors
+  displayStartupErrors: "Off"
+  ## @param php.logErrors Log PHP errors
+  logErrors: "On"
+  ## @param php.errorLog PHP error log location
+  errorLog: /var/log/apache2/error.log
+
+## @section Apache configuration parameters
+apache:
+  ## @param apache.logDir Apache log directory
+  logDir: /var/log/apache2
+  ## @param apache.serverName Apache ServerName directive (FQDN or hostname)
+  serverName: ""
+  ## @param apache.serverTokens Apache ServerTokens setting (Prod, Major, Minor, Minimal, OS, Full)
+  serverTokens: Prod
+  ## @param apache.serverSignature Apache ServerSignature setting (Off, On, EMail)
+  serverSignature: "Off"
+
+## @param resources Resource limits and requests for phpMyAdmin pod
+resources: {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 256Mi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+## @section Pod Disruption Budget parameters
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: ""
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable.
+  maxUnavailable: ""
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 33
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set phpMyAdmin container's privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount root filesystem as read-only
+  readOnlyRootFilesystem: false
+  ## @param containerSecurityContext.capabilities Drop all capabilities and add only required ones
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - NET_BIND_SERVICE
+
+## @param priorityClassName Priority class for the phpMyAdmin instance
+priorityClassName: ""
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set phpMyAdmin pod's Security Context fsGroup
+  fsGroup: 33
+
+livenessProbe:
+  ## @param livenessProbe.enabled Enable liveness probe
+  enabled: true
+  ## @param livenessProbe.httpGet HTTP GET configuration
+  httpGet:
+    path: /
+    port: http
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readiness probe
+  enabled: true
+  ## @param readinessProbe.httpGet HTTP GET configuration
+  httpGet:
+    path: /
+    port: http
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 5
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+
+## @param extraEnvVarsSecret Name of existing ConfigMap or Secret with extra environment variables
+extraEnvVarsSecret: ""
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the phpMyAdmin container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []

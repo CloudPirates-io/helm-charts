@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  {{- with (include "phpmyadmin.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "phpmyadmin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "phpmyadmin.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+{{- with (include "phpmyadmin.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      serviceAccountName: {{ include "phpmyadmin.serviceAccountName" . }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "phpmyadmin.image" (dict "image" .Values.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ include "phpmyadmin.imagePullPolicy" (dict "image" .Values.image) }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            {{- if .Values.config.pmaHost }}
+            - name: PMA_HOST
+              value: {{ .Values.config.pmaHost | quote }}
+            {{- end }}
+            {{- if ne (.Values.config.pmaPort | int) 3306 }}
+            - name: PMA_PORT
+              value: {{ .Values.config.pmaPort | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaUser }}
+            - name: PMA_USER
+              value: {{ .Values.config.pmaUser | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaAbsoluteUri }}
+            - name: PMA_ABSOLUTE_URI
+              value: {{ .Values.config.pmaAbsoluteUri | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaArbitrary }}
+            - name: PMA_ARBITRARY
+              value: "1"
+            {{- end }}
+            {{- if .Values.config.pmaCookieAuth }}
+            - name: PMA_COOKIE_AUTH
+              value: "1"
+            {{- end }}
+            {{- if .Values.config.pmaControlUser }}
+            - name: PMA_CONTROLUSER
+              value: {{ .Values.config.pmaControlUser | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaControlPass }}
+            - name: PMA_CONTROLPASS
+              value: {{ .Values.config.pmaControlPass | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaPmadb }}
+            - name: PMA_PMADB
+              value: {{ .Values.config.pmaPmadb | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaVerbose }}
+            - name: PMA_VERBOSE
+              value: {{ .Values.config.pmaVerbose | quote }}
+            {{- end }}
+            {{- if .Values.config.pmaVerboseCheck }}
+            - name: PMA_VERBOSE_CHECK
+              value: {{ .Values.config.pmaVerboseCheck | quote }}
+            {{- end }}
+            - name: MAX_EXECUTION_TIME
+              value: {{ .Values.php.maxExecutionTime | quote }}
+            - name: MEMORY_LIMIT
+              value: {{ .Values.php.memoryLimit | quote }}
+            - name: POST_MAX_SIZE
+              value: {{ .Values.php.postMaxSize | quote }}
+            - name: UPLOAD_MAX_FILESIZE
+              value: {{ .Values.php.uploadMaxFilesize | quote }}
+            - name: APACHE_LOG_DIR
+              value: {{ .Values.apache.logDir | quote }}
+            {{- if .Values.apache.serverName }}
+            - name: APACHE_SERVER_NAME
+              value: {{ .Values.apache.serverName | quote }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.extraEnvVarsSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.extraEnvVarsSecret }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
