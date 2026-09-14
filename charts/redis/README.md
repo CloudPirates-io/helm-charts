@@ -447,6 +447,7 @@ user default >sentinelpassword ~* +@all
 | `extraPorts`          | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
 | `extraInitContainers` | Additional init containers to add to the pod                            | `[]`    |
 | `extraContainers`     | Additional containers to add to the pod                                 | `[]`    |
+| `dnsConfig`           | DNS configuration for the pod                                           | `{}`    |
 
 ### Custom Scripts and Hooks
 
