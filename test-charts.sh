@@ -305,13 +305,34 @@ run_scenario() {
     fi
     echo ""
 
-    if ! helm install "$release_name" . \
-        $values_args \
-        --namespace "$namespace" \
-        --wait \
-        --timeout=600s \
-        --debug; then
-        echo -e "${RED}❌ Chart installation failed for $chart/$scenario_name${NC}"
+    # Retry once on install failure: "helm install --wait" can fail on a freshly-created
+    # cluster with a spurious "resource ... not ready: status: NotFound" for objects like
+    # ServiceAccounts that have no real readiness semantics - a read-after-write race against
+    # the API server/etcd, not a chart problem. A clean retry reliably clears it.
+    local install_attempt=1
+    local install_ok=false
+    while [ $install_attempt -le 2 ]; do
+        if helm install "$release_name" . \
+            $values_args \
+            --namespace "$namespace" \
+            --wait \
+            --timeout=600s \
+            --debug; then
+            install_ok=true
+            break
+        fi
+
+        echo -e "${YELLOW}⚠️  Install attempt $install_attempt failed for $chart/$scenario_name${NC}"
+        if [ $install_attempt -lt 2 ]; then
+            echo "   Retrying once (uninstalling first in case of a partial install)..."
+            helm uninstall "$release_name" -n "$namespace" --wait --timeout=120s >/dev/null 2>&1 || true
+            sleep 5
+        fi
+        install_attempt=$((install_attempt + 1))
+    done
+
+    if [ "$install_ok" != true ]; then
+        echo -e "${RED}❌ Chart installation failed for $chart/$scenario_name (after retry)${NC}"
         echo -e "\n${YELLOW}📋 Checking resources in namespace...${NC}"
         kubectl get all -n "$namespace" || true
         kubectl describe pods -n "$namespace" || true

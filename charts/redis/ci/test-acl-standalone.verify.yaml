@@ -26,10 +26,10 @@ spec:
             - |
               set -e
               echo "-> Authenticating as the configured ACL user (redisadmin) should succeed"
-              redis-cli -h test-redis-test-acl-standalone --user redisadmin -a 'RedisAdminPass123!' --no-auth-warning ping | grep -q PONG
+              redis-cli -t 3 -h test-redis-test-acl-standalone --user redisadmin -a 'RedisAdminPass123!' --no-auth-warning ping | grep -q PONG
 
               echo "-> Authenticating as the literal ACL user 'default' should be rejected (disabled in the ACL file)"
-              if redis-cli -h test-redis-test-acl-standalone --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
+              if redis-cli -t 3 -h test-redis-test-acl-standalone --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
                 echo "ERROR: PING succeeded as 'default', but that user is disabled in the ACL file"
                 exit 1
               fi

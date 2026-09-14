@@ -26,9 +26,9 @@ spec:
             - |
               set -e
               echo "-> Authenticating as 'default' should succeed"
-              redis-cli -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning ping | grep -q PONG
+              redis-cli -t 3 -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning ping | grep -q PONG
 
               echo "-> Cluster must report state:ok (proves the cluster-init Job's ACL-authenticated 'cluster create' actually succeeded)"
-              redis-cli -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning cluster info | grep -q "cluster_state:ok"
+              redis-cli -t 3 -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning cluster info | grep -q "cluster_state:ok"
 
               echo "OK: cluster ACL auth and cluster formation verified"

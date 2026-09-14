@@ -27,10 +27,10 @@ spec:
             - |
               set -e
               echo "-> Redis: authenticating as the configured ACL user (redisadmin) should succeed"
-              redis-cli -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning ping | grep -q PONG
+              redis-cli -t 3 -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning ping | grep -q PONG
 
               echo "-> Redis: authenticating as the literal ACL user 'default' should be rejected (disabled in the ACL file)"
-              if redis-cli -h test-redis-test-acl-replication --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
+              if redis-cli -t 3 -h test-redis-test-acl-replication --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
                 echo "ERROR: PING succeeded as 'default', but that user is disabled in the ACL file"
                 exit 1
               fi
@@ -38,7 +38,7 @@ spec:
               echo "-> Redis: replica must actually be replicating (proves 'masteruser redisadmin' + 'masterauth' let it authenticate to the master with a non-default ACL user)"
               REPLICA_CHECK=""
               for i in $(seq 1 12); do
-                REPLICA_CHECK=$(redis-cli -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^master_link_status:')
+                REPLICA_CHECK=$(redis-cli -t 3 -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^master_link_status:' || echo "")
                 if [ "$REPLICA_CHECK" = "master_link_status:up" ]; then
                   break
                 fi
@@ -51,10 +51,10 @@ spec:
               fi
 
               echo "-> Sentinel: authenticating as the Sentinel ACL user (sentineladmin) should succeed"
-              redis-cli -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning ping | grep -q PONG
+              redis-cli -t 3 -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning ping | grep -q PONG
 
               echo "-> Sentinel: must report a master address (proves it is actually monitoring, i.e. sentinel auth-user/auth-pass against Redis is correct)"
-              SENTINEL_REPLY=$(redis-cli -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning sentinel get-master-addr-by-name mymaster 2>/dev/null)
+              SENTINEL_REPLY=$(redis-cli -t 3 -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning sentinel get-master-addr-by-name mymaster 2>/dev/null)
               MASTER_ADDR=$(echo "$SENTINEL_REPLY" | sed -n '1p')
               MASTER_PORT=$(echo "$SENTINEL_REPLY" | sed -n '2p')
               # A successful reply is two lines: a host (IP or hostname, since this scenario

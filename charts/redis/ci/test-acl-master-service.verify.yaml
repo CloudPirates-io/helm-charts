@@ -29,7 +29,7 @@ spec:
               echo "-> Waiting for the master-discovery controller to point '-master' Service at a real master pod"
               MASTER_ROLE=""
               for i in $(seq 1 12); do
-                MASTER_ROLE=$(redis-cli -h test-redis-test-acl-master-service-master --user default -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^role:' || echo "")
+                MASTER_ROLE=$(redis-cli -t 3 -h test-redis-test-acl-master-service-master --user default -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^role:' || echo "")
                 if [ "$MASTER_ROLE" = "role:master" ]; then
                   break
                 fi
