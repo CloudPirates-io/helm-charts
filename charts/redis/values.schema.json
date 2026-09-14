@@ -143,6 +143,9 @@
                 "resources": {
                     "type": "object"
                 },
+                "runtimeClassName": {
+                    "type": "string"
+                },
                 "tolerations": {
                     "type": "array"
                 }
@@ -242,6 +245,9 @@
                     }
                 }
             }
+        },
+        "dnsConfig": {
+            "type": "object"
         },
         "externalMaster": {
             "type": "object",
@@ -602,6 +608,9 @@
         },
         "revisionHistoryLimit": {
             "type": "integer"
+        },
+        "runtimeClassName": {
+            "type": "string"
         },
         "sentinel": {
             "type": "object",
