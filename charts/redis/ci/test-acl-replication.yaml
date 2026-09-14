@@ -1,13 +1,12 @@
 # CI scenario: replication + Sentinel (StatefulSet mode) with both auth.acl and
-# sentinel.acl enabled, using non-default usernames for the sentinel-facing users.
+# sentinel.acl enabled, using non-default usernames throughout (including
+# auth.acl.defaultUsername, with the literal 'default' user disabled).
 # Exercises: sentinel "auth-user"/"auth-pass" wiring, sentinel.acl password lookup
-# and its ERROR-on-missing-password check, and the sentinel-probe/master-discovery
-# redis-cli calls authenticating via --user against the Sentinel ACL.
-#
-# auth.acl.defaultUsername is left as "default" here (kept out of this override)
-# because Redis-to-Redis replication auth (masterauth) always authenticates as
-# the literal ACL user "default"; ci/test-acl-standalone.yaml already exercises a
-# fully custom defaultUsername in a scenario with no replication involved.
+# and its ERROR-on-missing-password check, the sentinel-probe/master-discovery
+# redis-cli calls authenticating via --user against the Sentinel ACL, and the
+# "masteruser" directive emitted alongside "masterauth" so that replica->master
+# replication auth (and Sentinel-driven failover) work with a non-default,
+# non-literal-"default" ACL user.
 architecture: replication
 replicaCount: 3
 useDeployment: false
@@ -30,6 +29,7 @@ auth:
   acl:
     enabled: true
     existingSecret: redis-acl-replication
+    defaultUsername: redisadmin
     sentinelUsername: sentinelapp
 
 sentinel:

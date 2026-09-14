@@ -352,6 +352,7 @@ if [ -z "$ACL_PASSWORD" ]; then
   exit 1
 fi
 export REDIS_PASSWORD="$ACL_PASSWORD"
+export REDIS_USER="{{ $defaultUser }}"
 {{- else if eq .type "job" -}}
 ACL_PASSWORD=$({{ include "redis.auth.acl.awkCommand" (dict "user" $defaultUser "context" .context) }})
 if [ -z "$ACL_PASSWORD" ]; then
