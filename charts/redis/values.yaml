@@ -118,7 +118,7 @@ auth:
   existingSecret: ""
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
   existingSecretPasswordKey: "redis-password"
-  ## @param auth.acl Custom ACL rules to be applied. When set, all users, including the 'default' user, must be explicitly configured in the ACL file.
+  ## @param auth.acl Custom ACL rules to be applied. When set, all users the chart connects as - the ones selected by defaultUsername and sentinelUsername below - must be explicitly configured in the ACL file. The literal 'default' user is not required and may be disabled (`user default off`) if a different defaultUsername is configured.
   acl:
     ## @param auth.acl.enabled Enable custom ACL rules.
     enabled: false

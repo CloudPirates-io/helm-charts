@@ -53,6 +53,9 @@ data:
     # Function to run Redis commands
     run_redis_command() {
         local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        {{- if .Values.auth.acl.enabled }}
+        args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
@@ -241,6 +244,9 @@ data:
     # Function to run local Redis commands
     run_redis_command() {
         local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        {{- if .Values.auth.acl.enabled }}
+        args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
