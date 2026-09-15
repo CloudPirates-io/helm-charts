@@ -63,31 +63,36 @@ Allow users to select the server to connect to at login time:
 
 ```yaml
 config:
-  pmaArbitrary: true
-  pmaCookieAuth: true
+  auth:
+    arbitrary: true
+    cookieAuth: true
 ```
 
 #### 2. Fixed Database Connection
 
-Connect to a specific database server:
+Connect to a specific database server. **Important:** if `config.database.host` is empty, the phpMyAdmin image falls back to a hardcoded `db` hostname internally — always set `config.auth.arbitrary: false` together with a real `config.database.host`, never leave `host` empty with `arbitrary: false`.
 
 ```yaml
 config:
-  pmaHost: mariadb.default.svc.cluster.local
-  pmaPort: 3306
-  pmaUser: root
-  pmaArbitrary: false
-  pmaCookieAuth: true
+  database:
+    host: mariadb.default.svc.cluster.local
+    port: 3306
+    user: root
+  auth:
+    arbitrary: false
+    cookieAuth: true
 ```
 
 #### 3. Multiple Database Servers
 
-Configure multiple servers by setting `pmaAbsoluteUri` and using a custom config:
+Configure multiple servers by setting `absoluteUri` and using a custom config:
 
 ```yaml
 config:
-  pmaAbsoluteUri: "https://phpmyadmin.example.com/"
-  pmaArbitrary: true
+  database:
+    absoluteUri: "https://phpmyadmin.example.com/"
+  auth:
+    arbitrary: true
 ```
 
 ### Configuration Parameters
@@ -130,19 +135,31 @@ The following table lists the configurable parameters of the phpMyAdmin chart an
 
 #### phpMyAdmin Configuration Parameters
 
-| Parameter                   | Description                                          | Default |
-| --------------------------- | ---------------------------------------------------- | ------- |
-| `config.pmaHost`            | Database host (empty = show connection dialog)      | `""`    |
-| `config.pmaPort`            | Database port                                        | `3306`  |
-| `config.pmaUser`            | Database default user                               | `""`    |
-| `config.pmaAbsoluteUri`     | Absolute URI of phpMyAdmin installation             | `""`    |
-| `config.pmaArbitrary`       | Allow arbitrary server connection                   | `false` |
-| `config.pmaCookieAuth`      | Use cookie-based authentication                     | `true`  |
-| `config.pmaControlUser`     | Control user for advanced features                  | `""`    |
-| `config.pmaControlPass`     | Control user password                               | `""`    |
-| `config.pmaPmadb`           | Database for phpMyAdmin configuration storage       | `""`    |
-| `config.pmaVerbose`         | Display verbose error messages                      | `false` |
-| `config.pmaVerboseCheck`    | Verify MySQL connection details                     | `false` |
+| Parameter                            | Description                                                 | Default        |
+| ------------------------------------- | ------------------------------------------------------------ | -------------- |
+| `config.database.host`                | Database host (empty = show connection dialog)               | `""`            |
+| `config.database.port`                | Database port                                                 | `3306`          |
+| `config.database.user`                | Database default user (plain text)                            | `""`            |
+| `config.database.userSecret`          | Secret name containing the database user (overrides `user`)  | `""`            |
+| `config.database.userSecretKey`       | Key in Secret for the username                                 | `username`      |
+| `config.database.password`            | Database default user password (plain text)                   | `""`            |
+| `config.database.passwordSecret`      | Secret name containing the password (overrides `password`)     | `""`            |
+| `config.database.passwordSecretKey`   | Key in Secret for the password                                  | `password`      |
+| `config.database.absoluteUri`         | Absolute URI of phpMyAdmin installation                        | `""`            |
+| `config.auth.arbitrary`               | Allow arbitrary server connection. Keep `true` unless `config.database.host` is set — otherwise the image's hardcoded `db` fallback hostname leaves you unable to log in | `true` |
+| `config.auth.cookieAuth`              | Use cookie-based authentication                                 | `true`          |
+| `config.control.user`                 | Control user for advanced features (plain text)                | `pma`           |
+| `config.control.userSecret`           | Secret name containing the control user (overrides `user`)     | `""`            |
+| `config.control.userSecretKey`        | Key in Secret for the control username                          | `username`      |
+| `config.control.password`             | Control user password. **If left empty and `passwordSecret` is not set, a random 32-char password is auto-generated** and stored in a chart-managed Secret (`<release>-control`), preserved across upgrades | `""` |
+| `config.control.passwordSecret`       | Secret name containing the control password. **Setting this disables auto-generation.** | `""` |
+| `config.control.passwordSecretKey`    | Key in Secret for the control password                          | `password`      |
+| `config.control.pmadb`                | Database for phpMyAdmin configuration storage                   | `phpmyadmin`    |
+| `config.control.pmadbSecret`          | Secret name containing the pmadb name (overrides `pmadb`)        | `""`            |
+| `config.control.pmadbSecretKey`       | Key in Secret for the pmadb name                                  | `database`      |
+| `config.control.createTables`         | Auto-create the phpMyAdmin config storage tables via a post-install/upgrade Job (see caveat below) | `false` |
+| `config.debug.verbose`                | Display verbose error messages                                    | `false`         |
+| `config.debug.verboseCheck`           | Verify MySQL connection details                                   | `false`         |
 
 #### PHP Configuration Parameters
 
@@ -247,8 +264,9 @@ The following table lists the configurable parameters of the phpMyAdmin chart an
 replicaCount: 1
 
 config:
-  pmaArbitrary: true
-  pmaCookieAuth: true
+  auth:
+    arbitrary: true
+    cookieAuth: true
 
 resources:
   requests:
@@ -264,12 +282,16 @@ resources:
 replicaCount: 2
 
 config:
-  pmaHost: mariadb.database.svc.cluster.local
-  pmaPort: 3306
-  pmaUser: phpmyadmin
-  pmaCookieAuth: true
-  pmaControlUser: pma_control
-  pmaPmadb: phpmyadmin
+  database:
+    host: mariadb.database.svc.cluster.local
+    port: 3306
+    user: phpmyadmin
+  auth:
+    arbitrary: false
+    cookieAuth: true
+  control:
+    user: pma_control
+    pmadb: phpmyadmin
 
 php:
   maxExecutionTime: 600
@@ -309,8 +331,10 @@ pdb:
 
 ```yaml
 config:
-  pmaArbitrary: true
-  pmaAbsoluteUri: "https://phpmyadmin.example.com/"
+  auth:
+    arbitrary: true
+  database:
+    absoluteUri: "https://phpmyadmin.example.com/"
 
 traefik:
   ingressRoute:
@@ -321,9 +345,6 @@ traefik:
       enabled: true
       certResolver: letsencrypt
       secretName: phpmyadmin-tls
-
-metrics:
-  enabled: true
 ```
 
 ## Advanced Configuration
@@ -359,18 +380,53 @@ configMap:
     $cfg['Servers'][$i]['user'] = 'pma';
 ```
 
-### Environment Variables from Secrets
+### Using Kubernetes Secrets
 
-Reference database credentials from Kubernetes Secrets:
+Every sensitive `config` field (`database.user`, `database.password`, `control.user`, `control.password`, `control.pmadb`) can be sourced from an existing Secret instead of plain text:
 
 ```yaml
-extraEnvVars:
-  - name: PMA_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: phpmyadmin-credentials
-        key: password
+config:
+  database:
+    host: mariadb
+    userSecret: mariadb-credentials
+    userSecretKey: username
+    passwordSecret: mariadb-credentials
+    passwordSecretKey: password
+  control:
+    userSecret: mariadb-credentials
+    userSecretKey: username
+    passwordSecret: mariadb-credentials
+    passwordSecretKey: password
+    pmadbSecret: mariadb-credentials
+    pmadbSecretKey: database
 ```
+
+### Auto-Generated Control Password
+
+If `config.control.password` is left empty and `config.control.passwordSecret` is not set, the chart auto-generates a random 32-character password and stores it in a chart-managed Secret named `<release>-control`. This password is preserved across `helm upgrade` (it won't regenerate on every deploy). Retrieve it with:
+
+```bash
+kubectl get secret <release>-control -o jsonpath='{.data.password}' | base64 -d
+```
+
+Setting `config.control.passwordSecret` disables auto-generation entirely — the chart will not create its own Secret and will read from the one you provide instead.
+
+### Auto-Creating the Configuration Storage Tables
+
+By default, phpMyAdmin shows a "configuration storage is not completely configured" warning until its `create_tables.sql` has been run against the config-storage database once. Set `config.control.createTables: true` to have the chart run this automatically via a post-install/post-upgrade Job — it extracts `create_tables.sql` directly from the phpMyAdmin image and executes it using the `control.user`/`control.password` credentials.
+
+```yaml
+config:
+  database:
+    host: mariadb
+  control:
+    createTables: true
+```
+
+**Caveats:**
+- Requires `config.database.host` to be set (not used in arbitrary-server mode).
+- phpMyAdmin's `create_tables.sql` has the database name `phpmyadmin` hardcoded internally (`USE phpmyadmin;`), so this only creates tables in the right place if `config.control.pmadb` is left at its default (`phpmyadmin`). If you rename it, the tables will be created in a database literally named `phpmyadmin` regardless of what `pmadb` says.
+- The control user must already have `CREATE TABLE` privileges on that database (e.g. granted via your MariaDB chart's `auth.database`/`auth.username`).
 
 ## Testing
 

@@ -45,49 +45,83 @@ spec:
               containerPort: 80
               protocol: TCP
           env:
-            {{- if .Values.config.pmaHost }}
+            {{- if .Values.config.database.host }}
             - name: PMA_HOST
-              value: {{ .Values.config.pmaHost | quote }}
+              value: {{ .Values.config.database.host | quote }}
             {{- end }}
-            {{- if ne (.Values.config.pmaPort | int) 3306 }}
+            {{- if ne (.Values.config.database.port | int) 3306 }}
             - name: PMA_PORT
-              value: {{ .Values.config.pmaPort | quote }}
+              value: {{ .Values.config.database.port | quote }}
             {{- end }}
-            {{- if .Values.config.pmaUser }}
+            {{- if .Values.config.database.userSecret }}
             - name: PMA_USER
-              value: {{ .Values.config.pmaUser | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.userSecret }}
+                  key: {{ .Values.config.database.userSecretKey }}
+            {{- else if .Values.config.database.user }}
+            - name: PMA_USER
+              value: {{ .Values.config.database.user | quote }}
             {{- end }}
-            {{- if .Values.config.pmaAbsoluteUri }}
+            {{- if .Values.config.database.passwordSecret }}
+            - name: PMA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.passwordSecret }}
+                  key: {{ .Values.config.database.passwordSecretKey }}
+            {{- else if .Values.config.database.password }}
+            - name: PMA_PASSWORD
+              value: {{ .Values.config.database.password | quote }}
+            {{- end }}
+            {{- if .Values.config.database.absoluteUri }}
             - name: PMA_ABSOLUTE_URI
-              value: {{ .Values.config.pmaAbsoluteUri | quote }}
+              value: {{ .Values.config.database.absoluteUri | quote }}
             {{- end }}
-            {{- if .Values.config.pmaArbitrary }}
+            {{- if .Values.config.auth.arbitrary }}
             - name: PMA_ARBITRARY
               value: "1"
             {{- end }}
-            {{- if .Values.config.pmaCookieAuth }}
+            {{- if .Values.config.auth.cookieAuth }}
             - name: PMA_COOKIE_AUTH
               value: "1"
             {{- end }}
-            {{- if .Values.config.pmaControlUser }}
+            {{- if .Values.config.control.userSecret }}
             - name: PMA_CONTROLUSER
-              value: {{ .Values.config.pmaControlUser | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.userSecret }}
+                  key: {{ .Values.config.control.userSecretKey }}
+            {{- else if .Values.config.control.user }}
+            - name: PMA_CONTROLUSER
+              value: {{ .Values.config.control.user | quote }}
             {{- end }}
-            {{- if .Values.config.pmaControlPass }}
             - name: PMA_CONTROLPASS
-              value: {{ .Values.config.pmaControlPass | quote }}
-            {{- end }}
-            {{- if .Values.config.pmaPmadb }}
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.config.control.passwordSecret }}
+                  name: {{ .Values.config.control.passwordSecret }}
+                  key: {{ .Values.config.control.passwordSecretKey }}
+                  {{- else }}
+                  name: {{ include "phpmyadmin.fullname" . }}-control
+                  key: password
+                  {{- end }}
+            {{- if .Values.config.control.pmadbSecret }}
             - name: PMA_PMADB
-              value: {{ .Values.config.pmaPmadb | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.pmadbSecret }}
+                  key: {{ .Values.config.control.pmadbSecretKey }}
+            {{- else if .Values.config.control.pmadb }}
+            - name: PMA_PMADB
+              value: {{ .Values.config.control.pmadb | quote }}
             {{- end }}
-            {{- if .Values.config.pmaVerbose }}
+            {{- if .Values.config.debug.verbose }}
             - name: PMA_VERBOSE
-              value: {{ .Values.config.pmaVerbose | quote }}
+              value: {{ .Values.config.debug.verbose | quote }}
             {{- end }}
-            {{- if .Values.config.pmaVerboseCheck }}
+            {{- if .Values.config.debug.verboseCheck }}
             - name: PMA_VERBOSE_CHECK
-              value: {{ .Values.config.pmaVerboseCheck | quote }}
+              value: {{ .Values.config.debug.verboseCheck | quote }}
             {{- end }}
             - name: MAX_EXECUTION_TIME
               value: {{ .Values.php.maxExecutionTime | quote }}
@@ -123,13 +157,26 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.extraVolumeMounts }}
+          {{- if or .Values.persistence.sessions.enabled .Values.extraVolumeMounts }}
           volumeMounts:
+            {{- if .Values.persistence.sessions.enabled }}
+            - name: sessions
+              mountPath: /sessions
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-      {{- with .Values.extraVolumes }}
+      {{- if or .Values.persistence.sessions.enabled .Values.extraVolumes }}
       volumes:
+        {{- if .Values.persistence.sessions.enabled }}
+        - name: sessions
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.sessions.existingClaim | default (printf "%s-sessions" (include "phpmyadmin.fullname" .)) }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

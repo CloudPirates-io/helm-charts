@@ -14,11 +14,13 @@ apache:
   serverName: phpmyadmin.local
 
 config:
-  pmaHost: mariadb
-  pmaPort: 3306
-  pmaUser: root
-  pmaArbitrary: false
-  pmaCookieAuth: true
+  database:
+    host: mariadb
+    port: 3306
+    user: root
+  auth:
+    arbitrary: false
+    cookieAuth: true
 
 php:
   maxExecutionTime: 600

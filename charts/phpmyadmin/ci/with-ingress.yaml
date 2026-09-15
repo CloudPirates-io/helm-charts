@@ -14,8 +14,9 @@ apache:
   serverName: phpmyadmin.local
 
 config:
-  pmaArbitrary: true
-  pmaCookieAuth: true
+  auth:
+    arbitrary: true
+    cookieAuth: true
 
 ingress:
   enabled: true

@@ -37,6 +37,25 @@ image:
 ## @param replicaCount Number of phpMyAdmin replicas to deploy
 replicaCount: 1
 
+## @section Session persistence parameters
+## Mounts a volume at /sessions so PHP sessions (login state) survive pod restarts.
+## Without this, every pod restart logs all users out.
+persistence:
+  sessions:
+    ## @param persistence.sessions.enabled Mount a persistent volume at /sessions to survive pod restarts
+    enabled: false
+    ## @param persistence.sessions.existingClaim Use an existing PVC instead of letting the chart create one
+    existingClaim: ""
+    ## @param persistence.sessions.size Size of the auto-created PVC
+    size: 1Gi
+    ## @param persistence.sessions.storageClass StorageClass for the auto-created PVC (cluster default if empty)
+    storageClass: ""
+    ## @param persistence.sessions.accessModes Access modes for the auto-created PVC. Use ReadWriteMany if replicaCount > 1 and your storage class supports it; ReadWriteOnce will not work across multiple pods.
+    accessModes:
+      - ReadWriteOnce
+    ## @param persistence.sessions.annotations Annotations for the auto-created PVC
+    annotations: {}
+
 ## @section Service parameters
 service:
   ## @param service.type Kubernetes service type
@@ -138,28 +157,75 @@ configMap:
 
 ## @section phpMyAdmin configuration parameters
 config:
-  ## @param config.pmaHost Database host (if not set, connection dialog will be shown)
-  pmaHost: ""
-  ## @param config.pmaPort Database port
-  pmaPort: 3306
-  ## @param config.pmaUser Database default user
-  pmaUser: ""
-  ## @param config.pmaAbsoluteUri Absolute URI of phpMyAdmin installation (required for single signon)
-  pmaAbsoluteUri: ""
-  ## @param config.pmaArbitrary Allow arbitrary server connection (enable server selection dropdown)
-  pmaArbitrary: false
-  ## @param config.pmaCookieAuth Use cookie-based authentication
-  pmaCookieAuth: true
-  ## @param config.pmaControlUser Control user for advanced phpMyAdmin features
-  pmaControlUser: ""
-  ## @param config.pmaControlPass Control user password (should use secrets in real deployments)
-  pmaControlPass: ""
-  ## @param config.pmaPmadb Database for phpMyAdmin configuration storage
-  pmaPmadb: ""
-  ## @param config.pmaVerbose Display verbose error messages
-  pmaVerbose: false
-  ## @param config.pmaVerboseCheck Verify MySQL connection details
-  pmaVerboseCheck: false
+  database:
+    ## @param config.database.host Database host (if not set, connection dialog will be shown)
+    host: ""
+    ## @param config.database.port Database port
+    port: 3306
+    ## @param config.database.user Database default user (plain text, use config.database.userSecret for production)
+    user: ""
+    ## @param config.database.userSecret Name of Secret containing database user (overrides config.database.user if set)
+    userSecret: ""
+    ## @param config.database.userSecretKey Key in Secret containing the username (default: username)
+    userSecretKey: "username"
+    ## @param config.database.password Database default user password (plain text, use config.database.passwordSecret for production)
+    password: ""
+    ## @param config.database.passwordSecret Name of Secret containing database password (overrides config.database.password if set)
+    passwordSecret: ""
+    ## @param config.database.passwordSecretKey Key in Secret containing the password (default: password)
+    passwordSecretKey: "password"
+    ## @param config.database.absoluteUri Absolute URI of phpMyAdmin installation (required for single signon)
+    absoluteUri: ""
+
+    admin:
+      ## @param config.database.admin.user Database admin username (e.g. root), used only once by the provisioning Job to create the control user and grant it privileges. Never used at phpMyAdmin runtime.
+      user: "root"
+      ## @param config.database.admin.userSecret Secret name containing the admin username (overrides admin.user)
+      userSecret: ""
+      ## @param config.database.admin.userSecretKey Key in Secret for the admin username
+      userSecretKey: "username"
+      ## @param config.database.admin.password Database admin password, used only once by the provisioning Job
+      password: ""
+      ## @param config.database.admin.passwordSecret Secret name containing the admin password (overrides admin.password)
+      passwordSecret: ""
+      ## @param config.database.admin.passwordSecretKey Key in Secret for the admin password
+      passwordSecretKey: "password"
+
+  auth:
+    ## @param config.auth.arbitrary Allow arbitrary server connection (enable server selection dropdown). Defaults to true because the phpMyAdmin image falls back to a hardcoded "db" hostname when config.database.host is empty and arbitrary is false, leaving no way to enter a server in the UI. Set to false only when config.database.host is set to a real, reachable host.
+    arbitrary: true
+    ## @param config.auth.cookieAuth Use cookie-based authentication
+    cookieAuth: true
+
+  control:
+    ## @param config.control.user Control user for advanced phpMyAdmin features (plain text, use control.userSecret for production)
+    user: "pma"
+    ## @param config.control.userSecret Name of Secret containing control user (overrides control.user if set)
+    userSecret: ""
+    ## @param config.control.userSecretKey Key in Secret containing the control username (default: username)
+    userSecretKey: "username"
+    ## @param config.control.password Control user password. If empty and control.passwordSecret is not set, a random 32-char password is auto-generated and stored in a chart-managed Secret (<release>-control), preserved across upgrades.
+    password: ""
+    ## @param config.control.passwordSecret Name of an existing Secret containing control password. If set, disables auto-generation and the chart-managed Secret is not created.
+    passwordSecret: ""
+    ## @param config.control.passwordSecretKey Key in Secret containing the password (default: password)
+    passwordSecretKey: "password"
+    ## @param config.control.pmadb Database for phpMyAdmin configuration storage
+    pmadb: "phpmyadmin"
+    ## @param config.control.pmadbSecret Name of Secret containing pmadb (overrides control.pmadb if set)
+    pmadbSecret: ""
+    ## @param config.control.pmadbSecretKey Key in Secret containing the database name (default: database)
+    pmadbSecretKey: "database"
+    ## @param config.control.createUser Run a post-install/upgrade Job that creates the control user in the database (CREATE USER + GRANT ALL on control.pmadb), using config.database.admin credentials (e.g. root). Requires config.database.host to be set.
+    createUser: false
+    ## @param config.control.createTables Run a post-install/upgrade Job that creates the phpMyAdmin configuration storage tables automatically, using the control user credentials above (runs after createUser, if both are enabled). Requires config.database.host to be set. WARNING: phpMyAdmin's create_tables.sql has "phpmyadmin" hardcoded as the target database internally, so this only lands in the right place if control.pmadb is left at its default ("phpmyadmin"). If createUser is false, the control user must already exist with CREATE TABLE privileges on that database.
+    createTables: false
+
+  debug:
+    ## @param config.debug.verbose Display verbose error messages
+    verbose: false
+    ## @param config.debug.verboseCheck Verify MySQL connection details
+    verboseCheck: false
 
 ## @section PHP Configuration parameters
 php:
