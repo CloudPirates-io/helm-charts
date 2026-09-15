@@ -130,9 +130,9 @@ config:
       enabled: false
     ## @param config.logging.level Log level for RabbitMQ (debug, info, warning, error, critical, none)
     level: "info"
-  ## @param config.extraConfiguration Additional RabbitMQ configuration
+  ## @param config.extraConfiguration Additional RabbitMQ configuration. Supports Helm template expressions.
   extraConfiguration: ""
-  ## @param config.advancedConfiguration Advanced RabbitMQ configuration
+  ## @param config.advancedConfiguration Advanced RabbitMQ configuration. Supports Helm template expressions.
   advancedConfiguration: ""
 
 ## @section Queue Balancing and Distribution Configuration
