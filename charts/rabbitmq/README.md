@@ -223,8 +223,8 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ                                                                                                               | `false`      |
 | `config.memoryHighWatermark.type`    | Memory high watermark type. Either `absolute` or `relative`                                                                                                        | `"relative"` |
 | `config.memoryHighWatermark.value`   | Memory high watermark value. For relative: use number (e.g., `0.4` for 40%). For absolute: use string to avoid scientific notation (e.g., `"8GB"`, `"8590000000"`) | `0.4`        |
-| `config.extraConfiguration`          | Additional RabbitMQ configuration                                                                                                                                  | `""`         |
-| `config.advancedConfiguration`       | Advanced RabbitMQ configuration                                                                                                                                    | `""`         |
+| `config.extraConfiguration`          | Additional RabbitMQ configuration. Supports Helm template expressions.                                                                                            | `""`         |
+| `config.advancedConfiguration`       | Advanced RabbitMQ configuration. Supports Helm template expressions.                                                                                              | `""`         |
 
 ### PeerDiscoveryK8sPlugin configuration
 
