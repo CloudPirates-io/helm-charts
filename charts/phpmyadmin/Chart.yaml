@@ -1,0 +1,47 @@
+apiVersion: v2
+name: phpmyadmin
+description: phpMyAdmin is a free and open source administration tool for MySQL and MariaDB. It provides a web interface to manage databases, tables, columns, relations, indexes, users, permissions, etc.
+type: application
+version: 0.1.0
+appVersion: "5.2.3"
+keywords:
+  - phpmyadmin
+  - mysql
+  - mariadb
+  - database
+  - management
+home: https://www.phpmyadmin.net
+sources:
+  - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/phpmyadmin
+  - https://github.com/phpmyadmin/phpmyadmin
+maintainers:
+  - name: CloudPirates GmbH & Co. KG
+    email: hello@cloudpirates.io
+    url: https://www.cloudpirates.io
+dependencies:
+  - name: common
+    version: "2.2.1"
+    repository: oci://registry-1.docker.io/cloudpirates
+icon: https://a.storyblok.com/f/143071/512x512/phpmyadmin-logo.png
+annotations:
+  license: Apache-2.0
+  artifacthub.io/category: database
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+    url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+  artifacthub.io/links: |
+    - name: phpMyAdmin
+      url: https://www.phpmyadmin.net
+    - name: Helm Chart
+      url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/phpmyadmin
+    - name: Application
+      url: https://github.com/phpmyadmin/phpmyadmin
+    - name: Maintainer CloudPirates
+      url: https://www.cloudpirates.io
+  artifacthub.io/changes: |-
+    - kind: added
+      description: "Initial release of phpMyAdmin Helm chart"
+      links:
+        - name: "Changelog"
+          url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/phpmyadmin/CHANGELOG.md"
