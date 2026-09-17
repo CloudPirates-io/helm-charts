@@ -31717,6 +31717,60 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/nginx-0.1.0/nginx-0.1.0.tgz
     version: 0.1.0
+  phpmyadmin:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: added
+          description: "Initial release of phpMyAdmin Helm chart"
+          links:
+            - name: "Changelog"
+              url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/phpmyadmin/CHANGELOG.md"
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: phpMyAdmin
+          url: https://www.phpmyadmin.net
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/phpmyadmin
+        - name: Application
+          url: https://github.com/phpmyadmin/phpmyadmin
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 5.2.3
+    created: "2026-09-17T10:15:18.086628305Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: phpMyAdmin is a free and open source administration tool for MySQL
+      and MariaDB. It provides a web interface to manage databases, tables, columns,
+      relations, indexes, users, permissions, etc.
+    digest: bd660d5134032d06d50d30b41c6b53400e69929a4a27fb156262139e9e4f2d13
+    home: https://www.phpmyadmin.net
+    icon: https://a.storyblok.com/f/143071/512x512/350cf64a87/phpmyadmin-logo.svg
+    keywords:
+    - phpmyadmin
+    - mysql
+    - mariadb
+    - database
+    - management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: phpmyadmin
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/phpmyadmin
+    - https://github.com/phpmyadmin/phpmyadmin
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/phpmyadmin-0.1.0/phpmyadmin-0.1.0.tgz
+    version: 0.1.0
   postgres:
   - annotations:
       artifacthub.io/category: database
@@ -66132,4 +66186,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-15T07:48:41.25071149Z"
+generated: "2026-09-17T10:15:18.088535903Z"
