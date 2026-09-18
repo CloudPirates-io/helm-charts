@@ -3900,6 +3900,59 @@ entries:
   - annotations:
       artifacthub.io/changes: |-
         - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Ghost
+          url: https://ghost.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+        - name: Application
+          url: https://github.com/TryGhost/Ghost
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 6.63.0
+    created: "2026-09-18T06:54:40.881264423Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: A simple, powerful publishing platform that allows you to share your
+      stories with the world.
+    digest: 6ae50c1550a600c6a0f190577ec17e702d8c85c25f83d3408735833bb4f93693
+    home: https://ghost.org
+    icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+    keywords:
+    - ghost
+    - blogging
+    - content management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: ghost
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - https://github.com/TryGhost/Ghost
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.20.23/ghost-0.20.23.tgz
+    version: 0.20.23
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[ghost] Update image.repository to e05bc11 (#1718)'
           links:
           - name: Pull Request
@@ -8830,6 +8883,60 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.1.0/ghost-0.1.0.tgz
     version: 0.1.0
   kafka:
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Kafka
+          url: https://kafka.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+        - name: Application
+          url: https://github.com/apache/kafka
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 4.3.1
+    created: "2026-09-18T06:54:41.206617007Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: Apache Kafka is a distributed event streaming platform used for high-performance
+      data pipelines, streaming analytics, and data integration. This chart deploys
+      Kafka in KRaft mode (no ZooKeeper required).
+    digest: 69759ef81bf251de10ffe0321ea50e9d6c4b211fd2b4a0dd694f0fcc276a125f
+    home: https://kafka.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/a5d4be1ea1/kafka-logo.svg
+    keywords:
+    - kafka
+    - streaming
+    - messaging
+    - event-streaming
+    - kraft
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: vaggelis.vk@gmail.com
+      name: vaggeliskls
+      url: https://github.com/vaggeliskls
+    name: kafka
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/kafka
+    - https://github.com/apache/kafka
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/kafka-0.1.7/kafka-0.1.7.tgz
+    version: 0.1.7
   - annotations:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
@@ -24473,6 +24580,52 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/minio-0.1.7/minio-0.1.7.tgz
     version: 0.1.7
   mongodb:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.3.11
+    created: "2026-09-18T06:54:42.19398517Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: 113e5166769c2fccadcad0e8ea99dd7df6000dc0612a7f2ffd2275afdc189c2f
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.18.14/mongodb-0.18.14.tgz
+    version: 0.18.14
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
@@ -66241,4 +66394,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-17T19:40:55.443306755Z"
+generated: "2026-09-18T06:54:44.104085536Z"
