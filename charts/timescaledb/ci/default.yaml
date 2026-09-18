@@ -1,0 +1,14 @@
+# CI scenario: default TimescaleDB deployment with a deterministic password.
+# Exercises: PostgreSQL connectivity, TimescaleDB extension, hypertable operations.
+auth:
+  postgresPassword: "TimescaleTestPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 1Gi

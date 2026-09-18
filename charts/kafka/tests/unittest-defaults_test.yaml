@@ -458,10 +458,25 @@ tests:
       # not be concatenated onto it (previously rendered `--ignore-formatted"sleep 3600"`).
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: '--ignore-formatted\s+"sleep 3600"'
+          pattern: '--ignore-formatted\s+exec "sleep 3600"'
       - notMatchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: '--ignore-formatted"'
+      # The override has to be exec'd so SIGTERM reaches the broker instead of the shell.
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '(?m)^exec "sleep 3600"$'
+
+  - it: should exec a multi word command override
+    template: statefulset.yaml
+    set:
+      command:
+        - /opt/kafka/bin/custom-start.sh
+        - --foo
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '(?m)^exec "/opt/kafka/bin/custom-start\.sh" "--foo"$'
 
   - it: should append extraArgs to the kafka-server-start command
     template: statefulset.yaml

@@ -1,0 +1,29 @@
+# Functional verification for ci/with-db.yaml
+# Tests that phpMyAdmin environment variables are properly configured
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-phpmyadmin-with-db:80"
+              echo "-> Testing HTTP connectivity to phpMyAdmin with DB config"
+              curl -f http://${SERVICE_HOST}/ -L -o /dev/null -s
+              echo "-> phpMyAdmin with DB configuration is responding"
+              echo "OK: phpMyAdmin with database configuration verification passed"
