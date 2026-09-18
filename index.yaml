@@ -58008,6 +58008,60 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[timescale/timescaledb] Update image.repository to v2.30.1 (#1738)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1738
+        - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: TimescaleDB
+          url: https://www.timescale.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/timescaledb
+        - name: Application
+          url: https://github.com/timescale/timescaledb
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.30.1
+    created: "2026-09-18T08:11:19.189326892Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: TimescaleDB - The Open Source Time-Series Database for PostgreSQL
+    digest: fdf0109ebe6f117dc5523668b4881ab0f81a8ecc16f80cc128e4f75f0b7b5fd9
+    home: https://www.timescale.com
+    icon: https://a.storyblok.com/f/143071/512x512/b2e01452ce/timescaledb-logo.svg
+    keywords:
+    - timescaledb
+    - timeseries
+    - postgresql
+    - database
+    - sql
+    - analytics
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: timescaledb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/timescaledb
+    - https://github.com/timescale/timescaledb
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/timescaledb-0.13.11/timescaledb-0.13.11.tgz
+    version: 0.13.11
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[timescale/timescaledb] Update image.repository to 3113d12 (#1716)'
           links:
           - name: Pull Request
@@ -66638,4 +66692,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-18T08:04:39.991768638Z"
+generated: "2026-09-18T08:11:19.191683Z"
