@@ -1,0 +1,30 @@
+# CI scenario: TimescaleDB with a custom, tuned postgresql.conf.
+# Exercises: config.postgresql* tuning knobs and config.extraConfig, beyond the
+# hardcoded defaults exercised by ci/default.yaml.
+auth:
+  postgresPassword: "TimescaleTunedPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 1Gi
+
+config:
+  postgresqlMaxConnections: 200
+  postgresqlSharedBuffers: "256MB"
+  postgresqlEffectiveCacheSize: "768MB"
+  postgresqlWorkMem: "8MB"
+  postgresqlMaintenanceWorkMem: "128MB"
+  postgresqlWalBuffers: "8MB"
+  postgresqlCheckpointCompletionTarget: "0.9"
+  postgresqlRandomPageCost: "1.5"
+  postgresqlLogStatement: "ddl"
+  postgresqlLogMinDurationStatement: "500"
+  extraConfig:
+    - "timescaledb.max_background_workers = 4"
+    - "statement_timeout = 30000"

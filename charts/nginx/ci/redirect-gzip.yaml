@@ -1,0 +1,84 @@
+# CI test values for nginx chart - advanced scenario
+# Exercises a custom serverConfig with a redirect rule and gzip compression,
+# beyond the plain static-file serving covered by ci/test-values.yaml.
+
+image:
+  # Use IfNotPresent to avoid repeated pulls
+  pullPolicy: IfNotPresent
+  # Use simple tag without digest for better caching
+  tag: "1.29.2-alpine"
+
+# Use non-privileged port for CI environment
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+
+service:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+
+# Run as nginx user (101) - non-root
+containerSecurityContext:
+  runAsUser: 101
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+
+podSecurityContext:
+  fsGroup: 101
+
+# Reduce probe delays for faster readiness in tests
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+livenessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Configure nginx with a redirect rule and gzip compression on a second
+# location block, on the non-privileged port used for CI.
+serverConfig: |-
+  server {
+    listen 8080;
+    server_name _;
+
+    # Otherwise nginx's redirects include this internal container port (the listen
+    # directive's port), not the Service's externally-exposed port - correct behavior
+    # here since nginx sits behind the Service/any real reverse proxy.
+    absolute_redirect off;
+
+    gzip on;
+    gzip_min_length 1;
+    gzip_types text/plain;
+    gzip_proxied any;
+
+    location /old-page {
+      return 301 /new-page;
+    }
+
+    location /new-page {
+      default_type text/plain;
+      return 200 "this response body is long enough to be worth gzip compressing when the client advertises Accept-Encoding: gzip in its request headers\n";
+    }
+
+    location / {
+      root /usr/share/nginx/html;
+      index index.html index.htm;
+    }
+  }

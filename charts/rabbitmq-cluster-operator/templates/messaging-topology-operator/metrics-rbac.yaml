@@ -1,0 +1,58 @@
+{{- if and .Values.msgTopologyOperator.enabled .Values.msgTopologyOperator.rbac.create .Values.msgTopologyOperator.metrics.secure }}
+{{- if .Values.msgTopologyOperator.metrics.rbac.authDelegator }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  name: {{ printf "%s-auth-delegator" (include "rmqco.msgTopologyOperator.fullname.namespace" .) | trunc 63 | trimSuffix "-" }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "rmqco.msgTopologyOperator.serviceAccountName" . }}
+    namespace: {{ include "cloudpirates.namespace" . }}
+{{- end }}
+{{- if .Values.msgTopologyOperator.metrics.rbac.metricsReader.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    {{- include "rmqmto.labels" . | nindent 4 }}
+  name: {{ printf "%s-metrics-reader" (include "rmqco.msgTopologyOperator.fullname.namespace" .) | trunc 63 | trimSuffix "-" }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+rules:
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+{{- range .Values.msgTopologyOperator.metrics.rbac.metricsReader.serviceAccounts }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    {{- include "rmqmto.labels" $ | nindent 4 }}
+  name: {{ printf "%s-metrics-reader-%s-%s" (include "rmqco.msgTopologyOperator.fullname.namespace" $) .namespace .name | trunc 63 | trimSuffix "-" }}
+  {{- if $.Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ printf "%s-metrics-reader" (include "rmqco.msgTopologyOperator.fullname.namespace" $) | trunc 63 | trimSuffix "-" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .name }}
+    namespace: {{ .namespace }}
+{{- end }}
+{{- end }}
+{{- end }}

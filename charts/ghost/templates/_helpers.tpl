@@ -78,6 +78,22 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Return the public site URL for Ghost
+*/}}
+{{- define "ghost.url" -}}
+{{- if .Values.config.url }}
+{{- .Values.config.url }}
+{{- else if .Values.ingress.enabled }}
+{{- printf "https://%s" (first .Values.ingress.hosts).host }}
+{{- else -}}
+{{- /* Loopback, not the Service DNS name: Ghost self-fetches this URL during its own startup
+(e.g. the ActivityPub webhook init), before its readiness probe has passed and before the
+Service has any Ready endpoints to route to - going through the Service here would deadlock. */ -}}
+{{- printf "http://127.0.0.1:%v" .Values.config.server.port }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return the admin URL for Ghost
 */}}
 {{- define "ghost.admin_url" -}}

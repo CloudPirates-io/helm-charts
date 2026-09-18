@@ -1,0 +1,62 @@
+# Functional verification for ci/custom-user.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves that the non-root
+# application user created via customUsers can authenticate directly and
+# perform a real write/read round-trip against its own database, and that its
+# role grants are restricted to that database only (unlike the root user,
+# which has full admin access).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mongo:7
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-mongodb-custom-user"
+              PORT=27017
+              APP_USER="appuser"
+              APP_PASSWORD="AppPass123!"
+              APP_DB="appdb"
+              APP_URI="mongodb://${APP_USER}:${APP_PASSWORD}@${HOST}:${PORT}/${APP_DB}?authSource=${APP_DB}"
+
+              echo "-> Connecting as the application user and inserting a document into its own database"
+              mongosh "$APP_URI" --quiet --eval '
+                db.verify_col.insertOne({ _id: 1, value: "hello-appuser" });
+              '
+
+              echo "-> Reading back the document as the application user and asserting the value"
+              RESULT=$(mongosh "$APP_URI" --quiet --eval 'print(db.verify_col.findOne({ _id: 1 }).value)')
+              if [ "$RESULT" != "hello-appuser" ]; then
+                echo "ERROR: expected 'hello-appuser' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Asserting the application user's role is restricted to its own database"
+              if mongosh "$APP_URI" --quiet --eval '
+                db.getSiblingDB("admin").runCommand({ createUser: "shouldfail", pwd: "x", roles: [] });
+              ' 2>/tmp/err; then
+                echo "ERROR: application user was able to run admin commands outside its own grants"
+                cat /tmp/err
+                exit 1
+              fi
+              grep -qi "not authorized" /tmp/err
+
+              echo "-> Dropping the test collection"
+              mongosh "$APP_URI" --quiet --eval 'db.verify_col.drop();'
+
+              echo "OK: MongoDB custom-user verification passed"
