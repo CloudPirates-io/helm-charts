@@ -1,0 +1,74 @@
+# CI scenario: Ghost with ingress enabled.
+# Exercises the ghost.url helper's ingress branch (templates/_helpers.tpl):
+# with ingress.enabled: true, config.production.json's "url" is rendered from
+# the first ingress host instead of the 127.0.0.1 loopback used when ingress
+# is disabled (ci/test-values.yaml). This is the code path Ghost's own
+# ActivityPub webhook self-fetch takes at startup when ingress is on.
+
+image:
+  pullPolicy: IfNotPresent
+  tag: "6.4.0"
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts:
+    - host: ghost-with-ingress.local
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: admin.ghost-with-ingress.local
+      paths:
+        - path: /ghost
+          pathType: Prefix
+
+# Lenient probes for slow CI environments
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Disable persistence for faster CI tests
+persistence:
+  enabled: false
+
+# MariaDB configuration for CI
+mariadb:
+  enabled: true
+
+  auth:
+    database: ghost
+    username: ghost
+    password: ghost-test-password
+    rootPassword: root-test-password
+
+  image:
+    pullPolicy: IfNotPresent
+
+  primary:
+    persistence:
+      enabled: false
+
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi

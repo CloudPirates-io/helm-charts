@@ -31,6 +31,23 @@ spec:
 {{- end }}
       automountServiceAccountToken: false
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      initContainers:
+        # kafka_exporter exits fatally (no retry) if the broker isn't accepting connections yet
+        # at startup, which races with the Kafka StatefulSet on every fresh install - wait for
+        # the client listener to actually be open before starting it.
+        - name: wait-for-kafka
+          image: docker.io/busybox:1.37.0
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Kafka client listener {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }} to accept connections..."
+              until nc -z -w2 {{ include "kafka.fullname" . }} {{ .Values.service.ports.client }}; do
+                echo "Not reachable yet, retrying in 2s..."
+                sleep 2
+              done
+              echo "Kafka client listener is reachable."
       containers:
         - name: kafka-exporter
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}

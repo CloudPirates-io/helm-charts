@@ -1,0 +1,17 @@
+remote: origin
+target-branch: main
+
+chart-dirs:
+  - charts
+
+excluded-charts:
+  - common
+  - clusterpirate
+
+lint-conf: lintconf.yaml
+
+validate-maintainers: false
+check-version-increment: true
+
+additional-commands:
+  - "helm unittest {{ .Path }}"

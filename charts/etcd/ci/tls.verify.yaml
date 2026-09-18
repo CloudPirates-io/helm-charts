@@ -1,0 +1,78 @@
+# Functional verification for ci/tls.yaml.
+# Proves the deployed etcd cluster actually enforces client-cert-auth (a plain
+# HTTP/no-cert connection must be rejected) and that a client presenting a
+# certificate signed by the trusted CA can still do a real put/get/delete
+# round-trip over TLS - not just that probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: client-certs
+          secret:
+            secretName: test-etcd-tls-client-certs
+      containers:
+        - name: verify
+          # gcr.io/etcd-development/etcd release images are distroless (no shell), so this
+          # downloads the matching official etcdctl release binary into a shell-capable image
+          # instead of switching to a third-party (e.g. bitnami) etcd image.
+          image: docker.io/alpine:3.20
+          volumeMounts:
+            - name: client-certs
+              mountPath: /certs
+              readOnly: true
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ETCD_VERSION="v3.7.1"
+              ENDPOINT="https://test-etcd-tls:2379"
+              KEY="verify-key"
+              VALUE="verify-value-$(date +%s)"
+
+              echo "-> Downloading etcdctl ${ETCD_VERSION}"
+              apk add --no-cache curl tar >/dev/null
+              curl -fsSL "https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz" \
+                | tar -xz -C /tmp "etcd-${ETCD_VERSION}-linux-amd64/etcdctl"
+              ETCDCTL="/tmp/etcd-${ETCD_VERSION}-linux-amd64/etcdctl"
+
+              echo "-> Verifying a request without a client certificate is rejected"
+              if "$ETCDCTL" --endpoints="$ENDPOINT" --cacert=/certs/ca.crt get "$KEY" >/tmp/noauth.log 2>&1; then
+                echo "ERROR: request without a client certificate unexpectedly succeeded"
+                cat /tmp/noauth.log
+                exit 1
+              fi
+              echo "   (rejected as expected)"
+
+              echo "-> Writing key '$KEY' to etcd over mTLS"
+              "$ETCDCTL" --endpoints="$ENDPOINT" \
+                --cacert=/certs/ca.crt --cert=/certs/tls.crt --key=/certs/tls.key \
+                put "$KEY" "$VALUE"
+
+              echo "-> Reading key '$KEY' back from etcd over mTLS"
+              RESULT=$("$ETCDCTL" --endpoints="$ENDPOINT" \
+                --cacert=/certs/ca.crt --cert=/certs/tls.crt --key=/certs/tls.key \
+                get "$KEY" --print-value-only)
+
+              if [ "$RESULT" != "$VALUE" ]; then
+                echo "ERROR: expected '$VALUE' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Deleting key '$KEY'"
+              "$ETCDCTL" --endpoints="$ENDPOINT" \
+                --cacert=/certs/ca.crt --cert=/certs/tls.crt --key=/certs/tls.key \
+                del "$KEY" >/dev/null
+
+              echo "OK: etcd mTLS enforcement and put/get/delete round-trip verification passed"

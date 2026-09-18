@@ -297,6 +297,7 @@ tests:
         extraConfiguration: |
           management.rates_mode = basic
           collect_statistics_interval = 10000
+          cluster_name = {{ .Release.Name }}
     template: templates/configmap.yaml
     asserts:
       - matchRegex:
@@ -305,3 +306,18 @@ tests:
       - matchRegex:
           path: data["rabbitmq.conf"]
           pattern: "collect_statistics_interval = 10000"
+      - matchRegex:
+          path: data["rabbitmq.conf"]
+          pattern: "cluster_name = RELEASE-NAME"
+
+  - it: should render advanced configuration templates
+    set:
+      config:
+        advancedConfiguration: |
+          [{rabbit, [{cluster_name, <<"{{ .Release.Name }}">>}]}].
+    template: templates/configmap.yaml
+    asserts:
+      - equal:
+          path: data["advanced.config"]
+          value: |
+            [{rabbit, [{cluster_name, <<"RELEASE-NAME">>}]}].
