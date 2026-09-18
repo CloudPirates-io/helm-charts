@@ -3900,6 +3900,64 @@ entries:
   - annotations:
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[mariadb] Update initContainers.waitForMariadb.repository to v13 (#1741)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1741
+        - kind: changed
+          description: Fix ghost tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Ghost
+          url: https://ghost.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+        - name: Application
+          url: https://github.com/TryGhost/Ghost
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 6.63.0
+    created: "2026-09-18T07:55:57.696508475Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: A simple, powerful publishing platform that allows you to share your
+      stories with the world.
+    digest: 9e572d0823afa5459f140f5770e761c9dd3591ad62fe50eca5313ca8734b9f57
+    home: https://ghost.org
+    icon: https://a.storyblok.com/f/143071/512x512/3a5c1cb0c5/ghost-logo.png
+    keywords:
+    - ghost
+    - blogging
+    - content management
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: ghost
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/ghost
+    - https://github.com/TryGhost/Ghost
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/ghost-0.20.24/ghost-0.20.24.tgz
+    version: 0.20.24
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
           description: Add chart tests
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/links: |
@@ -9337,6 +9395,70 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/kafka-0.1.0/kafka-0.1.0.tgz
     version: 0.1.0
   keycloak:
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: '[mariadb] Update initContainers.waitForMariadb.repository to v13 (#1741)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1741
+        - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Keycloak
+          url: https://www.keycloak.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+        - name: Application
+          url: https://github.com/keycloak/keycloak
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 26.7.3
+    created: "2026-09-18T07:55:57.839170821Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    - condition: postgres.enabled
+      name: postgres
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.9.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.4.x
+    description: Open Source Identity and Access Management Solution
+    digest: dd65afd0f5a30a33beef3dbf21f0475d2c3dfcc7b531145cb603d41117216d89
+    home: https://www.keycloak.org
+    icon: https://a.storyblok.com/f/143071/512x512/6a85e594b2/keycloak-logo.svg
+    keywords:
+    - keycloak
+    - identity
+    - access-management
+    - authentication
+    - authorization
+    - oauth
+    - openid-connect
+    - saml
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: keycloak
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/keycloak
+    - https://github.com/keycloak/keycloak
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.21.38/keycloak-0.21.38.tgz
+    version: 0.21.38
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |-
@@ -17129,6 +17251,72 @@ entries:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/keycloak-0.1.0/keycloak-0.1.0.tgz
     version: 0.1.0
   mariadb:
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
+          description: '[mariadb] Update initContainers.waitForMariadb.repository to v13 (#1741)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1741
+        - kind: changed
+          description: Add chart tests
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MariaDB
+          url: https://mariadb.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+        - name: Application
+          url: https://github.com/MariaDB/server
+        - name: Docker Image
+          url: https://github.com/MariaDB/mariadb-docker
+        - name: Galera Cluster
+          url: https://galeracluster.com
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 13.0.2
+    created: "2026-09-18T07:55:57.964929734Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: MariaDB is a high-performance, open-source relational database server
+      that is a drop-in replacement for MySQL. Supports both single-node and Galera
+      Cluster deployments.
+    digest: 7b7f21cd778e77ac389060ac791db45c43668d731ca35b13de35aee1026dd1f0
+    home: https://mariadb.org
+    icon: https://a.storyblok.com/f/143071/512x512/6512dd22ee/mariadb-logo.svg
+    keywords:
+    - mariadb
+    - mysql
+    - database
+    - sql
+    - relational
+    - galera
+    - cluster
+    - replication
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: mariadb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+    - https://github.com/MariaDB/server
+    - https://github.com/MariaDB/mariadb-docker
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mariadb-0.16.15/mariadb-0.16.15.tgz
+    version: 0.16.15
   - annotations:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
@@ -66394,4 +66582,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-18T06:54:44.104085536Z"
+generated: "2026-09-18T07:55:57.967341572Z"
