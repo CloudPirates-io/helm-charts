@@ -1,0 +1,41 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the memcached
+# protocol actually works end-to-end (a real set/get round-trip), rather than
+# trusting the liveness/readiness probes alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          # The official memcached image strips build tooling (including any netcat) after
+          # compiling the binary, so it has no client to probe with. busybox ships `nc`,
+          # which is enough to speak the raw memcached line protocol.
+          image: docker.io/busybox:1.37.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-memcached-default"
+              SERVICE_PORT="11211"
+
+              echo "-> Storing a key via the memcached protocol"
+              printf 'set verify-key 0 60 11\r\nhello-world\r\nquit\r\n' | nc -w 3 "${SERVICE_HOST}" "${SERVICE_PORT}" | grep -q STORED
+
+              echo "-> Retrieving the key back and checking its value"
+              response=$(printf 'get verify-key\r\nquit\r\n' | nc -w 3 "${SERVICE_HOST}" "${SERVICE_PORT}")
+              echo "${response}" | grep -q "hello-world"
+
+              echo "OK: memcached verification passed"

@@ -147,7 +147,15 @@ test_chart() {
     echo -e "\n${BLUE}🧪 Testing chart: $chart${NC}"
     echo "================================="
     cd "$chart_path"
-    
+
+    # .disable-unittest also skips the whole chart in CI (see .github/workflows/pull-request.yaml),
+    # not just the helm-unittest step - match that here so local runs behave the same way.
+    if [ -f ".disable-unittest" ]; then
+        echo -e "${YELLOW}⏩ Skipping chart $chart entirely (.disable-unittest found)${NC}"
+        cd "$SCRIPT_DIR"
+        return 0
+    fi
+
     # Update dependencies based on Chart.yaml
     echo "📦 Building dependencies..."
     helm dependency build --skip-refresh
@@ -163,10 +171,8 @@ test_chart() {
     if grep -q "type: library" Chart.yaml; then
         echo -e "${YELLOW}ℹ️  Library chart detected. Skipping installation tests.${NC}"
 
-        # Helm unittest (if tests exist and not disabled)
-        if [ -f ".disable-unittest" ]; then
-            echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
-        elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+        # Helm unittest (if tests exist)
+        if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
             echo "🧪 Running Helm unittest..."
             if ! helm unittest .; then
                 echo -e "${RED}❌ Helm unittest failed for $chart${NC}"
@@ -181,10 +187,8 @@ test_chart() {
         return 0
     fi
     
-    # Helm unittest (if tests exist and not disabled) - runs once per chart, not per scenario
-    if [ -f ".disable-unittest" ]; then
-        echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
-    elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+    # Helm unittest (if tests exist) - runs once per chart, not per scenario
+    if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
         echo "🧪 Running Helm unittest..."
         if ! helm unittest .; then
             echo -e "${RED}❌ Helm unittest failed for $chart${NC}"

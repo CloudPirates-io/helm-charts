@@ -1,0 +1,44 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves password-authenticated
+# SET/GET actually works end-to-end, rather than trusting the liveness/readiness
+# probes alone (which run the exact same auth path they're meant to verify).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/valkey/valkey:9.1.0-alpine3.23
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-valkey-default"
+              SERVICE_PORT="6379"
+              PASSWORD="verify-valkey-password"
+
+              echo "-> Authenticating and writing a key"
+              valkey-cli -t 3 -h "${SERVICE_HOST}" -p "${SERVICE_PORT}" -a "${PASSWORD}" --no-auth-warning set verify-key "hello-world" | grep -q OK
+
+              echo "-> Reading the key back and checking its value"
+              valkey-cli -t 3 -h "${SERVICE_HOST}" -p "${SERVICE_PORT}" -a "${PASSWORD}" --no-auth-warning get verify-key | grep -q "hello-world"
+
+              echo "-> Confirming unauthenticated access is rejected"
+              if valkey-cli -t 3 -h "${SERVICE_HOST}" -p "${SERVICE_PORT}" --no-auth-warning ping 2>&1 | grep -q PONG; then
+                echo "ERROR: PING succeeded without authentication"
+                exit 1
+              fi
+
+              echo "OK: Valkey verification passed"
