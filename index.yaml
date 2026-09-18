@@ -64018,6 +64018,61 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[zookeeper] Add trafficDistribution support for Service (#1742)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1742
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: ZooKeeper
+          url: https://zookeeper.apache.org/
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+        - name: Application
+          url: https://github.com/apache/zookeeper
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.9.5
+    created: "2026-09-18T10:02:45.228727507Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: Apache ZooKeeper is a centralized service for maintaining configuration
+      information, naming, providing distributed synchronization, and providing group
+      services.
+    digest: e4426951d2c6c050dab1fbc533f39d6f76ef4a5a8c309f9bdd5d7eb67cea29f0
+    home: https://zookeeper.apache.org/
+    icon: https://a.storyblok.com/f/143071/512x512/07b0f90b58/apache-zookeeper-logo.svg
+    keywords:
+    - zookeeper
+    - distributed
+    - coordination
+    - apache
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: zookeeper
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/zookeeper
+    - https://github.com/apache/zookeeper
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.14.0/zookeeper-0.14.0.tgz
+    version: 0.14.0
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[zookeeper] Update image.repository to 7d0f24e (#1733)'
           links:
           - name: Pull Request
@@ -67087,4 +67142,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-18T09:37:08.128931091Z"
+generated: "2026-09-18T10:02:45.231101846Z"
