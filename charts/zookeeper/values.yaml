@@ -224,6 +224,9 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
+
 ## @section Persistence
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
