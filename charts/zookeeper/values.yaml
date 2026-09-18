@@ -183,6 +183,8 @@ podSecurityContext:
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
+  ## @param service.trafficDistribution Kubernetes service traffic distribution
+  trafficDistribution: ""
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
