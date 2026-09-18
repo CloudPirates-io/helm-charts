@@ -1,0 +1,57 @@
+suite: test timescaledb config configmap
+templates:
+  - statefulset.yaml
+  - configmap.yaml
+tests:
+  - it: should mount the chart ConfigMap by default
+    template: statefulset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config
+            configMap:
+              name: RELEASE-NAME-timescaledb
+              optional: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /etc/postgresql
+
+  - it: should mount an existing ConfigMap when one is named
+    template: statefulset.yaml
+    set:
+      config:
+        existingConfigmap: my-ts-config
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config
+            configMap:
+              name: my-ts-config
+              optional: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /etc/postgresql
+
+  - it: should create the chart ConfigMap by default
+    template: configmap.yaml
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-timescaledb
+
+  - it: should not create the chart ConfigMap when an existing one is named
+    template: configmap.yaml
+    set:
+      config:
+        existingConfigmap: my-ts-config
+    asserts:
+      - hasDocuments:
+          count: 0

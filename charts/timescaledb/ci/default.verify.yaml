@@ -1,0 +1,63 @@
+# Functional verification for ci/default.yaml.
+# Proves TimescaleDB actually works end-to-end: creates a hypertable, inserts
+# a row, and queries it back via a real psql connection.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/timescale/timescaledb:latest-pg16
+          env:
+            - name: PGHOST
+              value: test-timescaledb-default
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: postgres
+            - name: PGPASSWORD
+              value: "TimescaleTestPass123!"
+            - name: PGDATABASE
+              value: postgres
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Waiting for PostgreSQL to accept connections"
+              i=0
+              until pg_isready -q; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: PostgreSQL never became ready"
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              echo "-> Ensuring the timescaledb extension is available"
+              psql -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+
+              echo "-> Creating a hypertable and inserting a row"
+              psql -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS ci_verify_metrics (time TIMESTAMPTZ NOT NULL, value DOUBLE PRECISION);"
+              psql -v ON_ERROR_STOP=1 -c "SELECT create_hypertable('ci_verify_metrics', 'time', if_not_exists => TRUE);"
+              psql -v ON_ERROR_STOP=1 -c "INSERT INTO ci_verify_metrics (time, value) VALUES (now(), 42.0);"
+
+              echo "-> Querying the row back"
+              RESULT=$(psql -v ON_ERROR_STOP=1 -t -A -c "SELECT value FROM ci_verify_metrics WHERE value = 42.0;")
+              if [ "$RESULT" != "42" ]; then
+                echo "ERROR: expected to read back value 42, got '${RESULT}'"
+                exit 1
+              fi
+
+              echo "OK: TimescaleDB hypertable verification passed"

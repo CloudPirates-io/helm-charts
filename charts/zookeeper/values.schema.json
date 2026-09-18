@@ -370,7 +370,10 @@
                             "type": "integer"
                         },
                         "secureClient": {
-                            "type": "string"
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
                         }
                     }
                 },
