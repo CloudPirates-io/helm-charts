@@ -176,6 +176,10 @@ spec:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.metricsSecretPasswordKey" . }}
             {{- end }}
+            {{- if .Values.experimental.tcmallocRseqWorkaround.enabled }}
+            - name: GLIBC_TUNABLES
+              value: "glibc.pthread.rseq=1"
+            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}

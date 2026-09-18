@@ -1,0 +1,45 @@
+# Functional verification for ci/default.yaml.
+# Proves the deployed Zookeeper ensemble actually serves znode writes/reads
+# (a real create/get round-trip via zkCli.sh), not just that probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/zookeeper:3.9.5
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-zookeeper-default:2181"
+              ZNODE="/verify-znode"
+              VALUE="verify-value-$(date +%s)"
+
+              echo "-> Creating znode '$ZNODE'"
+              zkCli.sh -server "$HOST" create "$ZNODE" "$VALUE"
+
+              echo "-> Reading znode '$ZNODE'"
+              OUTPUT=$(zkCli.sh -server "$HOST" get "$ZNODE" 2>&1)
+              echo "$OUTPUT"
+
+              if ! echo "$OUTPUT" | grep -qF "$VALUE"; then
+                echo "ERROR: expected to find '$VALUE' in zkCli output"
+                exit 1
+              fi
+
+              echo "-> Deleting znode '$ZNODE'"
+              zkCli.sh -server "$HOST" delete "$ZNODE" >/dev/null 2>&1 || true
+
+              echo "OK: zookeeper create/get znode round-trip verification passed"
