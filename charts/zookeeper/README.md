@@ -215,6 +215,7 @@ Use aws-load-balancer-scheme internal if clients are in the VPC, internet-facing
 | `priorityClassName` | Priority class name for pod eviction | `""`    |
 | `tolerations`       | Tolerations for pod assignment       | `[]`    |
 | `affinity`          | Affinity rules for pod assignment    | `{}`    |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]`    |
 
 ### Security Context
 
