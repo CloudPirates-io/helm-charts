@@ -45,9 +45,12 @@ spec:
                 sleep 2
               done
 
+              # rabbitmqadmin's bundled v2 CLI (Rust-based, shipped with RabbitMQ 4.x) has no
+              # --format/column-selection flags and its "list nodes" table has no "running" column,
+              # so count node rows by their unique "rabbit@<pod>" name instead.
               echo "-> Waiting for all 3 nodes to join the cluster"
               i=0
-              until [ "$(${ADMIN} --format=tsv list nodes name running 2>/dev/null | tail -n +2 | grep -ic true)" -ge 3 ]; do
+              until [ "$(${ADMIN} --non-interactive list nodes 2>/dev/null | grep -c 'rabbit@')" -ge 3 ]; do
                 i=$((i+1))
                 if [ "$i" -ge 30 ]; then
                   echo "ERROR: cluster never reached 3 running nodes"
@@ -58,7 +61,7 @@ spec:
               done
 
               echo "-> Confirming cluster membership via management API"
-              NODE_COUNT=$(${ADMIN} --format=tsv list nodes name | tail -n +2 | wc -l)
+              NODE_COUNT=$(${ADMIN} --non-interactive list nodes 2>/dev/null | grep -c 'rabbit@')
               if [ "$NODE_COUNT" -ne 3 ]; then
                 echo "ERROR: expected 3 cluster nodes, found $NODE_COUNT"
                 ${ADMIN} list nodes
@@ -66,12 +69,12 @@ spec:
               fi
 
               echo "-> Declaring queue ci-verify-cluster-queue"
-              ${ADMIN} declare queue name=ci-verify-cluster-queue durable=true
+              ${ADMIN} declare queue --name ci-verify-cluster-queue --durable true
 
               echo "-> Publishing a message to ci-verify-cluster-queue"
-              ${ADMIN} publish exchange=amq.default routing_key=ci-verify-cluster-queue payload="hello-from-cluster-ci"
+              ${ADMIN} publish message --exchange amq.default --routing-key ci-verify-cluster-queue --payload "hello-from-cluster-ci"
 
               echo "-> Consuming the message back from ci-verify-cluster-queue"
-              ${ADMIN} get queue=ci-verify-cluster-queue ackmode=ack_requeue_false | grep -q "hello-from-cluster-ci"
+              ${ADMIN} get messages --queue ci-verify-cluster-queue --ack-mode ack_requeue_false | grep -q "hello-from-cluster-ci"
 
               echo "OK: RabbitMQ clustering verification passed"
