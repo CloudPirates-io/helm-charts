@@ -1,0 +1,57 @@
+# Functional verification for ci/leader-election.yaml.
+# Proves the 3-node ensemble actually formed quorum and elected a leader (a
+# real "mntr" 4-letter-word query against every pod's zk_server_state), not
+# just that probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/alpine:3.20
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HEADLESS="test-zookeeper-leader-election-headless"
+              LEADER_COUNT=0
+              FOLLOWER_COUNT=0
+
+              for i in 0 1 2; do
+                HOST="test-zookeeper-leader-election-$i.$HEADLESS"
+                echo "-> Querying mntr on $HOST"
+                STATE=$(printf 'mntr' | nc -w 5 "$HOST" 2181 | awk -F'\t' '/^zk_server_state/ {print $2}')
+                echo "   $HOST: zk_server_state=$STATE"
+
+                case "$STATE" in
+                  leader)
+                    LEADER_COUNT=$((LEADER_COUNT + 1))
+                    ;;
+                  follower)
+                    FOLLOWER_COUNT=$((FOLLOWER_COUNT + 1))
+                    ;;
+                  *)
+                    echo "ERROR: unexpected zk_server_state '$STATE' on $HOST"
+                    exit 1
+                    ;;
+                esac
+              done
+
+              echo "-> leaders=$LEADER_COUNT followers=$FOLLOWER_COUNT"
+              if [ "$LEADER_COUNT" -ne 1 ] || [ "$FOLLOWER_COUNT" -ne 2 ]; then
+                echo "ERROR: expected exactly 1 leader and 2 followers across the ensemble"
+                exit 1
+              fi
+
+              echo "OK: zookeeper quorum leader election verification passed"

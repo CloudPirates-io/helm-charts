@@ -1,0 +1,70 @@
+# Functional verification for ci/replication.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves replication actually
+# propagates data from the fixed master (pod-0, reached via the dedicated
+# "-master" Service) to a replica (pod-1, reached via its per-pod headless DNS
+# name), and that the replica enforces its default read-only mode.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/valkey/valkey:9.1.0-alpine3.23
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              MASTER_HOST="test-valkey-replication-master"
+              REPLICA_HOST="test-valkey-replication-1.test-valkey-replication-headless"
+              PORT="6379"
+              PASSWORD="verify-valkey-password"
+
+              echo "-> Confirming the master service reaches a node reporting role:master"
+              ROLE=$(valkey-cli -t 3 -h "${MASTER_HOST}" -p "${PORT}" -a "${PASSWORD}" --no-auth-warning info replication | tr -d '\r' | grep -m1 '^role:')
+              if [ "$ROLE" != "role:master" ]; then
+                echo "ERROR: expected role:master on ${MASTER_HOST}, got '${ROLE}'"
+                exit 1
+              fi
+
+              echo "-> Writing a key on the master"
+              valkey-cli -t 3 -h "${MASTER_HOST}" -p "${PORT}" -a "${PASSWORD}" --no-auth-warning set verify-key "hello-world" | grep -q OK
+
+              echo "-> Waiting for the key to replicate to pod-1"
+              REPLICATED=""
+              for i in $(seq 1 12); do
+                REPLICATED=$(valkey-cli -t 3 -h "${REPLICA_HOST}" -p "${PORT}" -a "${PASSWORD}" --no-auth-warning get verify-key 2>/dev/null || echo "")
+                if [ "$REPLICATED" = "hello-world" ]; then
+                  break
+                fi
+                sleep 5
+              done
+              if [ "$REPLICATED" != "hello-world" ]; then
+                echo "ERROR: replica did not receive the key within the timeout (got '${REPLICATED}')"
+                exit 1
+              fi
+              echo "   Confirmed replicated value on ${REPLICA_HOST}"
+
+              echo "-> Confirming the replica reports role:slave and is linked to the master"
+              REPLICA_INFO=$(valkey-cli -t 3 -h "${REPLICA_HOST}" -p "${PORT}" -a "${PASSWORD}" --no-auth-warning info replication | tr -d '\r')
+              echo "$REPLICA_INFO" | grep -q '^role:slave'
+              echo "$REPLICA_INFO" | grep -q '^master_link_status:up'
+
+              echo "-> Confirming the replica rejects writes (default read-only replica)"
+              if valkey-cli -t 3 -h "${REPLICA_HOST}" -p "${PORT}" -a "${PASSWORD}" --no-auth-warning set verify-key "should-fail" 2>&1 | grep -q OK; then
+                echo "ERROR: write succeeded on the replica, expected READONLY rejection"
+                exit 1
+              fi
+
+              echo "OK: Valkey replication verification passed"

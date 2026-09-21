@@ -1,0 +1,59 @@
+# Functional verification for ci/custom-user.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves that the non-root
+# application user created via customUser can authenticate directly and
+# perform a real write/read round-trip against its own database, and that it
+# lacks superuser/CREATEDB privileges (unlike the postgres superuser).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/postgres:16
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-postgres-custom-user"
+              PORT=5432
+              APP_USER="appuser"
+              APP_DB="appdb"
+              export PGPASSWORD="AppPass123!"
+
+              echo "-> Connecting as the application user and inserting a row into its own database"
+              psql -h "$HOST" -p "$PORT" -U "$APP_USER" -d "$APP_DB" -c "
+                CREATE TABLE verify_tbl (id INT PRIMARY KEY, value TEXT);
+                INSERT INTO verify_tbl (id, value) VALUES (1, 'hello-appuser');
+              "
+
+              echo "-> Reading back the row as the application user and asserting the value"
+              RESULT=$(psql -h "$HOST" -p "$PORT" -U "$APP_USER" -d "$APP_DB" -tAc "SELECT value FROM verify_tbl WHERE id=1;")
+              if [ "$RESULT" != "hello-appuser" ]; then
+                echo "ERROR: expected 'hello-appuser' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Asserting the application user lacks superuser/CREATEDB privileges"
+              if psql -h "$HOST" -p "$PORT" -U "$APP_USER" -d "$APP_DB" -c "CREATE DATABASE other_db;" 2>/tmp/err; then
+                echo "ERROR: application user was able to create a database outside its own grants"
+                cat /tmp/err
+                exit 1
+              fi
+              grep -qi "permission denied" /tmp/err
+
+              echo "-> Dropping the test table"
+              psql -h "$HOST" -p "$PORT" -U "$APP_USER" -d "$APP_DB" -c "DROP TABLE verify_tbl;"
+
+              echo "OK: PostgreSQL custom-user verification passed"

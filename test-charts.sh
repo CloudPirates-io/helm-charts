@@ -147,7 +147,15 @@ test_chart() {
     echo -e "\n${BLUE}🧪 Testing chart: $chart${NC}"
     echo "================================="
     cd "$chart_path"
-    
+
+    # .disable-unittest also skips the whole chart in CI (see .github/workflows/pull-request.yaml),
+    # not just the helm-unittest step - match that here so local runs behave the same way.
+    if [ -f ".disable-unittest" ]; then
+        echo -e "${YELLOW}⏩ Skipping chart $chart entirely (.disable-unittest found)${NC}"
+        cd "$SCRIPT_DIR"
+        return 0
+    fi
+
     # Update dependencies based on Chart.yaml
     echo "📦 Building dependencies..."
     helm dependency build --skip-refresh
@@ -163,10 +171,8 @@ test_chart() {
     if grep -q "type: library" Chart.yaml; then
         echo -e "${YELLOW}ℹ️  Library chart detected. Skipping installation tests.${NC}"
 
-        # Helm unittest (if tests exist and not disabled)
-        if [ -f ".disable-unittest" ]; then
-            echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
-        elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+        # Helm unittest (if tests exist)
+        if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
             echo "🧪 Running Helm unittest..."
             if ! helm unittest .; then
                 echo -e "${RED}❌ Helm unittest failed for $chart${NC}"
@@ -181,33 +187,8 @@ test_chart() {
         return 0
     fi
     
-    # Test template rendering
-    echo "📝 Testing template rendering..."
-
-    # Check for CI values files
-    CI_VALUES_ARGS=""
-    if [ -d "ci" ] && [ "$(ls -A ci/*.yaml 2>/dev/null)" ]; then
-        echo "📋 Found CI values files, using them for testing"
-        for values_file in ci/*.yaml; do
-            CI_VALUES_ARGS="$CI_VALUES_ARGS -f $values_file"
-        done
-    fi
-
-    if ! helm template test-release . $CI_VALUES_ARGS --debug > /tmp/rendered-$chart.yaml; then
-        echo -e "${RED}❌ Template rendering failed for $chart${NC}"
-        return 1
-    fi
-    
-    # Validate YAML
-    if ! kubectl apply --dry-run=client -f /tmp/rendered-$chart.yaml >/dev/null; then
-        echo -e "${RED}❌ Generated YAML validation failed for $chart${NC}"
-        return 1
-    fi
-
-    # Helm unittest (if tests exist and not disabled)
-    if [ -f ".disable-unittest" ]; then
-        echo -e "${YELLOW}ℹ️  Unittest disabled for $chart (.disable-unittest found)${NC}"
-    elif [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
+    # Helm unittest (if tests exist) - runs once per chart, not per scenario
+    if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
         echo "🧪 Running Helm unittest..."
         if ! helm unittest .; then
             echo -e "${RED}❌ Helm unittest failed for $chart${NC}"
@@ -217,42 +198,163 @@ test_chart() {
         echo -e "${YELLOW}ℹ️  No unittest tests found for $chart${NC}"
     fi
 
+    # Collect scenarios: one per ci/*.yaml file (excluding *.secrets.yaml and
+    # *.verify.yaml companions). If no ci/ values files exist, run a single
+    # "default" scenario with chart defaults.
+    local scenario_files=()
+    if [ -d "ci" ] && [ "$(ls -A ci/*.yaml 2>/dev/null)" ]; then
+        for values_file in ci/*.yaml; do
+            [[ "$values_file" == *.secrets.yaml || "$values_file" == *.verify.yaml ]] && continue
+            scenario_files+=("$values_file")
+        done
+    fi
+    if [ ${#scenario_files[@]} -eq 0 ]; then
+        scenario_files=("")
+    fi
+
+    echo -e "\n${BLUE}📋 Running ${#scenario_files[@]} scenario(s) for $chart:${NC}"
+    for f in "${scenario_files[@]}"; do
+        echo "   • $(basename "${f:-default}" .yaml)"
+    done
+
+    local chart_failed=0
+    for values_file in "${scenario_files[@]}"; do
+        if ! run_scenario "$chart" "$values_file"; then
+            chart_failed=1
+        fi
+    done
+
+    cd "$SCRIPT_DIR"
+    return $chart_failed
+}
+
+# Print each container's restart count and last termination reason, to make
+# flaky/crash-looping pods visible even when a scenario ultimately fails elsewhere.
+print_restart_summary() {
+    local namespace=$1
+    echo -e "${YELLOW}📋 Container restart counts and last state:${NC}"
+    kubectl get pods -n "$namespace" \
+        -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.containerStatuses[*]}  - {.name}: restarts={.restartCount} lastState={.lastState.terminated.reason}{"\n"}{end}{end}' \
+        2>/dev/null
+}
+
+# Snapshot of "<pod>/<container>=<restartCount>" pairs, used to detect whether any
+# container restarted during a stability window (a pod can be Ready for one instant
+# while still crash-looping around that snapshot).
+get_restart_counts() {
+    local namespace=$1
+    kubectl get pods -n "$namespace" \
+        -o jsonpath='{range .items[*]}{.metadata.uid}{range .status.containerStatuses[*]}/{.name}={.restartCount}{"\n"}{end}{end}' \
+        2>/dev/null | sort
+}
+
+# Test a single CI scenario (one ci/*.yaml values file) for a chart.
+# Must be called with the chart directory as the current working directory.
+run_scenario() {
+    local chart=$1
+    local values_file=$2
+    local scenario_name
+    scenario_name=$(basename "${values_file:-default}" .yaml)
+
+    echo -e "\n${BLUE}▶️  Scenario: $chart / $scenario_name${NC}"
+    echo "-----------------------------------"
+
+    local values_args=""
+    [ -n "$values_file" ] && values_args="-f $values_file"
+
+    # Test template rendering
+    echo "📝 Testing template rendering..."
+    if ! helm template "test-$chart-$scenario_name" . $values_args --debug > "/tmp/rendered-$chart-$scenario_name.yaml"; then
+        echo -e "${RED}❌ Template rendering failed for $chart/$scenario_name${NC}"
+        return 1
+    fi
+
+    # Validate YAML
+    if ! kubectl apply --dry-run=client -f "/tmp/rendered-$chart-$scenario_name.yaml" >/dev/null; then
+        echo -e "${RED}❌ Generated YAML validation failed for $chart/$scenario_name${NC}"
+        return 1
+    fi
+
     if [ "$SKIP_INSTALL" = true ]; then
         echo -e "${YELLOW}⏩ Skipping chart installation (--skip-install flag used)${NC}"
-        echo -e "${GREEN}✅ Chart $chart tested successfully (linting and templating only)${NC}"
-        cd "$SCRIPT_DIR"
+        echo -e "${GREEN}✅ Scenario $chart/$scenario_name passed (linting and templating only)${NC}"
         return 0
     fi
 
     # Install chart
-    local namespace="test-$chart"
-    local release_name="test-$chart"
+    local namespace="test-$chart-$scenario_name"
+    local release_name="test-$chart-$scenario_name"
+
+    echo "📦 Creating namespace..."
+    kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+
+    # Apply any companion manifest (e.g. ACL secrets) this scenario depends on.
+    # Convention: ci/<scenario>.secrets.yaml sits next to ci/<scenario>.yaml.
+    local secrets_file="${values_file%.yaml}.secrets.yaml"
+    if [ -n "$values_file" ] && [ -f "$secrets_file" ]; then
+        echo "🔐 Applying companion manifest: $secrets_file"
+        if ! kubectl apply -n "$namespace" -f "$secrets_file"; then
+            echo -e "${RED}❌ Failed to apply companion manifest $secrets_file${NC}"
+            kubectl delete namespace "$namespace" --ignore-not-found=true --timeout=60s || true
+            return 1
+        fi
+    fi
 
     echo "🚀 Installing chart..."
     echo "   Release: $release_name"
     echo "   Namespace: $namespace"
     echo "   Timeout: 600s"
-    if [ -n "$CI_VALUES_ARGS" ]; then
-        echo "   Values files: $CI_VALUES_ARGS"
+    if [ -n "$values_args" ]; then
+        echo "   Values file: $values_file"
     fi
     echo ""
 
-    if ! helm install "$release_name" . \
-        $CI_VALUES_ARGS \
-        --create-namespace \
-        --namespace "$namespace" \
-        --wait \
-        --timeout=600s \
-        --debug; then
-        echo -e "${RED}❌ Chart installation failed for $chart${NC}"
+    # Retry once on install failure: "helm install --wait" can fail on a freshly-created
+    # cluster with a spurious "resource ... not ready: status: NotFound" for objects like
+    # ServiceAccounts that have no real readiness semantics - a read-after-write race against
+    # the API server/etcd, not a chart problem. A clean retry reliably clears it.
+    local install_attempt=1
+    local install_ok=false
+    while [ $install_attempt -le 2 ]; do
+        if helm install "$release_name" . \
+            $values_args \
+            --namespace "$namespace" \
+            --wait \
+            --timeout=600s \
+            --debug; then
+            install_ok=true
+            break
+        fi
+
+        echo -e "${YELLOW}⚠️  Install attempt $install_attempt failed for $chart/$scenario_name${NC}"
+        if [ $install_attempt -lt 2 ]; then
+            echo "   Retrying once (uninstalling first in case of a partial install)..."
+            helm uninstall "$release_name" -n "$namespace" --wait --timeout=120s >/dev/null 2>&1 || true
+            # "helm uninstall --wait" can time out (or the delete can still be propagating) without
+            # this loop noticing, since the command above is best-effort ("|| true"). Cluster-scoped
+            # resources (ClusterRole, ClusterRoleBinding, webhook configs) aren't cleaned up by
+            # deleting the namespace, so a leftover one here would make the retry's install fail
+            # again with an immutable-field error (e.g. "cannot change roleRef") instead of a clean
+            # retry. Force-delete anything still tagged for this release before retrying.
+            kubectl delete clusterrole,clusterrolebinding,validatingwebhookconfiguration,mutatingwebhookconfiguration \
+                -l "app.kubernetes.io/instance=$release_name" --ignore-not-found=true --timeout=30s >/dev/null 2>&1 || true
+            sleep 5
+        fi
+        install_attempt=$((install_attempt + 1))
+    done
+
+    if [ "$install_ok" != true ]; then
+        echo -e "${RED}❌ Chart installation failed for $chart/$scenario_name (after retry)${NC}"
         echo -e "\n${YELLOW}📋 Checking resources in namespace...${NC}"
         kubectl get all -n "$namespace" || true
         kubectl describe pods -n "$namespace" || true
         echo -e "\n${YELLOW}📋 Recent events:${NC}"
         kubectl get events -n "$namespace" --sort-by='.lastTimestamp' || true
+        print_restart_summary "$namespace"
+        kubectl delete namespace "$namespace" --ignore-not-found=true --timeout=60s || true
         return 1
     fi
-    
+
     # Verify installation
     echo "🔍 Verifying installation..."
     helm list -n "$namespace"
@@ -265,6 +367,7 @@ test_chart() {
     local max_wait=300
     local elapsed=0
     local interval=10
+    local scenario_failed=0
 
     while [ $elapsed -lt $max_wait ]; do
         echo "   [$elapsed/${max_wait}s] Checking pod status..."
@@ -288,31 +391,87 @@ test_chart() {
         echo -e "${YELLOW}⚠️  Timeout waiting for pods. Current status:${NC}"
         kubectl get pods -n "$namespace" -o wide
         kubectl describe pods -n "$namespace"
+        print_restart_summary "$namespace"
+        scenario_failed=1
     fi
-    
+
+    # Stability check: a pod can report Ready in the single instant this loop happened
+    # to poll it, then immediately crash-loop. Require restart counts to stay flat for
+    # a short window before trusting "Ready" as a real pass.
+    if [ "$scenario_failed" -eq 0 ]; then
+        echo "🩺 Checking pod stability (watching for restarts over 20s)..."
+        local restarts_before restarts_after
+        restarts_before=$(get_restart_counts "$namespace")
+        sleep 20
+        restarts_after=$(get_restart_counts "$namespace")
+        if [ "$restarts_before" != "$restarts_after" ]; then
+            echo -e "${RED}❌ Container(s) restarted during the stability window for $chart/$scenario_name${NC}"
+            echo "   Restart counts before:"
+            echo "$restarts_before" | sed 's/^/     /'
+            echo "   Restart counts after:"
+            echo "$restarts_after" | sed 's/^/     /'
+            print_restart_summary "$namespace"
+            scenario_failed=1
+        else
+            echo -e "${GREEN}✅ Pods stable, no restarts in the last 20s${NC}"
+        fi
+    fi
+
+    # Functional verification: convention ci/<scenario>.verify.yaml (a Job manifest).
+    # Applied into the scenario's namespace and run to completion. Lets a scenario prove
+    # real functionality (e.g. that ACL auth actually works end-to-end) instead of trusting
+    # probe/Ready status alone, which only proves the probe command exited 0 - it can pass
+    # even when the feature under test is misconfigured.
+    if [ "$scenario_failed" -eq 0 ] && [ -n "$values_file" ]; then
+        local verify_manifest="${values_file%.yaml}.verify.yaml"
+        if [ -f "$verify_manifest" ]; then
+            echo "🔬 Running functional verification: $verify_manifest"
+            if ! kubectl apply -n "$namespace" -f "$verify_manifest"; then
+                echo -e "${RED}❌ Failed to apply functional verification manifest $verify_manifest${NC}"
+                scenario_failed=1
+            elif ! kubectl wait --for=condition=complete job -l test-charts.io/verify=true -n "$namespace" --timeout=120s; then
+                echo -e "${RED}❌ Functional verification failed for $chart/$scenario_name${NC}"
+                echo "   Verify job logs:"
+                kubectl logs -n "$namespace" -l test-charts.io/verify=true --all-containers --tail=200 2>&1 | sed 's/^/     /' || true
+                print_restart_summary "$namespace"
+                scenario_failed=1
+            else
+                echo -e "${GREEN}✅ Functional verification passed${NC}"
+                kubectl logs -n "$namespace" -l test-charts.io/verify=true --all-containers --tail=200 2>&1 | sed 's/^/     /' || true
+            fi
+            kubectl delete -n "$namespace" -f "$verify_manifest" --ignore-not-found=true --timeout=30s >/dev/null 2>&1 || true
+        fi
+    fi
+
     # Run tests if they exist
     if [ -d "tests" ] && [ "$(ls -A tests 2>/dev/null)" ]; then
         echo "🧪 Running Helm tests..."
         if ! helm test "$release_name" -n "$namespace" --timeout=300s; then
-            echo -e "${YELLOW}⚠️  Helm tests failed for $chart (continuing anyway)${NC}"
+            echo -e "${YELLOW}⚠️  Helm tests failed for $chart/$scenario_name (continuing anyway)${NC}"
         fi
     else
-        echo -e "${YELLOW}ℹ️  No Helm tests found for $chart${NC}"
+        echo -e "${YELLOW}ℹ️  No Helm tests found for $chart/$scenario_name${NC}"
     fi
-    
-    # Test upgrade
+
+    # Test upgrade (also exercises rolling-update lifecycle hooks, e.g. preStop)
     echo "🔄 Testing chart upgrade..."
-    if ! helm upgrade "$release_name" . $CI_VALUES_ARGS -n "$namespace" --wait --timeout=300s; then
-        echo -e "${YELLOW}⚠️  Chart upgrade failed for $chart${NC}"
+    if ! helm upgrade "$release_name" . $values_args -n "$namespace" --wait --timeout=300s; then
+        echo -e "${YELLOW}⚠️  Chart upgrade failed for $chart/$scenario_name${NC}"
+        print_restart_summary "$namespace"
+        scenario_failed=1
     fi
-    
+
     # Uninstall
     echo "🗑️  Uninstalling chart..."
     helm uninstall "$release_name" -n "$namespace" --wait --timeout=300s || true
     kubectl delete namespace "$namespace" --ignore-not-found=true --timeout=60s || true
-    
-    echo -e "${GREEN}✅ Chart $chart tested successfully${NC}"
-    cd "$SCRIPT_DIR"
+
+    if [ "$scenario_failed" -ne 0 ]; then
+        echo -e "${RED}❌ Scenario $chart/$scenario_name failed${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}✅ Scenario $chart/$scenario_name passed${NC}"
     return 0
 }
 
