@@ -1,0 +1,68 @@
+# Functional verification for ci/redirect-gzip.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the custom
+# serverConfig actually implements both features it declares: a 301 redirect
+# from /old-page to /new-page, and gzip compression of the /new-page response
+# when the client advertises Accept-Encoding: gzip.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-nginx-redirect-gzip:80"
+
+              echo "-> Checking /old-page issues a 301 redirect to /new-page"
+              HEADERS=$(curl -s -o /dev/null -D - "http://${SERVICE_HOST}/old-page")
+              echo "${HEADERS}" | grep -q "^HTTP/1.1 301" || {
+                echo "ERROR: expected a 301 response from /old-page"
+                echo "${HEADERS}"
+                exit 1
+              }
+              echo "${HEADERS}" | grep -qi "^location: /new-page" || {
+                echo "ERROR: expected Location: /new-page header"
+                echo "${HEADERS}"
+                exit 1
+              }
+
+              echo "-> Checking the redirect actually leads to the expected content"
+              BODY=$(curl -f -s -L "http://${SERVICE_HOST}/old-page")
+              echo "${BODY}" | grep -qi "worth gzip compressing" || {
+                echo "ERROR: redirected content did not match expected body"
+                echo "${BODY}"
+                exit 1
+              }
+
+              echo "-> Checking /new-page is served gzip-compressed when requested"
+              GZIP_HEADERS=$(curl -f -s -o /dev/null -D - -H "Accept-Encoding: gzip" "http://${SERVICE_HOST}/new-page")
+              echo "${GZIP_HEADERS}" | grep -qi "^content-encoding: gzip" || {
+                echo "ERROR: expected Content-Encoding: gzip header on /new-page"
+                echo "${GZIP_HEADERS}"
+                exit 1
+              }
+
+              echo "-> Checking the decompressed gzip body matches the expected content"
+              DECOMPRESSED=$(curl -f -s --compressed -H "Accept-Encoding: gzip" "http://${SERVICE_HOST}/new-page")
+              echo "${DECOMPRESSED}" | grep -qi "worth gzip compressing" || {
+                echo "ERROR: decompressed body did not match expected content"
+                echo "${DECOMPRESSED}"
+                exit 1
+              }
+
+              echo "OK: nginx redirect and gzip verification passed"

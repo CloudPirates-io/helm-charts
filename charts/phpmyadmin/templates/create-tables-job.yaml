@@ -1,0 +1,142 @@
+{{- if and (or .Values.config.control.createUser .Values.config.control.createTables) .Values.config.database.host }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}-provision
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        {{- include "phpmyadmin.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.config.control.createTables }}
+      initContainers:
+        - name: extract-sql
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "phpmyadmin.image" (dict "image" .Values.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ include "phpmyadmin.imagePullPolicy" (dict "image" .Values.image) }}
+          command:
+            - sh
+            - -c
+            - |
+              # Strip the hardcoded "CREATE DATABASE phpmyadmin; USE phpmyadmin;" block so the
+              # target database is controlled entirely by PMA_PMADB via the client's -D flag.
+              sed '/CREATE DATABASE IF NOT EXISTS/,/USE phpmyadmin;/d' \
+                /var/www/html/sql/create_tables.sql > /sql/create_tables.sql
+          volumeMounts:
+            - name: sql
+              mountPath: /sql
+      {{- end }}
+      containers:
+        - name: provision
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: docker.io/mariadb:11
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              CLIENT=mariadb
+              command -v mariadb >/dev/null 2>&1 || CLIENT=mysql
+
+              if [ "$CREATE_USER" = "1" ]; then
+                echo "-> Creating control user and granting privileges on $PMA_PMADB"
+                "$CLIENT" -h "$PMA_HOST" -P "$PMA_PORT" -u "$ADMIN_USER" -p"$ADMIN_PASSWORD" <<-SQL
+                  CREATE USER IF NOT EXISTS '$PMA_CONTROLUSER'@'%' IDENTIFIED BY '$PMA_CONTROLPASS';
+                  CREATE DATABASE IF NOT EXISTS \`$PMA_PMADB\`;
+                  GRANT ALL PRIVILEGES ON \`$PMA_PMADB\`.* TO '$PMA_CONTROLUSER'@'%';
+                  FLUSH PRIVILEGES;
+              SQL
+              fi
+
+              if [ "$CREATE_TABLES" = "1" ]; then
+                echo "-> Ensuring configuration storage database exists: $PMA_PMADB"
+                "$CLIENT" -h "$PMA_HOST" -P "$PMA_PORT" -u "$PMA_CONTROLUSER" -p"$PMA_CONTROLPASS" \
+                  -e "CREATE DATABASE IF NOT EXISTS \`$PMA_PMADB\`;"
+                echo "-> Creating configuration storage tables in $PMA_PMADB"
+                "$CLIENT" -h "$PMA_HOST" -P "$PMA_PORT" -u "$PMA_CONTROLUSER" -p"$PMA_CONTROLPASS" \
+                  -D "$PMA_PMADB" < /sql/create_tables.sql
+              fi
+          env:
+            - name: CREATE_USER
+              value: {{ .Values.config.control.createUser | ternary "1" "0" | quote }}
+            - name: CREATE_TABLES
+              value: {{ .Values.config.control.createTables | ternary "1" "0" | quote }}
+            - name: PMA_HOST
+              value: {{ .Values.config.database.host | quote }}
+            - name: PMA_PORT
+              value: {{ .Values.config.database.port | quote }}
+            {{- if .Values.config.control.userSecret }}
+            - name: PMA_CONTROLUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.userSecret }}
+                  key: {{ .Values.config.control.userSecretKey }}
+            {{- else }}
+            - name: PMA_CONTROLUSER
+              value: {{ .Values.config.control.user | quote }}
+            {{- end }}
+            - name: PMA_CONTROLPASS
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.config.control.passwordSecret }}
+                  name: {{ .Values.config.control.passwordSecret }}
+                  key: {{ .Values.config.control.passwordSecretKey }}
+                  {{- else }}
+                  name: {{ include "phpmyadmin.fullname" . }}-control
+                  key: password
+                  {{- end }}
+            {{- if .Values.config.control.pmadbSecret }}
+            - name: PMA_PMADB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.pmadbSecret }}
+                  key: {{ .Values.config.control.pmadbSecretKey }}
+            {{- else }}
+            - name: PMA_PMADB
+              value: {{ .Values.config.control.pmadb | quote }}
+            {{- end }}
+            {{- if .Values.config.control.createUser }}
+            {{- if .Values.config.database.admin.userSecret }}
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.admin.userSecret }}
+                  key: {{ .Values.config.database.admin.userSecretKey }}
+            {{- else }}
+            - name: ADMIN_USER
+              value: {{ .Values.config.database.admin.user | quote }}
+            {{- end }}
+            {{- if .Values.config.database.admin.passwordSecret }}
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.admin.passwordSecret }}
+                  key: {{ .Values.config.database.admin.passwordSecretKey }}
+            {{- else }}
+            - name: ADMIN_PASSWORD
+              value: {{ .Values.config.database.admin.password | quote }}
+            {{- end }}
+            {{- end }}
+          {{- if .Values.config.control.createTables }}
+          volumeMounts:
+            - name: sql
+              mountPath: /sql
+          {{- end }}
+      {{- if .Values.config.control.createTables }}
+      volumes:
+        - name: sql
+          emptyDir: {}
+      {{- end }}
+{{- end }}

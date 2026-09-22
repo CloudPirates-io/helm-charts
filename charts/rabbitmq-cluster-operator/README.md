@@ -351,6 +351,10 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 
 | Name                                                           | Description                                                                        | Value                    |
 | -------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------ |
+| `msgTopologyOperator.metrics.secure`                           | Enable authentication/authorization on metrics endpoint. Validates the bearer token against the Kubernetes API (TokenReview/SubjectAccessReview) instead of a sidecar like kube-rbac-proxy. See `msgTopologyOperator.metrics.rbac` and `bearerTokenSecret` below to make it scrapeable by Prometheus | `true`                   |
+| `msgTopologyOperator.metrics.rbac.authDelegator`               | Bind the operator's ServiceAccount to the `system:auth-delegator` ClusterRole so it can validate bearer tokens presented to the secure metrics endpoint. Only relevant when `msgTopologyOperator.metrics.secure` is `true` | `true`                   |
+| `msgTopologyOperator.metrics.rbac.metricsReader.create`        | Create a ClusterRole granting `nonResourceURLs: ["/metrics"]` GET access, bound to the ServiceAccounts listed below (e.g. your Prometheus ServiceAccount) | `false`                  |
+| `msgTopologyOperator.metrics.rbac.metricsReader.serviceAccounts` | List of `{name, namespace}` ServiceAccounts to grant metrics-read access to     | `[]`                     |
 | `msgTopologyOperator.metrics.service.enabled`                  | Create a service for accessing the metrics endpoint                                | `false`                  |
 | `msgTopologyOperator.metrics.service.type`                     | RabbitMQ Messaging Topology Operator metrics service type                          | `ClusterIP`              |
 | `msgTopologyOperator.metrics.service.ports.http`               | RabbitMQ Messaging Topology Operator metrics service port (target is HTTPS; metrics endpoint requires TLS as of v1.19.0) | `8443`                   |
@@ -365,7 +369,7 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.metrics.service.sessionAffinityConfig`    | Additional settings for the sessionAffinity                                        | `{}`                     |
 | `msgTopologyOperator.metrics.serviceMonitor.enabled`           | Specify if a servicemonitor will be deployed for prometheus-operator               | `false`                  |
 | `msgTopologyOperator.metrics.serviceMonitor.namespace`         | Namespace which Prometheus is running in                                           | `""`                     |
-| `msgTopologyOperator.metrics.serviceMonitor.jobLabel`          | Specify the jobLabel to use for the prometheus-operator                            | `app.kubernetes.io/name` |
+| `msgTopologyOperator.metrics.serviceMonitor.jobLabel`          | Specify the jobLabel to use for the prometheus-operator                            | `app.kubernetes.io/component` |
 | `msgTopologyOperator.metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                                | `{}`                     |
 | `msgTopologyOperator.metrics.serviceMonitor.honorLabels`       | Honor metrics labels                                                               | `false`                  |
 | `msgTopologyOperator.metrics.serviceMonitor.scrapeTimeout`     | Timeout after which the scrape is ended                                            | `""`                     |
@@ -373,8 +377,9 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.metrics.serviceMonitor.metricRelabelings` | Specify additional relabeling of metrics                                           | `[]`                     |
 | `msgTopologyOperator.metrics.serviceMonitor.relabelings`       | Specify general relabeling                                                         | `[]`                     |
 | `msgTopologyOperator.metrics.serviceMonitor.labels`            | Extra labels for the ServiceMonitor                                                | `{}`                     |
+| `msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret` | Reference a Secret (in the same namespace as this ServiceMonitor) with the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via `msgTopologyOperator.metrics.rbac.metricsReader`. Only used when `msgTopologyOperator.metrics.secure` is `true` | `{}`                     |
 | `msgTopologyOperator.metrics.podMonitor.enabled`               | Create PodMonitor Resource for scraping metrics using PrometheusOperator           | `false`                  |
-| `msgTopologyOperator.metrics.podMonitor.jobLabel`              | Specify the jobLabel to use for the prometheus-operator                            | `app.kubernetes.io/name` |
+| `msgTopologyOperator.metrics.podMonitor.jobLabel`              | Specify the jobLabel to use for the prometheus-operator                            | `app.kubernetes.io/component` |
 | `msgTopologyOperator.metrics.podMonitor.namespace`             | Namespace which Prometheus is running in                                           | `""`                     |
 | `msgTopologyOperator.metrics.podMonitor.honorLabels`           | Honor metrics labels                                                               | `false`                  |
 | `msgTopologyOperator.metrics.podMonitor.selector`              | Prometheus instance selector labels                                                | `{}`                     |
@@ -383,6 +388,7 @@ The following table lists the configurable values of the RabbitMQ chart and thei
 | `msgTopologyOperator.metrics.podMonitor.additionalLabels`      | Additional labels that can be used so PodMonitors will be discovered by Prometheus | `{}`                     |
 | `msgTopologyOperator.metrics.podMonitor.relabelings`           | Specify general relabeling                                                         | `[]`                     |
 | `msgTopologyOperator.metrics.podMonitor.metricRelabelings`     | Specify additional relabeling of metrics                                           | `[]`                     |
+| `msgTopologyOperator.metrics.podMonitor.bearerTokenSecret`     | Reference a Secret (in the same namespace as this PodMonitor) with the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via `msgTopologyOperator.metrics.rbac.metricsReader`. Only used when `msgTopologyOperator.metrics.secure` is `true` | `{}`                     |
 
 ## RabbitmqCluster admission webhook
 

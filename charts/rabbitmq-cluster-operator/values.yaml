@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: "4.3.5-management-alpine@sha256:e2f08f846de10bb09649a8b020f286ed362a8f72ee45e5a8d043851f1533fda8"
+  tag: "4.3.6-management-alpine@sha256:5240653724b684642bbbfd0a7bbd14dc0517078743a3114c9ed1ea2e32f4d69f"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -86,7 +86,7 @@ clusterOperator:
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
     repository: rabbitmq/cluster-operator
     ## @param clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
-    tag: "2.22.5@sha256:2727b84b835ada97247bbb65ebfa6998168b4e8ee11b0e6cece56ac2c9c4f0fb"
+    tag: "2.23.0@sha256:9236fb4f559bb6c4a04605fdf9aa1c03d00573df2d4da43c71e11b296e0a1886"
     ## @param clusterOperator.image.pullPolicy RabbitMQ Cluster Operator image pull policy
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -454,7 +454,7 @@ clusterOperator:
       ## namespace: monitoring
       namespace: ""
       ## @param clusterOperator.metrics.serviceMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param clusterOperator.metrics.serviceMonitor.honorLabels Honor metrics labels
       ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
       honorLabels: false
@@ -488,7 +488,7 @@ clusterOperator:
       ## @param clusterOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
       ## @param clusterOperator.metrics.podMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param clusterOperator.metrics.podMonitor.namespace Namespace which Prometheus is running in
       namespace: ""
       ## @param clusterOperator.metrics.podMonitor.honorLabels Honor metrics labels
@@ -521,7 +521,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
     repository: rabbitmq/messaging-topology-operator
     ## @param msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: "1.20.2@sha256:29174b668012d7a8cea8d30ee4acc80b0283911624564b604c344820cac3370d"
+    tag: "1.20.3@sha256:f377d3c3e2215a8dfb8a7a5ab953ef7f180f295c401e5d2c2060f3b0748fefd6"
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ## @param msgTopologyOperator.image.pullPolicy RabbitMQ Messaging Topology Operator image pull policy
@@ -874,7 +874,25 @@ msgTopologyOperator:
   metrics:
     ## Metrics endpoint authentication and transport settings.
     ## @param msgTopologyOperator.metrics.secure Enable authentication/authorization on metrics endpoint
+    ## When enabled, the operator validates the bearer token on every request against the Kubernetes API
+    ## (TokenReview/SubjectAccessReview) instead of a sidecar like kube-rbac-proxy. For Prometheus to scrape it
+    ## successfully, see msgTopologyOperator.metrics.rbac below and set a bearerTokenSecret on the
+    ## serviceMonitor/podMonitor.
     secure: true
+    ## RBAC required to make the secure metrics endpoint (msgTopologyOperator.metrics.secure: true) scrapeable.
+    ## Has no effect when msgTopologyOperator.metrics.secure is false.
+    rbac:
+      ## @param msgTopologyOperator.metrics.rbac.authDelegator Bind the operator's own ServiceAccount to the "system:auth-delegator" ClusterRole so it is allowed to validate the bearer tokens (via TokenReview/SubjectAccessReview) presented to the secure metrics endpoint
+      authDelegator: true
+      metricsReader:
+        ## @param msgTopologyOperator.metrics.rbac.metricsReader.create Create a ClusterRole granting `nonResourceURLs: ["/metrics"]` GET access, and bind it to the ServiceAccounts listed below (e.g. the Prometheus ServiceAccount) so their bearer token is authorized to scrape the secure metrics endpoint
+        create: false
+        ## @param msgTopologyOperator.metrics.rbac.metricsReader.serviceAccounts List of ServiceAccounts (e.g. the one used by your Prometheus/Prometheus Operator) to grant metrics-read access to
+        ## e.g:
+        ## serviceAccounts:
+        ##   - name: prometheus-kube-prometheus-prometheus
+        ##     namespace: monitoring
+        serviceAccounts: []
     ## Metrics service parameters
     service:
       ## @param msgTopologyOperator.metrics.service.enabled Create a service for accessing the metrics endpoint
@@ -927,7 +945,7 @@ msgTopologyOperator:
       ## namespace: monitoring
       namespace: ""
       ## @param msgTopologyOperator.metrics.serviceMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param msgTopologyOperator.metrics.serviceMonitor.selector [object] Selector for RabbitMQ Messaging Topology Operator metrics service
       ## DEPRECATED: Use msgTopologyOperator.metrics.serviceMonitor.labels instead.
       ## This value will be removed in a future release
@@ -949,11 +967,17 @@ msgTopologyOperator:
       relabelings: []
       ## @param msgTopologyOperator.metrics.serviceMonitor.labels Extra labels for the ServiceMonitor
       labels: {}
+      ## @param msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret Reference a Secret (in the same namespace as this ServiceMonitor) holding the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true.
+      ## e.g:
+      ## bearerTokenSecret:
+      ##   name: prometheus-metrics-token
+      ##   key: token
+      bearerTokenSecret: {}
     podMonitor:
       ## @param msgTopologyOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
       ## @param msgTopologyOperator.metrics.podMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param msgTopologyOperator.metrics.podMonitor.namespace Namespace which Prometheus is running in
       namespace: ""
       ## @param msgTopologyOperator.metrics.podMonitor.honorLabels Honor metrics labels
@@ -970,6 +994,12 @@ msgTopologyOperator:
       relabelings: []
       ## @param msgTopologyOperator.metrics.podMonitor.metricRelabelings Specify additional relabeling of metrics
       metricRelabelings: []
+      ## @param msgTopologyOperator.metrics.podMonitor.bearerTokenSecret Reference a Secret (in the same namespace as this PodMonitor) holding the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true.
+      ## e.g:
+      ## bearerTokenSecret:
+      ##   name: prometheus-metrics-token
+      ##   key: token
+      bearerTokenSecret: {}
 
 ## @param useCertManager Deploy cert-manager objects (Issuer and Certificate) for webhooks
 useCertManager: false
