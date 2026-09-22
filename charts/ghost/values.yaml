@@ -26,7 +26,7 @@ image:
   ## @param image.repository Ghost image repository
   repository: ghost
   ## @param image.tag Ghost image tag
-  tag: "6.59.0@sha256:53fa4a91df5f5853ddfd72e5ea8cda403f5e7ec10a6e9bc72dc59a0eb9c943f9"
+  tag: "6.64.0@sha256:a31d03f1f6294dc8b2c5fc3f70ed367801344c803492bed245867874339f92f8"
   ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 
@@ -241,9 +241,11 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB init container image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB init container image tag
-    tag: "12.3.2@sha256:a02fe89cb597d4375812b2eac90cf9d0775d4686daa7f7cc750ebbcad7525bbc"
+    tag: "13.0.2@sha256:d4fdec0510ad498e4f3127da30a99df3745bd6d5e611ae6ac5f76403d9284a8d"
 
 config:
+  ## @param config.url Public site URL. If not set, defaults to the first ingress host when ingress is enabled, otherwise falls back to the pod's own loopback address over HTTP (so background jobs like ActivityPub that self-fetch this URL during startup don't deadlock waiting on the Service's readiness-gated endpoints).
+  url: ""
   database:
     client: "mysql"
     externalConnection:

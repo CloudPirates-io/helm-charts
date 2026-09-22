@@ -5,6 +5,9 @@
         "affinity": {
             "type": "object"
         },
+        "topologySpreadConstraints": {
+            "type": "array"
+        },
         "command": {
             "type": "array"
         },
@@ -370,11 +373,17 @@
                             "type": "integer"
                         },
                         "secureClient": {
-                            "type": "string"
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
                         }
                     }
                 },
                 "type": {
+                    "type": "string"
+                },
+                "trafficDistribution": {
                     "type": "string"
                 }
             }

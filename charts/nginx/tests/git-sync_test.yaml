@@ -57,3 +57,48 @@ tests:
               runAsUser: 1337
               runAsNonRoot: true
           any: true
+
+  - it: should not set subPath on the nginx static-site mount by default
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: nginx
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: static-site
+            mountPath: /usr/share/nginx/html
+            subPath: ""
+          any: true
+
+  - it: should scope the nginx static-site mount to subPath when set
+    set:
+      cloneStaticSiteFromGit:
+        subPath: public
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: static-site
+            mountPath: /usr/share/nginx/html
+            subPath: public
+          any: true
+      # the git containers still clone/sync the full repository at /app, unscoped
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: git-clone-repository
+            volumeMounts:
+              - name: static-site
+                mountPath: /app
+          any: true
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: git-repo-syncer
+            volumeMounts:
+              - name: static-site
+                mountPath: /app
+          any: true

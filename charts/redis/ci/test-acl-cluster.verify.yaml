@@ -1,0 +1,34 @@
+# Functional verification for ci/test-acl-cluster.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the cluster actually
+# formed (cluster-init Job's redis-cli calls authenticated correctly) and that
+# ACL auth is enforced on the cluster nodes.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Authenticating as 'default' should succeed"
+              redis-cli -t 3 -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Cluster must report state:ok (proves the cluster-init Job's ACL-authenticated 'cluster create' actually succeeded)"
+              redis-cli -t 3 -h test-redis-test-acl-cluster --user default -a 'ClusterPass123!' --no-auth-warning cluster info | grep -q "cluster_state:ok"
+
+              echo "OK: cluster ACL auth and cluster formation verified"

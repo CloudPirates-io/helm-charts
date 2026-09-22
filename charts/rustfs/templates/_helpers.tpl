@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "rustfs.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{- toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
