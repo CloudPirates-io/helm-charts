@@ -30,7 +30,7 @@ image:
   ## @param image.repository PostgreSQL image repository
   repository: postgres
   ## @param image.tag PostgreSQL image tag (immutable tags are recommended)
-  tag: "18.6@sha256:1957b2ff3137e4ef7f3bc813e74fff50b1e1ffddc85c8b9d6f14ade972be8687"
+  tag: "18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280"
   ## @param image.imagePullPolicy PostgreSQL image pull policy
   imagePullPolicy: Always
   ## @param image.useHardenedImage Set to true when using hardened images (e.g., DHI) that have different PGDATA paths for Postgres <18

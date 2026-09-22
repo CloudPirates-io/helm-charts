@@ -42,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.8@sha256:5211c51171f57ae60842b11664bb244628971b3d35325762a97888337b9bb0db"
+  tag: "8.3.11@sha256:5d7043a4ffe02b9ed1b6e0bab057546981af5ca0a79107e9c461e49bc44c0a7b"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -757,3 +757,10 @@ shardedCluster:
       stop: ""
     ## @param shardedCluster.balancer.autoSplitEnabled Enable automatic chunk splitting (MongoDB 6.0+)
     autoSplitEnabled: true
+
+## @section Experimental parameters
+## Unofficial, unverified workarounds. Disabled by default - enable at your own risk.
+experimental:
+  tcmallocRseqWorkaround:
+    ## @param experimental.tcmallocRseqWorkaround.enabled Set GLIBC_TUNABLES=glibc.pthread.rseq=1 on all mongod/mongos containers. Community-reported (not MongoDB-endorsed) workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 due to a TCMalloc/glibc incompatibility (MongoDB SERVER-121912, google/tcmalloc#292). Reports of it actually helping are inconsistent. The official fix is to run kernel <=6.18 or >=7.0.14.
+    enabled: false

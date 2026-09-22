@@ -1,0 +1,43 @@
+# Functional verification for ci/clone-static-site.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves cloneStaticSiteFromGit
+# actually cloned the repository and that subPath scoped nginx's docroot to
+# charts/nginx (this chart's own directory), not the repository root.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-nginx-clone-static-site:80"
+
+              echo "-> Fetching README.md served from the cloned charts/nginx subdirectory"
+              BODY=$(curl -f http://${SERVICE_HOST}/README.md -s)
+
+              echo "-> Checking content specific to the nginx chart's own README is served"
+              echo "${BODY}" | grep -qi "nginx (\"engine x\")"
+
+              echo "-> Checking a file that only exists at the repository root is NOT served"
+              echo "   (proves subPath scoped the docroot to charts/nginx, not the repo root)"
+              if curl -f http://${SERVICE_HOST}/test-charts.sh -s -o /dev/null; then
+                echo "ERROR: repository-root file was unexpectedly served - subPath was not applied"
+                exit 1
+              fi
+
+              echo "OK: cloneStaticSiteFromGit + subPath verification passed"
