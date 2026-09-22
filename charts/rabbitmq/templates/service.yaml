@@ -22,15 +22,24 @@ spec:
     - port: {{ .Values.service.amqpPort }}
       targetPort: amqp
       name: amqp
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.amqp)) }}
+      nodePort: {{ .Values.service.nodePorts.amqp }}
+      {{- end }}
     {{- if .Values.managementPlugin.enabled }}
     - port: {{ .Values.service.managementPort }}
       targetPort: mgmt
       name: mgmt
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.mgmt)) }}
+      nodePort: {{ .Values.service.nodePorts.mgmt }}
+      {{- end }}
     {{- end }}
     {{- if .Values.metrics.enabled }}
     - port: {{ .Values.metrics.port }}
       targetPort: prometheus
       name: prometheus
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.metrics)) }}
+      nodePort: {{ .Values.service.nodePorts.metrics }}
+      {{- end }}
     {{- end }}
     {{- range .Values.extraPorts }}
     - port: {{ .port }}

@@ -99,6 +99,9 @@
                 },
                 "repository": {
                     "type": "string"
+                },
+                "subPath": {
+                    "type": "string"
                 }
             }
         },
@@ -323,6 +326,9 @@
             }
         },
         "initContainerSecurityContext": {
+            "type": "object"
+        },
+        "lifecycleHooks": {
             "type": "object"
         },
         "livenessProbe": {

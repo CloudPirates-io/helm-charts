@@ -1,0 +1,20 @@
+# CI scenario: replication architecture without Sentinel (pod-0 fixed master)
+# Exercises: StatefulSet with multiple replicas, the dedicated "-master" Service
+# that always targets pod-0, replica read-only enforcement, and actual
+# master->replica data propagation over the headless per-pod Service.
+architecture: replication
+replicaCount: 2
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  password: "verify-valkey-password"

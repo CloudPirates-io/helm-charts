@@ -26,7 +26,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.31.4-alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913"
+  tag: "1.31.6-alpine@sha256:adad2ae9204d0fd7a34f40299bc838c3782be1293b10005eac4315ff5a1abf4e"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -173,6 +173,10 @@ cloneStaticSiteFromGit:
   ##
   branch: "main"
 
+  ## @param cloneStaticSiteFromGit.subPath Subdirectory within the cloned repository to serve as the web root (e.g. "public" for Hugo/Zola sites). Leave empty to serve the repository root.
+  ##
+  subPath: ""
+
   ## @param cloneStaticSiteFromGit.interval Interval (seconds) for sidecar to pull from Git repository
   ##
   interval: 60
@@ -222,6 +226,9 @@ resources:
   #   cpu: 50m
   #   memory: 64Mi
 
+## @param lifecycleHooks for the Nginx container to automate configuration before or after startup
+lifecycleHooks: {}
+
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
 
@@ -252,6 +259,11 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
 
 ## @param podSecurityContext Security context for the pod
+## Note: fsGroup applies to ALL volumes in the pod, including extraVolumes. If you mount a Secret
+## (e.g. an SSH private key for cloneStaticSiteFromGit) with a restrictive defaultMode like 0600,
+## the group ownership set by fsGroup (101) may still make Git/SSH reject the key as "too open".
+## In that case, either set defaultMode: 0640 on the secret volume, or set podSecurityContext.fsGroup
+## to a value matching your key's requirements (or null, if your workload doesn't need it).
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101

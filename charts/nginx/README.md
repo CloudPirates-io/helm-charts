@@ -109,6 +109,61 @@ service:
       name: https
 ```
 
+### Cloning a Static Site from Git Using an SSH Key
+
+`podSecurityContext.fsGroup` defaults to `101` and applies to **all** volumes in the pod, including any
+`extraVolumes` you mount yourself. If you mount an SSH private key as a Secret for
+`cloneStaticSiteFromGit` (or any other Git-over-SSH use case), Git/SSH will still reject the key even
+if you set a restrictive `defaultMode` such as `0600`, because the file's group ownership is changed
+to `101` and the permission bits end up looking like `0640` to SSH.
+
+To fix this, either set the secret's `defaultMode` to `0640` so the group-owned permissions are what
+SSH expects:
+
+```yaml
+# my-values.yaml
+extraVolumes:
+  - name: git-credential-ssh-key
+    secret:
+      secretName: git-credential-ssh-key
+      defaultMode: 0640
+extraVolumeMounts:
+  - name: git-credential-ssh-key
+    mountPath: /root/.ssh/
+    readOnly: true
+cloneStaticSiteFromGit:
+  enabled: true
+  repository: git@example.com:my-org/my-site.git
+  branch: main
+```
+
+or unset `podSecurityContext.fsGroup` if your workload doesn't otherwise need it:
+
+```yaml
+# my-values.yaml
+podSecurityContext:
+  fsGroup: null
+```
+
+### Cloning a Static Site from Git with a Build Output Subdirectory
+
+If your repository puts the rendered site in a subdirectory (e.g. a Hugo or Zola site pre-built into
+`public/`), set `cloneStaticSiteFromGit.subPath` to serve only that subdirectory as the web root instead
+of the whole repository. The Git init/sync containers still clone the full repository; only the nginx
+container's mount is scoped to the subdirectory:
+
+```yaml
+# my-values.yaml
+cloneStaticSiteFromGit:
+  enabled: true
+  repository: https://example.com/my-org/my-site.git
+  branch: main
+  subPath: public
+```
+
+Note that this does not run a build step (e.g. `hugo build`) inside the container — the subdirectory
+must already contain the built output in the repository.
+
 ## Configuration
 
 The following table lists the configurable parameters of the Nginx chart and their default values.
@@ -255,9 +310,10 @@ service:
 
 ### Resources Parameters
 
-| Parameter   | Description                                | Default |
-| ----------- | ------------------------------------------ | ------- |
-| `resources` | Resource limits and requests for Nginx pod | `{}`    |
+| Parameter        | Description                                                                | Default |
+| ---------------- | --------------------------------------------------------------------------- | ------- |
+| `resources`      | Resource limits and requests for Nginx pod                                | `{}`    |
+| `lifecycleHooks` | for the Nginx container to automate configuration before or after startup | `{}`    |
 
 
 ### Health Check Parameters
