@@ -1,0 +1,48 @@
+# Functional verification for ci/metrics.yaml.
+# Proves the mongodb_exporter sidecar actually authenticated to mongod and is
+# scraping real, live server metrics from Prometheus' /metrics endpoint - not
+# just that its own liveness/readiness probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/alpine:3.20
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              URL="http://test-mongodb-metrics-metrics:9216/metrics"
+
+              apk add --no-cache curl >/dev/null
+
+              echo "-> Fetching metrics from $URL"
+              curl -fsS "$URL" -o /tmp/metrics.txt
+
+              echo "-> Checking mongodb_up reports a live, authenticated connection to mongod"
+              if ! grep -qE '^mongodb_up\{.*\}[[:space:]]+1' /tmp/metrics.txt; then
+                echo "ERROR: mongodb_up=1 not found in exporter output (exporter could not reach/authenticate to mongod)"
+                cat /tmp/metrics.txt
+                exit 1
+              fi
+
+              echo "-> Checking for real serverStatus-derived data (proves a live scrape, not a stub)"
+              if ! grep -qE '^mongodb_fcv_feature_compatibility_version\{' /tmp/metrics.txt; then
+                echo "ERROR: mongodb_fcv_feature_compatibility_version metric not found in exporter output"
+                cat /tmp/metrics.txt
+                exit 1
+              fi
+
+              echo "OK: MongoDB metrics exporter verification passed"

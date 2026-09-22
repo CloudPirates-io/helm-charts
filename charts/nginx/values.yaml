@@ -173,6 +173,10 @@ cloneStaticSiteFromGit:
   ##
   branch: "main"
 
+  ## @param cloneStaticSiteFromGit.subPath Subdirectory within the cloned repository to serve as the web root (e.g. "public" for Hugo/Zola sites). Leave empty to serve the repository root.
+  ##
+  subPath: ""
+
   ## @param cloneStaticSiteFromGit.interval Interval (seconds) for sidecar to pull from Git repository
   ##
   interval: 60
@@ -255,6 +259,11 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
 
 ## @param podSecurityContext Security context for the pod
+## Note: fsGroup applies to ALL volumes in the pod, including extraVolumes. If you mount a Secret
+## (e.g. an SSH private key for cloneStaticSiteFromGit) with a restrictive defaultMode like 0600,
+## the group ownership set by fsGroup (101) may still make Git/SSH reject the key as "too open".
+## In that case, either set defaultMode: 0640 on the secret volume, or set podSecurityContext.fsGroup
+## to a value matching your key's requirements (or null, if your workload doesn't need it).
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101
