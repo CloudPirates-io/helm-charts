@@ -1,0 +1,71 @@
+suite: test redis master discovery NetworkPolicy
+templates:
+  - sentinel-master-networkpolicy.yaml
+set:
+  architecture: replication
+  sentinel:
+    enabled: true
+    masterService:
+      enabled: true
+  networkPolicy:
+    enabled: true
+tests:
+  - it: should not render when networkPolicy is disabled
+    set:
+      networkPolicy:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render when masterService is disabled
+    set:
+      sentinel:
+        enabled: true
+        masterService:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render when sentinel is disabled
+    set:
+      sentinel:
+        enabled: false
+        masterService:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render for non-replication architectures even if masterService is set
+    set:
+      architecture: standalone
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should select only the master-discovery pods
+    asserts:
+      - equal:
+          path: spec.podSelector.matchLabels["app.kubernetes.io/component"]
+          value: master-discovery
+
+  - it: should only restrict Egress, leaving Ingress governed by the main NetworkPolicy
+    asserts:
+      - equal:
+          path: spec.policyTypes
+          value:
+            - Egress
+
+  - it: should allow unscoped egress to the Kubernetes API server on 443
+    asserts:
+      - contains:
+          path: spec.egress
+          content:
+            ports:
+              - port: 443
+                protocol: TCP
+          any: true
+      - notExists:
+          path: spec.egress[0].to

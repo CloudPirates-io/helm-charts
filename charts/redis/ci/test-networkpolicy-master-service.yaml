@@ -1,0 +1,49 @@
+# CI scenario: replication + Sentinel with the dynamic master Service
+# (sentinel.masterService.enabled) AND networkPolicy.enabled together.
+# Exercises templates/sentinel-master-networkpolicy.yaml: proves the
+# master-discovery controller's `kubectl get/exec/apply` calls to the
+# Kubernetes API server still succeed - and the "-master" Service selector
+# still gets kept in sync with the real master pod - once the chart's own
+# NetworkPolicy is restricting the pod's traffic (issue #1757).
+architecture: replication
+replicaCount: 3
+useDeployment: false
+
+image:
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: false
+
+sentinel:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  masterService:
+    enabled: true
+    # Shorter than the 60s default so the CI verification doesn't have to wait long
+    # for the master Service selector to be patched to point at the real master pod.
+    checkInterval: 10
+    resources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+
+networkPolicy:
+  enabled: true
