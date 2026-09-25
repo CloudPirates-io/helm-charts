@@ -37,6 +37,9 @@ image:
 ## @param replicaCount Number of Memcached replicas to deploy
 replicaCount: 1
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
+
 ## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
 deploymentType: Deployment
 
