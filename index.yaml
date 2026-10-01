@@ -25283,6 +25283,56 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[mongodb] Add external LoadBalancer access for replica set members
+            (#1770)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1770
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MongoDB
+          url: https://www.mongodb.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+        - name: Application
+          url: https://github.com/mongodb/mongo
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 8.3.11
+    created: "2026-10-01T16:48:06.878637146Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: MongoDB a flexible NoSQL database for scalable, real-time data management
+    digest: d212c7b1487e09eb9a468a83dfc74b2bb556a54dcc92e9e43f15305bcf4beffe
+    home: https://www.mongodb.com
+    icon: https://a.storyblok.com/f/143071/512x512/5d228988dc/mongodb-logo.svg
+    keywords:
+    - mongodb
+    - database
+    - nosql
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: mongodb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mongodb
+    - https://github.com/mongodb/mongo
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mongodb-0.19.0/mongodb-0.19.0.tgz
+    version: 0.19.0
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: Fix type in chart
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/links: |
@@ -67900,4 +67950,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-01T16:44:50.022839034Z"
+generated: "2026-10-01T16:48:06.880895112Z"
