@@ -185,6 +185,12 @@ The following table lists the configurable parameters of the Nginx chart and the
 | `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
 | `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
+### Deployment Parameters
+
+| Parameter              | Description                                         | Default |
+| ---------------------- | --------------------------------------------------- | ------- |
+| `replicaCount`         | Number of Nginx replicas to deploy                  | `1`     |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback | `10`    |
 
 ### Nginx Image Parameters
 
