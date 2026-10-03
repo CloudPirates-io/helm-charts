@@ -393,6 +393,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
 | `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
 
+When `sentinel.masterService.enabled` and `networkPolicy.enabled` are both set, the chart automatically
+deploys a second, narrowly-scoped `NetworkPolicy` for the master-discovery pod, allowing it egress to the
+Kubernetes API server on port 443 (needed for the `kubectl get/exec/apply` calls it uses to keep the
+`-master` Service selector pointed at the current master). You don't need to add this yourself via
+`networkPolicy.extraEgress`.
+
 ### Sentinel ACL Configuration
 
 Sentinel can run its own independent ACL, securing connections *to* the Sentinel process itself (e.g. `redis-cli` clients, the preStop failover hook, and the master-discovery controller). This is separate from `auth.acl`, which secures the monitored Redis instances - the two can be enabled independently or together.

@@ -1,0 +1,34 @@
+{{- if and .Values.networkPolicy.enabled .Values.sentinel.enabled .Values.sentinel.masterService.enabled (eq .Values.architecture "replication") }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "redis.fullname" . }}-master-discovery
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "redis.labels" . | nindent 4 }}
+    app.kubernetes.io/component: master-discovery
+  {{- if (include "redis.annotations" .) }}
+  annotations:
+{{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "redis.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: master-discovery
+  # Only adds Egress rules for the master-discovery pod on top of whatever the main
+  # NetworkPolicy (templates/networkpolicy.yaml) already allows for it as a regular
+  # redis-selector-labeled pod; Ingress stays governed entirely by that policy.
+  policyTypes:
+    - Egress
+  egress:
+    # The master-discovery container only talks to the Kubernetes API server
+    # (kubectl get/exec/apply) to keep the "-master" Service selector pointed at the
+    # current master. The API server can't reliably be scoped with a podSelector or
+    # ipBlock peer here - on many managed clusters (e.g. EKS, GKE) the control plane
+    # isn't part of the in-cluster pod network at all - so, like the DNS egress rule
+    # in templates/networkpolicy.yaml, this is left unscoped to any destination.
+    - ports:
+        - port: 443
+          protocol: TCP
+{{- end }}

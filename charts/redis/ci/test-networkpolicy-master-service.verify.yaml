@@ -1,0 +1,48 @@
+# Functional verification for ci/test-networkpolicy-master-service.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the master-discovery
+# controller (templates/sentinel-master-deployment.yaml) can still reach the
+# Kubernetes API server and keep the "-master" Service selector pointed at a
+# real master pod while templates/networkpolicy.yaml and
+# templates/sentinel-master-networkpolicy.yaml are both restricting egress.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Waiting for the master-discovery controller to point '-master' Service at a real master pod"
+              MASTER_ROLE=""
+              for i in $(seq 1 12); do
+                MASTER_ROLE=$(redis-cli -t 3 -h test-redis-test-networkpolicy-master-service-master info replication 2>/dev/null | tr -d '\r' | grep -m1 '^role:' || echo "")
+                if [ "$MASTER_ROLE" = "role:master" ]; then
+                  break
+                fi
+                echo "   Not ready yet (got: '${MASTER_ROLE:-<no response>}'), retrying in 5s..."
+                sleep 5
+              done
+              if [ "$MASTER_ROLE" != "role:master" ]; then
+                echo "ERROR: '-master' Service never resolved to a pod reporting role:master (last response: '${MASTER_ROLE:-<no response>}')"
+                echo "        This likely means the master-discovery pod's NetworkPolicy egress to the"
+                echo "        Kubernetes API server is being blocked."
+                exit 1
+              fi
+              echo "   '-master' Service correctly points at the current master"
+
+              echo "OK: sentinel.masterService + networkPolicy verified"
