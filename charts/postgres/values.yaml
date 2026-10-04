@@ -398,6 +398,17 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the MongoDB container
 extraVolumeMounts: []
 
+## @param extraContainers Additional sidecar containers to add to the PostgreSQL pod
+## Combine with extraVolumes to share volumes (e.g. the data volume or an emptyDir) with the sidecar
+extraContainers: []
+# - name: sidecar
+#   image: busybox:1.36
+#   command: ["sleep", "infinity"]
+#   volumeMounts:
+#     - name: data
+#       mountPath: /pgdata
+#       readOnly: true
+
 ## @param initContainers Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades
 initContainers: []
 # Example with pgautoupgrade for major version upgrades:
