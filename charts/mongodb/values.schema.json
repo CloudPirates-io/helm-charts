@@ -91,6 +91,19 @@
         "customUsers": {
             "type": "array"
         },
+        "experimental": {
+            "type": "object",
+            "properties": {
+                "tcmallocRseqWorkaround": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -590,10 +603,7 @@
                                     "type": "array"
                                 },
                                 "port": {
-                                    "type": [
-                                        "string",
-                                        "integer"
-                                    ]
+                                    "type": "string"
                                 },
                                 "publicNames": {
                                     "type": "array"
