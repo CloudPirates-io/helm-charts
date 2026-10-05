@@ -334,7 +334,8 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 | -------------------- | ---------------------------------------------------------------------- | ------- |
 | `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
 | `extraVolumes`       | Additional volumes to add to the pod                                   | `[]`    |
-| `extraVolumeMounts`  | Additional volume mounts to add to the MongoDB container               | `[]`    |
+| `extraVolumeMounts`  | Additional volume mounts to add to the Postgres container              | `[]`    |
+| `extraContainers`    | Additional containers to add to the pod                                | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 

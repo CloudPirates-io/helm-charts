@@ -1,0 +1,305 @@
+suite: test kafka external access
+
+tests:
+  - it: should not render an EXTERNAL listener or per-broker Services by default
+    template: service.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - notMatchRegex:
+          path: metadata.name
+          pattern: "-external$"
+
+  - it: should not add an EXTERNAL entry to server.properties by default
+    template: configmap.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["server.properties"]
+          pattern: "EXTERNAL"
+
+  - it: should not add a container port or EXTERNAL_HOST logic by default
+    template: statefulset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: external
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "EXTERNAL_HOST"
+
+  - it: should add an EXTERNAL entry to the listener map and listeners when enabled
+    template: configmap.yaml
+    set:
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:SASL_PLAINTEXT,INTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT,EXTERNAL:PLAINTEXT"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listeners=CLIENT://:9092,INTERNAL://:9094,CONTROLLER://:9093,EXTERNAL://:9095"
+
+  - it: should use SASL_PLAINTEXT for EXTERNAL when auth.external.enabled is also true
+    template: configmap.yaml
+    set:
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+      auth:
+        external:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "EXTERNAL:SASL_PLAINTEXT"
+
+  - it: should add the external container port to the statefulset when enabled
+    template: statefulset.yaml
+    set:
+      externalAccess:
+        enabled: true
+        service:
+          ports:
+            external: 9095
+        domain: kafka.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: external
+            containerPort: 9095
+            protocol: TCP
+
+  - it: should compute one EXTERNAL_HOST case arm per broker ordinal from loadBalancerIPs
+    template: statefulset.yaml
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+        service:
+          loadBalancerIPs:
+            - 10.0.0.1
+            - 10.0.0.2
+            - 10.0.0.3
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '0\) EXTERNAL_HOST="10\.0\.0\.1"'
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '1\) EXTERNAL_HOST="10\.0\.0\.2"'
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '2\) EXTERNAL_HOST="10\.0\.0\.3"'
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "advertised\\.listeners=CLIENT://\\$\\{ADVERTISED_HOST\\}:9092,INTERNAL://\\$\\{ADVERTISED_HOST\\}:9094,EXTERNAL://\\$\\{EXTERNAL_HOST\\}:9095"
+
+  - it: should fall back to fullname-ordinal.domain for an ordinal without a loadBalancerIPs entry
+    template: statefulset.yaml
+    set:
+      replicaCount: 2
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+        service:
+          loadBalancerIPs:
+            - 10.0.0.1
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '0\) EXTERNAL_HOST="10\.0\.0\.1"'
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '1\) EXTERNAL_HOST="RELEASE-NAME-kafka-1\.kafka\.example\.com"'
+
+  - it: should fail fast at runtime when an ordinal has neither a loadBalancerIPs entry nor a domain
+    template: statefulset.yaml
+    set:
+      externalAccess:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "ERROR: externalAccess.enabled is true but no address could be resolved"
+
+  - it: should create one external Service document per broker ordinal
+    template: service.yaml
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - hasDocuments:
+          count: 5
+
+  - it: should name and select broker 0's external Service correctly
+    template: service.yaml
+    documentIndex: 2
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kafka-0-external
+      - equal:
+          path: spec.selector["statefulset.kubernetes.io/pod-name"]
+          value: RELEASE-NAME-kafka-0
+
+  - it: should name and select broker 2's external Service correctly
+    template: service.yaml
+    documentIndex: 4
+    set:
+      replicaCount: 3
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kafka-2-external
+      - equal:
+          path: spec.selector["statefulset.kubernetes.io/pod-name"]
+          value: RELEASE-NAME-kafka-2
+
+  - it: should pin broker 0's loadBalancerIP from externalAccess.service.loadBalancerIPs
+    template: service.yaml
+    documentIndex: 2
+    set:
+      replicaCount: 2
+      externalAccess:
+        enabled: true
+        service:
+          loadBalancerIPs:
+            - 10.0.0.1
+            - 10.0.0.2
+    asserts:
+      - equal:
+          path: spec.loadBalancerIP
+          value: 10.0.0.1
+
+  - it: should pin broker 1's loadBalancerIP from externalAccess.service.loadBalancerIPs
+    template: service.yaml
+    documentIndex: 3
+    set:
+      replicaCount: 2
+      externalAccess:
+        enabled: true
+        service:
+          loadBalancerIPs:
+            - 10.0.0.1
+            - 10.0.0.2
+    asserts:
+      - equal:
+          path: spec.loadBalancerIP
+          value: 10.0.0.2
+
+  - it: should not set loadBalancerIP when the Service type is not LoadBalancer
+    template: service.yaml
+    documentIndex: 2
+    set:
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+        service:
+          type: NodePort
+          loadBalancerIPs:
+            - 10.0.0.1
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+      - isNull:
+          path: spec.loadBalancerIP
+
+  - it: should add annotations to broker 0's external Service
+    template: service.yaml
+    documentIndex: 2
+    set:
+      replicaCount: 2
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+        service:
+          annotations:
+            cloud.example.com/internal: "true"
+    asserts:
+      - equal:
+          path: metadata.annotations["cloud.example.com/internal"]
+          value: "true"
+
+  - it: should add annotations to broker 1's external Service
+    template: service.yaml
+    documentIndex: 3
+    set:
+      replicaCount: 2
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+        service:
+          annotations:
+            cloud.example.com/internal: "true"
+    asserts:
+      - equal:
+          path: metadata.annotations["cloud.example.com/internal"]
+          value: "true"
+
+  - it: should create an external-password Secret key only when both externalAccess and auth.external are enabled
+    template: secret.yaml
+    set:
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+      auth:
+        external:
+          enabled: true
+    asserts:
+      - exists:
+          path: data["external-password"]
+
+  - it: should not create an external-password Secret key when auth.external is disabled
+    template: secret.yaml
+    set:
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - notExists:
+          path: data["external-password"]
+
+  - it: should allow ingress to the EXTERNAL port when networkPolicy and externalAccess are both enabled
+    template: networkpolicy.yaml
+    set:
+      networkPolicy:
+        enabled: true
+      externalAccess:
+        enabled: true
+        domain: kafka.example.com
+    asserts:
+      - contains:
+          path: spec.ingress
+          content:
+            ports:
+              - port: 9095
+
+  - it: should not add an EXTERNAL ingress rule when externalAccess is disabled
+    template: networkpolicy.yaml
+    set:
+      networkPolicy:
+        enabled: true
+    asserts:
+      - notContains:
+          path: spec.ingress
+          content:
+            ports:
+              - port: 9095

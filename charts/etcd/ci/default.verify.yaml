@@ -1,0 +1,54 @@
+# Functional verification for ci/default.yaml.
+# Proves the deployed etcd cluster actually serves client reads/writes (a real
+# put/get/delete round-trip via etcdctl), not just that probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          # gcr.io/etcd-development/etcd release images are distroless (no shell), so this
+          # downloads the matching official etcdctl release binary into a shell-capable image
+          # instead of switching to a third-party (e.g. bitnami) etcd image.
+          image: docker.io/alpine:3.20
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ETCD_VERSION="v3.7.1"
+              ENDPOINT="http://test-etcd-default:2379"
+              KEY="verify-key"
+              VALUE="verify-value-$(date +%s)"
+
+              echo "-> Downloading etcdctl ${ETCD_VERSION}"
+              apk add --no-cache curl tar >/dev/null
+              curl -fsSL "https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz" \
+                | tar -xz -C /tmp "etcd-${ETCD_VERSION}-linux-amd64/etcdctl"
+              ETCDCTL="/tmp/etcd-${ETCD_VERSION}-linux-amd64/etcdctl"
+
+              echo "-> Writing key '$KEY' to etcd"
+              "$ETCDCTL" --endpoints="$ENDPOINT" put "$KEY" "$VALUE"
+
+              echo "-> Reading key '$KEY' back from etcd"
+              RESULT=$("$ETCDCTL" --endpoints="$ENDPOINT" get "$KEY" --print-value-only)
+
+              if [ "$RESULT" != "$VALUE" ]; then
+                echo "ERROR: expected '$VALUE' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Deleting key '$KEY'"
+              "$ETCDCTL" --endpoints="$ENDPOINT" del "$KEY" >/dev/null
+
+              echo "OK: etcd put/get/delete round-trip verification passed"

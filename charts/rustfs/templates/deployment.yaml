@@ -12,8 +12,6 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       {{- include "rustfs.selectorLabels" . | nindent 6 }}

@@ -1,0 +1,17 @@
+# CI scenario: default Kafka (KRaft) cluster with SASL/PLAIN client auth enabled.
+# A fixed clientPassword is set (instead of the auto-generated default) so the
+# verify job can authenticate without having to read the generated Secret.
+# Exercises: StatefulSet/Service deployment, KRaft quorum formation, and
+# SASL/PLAIN-authenticated client connectivity.
+auth:
+  clientPassword: "VerifyClientPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 1Gi

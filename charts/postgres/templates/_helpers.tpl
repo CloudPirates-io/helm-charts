@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "postgres.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{- toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*

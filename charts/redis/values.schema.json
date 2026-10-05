@@ -14,6 +14,9 @@
                 "acl": {
                     "type": "object",
                     "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -24,6 +27,9 @@
                             "type": "string"
                         },
                         "existingSecretACLKey": {
+                            "type": "string"
+                        },
+                        "sentinelUsername": {
                             "type": "string"
                         }
                     }
@@ -137,6 +143,9 @@
                 "resources": {
                     "type": "object"
                 },
+                "runtimeClassName": {
+                    "type": "string"
+                },
                 "tolerations": {
                     "type": "array"
                 }
@@ -236,6 +245,9 @@
                     }
                 }
             }
+        },
+        "dnsConfig": {
+            "type": "object"
         },
         "externalMaster": {
             "type": "object",
@@ -597,9 +609,32 @@
         "revisionHistoryLimit": {
             "type": "integer"
         },
+        "runtimeClassName": {
+            "type": "string"
+        },
         "sentinel": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {

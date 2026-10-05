@@ -1,0 +1,23 @@
+# CI scenario: PostgreSQL deployment with a non-root application user and database
+# Exercises: customUser (user creation that owns its own database only, without
+# superuser or CREATEDB privileges, unlike the postgres superuser)
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  password: "RootPass123!"
+
+customUser:
+  name: appuser
+  database: appdb
+  password: "AppPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

@@ -1,0 +1,38 @@
+# Functional verification for ci/test-metrics.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the Prometheus
+# exporter sidecar actually serves real Redis metrics, not just that its
+# readiness/liveness probes passed.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-redis-test-metrics-metrics:9121"
+              echo "-> Fetching /metrics from the redis_exporter sidecar"
+              METRICS=$(curl -f http://${SERVICE_HOST}/metrics -s)
+
+              echo "-> Checking for the redis_up metric emitted by oliver006/redis_exporter"
+              echo "${METRICS}" | grep -qE '^redis_up [0-9]+'
+
+              echo "-> Checking that redis_up reports the instance as reachable (value 1)"
+              echo "${METRICS}" | grep -qE '^redis_up 1$'
+
+              echo "OK: redis metrics verification passed"

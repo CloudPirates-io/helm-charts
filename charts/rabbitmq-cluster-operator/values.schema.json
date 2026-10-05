@@ -788,6 +788,9 @@
                                 "additionalLabels": {
                                     "type": "object"
                                 },
+                                "bearerTokenSecret": {
+                                    "type": "object"
+                                },
                                 "enabled": {
                                     "type": "boolean"
                                 },
@@ -814,6 +817,25 @@
                                 },
                                 "selector": {
                                     "type": "object"
+                                }
+                            }
+                        },
+                        "rbac": {
+                            "type": "object",
+                            "properties": {
+                                "authDelegator": {
+                                    "type": "boolean"
+                                },
+                                "metricsReader": {
+                                    "type": "object",
+                                    "properties": {
+                                        "create": {
+                                            "type": "boolean"
+                                        },
+                                        "serviceAccounts": {
+                                            "type": "array"
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -880,6 +902,9 @@
                         "serviceMonitor": {
                             "type": "object",
                             "properties": {
+                                "bearerTokenSecret": {
+                                    "type": "object"
+                                },
                                 "enabled": {
                                     "type": "boolean"
                                 },

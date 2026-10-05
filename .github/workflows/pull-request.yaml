@@ -6,25 +6,51 @@ on:
       - reopened
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to test"
+        required: true
+        type: number
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number }}
   cancel-in-progress: true
 
 permissions: # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
-  authorize:
+  resolve-pr:
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.full_name != github.repository &&
-      'external' || '' }}
+    outputs:
+      pr_number: ${{ steps.pr.outputs.pr_number }}
+      head_ref: ${{ steps.pr.outputs.head_ref }}
+      head_repo: ${{ steps.pr.outputs.head_repo }}
+    steps:
+      - name: Resolve PR metadata
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            pr_number="${{ inputs.pr_number }}"
+          else
+            pr_number="${{ github.event.pull_request.number }}"
+          fi
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(gh api "repos/${{ github.repository }}/pulls/$pr_number" -q .head.ref)" >> "$GITHUB_OUTPUT"
+          echo "head_repo=$(gh api "repos/${{ github.repository }}/pulls/$pr_number" -q .head.repo.full_name)" >> "$GITHUB_OUTPUT"
+
+  authorize:
+    needs: resolve-pr
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-pr.outputs.head_repo != github.repository && 'external' || '' }}
     steps:
       - run: "true"
 
   lint-test:
-    needs: authorize
+    needs: [resolve-pr, authorize]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -39,8 +65,8 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ needs.resolve-pr.outputs.head_ref }}
+          repository: ${{ needs.resolve-pr.outputs.head_repo }}
           fetch-depth: 0
           allow-unsafe-pr-checkout: true
 
@@ -50,8 +76,8 @@ jobs:
           git remote set-url origin https://github.com/CloudPirates-io/helm-charts.git
           git fetch origin ${{ github.event.repository.default_branch }}
           # Re-add the fork as a remote and checkout the PR branch
-          git remote add fork https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git || true
-          git fetch fork ${{ github.head_ref }}
+          git remote add fork https://github.com/${{ needs.resolve-pr.outputs.head_repo }}.git || true
+          git fetch fork ${{ needs.resolve-pr.outputs.head_ref }}
 
       # Python is required because `ct lint` runs Yamale (https://github.com/23andMe/Yamale) and
       # yamllint (https://github.com/adrienverge/yamllint) which require Python
@@ -93,7 +119,7 @@ jobs:
           ct lint --target-branch ${{ github.event.repository.default_branch }} --validate-maintainers=false --additional-commands 'helm unittest {{ .Path }}'
 
   integration-test:
-    needs: [authorize, lint-test]
+    needs: [resolve-pr, authorize, lint-test]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -103,8 +129,8 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
+          ref: ${{ needs.resolve-pr.outputs.head_ref }}
+          repository: ${{ needs.resolve-pr.outputs.head_repo }}
           fetch-depth: 0
           allow-unsafe-pr-checkout: true
 
@@ -121,7 +147,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Create kind cluster
-        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+        uses: helm/kind-action@06c1ae10762d3b9c1644e7fe69596ae519e015a2 # v1.15.0
         with:
           cluster_name: helm-chart-test
           wait: 300s

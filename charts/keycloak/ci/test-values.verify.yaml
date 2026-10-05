@@ -1,0 +1,50 @@
+# Functional verification for ci/test-values.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves Keycloak is actually
+# serving OIDC over plain HTTP (this scenario sets keycloak.httpsEnabled: false)
+# by fetching the master realm's OpenID Connect discovery document and checking
+# it is well-formed JSON with the fields a real client would rely on.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-keycloak-test-values:8080"
+
+              echo "-> Fetching the master realm OIDC discovery document over HTTP"
+              BODY=$(curl -f http://${SERVICE_HOST}/realms/master/.well-known/openid-configuration -s)
+
+              echo "-> Checking the discovery document has the expected OIDC fields"
+              for field in issuer authorization_endpoint token_endpoint jwks_uri; do
+                echo "${BODY}" | grep -q "\"${field}\"" || {
+                  echo "ERROR: discovery document is missing expected field: ${field}"
+                  echo "${BODY}"
+                  exit 1
+                }
+              done
+
+              echo "-> Checking the issuer points at the master realm"
+              echo "${BODY}" | grep -Eq '"issuer"[[:space:]]*:[[:space:]]*"http://test-keycloak-test-values:8080/realms/master"' || {
+                echo "ERROR: issuer field does not match the expected master realm URL"
+                echo "${BODY}"
+                exit 1
+              }
+
+              echo "OK: Keycloak OIDC discovery verification passed"

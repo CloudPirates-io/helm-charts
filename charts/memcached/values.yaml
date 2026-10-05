@@ -30,12 +30,15 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.45@sha256:75c93cc91e76853da7c029e74d6e8dbd44774dd3713c93be8cd1971ad26120a4"
+  tag: "1.6.45@sha256:405a445c7c81bca205850426288baa5655c72859ae31d3de3fa823e6482be4ad"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
 ## @param replicaCount Number of Memcached replicas to deploy
 replicaCount: 1
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
 
 ## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
 deploymentType: Deployment
