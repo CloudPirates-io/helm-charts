@@ -42,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.11@sha256:5d7043a4ffe02b9ed1b6e0bab057546981af5ca0a79107e9c461e49bc44c0a7b"
+  tag: "9.0.2@sha256:bac22ea7710d774103dcad3ec8ac13cba1eb378f488e3ce8a6b3a1adf2ba9dcc"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -552,6 +552,7 @@ replicaSet:
       ## @param replicaSet.externalAccess.service.type Kubernetes Service type for each per-pod external Service
       type: LoadBalancer
       ## @param replicaSet.externalAccess.service.port Port exposed by each external Service and advertised to the ReplicaSet (defaults to service.port)
+      ## @type string|number
       port: ""
       ## @param replicaSet.externalAccess.service.publicNames Externally reachable hostname for each pod, indexed by ordinal (must have exactly 1 primary + replicaSet.secondaries entries). Also used as the advertised replica set member identity instead of the internal FQDN.
       publicNames: []

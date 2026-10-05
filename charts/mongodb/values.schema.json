@@ -91,6 +91,19 @@
         "customUsers": {
             "type": "array"
         },
+        "experimental": {
+            "type": "object",
+            "properties": {
+                "tcmallocRseqWorkaround": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
             "type": "array"
         },
