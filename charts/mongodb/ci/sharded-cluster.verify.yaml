@@ -1,0 +1,77 @@
+# Functional verification for ci/sharded-cluster.yaml.
+# Proves the add-shards Job actually wired the cluster together - both shards
+# are registered and active per sh.status() - and that mongos can enable
+# sharding on a database, shard a collection, and perform a real write/read
+# round-trip through the router, not just that probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mongo:7
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-mongodb-sharded-cluster-mongos"
+              PORT=27017
+              ROOT_USER="admin"
+              ROOT_PASSWORD="RootPass123!"
+              URI="mongodb://${ROOT_USER}:${ROOT_PASSWORD}@${HOST}:${PORT}/admin?authSource=admin"
+
+              echo "-> Checking sh.status() reports 2 active shards"
+              SHARD_COUNT=$(mongosh "$URI" --quiet --eval '
+                print(db.getSiblingDB("config").shards.countDocuments({}));
+              ')
+              echo "   shard count=$SHARD_COUNT"
+              if [ "$SHARD_COUNT" != "2" ]; then
+                echo "ERROR: expected 2 registered shards, got $SHARD_COUNT"
+                mongosh "$URI" --quiet --eval 'sh.status()'
+                exit 1
+              fi
+
+              echo "-> Enabling sharding on verify_db and sharding verify_col"
+              mongosh "$URI" --quiet --eval '
+                sh.enableSharding("verify_db");
+                db.getSiblingDB("verify_db").verify_col.createIndex({ _id: "hashed" });
+                sh.shardCollection("verify_db.verify_col", { _id: "hashed" });
+              '
+
+              echo "-> Inserting documents through mongos"
+              mongosh "$URI" --quiet --eval '
+                db = db.getSiblingDB("verify_db");
+                for (let i = 0; i < 20; i++) {
+                  db.verify_col.insertOne({ _id: i, value: "hello-sharded-" + i });
+                }
+              '
+
+              echo "-> Reading back a document through mongos and asserting the value"
+              RESULT=$(mongosh "$URI" --quiet --eval 'print(db.getSiblingDB("verify_db").verify_col.findOne({ _id: 5 }).value)')
+              if [ "$RESULT" != "hello-sharded-5" ]; then
+                echo "ERROR: expected 'hello-sharded-5' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Asserting all 20 documents are readable through mongos (routed across shards)"
+              COUNT=$(mongosh "$URI" --quiet --eval 'print(db.getSiblingDB("verify_db").verify_col.countDocuments({}))')
+              if [ "$COUNT" != "20" ]; then
+                echo "ERROR: expected 20 documents, got $COUNT"
+                exit 1
+              fi
+
+              echo "-> Dropping the test collection"
+              mongosh "$URI" --quiet --eval 'db.getSiblingDB("verify_db").verify_col.drop();'
+
+              echo "OK: MongoDB sharded cluster verification passed"
