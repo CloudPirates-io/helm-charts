@@ -33,6 +33,9 @@ image:
 ## @param replicaCount Number of Nginx replicas to deploy
 replicaCount: 1
 
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
+
 ## @section Container port configuration
 ## @param containerPorts Array of container ports
 ## Example:

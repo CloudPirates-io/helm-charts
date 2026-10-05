@@ -27,7 +27,7 @@ spec:
         {{- with (include "kafka.annotations" .) }}
         {{- . | nindent 8 }}
         {{- end }}
-        checksum/config: {{ printf "%s-%s-%v-%s-%s-%s-%s" (toYaml .Values.kafkaConfig) (toYaml .Values.service.ports) .Values.replicaCount .Values.clusterId (toYaml .Values.logging) (toYaml .Values.auth) (toYaml .Values.tls) | sha256sum }}
+        checksum/config: {{ printf "%s-%s-%v-%s-%s-%s-%s-%s" (toYaml .Values.kafkaConfig) (toYaml .Values.service.ports) .Values.replicaCount .Values.clusterId (toYaml .Values.logging) (toYaml .Values.auth) (toYaml .Values.tls) (toYaml .Values.externalAccess) | sha256sum }}
     spec:
 {{- with (include "kafka.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
@@ -49,6 +49,11 @@ spec:
             - name: controller
               containerPort: {{ .Values.service.ports.controller }}
               protocol: TCP
+            {{- if .Values.externalAccess.enabled }}
+            - name: external
+              containerPort: {{ .Values.externalAccess.service.ports.external }}
+              protocol: TCP
+            {{- end }}
           env:
           {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
@@ -92,6 +97,15 @@ spec:
                   name: {{ include "kafka.secretName" . }}
                   key: controller-password
             {{- end }}
+            {{- if and .Values.externalAccess.enabled .Values.auth.external.enabled }}
+            - name: KAFKA_EXTERNAL_USER
+              value: {{ .Values.auth.externalUser | quote }}
+            - name: KAFKA_EXTERNAL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.secretName" . }}
+                  key: external-password
+            {{- end }}
           command: ["/bin/sh", "-ec"]
           args:
             - |
@@ -100,11 +114,26 @@ spec:
               NODE_ID=$((ORDINAL + NODE_ID_OFFSET))
               RUNTIME_CONFIG=/opt/kafka/config-runtime/server.properties
               ADVERTISED_HOST="{{ include "kafka.fullname" . }}-${ORDINAL}.{{ include "kafka.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain | default "cluster.local" }}"
+              {{- if .Values.externalAccess.enabled }}
+
+              # Resolve this broker's EXTERNAL advertised address from its ordinal. Values are
+              # baked in at render time (externalAccess.service.loadBalancerIPs / .domain are
+              # static Helm values), one case arm per broker ordinal.
+              case "$ORDINAL" in
+              {{- range $i := until (int .Values.replicaCount) }}
+                {{ $i }}) EXTERNAL_HOST="{{ include "kafka.externalAdvertisedHost" (dict "context" $ "ordinal" $i) }}" ;;
+              {{- end }}
+              esac
+              if [ -z "$EXTERNAL_HOST" ]; then
+                echo "ERROR: externalAccess.enabled is true but no address could be resolved for ordinal ${ORDINAL}. Set externalAccess.service.loadBalancerIPs[${ORDINAL}] or externalAccess.domain." >&2
+                exit 1
+              fi
+              {{- end }}
 
               cp /mnt/kafka/config/server.properties "$RUNTIME_CONFIG"
               {
                 echo "node.id=${NODE_ID}"
-                echo "advertised.listeners=CLIENT://${ADVERTISED_HOST}:{{ .Values.service.ports.client }},INTERNAL://${ADVERTISED_HOST}:{{ .Values.service.ports.internal }}"
+                echo "advertised.listeners=CLIENT://${ADVERTISED_HOST}:{{ .Values.service.ports.client }},INTERNAL://${ADVERTISED_HOST}:{{ .Values.service.ports.internal }}{{ if .Values.externalAccess.enabled }},EXTERNAL://${EXTERNAL_HOST}:{{ .Values.externalAccess.service.ports.external }}{{ end }}"
                 {{- if .Values.auth.client.enabled }}
                 # SASL/PLAIN credentials for the client listener (validated server-side via user_<name> entries)
                 echo "listener.name.client.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required user_${KAFKA_CLIENT_USER}=\"${KAFKA_CLIENT_PASSWORD}\";"
@@ -114,6 +143,9 @@ spec:
                 {{- end }}
                 {{- if .Values.auth.controller.enabled }}
                 echo "listener.name.controller.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KAFKA_CONTROLLER_USER}\" password=\"${KAFKA_CONTROLLER_PASSWORD}\" user_${KAFKA_CONTROLLER_USER}=\"${KAFKA_CONTROLLER_PASSWORD}\";"
+                {{- end }}
+                {{- if and .Values.externalAccess.enabled .Values.auth.external.enabled }}
+                echo "listener.name.external.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required user_${KAFKA_EXTERNAL_USER}=\"${KAFKA_EXTERNAL_PASSWORD}\";"
                 {{- end }}
               } >> "$RUNTIME_CONFIG"
               {{- if include "kafka.tls.enabled" . }}

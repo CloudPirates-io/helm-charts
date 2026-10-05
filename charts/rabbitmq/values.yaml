@@ -18,6 +18,8 @@ commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
 
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
 ## @section RabbitMQ image parameters
 image:
   ## @param image.registry RabbitMQ image registry
