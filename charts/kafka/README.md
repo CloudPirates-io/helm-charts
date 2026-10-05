@@ -178,6 +178,60 @@ Match `replicaCount` to your number of **independent nodes** (extra replicas on 
 | `service.ports.controller`      | Kafka controller (KRaft) port | `9093`     |
 | `service.annotations`           | Additional service annotations | `{}`      |
 
+### External access
+
+Exposes an additional `EXTERNAL` listener so brokers can be reached from outside the Kubernetes
+cluster (e.g. legacy VMs, or clients on a VPN-connected network) without an Ingress/Gateway. One
+`Service` is created per broker ordinal (`0..replicaCount-1`), each selecting only that broker's
+pod via the `statefulset.kubernetes.io/pod-name` label Kubernetes stamps on every StatefulSet
+pod, so clients reconnect to the correct broker after the initial bootstrap connection — the same
+metadata-driven reconnect flow Kafka always uses. Each broker's advertised address is resolved
+either from a static IP (`externalAccess.service.loadBalancerIPs`, indexed by ordinal) or a domain
+suffix (`externalAccess.domain`, giving `<fullname>-<ordinal>.<domain>`); at least one of the two
+must resolve every broker ordinal, or that broker fails to start.
+
+`externalAccess.service.type` and `.annotations` are plain passthroughs, so this works the same
+way on any Kubernetes distribution or cloud: `LoadBalancer` (the default) with your cloud's own
+annotations on AWS/GCP/Azure, `LoadBalancer` with MetalLB on bare metal, or `NodePort` on
+minikube/kind where no load-balancer controller is available.
+
+| Parameter                                  | Description                                                                   | Default       |
+| ------------------------------------------- | ------------------------------------------------------------------------------ | ------------- |
+| `externalAccess.enabled`                   | Enable the EXTERNAL listener and one Service per broker                       | `false`       |
+| `externalAccess.service.type`              | Kubernetes Service type for each per-broker external Service                  | `LoadBalancer`|
+| `externalAccess.service.ports.external`    | Port the EXTERNAL listener is exposed on                                      | `9095`        |
+| `externalAccess.service.loadBalancerIPs`   | Static IP per broker ordinal (index 0 = broker 0, ...)                        | `[]`          |
+| `externalAccess.service.annotations`       | Annotations added to every per-broker external Service                        | `{}`          |
+| `externalAccess.domain`                    | Domain suffix for brokers without a `loadBalancerIPs` entry: `<fullname>-<ordinal>.<domain>` | `""` |
+
+> **TLS note:** when both `tls.enabled` and `externalAccess.enabled` are true with a self-signed or
+> cert-manager certificate, the generated certificate's SANs do not yet cover the external
+> addresses above. Use `tls.source: existing-secret` with your own certificate covering those
+> addresses in the meantime.
+
+Example: a 3-broker cluster with a pinned LoadBalancer IP per broker (e.g. AWS/GCP/Azure/MetalLB):
+
+```yaml
+replicaCount: 3
+externalAccess:
+  enabled: true
+  service:
+    loadBalancerIPs:
+      - 203.0.113.10
+      - 203.0.113.11
+      - 203.0.113.12
+```
+
+Or, behind your own (e.g. split-horizon) DNS instead of pinned IPs:
+
+```yaml
+externalAccess:
+  enabled: true
+  domain: kafka.example.com
+  service:
+    type: NodePort # e.g. on minikube/kind, where no cloud LoadBalancer controller exists
+```
+
 ### Authentication
 
 SASL/PLAIN authentication for the client, inter-broker, and controller listeners. Enabled by
@@ -192,12 +246,15 @@ SASL/PLAIN authenticates but does not encrypt — combine it with TLS (below) fo
 | `auth.client.enabled`         | Require SASL/PLAIN on the client listener (apps must send credentials)      | `true`           |
 | `auth.interBroker.enabled`    | Require SASL/PLAIN on the inter-broker listener                             | `true`           |
 | `auth.controller.enabled`     | Require SASL/PLAIN on the KRaft controller listener                         | `true`           |
+| `auth.external.enabled`       | Require SASL/PLAIN on the EXTERNAL listener (only used with `externalAccess.enabled`) | `false` |
 | `auth.clientUser`             | Username applications use on the client listener                            | `user`           |
 | `auth.clientPassword`         | Password for `clientUser` (auto-generated if empty)                         | `""`             |
 | `auth.interBrokerUser`        | Username brokers use to authenticate to each other                          | `inter_broker`   |
 | `auth.interBrokerPassword`    | Password for `interBrokerUser` (auto-generated if empty)                    | `""`             |
 | `auth.controllerUser`         | Username controller nodes use to authenticate to each other                 | `controller`     |
 | `auth.controllerPassword`     | Password for `controllerUser` (auto-generated if empty)                     | `""`             |
+| `auth.externalUser`           | Username applications use on the EXTERNAL listener                          | `external`       |
+| `auth.externalPassword`       | Password for `externalUser` (auto-generated if empty)                       | `""`             |
 | `auth.existingSecret`         | Existing Secret with the passwords (overrides the generated one)            | `""`             |
 
 ### TLS

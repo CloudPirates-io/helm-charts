@@ -1,0 +1,31 @@
+# CI scenario: MongoDB replica set (HA mode) with 1 primary + 2 secondaries
+# Exercises: replica set auto-initialization, keyfile internal auth, primary
+# election, and real write replication from the primary to a secondary.
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootUsername: admin
+  rootPassword: "RootPass123!"
+
+replicaSet:
+  enabled: true
+  name: "repl"
+  key: "CIReplicaSetInternalAuthKey123"
+  secondaries: 2
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# Workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 (TCMalloc/glibc
+# incompatibility, MongoDB SERVER-121912). Needed on CI runners/kind nodes with newer kernels.
+experimental:
+  tcmallocRseqWorkaround:
+    enabled: true

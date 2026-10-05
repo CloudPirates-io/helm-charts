@@ -44,12 +44,12 @@ spec:
               done
 
               echo "-> Declaring queue ci-verify-queue"
-              ${ADMIN} declare queue name=ci-verify-queue durable=true
+              ${ADMIN} declare queue --name ci-verify-queue --durable true
 
               echo "-> Publishing a message to ci-verify-queue"
-              ${ADMIN} publish exchange=amq.default routing_key=ci-verify-queue payload="hello-from-ci"
+              ${ADMIN} publish message --exchange amq.default --routing-key ci-verify-queue --payload "hello-from-ci"
 
               echo "-> Consuming the message back from ci-verify-queue"
-              ${ADMIN} get queue=ci-verify-queue ackmode=ack_requeue_false | grep -q "hello-from-ci"
+              ${ADMIN} get messages --queue ci-verify-queue --ack-mode ack_requeue_false | grep -q "hello-from-ci"
 
               echo "OK: RabbitMQ AMQP/management verification passed"
