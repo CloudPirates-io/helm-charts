@@ -1,0 +1,43 @@
+suite: test memcached exporter address
+templates:
+  - deployment.yaml
+set:
+  metrics:
+    enabled: true
+tests:
+  - it: should point the exporter at the memcached container port
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].args
+          content: "--memcached.address=localhost:11211"
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: memcached
+            containerPort: 11211
+            protocol: TCP
+
+  - it: should keep the exporter on the container port when service.port differs
+    set:
+      service:
+        port: 11212
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].args
+          content: "--memcached.address=localhost:11211"
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: memcached
+            containerPort: 11211
+            protocol: TCP
+
+  - it: should still bind the exporter web listener to the metrics service port
+    set:
+      metrics:
+        service:
+          port: 9151
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].args
+          content: "--web.listen-address=:9151"

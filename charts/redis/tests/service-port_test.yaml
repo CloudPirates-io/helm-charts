@@ -1,0 +1,49 @@
+suite: test redis service port wiring
+templates:
+  - statefulset.yaml
+tests:
+  - it: should expose the default port on the container and the probes
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 6379
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6379 ping'
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6379 ping'
+
+  - it: should follow a custom service port on the container and the probes
+    set:
+      service.port: 6390
+      startupProbe.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 6390
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'port 6390'
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6390 ping'
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6390 ping'
+      - matchRegex:
+          path: spec.template.spec.containers[0].startupProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6390 ping'
+
+  - it: should use the tls port on the container and the probes when tls is enabled
+    set:
+      service.port: 6390
+      tls.enabled: true
+      tls.existingSecret: redis-tls
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 6380
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: 'redis-cli -h "127\.0\.0\.1" -p 6380 --tls'

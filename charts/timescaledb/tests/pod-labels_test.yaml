@@ -1,0 +1,72 @@
+suite: test timescaledb podLabels
+templates:
+  - statefulset.yaml
+tests:
+  - it: should add podLabels to the pod template
+    set:
+      podLabels:
+        team: platform
+        tier: database
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: platform
+      - equal:
+          path: spec.template.metadata.labels.tier
+          value: database
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: timescaledb
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+
+  - it: should not add podLabels to the immutable selector
+    set:
+      podLabels:
+        team: platform
+        tier: database
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: timescaledb
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - isNull:
+          path: spec.selector.matchLabels.team
+      - isNull:
+          path: spec.selector.matchLabels.tier
+
+  - it: should not add podLabels to the statefulset metadata labels
+    set:
+      podLabels:
+        team: platform
+    asserts:
+      - isNull:
+          path: metadata.labels.team
+
+  - it: should keep podLabels on the volume claim template
+    set:
+      podLabels:
+        team: platform
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.labels.team
+          value: platform
+
+  - it: should not add any pod labels when podLabels is empty
+    asserts:
+      - isNull:
+          path: spec.template.metadata.labels.team
+      - isNull:
+          path: spec.template.metadata.labels.tier
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: timescaledb
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm

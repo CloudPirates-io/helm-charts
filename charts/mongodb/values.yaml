@@ -42,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.3.4@sha256:309d760ba3f7962e14d54ac6123c7fe72ed2d465196b4d0eaf8abcea7dd39450"
+  tag: "9.0.2@sha256:bac22ea7710d774103dcad3ec8ac13cba1eb378f488e3ce8a6b3a1adf2ba9dcc"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -162,6 +162,7 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
   ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  # @schema type:[null, object]
   persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
@@ -196,6 +197,9 @@ podSecurityContext:
 
 ## @param priorityClassName Priority class for the mongodb instance
 priorityClassName: ""
+
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
+terminationGracePeriodSeconds: 30
 
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
@@ -457,6 +461,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-hidden-volume"
@@ -501,6 +506,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-arbiter-volume"
@@ -538,6 +544,38 @@ replicaSet:
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
+  ## @param replicaSet.externalAccess Creates per-pod external LoadBalancer Services for primary/secondary members and advertises their public hostnames in the replica set config instead of internal FQDNs
+  externalAccess:
+    ## @param replicaSet.externalAccess.enabled Enable per-pod external Services for primary/secondary ReplicaSet members
+    enabled: false
+    service:
+      ## @param replicaSet.externalAccess.service.type Kubernetes Service type for each per-pod external Service
+      type: LoadBalancer
+      ## @param replicaSet.externalAccess.service.port Port exposed by each external Service and advertised to the ReplicaSet (defaults to service.port)
+      ## @type string|number
+      port: ""
+      ## @param replicaSet.externalAccess.service.publicNames Externally reachable hostname for each pod, indexed by ordinal (must have exactly 1 primary + replicaSet.secondaries entries). Also used as the advertised replica set member identity instead of the internal FQDN.
+      publicNames: []
+      ## @param replicaSet.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod, indexed by ordinal (optional, must match publicNames length if set)
+      loadBalancerIPs: []
+      ## @param replicaSet.externalAccess.service.loadBalancerClass loadBalancerClass for the external Services
+      loadBalancerClass: ""
+      ## @param replicaSet.externalAccess.service.loadBalancerSourceRanges Restrict external Service access to these CIDRs
+      loadBalancerSourceRanges: []
+      ## @param replicaSet.externalAccess.service.externalTrafficPolicy externalTrafficPolicy for LoadBalancer/NodePort Services. Safe to use Local here (unlike a shared Service) because each external Service selects exactly one pod via statefulset.kubernetes.io/pod-name, so there's no cross-node routing ambiguity.
+      externalTrafficPolicy: Local
+      ## @param replicaSet.externalAccess.service.annotations Annotations applied to every external Service
+      annotations: {}
+      ## @param replicaSet.externalAccess.service.annotationsList Per-pod annotations, indexed by ordinal, merged on top of service.annotations (e.g. per-pod external-dns hostname)
+      annotationsList: []
+      ## @param replicaSet.externalAccess.service.labels Additional labels applied to every external Service
+      labels: {}
+      ## @param replicaSet.externalAccess.service.sessionAffinity Service session affinity (ClientIP or None)
+      sessionAffinity: None
+      ## @param replicaSet.externalAccess.service.sessionAffinityConfig Additional settings for sessionAffinity (e.g. clientIP.timeoutSeconds)
+      sessionAffinityConfig: {}
+      ## @param replicaSet.externalAccess.service.extraPorts Extra ports to expose on every external Service
+      extraPorts: []
 
 ## @section Common MongoDB parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
 common:
@@ -605,6 +643,7 @@ shardedCluster:
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
     ## Example: customInit: |
@@ -665,6 +704,7 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
     ## Example: customInit: |
@@ -749,3 +789,10 @@ shardedCluster:
       stop: ""
     ## @param shardedCluster.balancer.autoSplitEnabled Enable automatic chunk splitting (MongoDB 6.0+)
     autoSplitEnabled: true
+
+## @section Experimental parameters
+## Unofficial, unverified workarounds. Disabled by default - enable at your own risk.
+experimental:
+  tcmallocRseqWorkaround:
+    ## @param experimental.tcmallocRseqWorkaround.enabled Set GLIBC_TUNABLES=glibc.pthread.rseq=1 on all mongod/mongos containers. Community-reported (not MongoDB-endorsed) workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 due to a TCMalloc/glibc incompatibility (MongoDB SERVER-121912, google/tcmalloc#292). Reports of it actually helping are inconsistent. The official fix is to run kernel <=6.18 or >=7.0.14.
+    enabled: false

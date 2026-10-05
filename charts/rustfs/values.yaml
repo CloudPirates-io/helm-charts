@@ -70,13 +70,18 @@ config:
 
 # -- Setups RustFS via CLI
 setup:
+  job:
+    ## @param setup.job.ttlSecondsAfterFinished TTL for completed setup job
+    ttlSecondsAfterFinished: 300
+    ## @param setup.job.backoffLimit Backoff limit for setup job
+    backoffLimit: 3
   image:
     ## @param image.registry RustFS CLI image registry
     registry: docker.io
     ## @param image.repository RustFS CLI image repository
     repository: rustfs/rc
     ## @param image.tag RustFS CLI image tag (immutable tags are recommended)
-    tag: "v0.1.29@sha256:8b9d1273ab89ece0b6507f64dd96382ba3102f327334daca821a467d9a1d54cc"
+    tag: "v0.1.36@sha256:ab024bfebee49a750ce886b4c70963ccd9ddaa03f491704a90710641d7a26699"
     ## @param image.imagePullPolicy RustFS CLI image pull policy
     imagePullPolicy: Always
   # -- If defined, uses a pre-configured *SecretMap* with the keys below as JSON
@@ -100,6 +105,7 @@ setup:
   # -- Bucket definitions
   buckets: []
 #    - name: test
+#      versioning: true
 
 ## @section Deployment configuration
 replicaCount: 1

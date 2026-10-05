@@ -1,0 +1,51 @@
+# Functional verification for ci/realm-import.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves Keycloak actually
+# imported the preconfigured realm on startup (keycloak.realm.import: true with
+# a realm.configFile defining a "ci-test-realm" realm and an "ci-test-client"
+# client) by fetching that realm's OIDC discovery document and checking both
+# that it resolves (i.e. the realm exists) and that the issuer matches.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-keycloak-realm-import:8080"
+
+              echo "-> Fetching the imported ci-test-realm OIDC discovery document"
+              BODY=$(curl -f http://${SERVICE_HOST}/realms/ci-test-realm/.well-known/openid-configuration -s)
+
+              echo "-> Checking the discovery document has the expected OIDC fields"
+              for field in issuer authorization_endpoint token_endpoint jwks_uri; do
+                echo "${BODY}" | grep -q "\"${field}\"" || {
+                  echo "ERROR: discovery document is missing expected field: ${field}"
+                  echo "${BODY}"
+                  exit 1
+                }
+              done
+
+              echo "-> Checking the issuer points at the imported ci-test-realm"
+              echo "${BODY}" | grep -Eq '"issuer"[[:space:]]*:[[:space:]]*"http://test-keycloak-realm-import:8080/realms/ci-test-realm"' || {
+                echo "ERROR: issuer field does not match the expected ci-test-realm URL"
+                echo "${BODY}"
+                exit 1
+              }
+
+              echo "OK: Keycloak realm import verification passed"

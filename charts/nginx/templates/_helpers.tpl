@@ -51,7 +51,7 @@ Return the proper Nginx image name
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "nginx.imagePullSecrets" -}}
-{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image .Values.cloneStaticSiteFromGit.image) "context" .) }}
 {{- end -}}
 
 {{/*
@@ -104,6 +104,13 @@ Return the proper Nginx metrics image name
 */}}
 {{- define "nginx.metrics.image" -}}
 {{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
+Return the proper git image name for the static site containers
+*/}}
+{{- define "nginx.cloneStaticSiteFromGit.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.cloneStaticSiteFromGit.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*

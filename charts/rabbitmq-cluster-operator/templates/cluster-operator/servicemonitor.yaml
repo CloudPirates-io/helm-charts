@@ -5,8 +5,9 @@ metadata:
   name: {{ template "rmqco.clusterOperator.fullname" . }}
   labels:
     {{- include "rmqco.labels" . | nindent 4 }}
-    {{- if .Values.clusterOperator.metrics.serviceMonitor.additionalLabels }}
-    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.clusterOperator.metrics.serviceMonitor.additionalLabels "context" $) | nindent 4 }}
+    {{- $smLabels := merge (deepCopy (.Values.clusterOperator.metrics.serviceMonitor.labels | default dict)) (.Values.clusterOperator.metrics.serviceMonitor.additionalLabels | default dict) }}
+    {{- if $smLabels }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" $smLabels "context" $) | nindent 4 }}
     {{- end }}
   namespace: {{ default (include "cloudpirates.namespace" .) .Values.clusterOperator.metrics.serviceMonitor.namespace | quote }}
   {{- if .Values.commonAnnotations }}

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "phpmyadmin.selectorLabels" . | nindent 4 }}

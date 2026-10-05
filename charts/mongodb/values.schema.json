@@ -91,6 +91,19 @@
         "customUsers": {
             "type": "array"
         },
+        "experimental": {
+            "type": "object",
+            "properties": {
+                "tcmallocRseqWorkaround": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -421,7 +434,10 @@
                     "type": "string"
                 },
                 "persistentVolumeClaimRetentionPolicy": {
-                    "type": "null"
+                    "type": [
+                        "null",
+                        "object"
+                    ]
                 },
                 "size": {
                     "type": "string"
@@ -526,7 +542,10 @@
                                     "type": "null"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "requestedSize": {
                                     "type": "null"
@@ -549,6 +568,61 @@
                 },
                 "enabled": {
                     "type": "boolean"
+                },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "annotationsList": {
+                                    "type": "array"
+                                },
+                                "externalTrafficPolicy": {
+                                    "type": "string"
+                                },
+                                "extraPorts": {
+                                    "type": "array"
+                                },
+                                "labels": {
+                                    "type": "object"
+                                },
+                                "loadBalancerClass": {
+                                    "type": "string"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "port": {
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ]
+                                },
+                                "publicNames": {
+                                    "type": "array"
+                                },
+                                "sessionAffinity": {
+                                    "type": "string"
+                                },
+                                "sessionAffinityConfig": {
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
                 },
                 "extraInit": {
                     "type": "object",
@@ -616,7 +690,10 @@
                                     "type": "null"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "requestedSize": {
                                     "type": "string"
@@ -754,7 +831,10 @@
                                     "type": "string"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "size": {
                                     "type": "string"
@@ -924,7 +1004,10 @@
                                     "type": "string"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "size": {
                                     "type": "string"
@@ -963,6 +1046,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tolerations": {
             "type": "array"

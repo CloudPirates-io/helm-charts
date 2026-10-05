@@ -228,6 +228,9 @@
                 }
             }
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -385,6 +388,14 @@
                 },
                 "tls": {
                     "type": "array"
+                }
+            }
+        },
+        "initContainer": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "object"
                 }
             }
         },

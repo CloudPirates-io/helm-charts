@@ -526,6 +526,17 @@
                         }
                     }
                 },
+                "job": {
+                    "type": "object",
+                    "properties": {
+                        "backoffLimit": {
+                            "type": "integer"
+                        },
+                        "ttlSecondsAfterFinished": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "policies": {
                     "type": "array"
                 },

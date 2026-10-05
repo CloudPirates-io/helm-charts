@@ -1,0 +1,17 @@
+# CI scenario: standalone Valkey with a deterministic password
+# Exercises: basic StatefulSet, Service, and authenticated SET/GET round-trip
+architecture: standalone
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  password: "verify-valkey-password"

@@ -60,6 +60,7 @@ spec:
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds | default 30 }}
       {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.dataNode.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
       {{- with $nodeSelector }}
       nodeSelector:
@@ -308,6 +309,10 @@ spec:
             {{- if $.Values.customUsers }}
             {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
             {{- end }}
+            {{- if $.Values.experimental.tcmallocRseqWorkaround.enabled }}
+            - name: GLIBC_TUNABLES
+              value: "glibc.pthread.rseq=1"
+            {{- end }}
             {{- with $.Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -546,6 +551,7 @@ spec:
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "mongodb.serviceAccountName" $ }}
       {{- end }}
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds | default 30 }}
       {{- $nodeSelector := coalesce $.Values.shardedCluster.shardsvr.arbiter.nodeSelector $.Values.shardedCluster.shardsvr.nodeSelector $.Values.nodeSelector }}
       {{- with $nodeSelector }}
       nodeSelector:
@@ -665,6 +671,10 @@ spec:
             {{- end }}
             {{- if $.Values.customUsers }}
             {{- include "mongodb.customUsers.envVars" (dict "ctx" $) | nindent 12 }}
+            {{- end }}
+            {{- if $.Values.experimental.tcmallocRseqWorkaround.enabled }}
+            - name: GLIBC_TUNABLES
+              value: "glibc.pthread.rseq=1"
             {{- end }}
             {{- with $.Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
