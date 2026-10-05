@@ -245,7 +245,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # v3.10.0
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         if: steps.detect-changed-charts.outputs.has_changes == 'true'
 
       - id: github-repo-owner-name
@@ -295,7 +295,12 @@ jobs:
             if retry helm push "${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}" 2>&1 | tee output.log; then
               DIGEST=$(grep -oP 'Digest:\s*\K(sha256:[a-f0-9]+)' output.log || echo "")
               if [ -n "$DIGEST" ]; then
-                cosign sign -y --upload=true --key env://COSIGN_KEY "${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST"
+                # cosign v3 (installed by cosign-installer v4+) defaults to storing OCI
+                # signatures as OCI 1.1 referrer artifacts, which Docker Hub doesn't
+                # dependably support and which would silently break the
+                # `cosign verify --key cosign.pub` instructions in every chart's README.
+                # Force the legacy tag-based scheme to keep the existing storage format.
+                cosign sign -y --upload=true --registry-referrers-mode=legacy --key env://COSIGN_KEY "${{ vars.REGISTRY }}/${{ vars.REPOSITORY }}/${CHART_NAME}:${CHART_VERSION}@$DIGEST"
                 RELEASED_CHARTS="$RELEASED_CHARTS ${CHART_NAME}"
               fi
             fi
@@ -303,7 +308,7 @@ jobs:
             echo "Pushing $CHART_NAME-$CHART_VERSION to GHCR..."
             if retry helm push "${{ github.workspace }}/.cr-release-packages/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts" 2>&1 | tee ghcr-output.log; then
               GHCR_DIGEST=$(grep -oP 'Digest:\s*\K(sha256:[a-f0-9]+)' ghcr-output.log || echo "")
-              [ -n "$GHCR_DIGEST" ] && cosign sign -y --upload=true --key env://COSIGN_KEY "ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST"
+              [ -n "$GHCR_DIGEST" ] && cosign sign -y --upload=true --registry-referrers-mode=legacy --key env://COSIGN_KEY "ghcr.io/${{ steps.github-repo-owner-name.outputs.lowercase }}/helm-charts/${CHART_NAME}:${CHART_VERSION}@$GHCR_DIGEST"
             fi
 
             cd "${{ github.workspace }}"
