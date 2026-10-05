@@ -330,6 +330,14 @@ run_scenario() {
         if [ $install_attempt -lt 2 ]; then
             echo "   Retrying once (uninstalling first in case of a partial install)..."
             helm uninstall "$release_name" -n "$namespace" --wait --timeout=120s >/dev/null 2>&1 || true
+            # "helm uninstall --wait" can time out (or the delete can still be propagating) without
+            # this loop noticing, since the command above is best-effort ("|| true"). Cluster-scoped
+            # resources (ClusterRole, ClusterRoleBinding, webhook configs) aren't cleaned up by
+            # deleting the namespace, so a leftover one here would make the retry's install fail
+            # again with an immutable-field error (e.g. "cannot change roleRef") instead of a clean
+            # retry. Force-delete anything still tagged for this release before retrying.
+            kubectl delete clusterrole,clusterrolebinding,validatingwebhookconfiguration,mutatingwebhookconfiguration \
+                -l "app.kubernetes.io/instance=$release_name" --ignore-not-found=true --timeout=30s >/dev/null 2>&1 || true
             sleep 5
         fi
         install_attempt=$((install_attempt + 1))
