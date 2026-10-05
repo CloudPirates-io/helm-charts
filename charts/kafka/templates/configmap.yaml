@@ -16,8 +16,8 @@ data:
     process.roles=broker,controller
     controller.listener.names=CONTROLLER
     inter.broker.listener.name=INTERNAL
-    listener.security.protocol.map=CLIENT:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.client.enabled "tls" $tls) }},INTERNAL:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.interBroker.enabled "tls" $tls) }},CONTROLLER:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.controller.enabled "tls" $tls) }}
-    listeners=CLIENT://:{{ .Values.service.ports.client }},INTERNAL://:{{ .Values.service.ports.internal }},CONTROLLER://:{{ .Values.service.ports.controller }}
+    listener.security.protocol.map=CLIENT:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.client.enabled "tls" $tls) }},INTERNAL:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.interBroker.enabled "tls" $tls) }},CONTROLLER:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.controller.enabled "tls" $tls) }}{{ if .Values.externalAccess.enabled }},EXTERNAL:{{ include "kafka.listenerProtocol" (dict "auth" .Values.auth.external.enabled "tls" $tls) }}{{ end }}
+    listeners=CLIENT://:{{ .Values.service.ports.client }},INTERNAL://:{{ .Values.service.ports.internal }},CONTROLLER://:{{ .Values.service.ports.controller }}{{ if .Values.externalAccess.enabled }},EXTERNAL://:{{ .Values.externalAccess.service.ports.external }}{{ end }}
     controller.quorum.voters={{ include "kafka.quorumVoters" . }}
     {{- if include "kafka.auth.enabled" . }}
 
