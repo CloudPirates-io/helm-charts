@@ -311,10 +311,7 @@
                             "type": "object"
                         },
                         "port": {
-                            "type": [
-                                "string",
-                                "integer"
-                            ]
+                            "type": "integer"
                         },
                         "targetPort": {
                             "type": "string"
@@ -606,7 +603,10 @@
                                     "type": "array"
                                 },
                                 "port": {
-                                    "type": "string"
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ]
                                 },
                                 "publicNames": {
                                     "type": "array"
