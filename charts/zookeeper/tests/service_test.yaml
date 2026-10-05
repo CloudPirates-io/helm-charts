@@ -1,0 +1,28 @@
+suite: test zookeeper service
+templates:
+  - service.yaml
+tests:
+  - it: should not set trafficDistribution by default
+    asserts:
+      - isNull:
+          path: spec.trafficDistribution
+        documentIndex: 0
+
+  - it: should set trafficDistribution when configured
+    set:
+      service:
+        trafficDistribution: PreferClose
+    asserts:
+      - equal:
+          path: spec.trafficDistribution
+          value: PreferClose
+        documentIndex: 0
+
+  - it: should not set trafficDistribution on the headless service
+    set:
+      service:
+        trafficDistribution: PreferClose
+    asserts:
+      - isNull:
+          path: spec.trafficDistribution
+        documentIndex: 1

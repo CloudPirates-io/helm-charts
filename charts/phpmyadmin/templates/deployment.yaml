@@ -1,0 +1,192 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  {{- with (include "phpmyadmin.annotations" .) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "phpmyadmin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "phpmyadmin.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+{{- with (include "phpmyadmin.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      serviceAccountName: {{ include "phpmyadmin.serviceAccountName" . }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "phpmyadmin.image" (dict "image" .Values.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ include "phpmyadmin.imagePullPolicy" (dict "image" .Values.image) }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            {{- if .Values.config.database.host }}
+            - name: PMA_HOST
+              value: {{ .Values.config.database.host | quote }}
+            {{- end }}
+            {{- if ne (.Values.config.database.port | int) 3306 }}
+            - name: PMA_PORT
+              value: {{ .Values.config.database.port | quote }}
+            {{- end }}
+            {{- if .Values.config.database.userSecret }}
+            - name: PMA_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.userSecret }}
+                  key: {{ .Values.config.database.userSecretKey }}
+            {{- else if .Values.config.database.user }}
+            - name: PMA_USER
+              value: {{ .Values.config.database.user | quote }}
+            {{- end }}
+            {{- if .Values.config.database.passwordSecret }}
+            - name: PMA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.passwordSecret }}
+                  key: {{ .Values.config.database.passwordSecretKey }}
+            {{- else if .Values.config.database.password }}
+            - name: PMA_PASSWORD
+              value: {{ .Values.config.database.password | quote }}
+            {{- end }}
+            {{- if .Values.config.database.absoluteUri }}
+            - name: PMA_ABSOLUTE_URI
+              value: {{ .Values.config.database.absoluteUri | quote }}
+            {{- end }}
+            {{- if .Values.config.auth.arbitrary }}
+            - name: PMA_ARBITRARY
+              value: "1"
+            {{- end }}
+            {{- if .Values.config.auth.cookieAuth }}
+            - name: PMA_COOKIE_AUTH
+              value: "1"
+            {{- end }}
+            {{- if .Values.config.control.userSecret }}
+            - name: PMA_CONTROLUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.userSecret }}
+                  key: {{ .Values.config.control.userSecretKey }}
+            {{- else if .Values.config.control.user }}
+            - name: PMA_CONTROLUSER
+              value: {{ .Values.config.control.user | quote }}
+            {{- end }}
+            - name: PMA_CONTROLPASS
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.config.control.passwordSecret }}
+                  name: {{ .Values.config.control.passwordSecret }}
+                  key: {{ .Values.config.control.passwordSecretKey }}
+                  {{- else }}
+                  name: {{ include "phpmyadmin.fullname" . }}-control
+                  key: password
+                  {{- end }}
+            {{- if .Values.config.control.pmadbSecret }}
+            - name: PMA_PMADB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.control.pmadbSecret }}
+                  key: {{ .Values.config.control.pmadbSecretKey }}
+            {{- else if .Values.config.control.pmadb }}
+            - name: PMA_PMADB
+              value: {{ .Values.config.control.pmadb | quote }}
+            {{- end }}
+            {{- if .Values.config.debug.verbose }}
+            - name: PMA_VERBOSE
+              value: {{ .Values.config.debug.verbose | quote }}
+            {{- end }}
+            {{- if .Values.config.debug.verboseCheck }}
+            - name: PMA_VERBOSE_CHECK
+              value: {{ .Values.config.debug.verboseCheck | quote }}
+            {{- end }}
+            - name: MAX_EXECUTION_TIME
+              value: {{ .Values.php.maxExecutionTime | quote }}
+            - name: MEMORY_LIMIT
+              value: {{ .Values.php.memoryLimit | quote }}
+            - name: POST_MAX_SIZE
+              value: {{ .Values.php.postMaxSize | quote }}
+            - name: UPLOAD_MAX_FILESIZE
+              value: {{ .Values.php.uploadMaxFilesize | quote }}
+            - name: APACHE_LOG_DIR
+              value: {{ .Values.apache.logDir | quote }}
+            {{- if .Values.apache.serverName }}
+            - name: APACHE_SERVER_NAME
+              value: {{ .Values.apache.serverName | quote }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.extraEnvVarsSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.extraEnvVarsSecret }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.persistence.sessions.enabled .Values.extraVolumeMounts }}
+          volumeMounts:
+            {{- if .Values.persistence.sessions.enabled }}
+            - name: sessions
+              mountPath: /sessions
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+      {{- if or .Values.persistence.sessions.enabled .Values.extraVolumes }}
+      volumes:
+        {{- if .Values.persistence.sessions.enabled }}
+        - name: sessions
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.sessions.existingClaim | default (printf "%s-sessions" (include "phpmyadmin.fullname" .)) }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

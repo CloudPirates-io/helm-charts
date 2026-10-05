@@ -34,6 +34,15 @@ data:
     # Check for ACL authentication
     {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
 
+    # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
+    {{- if .Values.sentinel.acl.enabled }}
+    export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
+    {{- end }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -44,6 +53,9 @@ data:
     # Function to run Redis commands
     run_redis_command() {
         local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        {{- if .Values.auth.acl.enabled }}
+        args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
@@ -62,7 +74,9 @@ data:
     # Function to run Sentinel commands
     # NOTE: Sentinel runs in the same Pod, so we connect via localhost (REDIS_LOOPBACK)
     run_sentinel_command() {
-        {{- if .Values.auth.sentinel }}
+        {{- if .Values.sentinel.acl.enabled }}
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- else if .Values.auth.sentinel }}
         REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
         {{- else }}
         redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
@@ -209,6 +223,15 @@ data:
 
     {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
 
+    # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
+    {{- if .Values.sentinel.acl.enabled }}
+    export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
+    {{- end }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -221,12 +244,17 @@ data:
     # Function to run local Redis commands
     run_redis_command() {
         local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
+        {{- if .Values.auth.acl.enabled }}
+        args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
     # Function to run local Sentinel commands
     run_sentinel_command() {
-        {{- if .Values.auth.sentinel }}
+        {{- if .Values.sentinel.acl.enabled }}
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- else if .Values.auth.sentinel }}
         REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
         {{- else }}
         redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"

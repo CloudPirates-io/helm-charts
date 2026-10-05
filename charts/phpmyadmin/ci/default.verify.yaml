@@ -1,0 +1,30 @@
+# Functional verification for ci/default.yaml
+# Tests basic HTTP connectivity to phpMyAdmin
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-phpmyadmin-default:80"
+              echo "-> Testing HTTP connectivity to phpMyAdmin"
+              curl -f http://${SERVICE_HOST}/ -L -o /dev/null -s
+              echo "-> phpMyAdmin HTTP endpoint is responding"
+              curl -f http://${SERVICE_HOST}/ -L -o /dev/null -s -H "Accept: text/html"
+              echo "OK: phpMyAdmin verification passed"

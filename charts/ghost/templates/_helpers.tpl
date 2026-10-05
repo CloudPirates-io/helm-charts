@@ -78,13 +78,48 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Return "https" if the given host is covered by an ingress.tls entry, "http" otherwise.
+*/}}
+{{- define "ghost.hostScheme" -}}
+{{- $host := .host -}}
+{{- $tls := .tls -}}
+{{- $scheme := "http" -}}
+{{- range $tls }}
+{{- if has $host .hosts }}
+{{- $scheme = "https" }}
+{{- end }}
+{{- end }}
+{{- $scheme }}
+{{- end }}
+
+{{/*
+Return the public site URL for Ghost
+*/}}
+{{- define "ghost.url" -}}
+{{- if .Values.config.url }}
+{{- .Values.config.url }}
+{{- else if .Values.ingress.enabled }}
+{{- $host := (first .Values.ingress.hosts).host }}
+{{- $scheme := include "ghost.hostScheme" (dict "host" $host "tls" .Values.ingress.tls) }}
+{{- printf "%s://%s" $scheme $host }}
+{{- else -}}
+{{- /* Loopback, not the Service DNS name: Ghost self-fetches this URL during its own startup
+(e.g. the ActivityPub webhook init), before its readiness probe has passed and before the
+Service has any Ready endpoints to route to - going through the Service here would deadlock. */ -}}
+{{- printf "http://127.0.0.1:%v" .Values.config.server.port }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return the admin URL for Ghost
 */}}
 {{- define "ghost.admin_url" -}}
 {{- if .Values.config.admin.url }}
 {{- .Values.config.admin.url }}
 {{- else if ge (len .Values.ingress.hosts) 2 }}
-{{- printf "https://%s" (index .Values.ingress.hosts 1).host }}
+{{- $host := (index .Values.ingress.hosts 1).host }}
+{{- $scheme := include "ghost.hostScheme" (dict "host" $host "tls" .Values.ingress.tls) }}
+{{- printf "%s://%s" $scheme $host }}
 {{- else }}
 {{- fail "ERROR: Either config.admin.url must be set, or at least 2 ingress hosts must be configured. Please set config.admin.url or add a second ingress host for the admin interface." }}
 {{- end }}

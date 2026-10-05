@@ -23,6 +23,9 @@ tests:
       - equal:
           path: kind
           value: DaemonSet
+      - equal:
+          path: spec.revisionHistoryLimit
+          value: 10
       - isNull:
           path: spec.replicas
 

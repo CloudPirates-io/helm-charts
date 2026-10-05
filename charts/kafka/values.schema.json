@@ -16,13 +16,11 @@
                         }
                     }
                 },
-                "interBroker": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        }
-                    }
+                "clientPassword": {
+                    "type": "string"
+                },
+                "clientUser": {
+                    "type": "string"
                 },
                 "controller": {
                     "type": "object",
@@ -32,25 +30,41 @@
                         }
                     }
                 },
-                "clientUser": {
-                    "type": "string"
-                },
-                "clientPassword": {
-                    "type": "string"
-                },
-                "interBrokerUser": {
-                    "type": "string"
-                },
-                "interBrokerPassword": {
+                "controllerPassword": {
                     "type": "string"
                 },
                 "controllerUser": {
                     "type": "string"
                 },
-                "controllerPassword": {
+                "existingSecret": {
                     "type": "string"
                 },
-                "existingSecret": {
+                "external": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "externalPassword": {
+                    "type": "string"
+                },
+                "externalUser": {
+                    "type": "string"
+                },
+                "interBroker": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "interBrokerPassword": {
+                    "type": "string"
+                },
+                "interBrokerUser": {
                     "type": "string"
                 }
             }
@@ -108,6 +122,39 @@
                 "seccompProfile": {
                     "type": "object",
                     "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "externalAccess": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "loadBalancerIPs": {
+                            "type": "array"
+                        },
+                        "ports": {
+                            "type": "object",
+                            "properties": {
+                                "external": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "type": {
                             "type": "string"
                         }
@@ -251,9 +298,6 @@
                 "extraArgs": {
                     "type": "array"
                 },
-                "podAnnotations": {
-                    "type": "object"
-                },
                 "image": {
                     "type": "object",
                     "properties": {
@@ -270,6 +314,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "podAnnotations": {
+                    "type": "object"
                 },
                 "resources": {
                     "type": "object"
@@ -463,10 +510,10 @@
                         "client": {
                             "type": "integer"
                         },
-                        "internal": {
+                        "controller": {
                             "type": "integer"
                         },
-                        "controller": {
+                        "internal": {
                             "type": "integer"
                         }
                     }
@@ -502,29 +549,6 @@
         "tls": {
             "type": "object",
             "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "source": {
-                    "type": "string",
-                    "enum": ["self-signed", "existing-secret", "cert-manager"]
-                },
-                "existingSecret": {
-                    "type": "string"
-                },
-                "certFilename": {
-                    "type": "string"
-                },
-                "keyFilename": {
-                    "type": "string"
-                },
-                "caFilename": {
-                    "type": "string"
-                },
-                "clientAuth": {
-                    "type": "string",
-                    "enum": ["none", "requested", "required"]
-                },
                 "autoGenerated": {
                     "type": "object",
                     "properties": {
@@ -536,30 +560,51 @@
                         }
                     }
                 },
+                "caFilename": {
+                    "type": "string"
+                },
+                "certFilename": {
+                    "type": "string"
+                },
                 "certManager": {
                     "type": "object",
                     "properties": {
                         "duration": {
                             "type": "string"
                         },
-                        "renewBefore": {
-                            "type": "string"
-                        },
                         "issuerRef": {
                             "type": "object",
                             "properties": {
-                                "name": {
+                                "group": {
                                     "type": "string"
                                 },
                                 "kind": {
                                     "type": "string"
                                 },
-                                "group": {
+                                "name": {
                                     "type": "string"
                                 }
                             }
+                        },
+                        "renewBefore": {
+                            "type": "string"
                         }
                     }
+                },
+                "clientAuth": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingSecret": {
+                    "type": "string"
+                },
+                "keyFilename": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
                 }
             }
         },
