@@ -1,0 +1,17 @@
+# CI scenario: default PostgreSQL deployment with a deterministic superuser password
+# Exercises: basic deployment, service exposure, and superuser authentication
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  password: "RootPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

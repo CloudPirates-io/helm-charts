@@ -159,6 +159,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 **Buckets**
 ```yaml
 - name: my-bucket
+  versioning: true
 ```
 
 **Users**

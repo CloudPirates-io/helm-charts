@@ -1,0 +1,24 @@
+suite: test redis prestop failover wait
+templates:
+  - prestop-configmap.yaml
+set:
+  architecture: replication
+  replicaCount: 3
+  sentinel.enabled: true
+tests:
+  - it: should wait for failover by default
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'WAIT_FOR_FAILOVER=true'
+
+  - it: should not wait for failover when redisShutdownWaitFailover is disabled
+    set:
+      sentinel.redisShutdownWaitFailover: false
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'WAIT_FOR_FAILOVER=false'
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: 'WAIT_FOR_FAILOVER=true'

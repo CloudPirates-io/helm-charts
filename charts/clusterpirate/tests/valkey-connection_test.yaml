@@ -1,0 +1,110 @@
+suite: test clusterpirate valkey connection
+templates:
+  - configmap.yaml
+  - deployment.yaml
+tests:
+  - it: should point valkeyHost at the valkey subchart service by default
+    template: configmap.yaml
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: RELEASE-NAME-valkey
+
+  - it: should read the valkey password from the subchart secret by default
+    template: deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: VALKEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-valkey
+                key: password
+
+  - it: should follow the valkey subchart fullnameOverride in the ConfigMap
+    template: configmap.yaml
+    set:
+      valkey:
+        fullnameOverride: vk-custom
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: vk-custom
+
+  - it: should follow the valkey subchart fullnameOverride in the secretKeyRef
+    template: deployment.yaml
+    set:
+      valkey:
+        fullnameOverride: vk-custom
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: VALKEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: vk-custom
+                key: password
+
+  - it: should follow the valkey subchart nameOverride
+    template: configmap.yaml
+    set:
+      valkey:
+        nameOverride: vk
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: RELEASE-NAME-vk
+
+  - it: should keep the legacy name when the release is named clusterpirate
+    template: configmap.yaml
+    release:
+      name: clusterpirate
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: clusterpirate-valkey
+
+  - it: should prefer an explicit cache host over the subchart name
+    template: configmap.yaml
+    set:
+      clusterPirate:
+        metrics:
+          cache:
+            host: valkey.example.com
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: valkey.example.com
+
+  - it: should render the explicit cache host when valkey is disabled
+    template: configmap.yaml
+    set:
+      valkey:
+        enabled: false
+      clusterPirate:
+        metrics:
+          cache:
+            host: valkey.example.com
+    asserts:
+      - equal:
+          path: data.valkeyHost
+          value: valkey.example.com
+
+  - it: should use the valkey existingSecret when one is configured
+    template: deployment.yaml
+    set:
+      valkey:
+        auth:
+          existingSecret: my-valkey-secret
+          existingSecretPasswordKey: valkey-password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: VALKEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: my-valkey-secret
+                key: valkey-password

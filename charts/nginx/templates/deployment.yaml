@@ -10,6 +10,7 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if and (not .Values.autoscaling.enabled) (not .Values.daemonset.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -53,7 +54,7 @@ spec:
           {{- if .Values.initContainerSecurityContext }}
           securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
+          image: {{ include "nginx.cloneStaticSiteFromGit.image" . | quote }}
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitClone.command }}
           command: {{- toYaml .Values.cloneStaticSiteFromGit.gitClone.command | nindent 12 }}
@@ -134,6 +135,9 @@ spec:
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
           {{- end }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.lifecycleHooks }}
+          lifecycle: {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: emptydir
               mountPath: /tmp
@@ -159,6 +163,9 @@ spec:
           {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}
             - name: static-site
               mountPath: /usr/share/nginx/html
+              {{- if and .Values.cloneStaticSiteFromGit.enabled .Values.cloneStaticSiteFromGit.subPath }}
+              subPath: {{ .Values.cloneStaticSiteFromGit.subPath }}
+              {{- end }}
           {{- end }}
           {{- if or .Values.config .Values.existingConfigConfigmap }}
             - name: nginx-config
@@ -171,7 +178,8 @@ spec:
           {{- end }}
           {{- if or .Values.streamServerConfig .Values.existingStreamServerConfigConfigmap }}
             - name: stream-server-config
-              mountPath: /etc/nginx/conf.d
+              mountPath: /etc/nginx/conf.d/stream-server-config.conf
+              subPath: stream-server-config.conf
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -181,7 +189,7 @@ spec:
           {{- if .Values.initContainerSecurityContext }}
           securityContext: {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloneStaticSiteFromGit.image.registry }}/{{ .Values.cloneStaticSiteFromGit.image.repository }}:{{ .Values.cloneStaticSiteFromGit.image.tag }}"
+          image: {{ include "nginx.cloneStaticSiteFromGit.image" . | quote }}
           imagePullPolicy: {{ .Values.cloneStaticSiteFromGit.image.pullPolicy }}
           {{- if .Values.cloneStaticSiteFromGit.gitSync.command }}
           command: {{- toYaml .Values.cloneStaticSiteFromGit.gitSync.command | nindent 12 }}
@@ -270,7 +278,7 @@ spec:
         - name: static-site
           {{- include "nginx.staticSiteVolume" . | nindent 10 }}
         {{- end }}
-      {{- if or .Values.serverConfig .Values.streamServerConfig .Values.existingServerConfigConfigmap }}
+      {{- if or .Values.serverConfig .Values.existingServerConfigConfigmap }}
         - name: nginx-server-config
           configMap:
             name: {{ include "nginx.serverConfigConfigmapName" . }}
@@ -278,11 +286,6 @@ spec:
             items:
               - key: server-config.conf
                 path: server-config.conf
-            {{- end }}
-            {{- if .Values.streamServerConfig }}
-            items:
-              - key: stream-server-config.conf
-                path: stream-server-config.conf
             {{- end }}
       {{- end }}
       {{- if or .Values.config .Values.existingConfigConfigmap }}
@@ -310,6 +313,10 @@ spec:
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.priorityClassName }}

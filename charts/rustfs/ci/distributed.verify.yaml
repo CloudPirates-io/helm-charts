@@ -1,0 +1,71 @@
+# Functional verification for ci/distributed.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the distributed
+# StatefulSet deployment (deploymentType: statefulset, replicaCount: 4) is
+# actually serving a working, erasure-coded S3 API across its 4 pods: create a
+# bucket, upload multiple objects, download them back through the Service
+# (which load-balances across all 4 pods), and compare checksums.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-rustfs-distributed:9000"
+              BUCKET="verify-bucket"
+
+              echo "-> Authenticating against the distributed RustFS S3 API with the configured credentials"
+              # The 4 StatefulSet pods pass their HTTP /health check as soon as their own process is up,
+              # but the erasure-coded backend can still be forming quorum across peers for a bit after
+              # that, during which the S3 API answers with a transient "Service not ready" error.
+              i=0
+              until mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret > /dev/null 2>&1; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: RustFS S3 API never became ready"
+                  mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              echo "-> Creating a bucket"
+              mc mb "rustfs/${BUCKET}"
+
+              echo "-> Uploading multiple objects, requests load-balanced across the 4 StatefulSet pods"
+              for i in 1 2 3 4 5; do
+                echo "hello from test-charts distributed verify object ${i} $(date +%s)" > "/tmp/upload-${i}.txt"
+                mc cp "/tmp/upload-${i}.txt" "rustfs/${BUCKET}/verify-object-${i}.txt"
+              done
+
+              echo "-> Downloading each object back and comparing checksums"
+              for i in 1 2 3 4 5; do
+                mc cat "rustfs/${BUCKET}/verify-object-${i}.txt" > "/tmp/download-${i}.txt"
+                diff "/tmp/upload-${i}.txt" "/tmp/download-${i}.txt"
+              done
+
+              echo "-> Listing the bucket and checking all 5 objects are present"
+              LISTED=$(mc ls "rustfs/${BUCKET}" | wc -l)
+              [ "${LISTED}" -eq 5 ] || {
+                echo "ERROR: expected 5 objects in bucket, found ${LISTED}"
+                mc ls "rustfs/${BUCKET}"
+                exit 1
+              }
+
+              echo "OK: rustfs distributed verification passed"

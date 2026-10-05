@@ -18,6 +18,8 @@ commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
 
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
 ## @section RabbitMQ image parameters
 image:
   ## @param image.registry RabbitMQ image registry
@@ -25,7 +27,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.3.1-management@sha256:261d0262cae01a375f9778a2a373d4f796dadaede341d5cbabf5ef9d25ae0045"
+  tag: "4.3.6-management@sha256:de62d9901fb73aaa8767b9c1e9ea32f2938f69d1b83e430f7c5ca854081d2128"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -61,6 +63,14 @@ service:
   annotations: {}
   ## @param service.annotationsHeadless Kubernetes service-headless annotations
   annotationsHeadless: {}
+  ## @param service.nodePorts Node ports to expose, only used if service.type is NodePort
+  nodePorts:
+    ## @param service.nodePorts.amqp Node port for the AMQP service port
+    amqp: ""
+    ## @param service.nodePorts.mgmt Node port for the management UI service port
+    mgmt: ""
+    ## @param service.nodePorts.metrics Node port for the Prometheus metrics service port
+    metrics: ""
 
 ## @section RabbitMQ Authentication
 auth:
@@ -122,9 +132,9 @@ config:
       enabled: false
     ## @param config.logging.level Log level for RabbitMQ (debug, info, warning, error, critical, none)
     level: "info"
-  ## @param config.extraConfiguration Additional RabbitMQ configuration
+  ## @param config.extraConfiguration Additional RabbitMQ configuration. Supports Helm template expressions.
   extraConfiguration: ""
-  ## @param config.advancedConfiguration Advanced RabbitMQ configuration
+  ## @param config.advancedConfiguration Advanced RabbitMQ configuration. Supports Helm template expressions.
   advancedConfiguration: ""
 
 ## @section Queue Balancing and Distribution Configuration

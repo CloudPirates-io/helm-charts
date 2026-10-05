@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "timescaledb.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{ toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*

@@ -60,7 +60,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
     --image redis:8.2.0 -- bash
 
 # Inside the pod:
-redis-cli -h my-redis -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h my-redis
 ```
 
 ## Security & Signature Verification
@@ -146,6 +146,8 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
 | `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 | `auth.acl.existingFilePath`      | Path to existing ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""`    |
+| `auth.acl.defaultUsername`       | ACL username in the ACL file used as the main/default Redis user (e.g. for probes and clients) | `default` |
+| `auth.acl.sentinelUsername`      | ACL username in the ACL file Sentinel uses to authenticate to the monitored Redis instances | `sentinel` |
 
 #### Connection Details Secret
 
@@ -194,8 +196,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - When using `existingFilePath`, no volume mounting is performed - the file must be available at the specified path
-- The ACL file must contain at least a 'default' user
-- For Sentinel deployments, include a 'sentinel' user or the 'default' user password will be used
+- The ACL file must contain at least the user named by `auth.acl.defaultUsername` (`default` unless overridden)
+- For Sentinel deployments, include a user named by `auth.acl.sentinelUsername` (`sentinel` unless overridden), or the `defaultUsername` user's password will be used instead
+- This is separate from Sentinel's own ACL, which secures connections *to* the Sentinel process itself - see [Sentinel ACL Configuration](#sentinel-acl-configuration)
 
 ### TLS/SSL Configuration
 
@@ -221,6 +224,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `config.existingConfigmap`    | Name of existing ConfigMap to use    | `""`                   |
 | `config.existingConfigmapKey` | Key in existing ConfigMap            | `""`                   |
 
+### Redis Cluster Configuration (only applicable when `architecture=cluster`)
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `cluster.announceHostnames` | Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes). When enabled, Redis announces pod hostnames instead of IPs, making the cluster more resilient to pod restarts | `false` |
+| `cluster.announceHostnamesOverride` | Map of hostnames to announce for Redis Cluster topology. Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `true` (e.g. `0: foo-bar-0`) | `{}` |
+| `cluster.announceIpsOverride` | Map of IPs to announce for Redis Cluster topology. Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `false` (e.g. `0: 1.2.3.4`) | `{}` |
+| `cluster.startupSleepTime` | Seconds to sleep in the init container before configuring Redis Cluster. Useful when persistence is disabled: gives the cluster time to detect a failed master and elect a new one before the restarting pod rejoins, preventing the old master from re-entering as master with an empty dataset. Set to `0` to disable | `0` |
+| `cluster.config.nodeTimeout` | Cluster node timeout in milliseconds | `15000` |
+| `cluster.config.requireFullCoverage` | Require full coverage to accept queries | `true` |
+
 ### Metrics
 
 | Parameter                                  | Description                                                                             | Default                    |
@@ -236,6 +250,7 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.port`                             | Port that the metrics server and endpoint is running on                                 | `9121`                     |
 | `metrics.service.enabled`                  | Enable the dedicated metrics service                                                    | `true`                     |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
+| `metrics.service.name`                     | Metrics service name                                                                    | `http-metrics`             |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                       |
 | `metrics.service.loadBalancerIP`           | LoadBalancer IP if metrics service type is `LoadBalancer`                               | `""`                       |
@@ -347,7 +362,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
 | `sentinel.image.registry`                     | Redis Sentinel image registry                                                                 | `docker.io` |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.8.1`     |
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
@@ -378,6 +393,40 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
 | `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
 
+### Sentinel ACL Configuration
+
+Sentinel can run its own independent ACL, securing connections *to* the Sentinel process itself (e.g. `redis-cli` clients, the preStop failover hook, and the master-discovery controller). This is separate from `auth.acl`, which secures the monitored Redis instances - the two can be enabled independently or together.
+
+| Parameter                            | Description                                                        | Default              |
+| ------------------------------------- | ------------------------------------------------------------------- | --------------------- |
+| `sentinel.acl.enabled`                | Enable custom ACL rules for Sentinel from a secret file            | `false`                |
+| `sentinel.acl.existingSecret`         | Name of existing secret containing the Sentinel ACL rules          | `""`                    |
+| `sentinel.acl.existingSecretACLKey`   | Key in existing secret containing the Sentinel ACL rules           | `""`                    |
+| `sentinel.acl.existingFilePath`       | Path to existing Sentinel ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""` |
+| `sentinel.acl.defaultUsername`        | ACL username in the Sentinel ACL file used to authenticate to Sentinel | `default`           |
+
+**Using Kubernetes Secret (existingSecret):**
+
+```yaml
+sentinel:
+  acl:
+    enabled: true
+    existingSecret: "my-sentinel-acl"
+    existingSecretACLKey: "sentinel-users.acl"
+```
+
+**ACL File Format Example:**
+
+```
+user default >sentinelpassword ~* +@all
+```
+
+**Notes:**
+
+- `existingSecret` and `existingFilePath` are mutually exclusive
+- The ACL file must contain at least the user named by `sentinel.acl.defaultUsername`
+- Setting the `aclfile` directive alone is what enables ACL auth on the Sentinel process; no other configuration is needed for clients to authenticate with the users it defines
+
 ### ServiceAccount
 
 | Parameter                                     | Description                                                                                                                             | Default |
@@ -389,13 +438,16 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts for Redis container                            | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
-| `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| Parameter             | Description                                                             | Default |
+| --------------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars`        | Additional environment variables to set                                 | `[]`    |
+| `extraVolumes`        | Additional volumes to add to the pod                                    | `[]`    |
+| `extraVolumeMounts`   | Additional volume mounts for Redis container                            | `[]`    |
+| `extraObjects`        | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| `extraPorts`          | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| `extraInitContainers` | Additional init containers to add to the pod                            | `[]`    |
+| `extraContainers`     | Additional containers to add to the pod                                 | `[]`    |
+| `dnsConfig`           | DNS configuration for the pod                                           | `{}`    |
 
 ### Custom Scripts and Hooks
 
@@ -518,7 +570,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
 redis-cli -h my-redis-sentinel -p 26379 sentinel get-master-addr-by-name mymaster
 
 # Connect to the current master (address from previous command)
-redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h <master-ip> -p 6379
 ```
 
 ### Master-Replica without Sentinel

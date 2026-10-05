@@ -99,6 +99,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | Parameter      | Description                           | Default |
 | -------------- | ------------------------------------- | ------- |
 | `replicaCount` | Number of Keycloak replicas to deploy | `1`     |
+| `revisionHistoryLimit` | Number of old StatefulSet revisions to retain for rollback | `10`    |
 
 ### Pod annotations and labels
 
@@ -109,9 +110,11 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 ### Pod configuration
 
-| Parameter               | Description                                                    | Default |
-| ----------------------- | -------------------------------------------------------------- | ------- |
-| `shareProcessNamespace` | Enable process namespace sharing between containers in the pod | `false` |
+| Parameter                       | Description                                                                                         | Default |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | ------- |
+| `shareProcessNamespace`         | Enable process namespace sharing between containers in the pod                                      | `false` |
+| `terminationGracePeriodSeconds` | Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default | `""`    |
+| `lifecycle`                     | Lifecycle hooks for the Keycloak container                                                            | `{}`    |
 
 ### Extra volumes and volumes mount
 

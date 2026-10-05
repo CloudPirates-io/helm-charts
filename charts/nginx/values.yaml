@@ -26,12 +26,15 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.31.0-alpine@sha256:2f07d83bf561b506400dc183b1b2003803e39efbd22451f848adaba14d28c7c7"
+  tag: "1.31.6-alpine@sha256:adad2ae9204d0fd7a34f40299bc838c3782be1293b10005eac4315ff5a1abf4e"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
 ## @param replicaCount Number of Nginx replicas to deploy
 replicaCount: 1
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
 
 ## @section Container port configuration
 ## @param containerPorts Array of container ports
@@ -154,11 +157,15 @@ cloneStaticSiteFromGit:
   ## Git image settings
   ##
   image:
+    ## @param cloneStaticSiteFromGit.image.registry Git image registry
     registry: docker.io
+    ## @param cloneStaticSiteFromGit.image.repository Git image repository
     repository: alpine/git
-    tag: v2.52.0
-    digest: "sha256:9c9c6debba3eac25c9230db4bbd1e17d0c27efffdb93e502a47f6f447ab90ac4"
+    ## @param cloneStaticSiteFromGit.image.tag Git image tag
+    tag: "v2.54.0"
+    ## @param cloneStaticSiteFromGit.image.pullPolicy Git image pull policy
     pullPolicy: IfNotPresent
+    ## @param cloneStaticSiteFromGit.image.pullSecrets Git image pull secrets
     pullSecrets: []
 
   ## @param cloneStaticSiteFromGit.repository Git Repository to clone static content from
@@ -168,6 +175,10 @@ cloneStaticSiteFromGit:
   ## @param cloneStaticSiteFromGit.branch Git branch to checkout
   ##
   branch: "main"
+
+  ## @param cloneStaticSiteFromGit.subPath Subdirectory within the cloned repository to serve as the web root (e.g. "public" for Hugo/Zola sites). Leave empty to serve the repository root.
+  ##
+  subPath: ""
 
   ## @param cloneStaticSiteFromGit.interval Interval (seconds) for sidecar to pull from Git repository
   ##
@@ -218,6 +229,9 @@ resources:
   #   cpu: 50m
   #   memory: 64Mi
 
+## @param lifecycleHooks for the Nginx container to automate configuration before or after startup
+lifecycleHooks: {}
+
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
 
@@ -229,6 +243,9 @@ tolerations: []
 
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
 
 ## @param dnsPolicy DNS policy for the pod
 dnsPolicy: ""
@@ -245,6 +262,11 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
 
 ## @param podSecurityContext Security context for the pod
+## Note: fsGroup applies to ALL volumes in the pod, including extraVolumes. If you mount a Secret
+## (e.g. an SSH private key for cloneStaticSiteFromGit) with a restrictive defaultMode like 0600,
+## the group ownership set by fsGroup (101) may still make Git/SSH reject the key as "too open".
+## In that case, either set defaultMode: 0640 on the secret volume, or set podSecurityContext.fsGroup
+## to a value matching your key's requirements (or null, if your workload doesn't need it).
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101

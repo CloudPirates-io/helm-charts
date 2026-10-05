@@ -1,0 +1,28 @@
+# CI scenario: standalone MongoDB with the mongodb_exporter Prometheus metrics sidecar enabled
+# Exercises: the metrics container/Service, and that mongodb_exporter can actually
+# authenticate to mongod and scrape real server metrics - not just that probes pass.
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootUsername: admin
+  rootPassword: "RootPass123!"
+
+metrics:
+  enabled: true
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# Workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 (TCMalloc/glibc
+# incompatibility, MongoDB SERVER-121912). Needed on CI runners/kind nodes with newer kernels.
+experimental:
+  tcmallocRseqWorkaround:
+    enabled: true

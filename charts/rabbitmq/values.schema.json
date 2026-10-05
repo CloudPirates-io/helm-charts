@@ -594,6 +594,9 @@
                 "fsGroup": {
                     "type": "integer"
                 },
+                "fsGroupChangePolicy": {
+                    "type": "string"
+                },
                 "seccompProfile": {
                     "type": "object",
                     "properties": {
@@ -740,6 +743,20 @@
                 },
                 "managementPort": {
                     "type": "integer"
+                },
+                "nodePorts": {
+                    "type": "object",
+                    "properties": {
+                        "amqp": {
+                            "type": "string"
+                        },
+                        "metrics": {
+                            "type": "string"
+                        },
+                        "mgmt": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "trafficDistribution": {
                     "type": "string"

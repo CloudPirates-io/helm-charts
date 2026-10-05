@@ -58,6 +58,27 @@ tests:
           value: custom-value
         template: templates/statefulset.yaml
 
+  - it: should tpl-render templated values in commonLabels and commonAnnotations
+    set:
+      commonLabels:
+        tags.datadoghq.com/version: "{{ .Values.image.tag }}"
+      commonAnnotations:
+        release-revision: "{{ .Release.Revision }}"
+    asserts:
+      - equal:
+          path: metadata.labels['tags.datadoghq.com/version']
+          value: "26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e"
+        template: templates/statefulset.yaml
+      - equal:
+          path: spec.template.metadata.labels['tags.datadoghq.com/version']
+          value: "26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e"
+        template: templates/statefulset.yaml
+      - equal:
+          # helm-unittest doesn't perform a real install, so .Release.Revision defaults to 0
+          path: metadata.annotations['release-revision']
+          value: "0"
+        template: templates/statefulset.yaml
+
   - it: should render custom image registry
     set:
       global:

@@ -1,0 +1,166 @@
+suite: test nginx server config volumes
+templates:
+  - deployment.yaml
+  - configmap.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+tests:
+  - it: should not render any server config volume or mount by default
+    template: deployment.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: nginx-server-config
+          any: true
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: stream-server-config
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-server-config
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: stream-server-config
+          any: true
+
+  - it: should render only the nginx-server-config volume when serverConfig is set
+    template: deployment.yaml
+    set:
+      serverConfig: |
+        server { listen 8080; }
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: nginx-server-config
+            configMap:
+              name: RELEASE-NAME-nginx
+              items:
+                - key: server-config.conf
+                  path: server-config.conf
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: stream-server-config
+          any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-server-config
+            mountPath: /etc/nginx/conf.d
+
+  - it: should not render an unmounted nginx-server-config volume when only streamServerConfig is set
+    template: deployment.yaml
+    set:
+      streamServerConfig: |
+        server { listen 9000; }
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: nginx-server-config
+          any: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: stream-server-config
+            configMap:
+              name: RELEASE-NAME-nginx
+              items:
+                - key: stream-server-config.conf
+                  path: stream-server-config.conf
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-server-config
+          any: true
+
+  - it: should render a single items list on the nginx-server-config volume when both configs are set
+    template: deployment.yaml
+    set:
+      serverConfig: |
+        server { listen 8080; }
+      streamServerConfig: |
+        server { listen 9000; }
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: nginx-server-config
+            configMap:
+              name: RELEASE-NAME-nginx
+              items:
+                - key: server-config.conf
+                  path: server-config.conf
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: stream-server-config
+            configMap:
+              name: RELEASE-NAME-nginx
+              items:
+                - key: stream-server-config.conf
+                  path: stream-server-config.conf
+      - equal:
+          path: spec.template.spec.volumes[1].configMap.items
+          value:
+            - key: server-config.conf
+              path: server-config.conf
+
+  - it: should mount both configs at distinct paths when both configs are set
+    template: deployment.yaml
+    set:
+      serverConfig: |
+        server { listen 8080; }
+      streamServerConfig: |
+        server { listen 9000; }
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-server-config
+            mountPath: /etc/nginx/conf.d
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: stream-server-config
+            mountPath: /etc/nginx/conf.d/stream-server-config.conf
+            subPath: stream-server-config.conf
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: stream-server-config
+            mountPath: /etc/nginx/conf.d
+
+  - it: should keep the stream config file path when existingStreamServerConfigConfigmap is used
+    template: deployment.yaml
+    set:
+      existingStreamServerConfigConfigmap: my-stream-cm
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: stream-server-config
+            configMap:
+              name: my-stream-cm
+              items:
+                - key: stream-server-config.conf
+                  path: stream-server-config.conf
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: stream-server-config
+            mountPath: /etc/nginx/conf.d/stream-server-config.conf
+            subPath: stream-server-config.conf
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: nginx-server-config
+          any: true

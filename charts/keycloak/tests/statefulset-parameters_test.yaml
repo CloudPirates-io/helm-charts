@@ -2,6 +2,46 @@ suite: test service account
 templates:
   - templates/statefulset.yaml
 tests:
+  - it: should not render pod termination settings by default
+    asserts:
+      - isNull:
+          path: spec.template.spec.terminationGracePeriodSeconds
+      - isNull:
+          path: spec.template.spec.containers[0].lifecycle
+
+  - it: should render a custom termination grace period
+    set:
+      terminationGracePeriodSeconds: 45
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 45
+
+  - it: should render a zero-second termination grace period
+    set:
+      terminationGracePeriodSeconds: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 0
+
+  - it: should render custom container lifecycle hooks
+    set:
+      lifecycle:
+        preStop:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - sleep 15
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].lifecycle.preStop.exec.command
+          value:
+            - /bin/sh
+            - -c
+            - sleep 15
+
   - it: liveness probe should use /health/live
     asserts:
       - equal:
@@ -28,6 +68,28 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
           value: /auth/health/ready
+  - it: should pass the default management port to keycloak
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --http-management-port=9000
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 9000
+  - it: should pass a custom management port to keycloak
+    set:
+      keycloak:
+        managementPort: 9001
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --http-management-port=9001
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 9001
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: management
   - it: hostname explicitly set should be unchanged
     set:
       keycloak:

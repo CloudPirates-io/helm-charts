@@ -13,8 +13,15 @@ metadata:
 data:
   postgresql.conf: |
     # PostgreSQL configuration file
-    
+
     # Connection Settings
+    #
+    # listen_addresses defaults to 'localhost' in stock Postgres -- the standard
+    # postgres Docker entrypoint normally overrides this to '*' in the generated
+    # config specifically so the container is reachable from other pods. Since
+    # config_file now points here instead of that generated file, this must be
+    # set explicitly, or every other pod loses TCP access to this one.
+    listen_addresses = '*'
     {{- if .Values.config.postgresqlMaxConnections }}
     max_connections = {{ .Values.config.postgresqlMaxConnections }}
     {{- else }}
@@ -74,7 +81,7 @@ data:
     log_min_error_statement = error
     
     {{- if .Values.config.postgresqlLogStatement }}
-    log_statement = {{ .Values.config.postgresqlLogStatement | quote }}
+    log_statement = {{ .Values.config.postgresqlLogStatement | squote }}
     {{- else }}
     log_statement = 'none'
     {{- end }}
@@ -87,7 +94,7 @@ data:
     
     # Shared Libraries
     {{- if .Values.config.postgresqlSharedPreloadLibraries }}
-    shared_preload_libraries = {{ .Values.config.postgresqlSharedPreloadLibraries | quote }}
+    shared_preload_libraries = {{ .Values.config.postgresqlSharedPreloadLibraries | squote }}
     {{- end }}
     
     # Locale and Formatting
@@ -103,4 +110,12 @@ data:
     {{- range .Values.config.extraConfig }}
     {{ . }}
     {{- end }}
+
+    # Must stay last: postgres applies config sequentially, so anything set here wins
+    # over everything above, matching normal ALTER SYSTEM semantics. A relative path
+    # here would resolve against the directory containing *this* file
+    # (timescaledb.configDir), not PGDATA -- ALTER SYSTEM always writes to
+    # PGDATA/postgresql.auto.conf regardless of config_file, so this must be an
+    # absolute path to actually find it.
+    include_if_exists '{{ include "timescaledb.dataDir" . }}/pgdata/postgresql.auto.conf'
 {{- end }}

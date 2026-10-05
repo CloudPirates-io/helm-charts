@@ -14,6 +14,9 @@
                 "acl": {
                     "type": "object",
                     "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -24,6 +27,9 @@
                             "type": "string"
                         },
                         "existingSecretACLKey": {
+                            "type": "string"
+                        },
+                        "sentinelUsername": {
                             "type": "string"
                         }
                     }
@@ -54,6 +60,12 @@
                 "announceHostnames": {
                     "type": "boolean"
                 },
+                "announceHostnamesOverride": {
+                    "type": "object"
+                },
+                "announceIpsOverride": {
+                    "type": "object"
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -62,6 +74,49 @@
                         },
                         "requireFullCoverage": {
                             "type": "boolean"
+                        }
+                    }
+                },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "addresses": {
+                            "type": "array"
+                        },
+                        "busPort": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "port": {
+                            "type": "string"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "busNodePorts": {
+                                    "type": "array"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "nodePorts": {
+                                    "type": "array"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 },
@@ -76,8 +131,23 @@
         "clusterInitJob": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object"
+                },
+                "nodeSelector": {
+                    "type": "object"
+                },
+                "recoveryTimeout": {
+                    "type": "integer"
+                },
                 "resources": {
                     "type": "object"
+                },
+                "runtimeClassName": {
+                    "type": "string"
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             }
         },
@@ -176,13 +246,36 @@
                 }
             }
         },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "externalMaster": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
         "extraConfig": {
             "type": "string"
+        },
+        "extraContainers": {
+            "type": "array"
         },
         "extraEnvVars": {
             "type": "array"
         },
         "extraFlags": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -318,6 +411,9 @@
                         "loadBalancerSourceRanges": {
                             "type": "array"
                         },
+                        "name": {
+                            "type": "string"
+                        },
                         "nodePort": {
                             "type": "string"
                         },
@@ -405,10 +501,16 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": ["integer", "string"]
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "minAvailable": {
-                    "type": ["integer", "string"]
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
@@ -507,9 +609,32 @@
         "revisionHistoryLimit": {
             "type": "integer"
         },
+        "runtimeClassName": {
+            "type": "string"
+        },
         "sentinel": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -829,7 +954,7 @@
                     "type": "object",
                     "properties": {
                         "maxUnavailable": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 },

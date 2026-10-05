@@ -1,0 +1,43 @@
+# CI scenario: replication + Sentinel in Deployment mode (useDeployment: true,
+# persistence disabled) with both auth.acl and sentinel.acl enabled.
+# Exercises the Deployment-mode Sentinel config block specifically: before this
+# fix it never emitted "sentinel auth-user"/"auth-pass" and Sentinel silently
+# fell back to authenticating as ACL user "default" against the monitored
+# master, unlike the StatefulSet-mode block covered by ci/test-acl-replication.yaml.
+architecture: replication
+replicaCount: 3
+useDeployment: true
+
+image:
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  acl:
+    enabled: true
+    existingSecret: redis-acl-deployment
+    defaultUsername: redisadmin
+    sentinelUsername: sentinelapp
+
+sentinel:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  acl:
+    enabled: true
+    existingSecret: sentinel-acl-deployment
+    defaultUsername: sentineladmin
