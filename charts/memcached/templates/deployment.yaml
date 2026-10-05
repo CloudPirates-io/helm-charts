@@ -15,6 +15,7 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if eq .Values.deploymentType "StatefulSet" }}
   serviceName: {{ include "memcached.fullname" . }}
   {{- end }}

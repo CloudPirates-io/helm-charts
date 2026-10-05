@@ -1,0 +1,92 @@
+suite: test extra containers
+templates:
+  - statefulset.yaml
+tests:
+  - it: should only render the postgres container by default
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+
+  - it: should render extra containers after the main container
+    set:
+      extraContainers:
+        - name: pgbadger
+          image: example.com/pgbadger:1.0
+          volumeMounts:
+            - name: data
+              mountPath: /pgdata
+              readOnly: true
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 2
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: postgres
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: pgbadger
+      - equal:
+          path: spec.template.spec.containers[1].image
+          value: example.com/pgbadger:1.0
+      - equal:
+          path: spec.template.spec.containers[1].volumeMounts[0].readOnly
+          value: true
+
+  - it: should render extra containers after the metrics container
+    set:
+      metrics:
+        enabled: true
+      extraContainers:
+        - name: pgbadger
+          image: example.com/pgbadger:1.0
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 3
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: metrics
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: pgbadger
+
+  - it: should render multiple extra containers in order
+    set:
+      extraContainers:
+        - name: first
+          image: example.com/first:1.0
+        - name: second
+          image: example.com/second:1.0
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 3
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: first
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: second
+
+  - it: should render extra volumes alongside extra containers
+    set:
+      extraVolumes:
+        - name: reports
+          emptyDir: {}
+      extraContainers:
+        - name: report-server
+          image: example.com/nginx:1.0
+          volumeMounts:
+            - name: reports
+              mountPath: /usr/share/nginx/html
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: reports
+            emptyDir: {}
+      - equal:
+          path: spec.template.spec.containers[1].volumeMounts[0].name
+          value: reports

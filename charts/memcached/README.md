@@ -80,10 +80,11 @@ The following table lists the configurable parameters of the Memcached chart and
 
 ### Deployment Parameters
 
-| Parameter        | Description                                            | Default      |
-| ---------------- | ------------------------------------------------------ | ------------ |
-| `replicaCount`   | Number of Memcached replicas to deploy                 | `1`          |
-| `deploymentType` | Type of workload to deploy (Deployment or StatefulSet) | `Deployment` |
+| Parameter              | Description                                            | Default      |
+| ---------------------- | ------------------------------------------------------ | ------------ |
+| `replicaCount`         | Number of Memcached replicas to deploy                 | `1`          |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback    | `10`         |
+| `deploymentType`       | Type of workload to deploy (Deployment or StatefulSet) | `Deployment` |
 
 ### Memcached Image Parameters
 
