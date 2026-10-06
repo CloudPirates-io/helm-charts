@@ -107,9 +107,10 @@ spec:
               oldmaster=$(kubectl get service "$MASTER_SERVICE" -n "$NAMESPACE" \
                 -o jsonpath='{.spec.selector.statefulset\.kubernetes\.io/pod-name}' 2>/dev/null || echo "<none>")
 
-              # Get a random Redis Sentinel pod to query Sentinel from
+              # Get a random Running Redis Sentinel pod to query Sentinel from
               pod=$(kubectl get pods -n "$NAMESPACE" \
                 --selector="app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=sentinel" \
+                --field-selector=status.phase=Running \
                 -o name 2>/dev/null | shuf | head -n1)
 
               if [ -z "$pod" ]; then
@@ -140,11 +141,20 @@ spec:
                 | head -n1 || echo "")
               {{- end }}
 
-              # Extract just the pod name from the hostname (e.g., test-redis-0 from test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
-              master=$(echo "$master_hostname" | cut -d'.' -f1)
+              # Sentinel may report either a pod FQDN (e.g. test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
+              # or a bare IP (when replica-announce-ip is set, e.g. sentinel.config.announceHostnames=false); resolve both to a pod name.
+              master_addr=$(printf '%s' "$master_hostname" | head -n1)
 
-              if [ -z "$master" ]; then
-                echo "Warning: Could not determine master from Sentinel, retrying in 10s..."
+              if printf '%s' "$master_addr" | grep -qE '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+                master=$(kubectl get pods -n "$NAMESPACE" \
+                  -l "app.kubernetes.io/instance={{ .Release.Name }}" \
+                  -o jsonpath="{range .items[?(@.status.podIP=='$master_addr')]}{.metadata.name}{end}" 2>/dev/null || echo "")
+              else
+                master="${master_addr%%.*}"
+              fi
+
+              if [ -z "$master" ] || ! kubectl get pod "$master" -n "$NAMESPACE" --field-selector=status.phase=Running >/dev/null 2>&1; then
+                echo "Warning: Master address '$master_addr' did not resolve to a Running pod, retrying in 10s..."
                 sleep 10
                 continue
               fi
@@ -172,6 +182,17 @@ spec:
             metadata:
               name: $MASTER_SERVICE
               namespace: $NAMESPACE
+              labels:
+                {{- include "redis.labels" . | nindent 16 }}
+                app.kubernetes.io/component: master
+              annotations:
+                meta.helm.sh/release-name: {{ .Release.Name }}
+                meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+                {{- if .Values.sentinel.masterService.annotations }}
+                {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.sentinel.masterService.annotations "context" .) | nindent 16 }}
+                {{- else if (include "redis.annotations" .) }}
+                {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | nindent 16 }}
+                {{- end }}
             spec:
               ports:
                 - port: {{ .Values.service.port }}
@@ -185,7 +206,7 @@ spec:
                 {{- end }}
               selector:
                 {{- include "redis.selectorLabels" . | nindent 16 }}
-                statefulset.kubernetes.io/pod-name: $master
+                statefulset.kubernetes.io/pod-name: "$master"
             EOF
               then
                 echo "Successfully updated service to point to master: $master"
