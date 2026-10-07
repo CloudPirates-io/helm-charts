@@ -153,7 +153,10 @@ spec:
                 master="${master_addr%%.*}"
               fi
 
-              if [ -z "$master" ] || ! kubectl get pod "$master" -n "$NAMESPACE" --field-selector=status.phase=Running >/dev/null 2>&1; then
+              # NOTE: --field-selector cannot be combined with a resource name
+              # (kubectl fails with "name cannot be provided when a selector is
+              # specified"), so the phase has to be read from the pod object.
+              if [ -z "$master" ] || [ "$(kubectl get pod "$master" -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null)" != "Running" ]; then
                 echo "Warning: Master address '$master_addr' did not resolve to a Running pod, retrying in 10s..."
                 sleep 10
                 continue
