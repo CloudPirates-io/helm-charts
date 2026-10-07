@@ -1131,6 +1131,14 @@ spec:
               loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
+              # Pin the Sentinel id so it survives a restart. The Sentinel config file lives on an
+              # emptyDir, so a restarted Sentinel comes back with a new run id on a new pod IP and
+              # its peers keep the previous identity as a known-sentinel entry. Leader election
+              # requires a majority of known Sentinels, so every rollout raises that threshold for
+              # good and can end up blocking failover entirely.
+              SENTINEL_MYID=$(printf '%s' "{{ .Values.sentinel.idSeed | default (include "redis.fullname" .) }}/$(hostname)" | sha1sum | cut -c1-40)
+              echo "sentinel myid ${SENTINEL_MYID}" >> /tmp/sentinel.conf
+
               # Note: In deployment mode, known-sentinel entries are intentionally omitted.
               # Sentinel peers discover each other organically via the __sentinel__:hello
               # pub/sub channel on shared Redis instances. Static known-sentinel entries
@@ -1300,6 +1308,14 @@ spec:
               logfile ""
               loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
+
+              # Pin the Sentinel id so it survives a restart. The Sentinel config file lives on an
+              # emptyDir, so a restarted Sentinel comes back with a new run id on a new pod IP and
+              # its peers keep the previous identity as a known-sentinel entry. Leader election
+              # requires a majority of known Sentinels, so every rollout raises that threshold for
+              # good and can end up blocking failover entirely.
+              SENTINEL_MYID=$(printf '%s' "{{ .Values.sentinel.idSeed | default (include "redis.fullname" .) }}/$(hostname)" | sha1sum | cut -c1-40)
+              echo "sentinel myid ${SENTINEL_MYID}" >> /tmp/sentinel.conf
 
               # Add known sentinels to help with discovery, as hostnames rather than resolved
               # IPs: an IP resolved once at startup goes stale as soon as a peer pod is

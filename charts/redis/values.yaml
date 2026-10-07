@@ -519,6 +519,17 @@ sentinel:
   ## forming across clusters. Set this to an externally-resolvable hostname or IP (e.g., an internal
   ## NLB DNS name or a Route53 record) that all Sentinels can reach to monitor a shared master.
   monitorTarget: ""
+  ## @param sentinel.idSeed Seed used to derive a stable Sentinel id across restarts
+  ## The Sentinel configuration file lives on an emptyDir, so a restarting Sentinel comes back with
+  ## a new run id on a new pod IP. Its peers keep the previous identity as a known-sentinel entry,
+  ## and because leader election requires a majority of known Sentinels, every rollout raises that
+  ## threshold permanently and can end up blocking failover. Pinning the id keeps a restarted
+  ## Sentinel the same peer it was before.
+  ## The id is sha1("<idSeed>/<pod hostname>") truncated to 40 hex characters. The default seed is
+  ## the release fullname, which is unique within a cluster. Multi-cluster deployments reuse pod
+  ## names across clusters, so they must set this to a value that is unique per cluster (for example
+  ## the externally-resolvable hostname of that release).
+  idSeed: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
