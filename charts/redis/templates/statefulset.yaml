@@ -1131,6 +1131,14 @@ spec:
               loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
+              # Pin the Sentinel id so it survives a restart. The Sentinel config file lives on an
+              # emptyDir, so a restarted Sentinel comes back with a new run id on a new pod IP and
+              # its peers keep the previous identity as a known-sentinel entry. Leader election
+              # requires a majority of known Sentinels, so every rollout raises that threshold for
+              # good and can end up blocking failover entirely.
+              SENTINEL_MYID=$(printf '%s' "{{ .Values.sentinel.idSeed | default (include "redis.fullname" .) }}/$(hostname)" | sha1sum | cut -c1-40)
+              echo "sentinel myid ${SENTINEL_MYID}" >> /tmp/sentinel.conf
+
               # Note: In deployment mode, known-sentinel entries are intentionally omitted.
               # Sentinel peers discover each other organically via the __sentinel__:hello
               # pub/sub channel on shared Redis instances. Static known-sentinel entries
@@ -1248,25 +1256,6 @@ spec:
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
-              # Get IP address based on ipFamily setting
-              {{- if eq .Values.ipFamily "ipv4" }}
-              SENTINEL_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
-              if [ -z "$SENTINEL_IP" ]; then
-                echo "Warning: No IPv4 address found, falling back to first available IP"
-                SENTINEL_IP=$(hostname -i | awk '{print $1}')
-              fi
-              {{- else if eq .Values.ipFamily "ipv6" }}
-              SENTINEL_IP=$(hostname -i | grep -oE '([0-9a-f:]+:+)+[0-9a-f]+' | head -1)
-              if [ -z "$SENTINEL_IP" ]; then
-                echo "Warning: No IPv6 address found, falling back to first available IP"
-                SENTINEL_IP=$(hostname -i | awk '{print $1}')
-              fi
-              {{- else }}
-              # auto: Use the first IP address for dual-stack compatibility
-              SENTINEL_IP=$(hostname -i | awk '{print $1}')
-              {{- end }}
-              echo "Sentinel using IP address: ${SENTINEL_IP}"
-
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
               # Enable TLS in Sentinel
@@ -1310,27 +1299,34 @@ spec:
               sentinel deny-scripts-reconfig yes
               # Fix leader election issues during force deletions
               protected-mode no
-              # Allow sentinels to discover each other
-              {{ if .Values.sentinel.config.announceHostnames }}
+              # Allow sentinels to discover each other.
+              # Always announce the pod's stable headless-service FQDN rather than its IP:
+              # a recreated pod keeps the same name but gets a new IP, so an IP-form
+              # announcement goes stale and leaves the Sentinel mesh unable to re-converge.
               sentinel announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
-              {{- else }}
-              sentinel announce-ip ${SENTINEL_IP}
-              {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
               loglevel {{ .Values.sentinel.config.loglevel }}
               EOF
 
-              # Add known sentinels to help with discovery (using hostnames for resilience)
+              # Pin the Sentinel id so it survives a restart. The Sentinel config file lives on an
+              # emptyDir, so a restarted Sentinel comes back with a new run id on a new pod IP and
+              # its peers keep the previous identity as a known-sentinel entry. Leader election
+              # requires a majority of known Sentinels, so every rollout raises that threshold for
+              # good and can end up blocking failover entirely.
+              SENTINEL_MYID=$(printf '%s' "{{ .Values.sentinel.idSeed | default (include "redis.fullname" .) }}/$(hostname)" | sha1sum | cut -c1-40)
+              echo "sentinel myid ${SENTINEL_MYID}" >> /tmp/sentinel.conf
+
+              # Add known sentinels to help with discovery, as hostnames rather than resolved
+              # IPs: an IP resolved once at startup goes stale as soon as a peer pod is
+              # recreated, whereas the hostname stays valid and is re-resolved by Sentinel
+              # itself (resolve-hostnames yes) on every reconnect attempt.
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
                 if [ "$i" != "$POD_ORDINAL" ]; then
                   SENTINEL_HOST="{{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                   # Test if the host is resolvable before adding
                   if getent hosts "$SENTINEL_HOST" >/dev/null 2>&1; then
-                    SENTINEL_IP=$(getent hosts "$SENTINEL_HOST" | awk '{print $1}' | head -1)
-                    if [ -n "$SENTINEL_IP" ]; then
-                      echo "sentinel known-sentinel {{ .Values.sentinel.masterName }} ${SENTINEL_IP} {{ .Values.sentinel.port }}" >> /tmp/sentinel.conf
-                    fi
+                    echo "sentinel known-sentinel {{ .Values.sentinel.masterName }} ${SENTINEL_HOST} {{ .Values.sentinel.port }}" >> /tmp/sentinel.conf
                   fi
                 fi
               done
