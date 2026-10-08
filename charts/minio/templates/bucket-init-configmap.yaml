@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "minio.fullname" . }}-bucket-init
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "minio.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}

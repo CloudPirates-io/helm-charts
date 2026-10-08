@@ -60,7 +60,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
     --image redis:8.2.0 -- bash
 
 # Inside the pod:
-redis-cli -h my-redis -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h my-redis
 ```
 
 ## Security & Signature Verification
@@ -138,6 +138,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | -------------------------------- | ------------------------------------------------------------ | ------- |
 | `auth.enabled`                   | Enable Redis authentication                                  | `true`  |
 | `auth.sentinel`                  | Enable authentication for Redis sentinels                    | `true`  |
+| `auth.metrics`                   | Enable authentication for Redis metrics sidecar              | `true`  |
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
 | `auth.existingSecretPasswordKey` | Key in existing secret containing Redis password             | `""`    |
@@ -145,6 +146,8 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | `auth.acl.existingSecret`        | Name of existing secret containing ACL rules                 | `""`    |
 | `auth.acl.existingSecretACLKey`  | Key in existing secret containing ACL rules                  | `""`    |
 | `auth.acl.existingFilePath`      | Path to existing ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""`    |
+| `auth.acl.defaultUsername`       | ACL username in the ACL file used as the main/default Redis user (e.g. for probes and clients) | `default` |
+| `auth.acl.sentinelUsername`      | ACL username in the ACL file Sentinel uses to authenticate to the monitored Redis instances | `sentinel` |
 
 #### Connection Details Secret
 
@@ -193,8 +196,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - When using `existingFilePath`, no volume mounting is performed - the file must be available at the specified path
-- The ACL file must contain at least a 'default' user
-- For Sentinel deployments, include a 'sentinel' user or the 'default' user password will be used
+- The ACL file must contain at least the user named by `auth.acl.defaultUsername` (`default` unless overridden)
+- For Sentinel deployments, include a user named by `auth.acl.sentinelUsername` (`sentinel` unless overridden), or the `defaultUsername` user's password will be used instead
+- This is separate from Sentinel's own ACL, which secures connections *to* the Sentinel process itself - see [Sentinel ACL Configuration](#sentinel-acl-configuration)
 
 ### TLS/SSL Configuration
 
@@ -220,6 +224,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `config.existingConfigmap`    | Name of existing ConfigMap to use    | `""`                   |
 | `config.existingConfigmapKey` | Key in existing ConfigMap            | `""`                   |
 
+### Redis Cluster Configuration (only applicable when `architecture=cluster`)
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `cluster.announceHostnames` | Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes). When enabled, Redis announces pod hostnames instead of IPs, making the cluster more resilient to pod restarts | `false` |
+| `cluster.announceHostnamesOverride` | Map of hostnames to announce for Redis Cluster topology. Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `true` (e.g. `0: foo-bar-0`) | `{}` |
+| `cluster.announceIpsOverride` | Map of IPs to announce for Redis Cluster topology. Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers. Only works if `announceHostnames` is `false` (e.g. `0: 1.2.3.4`) | `{}` |
+| `cluster.startupSleepTime` | Seconds to sleep in the init container before configuring Redis Cluster. Useful when persistence is disabled: gives the cluster time to detect a failed master and elect a new one before the restarting pod rejoins, preventing the old master from re-entering as master with an empty dataset. Set to `0` to disable | `0` |
+| `cluster.config.nodeTimeout` | Cluster node timeout in milliseconds | `15000` |
+| `cluster.config.requireFullCoverage` | Require full coverage to accept queries | `true` |
+
 ### Metrics
 
 | Parameter                                  | Description                                                                             | Default                    |
@@ -229,12 +244,13 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 | `metrics.image.repository`                 | Redis exporter image repository                                                         | `oliver006/redis_exporter` |
 | `metrics.image.tag`                        | Redis exporter image tag                                                                | `v1.80.1-alpine`           |
 | `metrics.image.pullPolicy`                 | Redis exporter image pull policy                                                        | `Always`                   |
-| `metrics.resources.requests.cpu`           | CPU request for the metrics container                                                   | `50m`                      |
-| `metrics.resources.requests.memory`        | Memory request for the metrics container                                                | `64Mi`                     |
-| `metrics.resources.limits.cpu`             | CPU limit for the metrics container                                                     | `nil`                      |
-| `metrics.resources.limits.memory`          | Memory limit for the metrics container                                                  | `64Mi`                     |
+| `metrics.resources`                        | Resource limits and requests for metrics container                                      | `{}`                       |
 | `metrics.extraArgs`                        | Extra arguments for Redis exporter (e.g. `--redis.addr`, `--web.listen-address`)        | `[]`                       |
+| `metrics.tls`                              | Enable TLS for Redis metrics exporter endpoints                                         | `false`                    |
+| `metrics.port`                             | Port that the metrics server and endpoint is running on                                 | `9121`                     |
+| `metrics.service.enabled`                  | Enable the dedicated metrics service                                                    | `true`                     |
 | `metrics.service.type`                     | Metrics service type                                                                    | `ClusterIP`                |
+| `metrics.service.name`                     | Metrics service name                                                                    | `http-metrics`             |
 | `metrics.service.port`                     | Metrics service port                                                                    | `9121`                     |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                                       | `{}`                       |
 | `metrics.service.loadBalancerIP`           | LoadBalancer IP if metrics service type is `LoadBalancer`                               | `""`                       |
@@ -262,16 +278,17 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Persistence
 
-| Parameter                   | Description                                        | Default         |
-| --------------------------- | -------------------------------------------------- | --------------- |
-| `persistence.enabled`       | Enable persistent storage                          | `true`          |
-| `persistence.storageClass`  | Storage class for persistent volume                | `""`            |
-| `persistence.accessMode`    | Access mode for persistent volume                  | `ReadWriteOnce` |
-| `persistence.size`          | Size of persistent volume                          | `8Gi`           |
-| `persistence.mountPath`     | Mount path for Redis data                          | `/data`         |
-| `persistence.annotations`   | Annotations for persistent volume claims           | `{}`            |
-| `persistence.existingClaim` | The name of an existing PVC to use for persistence | `""`            |
-| `persistence.subPath`       | The subdirectory of the volume to mount to         | `""`            |
+| Parameter                   | Description                                                 | Default         |
+| --------------------------- | ----------------------------------------------------------- | --------------- |
+| `persistence.enabled`       | Enable persistent storage                                   | `true`          |
+| `persistence.storageClass`  | Storage class for persistent volume                         | `""`            |
+| `persistence.accessMode`    | Access mode for persistent volume                           | `ReadWriteOnce` |
+| `persistence.size`          | Size of persistent volume                                   | `8Gi`           |
+| `persistence.mountPath`     | Mount path for Redis data                                   | `/data`         |
+| `persistence.annotations`   | Annotations for persistent volume claims                    | `{}`            |
+| `persistence.existingClaim` | The name of an existing PVC to use for persistence          | `""`            |
+| `persistence.subPath`       | The subdirectory of the volume to mount to                  | `""`            |
+| `persistence.labels`        | Map of labels to add to the Persistent Volume Claims (PVCs) | `""`            |
 
 ### Persistent Volume Claim Retention Policy
 
@@ -283,11 +300,9 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 
 ### Resource Management
 
-| Parameter                   | Description    | Default |
-| --------------------------- | -------------- | ------- |
-| `resources.limits.memory`   | Memory limit   | `256Mi` |
-| `resources.requests.cpu`    | CPU request    | `50m`   |
-| `resources.requests.memory` | Memory request | `128Mi` |
+| Parameter   | Description                                | Default |
+| ----------- | ------------------------------------------ | ------- |
+| `resources` | Resource limits and requests for Redis pod | `{}`    |
 
 ### Pod Assignment / Eviction
 
@@ -347,10 +362,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.enabled`                            | Enable Redis Sentinel for high availability. When disabled, pod-0 is master (manual failover) | `false`     |
 | `sentinel.image.registry`                     | Redis Sentinel image registry                                                                 | `docker.io` |
 | `sentinel.image.repository`                   | Redis Sentinel image repository                                                               | `redis`     |
-| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.4.0`     |
+| `sentinel.image.tag`                          | Redis Sentinel image tag                                                                      | `8.8.1`     |
 | `sentinel.image.pullPolicy`                   | Sentinel image pull policy                                                                    | `Always`    |
 | `sentinel.config.announceHostnames`           | Use the hostnames instead of the IP in "announce-ip" commands                                 | `true`      |
 | `sentinel.masterName`                         | Name of the master server                                                                     | `mymaster`  |
+| `sentinel.monitorTarget`                      | Override Sentinel master discovery with an explicit hostname or IP (multi-region/multi-cluster) | `""`        |
+| `sentinel.idSeed`                             | Seed for a stable Sentinel id across restarts; defaults to the release fullname                 | `""`        |
 | `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
 | `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |
@@ -359,9 +376,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.port`                               | Sentinel port                                                                                 | `26379`     |
 | `sentinel.service.type`                       | Kubernetes service type for Sentinel                                                          | `ClusterIP` |
 | `sentinel.service.port`                       | Sentinel service port                                                                         | `26379`     |
-| `sentinel.resources.limits.memory`            | Memory limit for Sentinel pods                                                                | `128Mi`     |
-| `sentinel.resources.requests.cpu`             | CPU request for Sentinel pods                                                                 | `25m`       |
-| `sentinel.resources.requests.memory`          | Memory request for Sentinel pods                                                              | `64Mi`      |
+| `sentinel.resources`                          | Resource limits and requests for Sentinel pods                                                | `{}`        |
 | `sentinel.extraVolumeMounts`                  | Additional volume mounts for Sentinel container                                               | `[]`        |
 | `sentinel.redisShutdownWaitFailover`          | Whether Redis waits for Sentinel failover before shutdown (zero-downtime upgrades)            | `true`      |
 | `sentinel.preStop.enabled`                    | Enable preStop hook for Sentinel container (waits for failover before terminating)            | `true`      |
@@ -377,6 +392,41 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                                                                | `5`         |
 | `sentinel.readinessProbe.failureThreshold`    | Number of failures before pod is marked unready                                               | `6`         |
 | `sentinel.readinessProbe.successThreshold`    | Number of successes to mark probe as successful                                               | `1`         |
+| `sentinel.masterService.affinity`             | Affinity rules for the master discovery deployment (defaults to `affinity` if not set)        | `{}`        |
+
+### Sentinel ACL Configuration
+
+Sentinel can run its own independent ACL, securing connections *to* the Sentinel process itself (e.g. `redis-cli` clients, the preStop failover hook, and the master-discovery controller). This is separate from `auth.acl`, which secures the monitored Redis instances - the two can be enabled independently or together.
+
+| Parameter                            | Description                                                        | Default              |
+| ------------------------------------- | ------------------------------------------------------------------- | --------------------- |
+| `sentinel.acl.enabled`                | Enable custom ACL rules for Sentinel from a secret file            | `false`                |
+| `sentinel.acl.existingSecret`         | Name of existing secret containing the Sentinel ACL rules          | `""`                    |
+| `sentinel.acl.existingSecretACLKey`   | Key in existing secret containing the Sentinel ACL rules           | `""`                    |
+| `sentinel.acl.existingFilePath`       | Path to existing Sentinel ACL file injected by Vault Agent Injector (mutually exclusive with existingSecret) | `""` |
+| `sentinel.acl.defaultUsername`        | ACL username in the Sentinel ACL file used to authenticate to Sentinel | `default`           |
+
+**Using Kubernetes Secret (existingSecret):**
+
+```yaml
+sentinel:
+  acl:
+    enabled: true
+    existingSecret: "my-sentinel-acl"
+    existingSecretACLKey: "sentinel-users.acl"
+```
+
+**ACL File Format Example:**
+
+```
+user default >sentinelpassword ~* +@all
+```
+
+**Notes:**
+
+- `existingSecret` and `existingFilePath` are mutually exclusive
+- The ACL file must contain at least the user named by `sentinel.acl.defaultUsername`
+- Setting the `aclfile` directive alone is what enables ACL auth on the Sentinel process; no other configuration is needed for clients to authenticate with the users it defines
 
 ### ServiceAccount
 
@@ -389,13 +439,16 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Additional Configuration
 
-| Parameter           | Description                                                             | Default |
-| ------------------- | ----------------------------------------------------------------------- | ------- |
-| `extraEnvVars`      | Additional environment variables to set                                 | `[]`    |
-| `extraVolumes`      | Additional volumes to add to the pod                                    | `[]`    |
-| `extraVolumeMounts` | Additional volume mounts for Redis container                            | `[]`    |
-| `extraObjects`      | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
-| `extraPorts`        | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| Parameter             | Description                                                             | Default |
+| --------------------- | ----------------------------------------------------------------------- | ------- |
+| `extraEnvVars`        | Additional environment variables to set                                 | `[]`    |
+| `extraVolumes`        | Additional volumes to add to the pod                                    | `[]`    |
+| `extraVolumeMounts`   | Additional volume mounts for Redis container                            | `[]`    |
+| `extraObjects`        | A list of additional Kubernetes objects to deploy alongside the release | `[]`    |
+| `extraPorts`          | Additional ports to be exposed by Services and StatefulSet              | `[]`    |
+| `extraInitContainers` | Additional init containers to add to the pod                            | `[]`    |
+| `extraContainers`     | Additional containers to add to the pod                                 | `[]`    |
+| `dnsConfig`           | DNS configuration for the pod                                           | `{}`    |
 
 ### Custom Scripts and Hooks
 
@@ -408,12 +461,12 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 
 ### Configurations for the Job-Template
 
-| Parameter                                  | Description                                      | Default |
-| ------------------------------------------ | ------------------------------------------------ | ------- |
-| `clusterInitJob.resources`                 | Resource limits and requests for clusterInit Job | `{}`    |
-| `clusterInitJob.resources.limits.memory`   | Memory limit for clusterInit Job                 | `128Mi` |
-| `clusterInitJob.resources.requests.cpu`    | CPU request for clusterInit Job                  | `10m`   |
-| `clusterInitJob.resources.requests.memory` | Memory request for clusterInit Job               | `64Mi`  |
+| Parameter                     | Description                                                                        | Default |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| `clusterInitJob.resources`    | Resource limits and requests for clusterInit Job                                   | `{}`    |
+| `clusterInitJob.nodeSelector` | Node selector for the clusterInit Job (defaults to `.Values.nodeSelector` if unset)| `{}`    |
+| `clusterInitJob.tolerations`  | Tolerations for the clusterInit Job (defaults to `.Values.tolerations` if unset)   | `[]`    |
+| `clusterInitJob.affinity`     | Affinity rules for the clusterInit Job (defaults to `.Values.affinity` if unset)   | `{}`    |
 
 #### Extra Objects
 
@@ -518,7 +571,7 @@ kubectl run redis-client --rm --tty -i --restart='Never' \
 redis-cli -h my-redis-sentinel -p 26379 sentinel get-master-addr-by-name mymaster
 
 # Connect to the current master (address from previous command)
-redis-cli -h <master-ip> -p 6379 -a $REDIS_PASSWORD
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h <master-ip> -p 6379
 ```
 
 ### Master-Replica without Sentinel
@@ -568,6 +621,43 @@ helm install my-redis ./charts/redis -f values-cluster.yaml
 - Redis Cluster supports single database only
 - Data is automatically divided across multiple nodes for improved performance
 - With cluster-aware client, user can connect to any node (directly or via service) and requests will be automatically redirected, based on MOVED response
+
+#### External access
+
+A Redis Cluster client connects to one node and is then redirected to the others using the addresses returned by `CLUSTER NODES` / `CLUSTER SLOTS`. Inside Kubernetes the chart announces pod hostnames/IPs, which clients outside the cluster cannot reach. Enable `cluster.externalAccess` so each node announces an externally-reachable address and (optionally) gets its own Service.
+
+Because a Redis node must announce a fixed address, the external addresses have to be known up front — pre-allocate one static `LoadBalancer` IP per pod (or use `NodePort` with the nodes' external IPs). Provide exactly one entry per pod in `cluster.externalAccess.addresses` (ordinal `0` first).
+
+```yaml
+# values-cluster-external.yaml
+architecture: cluster
+replicaCount: 6
+clusterReplicaCount: 1
+cluster:
+  externalAccess:
+    enabled: true
+    # One externally-reachable address per pod (pod-0 first). IPs use cluster-announce-ip,
+    # hostnames use cluster-announce-hostname.
+    addresses:
+      - 203.0.113.10
+      - 203.0.113.11
+      - 203.0.113.12
+      - 203.0.113.13
+      - 203.0.113.14
+      - 203.0.113.15
+    service:
+      type: LoadBalancer
+      # Pre-allocated static LoadBalancer IPs, matching the addresses above
+      loadBalancerIPs:
+        - 203.0.113.10
+        - 203.0.113.11
+        - 203.0.113.12
+        - 203.0.113.13
+        - 203.0.113.14
+        - 203.0.113.15
+```
+
+Each per-pod Service exposes both the client port (`service.port`) and the cluster bus port (`service.clusterPort`); both must be reachable by clients and by the other nodes.
 
 ## Upgrading
 

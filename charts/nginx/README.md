@@ -57,6 +57,10 @@ To run Nginx on port 8080 with matching health checks:
 
 ```yaml
 # my-values.yaml
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
 serverConfig: |
   server {
     listen 0.0.0.0:8080;
@@ -105,6 +109,61 @@ service:
       name: https
 ```
 
+### Cloning a Static Site from Git Using an SSH Key
+
+`podSecurityContext.fsGroup` defaults to `101` and applies to **all** volumes in the pod, including any
+`extraVolumes` you mount yourself. If you mount an SSH private key as a Secret for
+`cloneStaticSiteFromGit` (or any other Git-over-SSH use case), Git/SSH will still reject the key even
+if you set a restrictive `defaultMode` such as `0600`, because the file's group ownership is changed
+to `101` and the permission bits end up looking like `0640` to SSH.
+
+To fix this, either set the secret's `defaultMode` to `0640` so the group-owned permissions are what
+SSH expects:
+
+```yaml
+# my-values.yaml
+extraVolumes:
+  - name: git-credential-ssh-key
+    secret:
+      secretName: git-credential-ssh-key
+      defaultMode: 0640
+extraVolumeMounts:
+  - name: git-credential-ssh-key
+    mountPath: /root/.ssh/
+    readOnly: true
+cloneStaticSiteFromGit:
+  enabled: true
+  repository: git@example.com:my-org/my-site.git
+  branch: main
+```
+
+or unset `podSecurityContext.fsGroup` if your workload doesn't otherwise need it:
+
+```yaml
+# my-values.yaml
+podSecurityContext:
+  fsGroup: null
+```
+
+### Cloning a Static Site from Git with a Build Output Subdirectory
+
+If your repository puts the rendered site in a subdirectory (e.g. a Hugo or Zola site pre-built into
+`public/`), set `cloneStaticSiteFromGit.subPath` to serve only that subdirectory as the web root instead
+of the whole repository. The Git init/sync containers still clone the full repository; only the nginx
+container's mount is scoped to the subdirectory:
+
+```yaml
+# my-values.yaml
+cloneStaticSiteFromGit:
+  enabled: true
+  repository: https://example.com/my-org/my-site.git
+  branch: main
+  subPath: public
+```
+
+Note that this does not run a build step (e.g. `hugo build`) inside the container — the subdirectory
+must already contain the built output in the repository.
+
 ## Configuration
 
 The following table lists the configurable parameters of the Nginx chart and their default values.
@@ -118,13 +177,20 @@ The following table lists the configurable parameters of the Nginx chart and the
 
 ### Common Parameters
 
-| Parameter           | Description                                 | Default |
-| ------------------- | ------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override nginx.fullname | `""`    |
-| `fullnameOverride`  | String to fully override nginx.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override nginx.fullname        | `""`    |
+| `fullnameOverride`  | String to fully override nginx.fullname            | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
 
+### Deployment Parameters
+
+| Parameter              | Description                                         | Default |
+| ---------------------- | --------------------------------------------------- | ------- |
+| `replicaCount`         | Number of Nginx replicas to deploy                  | `1`     |
+| `revisionHistoryLimit` | Number of revisions to keep in history for rollback | `10`    |
 
 ### Nginx Image Parameters
 
@@ -134,6 +200,18 @@ The following table lists the configurable parameters of the Nginx chart and the
 | `image.repository` | Nginx image repository  | `nginx`                                                                                   |
 | `image.tag`        | Nginx image tag         | `"1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e"` |
 | `image.pullPolicy` | Nginx image pull policy | `Always`                                                                                  |
+
+### Git Image Parameters
+
+Used by the `git-clone-repository` init container and the `git-repo-syncer` sidecar when `cloneStaticSiteFromGit.enabled` is set.
+
+| Parameter                                    | Description            | Default       |
+| -------------------------------------------- | ---------------------- | ------------- |
+| `cloneStaticSiteFromGit.image.registry`      | Git image registry     | `docker.io`   |
+| `cloneStaticSiteFromGit.image.repository`    | Git image repository   | `alpine/git`  |
+| `cloneStaticSiteFromGit.image.tag`           | Git image tag          | `v2.52.0`     |
+| `cloneStaticSiteFromGit.image.pullPolicy`    | Git image pull policy  | `IfNotPresent`|
+| `cloneStaticSiteFromGit.image.pullSecrets`   | Git image pull secrets | `[]`          |
 
 
 ### Nginx Configuration Parameters
@@ -204,7 +282,9 @@ containerPorts:
 | ------------------------------- | -------------------------------------------------------------- | ----------- |
 | `service.type`                  | Nginx service type                                             | `ClusterIP` |
 | `service.ports`                 | Array of service ports (advanced configuration) - see examples | `[]`        |
+| `service.clusterIP`             | Kubernetes service static ClusterIP                            | `""`        |
 | `service.internalTrafficPolicy` | Kubernetes service internal traffic policy                     | `Cluster`   |
+| `service.trafficDistribution`   | Kubernetes service traffic distribution                        | `""`        |
 | `service.annotations`           | Additional annotations to add to the service                   | `{}`        |
 
 #### Service Ports Examples
@@ -236,9 +316,10 @@ service:
 
 ### Resources Parameters
 
-| Parameter   | Description                                | Default |
-| ----------- | ------------------------------------------ | ------- |
-| `resources` | Resource limits and requests for Nginx pod | `{}`    |
+| Parameter        | Description                                                                | Default |
+| ---------------- | --------------------------------------------------------------------------- | ------- |
+| `resources`      | Resource limits and requests for Nginx pod                                | `{}`    |
+| `lifecycleHooks` | for the Nginx container to automate configuration before or after startup | `{}`    |
 
 
 ### Health Check Parameters
@@ -317,9 +398,7 @@ readinessProbe:
 | `metrics.image.repository`                 | Nginx exporter image repository                                | `nginx/nginx-prometheus-exporter` |
 | `metrics.image.tag`                        | Nginx exporter image tag                                       | `"1.5@sha256:..."`                |
 | `metrics.image.pullPolicy`                 | Nginx exporter image pull policy                               | `Always`                          |
-| `metrics.resources.limits.memory`          | Memory limit for metrics container                             | `64Mi`                            |
-| `metrics.resources.requests.cpu`           | CPU request for metrics container                              | `50m`                             |
-| `metrics.resources.requests.memory`        | Memory request for metrics container                           | `64Mi`                            |
+| `metrics.resources`                        | Resource limits and requests for metrics container             | `{}`                              |
 | `metrics.extraArgs`                        | Extra arguments for nginx exporter                             | `[]`                              |
 | `metrics.service.type`                     | Metrics service type                                           | `ClusterIP`                       |
 | `metrics.service.port`                     | Metrics service port                                           | `9113`                            |
@@ -456,6 +535,9 @@ All containers in `sidecars` will be added to the pod and run alongside the main
 | `priorityClassName` | Priority class for pod eviction   | `""`    |
 | `tolerations`       | Tolerations for pod assignment    | `[]`    |
 | `affinity`          | Affinity rules for pod assignment | `{}`    |
+| `topologySpreadConstraints` | Topology spread constraints for pod assignment | `[]`    |
+| `dnsPolicy`         | DNS policy for the pod            | `""`    |
+| `dnsConfig`         | DNS configuration for the pod     | `{}`    |
 
 ### DaemonSet Configuration Parameters
 

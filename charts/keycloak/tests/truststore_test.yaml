@@ -1,0 +1,64 @@
+suite: test keycloak truststore password handling
+templates:
+  - templates/statefulset.yaml
+  - templates/secret.yaml
+tests:
+  - it: should read the truststore password from the secret that holds it
+    template: templates/statefulset.yaml
+    set:
+      tls:
+        truststoreEnabled: true
+        truststorePassword: changeit
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KC_HTTPS_TRUST_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-keycloak
+                key: truststore-password
+
+  - it: should write the truststore password into the same secret
+    template: templates/secret.yaml
+    documentIndex: 0
+    set:
+      tls:
+        truststoreEnabled: true
+        truststorePassword: changeit
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-keycloak
+      - isNotNull:
+          path: data["truststore-password"]
+
+  - it: should read the truststore password from an existing truststore secret
+    template: templates/statefulset.yaml
+    set:
+      tls:
+        truststoreEnabled: true
+        truststoreExistingSecret: keycloak-truststore
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KC_HTTPS_TRUST_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keycloak-truststore
+                key: truststore-password
+
+  - it: should not pass the truststore password as a command line argument
+    template: templates/statefulset.yaml
+    set:
+      tls:
+        truststoreEnabled: true
+        truststorePassword: changeit
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --https-trust-store-file=/opt/keycloak/truststore/truststore.jks
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --https-trust-store-password=changeit

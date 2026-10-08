@@ -6,7 +6,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ printf "%s-init-scripts" (include "postgres.fullname" .) }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "postgres.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}

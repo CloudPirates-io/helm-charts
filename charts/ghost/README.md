@@ -195,13 +195,14 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Common Parameters
 
-| Parameter           | Description                                 | Default |
-| ------------------- | ------------------------------------------- | ------- |
-| `nameOverride`      | String to partially override ghost.fullname | `""`    |
-| `fullnameOverride`  | String to fully override ghost.fullname     | `""`    |
-| `commonLabels`      | Labels to add to all deployed objects       | `{}`    |
-| `commonAnnotations` | Annotations to add to all deployed objects  | `{}`    |
-| `replicaCount`      | Number of Ghost replicas to deploy          | `1`     |
+| Parameter           | Description                                        | Default |
+| ------------------- | -------------------------------------------------- | ------- |
+| `nameOverride`      | String to partially override ghost.fullname        | `""`    |
+| `fullnameOverride`  | String to fully override ghost.fullname            | `""`    |
+| `namespaceOverride` | String to override the namespace for all resources | `""`    |
+| `commonLabels`      | Labels to add to all deployed objects              | `{}`    |
+| `commonAnnotations` | Annotations to add to all deployed objects         | `{}`    |
+| `replicaCount`      | Number of Ghost replicas to deploy                 | `1`     |
 
 ### Image Parameters
 
@@ -287,9 +288,12 @@ The following tables list the configurable parameters of the Ghost chart organiz
 
 ### Init Container Parameters
 
-| Parameter                             | Description                  | Default          |
-| ------------------------------------- | ---------------------------- | ---------------- |
-| `initContainers.waitForMariadb.image` | MariaDB init container image | `mariadb:12.0.2` |
+| Parameter                                  | Description                                                                     | Default    |
+| ------------------------------------------ | ------------------------------------------------------------------------------- | ---------- |
+| `initContainers.waitForMariadb.image`      | MariaDB init container image (leave empty to use registry/repository/tag)         | `""`       |
+| `initContainers.waitForMariadb.registry`   | MariaDB init container image registry (overrides `global.imageRegistry`)          | `""`       |
+| `initContainers.waitForMariadb.repository` | MariaDB init container image repository                                           | `mariadb`  |
+| `initContainers.waitForMariadb.tag`        | MariaDB init container image tag                                                  | `12.0.2`   |
 
 ### Autoscaling Parameters
 

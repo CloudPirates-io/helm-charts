@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override ghost.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -24,7 +26,7 @@ image:
   ## @param image.repository Ghost image repository
   repository: ghost
   ## @param image.tag Ghost image tag
-  tag: "6.21.2@sha256:8531387dd7fd7df895dc6642f1d2a9d2875ac244858a4170d3037622af0a8adb"
+  tag: "6.69.0@sha256:55131b90d48c3cecae6c085f873b2067542ababd286b12d08474b2b34328e266"
   ## @param image.pullPolicy Ghost image pull policy
   pullPolicy: Always
 
@@ -84,6 +86,37 @@ ingress:
           pathType: Prefix
   ## @param ingress.tls An array with the tls configuration
   tls: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - ghost.localhost
+      - admin.ghost.localhost
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Service Account parameters
 serviceAccount:
@@ -200,11 +233,19 @@ extraObjects: []
 ## @section Init Container Configuration
 ## Configuration for init containers
 initContainers:
-  ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting
   waitForMariadb:
-    image: "mariadb:12.0.2@sha256:03a03a6817bb9eaa21e5aed1b734d432ec3f80021f5a2de1795475f158217545"
+    ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
+    image: ""
+    ## @param initContainers.waitForMariadb.registry MariaDB init container image registry (overrides global.imageRegistry)
+    registry: ""
+    ## @param initContainers.waitForMariadb.repository MariaDB init container image repository
+    repository: mariadb
+    ## @param initContainers.waitForMariadb.tag MariaDB init container image tag
+    tag: "13.0.2@sha256:f1bba652ba57bea3099ca2fe1af692af537c27d96e0bcde39dce29e2ba1ec4f3"
 
 config:
+  ## @param config.url Public site URL. If not set, defaults to the first ingress host when ingress is enabled, otherwise falls back to the pod's own loopback address over HTTP (so background jobs like ActivityPub that self-fetch this URL during startup don't deadlock waiting on the Service's readiness-gated endpoints).
+  url: ""
   database:
     client: "mysql"
     externalConnection:

@@ -36,4 +36,8 @@ data:
     {{- if and .Values.auth.acl.enabled (eq .Values.architecture "standalone") }}
     aclfile {{ include "redis.auth.acl.path" . }}
     {{- end }}
+    {{- if and .Values.extraConfig (eq .Values.architecture "standalone") }}
+    # Extra configuration from values.yaml
+    {{- .Values.extraConfig | nindent 4 }}
+    {{- end }}
 {{- end }}

@@ -1,0 +1,135 @@
+suite: test kafka common parameters
+set:
+  image:
+    tag: 4.0.0@sha256:testdigest123
+tests:
+  - it: should use default values when nothing is overridden
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-kafka
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: kafka
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/apache/kafka:4.0.0@sha256:testdigest123
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should respect global.imageRegistry override
+    template: statefulset.yaml
+    set:
+      global:
+        imageRegistry: "my-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry.com/apache/kafka:4.0.0@sha256:testdigest123
+
+  - it: should respect global.imagePullSecrets
+    template: statefulset.yaml
+    set:
+      global:
+        imagePullSecrets:
+          - my-secret-1
+          - my-secret-2
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: my-secret-1
+      - equal:
+          path: spec.template.spec.imagePullSecrets[1].name
+          value: my-secret-2
+
+  - it: should respect nameOverride
+    template: statefulset.yaml
+    set:
+      nameOverride: "custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-custom-name
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-name
+
+  - it: should respect fullnameOverride
+    template: statefulset.yaml
+    set:
+      fullnameOverride: "completely-custom-name"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: completely-custom-name
+
+  - it: should add commonLabels to all resources
+    template: statefulset.yaml
+    set:
+      commonLabels:
+        environment: "test"
+        team: "platform"
+    asserts:
+      - equal:
+          path: metadata.labels.environment
+          value: test
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: platform
+
+  - it: should add commonAnnotations to all resources
+    template: statefulset.yaml
+    set:
+      commonAnnotations:
+        deployment.kubernetes.io/revision: "1"
+    asserts:
+      - equal:
+          path: metadata.annotations["deployment.kubernetes.io/revision"]
+          value: "1"
+
+  - it: should respect image.registry override
+    template: statefulset.yaml
+    set:
+      image:
+        registry: "custom-registry.io"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/apache/kafka:4.0.0@sha256:testdigest123
+
+  - it: should respect image.repository override
+    template: statefulset.yaml
+    set:
+      image:
+        repository: "custom/kafka"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/custom/kafka:4.0.0@sha256:testdigest123
+
+  - it: should respect image.imagePullPolicy override
+    template: statefulset.yaml
+    set:
+      image:
+        imagePullPolicy: "IfNotPresent"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should prioritize global.imageRegistry over image.registry
+    template: statefulset.yaml
+    set:
+      global:
+        imageRegistry: "global-registry.com"
+      image:
+        registry: "image-registry.com"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: global-registry.com/apache/kafka:4.0.0@sha256:testdigest123

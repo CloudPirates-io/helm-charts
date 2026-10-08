@@ -27,6 +27,9 @@
                 }
             }
         },
+        "clusterDomain": {
+            "type": "string"
+        },
         "commonAnnotations": {
             "type": "object"
         },
@@ -220,6 +223,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "networkPolicy": {
             "type": "object",
             "properties": {
@@ -285,7 +291,10 @@
                     "type": "integer"
                 },
                 "minAvailable": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },

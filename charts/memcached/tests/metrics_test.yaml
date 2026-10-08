@@ -21,14 +21,8 @@ tests:
       - equal:
           path: spec.template.spec.containers[1].ports[0].containerPort
           value: 9150
-      - equal:
+      - isEmpty:
           path: spec.template.spec.containers[1].resources
-          value:
-            limits:
-              memory: 64Mi
-            requests:
-              cpu: 50m
-              memory: 64Mi
 
   - it: should respect config change
     set:

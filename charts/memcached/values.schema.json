@@ -71,6 +71,72 @@
         "fullnameOverride": {
             "type": "string"
         },
+        "gatewayAPI": {
+            "type": "object",
+            "properties": {
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "parentRefs": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "namespace": {
+                                        "type": "string"
+                                    },
+                                    "sectionName": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "rules": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "matches": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "global": {
             "type": "object",
             "properties": {
@@ -191,28 +257,7 @@
                     }
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -266,6 +311,9 @@
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "nodeSelector": {
@@ -331,11 +379,20 @@
         "resources": {
             "type": "object"
         },
+        "revisionHistoryLimit": {
+            "type": "integer"
+        },
         "service": {
             "type": "object",
             "properties": {
+                "clusterIP": {
+                    "type": "string"
+                },
                 "port": {
                     "type": "integer"
+                },
+                "publishNotReadyAddresses": {
+                    "type": "boolean"
                 },
                 "type": {
                     "type": "string"

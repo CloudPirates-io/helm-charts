@@ -1,0 +1,22 @@
+{{- if .Values.clusterOperator.webhook.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  name: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.clusterOperator.webhook.service.type }}
+  ports:
+    - name: https
+      port: {{ .Values.clusterOperator.webhook.service.port }}
+      targetPort: webhook-server
+      protocol: TCP
+  selector:
+    {{- include "rmqco.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq-operator
+{{- end }}

@@ -31,7 +31,7 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: redis
       protocol: TCP
-      name: redis
+      name: tcp-redis
       {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}

@@ -1,0 +1,214 @@
+suite: test data port wiring when tls is enabled
+set:
+  architecture: replication
+  auth:
+    password: testpass123
+tests:
+  - it: should point replicaof at the TLS port when TLS is enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$CURRENT_MASTER 6380"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6380"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$[A-Z_]+ 6379"
+
+  - it: should point replicaof at the service port by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$CURRENT_MASTER 6379"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6379"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$[A-Z_]+ 6380"
+
+  - it: should point replicaof at the TLS port without sentinel when TLS is enabled
+    template: statefulset.yaml
+    set:
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6380"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6379"
+
+  - it: should point replicaof at the service port without sentinel by default
+    template: statefulset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6379"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replicaof \\$MASTER_HOSTNAME 6380"
+
+  - it: should announce the TLS port when announceHostnames and TLS are enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        config:
+          announceHostnames: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replica-announce-port 6380"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "slave-announce-port 6380"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "announce-port 6379"
+
+  - it: should announce the service port when announceHostnames is enabled by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        config:
+          announceHostnames: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "replica-announce-port 6379"
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "slave-announce-port 6379"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "announce-port 6380"
+
+  - it: should monitor the TLS port from sentinel when TLS is enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "sentinel monitor mymaster \\$\\{MASTER_HOST\\} 6380 2"
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "sentinel monitor mymaster \\$\\{MASTER_HOST\\} 6379 2"
+
+  - it: should monitor the service port from sentinel by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "sentinel monitor mymaster \\$\\{MASTER_HOST\\} 6379 2"
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "sentinel monitor mymaster \\$\\{MASTER_HOST\\} 6380 2"
+
+  - it: should reach the data port over TLS from the sentinel sidecar when TLS is enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "while ! valkey-cli -a \"\\$\\{VALKEY_PASSWORD\\}\" -h \"\\$\\{VALKEY_HOST\\}\" -p 6380 --tls --cert /etc/valkey/tls/tls\\.crt --key /etc/valkey/tls/tls\\.key --cacert /etc/valkey/tls/ca\\.crt ping"
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "ROLE_INFO=\\$\\(valkey-cli -h \"\\$\\{VALKEY_HOST\\}\" -p 6380 --tls --cert /etc/valkey/tls/tls\\.crt --key /etc/valkey/tls/tls\\.key --cacert /etc/valkey/tls/ca\\.crt -a"
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "-p 6379"
+
+  - it: should reach the data port in plaintext from the sentinel sidecar by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "while ! valkey-cli -a \"\\$\\{VALKEY_PASSWORD\\}\" -h \"\\$\\{VALKEY_HOST\\}\" -p 6379 ping"
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "ROLE_INFO=\\$\\(valkey-cli -h \"\\$\\{VALKEY_HOST\\}\" -p 6379 -a"
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: "--tls"
+
+  - it: should use the TLS port and TLS client args in the preStop scripts when TLS is enabled
+    template: prestop-configmap.yaml
+    set:
+      sentinel:
+        enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: "VALKEY_PORT=\"6380\""
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: "valkey-cli -h \"\\$VALKEY_LOOPBACK\" -p \"\\$VALKEY_PORT\" --tls --cert /etc/valkey/tls/tls\\.crt --key /etc/valkey/tls/tls\\.key --cacert /etc/valkey/tls/ca\\.crt \"\\$@\""
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: "VALKEY_PORT=\"6380\""
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: "valkey-cli -h \"\\$VALKEY_LOOPBACK\" -p \"\\$VALKEY_PORT\" --tls --cert /etc/valkey/tls/tls\\.crt --key /etc/valkey/tls/tls\\.key --cacert /etc/valkey/tls/ca\\.crt \"\\$@\""
+
+  - it: should use the service port without TLS client args in the preStop scripts by default
+    template: prestop-configmap.yaml
+    set:
+      sentinel:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: "VALKEY_PORT=\"6379\""
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: "valkey-cli -h \"\\$VALKEY_LOOPBACK\" -p \"\\$VALKEY_PORT\" \"\\$@\""
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: "--tls"
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: "VALKEY_PORT=\"6379\""
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: "valkey-cli -h \"\\$VALKEY_LOOPBACK\" -p \"\\$VALKEY_PORT\" \"\\$@\""
+      - notMatchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: "--tls"

@@ -1,0 +1,422 @@
+suite: test redis authentication process arguments
+templates:
+  - statefulset.yaml
+  - sentinel-master-deployment.yaml
+  - job.yaml
+  - prestop-configmap.yaml
+tests:
+  - it: should write standalone authentication to the generated config
+    template: statefulset.yaml
+    set:
+      auth.password: testpassword
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'printf .*requirepass %s.*"\$REDIS_PASSWORD".*/tmp/redis.conf'
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: redis-config
+            mountPath: /tmp
+
+  - it: should start standalone redis without a password argument
+    template: statefulset.yaml
+    set:
+      auth.password: testpassword
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'CONFIG_FILE="/tmp/redis.conf"'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: '--requirepass|(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: redis-config
+            mountPath: /tmp
+
+  - it: should expose cli authentication through the existing secret
+    template: statefulset.yaml
+    set:
+      auth.existingSecret: redis-auth
+      auth.existingSecretPasswordKey: password
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: redis-auth
+                key: password
+
+  - it: should keep standalone probes free of password arguments
+    template: statefulset.yaml
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should keep replication init commands free of password arguments
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+
+  - it: should keep sentinel startup and probes free of password arguments
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].livenessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+
+  - it: should authenticate sentinel discovery without password arguments
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_SENTINEL_PASSWORD:-\$REDIS_PASSWORD\}" redis-cli'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should inherit sentinel master discovery authentication
+    template: sentinel-master-deployment.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      sentinel.masterService.enabled: true
+      auth.sentinel: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'kubectl exec -i'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should keep redis cluster initialization free of password arguments
+    template: job.yaml
+    set:
+      architecture: cluster
+      replicaCount: 6
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDISCLI_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should keep redis prestop commands free of password arguments
+    template: prestop-configmap.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'export REDISCLI_AUTH="\$\{REDIS_PASSWORD\}"'
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should keep sentinel prestop commands free of password arguments
+    template: prestop-configmap.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+    asserts:
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli'
+      - notMatchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should keep acl probes free of password arguments
+    template: statefulset.yaml
+    set:
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: 'export REDISCLI_AUTH=\$\(awk'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should export acl init authentication before redis cli use
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(?s)export REDISCLI_AUTH="\$REDIS_PASSWORD".*redis-cli'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should export acl sentinel authentication before redis cli use
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?s)export REDISCLI_AUTH="\$REDIS_PASSWORD".*redis-cli'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_SENTINEL_PASSWORD:-\$REDIS_PASSWORD\}" redis-cli'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should select acl sentinel probe authentication with fallback
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: 'export REDIS_PASSWORD=\$\(awk .*\$2=="sentinel"'
+      - matchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: '\[ -z "\$REDIS_PASSWORD" \] && export REDIS_PASSWORD=\$\(awk .*\$2=="default"'
+      - matchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: 'export REDISCLI_AUTH="\$REDIS_PASSWORD"'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should export acl authentication for every redis probe
+    template: statefulset.yaml
+    set:
+      startupProbe.enabled: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].livenessProbe.exec.command[2]
+          pattern: '(?s)export REDISCLI_AUTH=\$\(awk.*redis-cli'
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: '(?s)export REDISCLI_AUTH=\$\(awk.*redis-cli'
+      - matchRegex:
+          path: spec.template.spec.containers[0].startupProbe.exec.command[2]
+          pattern: '(?s)export REDISCLI_AUTH=\$\(awk.*redis-cli'
+
+  - it: should export acl cluster job authentication
+    template: job.yaml
+    set:
+      architecture: cluster
+      replicaCount: 6
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'export REDIS_PASSWORD="\$ACL_PASSWORD"'
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should export distinct acl prestop authentication
+    template: prestop-configmap.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      auth.sentinel: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'export REDIS_SENTINEL_PASSWORD="\$SENTINEL_ACL_PASSWORD"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'export REDIS_SENTINEL_PASSWORD="\$SENTINEL_ACL_PASSWORD"'
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - notMatchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should pass acl sentinel master discovery authentication over stdin
+    template: sentinel-master-deployment.yaml
+    set:
+      architecture: replication
+      replicaCount: 3
+      sentinel.enabled: true
+      sentinel.masterService.enabled: true
+      auth.sentinel: true
+      auth.acl.enabled: true
+      auth.acl.existingSecret: redis-acl
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'ACL_PASSWORD=\$\(awk'
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: 'printf .*"\$REDIS_PASSWORD".*kubectl exec -i'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '(?s)REDIS_PASSWORD="\$ACL_PASSWORD".*export REDISCLI_AUTH="\$REDIS_PASSWORD".*printf'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+
+  - it: should avoid authentication environment when auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.enabled: false
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+      - notExists:
+          path: spec.template.spec.containers[0].env
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'CONFIG_FILE="/usr/local/etc/redis/redis.conf"'
+
+  - it: should avoid metrics authentication environment when auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.enabled: false
+      metrics.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password
+
+  - it: should avoid sentinel authentication environment when auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.enabled: false
+      architecture: replication
+      sentinel.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[1].env
+
+  - it: should keep sentinel authentication environment when only sentinel auth is disabled
+    template: statefulset.yaml
+    set:
+      auth.sentinel: false
+      architecture: replication
+      sentinel.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: RELEASE-NAME-redis
+                key: redis-password

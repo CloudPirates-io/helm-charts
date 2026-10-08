@@ -14,6 +14,9 @@
                 "acl": {
                     "type": "object",
                     "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -24,6 +27,9 @@
                             "type": "string"
                         },
                         "existingSecretACLKey": {
+                            "type": "string"
+                        },
+                        "sentinelUsername": {
                             "type": "string"
                         }
                     }
@@ -36,6 +42,9 @@
                 },
                 "existingSecretPasswordKey": {
                     "type": "string"
+                },
+                "metrics": {
+                    "type": "boolean"
                 },
                 "password": {
                     "type": "string"
@@ -51,6 +60,12 @@
                 "announceHostnames": {
                     "type": "boolean"
                 },
+                "announceHostnamesOverride": {
+                    "type": "object"
+                },
+                "announceIpsOverride": {
+                    "type": "object"
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -61,6 +76,52 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "addresses": {
+                            "type": "array"
+                        },
+                        "busPort": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "port": {
+                            "type": "string"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "busNodePorts": {
+                                    "type": "array"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "nodePorts": {
+                                    "type": "array"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "startupSleepTime": {
+                    "type": "integer"
                 }
             }
         },
@@ -70,32 +131,23 @@
         "clusterInitJob": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object"
+                },
+                "nodeSelector": {
+                    "type": "object"
+                },
+                "recoveryTimeout": {
+                    "type": "integer"
+                },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
+                },
+                "runtimeClassName": {
+                    "type": "string"
+                },
+                "tolerations": {
+                    "type": "array"
                 }
             }
         },
@@ -194,13 +246,36 @@
                 }
             }
         },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "externalMaster": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "string"
+                }
+            }
+        },
         "extraConfig": {
             "type": "string"
+        },
+        "extraContainers": {
+            "type": "array"
         },
         "extraEnvVars": {
             "type": "array"
         },
         "extraFlags": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -250,31 +325,7 @@
             "type": "object",
             "properties": {
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 }
             }
         },
@@ -330,32 +381,11 @@
                         }
                     }
                 },
+                "port": {
+                    "type": "integer"
+                },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -365,6 +395,9 @@
                         },
                         "clusterIP": {
                             "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
                         },
                         "ipFamilies": {
                             "type": "array"
@@ -377,6 +410,9 @@
                         },
                         "loadBalancerSourceRanges": {
                             "type": "array"
+                        },
+                        "name": {
+                            "type": "string"
                         },
                         "nodePort": {
                             "type": "string"
@@ -423,6 +459,9 @@
                             "type": "object"
                         }
                     }
+                },
+                "tls": {
+                    "type": "boolean"
                 }
             }
         },
@@ -462,10 +501,16 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "minAvailable": {
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
@@ -483,6 +528,9 @@
                 },
                 "existingClaim": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object"
                 },
                 "mountPath": {
                     "type": "string"
@@ -556,38 +604,37 @@
             "type": "integer"
         },
         "resources": {
-            "type": "object",
-            "properties": {
-                "limits": {
-                    "type": "object",
-                    "properties": {
-                        "cpu": {
-                            "type": "string"
-                        },
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "requests": {
-                    "type": "object",
-                    "properties": {
-                        "cpu": {
-                            "type": "string"
-                        },
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
+            "type": "object"
         },
         "revisionHistoryLimit": {
             "type": "integer"
         },
+        "runtimeClassName": {
+            "type": "string"
+        },
         "sentinel": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -613,6 +660,9 @@
                 },
                 "failoverTimeout": {
                     "type": "integer"
+                },
+                "idSeed": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "object",
@@ -660,6 +710,9 @@
                 "masterService": {
                     "type": "object",
                     "properties": {
+                        "affinity": {
+                            "type": "object"
+                        },
                         "annotations": {
                             "type": "object"
                         },
@@ -690,36 +743,18 @@
                             "type": "string"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "type": {
                             "type": "string"
+                        },
+                        "verbose": {
+                            "type": "boolean"
                         }
                     }
+                },
+                "monitorTarget": {
+                    "type": "string"
                 },
                 "parallelSyncs": {
                     "type": "integer"
@@ -765,31 +800,7 @@
                     "type": "boolean"
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -939,8 +950,52 @@
         "topologySpreadConstraints": {
             "type": "array"
         },
+        "updateStrategy": {
+            "type": "object",
+            "properties": {
+                "rollingUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "maxUnavailable": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "useDeployment": {
             "type": "boolean"
+        },
+        "volumePermissions": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "resources": {
+                    "type": "object"
+                }
+            }
         }
     }
 }

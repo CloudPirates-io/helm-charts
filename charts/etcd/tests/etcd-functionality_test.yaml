@@ -65,6 +65,21 @@ tests:
           path: spec.template.spec.containers[0].args
           content: "--listen-client-urls=http://127.0.0.1:2379"
 
+  - it: should configure cluster domain
+    template: statefulset.yaml
+    set:
+      clusterDomain: "unit.test"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--advertise-client-urls=http://$(POD_NAME).RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2379"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--initial-advertise-peer-urls=http://$(POD_NAME).RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--initial-cluster=RELEASE-NAME-etcd-0=http://RELEASE-NAME-etcd-0.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380,RELEASE-NAME-etcd-1=http://RELEASE-NAME-etcd-1.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380,RELEASE-NAME-etcd-2=http://RELEASE-NAME-etcd-2.RELEASE-NAME-etcd-headless.NAMESPACE.svc.unit.test:2380"
+
   - it: should add extraArgs
     template: statefulset.yaml
     set:
@@ -213,7 +228,60 @@ tests:
     asserts:
       - equal:
           path: spec.minAvailable
-          value: "2"
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set integer minAvailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set percentage minAvailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: "50%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "50%"
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should set maxUnavailable in PDB by default
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - isNull:
+          path: spec.minAvailable
+
+  - it: should set maxUnavailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2
+      - isNull:
+          path: spec.minAvailable
 
   # NetworkPolicy
   - it: should create NetworkPolicy when enabled

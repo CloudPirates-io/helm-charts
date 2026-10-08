@@ -54,6 +54,9 @@
                 "existingConfigmap": {
                     "type": "string"
                 },
+                "existingConfigmapKey": {
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
                 }
@@ -73,10 +76,38 @@
                 }
             }
         },
-        "customUser": {
+        "customLivenessProbe": {
             "type": "object"
         },
+        "customReadinessProbe": {
+            "type": "object"
+        },
+        "customRoles": {
+            "type": "array"
+        },
+        "customStartupProbe": {
+            "type": "object"
+        },
+        "customUsers": {
+            "type": "array"
+        },
+        "experimental": {
+            "type": "object",
+            "properties": {
+                "tcmallocRseqWorkaround": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -94,6 +125,17 @@
         "global": {
             "type": "object",
             "properties": {
+                "dataNodes": {
+                    "type": "object",
+                    "properties": {
+                        "extraContainers": {
+                            "type": "array"
+                        },
+                        "extraVolumes": {
+                            "type": "array"
+                        }
+                    }
+                },
                 "imagePullSecrets": {
                     "type": "array"
                 },
@@ -257,28 +299,7 @@
                     }
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -335,12 +356,32 @@
                         }
                     }
                 },
+                "uriEncodeImage": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "username": {
                     "type": "string"
                 }
             }
         },
         "nameOverride": {
+            "type": "string"
+        },
+        "namespaceOverride": {
             "type": "string"
         },
         "networkPolicy": {
@@ -393,7 +434,10 @@
                     "type": "string"
                 },
                 "persistentVolumeClaimRetentionPolicy": {
-                    "type": "null"
+                    "type": [
+                        "null",
+                        "object"
+                    ]
                 },
                 "size": {
                     "type": "string"
@@ -498,7 +542,10 @@
                                     "type": "null"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "requestedSize": {
                                     "type": "null"
@@ -521,6 +568,61 @@
                 },
                 "enabled": {
                     "type": "boolean"
+                },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "annotationsList": {
+                                    "type": "array"
+                                },
+                                "externalTrafficPolicy": {
+                                    "type": "string"
+                                },
+                                "extraPorts": {
+                                    "type": "array"
+                                },
+                                "labels": {
+                                    "type": "object"
+                                },
+                                "loadBalancerClass": {
+                                    "type": "string"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "port": {
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ]
+                                },
+                                "publicNames": {
+                                    "type": "array"
+                                },
+                                "sessionAffinity": {
+                                    "type": "string"
+                                },
+                                "sessionAffinityConfig": {
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
                 },
                 "extraInit": {
                     "type": "object",
@@ -588,7 +690,10 @@
                                     "type": "null"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "requestedSize": {
                                     "type": "string"
@@ -629,28 +734,7 @@
             }
         },
         "resources": {
-            "type": "object",
-            "properties": {
-                "limits": {
-                    "type": "object",
-                    "properties": {
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "requests": {
-                    "type": "object",
-                    "properties": {
-                        "cpu": {
-                            "type": "string"
-                        },
-                        "memory": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
+            "type": "object"
         },
         "revisionHistoryLimit": {
             "type": "integer"
@@ -747,7 +831,10 @@
                                     "type": "string"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "size": {
                                     "type": "string"
@@ -764,28 +851,7 @@
                             "type": "integer"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "tolerations": {
                             "type": "array"
@@ -843,28 +909,7 @@
                             "type": "integer"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "service": {
                             "type": "object",
@@ -916,28 +961,7 @@
                                     "type": "integer"
                                 },
                                 "resources": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limits": {
-                                            "type": "object",
-                                            "properties": {
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "requests": {
-                                            "type": "object",
-                                            "properties": {
-                                                "cpu": {
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "type": "object"
                                 },
                                 "tolerations": {
                                     "type": "array"
@@ -963,28 +987,7 @@
                                     "type": "integer"
                                 },
                                 "resources": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limits": {
-                                            "type": "object",
-                                            "properties": {
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "requests": {
-                                            "type": "object",
-                                            "properties": {
-                                                "cpu": {
-                                                    "type": "string"
-                                                },
-                                                "memory": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
-                                    }
+                                    "type": "object"
                                 },
                                 "tolerations": {
                                     "type": "array"
@@ -1001,7 +1004,10 @@
                                     "type": "string"
                                 },
                                 "persistentVolumeClaimRetentionPolicy": {
-                                    "type": "null"
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
                                 },
                                 "size": {
                                     "type": "string"
@@ -1040,6 +1046,9 @@
                     "type": "integer"
                 }
             }
+        },
+        "terminationGracePeriodSeconds": {
+            "type": "integer"
         },
         "tolerations": {
             "type": "array"

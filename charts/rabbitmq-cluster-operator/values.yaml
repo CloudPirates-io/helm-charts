@@ -25,6 +25,8 @@ kubeVersion: ""
 nameOverride: ""
 ## @param fullnameOverride String to fully override cloudpirates.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -45,10 +47,8 @@ rabbitmqImage:
   registry: docker.io
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
-  ## @skip rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: 4.1.6-management-alpine
-  ## @param rabbitmqImage.digest RabbitMQ image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-  digest: ""
+  ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
+  tag: "4.3.6-management-alpine@sha256:3ef7f7e89fed709a78f79b8b5f4e30e1312a1d4089da752e23595566d9d61a95"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -59,16 +59,14 @@ rabbitmqImage:
   pullSecrets: []
 
 ## RabbitMQ Default User Credential Updater Image
-## ref: https://hub.docker.com/r/rabbitmqoperator/default-user-credential-updater/tags
+## ref: https://github.com/rabbitmq/default-user-credential-updater/pkgs/container/default-user-credential-updater
 credentialUpdaterImage:
   ## @param credentialUpdaterImage.registry [default: REGISTRY_NAME] RabbitMQ Default User Credential Updater image registry
-  registry: docker.io
+  registry: ghcr.io
   ## @param credentialUpdaterImage.repository [default: REPOSITORY_NAME/rmq-default-credential-updater] RabbitMQ Default User Credential Updater image repository
-  repository: rabbitmqoperator/default-user-credential-updater
-  ## @skip credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
-  tag: 1.0.9
-  ## @param credentialUpdaterImage.digest RabbitMQ Default User Credential Updater image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-  digest: ""
+  repository: rabbitmq/default-user-credential-updater
+  ## @param credentialUpdaterImage.tag RabbitMQ Default User Credential Updater image tag (immutable tags are recommended)
+  tag: "1.0.17@sha256:3f5335baf93c302ccb1054481eb422fb6d2e494c216f6a3bbdd414c6e4e2cf04"
   ## @param credentialUpdaterImage.pullSecrets RabbitMQ Default User Credential Updater image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -80,17 +78,15 @@ credentialUpdaterImage:
 
 ## @section RabbitMQ Cluster Operator Parameters
 ## RabbitMQ Cluster Operator image
-## ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator
+## ref: https://github.com/rabbitmq/cluster-operator/pkgs/container/cluster-operator
 clusterOperator:
   image:
     ## @param clusterOperator.image.registry [default: REGISTRY_NAME] RabbitMQ Cluster Operator image registry
-    registry: docker.io
+    registry: ghcr.io
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
-    repository: rabbitmqoperator/cluster-operator
-    ## @skip clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
-    tag: 2.19.1
-    ## @param clusterOperator.image.digest RabbitMQ Cluster Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-    digest: ""
+    repository: rabbitmq/cluster-operator
+    ## @param clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
+    tag: "2.23.0@sha256:9236fb4f559bb6c4a04605fdf9aa1c03d00573df2d4da43c71e11b296e0a1886"
     ## @param clusterOperator.image.pullPolicy RabbitMQ Cluster Operator image pull policy
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -228,6 +224,10 @@ clusterOperator:
   command: []
   ## @param clusterOperator.args Override default container args (useful when using custom images)
   args: []
+  ## @param clusterOperator.logLevel Log level for the Cluster Operator. When set, adds `--zap-log-level=<value>` to the default args. Allowed values: debug, info, error. Ignored when `clusterOperator.args` is set.
+  logLevel: ""
+  ## @param clusterOperator.extraArgs Additional container args appended to the default args (ignored when `clusterOperator.args` is set)
+  extraArgs: []
   ## @param clusterOperator.automountServiceAccountToken Mount Service Account token in pod
   automountServiceAccountToken: true
   ## @param clusterOperator.hostAliases RabbitMQ Cluster Operator pods host aliases
@@ -259,8 +259,10 @@ clusterOperator:
   ## @param clusterOperator.lifecycleHooks for the RabbitMQ Cluster Operator container(s) to automate configuration before or after startup
   lifecycleHooks: {}
   ## @param clusterOperator.containerPorts.metrics RabbitMQ Cluster Operator container port (used for metrics)
+  ## @param clusterOperator.containerPorts.health RabbitMQ Cluster Operator container port (used for /healthz and /readyz probes)
   containerPorts:
     metrics: 9782
+    health: 8081
   ## @param clusterOperator.extraEnvVars Array with extra environment variables to add to RabbitMQ Cluster Operator nodes
   ## e.g:
   ## extraEnvVars:
@@ -294,6 +296,25 @@ clusterOperator:
   ##    imagePullPolicy: Always
   ##    command: ['sh', '-c', 'echo "hello world"']
   initContainers: []
+  ## RabbitmqCluster admission webhook (cluster-operator v2.22.0+)
+  ## The cluster operator can run mutating (defaulting) and validating admission webhooks for RabbitmqCluster
+  ## resources. It is DISABLED by default: enabling it requires TLS serving certificates. When disabled, the
+  ## operator is started with ENABLE_WEBHOOKS=false (matching the chart's behavior prior to v2.22.0). When
+  ## enabled, provide certificates via a chart-generated self-signed secret (default), an existing secret, or
+  ## cert-manager (useCertManager=true). See the README for enablement instructions.
+  webhook:
+    ## @param clusterOperator.webhook.enabled Enable the RabbitmqCluster admission webhook (requires TLS serving certificates)
+    enabled: false
+    ## @param clusterOperator.webhook.existingWebhookCertSecret Name of an existing secret containing the webhook certificates (use it to avoid the chart generating one)
+    existingWebhookCertSecret: ""
+    ## @param clusterOperator.webhook.existingWebhookCertCABundle PEM-encoded CA Bundle of the existing secret provided in existingWebhookCertSecret (only if useCertManager=false)
+    existingWebhookCertCABundle: ""
+    ## Webhook service parameters
+    service:
+      ## @param clusterOperator.webhook.service.type RabbitMQ Cluster Operator webhook service type
+      type: ClusterIP
+      ## @param clusterOperator.webhook.service.port RabbitMQ Cluster Operator webhook service port
+      port: 443
   ## Network Policies
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
   networkPolicy:
@@ -393,7 +414,7 @@ clusterOperator:
       ## @param clusterOperator.metrics.service.nodePorts.http Node port for HTTP
       ## NOTE: choose port between <30000-32767>
       nodePorts:
-        http: ""
+        http: 30001
       ## @param clusterOperator.metrics.service.clusterIP RabbitMQ Cluster Operator metrics service Cluster IP
       ## e.g.:
       ## clusterIP: None
@@ -433,7 +454,7 @@ clusterOperator:
       ## namespace: monitoring
       namespace: ""
       ## @param clusterOperator.metrics.serviceMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param clusterOperator.metrics.serviceMonitor.honorLabels Honor metrics labels
       ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
       honorLabels: false
@@ -467,7 +488,7 @@ clusterOperator:
       ## @param clusterOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
       ## @param clusterOperator.metrics.podMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param clusterOperator.metrics.podMonitor.namespace Namespace which Prometheus is running in
       namespace: ""
       ## @param clusterOperator.metrics.podMonitor.honorLabels Honor metrics labels
@@ -493,16 +514,14 @@ msgTopologyOperator:
   ## @param msgTopologyOperator.enabled Deploy RabbitMQ Messaging Topology Operator as part of the installation
   enabled: true
   ## RabbitMQ Messaging Topology Operator image
-  ## ref: https://hub.docker.com/r/rabbitmqoperator/cluster-operator/tags
+  ## ref: https://github.com/rabbitmq/messaging-topology-operator/pkgs/container/messaging-topology-operator
   image:
     ## @param msgTopologyOperator.image.registry [default: REGISTRY_NAME] RabbitMQ Messaging Topology Operator image registry
-    registry: docker.io
+    registry: ghcr.io
     ## @param msgTopologyOperator.image.repository [default: REPOSITORY_NAME/rmq-messaging-topology-operator] RabbitMQ Messaging Topology Operator image repository
-    repository: rabbitmqoperator/messaging-topology-operator
-    ## @skip msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
-    tag: 1.18.3
-    ## @param msgTopologyOperator.image.digest RabbitMQ Messaging Topology Operator image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-    digest: ""
+    repository: rabbitmq/messaging-topology-operator
+    ## @param msgTopologyOperator.image.tag RabbitMQ Messaging Topology Operator image tag (immutable tags are recommended)
+    tag: "1.20.3@sha256:f377d3c3e2215a8dfb8a7a5ab953ef7f180f295c401e5d2c2060f3b0748fefd6"
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     ## @param msgTopologyOperator.image.pullPolicy RabbitMQ Messaging Topology Operator image pull policy
@@ -652,6 +671,10 @@ msgTopologyOperator:
   command: []
   ## @param msgTopologyOperator.args Override default container args (useful when using custom images)
   args: []
+  ## @param msgTopologyOperator.logLevel Log level for the Messaging Topology Operator. Adds `--zap-log-level=<value>` to the default args. Defaults to `info` because the operator binary logs at debug level by default. Allowed values: debug, info, error. Set to "" to keep the operator's built-in default. Ignored when `msgTopologyOperator.args` is set.
+  logLevel: "info"
+  ## @param msgTopologyOperator.extraArgs Additional container args appended to the default args (ignored when `msgTopologyOperator.args` is set)
+  extraArgs: []
   ## @param msgTopologyOperator.automountServiceAccountToken Mount Service Account token in pod
   automountServiceAccountToken: true
   ## @param msgTopologyOperator.hostAliases RabbitMQ Messaging Topology Operator pods host aliases
@@ -682,9 +705,13 @@ msgTopologyOperator:
   priorityClassName: ""
   ## @param msgTopologyOperator.lifecycleHooks for the RabbitMQ Messaging Topology Operator container(s) to automate configuration before or after startup
   lifecycleHooks: {}
-  ## @param msgTopologyOperator.containerPorts.metrics RabbitMQ Messaging Topology Operator container port (used for metrics)
+  ## @param msgTopologyOperator.containerPorts.metricsHttp RabbitMQ Messaging Topology Operator container port (used for metrics, HTTP)
+  ## @param msgTopologyOperator.containerPorts.metrics RabbitMQ Messaging Topology Operator container port (used for metrics, HTTPS)
+  ## @param msgTopologyOperator.containerPorts.health RabbitMQ Messaging Topology Operator container port (used for /healthz and /readyz probes)
   containerPorts:
-    metrics: 8080
+    metricsHttp: 8080
+    metrics: 8443
+    health: 8081
   ## @param msgTopologyOperator.extraEnvVars Array with extra environment variables to add to RabbitMQ Messaging Topology Operator nodes
   ## e.g:
   ## extraEnvVars:
@@ -729,7 +756,7 @@ msgTopologyOperator:
     ## @param msgTopologyOperator.service.nodePorts.http Node port for HTTP
     ## NOTE: choose port between <30000-32767>
     nodePorts:
-      http: ""
+      http: 30002
     ## @param msgTopologyOperator.service.clusterIP RabbitMQ Messaging Topology Operator webhook service Cluster IP
     ## e.g.:
     ## clusterIP: None
@@ -845,20 +872,42 @@ msgTopologyOperator:
     automountServiceAccountToken: false
   ## @section RabbitMQ Messaging Topology Operator parameters
   metrics:
+    ## Metrics endpoint authentication and transport settings.
+    ## @param msgTopologyOperator.metrics.secure Enable authentication/authorization on metrics endpoint
+    ## When enabled, the operator validates the bearer token on every request against the Kubernetes API
+    ## (TokenReview/SubjectAccessReview) instead of a sidecar like kube-rbac-proxy. For Prometheus to scrape it
+    ## successfully, see msgTopologyOperator.metrics.rbac below and set a bearerTokenSecret on the
+    ## serviceMonitor/podMonitor.
+    secure: true
+    ## RBAC required to make the secure metrics endpoint (msgTopologyOperator.metrics.secure: true) scrapeable.
+    ## Has no effect when msgTopologyOperator.metrics.secure is false.
+    rbac:
+      ## @param msgTopologyOperator.metrics.rbac.authDelegator Bind the operator's own ServiceAccount to the "system:auth-delegator" ClusterRole so it is allowed to validate the bearer tokens (via TokenReview/SubjectAccessReview) presented to the secure metrics endpoint
+      authDelegator: true
+      metricsReader:
+        ## @param msgTopologyOperator.metrics.rbac.metricsReader.create Create a ClusterRole granting `nonResourceURLs: ["/metrics"]` GET access, and bind it to the ServiceAccounts listed below (e.g. the Prometheus ServiceAccount) so their bearer token is authorized to scrape the secure metrics endpoint
+        create: false
+        ## @param msgTopologyOperator.metrics.rbac.metricsReader.serviceAccounts List of ServiceAccounts (e.g. the one used by your Prometheus/Prometheus Operator) to grant metrics-read access to
+        ## e.g:
+        ## serviceAccounts:
+        ##   - name: prometheus-kube-prometheus-prometheus
+        ##     namespace: monitoring
+        serviceAccounts: []
     ## Metrics service parameters
     service:
       ## @param msgTopologyOperator.metrics.service.enabled Create a service for accessing the metrics endpoint
       enabled: false
-      ## @param msgTopologyOperator.metrics.service.type RabbitMQ Cluster Operator metrics service type
+      ## @param msgTopologyOperator.metrics.service.type RabbitMQ Messaging Topology Operator metrics service type
       type: ClusterIP
-      ## @param msgTopologyOperator.metrics.service.ports.http RabbitMQ Cluster Operator metrics service HTTP port
+      ## RabbitMQ Messaging Topology Operator metrics service ports (if target is HTTPS; metrics endpoint requires TLS as of v1.19.0)
       ports:
-        http: 80
+        http: 8080
+        https: 8443
       ## Node ports to expose
-      ## @param msgTopologyOperator.metrics.service.nodePorts.http Node port for HTTP
       ## NOTE: choose port between <30000-32767>
       nodePorts:
-        http: ""
+        http: 31500
+        https: 31501
       ## @param msgTopologyOperator.metrics.service.clusterIP RabbitMQ Cluster Operator metrics service Cluster IP
       ## e.g.:
       ## clusterIP: None
@@ -877,10 +926,8 @@ msgTopologyOperator:
       ## @param msgTopologyOperator.metrics.service.externalTrafficPolicy RabbitMQ Cluster Operator metrics service external traffic policy
       ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
       externalTrafficPolicy: Cluster
-      ## @param msgTopologyOperator.metrics.service.annotations [object] Additional custom annotations for RabbitMQ Cluster Operator metrics service
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.msgTopologyOperator.metrics.service.ports.http }}"
+      ## @param msgTopologyOperator.metrics.service.annotations [object] Additional custom annotations for RabbitMQ Messaging Topology Operator metrics service
+      annotations: {}
       ## @param msgTopologyOperator.metrics.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
       ## If "ClientIP", consecutive client requests will be directed to the same Pod
       ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
@@ -898,7 +945,8 @@ msgTopologyOperator:
       ## namespace: monitoring
       namespace: ""
       ## @param msgTopologyOperator.metrics.serviceMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
+      ## @param msgTopologyOperator.metrics.serviceMonitor.selector [object] Selector for RabbitMQ Messaging Topology Operator metrics service
       ## DEPRECATED: Use msgTopologyOperator.metrics.serviceMonitor.labels instead.
       ## This value will be removed in a future release
       ## additionalLabels: {}
@@ -919,11 +967,17 @@ msgTopologyOperator:
       relabelings: []
       ## @param msgTopologyOperator.metrics.serviceMonitor.labels Extra labels for the ServiceMonitor
       labels: {}
+      ## @param msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret Reference a Secret (in the same namespace as this ServiceMonitor) holding the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true.
+      ## e.g:
+      ## bearerTokenSecret:
+      ##   name: prometheus-metrics-token
+      ##   key: token
+      bearerTokenSecret: {}
     podMonitor:
       ## @param msgTopologyOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
       ## @param msgTopologyOperator.metrics.podMonitor.jobLabel Specify the jobLabel to use for the prometheus-operator
-      jobLabel: app.kubernetes.io/name
+      jobLabel: app.kubernetes.io/component
       ## @param msgTopologyOperator.metrics.podMonitor.namespace Namespace which Prometheus is running in
       namespace: ""
       ## @param msgTopologyOperator.metrics.podMonitor.honorLabels Honor metrics labels
@@ -940,6 +994,12 @@ msgTopologyOperator:
       relabelings: []
       ## @param msgTopologyOperator.metrics.podMonitor.metricRelabelings Specify additional relabeling of metrics
       metricRelabelings: []
+      ## @param msgTopologyOperator.metrics.podMonitor.bearerTokenSecret Reference a Secret (in the same namespace as this PodMonitor) holding the bearer token to present to the secure metrics endpoint, e.g. the token Secret of a ServiceAccount granted access via msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true.
+      ## e.g:
+      ## bearerTokenSecret:
+      ##   name: prometheus-metrics-token
+      ##   key: token
+      bearerTokenSecret: {}
 
 ## @param useCertManager Deploy cert-manager objects (Issuer and Certificate) for webhooks
 useCertManager: false

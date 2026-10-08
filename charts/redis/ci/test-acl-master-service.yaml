@@ -1,0 +1,54 @@
+# CI scenario: replication + Sentinel with the dynamic master Service
+# (sentinel.masterService.enabled) on top of both auth.acl and sentinel.acl.
+# Exercises templates/sentinel-master-deployment.yaml's ACL wiring: the
+# master-discovery controller queries Sentinel via `kubectl exec` using the
+# Sentinel ACL password (setupScript type=master-discovery) and authenticates
+# as the custom sentinel.acl.defaultUsername, then points the "-master"
+# Service at whichever pod Sentinel currently reports as master.
+architecture: replication
+replicaCount: 3
+useDeployment: false
+
+image:
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  acl:
+    enabled: true
+    existingSecret: redis-acl-master-service
+    sentinelUsername: sentinelapp
+
+sentinel:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  acl:
+    enabled: true
+    existingSecret: sentinel-acl-master-service
+    defaultUsername: sentineladmin
+  masterService:
+    enabled: true
+    # Shorter than the 60s default so the CI verification doesn't have to wait long
+    # for the master Service selector to be patched to point at the real master pod.
+    checkInterval: 10
+    resources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        memory: 64Mi

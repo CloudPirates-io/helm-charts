@@ -1,0 +1,96 @@
+{{- if and .Values.metrics.enabled .Values.auth.enabled .Values.metrics.username }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mongodb.fullname" . }}-metrics-user
+  namespace: {{ include "cloudpirates.namespace" . }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    {{- with (include "mongodb.annotations" .) }}
+    {{- . | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: metrics
+    spec:
+{{- with (include "mongodb.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      restartPolicy: OnFailure
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "mongodb.serviceAccountName" . }}
+      {{- end }}
+      containers:
+        - name: create-metrics-user
+          image: {{ include "mongodb.image" . }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for MongoDB to be ready at $MONGO_HOST..."
+              until mongosh --host "$MONGO_HOST" \
+                --username "$MONGO_INITDB_ROOT_USERNAME" \
+                --password "$MONGO_INITDB_ROOT_PASSWORD" \
+                --authenticationDatabase admin \
+                --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1"; do
+                sleep 5
+              done
+              echo "MongoDB is ready"
+
+              mongosh --host "$MONGO_HOST" \
+                --username "$MONGO_INITDB_ROOT_USERNAME" \
+                --password "$MONGO_INITDB_ROOT_PASSWORD" \
+                --authenticationDatabase admin \
+                --eval "
+                  var existing = db.getSiblingDB('admin').getUser('$MONGO_METRICS_USERNAME');
+                  if (existing) {
+                    db.getSiblingDB('admin').updateUser('$MONGO_METRICS_USERNAME', {
+                      pwd: '$MONGO_METRICS_PASSWORD'
+                    });
+                    print('METRICS_USER_UPDATED');
+                  } else {
+                    db.getSiblingDB('admin').createUser({
+                      user: '$MONGO_METRICS_USERNAME',
+                      pwd: '$MONGO_METRICS_PASSWORD',
+                      roles: [
+                        { role: 'clusterMonitor', db: 'admin' },
+                        { role: 'readAnyDatabase', db: 'admin' },
+                        { role: 'read', db: 'local' }
+                      ]
+                    });
+                    print('METRICS_USER_CREATED');
+                  }
+                "
+          env:
+            - name: MONGO_HOST
+              {{- if .Values.shardedCluster.enabled }}
+              value: "{{ include "mongodb.fullname" . }}-mongos-0.{{ include "mongodb.fullname" . }}-mongos-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:27017"
+              {{- else if .Values.replicaSet.enabled }}
+              value: "{{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}-{{ .Values.service.headlessServiceSuffix }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:{{ .Values.service.port }}"
+              {{- else }}
+              value: "{{ include "mongodb.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.replicaSet.clusterDomain | default "cluster.local" }}:{{ .Values.service.port }}"
+              {{- end }}
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.secretName" . }}
+                  key: {{ include "mongodb.secretPasswordKey" . }}
+            - name: MONGO_METRICS_USERNAME
+              value: {{ .Values.metrics.username | quote }}
+            - name: MONGO_METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.metrics.secretName" . }}
+                  key: {{ include "mongodb.metricsSecretPasswordKey" . }}
+{{- end }}

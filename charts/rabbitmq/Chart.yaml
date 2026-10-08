@@ -2,8 +2,8 @@ apiVersion: v2
 name: rabbitmq
 description: A messaging broker that implements the Advanced Message Queuing Protocol (AMQP)
 type: application
-version: 0.18.2
-appVersion: "4.2.4"
+version: 0.21.30
+appVersion: "4.3.6"
 keywords:
   - rabbitmq
   - message broker
@@ -20,7 +20,7 @@ maintainers:
     url: https://www.cloudpirates.io
 dependencies:
   - name: common
-    version: "2.2.0"
+    version: "2.2.1"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
 annotations:
@@ -40,10 +40,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: changed
-      description: "Update image.repository to 81de74a"
+    - kind: added
+      description: "Add namespaceOverride Value to all Charts that missing it"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1126"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/rabbitmq/CHANGELOG.md"

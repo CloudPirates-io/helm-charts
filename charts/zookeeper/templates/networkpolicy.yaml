@@ -3,7 +3,7 @@ kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "zookeeper.labels" . | nindent 4 }}
   {{- with (include "zookeeper.annotations" .) }}
@@ -29,6 +29,9 @@ spec:
     # Allow inbound connections to ZooKeeper
     - ports:
         - port: {{ .Values.service.ports.client | default 2181 }}
+        {{- if .Values.service.ports.secureClient }}
+        - port: {{ .Values.service.ports.secureClient }}
+        {{- end }}
     # Allow internal communications between nodes
     - ports:
         - port: {{ .Values.service.ports.quorum | default 2888 }}

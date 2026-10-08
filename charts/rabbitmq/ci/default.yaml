@@ -1,0 +1,18 @@
+# CI scenario: default RabbitMQ deployment with a deterministic password.
+# Exercises: AMQP + management plugin, basic queue publish/consume.
+auth:
+  username: admin
+  password: "RabbitMQTestPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+managementPlugin:
+  enabled: true

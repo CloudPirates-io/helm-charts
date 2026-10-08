@@ -10,19 +10,21 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override minio.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
 
 ## @section MinIO image configuration
+## IMPORTANT: We are using a, by default, hardened image provided by us, which patches cve´s but does not in any way modify the behavior of minio. You are free to switch over to vanilla versions if this concerns you.
 image:
   ## @param image.registry MinIO image registry
   registry: docker.io
   ## @param image.repository MinIO image repository
   repository: cloudpirates/image-minio
   ## @param image.tag MinIO image tag (immutable tags are recommended)
-  ## IMPORTANT: We are using a, by default, hardened image provided by us, which patches cve´s but does not in any way modify the behavior of minio. You are free to switch over to vanilla versions if this concerns you.
   tag: "RELEASE.2025-10-15T17-29-55Z-hardened@sha256:8dc02a7e509336c8bbb67962086d691bdcde20a2c9327ed68e5081a681f6dbfc"
   ## @param image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365)
   useCpuV1: false
@@ -30,6 +32,8 @@ image:
   tagCpuV1: "RELEASE.2025-10-15T17-29-55Z-cpuv1@sha256:e16e8408a0d04699057f4cc8d7e6770553734542aa55066a8fabc0e8adfae873"
   ## @param image.imagePullPolicy MinIO image pull policy
   imagePullPolicy: Always
+  ## @param image.executable Executable tha will be run by deployment. Useful if you want to switch to silo
+  executable: minio
 
 ## @section MinIO Authentication
 auth:
@@ -80,12 +84,6 @@ config:
 ## e.g: "my-bucket, my-second-bucket:download, my-public-bucket:public"
 defaultBuckets: ""
 
-## @section postJob Configuration for the Job '{{ .Release.Name }}-post-job'
-postJob:
-  ## postJob.annotations Additional annotations for the Job
-  annotations:
-    helm.sh/hook: post-install,post-upgrade  # @schema hidden: true
-
 ## @section Bucket Initialization Job
 bucketInitJob:
   ## @param bucketInitJob.ttlSecondsAfterFinished Seconds after which the job is automatically deleted after completion (success or failure)
@@ -101,7 +99,13 @@ bucketInitJob:
   ## @param bucketInitJob.restartPolicy Restart policy for the job pods (OnFailure or Never)
   restartPolicy: OnFailure
   ## @param bucketInitJob.annotations Additional annotations for the bucket initialization job
+  ## To run the job as a Helm hook, set:
+  ##   annotations:
+  ##     helm.sh/hook: post-install,post-upgrade
+  ##     helm.sh/hook-delete-policy: before-hook-creation
   annotations: {}
+  ## @param bucketInitJob.podLabels Additional labels for the bucket initialization job pods
+  podLabels: {}
   ## @param bucketInitJob.podAnnotations Additional annotations for the bucket initialization job pods
   podAnnotations: {}
   ## @param bucketInitJob.resources Resource requests and limits for the bucket initialization job
@@ -187,6 +191,55 @@ ingress:
   #  - secretName: minio-tls
   #    hosts:
   #      - minio.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for MinIO
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - minio.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+  consoleHttpRoute:
+    ## @param gatewayAPI.consoleHttpRoute.enabled Enable Gateway API HTTPRoute generation for MinIO Console
+    enabled: false
+    ## @param gatewayAPI.consoleHttpRoute.annotations Additional annotations for the Console HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.consoleHttpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.consoleHttpRoute.hostnames List of hostnames to match
+    hostnames:
+      - minio-console.local
+    ## @param gatewayAPI.consoleHttpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Console Ingress configuration
 consoleIngress:

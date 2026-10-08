@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "rustfs.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
   {{- if .Values.commonAnnotations }}
@@ -12,8 +12,6 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       {{- include "rustfs.selectorLabels" . | nindent 6 }}

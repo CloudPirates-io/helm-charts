@@ -1,0 +1,87 @@
+Apache Kafka has been deployed in KRaft mode!
+
+**Bootstrap servers (from inside the cluster):**
+
+  {{ include "kafka.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain | default "cluster.local" }}:{{ .Values.service.ports.client }}
+{{- if .Values.tls.enabled }}
+
+**TLS is ENABLED.** Clients connect with security.protocol={{ if .Values.auth.client.enabled }}SASL_SSL{{ else }}SSL{{ end }} and must trust the CA.
+
+  # Retrieve the CA certificate:
+  kubectl get secret --namespace {{ include "cloudpirates.namespace" . }} {{ include "kafka.tlsSecretName" . }} \
+    -o jsonpath='{.data.{{ .Values.tls.caFilename }}}' | base64 -d > ca.crt
+{{- if eq .Values.tls.source "self-signed" }}
+
+  NOTE: the certificate is self-signed by a chart-generated CA. Distribute ca.crt to clients
+  (the SAN covers *.{{ include "kafka.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain | default "cluster.local" }} and the client Service).
+{{- end }}
+{{- end }}
+{{- if .Values.auth.client.enabled }}
+
+**Client authentication is ENABLED (SASL/PLAIN).**
+Applications must connect with username "{{ .Values.auth.clientUser }}" and the generated password.
+
+  # Retrieve the client password:
+  kubectl get secret --namespace {{ include "cloudpirates.namespace" . }} {{ include "kafka.secretName" . }} \
+    -o jsonpath='{.data.client-password}' | base64 -d; echo
+
+  # Example client.properties for the Kafka CLI tools (use with --command-config):
+  #   security.protocol={{ if .Values.tls.enabled }}SASL_SSL{{ else }}SASL_PLAINTEXT{{ end }}
+  #   sasl.mechanism=PLAIN
+  #   sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  #     username="{{ .Values.auth.clientUser }}" password="<PASSWORD>";
+  {{- if .Values.tls.enabled }}
+  #   ssl.truststore.type=PEM
+  #   ssl.truststore.location=/path/to/ca.crt   # see the TLS section above
+  {{- end }}
+{{- if not .Values.tls.enabled }}
+
+  NOTE: SASL/PLAIN authenticates but does NOT encrypt traffic. Use on a trusted network or add TLS (tls.enabled=true).
+{{- end }}
+{{- end }}
+
+**Test your cluster with a client pod:**
+
+  kubectl run kafka-client --rm -it --restart='Never' \
+    --namespace {{ include "cloudpirates.namespace" . }} \
+    --image {{ include "kafka.image" . }} -- bash
+{{- if .Values.auth.client.enabled }}
+
+  # Inside the pod, write a client.properties first (replace <PASSWORD> with the value above):
+  cat > /tmp/client.properties <<'EOF'
+  security.protocol={{ if .Values.tls.enabled }}SASL_SSL{{ else }}SASL_PLAINTEXT{{ end }}
+  sasl.mechanism=PLAIN
+  sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.auth.clientUser }}" password="<PASSWORD>";
+  {{- if .Values.tls.enabled }}
+  ssl.truststore.type=PEM
+  ssl.truststore.location=/tmp/ca.crt
+  {{- end }}
+  EOF
+
+  # Create a topic:
+  /opt/kafka/bin/kafka-topics.sh --create --topic demo --command-config /tmp/client.properties \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }} \
+    --partitions {{ .Values.kafkaConfig.numPartitions }} --replication-factor {{ min (int .Values.kafkaConfig.defaultReplicationFactor) (int .Values.replicaCount) }}
+
+  # List topics:
+  /opt/kafka/bin/kafka-topics.sh --list --command-config /tmp/client.properties \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }}
+{{- else }}
+
+  # Inside the pod, create a topic:
+  /opt/kafka/bin/kafka-topics.sh --create --topic demo \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }} \
+    --partitions {{ .Values.kafkaConfig.numPartitions }} --replication-factor {{ min (int .Values.kafkaConfig.defaultReplicationFactor) (int .Values.replicaCount) }}
+
+  # List topics:
+  /opt/kafka/bin/kafka-topics.sh --list \
+    --bootstrap-server {{ include "kafka.fullname" . }}:{{ .Values.service.ports.client }}
+{{- end }}
+
+**To upgrade this release:**
+
+  helm upgrade <RELEASE_NAME> ./charts/kafka
+
+**To uninstall/delete the release:**
+
+  helm delete <RELEASE_NAME>

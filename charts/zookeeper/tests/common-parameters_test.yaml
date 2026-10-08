@@ -81,6 +81,12 @@ tests:
       - equal:
           path: metadata.labels.team
           value: platform
+      - equal:
+          path: spec.template.metadata.labels.environment
+          value: test
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: platform
 
   - it: should add commonAnnotations to all resources
     template: statefulset.yaml

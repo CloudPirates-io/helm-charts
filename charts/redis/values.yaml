@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.6.1@sha256:1c054d54ecd1597bba52f4304bca5afbc5565ebe614c5b3d7dc5b7f8a0cd768d"
+  tag: "8.10.2@sha256:6f81e8915c60b065a524e6967e0ad1c639ba6efa84d669f823683ea04d9150ee"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -53,6 +53,17 @@ clusterReplicaCount: 0
 
 ## @param revisionHistoryLimit Number of revisions to keep in history for rollback (set to 0 for unlimited)
 revisionHistoryLimit: 10
+
+## @param updateStrategy StatefulSet update strategy (RollingUpdate or OnDelete)
+## When set to OnDelete, pods must be manually deleted to trigger updates
+## This allows for controlled update sequencing in Redis clusters
+updateStrategy:
+  ## @param updateStrategy.type Update strategy type (RollingUpdate or OnDelete)
+  type: RollingUpdate
+  ## @param updateStrategy.rollingUpdate Rolling update configuration (only when type=RollingUpdate)
+  rollingUpdate:
+    ## @param updateStrategy.rollingUpdate.maxUnavailable Maximum number of pods that can be unavailable during update. Left unset by default since the `MaxUnavailableStatefulSet` feature gate is disabled on some managed Kubernetes offerings (e.g. GKE), which silently strips this field and causes a permanent GitOps diff
+    maxUnavailable: ""
 
 ## @param useDeployment Use a Deployment instead of a StatefulSet for Redis nodes.
 ## Only takes effect when persistence.enabled=false.
@@ -97,15 +108,17 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.enabled Enable Sentinel authentication
+  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
   sentinel: true
+  ## @param auth.metrics Enable Metrics authentication
+  metrics: true
   ## @param auth.password Redis password (if empty, random password will be generated)
   password: ""
   ## @param auth.existingSecret Name of existing secret containing Redis password
   existingSecret: ""
   ## @param auth.existingSecretPasswordKey Key in existing secret containing Redis password
   existingSecretPasswordKey: "redis-password"
-  ## @param auth.acl Custom ACL rules to be applied. When set, all users, including the 'default' user, must be explicitly configured in the ACL file.
+  ## @param auth.acl Custom ACL rules to be applied. When set, all users the chart connects as - the ones selected by defaultUsername and sentinelUsername below - must be explicitly configured in the ACL file. The literal 'default' user is not required and may be disabled (`user default off`) if a different defaultUsername is configured.
   acl:
     ## @param auth.acl.enabled Enable custom ACL rules.
     enabled: false
@@ -122,6 +135,10 @@ auth:
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
     ## Example: "/vault/secrets/redis-acl"
     existingFilePath: ""
+    ## @param auth.acl.defaultUsername ACL username used as the 'default' Redis user. Must match a user defined in the ACL file.
+    defaultUsername: "default"
+    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file.
+    sentinelUsername: "sentinel"
 
 ## @section TLS/SSL configuration
 tls:
@@ -172,8 +189,25 @@ config:
 cluster:
   ## @param cluster.announceHostnames Enable hostname-based announcements for Redis Cluster (recommended for Kubernetes)
   ## When enabled, Redis will announce pod hostnames instead of IPs, making cluster more resilient to pod restarts
-  ## This addresses the issue where pod IP changes on restart cause connection errors
-  announceHostnames: false
+  ## This addresses the issue where pod IP changes on restart cause connection errors and, crucially, lets the
+  ## cluster re-form via gossip after all pods are deleted and recreated (persisted nodes.conf keeps resolvable
+  ## hostnames instead of stale IPs). Disable only if your clients cannot resolve the headless service hostnames.
+  announceHostnames: true
+  ## @param cluster.announceHostnamesOverride Map of hostnames to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod hostnames. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is true.
+  ## Example: 0: foo-bar-0
+  announceHostnamesOverride: {}
+  ## @param cluster.announceIpsOverride Map of IPs to announce for Redis Cluster topology.
+  ## Overrides the default behavior of announcing pod IPs. Useful for external access with LoadBalancers for example.
+  ## Only works if announceHostnames is false.
+  ## Example: 0: 1.2.3.4
+  announceIpsOverride: {}
+  ## @param cluster.startupSleepTime Seconds to sleep in the init container before configuring Redis Cluster
+  ## Useful when persistence is disabled: gives the cluster time to detect a failed master and elect
+  ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
+  ## with an empty dataset. Set to 0 to disable (default).
+  startupSleepTime: 0
   ## @param cluster.config Additional cluster-specific configuration settings
   ## These settings are automatically applied when architecture=cluster
   config:
@@ -181,9 +215,44 @@ cluster:
     nodeTimeout: 15000
     ## @param cluster.config.requireFullCoverage Require full coverage to accept queries
     requireFullCoverage: true
+  ## External access to the Redis cluster from outside Kubernetes.
+  ## A Redis Cluster client (e.g. redis-cli -c, Redis for VS Code) connects to any node and is then
+  ## redirected to other nodes using the addresses returned by CLUSTER NODES / CLUSTER SLOTS. Those must
+  ## be reachable by the client. Inside Kubernetes the chart announces pod hostnames/IPs, which external
+  ## clients cannot reach. Enabling externalAccess makes each node announce an externally-reachable
+  ## address instead, and (optionally) creates one Service per pod to expose the nodes.
+  externalAccess:
+    ## @param cluster.externalAccess.enabled Enable external access to the Redis cluster from outside the Kubernetes cluster
+    enabled: false
+    ## @param cluster.externalAccess.addresses External address (IP or hostname) announced by each node, one entry per pod ordinal (pod-0 first)
+    ## For service.type=LoadBalancer, pre-allocate static IPs/hostnames and list them here. For NodePort, list the nodes' external IPs/hostnames.
+    ## Required when externalAccess.enabled=true. The number of entries must match replicaCount.
+    addresses: []
+    ## @param cluster.externalAccess.port External client port announced by each node (defaults to service.port)
+    port: ""
+    ## @param cluster.externalAccess.busPort External cluster bus port announced by each node (defaults to service.clusterPort)
+    busPort: ""
+    ## Per-pod Service used to expose each node externally
+    service:
+      ## @param cluster.externalAccess.service.enabled Create one Service per pod to expose the nodes externally
+      enabled: true
+      ## @param cluster.externalAccess.service.type Service type for the per-pod external services (LoadBalancer or NodePort)
+      type: LoadBalancer
+      ## @param cluster.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod ordinal (used when service.type=LoadBalancer)
+      loadBalancerIPs: []
+      ## @param cluster.externalAccess.service.loadBalancerSourceRanges Source ranges allowed on the per-pod LoadBalancer services
+      loadBalancerSourceRanges: []
+      ## @param cluster.externalAccess.service.nodePorts Client nodePort per pod ordinal (used when service.type=NodePort)
+      nodePorts: []
+      ## @param cluster.externalAccess.service.busNodePorts Cluster bus nodePort per pod ordinal (used when service.type=NodePort)
+      busNodePorts: []
+      ## @param cluster.externalAccess.service.annotations Annotations for the per-pod external services
+      annotations: {}
 
 ## @param extraConfig Additional Redis configuration to be appended to the generated config
 ## This provides flexibility to add any Redis configuration directives
+## Note: in standalone architecture this is appended to the chart-managed ConfigMap, so it has
+## no effect when config.existingConfigmap is set (add the directives to your own ConfigMap instead)
 ## Example:
 ## extraConfig: |
 ##   # Custom memory policy
@@ -200,8 +269,10 @@ pdb:
   ## @param pdb.enabled Enable Pod Disruption Budget
   enabled: false
   ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  # @schema type:[integer, string]
   minAvailable: 1
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  # @schema type:[integer, string]
   maxUnavailable: ""
 
 persistence:
@@ -222,6 +293,30 @@ persistence:
   ## @param persistence.subPath The subdirectory of the volume to mount to
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
+  ## @param Map of labels to add to the Persistent Volume Claims (PVCs)
+  labels: {}
+
+## @section Volume Permissions
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner of the PV mount point
+  enabled: false
+  image:
+    ## @param volumePermissions.image.registry Image registry
+    registry: docker.io
+    ## @param volumePermissions.image.repository Image repository
+    repository: busybox
+    ## @param volumePermissions.image.tag Image tag
+    tag: "1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e"
+    ## @param volumePermissions.image.pullPolicy Image pull policy
+    pullPolicy: IfNotPresent
+  ## @param volumePermissions.resources Resource limits and requests
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @section Persistent Volume Claim Retention Policy
 persistentVolumeClaimRetentionPolicy:
@@ -233,19 +328,22 @@ persistentVolumeClaimRetentionPolicy:
   whenDeleted: Retain
 
 ## @param resources Resource limits and requests for Redis pod
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 50m
-    memory: 128Mi
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 128Mi
 
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
 
 ## @param priorityClassName for pod eviction
 priorityClassName: ""
+
+## @param runtimeClassName Runtime class for pods (leave empty to use cluster default)
+runtimeClassName: ""
 
 ## @param tolerations Tolerations for pod assignment
 tolerations: []
@@ -361,6 +459,33 @@ extraVolumes: []
 ## @param extraVolumeMounts Additional volume mounts to add to the Redis container
 extraVolumeMounts: []
 
+## @param extraInitContainers Additional init containers to add to the pod
+extraInitContainers: []
+
+## @param extraVolumeMounts Additional containers to add to the pod
+extraContainers: []
+
+## @param dnsConfig DNS configuration for the pod
+dnsConfig: {}
+
+## @section External master (migration)
+## Bootstrap Redis pods as replicas of an external, chart-unmanaged Redis instance. Use this to migrate
+## an existing Redis deployment into this chart: on first bootstrap the pods replicate from the external
+## master instead of electing one of themselves. Once the external master's data has fully replicated,
+## decommission it — with sentinel.enabled and sentinel.monitorTarget left unset, Sentinel automatically
+## monitors the same external host and promotes one of the chart-managed pods once it goes away.
+## Only affects the initial bootstrap: once a chart-managed master or Sentinel is already found, that
+## takes precedence over this setting.
+## NOTE: the external instance must accept the same password as auth.password/auth.existingSecret (or have
+## authentication disabled).
+externalMaster:
+  ## @param externalMaster.enabled Bootstrap Redis pods as replicas of an external master (architecture=replication only)
+  enabled: false
+  ## @param externalMaster.host Hostname or IP of the external Redis master to replicate from
+  host: ""
+  ## @param externalMaster.port Port of the external Redis master (defaults to service.port)
+  port: ""
+
 ## @section Redis Sentinel configuration
 ## This section configures Redis Sentinel for high availability in replication mode
 ## When enabled, Redis instances use dynamic master/replica role assignment managed by Sentinel
@@ -370,14 +495,14 @@ sentinel:
   ## IMPORTANT: When enabled, applications should use Sentinel-aware clients to discover the current master
   ## When disabled, pod-0 is the master and can be accessed via the -master service
   enabled: false
-  ## @param sentinel.image.registry Redis Sentinel image registry
-  ## @param sentinel.image.repository Redis Sentinel image repository
-  ## @param sentinel.image.tag Redis Sentinel image tag
-  ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
   image:
+    ## @param sentinel.image.registry Redis Sentinel image registry
     registry: docker.io
+    ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
-    tag: "8.6.1@sha256:1c054d54ecd1597bba52f4304bca5afbc5565ebe614c5b3d7dc5b7f8a0cd768d"
+    ## @param sentinel.image.tag Redis Sentinel image tag
+    tag: "8.10.2@sha256:6f81e8915c60b065a524e6967e0ad1c639ba6efa84d669f823683ea04d9150ee"
+    ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
   ## @param sentinel.config.loglevel Sentinel log level. Allowed values: debug, verbose, notice, warning
@@ -387,6 +512,24 @@ sentinel:
     loglevel: notice
   ## @param sentinel.masterName Name of the master server (default: mymaster)
   masterName: mymaster
+  ## @param sentinel.monitorTarget Override the Sentinel master discovery with an explicit hostname or IP
+  ## When unset (default), the chart's startup script discovers the master locally via the headless
+  ## service hostname (redis-X.redis-headless.<ns>.svc.cluster.local). In multi-region or multi-cluster
+  ## deployments that hostname only resolves inside the local cluster, preventing Sentinel quorum from
+  ## forming across clusters. Set this to an externally-resolvable hostname or IP (e.g., an internal
+  ## NLB DNS name or a Route53 record) that all Sentinels can reach to monitor a shared master.
+  monitorTarget: ""
+  ## @param sentinel.idSeed Seed used to derive a stable Sentinel id across restarts
+  ## The Sentinel configuration file lives on an emptyDir, so a restarting Sentinel comes back with
+  ## a new run id on a new pod IP. Its peers keep the previous identity as a known-sentinel entry,
+  ## and because leader election requires a majority of known Sentinels, every rollout raises that
+  ## threshold permanently and can end up blocking failover. Pinning the id keeps a restarted
+  ## Sentinel the same peer it was before.
+  ## The id is sha1("<idSeed>/<pod hostname>") truncated to 40 hex characters. The default seed is
+  ## the release fullname, which is unique within a cluster. Multi-cluster deployments reuse pod
+  ## names across clusters, so they must set this to a value that is unique per cluster (for example
+  ## the externally-resolvable hostname of that release).
+  idSeed: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
@@ -401,6 +544,24 @@ sentinel:
   discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
+  ## @param sentinel.acl Custom ACL rules for the Sentinel process itself (clients connecting to the Sentinel port), fully independent of the Redis ACL configured under auth.acl.
+  acl:
+    ## @param sentinel.acl.enabled Enable a dedicated ACL for the Sentinel port. When enabled, Sentinel loads its own `aclfile` instead of relying on `requirepass`/auth.sentinel, so Sentinel clients can be managed independently of the monitored Redis instances' ACL.
+    enabled: false
+    ## @param sentinel.acl.existingSecret Name of existing secret containing the Sentinel ACL rules
+    existingSecret: ""
+    ## @param sentinel.acl.existingSecretACLKey Key in existing secret containing the Sentinel ACL rules
+    ## Key should represent an ACL file content, e.g.:
+    ##
+    ## user default >sentinelpassword ~* +@all
+    ## user monitoring >monitoringpassword ~* +client +info +ping +subscribe +psubscribe
+    existingSecretACLKey: ""
+    ## @param sentinel.acl.existingFilePath Path to existing Sentinel ACL file injected by Vault Agent Injector or similar tools
+    ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
+    ## Example: "/vault/secrets/sentinel-acl"
+    existingFilePath: ""
+    ## @param sentinel.acl.defaultUsername ACL username used as the 'default' user for clients connecting to the Sentinel port. Must match a user defined in the Sentinel ACL file.
+    defaultUsername: "default"
   service:
     ## @param sentinel.service.type Kubernetes service type for Sentinel
     type: ClusterIP
@@ -411,13 +572,13 @@ sentinel:
     ## @param sentinel.service.ipFamilyPolicy IP family policy for the sentinel service
     ipFamilyPolicy: ""
   ## @param sentinel.resources Resource limits and requests for Sentinel pods
-  resources:
-    limits:
-      cpu: 200m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param sentinel.redisShutdownWaitFailover Whether Redis should wait for Sentinel failover before shutdown
   ## When true: On master termination, waits for failover to complete (zero-downtime)
   ## When false: Shuts down immediately without waiting for failover
@@ -438,19 +599,25 @@ sentinel:
     ipFamilyPolicy: ""
     ## @param sentinel.masterService.checkInterval Interval in seconds to check for master changes
     checkInterval: 60
-    ## @param sentinel.masterService.image.repository Image for master discovery deployment
     image:
+      ## @param sentinel.masterService.image.repository Image for master discovery deployment
       repository: alpine/kubectl
-      tag: "1.35.2"
+      ## @param sentinel.masterService.image.tag Image tag for master discovery deployment
+      tag: "1.37.1@sha256:b57b3bd3cd9f4f02dd444281857126aa78efa4b7b7e6ec57579dd927bf146fc3"
+      ## @param sentinel.masterService.image.pullPolicy Image pull policy for master discovery deployment
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
-    resources:
-      limits:
-        cpu: 25m
-        memory: 64Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 25m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+    ## @param sentinel.masterService.verbose Enable verbose logging for master discovery
+    verbose: false
+    ## @param sentinel.masterService.affinity Affinity rules for the master discovery deployment (defaults to .Values.affinity if not set)
+    affinity: {}
 
   livenessProbe:
     ## @param sentinel.livenessProbe.enabled Enable liveness probe
@@ -490,45 +657,51 @@ sentinel:
 
 ## @param resources Resource limits and requests for Redis init container pod
 initContainer:
-  resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
-    requests:
-      cpu: 25m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 50m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 25m
+    #   memory: 64Mi
 
 ## @section Redis metrics parameters
 ## Prometheus metrics configuration
 metrics:
   ## @param metrics.enabled Start a sidecar prometheus exporter to expose Redis metrics
   enabled: false
-  ## @param metrics.image.registry Redis exporter image registry
-  ## @param metrics.image.repository Redis exporter image repository
-  ## @param metrics.image.tag Redis exporter image tag
-  ## @param metrics.image.pullPolicy Redis exporter image pull policy
+  ## @param metrics.tls.enabled Enable TLS for the metrics exporter endpoint
+  tls: false
   image:
+    ## @param metrics.image.registry Redis exporter image registry
     registry: docker.io
+    ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
-    tag: "v1.82.0-alpine@sha256:da9e89ee4e755bfa1b6a6b2ed345c2de63ca3976f95c9f1e9538882bc1414cb8"
+    ## @param metrics.image.tag Redis exporter image tag
+    tag: "v1.93.0-alpine@sha256:93831cd4d5d67687de67c9d5221b14312fea580af8d157583ed9d4459bf2dd70"
+    ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
+  ## @param metrics.port Metrics exporter port
+  port: 9121
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      cpu: 100m
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for redis exporter, for example:
   ## extraArgs:
-  ##   - --redis.addr=redis://localhost:6379
-  ##   - --web.listen-address=0.0.0.0:9121
+  ##   can be found on https://github.com/oliver006/redis_exporter
   extraArgs: []
   ## Metrics service configuration
   service:
+    enabled: true
     ## @param metrics.service.type Metrics service type
     type: ClusterIP
+    ## @param metrics.service.name Metrics service name
+    name: http-metrics
     ## @param metrics.service.port Metrics service port
     port: 9121
     ## @param metrics.service.annotations Additional custom annotations for Metrics service
@@ -633,10 +806,24 @@ customScripts:
 ## @section clusterInitJob Configurations for the Job-Template
 clusterInitJob:
   ## @param clusterInitJob.resources Resource limits and requests for clusterInit Job
-  resources:
-    limits:
-      cpu: 25m
-      memory: 128Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   cpu: 25m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
+  ## @param clusterInitJob.nodeSelector Node selector for the clusterInit Job (defaults to .Values.nodeSelector if not set)
+  nodeSelector: {}
+  ## @param clusterInitJob.tolerations Tolerations for the clusterInit Job (defaults to .Values.tolerations if not set)
+  tolerations: []
+  ## @param clusterInitJob.affinity Affinity rules for the clusterInit Job (defaults to .Values.affinity if not set)
+  affinity: {}
+  ## @param clusterInitJob.runtimeClassName Runtime class for the clusterInit Job pod (defaults to .Values.runtimeClassName if not set)
+  runtimeClassName: ""
+  ## @param clusterInitJob.recoveryTimeout Seconds the Job waits for an existing cluster to re-form via gossip before failing
+  ## When the cluster already holds state (e.g. all pods were deleted and recreated), the Job waits for the nodes to
+  ## re-form the cluster instead of running "cluster create" on non-empty nodes (which fails with "Node is not empty"
+  ## and would destroy the topology). If the cluster is still not healthy after this timeout, the Job fails instead of
+  ## recreating the cluster, preserving data for manual intervention.
+  recoveryTimeout: 120

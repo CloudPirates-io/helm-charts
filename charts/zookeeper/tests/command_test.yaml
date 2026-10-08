@@ -1,0 +1,67 @@
+suite: test zookeeper custom command
+templates:
+  - templates/statefulset.yaml
+tests:
+  - it: should exec the docker entrypoint by default
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "(?m)^exec /docker-entrypoint\\.sh zkServer\\.sh start-foreground$"
+
+  - it: should end the ZOO_MY_ID echo line by default
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "(?m)^echo \"Calculated ZOO_MY_ID=\\$ZOO_MY_ID \\(pod-index=\\$POD_INDEX \\+ offset=\\$SERVER_ID_OFFSET\\)\"$"
+
+  - it: should exec a user supplied command on its own line
+    set:
+      command:
+        - /bin/my-entrypoint.sh
+        - --foo
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "(?m)^exec \"/bin/my-entrypoint\\.sh\" \"--foo\"$"
+
+  - it: should not concatenate a user supplied command onto the preceding echo
+    set:
+      command:
+        - /bin/my-entrypoint.sh
+        - --foo
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "(?m)^echo \"Calculated ZOO_MY_ID=\\$ZOO_MY_ID \\(pod-index=\\$POD_INDEX \\+ offset=\\$SERVER_ID_OFFSET\\)\"$"
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "offset=\\$SERVER_ID_OFFSET\\)\"\""
+
+  - it: should exec a single element command
+    set:
+      command:
+        - /bin/my-entrypoint.sh
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "(?m)^exec \"/bin/my-entrypoint\\.sh\"$"
+
+  - it: should not run the docker entrypoint when a command is supplied
+    set:
+      command:
+        - /bin/my-entrypoint.sh
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "/docker-entrypoint\\.sh"
+
+  - it: should keep the shell wrapper command unchanged
+    set:
+      command:
+        - /bin/my-entrypoint.sh
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -ec

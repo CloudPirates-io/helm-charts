@@ -1,6 +1,13 @@
 # Changelog
 
+> [!CAUTION]
+> This file is kept for backwards compatibility only and is no longer updated. See the [GitHub Releases](https://github.com/CloudPirates-io/helm-charts/releases) page to view changes for each version.
+
 All notable changes to this chart will be documented in this file.
+
+## [1.4.1] - 2026-03-10
+
+- [helm] Update valkey Docker tag to v0.17.1 (#1102) ([d0e0ea05](https://github.com/CloudPirates-io/helm-charts/commit/d0e0ea05))
 
 ## [1.4.0] - 2026-02-17
 

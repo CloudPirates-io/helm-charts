@@ -11,11 +11,15 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override rabbitmq.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 commonAnnotations: {}
 
+## @param terminationGracePeriodSeconds Time for Kubernetes to wait for the pod to gracefully terminate
+terminationGracePeriodSeconds: 30
 ## @section RabbitMQ image parameters
 image:
   ## @param image.registry RabbitMQ image registry
@@ -23,7 +27,7 @@ image:
   ## @param image.repository RabbitMQ image repository
   repository: rabbitmq
   ## @param image.tag RabbitMQ image tag
-  tag: "4.2.4-management@sha256:81de74a084d480bbcbf43c625a740b5dda96251d67a1df17dcf59dcd8e5efe69"
+  tag: "4.3.6-management@sha256:316ffd2a847e59112eee2c65f04bbd0989d93aaf1486c07b721f8d22d863b968"
   ## @param image.imagePullPolicy RabbitMQ image pull policy
   imagePullPolicy: Always
 
@@ -59,6 +63,14 @@ service:
   annotations: {}
   ## @param service.annotationsHeadless Kubernetes service-headless annotations
   annotationsHeadless: {}
+  ## @param service.nodePorts Node ports to expose, only used if service.type is NodePort
+  nodePorts:
+    ## @param service.nodePorts.amqp Node port for the AMQP service port
+    amqp: ""
+    ## @param service.nodePorts.mgmt Node port for the management UI service port
+    mgmt: ""
+    ## @param service.nodePorts.metrics Node port for the Prometheus metrics service port
+    metrics: ""
 
 ## @section RabbitMQ Authentication
 auth:
@@ -76,6 +88,8 @@ auth:
   existingPasswordKey: "password"
   ## @param auth.existingErlangCookieKey Key in existing secret containing Erlang cookie
   existingErlangCookieKey: "erlang-cookie"
+  ## @param auth.erlangCookiePermissions [experimental] File permissions for the .erlang.cookie file. See https://github.com/CloudPirates-io/helm-charts/issues/1141
+  erlangCookiePermissions: 400
 
 ## @section RabbitMQ configuration
 config:
@@ -118,9 +132,9 @@ config:
       enabled: false
     ## @param config.logging.level Log level for RabbitMQ (debug, info, warning, error, critical, none)
     level: "info"
-  ## @param config.extraConfiguration Additional RabbitMQ configuration
+  ## @param config.extraConfiguration Additional RabbitMQ configuration. Supports Helm template expressions.
   extraConfiguration: ""
-  ## @param config.advancedConfiguration Advanced RabbitMQ configuration
+  ## @param config.advancedConfiguration Advanced RabbitMQ configuration. Supports Helm template expressions.
   advancedConfiguration: ""
 
 ## @section Queue Balancing and Distribution Configuration
@@ -356,6 +370,46 @@ ingress:
   ## @param ingress.tls Ingress TLS configuration
   tls: []
 
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## To attach to another parent type, such as ListenerSet, set group and kind:
+##
+##   parentRefs:
+##     - group: gateway.networking.k8s.io
+##       kind: ListenerSet
+##       name: my-listenerset
+##       sectionName: https
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for RabbitMQ management
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways or ListenerSets
+    parentRefs:
+      - name: gateway
+        group: ""
+        kind: ""
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - rabbitmq.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
 ## @section Resources
 ## @param resources Resource limits and requests for RabbitMQ pods
 resources: {}
@@ -402,6 +456,15 @@ containerSecurityContext:
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 999
+  ## @param podSecurityContext.fsGroupChangePolicy When kubelet should recursively change ownership/permissions of the volume
+  ## Set to "OnRootMismatch" so the kubelet only re-applies fsGroup ownership when the volume root does not already match.
+  ## This prevents Kubernetes from relaxing the .erlang.cookie file permissions (e.g. from 0400 to 0660) on container/kubelet
+  ## restarts, which would otherwise make RabbitMQ crash-loop with "Cookie file ... must be accessible by owner only" because
+  ## init containers do not re-run on a plain container restart. See https://github.com/CloudPirates-io/helm-charts/issues/1397
+  fsGroupChangePolicy: OnRootMismatch
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 ## @param priorityClassName Priority class for the rabbitmq instance
 priorityClassName: ""
@@ -680,10 +743,10 @@ definitions:
       tag: "8.18.0"
       pullPolicy: IfNotPresent
     ## @param definitions.autoReload.resources Resource limits and requests for the config watcher sidecar
-    resources:
-      requests:
-        cpu: 10m
-        memory: 16Mi
-      limits:
-        cpu: 50m
-        memory: 32Mi
+    resources: {}
+      # requests:
+      #   cpu: 10m
+      #   memory: 16Mi
+      # limits:
+      #   cpu: 50m
+      #   memory: 32Mi

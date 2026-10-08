@@ -1,0 +1,69 @@
+suite: test redis service monitor
+templates:
+  - servicemonitor.yaml
+  - metrics-service.yaml
+tests:
+  - it: should scrape the port name exposed by the metrics service
+    template: servicemonitor.yaml
+    set:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].port
+          value: http-metrics
+
+  - it: should expose that same port name on the metrics service
+    template: metrics-service.yaml
+    set:
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.ports[0].name
+          value: http-metrics
+
+  - it: should follow a custom metrics service name
+    template: servicemonitor.yaml
+    set:
+      metrics:
+        enabled: true
+        service:
+          name: metrics
+        serviceMonitor:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: metrics
+
+  - it: should scrape the metrics service port on the sentinel endpoint
+    template: servicemonitor.yaml
+    set:
+      architecture: replication
+      sentinel:
+        enabled: true
+      metrics:
+        enabled: true
+        service:
+          name: custom-metrics
+        serviceMonitor:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.endpoints[0].port
+          value: custom-metrics
+      - equal:
+          path: spec.endpoints[1].port
+          value: custom-metrics
+      - equal:
+          path: spec.endpoints[1].path
+          value: /scrape

@@ -43,6 +43,13 @@ Return the proper MariaDB image name
 {{- end }}
 
 {{/*
+Return the proper MariaDB exporter image name
+*/}}
+{{- define "mariadb.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "mariadb.imagePullSecrets" -}}
@@ -106,10 +113,10 @@ Generate Galera cluster address list
 {{- define "mariadb.galeraClusterAddress" -}}
 {{- $fullname := include "mariadb.fullname" . -}}
 {{- $replicaCount := int .Values.galera.replicaCount -}}
-{{- $namespace := .Release.Namespace -}}
+{{- $namespace := include "cloudpirates.namespace" . -}}
 {{- $addresses := list -}}
 {{- range $i := until $replicaCount -}}
-{{- $addresses = append $addresses (printf "%s-%d.%s.%s.svc.cluster.local:4567" $fullname $i $fullname $namespace) -}}
+{{- $addresses = append $addresses (printf "%s-%d.%s-headless.%s.svc.cluster.local:4567" $fullname $i $fullname $namespace) -}}
 {{- end -}}
 {{- join "," $addresses -}}
 {{- end }}
@@ -132,7 +139,7 @@ Generate Galera node name with pod name
 Generate Galera node address
 */}}
 {{- define "mariadb.galeraNodeAddress" -}}
-{{- printf "%s-%s.%s.%s.svc.cluster.local" (include "mariadb.fullname" .) "REPLICA_NUM" (include "mariadb.fullname" .) .Release.Namespace -}}
+{{- printf "%s-%s.%s-headless.%s.svc.cluster.local" (include "mariadb.fullname" .) "REPLICA_NUM" (include "mariadb.fullname" .) (include "cloudpirates.namespace" .) -}}
 {{- end }}
 
 {{/*

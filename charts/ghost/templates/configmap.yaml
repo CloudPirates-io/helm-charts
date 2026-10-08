@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "ghost.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "ghost.labels" . | nindent 4 }}
   {{- with (include "ghost.annotations" .) }}
@@ -12,12 +12,12 @@ metadata:
 data:
   config.production.json: |-
     {
-      "url": {{ printf "https://%s" (first .Values.ingress.hosts).host | quote }},
+      "url": {{ include "ghost.url" . | quote }},
       "database": {
         {{- if .Values.mariadb.enabled }}
         "client": "mysql",
         "connection": {
-          "host": "{{ include "ghost.fullname" . }}-mariadb",
+          "host": {{ include "mariadb.fullname" .Subcharts.mariadb | quote }},
           "port": {{ .Values.mariadb.service.port }},
           "user": "",
           "password": "",

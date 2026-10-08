@@ -145,6 +145,7 @@ rules:
       - rabbitmqclusters/status
     verbs:
       - get
+      - patch
       - update
   - apiGroups:
       - rbac.authorization.k8s.io
@@ -152,6 +153,7 @@ rules:
       - rolebindings
     verbs:
       - create
+      - delete
       - get
       - list
       - update
@@ -162,6 +164,7 @@ rules:
       - roles
     verbs:
       - create
+      - delete
       - get
       - list
       - update

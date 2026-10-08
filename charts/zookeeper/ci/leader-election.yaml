@@ -1,0 +1,17 @@
+# CI scenario: Zookeeper 3-node ensemble with the "mntr" 4-letter-word command
+# whitelisted (the default scenario only whitelists "srvr").
+# Exercises: real quorum formation and leader election across the ensemble -
+# verified by querying zk_server_state on every pod and confirming exactly
+# one leader and the rest followers, not just that probes pass.
+zookeeperConfig:
+  commandsWhitelist: "mntr,srvr,ruok"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

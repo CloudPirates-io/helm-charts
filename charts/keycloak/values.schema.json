@@ -134,6 +134,72 @@
         "fullnameOverride": {
             "type": "string"
         },
+        "gatewayAPI": {
+            "type": "object",
+            "properties": {
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "parentRefs": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "namespace": {
+                                        "type": "string"
+                                    },
+                                    "sectionName": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "rules": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "matches": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "global": {
             "type": "object",
             "properties": {
@@ -210,6 +276,14 @@
         "initContainers": {
             "type": "object",
             "properties": {
+                "copyQuarkusLib": {
+                    "type": "object",
+                    "properties": {
+                        "resources": {
+                            "type": "object"
+                        }
+                    }
+                },
                 "waitForMariadb": {
                     "type": "object",
                     "properties": {
@@ -226,31 +300,7 @@
                             "type": "string"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "tag": {
                             "type": "string"
@@ -273,31 +323,7 @@
                             "type": "string"
                         },
                         "resources": {
-                            "type": "object",
-                            "properties": {
-                                "limits": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                },
-                                "requests": {
-                                    "type": "object",
-                                    "properties": {
-                                        "cpu": {
-                                            "type": "string"
-                                        },
-                                        "memory": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "object"
                         },
                         "tag": {
                             "type": "string"
@@ -375,6 +401,9 @@
                     }
                 }
             }
+        },
+        "lifecycle": {
+            "type": "object"
         },
         "livenessProbe": {
             "type": "object",
@@ -504,6 +533,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "nodeSelector": {
             "type": "object"
         },
@@ -544,6 +576,14 @@
             "properties": {
                 "fsGroup": {
                     "type": "integer"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -624,6 +664,9 @@
         "resources": {
             "type": "object"
         },
+        "revisionHistoryLimit": {
+            "type": "integer"
+        },
         "service": {
             "type": "object",
             "properties": {
@@ -699,6 +742,14 @@
                 }
             }
         },
+        "terminationGracePeriodSeconds": {
+            "type": [
+                "integer",
+                "string"
+            ],
+            "minimum": 0,
+            "pattern": "^$"
+        },
         "tls": {
             "type": "object",
             "properties": {
@@ -770,6 +821,9 @@
                     "type": "string"
                 },
                 "truststoreExistingSecretKey": {
+                    "type": "string"
+                },
+                "truststoreExistingSecretPasswordKey": {
                     "type": "string"
                 },
                 "truststoreFile": {

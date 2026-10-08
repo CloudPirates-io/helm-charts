@@ -1,0 +1,21 @@
+{{- if and (.Values.clusterOperator.webhook.enabled) (.Values.useCertManager) (not .Values.clusterOperator.webhook.existingWebhookCertSecret) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    {{- include "rmqco.labels" . | nindent 4 }}
+  name: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+  namespace: {{ include "cloudpirates.namespace" . }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  commonName: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+  dnsNames:
+    - {{ printf "%s.%s.svc" (include "rmqco.clusterOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) }}
+    - {{ printf "%s.%s.svc.%s" (include "rmqco.clusterOperator.webhook.fullname" .) (include "cloudpirates.namespace" .) .Values.clusterDomain }}
+  issuerRef:
+    kind: Issuer
+    name: {{ template "cloudpirates.fullname" . }}
+  secretName: {{ template "rmqco.clusterOperator.webhook.fullname" . }}
+{{- end }}

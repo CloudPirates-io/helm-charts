@@ -86,4 +86,17 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsGroup
       - isNull:
           path: spec.template.spec.containers[0].securityContext.seLinuxOptions
+
+  - it: should configure OpenShift restricted metrics container security context
+    set:
+      targetPlatform: openshift
+      metrics.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: metrics
+      - isNull:
+          path: spec.template.spec.containers[1].securityContext.runAsUser
+      - isNull:
+          path: spec.template.spec.containers[1].securityContext.runAsGroup
           

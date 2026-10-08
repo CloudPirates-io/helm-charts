@@ -96,9 +96,7 @@ The following table lists the configurable parameters of the ClusterPirate chart
 | `deployment.image.repository`          | ClusterPirate image repository             | `koperator-internal/services/clusterpirate` |
 | `deployment.image.tag`                 | ClusterPirate image tag                    | `latest`                                    |
 | `deployment.image.pullPolicy`          | ClusterPirate image pull policy            | `Always`                                    |
-| `deployment.resources.limits.memory`   | Memory limit for ClusterPirate container   | `300Mi`                                     |
-| `deployment.resources.requests.memory` | Memory request for ClusterPirate container | `100Mi`                                     |
-| `deployment.resources.requests.cpu`    | CPU request for ClusterPirate container    | `10m`                                       |
+| `deployment.resources`                 | Resource limits and requests for ClusterPirate container | `{}`                                        |
 | `deployment.extraEnvVars`              | Additional environment variables           | `[]`                                        |
 
 ### Health probe configuration

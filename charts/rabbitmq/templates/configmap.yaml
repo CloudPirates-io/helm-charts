@@ -20,7 +20,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "rabbitmq.fullname" . }}-config
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "rabbitmq.labels" . | nindent 4 }}
   {{- with (include "rabbitmq.annotations" .) }}
@@ -45,7 +45,7 @@ data:
     cluster_formation.k8s.host = kubernetes.default.svc.{{ .Values.clusterDomain }}
     cluster_formation.k8s.address_type = {{ .Values.peerDiscoveryK8sPlugin.addressType }}
     cluster_formation.k8s.service_name = {{ include "rabbitmq.fullname" . }}-headless
-    cluster_formation.k8s.hostname_suffix = .{{ include "rabbitmq.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+    cluster_formation.k8s.hostname_suffix = .{{ include "rabbitmq.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
     {{- end }}
 
 
@@ -109,12 +109,12 @@ data:
 
     {{- if and .Values.config.extraConfiguration (ne .Values.config.extraConfiguration "") }}
     # Extra configuration
-{{ .Values.config.extraConfiguration | indent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.extraConfiguration "context" $) | nindent 4 }}
     {{- end }}
 
   {{- if and .Values.config.advancedConfiguration (ne .Values.config.advancedConfiguration "") }}
   advanced.config: |
-{{ .Values.config.advancedConfiguration | indent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.advancedConfiguration "context" $) | nindent 4 }}
   {{- end }}
   enabled_plugins: |
     [{{- join "," $plugins }}].

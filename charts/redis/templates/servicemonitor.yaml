@@ -21,7 +21,7 @@ spec:
       {{- include "redis.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: metrics
   endpoints:
-    - port: metrics
+    - port: {{ .Values.metrics.service.name }}
       {{- with .Values.metrics.serviceMonitor.interval }}
       interval: {{ . }}
       {{- end }}
@@ -32,8 +32,11 @@ spec:
       {{- with .Values.metrics.serviceMonitor.honorLabels }}
       honorLabels: {{ . }}
       {{- end }}
-      {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
+        - action: replace
+          targetLabel: scrape_target
+          replacement: redis
+      {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}
@@ -41,7 +44,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
-    - port: metrics
+    - port: {{ .Values.metrics.service.name }}
       {{- with .Values.metrics.serviceMonitor.interval }}
       interval: {{ . }}
       {{- end }}
@@ -52,8 +55,11 @@ spec:
       {{- with .Values.metrics.serviceMonitor.honorLabels }}
       honorLabels: {{ . }}
       {{- end }}
-      {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
+        - action: replace
+          targetLabel: scrape_target
+          replacement: sentinel
+      {{- with .Values.metrics.serviceMonitor.relabelings }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.metrics.serviceMonitor.metricRelabelings }}

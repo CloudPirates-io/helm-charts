@@ -3,11 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "keycloak.fullname" . }}
-  {{- if .Values.metrics.serviceMonitor.namespace }}
-  namespace: {{ .Values.metrics.serviceMonitor.namespace | quote }}
-  {{- else }}
-  namespace: {{ .Release.Namespace | quote }}
-  {{- end }}
+  namespace: {{ default (include "cloudpirates.namespace" .) .Values.metrics.serviceMonitor.namespace }}
   labels:
     {{- include "keycloak.metrics.serviceMonitor.labels" . | nindent 4 }}
   {{- $annotations := merge .Values.metrics.serviceMonitor.annotations .Values.commonAnnotations }}
@@ -25,7 +21,7 @@ spec:
       app.kubernetes.io/component: metrics
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace | quote }}
+      - {{ include "cloudpirates.namespace" . }}
   endpoints:
     - port: {{ .Values.metrics.service.targetPort }}
       {{- if .Values.metrics.serviceMonitor.interval }}

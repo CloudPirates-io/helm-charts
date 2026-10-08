@@ -6,7 +6,7 @@ kind: Deployment
 {{- end }}
 metadata:
   name: {{ include "memcached.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "memcached.labels" . | nindent 4 }}
   {{- with (include "memcached.annotations" .) }}
@@ -15,6 +15,7 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if eq .Values.deploymentType "StatefulSet" }}
   serviceName: {{ include "memcached.fullname" . }}
   {{- end }}
@@ -100,7 +101,7 @@ spec:
           image: {{ include "memcached.metrics.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.metrics.image) }}
           args:
-            - "--memcached.address=localhost:{{ .Values.service.port }}"
+            - "--memcached.address=localhost:11211"
             - "--web.listen-address=:{{ .Values.metrics.service.port }}"
             {{- range .Values.metrics.extraArgs }}
             - {{ . }}

@@ -5,7 +5,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
   {{- $annotations := merge .Values.ingress.annotations .Values.commonAnnotations }}
@@ -52,7 +52,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-console
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "cloudpirates.namespace" . }}
   labels:
     {{- include "rustfs.labels" . | nindent 4 }}
     app.kubernetes.io/component: console

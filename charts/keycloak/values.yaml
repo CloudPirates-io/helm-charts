@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override keycloak.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -22,7 +24,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.5.5@sha256:a7b0cb7a43a1235a61872883414d3f1d9a3ceac9df6e5907bd12202778a6265c"
+  tag: "26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -31,6 +33,8 @@ image:
 ## @section Deployment configuration
 ## @param replicaCount Number of Keycloak replicas to deploy
 replicaCount: 1
+## @param revisionHistoryLimit Number of old StatefulSet revisions to retain for rollback
+revisionHistoryLimit: 10
 
 ## @section Pod annotations and labels
 ## @param podAnnotations Map of annotations to add to the pods
@@ -41,6 +45,10 @@ podLabels: {}
 ## @section Pod configuration
 ## @param shareProcessNamespace Enable process namespace sharing between containers in the pod
 shareProcessNamespace: false
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the Keycloak pod to terminate. Leave empty to use the Kubernetes default
+terminationGracePeriodSeconds: ""  # @schema type:[integer, string]; minimum:0; pattern:^$
+## @param lifecycle Lifecycle hooks for the Keycloak container
+lifecycle: {}
 
 ## @section extra volumes and volumes mount
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pod
@@ -80,6 +88,9 @@ extraContainers: []
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Group ID for the volumes of the pod
   fsGroup: 1001
+  ## @param podSecurityContext.seccompProfile Seccomp profile for the pod
+  seccompProfile:
+    type: RuntimeDefault
 
 containerSecurityContext:
   ## @param containerSecurityContext.allowPrivilegeEscalation Enable container privilege escalation
@@ -193,6 +204,8 @@ tls:
   truststoreExistingSecret: ""
   ## @param tls.truststoreExistingSecretKey Key within the truststore secret that holds the truststore file
   truststoreExistingSecretKey: "truststore.jks"
+  ## @param tls.truststoreExistingSecretPasswordKey Key within the truststore secret that holds the truststore password
+  truststoreExistingSecretPasswordKey: "truststore-password"
   ## @param tls.truststorePassword Password for the truststore (use with caution - consider using existingSecret)
   truststorePassword: ""
   ## @param tls.truststoreFile Path where the truststore file will be mounted (internal)
@@ -296,6 +309,36 @@ ingress:
   #  - secretName: keycloak-tls
   #    hosts:
   #      - keycloak.local
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation for Keycloak
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - keycloak.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Resources
 resources: {}
@@ -453,6 +496,9 @@ extraObjects: []
 
 ## @section Init Container Configuration
 initContainers:
+  copyQuarkusLib:
+    ## @param initContainers.copyQuarkusLib.resources Resource requests and limits for the copy-quarkus-lib init container
+    resources: {}
   waitForPostgres:
     ## @param initContainers.waitForPostgres.image PostgreSQL init container image for waiting (leave empty to use registry/repository/tag)
     image: ""
@@ -461,17 +507,17 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d"
+    tag: "18.6@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
-    resources:
-      limits:
-        cpu: 100m
-        memory: 64Mi
-      requests:
-        cpu: 100m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 32Mi
   waitForMariadb:
     ## @param initContainers.waitForMariadb.image MariaDB init container image for waiting (leave empty to use registry/repository/tag)
     image: ""
@@ -480,17 +526,17 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "12.2.2@sha256:b1cb255a9939d28a1856815f0de6046c20c28c21b92a9f2696bc782b247a47ee"
+    tag: "13.0.2@sha256:f1bba652ba57bea3099ca2fe1af692af537c27d96e0bcde39dce29e2ba1ec4f3"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container
-    resources:
-      limits:
-        cpu: 100m
-        memory: 64Mi
-      requests:
-        cpu: 100m
-        memory: 32Mi
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 64Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 32Mi
 
 ## @section PostgreSQL Configuration (when postgres.enabled=true)
 ## @descriptionStart

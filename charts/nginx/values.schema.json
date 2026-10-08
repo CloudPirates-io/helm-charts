@@ -63,6 +63,9 @@
                         "command": {
                             "type": "array"
                         },
+                        "enabled": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object"
                         },
@@ -74,9 +77,6 @@
                 "image": {
                     "type": "object",
                     "properties": {
-                        "digest": {
-                            "type": "string"
-                        },
                         "pullPolicy": {
                             "type": "string"
                         },
@@ -98,6 +98,9 @@
                     "type": "integer"
                 },
                 "repository": {
+                    "type": "string"
+                },
+                "subPath": {
                     "type": "string"
                 }
             }
@@ -153,6 +156,12 @@
                 }
             }
         },
+        "dnsConfig": {
+            "type": "object"
+        },
+        "dnsPolicy": {
+            "type": "string"
+        },
         "existingConfigConfigmap": {
             "type": "string"
         },
@@ -179,6 +188,72 @@
         },
         "fullnameOverride": {
             "type": "string"
+        },
+        "gatewayAPI": {
+            "type": "object",
+            "properties": {
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "parentRefs": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "namespace": {
+                                        "type": "string"
+                                    },
+                                    "sectionName": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "rules": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "matches": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "path": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         },
         "global": {
             "type": "object",
@@ -253,6 +328,9 @@
         "initContainerSecurityContext": {
             "type": "object"
         },
+        "lifecycleHooks": {
+            "type": "object"
+        },
         "livenessProbe": {
             "type": "object",
             "properties": {
@@ -309,28 +387,7 @@
                     }
                 },
                 "resources": {
-                    "type": "object",
-                    "properties": {
-                        "limits": {
-                            "type": "object",
-                            "properties": {
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
+                    "type": "object"
                 },
                 "service": {
                     "type": "object",
@@ -398,6 +455,9 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespaceOverride": {
+            "type": "string"
+        },
         "nodeSelector": {
             "type": "object"
         },
@@ -450,6 +510,9 @@
         "resources": {
             "type": "object"
         },
+        "revisionHistoryLimit": {
+            "type": "integer"
+        },
         "serverConfig": {
             "type": "string"
         },
@@ -458,6 +521,9 @@
             "properties": {
                 "annotations": {
                     "type": "object"
+                },
+                "clusterIP": {
+                    "type": "string"
                 },
                 "internalTrafficPolicy": {
                     "type": "string"
@@ -481,6 +547,9 @@
                             }
                         }
                     }
+                },
+                "trafficDistribution": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
@@ -514,6 +583,9 @@
             "type": "string"
         },
         "tolerations": {
+            "type": "array"
+        },
+        "topologySpreadConstraints": {
             "type": "array"
         }
     }

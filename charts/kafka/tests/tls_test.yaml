@@ -1,0 +1,160 @@
+suite: test kafka TLS
+
+tests:
+  - it: should not enable TLS by default
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:SASL_PLAINTEXT,INTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT"
+      - notMatchRegex:
+          path: data["server.properties"]
+          pattern: "ssl.keystore"
+
+  - it: should use SASL_SSL on all listeners when TLS and auth are enabled
+    template: configmap.yaml
+    set:
+      tls:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:SASL_SSL,INTERNAL:SASL_SSL,CONTROLLER:SASL_SSL"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "ssl.keystore.type=PEM"
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "ssl.truststore.location=/mnt/kafka/certs/ca.crt"
+
+  - it: should use plain SSL when TLS is on but auth is off
+    template: configmap.yaml
+    set:
+      tls:
+        enabled: true
+      auth:
+        client: { enabled: false }
+        interBroker: { enabled: false }
+        controller: { enabled: false }
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "listener.security.protocol.map=CLIENT:SSL,INTERNAL:SSL,CONTROLLER:SSL"
+
+  - it: should set ssl.client.auth only when clientAuth is not none
+    template: configmap.yaml
+    set:
+      tls:
+        enabled: true
+        clientAuth: required
+    asserts:
+      - matchRegex:
+          path: data["server.properties"]
+          pattern: "ssl.client.auth=required"
+
+  - it: should generate a self-signed TLS Secret by default source
+    template: tls-secret.yaml
+    set:
+      tls:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Secret
+      - equal:
+          path: type
+          value: kubernetes.io/tls
+      - exists:
+          path: data["tls.crt"]
+      - exists:
+          path: data["tls.key"]
+      - exists:
+          path: data["ca.crt"]
+
+  - it: should not render the self-signed Secret for the existing-secret source
+    template: tls-secret.yaml
+    set:
+      tls:
+        enabled: true
+        source: existing-secret
+        existingSecret: my-tls
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render the self-signed Secret for the cert-manager source
+    template: tls-secret.yaml
+    set:
+      tls:
+        enabled: true
+        source: cert-manager
+        certManager:
+          issuerRef:
+            name: ca-issuer
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should mount the cert Secret and assemble the keystore at runtime
+    template: statefulset.yaml
+    set:
+      tls:
+        enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /mnt/kafka/certs
+            readOnly: true
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="certs")].secret.secretName
+          value: RELEASE-NAME-kafka-tls
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: "openssl pkcs8 -topk8 -nocrypt -in /mnt/kafka/certs/tls.key -out /opt/kafka/tls-runtime/keystore.pem"
+
+  - it: should reference an existing TLS secret when source is existing-secret
+    template: statefulset.yaml
+    set:
+      tls:
+        enabled: true
+        source: existing-secret
+        existingSecret: my-tls
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="certs")].secret.secretName
+          value: my-tls
+
+  - it: should create a cert-manager Certificate for the cert-manager source
+    template: certificate.yaml
+    set:
+      tls:
+        enabled: true
+        source: cert-manager
+        certManager:
+          issuerRef:
+            name: ca-issuer
+            kind: ClusterIssuer
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Certificate
+      - equal:
+          path: spec.secretName
+          value: RELEASE-NAME-kafka-tls
+      - equal:
+          path: spec.issuerRef.name
+          value: ca-issuer
+
+  - it: should not mount certs when TLS is disabled
+    template: statefulset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: certs
+            secret:
+              secretName: RELEASE-NAME-kafka-tls

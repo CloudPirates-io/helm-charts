@@ -2,8 +2,8 @@ apiVersion: v2
 name: mariadb
 description: MariaDB is a high-performance, open-source relational database server that is a drop-in replacement for MySQL. Supports both single-node and Galera Cluster deployments.
 type: application
-version: 0.14.3
-appVersion: "12.2.2"
+version: 0.16.16
+appVersion: "13.0.2"
 keywords:
   - mariadb
   - mysql
@@ -27,7 +27,7 @@ maintainers:
     url: https://www.srf.ch
 dependencies:
   - name: common
-    version: "2.2.0"
+    version: "2.2.1"
     repository: oci://registry-1.docker.io/cloudpirates
 icon: https://a.storyblok.com/f/143071/512x512/6512dd22ee/mariadb-logo.svg
 annotations:
@@ -51,10 +51,10 @@ annotations:
     - name: Maintainer CloudPirates
       url: https://www.cloudpirates.io
   artifacthub.io/changes: |-
-    - kind: fixed
-      description: "Fixes broken healthcheck"
+    - kind: added
+      description: "Add namespaceOverride Value to all Charts that missing it"
       links:
         - name: "Pull Request"
-          url: "https://github.com/CloudPirates-io/helm-charts/pull/1041"
+          url: "https://github.com/CloudPirates-io/helm-charts/pull/1214"
         - name: "Changelog"
           url: "https://github.com/CloudPirates-io/helm-charts/blob/main/charts/mariadb/CHANGELOG.md"

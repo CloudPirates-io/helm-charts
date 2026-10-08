@@ -4,12 +4,20 @@ global:
   imageRegistry: ""
   ## @param global.imagePullSecrets Global Docker registry secret names as an array
   imagePullSecrets: []
+  ## @section global.dataNodes Global settings applied to all data node statefulsets
+  dataNodes:
+    ## @param global.dataNodes.extraContainers Additional containers to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraContainers: []
+    ## @param global.dataNodes.extraVolumes Additional volumes to add to all data node pods (statefulset, statefulset-shard, statefulset-hidden, statefulset-configserver)
+    extraVolumes: []
 
 ## @section Common parameters
 ## @param nameOverride String to partially override mongodb.fullname
 nameOverride: ""
 ## @param fullnameOverride String to fully override mongodb.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -34,7 +42,7 @@ image:
   ## @param image.repository MongoDB image repository
   repository: mongo
   ## @param image.tag MongoDB image tag
-  tag: "8.2.5@sha256:3a7947f3211e70c045ebff7e94293298bc3fa4e08e5cfcb8cb32ca0d06e06635"
+  tag: "9.0.2@sha256:bac22ea7710d774103dcad3ec8ac13cba1eb378f488e3ce8a6b3a1adf2ba9dcc"
   ## @param image.pullPolicy MongoDB image pull policy
   pullPolicy: Always
   ## @param image.args Override default container args (useful when using custom images)
@@ -78,22 +86,60 @@ config:
       bindIpAll: true
   ## param config.existingConfigmap Name of an existing Configmap to use instead of creating one
   existingConfigmap: ""
+  ## param config.existingConfigmapKey Name of the key that will hold configuration
+  existingConfigmapKey: ""
 
-## @section customUser Optional user to be created at initialisation with a custom password and database
-customUser: {}
-  ## @param customUser.name Name of the custom user to be created
-  # name: ""
-  ## @param customUser.database Name of the database to be created
-  # database: ""
-  ## @param customUser.password Password to be used for the custom user
-  # password: ""
-  ## @param customUser.existingSecret Existing secret, in which username, password and database name are saved
-  # existingSecret: ""
-  ## @param customUser.secretKeys Name of keys in existing secret to use the custom user name, password and database
-  # secretKeys:
-  #   name: ""
+## @section customRoles Optional roles to be created at initialisation (before customUsers)
+customRoles: []
+  ## Each entry supports the following fields:
+  ## @param customRoles[].role Role name to create
+  ## @param customRoles[].database Database where the role is created (default: admin)
+  ## @param customRoles[].privileges List of privilege objects with resource and actions
+  ## @param customRoles[].roles List of inherited roles (strings apply to same database, objects with {role, db} for cross-database)
+  ## Example:
+  # - role: myCustomRole
+  #   database: admin
+  #   privileges:
+  #     - resource: { cluster: true }
+  #       actions: ["find"]
+  #     - resource: { db: "", collection: "" }
+  #       actions: ["find", "listCollections", "listIndexes"]
+  #   roles:
+  #     - backup
+  #     - restore
+  #     - clusterMonitor
+  #     - { role: "read", db: "reporting" }
+
+## @section customUsers Optional users to be created at initialisation
+customUsers: []
+  ## Each entry supports the following fields:
+  ## @param customUsers[].name Username. A secret is auto-generated if existingSecret is not set.
+  ## @param customUsers[].database Database to create the user in. Defaults to name if not set.
+  ## @param customUsers[].password Password. Random 32-char string generated if not set.
+  ## @param customUsers[].existingSecret Name of an existing secret. Supports Helm template strings.
+  ## @param customUsers[].secretKeys.name Key in existingSecret for username (default: CUSTOM_USER)
+  ## @param customUsers[].secretKeys.password Key in existingSecret for password (default: CUSTOM_PASSWORD)
+  ## @param customUsers[].secretKeys.database Key in existingSecret for database (default: CUSTOM_DB)
+  ## @param customUsers[].roles List of MongoDB roles. Strings apply to the user's own database.
+  ##   Use {role: x, db: y} for cross-database roles.
+  ## Example:
+  # - name: appuser
+  #   database: appdb
   #   password: ""
-  #   database: ""
+  #   roles:
+  #     - readWrite
+  #     - dbAdmin
+  # - name: readonlyuser
+  #   database: reportingdb
+  #   roles:
+  #     - read
+  # - existingSecret: my-secret
+  #   secretKeys:
+  #     name: CUSTOM_USER
+  #     password: CUSTOM_PASSWORD
+  #     database: CUSTOM_DB
+  #   roles:
+  #     - readWrite
 
 persistence:
   ## @param persistence.enabled Enable persistent storage
@@ -116,15 +162,16 @@ persistence:
   ## Useful in dev environments and one PV for multiple services
   subPath: ""
   ## @param persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+  # @schema type:[null, object]
   persistentVolumeClaimRetentionPolicy:
 
 ## @param resources Resource limits and requests for MongoDB pod
-resources:
-  limits:
-    memory: 512Mi
-  requests:
-    cpu: 50m
-    memory: 512Mi
+resources: {}
+  # limits:
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 50m
+  #   memory: 512Mi
 
 ## @param nodeSelector Node selector for pod assignment
 nodeSelector: {}
@@ -151,6 +198,9 @@ podSecurityContext:
 ## @param priorityClassName Priority class for the mongodb instance
 priorityClassName: ""
 
+## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
+terminationGracePeriodSeconds: 30
+
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true
@@ -164,6 +214,9 @@ livenessProbe:
   failureThreshold: 6
   ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
+
+## @section Custom liveness probe configuration
+customLivenessProbe: {}
 
 readinessProbe:
   ## @param readinessProbe.enabled Enable readiness probe
@@ -179,6 +232,9 @@ readinessProbe:
   ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
   successThreshold: 1
 
+## @section Custom readiness probe configuration
+customReadinessProbe: {}
+
 startupProbe:
   ## @param startupProbe.enabled Enable startup probe
   enabled: true
@@ -192,6 +248,9 @@ startupProbe:
   successThreshold: 1
   ## @param startupProbe.periodSeconds How often to perform the probe
   periodSeconds: 5
+
+## @section Custom startup probe configuration
+customStartupProbe: {}
 
 ## @param extraEnvVars Additional environment variables to set
 extraEnvVars: []
@@ -240,13 +299,22 @@ metrics:
     repository: percona/mongodb_exporter
     tag: "0.49.0@sha256:ff224c78c48f252191f2745ca87cf5c6e384c404f89d7f40332809cbb5c8da7a"
     pullPolicy: IfNotPresent
+  ## @param metrics.uriEncodeImage.registry URI encode init container image registry
+  ## @param metrics.uriEncodeImage.repository URI encode init container image repository
+  ## @param metrics.uriEncodeImage.tag URI encode init container image tag
+  ## @param metrics.uriEncodeImage.pullPolicy URI encode init container image pull policy
+  uriEncodeImage:
+    registry: docker.io
+    repository: busybox
+    tag: "musl"
+    pullPolicy: IfNotPresent
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 256Mi
-    requests:
-      cpu: 10m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 256Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
   ## @param metrics.containerSecurityContext Security context for metrics container
   containerSecurityContext:
     runAsUser: 65534
@@ -348,6 +416,9 @@ initContainer:
     #   cpu: 100m
     #   memory: 128Mi
 
+## @section extraInitContainers Optional extra init containers configuration
+extraInitContainers: []
+
 ## @section replicaSet Parameters to build a MongoDB replica set (HA mode)
 replicaSet:
   ## @param replicaSet.enabled Enables replica set deployment mode
@@ -390,6 +461,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.hiddenSecondaries.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-hidden-volume"
@@ -434,6 +506,7 @@ replicaSet:
       persistentVolumeClaimName:
       ## @param replicaSet.arbiter.storage.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed
       ## when a stateful set is scaled or deleted. (new feature in k8s 1.32)
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
       ## @param replicaSet.arbiter.storage.volumeName Internal volume name and prefix of a created PVC
       volumeName: "mongodb-arbiter-volume"
@@ -471,6 +544,38 @@ replicaSet:
   shutdown:
     ## @param replicaSet.shutdown.delay Delay until termination request is forwarded to mongod process to give ReplicaSet time for electing a new primary instance
     delay: 10
+  ## @param replicaSet.externalAccess Creates per-pod external LoadBalancer Services for primary/secondary members and advertises their public hostnames in the replica set config instead of internal FQDNs
+  externalAccess:
+    ## @param replicaSet.externalAccess.enabled Enable per-pod external Services for primary/secondary ReplicaSet members
+    enabled: false
+    service:
+      ## @param replicaSet.externalAccess.service.type Kubernetes Service type for each per-pod external Service
+      type: LoadBalancer
+      ## @param replicaSet.externalAccess.service.port Port exposed by each external Service and advertised to the ReplicaSet (defaults to service.port)
+      ## @type string|number
+      port: ""
+      ## @param replicaSet.externalAccess.service.publicNames Externally reachable hostname for each pod, indexed by ordinal (must have exactly 1 primary + replicaSet.secondaries entries). Also used as the advertised replica set member identity instead of the internal FQDN.
+      publicNames: []
+      ## @param replicaSet.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod, indexed by ordinal (optional, must match publicNames length if set)
+      loadBalancerIPs: []
+      ## @param replicaSet.externalAccess.service.loadBalancerClass loadBalancerClass for the external Services
+      loadBalancerClass: ""
+      ## @param replicaSet.externalAccess.service.loadBalancerSourceRanges Restrict external Service access to these CIDRs
+      loadBalancerSourceRanges: []
+      ## @param replicaSet.externalAccess.service.externalTrafficPolicy externalTrafficPolicy for LoadBalancer/NodePort Services. Safe to use Local here (unlike a shared Service) because each external Service selects exactly one pod via statefulset.kubernetes.io/pod-name, so there's no cross-node routing ambiguity.
+      externalTrafficPolicy: Local
+      ## @param replicaSet.externalAccess.service.annotations Annotations applied to every external Service
+      annotations: {}
+      ## @param replicaSet.externalAccess.service.annotationsList Per-pod annotations, indexed by ordinal, merged on top of service.annotations (e.g. per-pod external-dns hostname)
+      annotationsList: []
+      ## @param replicaSet.externalAccess.service.labels Additional labels applied to every external Service
+      labels: {}
+      ## @param replicaSet.externalAccess.service.sessionAffinity Service session affinity (ClientIP or None)
+      sessionAffinity: None
+      ## @param replicaSet.externalAccess.service.sessionAffinityConfig Additional settings for sessionAffinity (e.g. clientIP.timeoutSeconds)
+      sessionAffinityConfig: {}
+      ## @param replicaSet.externalAccess.service.extraPorts Extra ports to expose on every external Service
+      extraPorts: []
 
 ## @section Common MongoDB parameters (applies to all deployment modes: standalone, replica set, and sharded cluster)
 common:
@@ -517,12 +622,12 @@ shardedCluster:
     ## @param shardedCluster.configsvr.priorityClassName Priority class name for config server pods
     priorityClassName: ""
     ## @param shardedCluster.configsvr.resources Resource limits and requests for config server pods
-    resources:
-      limits:
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 512Mi
+    resources: {}
+      # limits:
+      #   memory: 512Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 512Mi
     ## @param shardedCluster.configsvr.nodeSelector Node selector for config server pods
     nodeSelector: {}
     ## @param shardedCluster.configsvr.tolerations Tolerations for config server pods
@@ -538,6 +643,7 @@ shardedCluster:
       ## @param shardedCluster.configsvr.persistence.accessMode Access mode for config server persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.configsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.configsvr.customInit Custom shell commands to run during config server initialization (executed on each config server pod)
     ## Example: customInit: |
@@ -552,12 +658,12 @@ shardedCluster:
     ## @param shardedCluster.mongos.priorityClassName Priority class name for mongos router pods
     priorityClassName: ""
     ## @param shardedCluster.mongos.resources Resource limits and requests for mongos router pods
-    resources:
-      limits:
-        memory: 256Mi
-      requests:
-        cpu: 50m
-        memory: 256Mi
+    resources: {}
+      # limits:
+      #   memory: 256Mi
+      # requests:
+      #   cpu: 50m
+      #   memory: 256Mi
     ## @param shardedCluster.mongos.nodeSelector Node selector for mongos router pods
     nodeSelector: {}
     ## @param shardedCluster.mongos.tolerations Tolerations for mongos router pods
@@ -598,6 +704,7 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.persistence.accessMode Access mode for shard persistent volumes
       accessMode: ReadWriteOnce
       ## @param shardedCluster.shardsvr.persistence.persistentVolumeClaimRetentionPolicy Set persistentVolumeClaimRetentionPolicy to explicitly control how PVCs are managed when a stateful set is scaled or deleted
+      # @schema type:[null, object]
       persistentVolumeClaimRetentionPolicy:
     ## @param shardedCluster.shardsvr.customInit Custom shell commands to run during shard server initialization (executed on each shard data node pod)
     ## Example: customInit: |
@@ -612,12 +719,12 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.dataNode.priorityClassName Priority class name for shard data node pods
       priorityClassName: ""
       ## @param shardedCluster.shardsvr.dataNode.resources Resource limits and requests for shard data node pods
-      resources:
-        limits:
-          memory: 1Gi
-        requests:
-          cpu: 100m
-          memory: 1Gi
+      resources: {}
+        # limits:
+        #   memory: 1Gi
+        # requests:
+        #   cpu: 100m
+        #   memory: 1Gi
       ## @param shardedCluster.shardsvr.dataNode.nodeSelector Node selector for shard data node pods (overrides shardsvr.nodeSelector)
       nodeSelector: {}
       ## @param shardedCluster.shardsvr.dataNode.tolerations Tolerations for shard data node pods (overrides shardsvr.tolerations)
@@ -635,12 +742,12 @@ shardedCluster:
       ## @param shardedCluster.shardsvr.arbiter.priorityClassName Priority class name for arbiter pods
       priorityClassName: ""
       ## @param shardedCluster.shardsvr.arbiter.resources Resource limits and requests for arbiter pods
-      resources:
-        limits:
-          memory: 256Mi
-        requests:
-          cpu: 50m
-          memory: 256Mi
+      resources: {}
+        # limits:
+        #   memory: 256Mi
+        # requests:
+        #   cpu: 50m
+        #   memory: 256Mi
       ## @param shardedCluster.shardsvr.arbiter.nodeSelector Node selector for arbiter pods (overrides shardsvr.nodeSelector)
       nodeSelector: {}
       ## @param shardedCluster.shardsvr.arbiter.tolerations Tolerations for arbiter pods (overrides shardsvr.tolerations)
@@ -682,3 +789,10 @@ shardedCluster:
       stop: ""
     ## @param shardedCluster.balancer.autoSplitEnabled Enable automatic chunk splitting (MongoDB 6.0+)
     autoSplitEnabled: true
+
+## @section Experimental parameters
+## Unofficial, unverified workarounds. Disabled by default - enable at your own risk.
+experimental:
+  tcmallocRseqWorkaround:
+    ## @param experimental.tcmallocRseqWorkaround.enabled Set GLIBC_TUNABLES=glibc.pthread.rseq=1 on all mongod/mongos containers. Community-reported (not MongoDB-endorsed) workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 due to a TCMalloc/glibc incompatibility (MongoDB SERVER-121912, google/tcmalloc#292). Reports of it actually helping are inconsistent. The official fix is to run kernel <=6.18 or >=7.0.14.
+    enabled: false

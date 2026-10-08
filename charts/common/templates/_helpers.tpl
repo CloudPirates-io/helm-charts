@@ -59,7 +59,7 @@ commonLabels takes highest precedence.
   {{- $_ := set $default "app.kubernetes.io/version" . -}}
 {{- end -}}
 {{- $selectorLabels := include "cloudpirates.selectorLabels" . | fromYaml -}}
-{{- $commonLabels := .Values.commonLabels | default dict -}}
+{{- $commonLabels := include "cloudpirates.tplvalues.render" (dict "value" (.Values.commonLabels | default dict) "context" .) | fromYaml -}}
 {{- merge $commonLabels $selectorLabels $default | toYaml }}
 {{- end }}
 
@@ -83,7 +83,7 @@ Common annotations
 */}}
 {{- define "cloudpirates.annotations" -}}
 {{- with .Values.commonAnnotations }}
-{{ toYaml . }}
+{{ include "cloudpirates.tplvalues.render" (dict "value" . "context" $) }}
 {{- end }}
 {{- end }}
 

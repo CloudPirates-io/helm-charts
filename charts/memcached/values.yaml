@@ -10,6 +10,8 @@ global:
 nameOverride: ""
 ## @param fullnameOverride String to fully override memcached.fullname
 fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
@@ -28,12 +30,15 @@ image:
   ## @param image.repository Memcached image repository
   repository: memcached
   ## @param image.tag Memcached image tag
-  tag: "1.6.41@sha256:d99136ed4c1cf2e3fceb498763f2b7fedec7c486a0fe8a57be19f2a0519ce1fa"
+  tag: "1.6.45@sha256:405a445c7c81bca205850426288baa5655c72859ae31d3de3fa823e6482be4ad"
   ## @param image.pullPolicy Memcached image pull policy
   pullPolicy: Always
 
 ## @param replicaCount Number of Memcached replicas to deploy
 replicaCount: 1
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
 
 ## @param workloadType Type of workload to deploy (Deployment or StatefulSet)
 deploymentType: Deployment
@@ -41,6 +46,10 @@ deploymentType: Deployment
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
+  ## @param service.clusterIP Static cluster IP or "None" for a headless service (recommended when deploymentType is StatefulSet)
+  clusterIP: ""
+  ## @param service.publishNotReadyAddresses Publish pod DNS names before pods are ready (recommended for StatefulSet peer discovery)
+  publishNotReadyAddresses: false
   ## @param service.port Memcached service port
   port: 11211
 
@@ -60,6 +69,36 @@ ingress:
           pathType: ImplementationSpecific
   ## @param ingress.tls An array with the tls configuration
   tls: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - memcached.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
 
 ## @section Service Account parameters
 serviceAccount:
@@ -200,12 +239,12 @@ metrics:
     tag: "v0.15.5@sha256:92a6ad5a3d3e2dffc75efd4e18d1470fa5703dd79b6bace53fe11312b634578e"
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
-  resources:
-    limits:
-      memory: 64Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  resources: {}
+    # limits:
+    #   memory: 64Mi
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
   ## @param metrics.extraArgs Extra arguments for Memcached exporter, for example:
   ## extraArgs:
   ##   - --log.level=debug
