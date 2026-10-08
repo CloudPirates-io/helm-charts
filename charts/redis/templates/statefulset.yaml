@@ -1256,6 +1256,17 @@ spec:
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
               fi
 
+              {{- if not .Values.sentinel.config.announceHostnames }}
+              # Address announced to the other Sentinels, see announce-ip below
+              {{- if eq .Values.ipFamily "ipv6" }}
+              SENTINEL_ANNOUNCE_IP=$(hostname -i | awk '{print $1}')
+              {{- else }}
+              SENTINEL_ANNOUNCE_IP=$(hostname -i | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              [ -n "${SENTINEL_ANNOUNCE_IP}" ] || SENTINEL_ANNOUNCE_IP=$(hostname -i | awk '{print $1}')
+              {{- end }}
+              echo "Sentinel announcing IP address: ${SENTINEL_ANNOUNCE_IP}"
+              {{- end }}
+
               # Create Sentinel config
               cat > /tmp/sentinel.conf << EOF
               # Enable TLS in Sentinel
@@ -1300,10 +1311,16 @@ spec:
               # Fix leader election issues during force deletions
               protected-mode no
               # Allow sentinels to discover each other.
-              # Always announce the pod's stable headless-service FQDN rather than its IP:
-              # a recreated pod keeps the same name but gets a new IP, so an IP-form
-              # announcement goes stale and leaves the Sentinel mesh unable to re-converge.
+              {{- if .Values.sentinel.config.announceHostnames }}
+              # Announce the pod's stable headless-service FQDN rather than its IP: a recreated
+              # pod keeps the same name but gets a new IP, so an IP-form announcement goes stale
+              # and leaves the Sentinel mesh unable to re-converge.
               sentinel announce-ip ${HOSTNAME}.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}
+              {{- else }}
+              # Announce the pod IP. The headless FQDN only resolves inside its own cluster, so a
+              # Sentinel group spanning clusters has to announce an address its peers can reach.
+              sentinel announce-ip ${SENTINEL_ANNOUNCE_IP}
+              {{- end }}
               sentinel announce-port {{ .Values.sentinel.port }}
               logfile ""
               loglevel {{ .Values.sentinel.config.loglevel }}
