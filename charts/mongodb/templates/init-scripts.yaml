@@ -146,7 +146,9 @@ data:
       local delay=$2
       local initdelay=$3
       while true; do
-        mp=$(ps aux | grep "mongod --config {{ include "mongodb.configFullName" . | quote }}" | grep -v grep)
+        # Match the final mongod by its --config argument wherever it appears, so extra args may precede it.
+        # The temporary mongod started by docker-entrypoint.sh runs with a different --config and is not matched.
+        mp=$(ps -eo args | grep -E '^([^ ]*/)?mongod ' | grep -F -e "--config {{ include "mongodb.configFullName" . }}")
         if [ ! -z "$mp" ]; then
           log "mongod is running giving it time to initialize"
           sleep $initdelay
@@ -617,7 +619,7 @@ data:
       local delay=$2
       local initdelay=$3
       while true; do
-        mp=$(ps aux | grep "mongod --config {{ include "mongodb.configFullName" . | quote }}" | grep -v grep)
+        mp=$(ps -eo args | grep -E '^([^ ]*/)?mongod ' | grep -F -e "--config {{ include "mongodb.configFullName" . }}")
         if [ ! -z "$mp" ]; then
           log_shard "mongod is running giving it time to initialize"
           sleep $initdelay
