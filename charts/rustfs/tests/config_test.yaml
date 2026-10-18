@@ -1,0 +1,55 @@
+suite: Test configuration
+templates:
+  - configmap.yaml
+  - deployment.yaml
+  - secret.yaml
+
+tests:
+  - it: TLS path should not be set by default
+    template: configmap.yaml
+    asserts:
+      - notExists:
+          path: data.RUSTFS_TLS_PATH
+
+  - it: TLS path should follow the TLS volume when it is enabled
+    set:
+      tlsPersistence:
+        enabled: true
+    template: configmap.yaml
+    asserts:
+      - equal:
+          path: data.RUSTFS_TLS_PATH
+          value: /opt/tls
+
+  - it: Explicit TLS path should win
+    set:
+      config:
+        tlsPath: /certs
+    template: configmap.yaml
+    asserts:
+      - equal:
+          path: data.RUSTFS_TLS_PATH
+          value: /certs
+
+  - it: Log directory should be the logs volume
+    template: configmap.yaml
+    asserts:
+      - equal:
+          path: data.RUSTFS_OBS_LOG_DIRECTORY
+          value: /app/logs
+
+  - it: Pods should roll when the configuration changes
+    template: deployment.yaml
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/config"]
+
+  - it: Explicit secret key should be used
+    set:
+      auth:
+        secretKey: my-secret-key
+    template: secret.yaml
+    asserts:
+      - equal:
+          path: data["secret-key"]
+          value: bXktc2VjcmV0LWtleQ==
