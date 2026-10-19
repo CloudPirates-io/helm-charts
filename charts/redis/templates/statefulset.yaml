@@ -702,6 +702,16 @@ spec:
             {{- end }}
             - name: redis-config
               mountPath: /tmp
+            {{- if .Values.tls.enabled }}
+            - name: tls-certs
+              mountPath: /etc/redis/tls
+              readOnly: true
+            {{- if .Values.tls.client.existingSecret }}
+            - name: tls-client-certs
+              mountPath: /etc/redis/tls-client
+              readOnly: true
+            {{- end }}
+            {{- end }}
             {{- if and .Values.auth.acl.enabled .Values.auth.acl.existingSecret }}
             - name: acl-file
               mountPath: {{ include "redis.auth.acl.path" . }}
