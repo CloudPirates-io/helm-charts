@@ -241,7 +241,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB init container image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB init container image tag
-    tag: "13.0.2@sha256:f1bba652ba57bea3099ca2fe1af692af537c27d96e0bcde39dce29e2ba1ec4f3"
+    tag: "13.0.2@sha256:0e4bb0f339feba125d1154fbacd36c16ec8518f52e44e1f82ecec7d6771caf39"
 
 config:
   ## @param config.url Public site URL. If not set, defaults to the first ingress host when ingress is enabled, otherwise falls back to the pod's own loopback address over HTTP (so background jobs like ActivityPub that self-fetch this URL during startup don't deadlock waiting on the Service's readiness-gated endpoints).
