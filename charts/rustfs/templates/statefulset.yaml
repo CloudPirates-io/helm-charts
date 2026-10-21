@@ -25,11 +25,12 @@ spec:
       {{- include "rustfs.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- $annotations := merge .Values.podAnnotations .Values.commonAnnotations }}
-      {{- with $annotations }}
       annotations:
+        checksum/config: {{ printf "%s-%s-%s" (toYaml .Values.config) (toYaml .Values.tlsPersistence) (toYaml .Values.logsPersistence) | sha256sum }}
+        {{- $annotations := merge .Values.podAnnotations .Values.commonAnnotations }}
+        {{- with $annotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "rustfs.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
