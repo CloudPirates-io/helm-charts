@@ -1,0 +1,48 @@
+# Functional verification for ci/test-values.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the S3-compatible
+# API actually works end-to-end with the configured auth credentials: create a
+# bucket, upload an object, download it back, and compare checksums.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-rustfs-test-values:9000"
+              BUCKET="verify-bucket"
+              OBJECT="verify-object.txt"
+
+              echo "-> Authenticating against the RustFS S3 API with the configured credentials"
+              mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret
+
+              echo "-> Creating a bucket"
+              mc mb "rustfs/${BUCKET}"
+
+              echo "-> Uploading an object"
+              echo "hello from test-charts verify $(date +%s)" > /tmp/upload.txt
+              mc cp /tmp/upload.txt "rustfs/${BUCKET}/${OBJECT}"
+
+              echo "-> Downloading the object back"
+              mc cat "rustfs/${BUCKET}/${OBJECT}" > /tmp/download.txt
+
+              echo "-> Comparing uploaded and downloaded content"
+              diff /tmp/upload.txt /tmp/download.txt
+
+              echo "OK: rustfs verification passed"

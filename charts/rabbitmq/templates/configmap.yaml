@@ -109,12 +109,12 @@ data:
 
     {{- if and .Values.config.extraConfiguration (ne .Values.config.extraConfiguration "") }}
     # Extra configuration
-{{ .Values.config.extraConfiguration | indent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.extraConfiguration "context" $) | nindent 4 }}
     {{- end }}
 
   {{- if and .Values.config.advancedConfiguration (ne .Values.config.advancedConfiguration "") }}
   advanced.config: |
-{{ .Values.config.advancedConfiguration | indent 4 }}
+    {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.config.advancedConfiguration "context" $) | nindent 4 }}
   {{- end }}
   enabled_plugins: |
     [{{- join "," $plugins }}].

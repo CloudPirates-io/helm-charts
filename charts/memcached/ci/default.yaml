@@ -1,0 +1,8 @@
+# CI scenario: default Memcached deployment
+# Exercises: basic Deployment, Service, and unauthenticated memcached protocol access
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

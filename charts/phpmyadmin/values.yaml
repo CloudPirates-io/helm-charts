@@ -1,0 +1,370 @@
+## @section Global parameters
+global:
+  ## @param global.imageRegistry Global Docker Image registry
+  imageRegistry: ""
+  ## @param global.imagePullSecrets Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+## @section Common parameters
+## @param nameOverride String to partially override phpmyadmin.fullname
+nameOverride: ""
+## @param fullnameOverride String to fully override phpmyadmin.fullname
+fullnameOverride: ""
+## @param namespaceOverride String to override the namespace for all resources
+namespaceOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+commonAnnotations: {}
+
+## @param podAnnotations Annotations to add to the pods created by the deployment
+podAnnotations: {}
+
+## @param podLabels Labels to add to the pods created by the deployment
+podLabels: {}
+
+## @section phpMyAdmin image parameters
+image:
+  ## @param image.registry phpMyAdmin image registry
+  registry: docker.io
+  ## @param image.repository phpMyAdmin image repository
+  repository: phpmyadmin
+  ## @param image.tag phpMyAdmin image tag
+  tag: "5.2.3-apache"
+  ## @param image.pullPolicy phpMyAdmin image pull policy
+  pullPolicy: Always
+
+## @param replicaCount Number of phpMyAdmin replicas to deploy
+replicaCount: 1
+
+## @section Session persistence parameters
+## Mounts a volume at /sessions so PHP sessions (login state) survive pod restarts.
+## Without this, every pod restart logs all users out.
+persistence:
+  sessions:
+    ## @param persistence.sessions.enabled Mount a persistent volume at /sessions to survive pod restarts
+    enabled: false
+    ## @param persistence.sessions.existingClaim Use an existing PVC instead of letting the chart create one
+    existingClaim: ""
+    ## @param persistence.sessions.size Size of the auto-created PVC
+    size: 1Gi
+    ## @param persistence.sessions.storageClass StorageClass for the auto-created PVC (cluster default if empty)
+    storageClass: ""
+    ## @param persistence.sessions.accessModes Access modes for the auto-created PVC. Use ReadWriteMany if replicaCount > 1 and your storage class supports it; ReadWriteOnce will not work across multiple pods.
+    accessModes:
+      - ReadWriteOnce
+    ## @param persistence.sessions.annotations Annotations for the auto-created PVC
+    annotations: {}
+
+## @section Service parameters
+service:
+  ## @param service.type Kubernetes service type
+  type: ClusterIP
+  ## @param service.port phpMyAdmin service port
+  port: 80
+  ## @param service.targetPort Target port for the service
+  targetPort: 80
+  ## @param service.annotations Additional custom annotations for Service
+  annotations: {}
+
+## @section Ingress parameters
+ingress:
+  ## @param ingress.enabled Enable ingress record generation
+  enabled: false
+  ## @param ingress.className IngressClass that will be be used to implement the Ingress
+  className: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource
+  annotations: {}
+  ## @param ingress.hosts An array with hosts and paths
+  hosts:
+    - host: phpmyadmin.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  ## @param ingress.tls An array with the tls configuration
+  tls: []
+
+## @section Traefik IngressRoute parameters
+traefik:
+  ingressRoute:
+    ## @param traefik.ingressRoute.enabled Enable Traefik IngressRoute generation
+    enabled: false
+    ## @param traefik.ingressRoute.annotations Additional annotations for the IngressRoute resource
+    annotations: {}
+    ## @param traefik.ingressRoute.entryPoints Traefik entry points
+    entryPoints:
+      - web
+    ## @param traefik.ingressRoute.hosts List of hosts for the IngressRoute
+    hosts:
+      - phpmyadmin.local
+    ## @param traefik.ingressRoute.tls TLS configuration for Traefik
+    tls:
+      enabled: false
+      ## @param traefik.ingressRoute.tls.secretName TLS certificate secret name
+      secretName: ""
+      ## @param traefik.ingressRoute.tls.certResolver Certificate resolver to use
+      certResolver: ""
+    ## @param traefik.ingressRoute.middlewares List of Traefik middlewares to apply
+    middlewares: []
+
+## @section Gateway API parameters
+## TLS termination happens at the Gateway listener level, not at the backend service.
+## To serve traffic from an HTTPS listener, set sectionName to the listener's name:
+##
+##   parentRefs:
+##     - name: my-gateway
+##       sectionName: https   # matches the HTTPS listener defined in the Gateway resource
+##
+## The backend always receives plain HTTP traffic regardless of the listener protocol.
+gatewayAPI:
+  httpRoute:
+    ## @param gatewayAPI.httpRoute.enabled Enable Gateway API HTTPRoute generation
+    enabled: false
+    ## @param gatewayAPI.httpRoute.annotations Additional annotations for the HTTPRoute resource
+    annotations: {}
+    ## @param gatewayAPI.httpRoute.parentRefs References to the parent Gateways
+    parentRefs:
+      - name: gateway
+        namespace: ""
+        sectionName: ""
+    ## @param gatewayAPI.httpRoute.hostnames List of hostnames to match
+    hostnames:
+      - phpmyadmin.local
+    ## @param gatewayAPI.httpRoute.rules HTTPRoute rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+
+## @section Service Account parameters
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: true
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Automatically mount service account token
+  automountServiceAccountToken: false
+
+## @section ConfigMap parameters
+configMap:
+  ## @param configMap.create Create a ConfigMap for phpMyAdmin configuration
+  create: true
+  ## @param configMap.data ConfigMap data (custom PHP configuration as raw string)
+  data: ""
+
+## @section phpMyAdmin configuration parameters
+config:
+  database:
+    ## @param config.database.host Database host (if not set, connection dialog will be shown)
+    host: ""
+    ## @param config.database.port Database port
+    port: 3306
+    ## @param config.database.user Database default user (plain text, use config.database.userSecret for production)
+    user: ""
+    ## @param config.database.userSecret Name of Secret containing database user (overrides config.database.user if set)
+    userSecret: ""
+    ## @param config.database.userSecretKey Key in Secret containing the username (default: username)
+    userSecretKey: "username"
+    ## @param config.database.password Database default user password (plain text, use config.database.passwordSecret for production)
+    password: ""
+    ## @param config.database.passwordSecret Name of Secret containing database password (overrides config.database.password if set)
+    passwordSecret: ""
+    ## @param config.database.passwordSecretKey Key in Secret containing the password (default: password)
+    passwordSecretKey: "password"
+    ## @param config.database.absoluteUri Absolute URI of phpMyAdmin installation (required for single signon)
+    absoluteUri: ""
+
+    admin:
+      ## @param config.database.admin.user Database admin username (e.g. root), used only once by the provisioning Job to create the control user and grant it privileges. Never used at phpMyAdmin runtime.
+      user: "root"
+      ## @param config.database.admin.userSecret Secret name containing the admin username (overrides admin.user)
+      userSecret: ""
+      ## @param config.database.admin.userSecretKey Key in Secret for the admin username
+      userSecretKey: "username"
+      ## @param config.database.admin.password Database admin password, used only once by the provisioning Job
+      password: ""
+      ## @param config.database.admin.passwordSecret Secret name containing the admin password (overrides admin.password)
+      passwordSecret: ""
+      ## @param config.database.admin.passwordSecretKey Key in Secret for the admin password
+      passwordSecretKey: "password"
+
+  auth:
+    ## @param config.auth.arbitrary Allow arbitrary server connection (enable server selection dropdown). Defaults to true because the phpMyAdmin image falls back to a hardcoded "db" hostname when config.database.host is empty and arbitrary is false, leaving no way to enter a server in the UI. Set to false only when config.database.host is set to a real, reachable host.
+    arbitrary: true
+    ## @param config.auth.cookieAuth Use cookie-based authentication
+    cookieAuth: true
+
+  control:
+    ## @param config.control.user Control user for advanced phpMyAdmin features (plain text, use control.userSecret for production)
+    user: "pma"
+    ## @param config.control.userSecret Name of Secret containing control user (overrides control.user if set)
+    userSecret: ""
+    ## @param config.control.userSecretKey Key in Secret containing the control username (default: username)
+    userSecretKey: "username"
+    ## @param config.control.password Control user password. If empty and control.passwordSecret is not set, a random 32-char password is auto-generated and stored in a chart-managed Secret (<release>-control), preserved across upgrades.
+    password: ""
+    ## @param config.control.passwordSecret Name of an existing Secret containing control password. If set, disables auto-generation and the chart-managed Secret is not created.
+    passwordSecret: ""
+    ## @param config.control.passwordSecretKey Key in Secret containing the password (default: password)
+    passwordSecretKey: "password"
+    ## @param config.control.pmadb Database for phpMyAdmin configuration storage
+    pmadb: "phpmyadmin"
+    ## @param config.control.pmadbSecret Name of Secret containing pmadb (overrides control.pmadb if set)
+    pmadbSecret: ""
+    ## @param config.control.pmadbSecretKey Key in Secret containing the database name (default: database)
+    pmadbSecretKey: "database"
+    ## @param config.control.createUser Run a post-install/upgrade Job that creates the control user in the database (CREATE USER + GRANT ALL on control.pmadb), using config.database.admin credentials (e.g. root). Requires config.database.host to be set.
+    createUser: false
+    ## @param config.control.createTables Run a post-install/upgrade Job that creates the phpMyAdmin configuration storage tables automatically, using the control user credentials above (runs after createUser, if both are enabled). Requires config.database.host to be set. WARNING: phpMyAdmin's create_tables.sql has "phpmyadmin" hardcoded as the target database internally, so this only lands in the right place if control.pmadb is left at its default ("phpmyadmin"). If createUser is false, the control user must already exist with CREATE TABLE privileges on that database.
+    createTables: false
+
+  debug:
+    ## @param config.debug.verbose Display verbose error messages
+    verbose: false
+    ## @param config.debug.verboseCheck Verify MySQL connection details
+    verboseCheck: false
+
+## @section PHP Configuration parameters
+php:
+  ## @param php.maxExecutionTime Maximum script execution time (seconds)
+  maxExecutionTime: 300
+  ## @param php.memoryLimit PHP memory limit
+  memoryLimit: 256M
+  ## @param php.postMaxSize Maximum size of POST data
+  postMaxSize: 16M
+  ## @param php.uploadMaxFilesize Maximum file upload size
+  uploadMaxFilesize: 16M
+  ## @param php.displayErrors Display PHP errors
+  displayErrors: "Off"
+  ## @param php.displayStartupErrors Display PHP startup errors
+  displayStartupErrors: "Off"
+  ## @param php.logErrors Log PHP errors
+  logErrors: "On"
+  ## @param php.errorLog PHP error log location
+  errorLog: /var/log/apache2/error.log
+
+## @section Apache configuration parameters
+apache:
+  ## @param apache.logDir Apache log directory
+  logDir: /var/log/apache2
+  ## @param apache.serverName Apache ServerName directive (FQDN or hostname)
+  serverName: ""
+  ## @param apache.serverTokens Apache ServerTokens setting (Prod, Major, Minor, Minimal, OS, Full)
+  serverTokens: Prod
+  ## @param apache.serverSignature Apache ServerSignature setting (Off, On, EMail)
+  serverSignature: "Off"
+
+## @param resources Resource limits and requests for phpMyAdmin pod
+resources: {}
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 256Mi
+
+## @param nodeSelector Node selector for pod assignment
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## @param affinity Affinity rules for pod assignment
+affinity: {}
+
+## @section Pod Disruption Budget parameters
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  minAvailable: ""
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable.
+  maxUnavailable: ""
+
+containerSecurityContext:
+  ## @param containerSecurityContext.runAsUser User ID to run the container
+  runAsUser: 33
+  ## @param containerSecurityContext.runAsNonRoot Run as non-root user
+  runAsNonRoot: true
+  ## @param containerSecurityContext.allowPrivilegeEscalation Set phpMyAdmin container's privilege escalation
+  allowPrivilegeEscalation: false
+  ## @param containerSecurityContext.readOnlyRootFilesystem Mount root filesystem as read-only
+  readOnlyRootFilesystem: false
+  ## @param containerSecurityContext.capabilities Drop all capabilities and add only required ones
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - NET_BIND_SERVICE
+
+## @param priorityClassName Priority class for the phpMyAdmin instance
+priorityClassName: ""
+
+## @param podSecurityContext Security context for the pod
+podSecurityContext:
+  ## @param podSecurityContext.fsGroup Set phpMyAdmin pod's Security Context fsGroup
+  fsGroup: 33
+
+livenessProbe:
+  ## @param livenessProbe.enabled Enable liveness probe
+  enabled: true
+  ## @param livenessProbe.httpGet HTTP GET configuration
+  httpGet:
+    path: /
+    port: http
+  ## @param livenessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 30
+  ## @param livenessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 10
+  ## @param livenessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param livenessProbe.failureThreshold Number of failures before pod is restarted
+  failureThreshold: 3
+  ## @param livenessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+readinessProbe:
+  ## @param readinessProbe.enabled Enable readiness probe
+  enabled: true
+  ## @param readinessProbe.httpGet HTTP GET configuration
+  httpGet:
+    path: /
+    port: http
+  ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
+  initialDelaySeconds: 5
+  ## @param readinessProbe.periodSeconds How often to perform the probe
+  periodSeconds: 5
+  ## @param readinessProbe.timeoutSeconds Timeout for each probe attempt
+  timeoutSeconds: 5
+  ## @param readinessProbe.failureThreshold Number of failures before pod is marked unready
+  failureThreshold: 3
+  ## @param readinessProbe.successThreshold Number of successes to mark probe as successful
+  successThreshold: 1
+
+## @param extraEnvVars Additional environment variables to set
+extraEnvVars: []
+  # - name: CUSTOM_VAR
+  #   value: "custom-value"
+  # - name: SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+
+## @param extraEnvVarsSecret Name of existing ConfigMap or Secret with extra environment variables
+extraEnvVarsSecret: ""
+
+## @param extraVolumes Additional volumes to add to the pod
+extraVolumes: []
+
+## @param extraVolumeMounts Additional volume mounts to add to the phpMyAdmin container
+extraVolumeMounts: []
+
+## @param extraObjects Array of extra objects to deploy with the release
+extraObjects: []

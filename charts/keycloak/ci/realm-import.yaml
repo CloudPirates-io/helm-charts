@@ -1,0 +1,20 @@
+keycloak:
+  httpsEnabled: false
+
+realm:
+  import: true
+  configFile: |-
+    {
+      "realm": "ci-test-realm",
+      "enabled": true,
+      "clients": [
+        {
+          "clientId": "ci-test-client",
+          "enabled": true,
+          "publicClient": true,
+          "protocol": "openid-connect",
+          "standardFlowEnabled": true,
+          "redirectUris": ["https://ci-test.example.com/*"]
+        }
+      ]
+    }

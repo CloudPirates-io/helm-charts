@@ -1,0 +1,16 @@
+# CI scenario: Kafka with the kafka-exporter Prometheus metrics Deployment enabled.
+# Exercises: the metrics Deployment/Service, and that kafka-exporter can
+# actually authenticate to the (SASL/PLAIN-secured, chart default) client
+# listener and scrape real cluster-level metrics - not just that probes pass.
+metrics:
+  enabled: true
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 1Gi

@@ -94,14 +94,14 @@ spec:
                 ; do
                 EP_HOST="${endpoint%:*}"
                 EP_PORT="${endpoint##*:}"
-                until redis-cli -h "$EP_HOST" -p "$EP_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
+                until redis-cli -h "$EP_HOST" -p "$EP_PORT"{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
                   echo "Waiting for node ${endpoint} to be ready..."
                   sleep 3
                 done
               done
               {{- else }}
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
+                until redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} ping 2>/dev/null | grep -q PONG; do
                   echo "Waiting for pod {{ include "redis.fullname" . }}-${i}..."
                   sleep 3
                 done
@@ -109,7 +109,7 @@ spec:
               {{- end }}
 
               # If the cluster is already healthy there is nothing to do
-              if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+              if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
                 echo "Redis cluster is already initialized and healthy, skipping creation..."
                 exit 0
               fi
@@ -121,7 +121,7 @@ spec:
               # brand new cluster when every node is genuinely empty.
               EXISTING_STATE=false
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
-                INFO=$(redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null || echo "")
+                INFO=$(redis-cli -h {{ include "redis.fullname" . }}-${i}.{{ include "redis.fullname" . }}-headless -p "$PORT"{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null || echo "")
                 KNOWN=$(echo "$INFO" | awk -F: '/cluster_known_nodes:/ {print $2}' | tr -d '\r\n ')
                 SLOTS=$(echo "$INFO" | awk -F: '/cluster_slots_assigned:/ {print $2}' | tr -d '\r\n ')
                 case "$KNOWN" in ''|*[!0-9]*) KNOWN=0 ;; esac
@@ -141,7 +141,7 @@ spec:
                 RECOVERY_TIMEOUT={{ .Values.clusterInitJob.recoveryTimeout }}
                 elapsed=0
                 while [ "$elapsed" -lt "$RECOVERY_TIMEOUT" ]; do
-                  if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
+                  if redis-cli -h "$FIRST_NODE" -p "$PORT"{{- if .Values.auth.acl.enabled }} --user {{ include "redis.auth.acl.defaultUsername" . }}{{- end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} cluster info 2>/dev/null | grep -q "cluster_state:ok"; then
                     echo "Redis cluster recovered successfully (cluster_state:ok)."
                     exit 0
                   fi
@@ -185,6 +185,9 @@ spec:
               redis-cli \
                 -h "$CREATE_HOST" \
                 -p "$CREATE_PORT" \
+                {{- if .Values.auth.acl.enabled }}
+                --user {{ include "redis.auth.acl.defaultUsername" . }} \
+                {{- end }}
                 {{- if .Values.tls.enabled }}
                 {{ include "redis.tls.probeArgs" . }} \
                 {{- end }}

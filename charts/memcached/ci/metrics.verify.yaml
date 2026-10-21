@@ -1,0 +1,62 @@
+# Functional verification for ci/metrics.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the metrics sidecar
+# actually scrapes live memcached state (not just that it starts), by
+# performing a real "set" over the memcached protocol and confirming the
+# exporter's set-command counter increases afterwards.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          # The official memcached image strips build tooling (including any netcat) after
+          # compiling the binary, so it has no client to probe with. busybox ships `nc` and
+          # `wget`, which is enough to speak the raw memcached line protocol and scrape metrics.
+          image: docker.io/busybox:1.37.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-memcached-metrics"
+              SERVICE_PORT="11211"
+              METRICS_HOST="test-memcached-metrics-metrics"
+              METRICS_PORT="9150"
+
+              echo "-> Fetching metrics before performing any memcached commands"
+              wget -q -O /tmp/metrics-before.txt "http://${METRICS_HOST}:${METRICS_PORT}/metrics"
+              grep -q '^memcached_up 1$' /tmp/metrics-before.txt
+              before_sets=$(grep '^memcached_commands_total{command="set"' /tmp/metrics-before.txt | awk '{print $2}')
+              before_sets=${before_sets:-0}
+
+              echo "-> Storing a key via the memcached protocol"
+              printf 'set verify-key 0 60 11\r\nhello-world\r\nquit\r\n' | nc -w 3 "${SERVICE_HOST}" "${SERVICE_PORT}" | grep -q STORED
+
+              echo "-> Retrieving the key back and checking its value"
+              response=$(printf 'get verify-key\r\nquit\r\n' | nc -w 3 "${SERVICE_HOST}" "${SERVICE_PORT}")
+              echo "${response}" | grep -q "hello-world"
+
+              echo "-> Confirming the exporter's set-command counter increased"
+              wget -q -O /tmp/metrics-after.txt "http://${METRICS_HOST}:${METRICS_PORT}/metrics"
+              after_sets=$(grep '^memcached_commands_total{command="set"' /tmp/metrics-after.txt | awk '{print $2}')
+              after_sets=${after_sets:-0}
+
+              # awk for float comparison since prometheus counters are printed as floats (e.g. "1")
+              if ! awk -v b="$before_sets" -v a="$after_sets" 'BEGIN { exit !(a > b) }'; then
+                echo "ERROR: memcached_commands_total{command=\"set\"} did not increase (before=${before_sets}, after=${after_sets})"
+                exit 1
+              fi
+              echo "   set-command counter went from ${before_sets} to ${after_sets}"
+
+              echo "OK: memcached metrics verification passed"

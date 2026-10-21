@@ -176,6 +176,10 @@ spec:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.metricsSecretPasswordKey" . }}
             {{- end }}
+            {{- if .Values.experimental.tcmallocRseqWorkaround.enabled }}
+            - name: GLIBC_TUNABLES
+              value: "glibc.pthread.rseq=1"
+            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
             {{- end }}
@@ -213,7 +217,7 @@ spec:
                 - |
                   mongosh \
                   {{- if .Values.auth.enabled }}
-                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --username "${MONGO_INITDB_ROOT_USERNAME}" \
                   --password "${MONGO_INITDB_ROOT_PASSWORD}" \
                   --authenticationDatabase admin \
                   {{- end }}

@@ -73,6 +73,10 @@ spec:
               name: scripts
             - mountPath: /configs
               name: configs
+            {{- if or .Values.config.content .Values.config.existingConfigmap }}
+            - name: custom-config
+              mountPath: /customconfig
+            {{- end }}
             - mountPath: /replicaset
               name: keyfile
             {{- if .Values.replicaSet.keySecretName }}
@@ -215,6 +219,10 @@ spec:
                   name: {{ include "mongodb.metrics.secretName" . }}
                   key: {{ include "mongodb.secretPasswordKey" . }}
           {{- end }}
+          {{- if .Values.experimental.tcmallocRseqWorkaround.enabled }}
+            - name: GLIBC_TUNABLES
+              value: "glibc.pthread.rseq=1"
+          {{- end }}
           {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -267,6 +275,15 @@ spec:
           configMap:
             name: {{ include "mongodb.fullname" . }}-init-scripts
             defaultMode: 0555
+        {{- if or .Values.config.content .Values.config.existingConfigmap }}
+        - name: custom-config
+          configMap:
+            {{- if .Values.config.existingConfigmap }}
+            name: {{ .Values.config.existingConfigmap }}
+            {{- else }}
+            name: {{ include "mongodb.fullname" . }}-config
+            {{- end }}
+        {{- end }}
         {{- if and .Values.replicaSet.enabled .Values.replicaSet.keySecretName }}
         - name: keyfile-secret
           secret:

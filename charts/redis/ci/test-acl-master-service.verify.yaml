@@ -1,0 +1,45 @@
+# Functional verification for ci/test-acl-master-service.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the master-discovery
+# controller (templates/sentinel-master-deployment.yaml) actually authenticated
+# to Sentinel with the ACL creds and patched the "-master" Service to point at
+# a real master pod - not just that all pods reported Ready.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Waiting for the master-discovery controller to point '-master' Service at a real master pod"
+              MASTER_ROLE=""
+              for i in $(seq 1 12); do
+                MASTER_ROLE=$(redis-cli -t 3 -h test-redis-test-acl-master-service-master --user default -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^role:' || echo "")
+                if [ "$MASTER_ROLE" = "role:master" ]; then
+                  break
+                fi
+                echo "   Not ready yet (got: '${MASTER_ROLE:-<no response>}'), retrying in 5s..."
+                sleep 5
+              done
+              if [ "$MASTER_ROLE" != "role:master" ]; then
+                echo "ERROR: '-master' Service never resolved to a pod reporting role:master (last response: '${MASTER_ROLE:-<no response>}')"
+                exit 1
+              fi
+              echo "   '-master' Service correctly points at the current master"
+
+              echo "OK: sentinel.masterService + auth.acl + sentinel.acl verified"

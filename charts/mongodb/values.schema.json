@@ -91,6 +91,19 @@
         "customUsers": {
             "type": "array"
         },
+        "experimental": {
+            "type": "object",
+            "properties": {
+                "tcmallocRseqWorkaround": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -555,6 +568,61 @@
                 },
                 "enabled": {
                     "type": "boolean"
+                },
+                "externalAccess": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "service": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "object"
+                                },
+                                "annotationsList": {
+                                    "type": "array"
+                                },
+                                "externalTrafficPolicy": {
+                                    "type": "string"
+                                },
+                                "extraPorts": {
+                                    "type": "array"
+                                },
+                                "labels": {
+                                    "type": "object"
+                                },
+                                "loadBalancerClass": {
+                                    "type": "string"
+                                },
+                                "loadBalancerIPs": {
+                                    "type": "array"
+                                },
+                                "loadBalancerSourceRanges": {
+                                    "type": "array"
+                                },
+                                "port": {
+                                    "type": [
+                                        "string",
+                                        "integer"
+                                    ]
+                                },
+                                "publicNames": {
+                                    "type": "array"
+                                },
+                                "sessionAffinity": {
+                                    "type": "string"
+                                },
+                                "sessionAffinityConfig": {
+                                    "type": "object"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
                 },
                 "extraInit": {
                     "type": "object",

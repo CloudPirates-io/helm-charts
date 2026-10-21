@@ -99,6 +99,9 @@
                 },
                 "repository": {
                     "type": "string"
+                },
+                "subPath": {
+                    "type": "string"
                 }
             }
         },
@@ -506,6 +509,9 @@
         },
         "resources": {
             "type": "object"
+        },
+        "revisionHistoryLimit": {
+            "type": "integer"
         },
         "serverConfig": {
             "type": "string"

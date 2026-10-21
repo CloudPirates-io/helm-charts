@@ -36,7 +36,17 @@ spec:
     {{- end }}
   selector:
     {{- include "redis.selectorLabels" . | nindent 4 }}
-    # This selector will be dynamically updated by the master discovery deployment
-    # to point to the current master pod
-    statefulset.kubernetes.io/pod-name: not-yet-decided
+    # This selector is dynamically updated by the master discovery deployment to
+    # point to the current master pod. When rendering against a live cluster
+    # (helm install / helm upgrade), keep the value the controller has currently
+    # selected: re-rendering the placeholder on every upgrade resets the Service
+    # to no endpoints until the next discovery pass. Offline renders
+    # (helm template, --dry-run, GitOps renderers) have no cluster state to read
+    # and keep the initial placeholder.
+    {{- $masterService := (lookup "v1" "Service" (include "cloudpirates.namespace" .) (printf "%s-master" (include "redis.fullname" .))) }}
+    {{- $selectedMaster := "" }}
+    {{- if and $masterService $masterService.spec $masterService.spec.selector }}
+      {{- $selectedMaster = index $masterService.spec.selector "statefulset.kubernetes.io/pod-name" | default "" }}
+    {{- end }}
+    statefulset.kubernetes.io/pod-name: {{ if $selectedMaster }}{{ $selectedMaster | quote }}{{ else }}not-yet-decided{{ end }}
 {{- end }}
