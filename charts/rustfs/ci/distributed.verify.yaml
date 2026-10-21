@@ -31,7 +31,19 @@ spec:
               BUCKET="verify-bucket"
 
               echo "-> Authenticating against the distributed RustFS S3 API with the configured credentials"
-              mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret
+              # The 4 StatefulSet pods pass their HTTP /health check as soon as their own process is up,
+              # but the erasure-coded backend can still be forming quorum across peers for a bit after
+              # that, during which the S3 API answers with a transient "Service not ready" error.
+              i=0
+              until mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret > /dev/null 2>&1; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: RustFS S3 API never became ready"
+                  mc alias set rustfs "http://${SERVICE_HOST}" testkey testsecret
+                  exit 1
+                fi
+                sleep 2
+              done
 
               echo "-> Creating a bucket"
               mc mb "rustfs/${BUCKET}"

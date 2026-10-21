@@ -112,8 +112,25 @@ Returns an empty string when none is set (cluster default).
 Return true (as a non-empty string) when SASL is enabled on at least one listener.
 */}}
 {{- define "kafka.auth.enabled" -}}
-{{- if or .Values.auth.client.enabled .Values.auth.interBroker.enabled .Values.auth.controller.enabled -}}
+{{- if or .Values.auth.client.enabled .Values.auth.interBroker.enabled .Values.auth.controller.enabled (and .Values.externalAccess.enabled .Values.auth.external.enabled) -}}
 true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the address a broker advertises for the EXTERNAL listener, given its ordinal.
+Prefers externalAccess.service.loadBalancerIPs[ordinal] when present, otherwise falls back to
+"<fullname>-<ordinal>.<externalAccess.domain>". Returns an empty string when neither resolves.
+Usage: include "kafka.externalAdvertisedHost" (dict "context" . "ordinal" <int>)
+*/}}
+{{- define "kafka.externalAdvertisedHost" -}}
+{{- $ctx := .context -}}
+{{- $ordinal := .ordinal -}}
+{{- $ips := $ctx.Values.externalAccess.service.loadBalancerIPs -}}
+{{- if gt (len $ips) $ordinal -}}
+{{- index $ips $ordinal -}}
+{{- else if $ctx.Values.externalAccess.domain -}}
+{{- printf "%s-%d.%s" (include "kafka.fullname" $ctx) $ordinal $ctx.Values.externalAccess.domain -}}
 {{- end -}}
 {{- end -}}
 

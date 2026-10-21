@@ -1,0 +1,66 @@
+{{- if and .Values.replicaSet.enabled .Values.replicaSet.externalAccess.enabled (not .Values.shardedCluster.enabled) }}
+{{- include "mongodb.externalAccess.validate" . -}}
+{{- $fullname := include "mongodb.fullname" . }}
+{{- $replicaCount := int (add1 (int .Values.replicaSet.secondaries)) }}
+{{- $svc := .Values.replicaSet.externalAccess.service }}
+{{- range $i := until $replicaCount }}
+{{- $targetPod := printf "%s-%d" $fullname $i }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%d-external" $fullname $i | trunc 63 | trimSuffix "-" }}
+  namespace: {{ include "cloudpirates.namespace" $ }}
+  labels:
+    {{- include "mongodb.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: external-access
+    pod: {{ $targetPod }}
+    {{- with $svc.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- $annotations := merge (dict) ($svc.annotations | default dict) ($.Values.commonAnnotations | default dict) }}
+  {{- if $svc.annotationsList }}
+  {{- $podAnnotations := index $svc.annotationsList $i }}
+  {{- $annotations = merge $annotations ($podAnnotations | default dict) }}
+  {{- end }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $svc.type }}
+  {{- if $svc.loadBalancerClass }}
+  loadBalancerClass: {{ $svc.loadBalancerClass }}
+  {{- end }}
+  {{- if and (not (empty $svc.loadBalancerIPs)) (eq (len $svc.loadBalancerIPs) $replicaCount) }}
+  loadBalancerIP: {{ index $svc.loadBalancerIPs $i }}
+  {{- end }}
+  {{- if $svc.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml $svc.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- if and (or (eq $svc.type "LoadBalancer") (eq $svc.type "NodePort")) $svc.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ $svc.externalTrafficPolicy }}
+  {{- end }}
+  {{- if $svc.sessionAffinity }}
+  sessionAffinity: {{ $svc.sessionAffinity }}
+  {{- end }}
+  {{- if $svc.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml $svc.sessionAffinityConfig | nindent 4 }}
+  {{- end }}
+  publishNotReadyAddresses: true
+  ports:
+    - name: mongodb
+      port: {{ $svc.port | default $.Values.service.port }}
+      targetPort: mongodb
+      protocol: TCP
+    {{- if $svc.extraPorts }}
+    {{- toYaml $svc.extraPorts | nindent 4 }}
+    {{- end }}
+  selector:
+    {{- include "mongodb.selectorLabels" $ | nindent 4 }}
+    service-type: primary-secondary
+    statefulset.kubernetes.io/pod-name: {{ $targetPod }}
+---
+{{- end }}
+{{- end }}
