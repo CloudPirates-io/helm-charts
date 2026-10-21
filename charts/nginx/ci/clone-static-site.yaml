@@ -1,0 +1,84 @@
+# CI test values for nginx chart - clone static site from Git with a subdirectory
+# Exercises cloneStaticSiteFromGit end-to-end: the init container actually clones
+# a real repository, and subPath scopes the served content to a subdirectory of it
+# (e.g. a Hugo/Zola build output dir), rather than the whole repository root.
+
+image:
+  # Use IfNotPresent to avoid repeated pulls
+  pullPolicy: IfNotPresent
+  # Use simple tag without digest for better caching
+  tag: "1.29.2-alpine"
+
+# Use non-privileged port for CI environment
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+
+service:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+
+# Run as nginx user (101) - non-root
+containerSecurityContext:
+  runAsUser: 101
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+
+podSecurityContext:
+  fsGroup: 101
+
+# Reduce probe delays for faster readiness in tests
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+livenessProbe:
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 6
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+# Configure nginx to listen on non-privileged port
+serverConfig: |-
+  server {
+    listen 8080;
+    server_name _;
+    location / {
+      root /usr/share/nginx/html;
+      index index.html index.htm;
+    }
+  }
+
+cloneStaticSiteFromGit:
+  enabled: true
+  # Clone this very repository so the scenario has no external fixture to maintain.
+  repository: https://github.com/CloudPirates-io/helm-charts.git
+  branch: main
+  # Serve only charts/nginx (which contains this chart's own README.md), not the
+  # whole monorepo - proving subPath actually scopes the nginx docroot.
+  subPath: charts/nginx
+  # Shallow clone keeps the CI job fast; a full history isn't needed to serve files.
+  gitClone:
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        git clone --depth 1 https://github.com/CloudPirates-io/helm-charts.git --branch main /app
+  # A single clone at startup is enough to prove the feature; no need to keep
+  # polling for updates in this scenario.
+  gitSync:
+    enabled: false
