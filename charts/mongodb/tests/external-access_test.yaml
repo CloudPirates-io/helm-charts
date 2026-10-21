@@ -1,0 +1,284 @@
+suite: test mongodb replica set external access
+templates:
+  - svc-external-access.yaml
+  - init-scripts.yaml
+
+tests:
+  - it: should not create external access services by default
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: svc-external-access.yaml
+
+  - it: should not create external access services when replicaSet is disabled, even if externalAccess is enabled
+    set:
+      replicaSet.enabled: false
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: svc-external-access.yaml
+
+  - it: should create one external service per replica (1 primary + secondaries) when enabled
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 2
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+        - mongodb-2.example.com
+    asserts:
+      - hasDocuments:
+          count: 3
+        template: svc-external-access.yaml
+
+  - it: should target the correct pod via selector
+    documentIndex: 1
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - equal:
+          path: spec.selector["statefulset.kubernetes.io/pod-name"]
+          value: RELEASE-NAME-mongodb-1
+        template: svc-external-access.yaml
+      - equal:
+          path: spec.selector["service-type"]
+          value: primary-secondary
+        template: svc-external-access.yaml
+
+  - it: should default service type to LoadBalancer and port to service.port
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+        template: svc-external-access.yaml
+      - equal:
+          path: spec.ports[0].port
+          value: 27017
+        template: svc-external-access.yaml
+      - equal:
+          path: spec.ports[0].targetPort
+          value: mongodb
+        template: svc-external-access.yaml
+
+  - it: should use externalAccess.service.port when set
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.port: 37017
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 37017
+        template: svc-external-access.yaml
+
+  - it: should always set publishNotReadyAddresses to true
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - equal:
+          path: spec.publishNotReadyAddresses
+          value: true
+        template: svc-external-access.yaml
+
+  - it: should default externalTrafficPolicy to Local
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - equal:
+          path: spec.externalTrafficPolicy
+          value: Local
+        template: svc-external-access.yaml
+
+  - it: should pass through sessionAffinity and sessionAffinityConfig
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+      replicaSet.externalAccess.service.sessionAffinity: ClientIP
+      replicaSet.externalAccess.service.sessionAffinityConfig:
+        clientIP:
+          timeoutSeconds: 10800
+    asserts:
+      - equal:
+          path: spec.sessionAffinity
+          value: ClientIP
+        template: svc-external-access.yaml
+      - equal:
+          path: spec.sessionAffinityConfig.clientIP.timeoutSeconds
+          value: 10800
+        template: svc-external-access.yaml
+
+  - it: should pass through extraPorts
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+      replicaSet.externalAccess.service.extraPorts:
+        - name: metrics
+          port: 9216
+          targetPort: metrics
+          protocol: TCP
+    asserts:
+      - equal:
+          path: spec.ports[1].name
+          value: metrics
+        template: svc-external-access.yaml
+      - equal:
+          path: spec.ports[1].port
+          value: 9216
+        template: svc-external-access.yaml
+
+  - it: should pass through loadBalancerSourceRanges
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+      replicaSet.externalAccess.service.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges[0]
+          value: 10.0.0.0/8
+        template: svc-external-access.yaml
+
+  - it: should pass through loadBalancerClass
+    documentIndex: 0
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+      replicaSet.externalAccess.service.loadBalancerClass: service.k8s.aws/nlb
+    asserts:
+      - equal:
+          path: spec.loadBalancerClass
+          value: service.k8s.aws/nlb
+        template: svc-external-access.yaml
+
+  - it: should merge per-pod annotationsList with common annotations, distinct per document
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+      replicaSet.externalAccess.service.annotations:
+        shared.example.com/common: "true"
+      replicaSet.externalAccess.service.annotationsList:
+        - external-dns.alpha.kubernetes.io/hostname: mongodb-0.example.com
+        - external-dns.alpha.kubernetes.io/hostname: mongodb-1.example.com
+    asserts:
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: mongodb-0.example.com
+        documentIndex: 0
+        template: svc-external-access.yaml
+      - equal:
+          path: metadata.annotations["shared.example.com/common"]
+          value: "true"
+        documentIndex: 0
+        template: svc-external-access.yaml
+      - equal:
+          path: metadata.annotations["external-dns.alpha.kubernetes.io/hostname"]
+          value: mongodb-1.example.com
+        documentIndex: 1
+        template: svc-external-access.yaml
+      - equal:
+          path: metadata.annotations["shared.example.com/common"]
+          value: "true"
+        documentIndex: 1
+        template: svc-external-access.yaml
+
+  - it: should fail when publicNames length does not match 1 + secondaries
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 2
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+    asserts:
+      - failedTemplate:
+          errorMessage: "replicaSet.externalAccess.service.publicNames must have exactly 3 entries (1 primary + replicaSet.secondaries), got 1"
+        template: svc-external-access.yaml
+
+  - it: should advertise public hostnames in extra-init.sh when enabled
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+      replicaSet.externalAccess.enabled: true
+      replicaSet.externalAccess.service.publicNames:
+        - mongodb-0.example.com
+        - mongodb-1.example.com
+    asserts:
+      - matchRegex:
+          path: data["extra-init.sh"]
+          pattern: '0\) echo "mongodb-0\.example\.com:27017" ;;'
+        template: init-scripts.yaml
+      - matchRegex:
+          path: data["extra-init.sh"]
+          pattern: '1\) echo "mongodb-1\.example\.com:27017" ;;'
+        template: init-scripts.yaml
+
+  - it: should not advertise any public hostname in extra-init.sh when disabled
+    set:
+      replicaSet.enabled: true
+      replicaSet.secondaries: 1
+    asserts:
+      - notMatchRegex:
+          path: data["extra-init.sh"]
+          pattern: "example\\.com"
+        template: init-scripts.yaml

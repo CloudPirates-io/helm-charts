@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "imageRegistry": {
+          "type": "string",
+          "description": "Global Docker image registry"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "description": "Global Docker registry pull secrets"
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of replicas"
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "phpMyAdmin image registry"
+        },
+        "repository": {
+          "type": "string",
+          "description": "phpMyAdmin image repository"
+        },
+        "tag": {
+          "type": "string",
+          "description": "phpMyAdmin image tag"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "description": "Image pull policy"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "pmaHost": {
+          "type": "string",
+          "description": "Database host"
+        },
+        "pmaPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Database port"
+        },
+        "pmaUser": {
+          "type": "string",
+          "description": "Default database user"
+        },
+        "pmaAbsoluteUri": {
+          "type": "string",
+          "description": "Absolute URI of phpMyAdmin installation"
+        },
+        "pmaArbitrary": {
+          "type": "boolean",
+          "description": "Allow arbitrary server connection"
+        },
+        "pmaCookieAuth": {
+          "type": "boolean",
+          "description": "Use cookie-based authentication"
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "description": "Kubernetes service type"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Service port"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable Ingress"
+        },
+        "className": {
+          "type": "string",
+          "description": "Ingress class name"
+        }
+      }
+    },
+    "traefik": {
+      "type": "object",
+      "properties": {
+        "ingressRoute": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable Traefik IngressRoute"
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable metrics exporter"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "description": "Metrics exporter image registry"
+            },
+            "repository": {
+              "type": "string",
+              "description": "Metrics exporter image repository"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Metrics exporter image tag"
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU limit"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory limit"
+            }
+          }
+        },
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU request"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory request"
+            }
+          }
+        }
+      }
+    }
+  }
+}

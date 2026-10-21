@@ -1,0 +1,39 @@
+# Functional verification for ci/test-values.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves nginx is actually
+# serving content through the custom non-privileged serverConfig (listening on
+# 8080 as the non-root user 101, fronted by the Service on port 80), not just
+# that the readiness probe passed.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-nginx-test-values:80"
+              echo "-> Fetching / through the Service (routes to the non-privileged 8080 listener)"
+              BODY=$(curl -f http://${SERVICE_HOST}/ -s)
+
+              echo "-> Checking the default docroot content is actually served"
+              echo "${BODY}" | grep -qi "Welcome to nginx"
+
+              echo "-> Checking the response comes from nginx"
+              curl -f http://${SERVICE_HOST}/ -s -D - -o /dev/null | grep -qi "^Server: nginx"
+
+              echo "OK: nginx verification passed"

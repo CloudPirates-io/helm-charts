@@ -1,0 +1,26 @@
+# CI scenario: cluster architecture with auth.acl enabled.
+# Exercises the cluster-init Job (templates/job.yaml): every redis-cli call it
+# makes against the cluster nodes must pass --user once ACL auth is enabled,
+# otherwise "cluster create" and the node-readiness checks fail with NOAUTH.
+architecture: cluster
+replicaCount: 3
+clusterReplicaCount: 0
+
+image:
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  acl:
+    enabled: true
+    existingSecret: redis-acl-cluster

@@ -29,7 +29,13 @@ spec:
       {{- if .Values.msgTopologyOperator.metrics.secure }}
       scheme: https
       tlsConfig:
-        insecureSkipVerify: true      
+        insecureSkipVerify: true
+      {{- if .Values.msgTopologyOperator.metrics.podMonitor.bearerTokenSecret }}
+      authorization:
+        credentials:
+          name: {{ .Values.msgTopologyOperator.metrics.podMonitor.bearerTokenSecret.name }}
+          key: {{ .Values.msgTopologyOperator.metrics.podMonitor.bearerTokenSecret.key }}
+      {{- end }}
       {{- else }}
       scheme: http
       {{- end }}

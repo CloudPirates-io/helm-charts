@@ -1,0 +1,40 @@
+# Functional verification for ci/test-values.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves Ghost is actually
+# serving a real blog (not just answering the liveness/readiness probe path)
+# by fetching the public home page and checking for content only a rendered
+# Ghost site would produce.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-ghost-test-values:80"
+
+              echo "-> Fetching the Ghost blog home page"
+              BODY=$(curl -f http://${SERVICE_HOST}/ -L -s)
+
+              echo "-> Checking the response is a real Ghost-rendered page"
+              echo "${BODY}" | grep -qi 'content="Ghost' || {
+                echo "ERROR: home page did not contain the Ghost generator meta tag"
+                exit 1
+              }
+
+              echo "OK: Ghost home page verification passed"

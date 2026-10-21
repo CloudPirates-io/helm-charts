@@ -1,0 +1,21 @@
+# CI scenario: MariaDB deployment with a non-root application user and database
+# Exercises: auth.database/auth.username/auth.password (custom user creation with
+# grants restricted to its own database, rather than global root access)
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootPassword: "RootPass123!"
+  database: "appdb"
+  username: "appuser"
+  password: "AppPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
