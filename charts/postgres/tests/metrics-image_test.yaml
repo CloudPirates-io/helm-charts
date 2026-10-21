@@ -1,0 +1,59 @@
+suite: test postgres exporter image
+templates:
+  - statefulset.yaml
+set:
+  metrics:
+    enabled: true
+    image:
+      registry: quay.io
+      repository: prometheuscommunity/postgres-exporter
+      tag: v0.20.1
+tests:
+  - it: should use the chart registry when no global registry is set
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+          any: true
+
+  - it: should use global.imageRegistry for the exporter image
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: myregistry.example.com/prometheuscommunity/postgres-exporter:v0.20.1
+          any: true
+
+  - it: should let global.imageRegistry override the image registry
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+      metrics:
+        image:
+          registry: docker.io
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: myregistry.example.com/prometheuscommunity/postgres-exporter:v0.20.1
+          any: true
+
+  - it: should omit the registry prefix when both registries are empty
+    set:
+      metrics:
+        image:
+          registry: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: metrics
+            image: prometheuscommunity/postgres-exporter:v0.20.1
+          any: true

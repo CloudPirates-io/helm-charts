@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "postgres.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{- toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
@@ -49,6 +47,13 @@ Return the proper PostgreSQL image name
 */}}
 {{- define "postgres.image" -}}
 {{- include "cloudpirates.image" (dict "image" .Values.image "global" .Values.global) -}}
+{{- end }}
+
+{{/*
+Return the proper PostgreSQL exporter image name
+*/}}
+{{- define "postgres.metrics.image" -}}
+{{- include "cloudpirates.image" (dict "image" .Values.metrics.image "global" .Values.global) -}}
 {{- end }}
 
 {{/*
@@ -117,7 +122,7 @@ Get PostgreSQL database name
 {{- if .Values.auth.database -}}
 {{- .Values.auth.database -}}
 {{- else -}}
-postgres
+{{- include "postgres.username" . -}}
 {{- end -}}
 {{- end }}
 

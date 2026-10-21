@@ -107,7 +107,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | ----------------------- | ------------------------------------------------- | --------------- |
 | `image.registry`        | RustFS image registry                             | `docker.io`     |
 | `image.repository`      | RustFS image repository                           | `rustfs/rustfs` |
-| `image.tag`             | RustFS image tag (immutable tags are recommended) | `"latest"`      |
+| `image.tag`             | RustFS image tag (immutable tags are recommended) | `"1.0.2"`       |
 | `image.imagePullPolicy` | RustFS image pull policy                          | `Always`        |
 
 ### RustFS Authentication
@@ -132,7 +132,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `config.corsAllowedOrigins`        | CORS allowed origins for API                       | `"*"`                  |
 | `config.consoleCorsAllowedOrigins` | CORS allowed origins for console                   | `"*"`                  |
 | `config.logLevel`                  | RustFS log level (trace, debug, info, warn, error) | `"info"`               |
-| `config.tlsPath`                   | Path to TLS certificates                           | `"/opt/tls"`           |
+| `config.tlsPath`                   | Path to TLS certificates. Empty disables TLS unless `tlsPersistence` is enabled, then its `mountPath` is used | `""`                   |
 | `config.extraEnvVars`              | Extra environment variables                        | `[]`                   |
 
 ### RustFS setup
@@ -144,6 +144,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 | `setup.policies`       | Policy definitions                                                        | `[]`    |
 | `setup.buckets`        | Bucket definitions                                                        | `[]`    |
 | `setup.users`          | User definitions                                                          | `[]`    |
+| `setup.resources`      | Resource requests and limits for the setup job containers                 | `{}`    |
 
 **Policies**
 ```yaml
@@ -159,6 +160,7 @@ The following table lists the configurable parameters of the RustFS chart and th
 **Buckets**
 ```yaml
 - name: my-bucket
+  versioning: true
 ```
 
 **Users**

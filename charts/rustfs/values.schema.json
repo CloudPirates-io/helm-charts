@@ -526,8 +526,22 @@
                         }
                     }
                 },
+                "job": {
+                    "type": "object",
+                    "properties": {
+                        "backoffLimit": {
+                            "type": "integer"
+                        },
+                        "ttlSecondsAfterFinished": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "policies": {
                     "type": "array"
+                },
+                "resources": {
+                    "type": "object"
                 },
                 "users": {
                     "type": "array"

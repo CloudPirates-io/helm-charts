@@ -1,0 +1,56 @@
+suite: test rustfs gateway api routes
+templates:
+  - httproute.yaml
+  - service.yaml
+tests:
+  - it: should point the console route at the console Service
+    template: httproute.yaml
+    set:
+      gatewayAPI:
+        consoleHttpRoute:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: RELEASE-NAME-rustfs-console
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 9001
+
+  - it: should create a Service under the name the console route points at
+    template: service.yaml
+    documentIndex: 1
+    set:
+      gatewayAPI:
+        consoleHttpRoute:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-rustfs-console
+      - equal:
+          path: spec.ports[0].port
+          value: 9001
+
+  - it: should point the api route at the main Service
+    template: httproute.yaml
+    set:
+      gatewayAPI:
+        httpRoute:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: RELEASE-NAME-rustfs
+
+  - it: should follow fullnameOverride on the console backend
+    template: httproute.yaml
+    set:
+      fullnameOverride: storage
+      gatewayAPI:
+        consoleHttpRoute:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: storage-console

@@ -1,0 +1,169 @@
+suite: test sentinel.masterProxy
+set:
+  architecture: replication
+  sentinel:
+    enabled: true
+  auth:
+    password: testpass123
+tests:
+  - it: should not render the haproxy sidecar by default
+    template: statefulset.yaml
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 2
+      - notExists:
+          path: spec.template.spec.containers[2]
+
+  - it: should not render the master-proxy service when masterProxy is disabled
+    template: sentinel-master-proxy-service.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render the haproxy sidecar when masterProxy is enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: haproxy
+      - equal:
+          path: spec.template.spec.containers[2].ports[0].containerPort
+          value: 6380
+      - equal:
+          path: spec.template.spec.containers[2].readinessProbe.tcpSocket.port
+          value: haproxy
+      - equal:
+          path: spec.template.spec.containers[2].livenessProbe.tcpSocket.port
+          value: haproxy
+
+  - it: should render a static master service selecting all StatefulSet pods when masterProxy is enabled
+    template: sentinel-master-proxy-service.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-valkey-master
+      - equal:
+          path: spec.ports[0].targetPort
+          value: haproxy
+      - notExists:
+          path: spec.selector["app.kubernetes.io/component"]
+
+  - it: should fail when masterProxy and tls are both enabled
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+      tls:
+        enabled: true
+        existingSecret: valkey-tls
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.masterProxy is not yet supported together with tls.enabled"
+
+  - it: should fall back to valkey_master_any when no strict candidate is available
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "use_backend valkey_master_strict if \\{ nbsrv\\(valkey_master_strict\\) gt 0 \\}"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "default_backend valkey_master_any"
+
+  - it: should require an attached replica and no in-progress failover only on the strict backend
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "(?ms)^backend valkey_master_strict$.*?connected_slaves:\\[1-9\\].*?^backend valkey_master_any$"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "(?ms)^backend valkey_master_strict$.*?master_failover_state:no-failover.*?^backend valkey_master_any$"
+      - notMatchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "(?ms)^backend valkey_master_any$.*?connected_slaves:"
+      - notMatchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "(?ms)^backend valkey_master_any$.*?master_failover_state:no-failover"
+
+  - it: should fail when containerPort collides with service.port
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          containerPort: 6379
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.masterProxy.containerPort must differ from service.port"
+
+  - it: should prefer ipv6 DNS resolution when ipFamily is ipv6
+    template: statefulset.yaml
+    set:
+      ipFamily: ipv6
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv6"
+      - notMatchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv4"
+
+  - it: should default to ipv4 DNS resolution when ipFamily is auto
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "resolve-prefer ipv4"
+
+  - it: should escape sed-special characters in the password before substitution
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "ESCAPED_PASSWORD=.*sed -e '[^']*\\\\\\\\[^']*' -e '[^']*&[^']*'"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "sed -i \"s/__VALKEY_PASSWORD__/\\$\\{ESCAPED_PASSWORD\\}/\" /tmp/haproxy\\.cfg"

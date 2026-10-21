@@ -1,0 +1,59 @@
+suite: test redis configuration volume
+templates:
+  - statefulset.yaml
+tests:
+  - it: should mount the config volume in the init container by default
+    set:
+      architecture: replication
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /usr/local/etc/redis
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config
+            configMap:
+              name: RELEASE-NAME-redis-config
+
+  - it: should not mount the config volume in the init container when no config is provided
+    set:
+      architecture: replication
+      config.content: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /usr/local/etc/redis
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /usr/local/etc/redis
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: config
+            configMap:
+              name: RELEASE-NAME-redis-config
+
+  - it: should mount the config volume in the init container when an existing configmap is used
+    set:
+      architecture: replication
+      config.content: ""
+      config.existingConfigmap: redis-custom-config
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /usr/local/etc/redis
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config
+            configMap:
+              name: redis-custom-config

@@ -63,7 +63,11 @@ spec:
         - port: 9443
         - port: {{ .Values.msgTopologyOperator.containerPorts.health }}
         {{- if .Values.msgTopologyOperator.metrics.service.enabled }}
+        {{- if .Values.msgTopologyOperator.metrics.secure }}
         - port: {{ .Values.msgTopologyOperator.containerPorts.metrics }}
+        {{- else }}
+        - port: {{ .Values.msgTopologyOperator.containerPorts.metricsHttp }}
+        {{- end }}
         {{- end }}
       {{- if not .Values.msgTopologyOperator.networkPolicy.allowExternal }}
       from:
@@ -90,6 +94,6 @@ spec:
         {{- end }}
       {{- end }}
     {{- if .Values.msgTopologyOperator.networkPolicy.extraIngress }}
-    {{- include "cloudpirates.tplvalues.render" ( dict "value" .Values.msgTopologyOperator.networkPolicy.extraIngress "context" $ ) | nindent 4 }}
+    {{ include "cloudpirates.tplvalues.render" ( dict "value" .Values.msgTopologyOperator.networkPolicy.extraIngress "context" $ ) | nindent 4 }}
     {{- end }}
 {{- end }}

@@ -280,6 +280,8 @@ Configure Valkey as a replica of an external Redis/Valkey server. This is useful
 
 Sentinel provides high availability for Valkey replication. When enabled, Sentinel monitors the master and automatically promotes a replica to master if the master fails.
 
+When `sentinel.masterProxy.enabled` is set, the `<release>-master` Service always selects every Valkey pod rather than just the current master, since any pod's HAProxy sidecar can forward a connection to whichever one is actually master - so `kubectl get endpoints <release>-master` won't tell you who that is. To check, look at the HAProxy sidecar's own logs on any pod: `kubectl logs <pod> -c haproxy`, which reports every time a backend transitions `UP`/`DOWN`.
+
 | Parameter                            | Description                                                                         | Default                                                                                      |
 | ------------------------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `sentinel.enabled`                   | Enable Valkey Sentinel for high availability                                        | `false`                                                                                      |
@@ -300,6 +302,18 @@ Sentinel provides high availability for Valkey replication. When enabled, Sentin
 | `sentinel.resources`                 | Resource limits and requests for Sentinel container                                 | `{}`                                                                                         |
 | `sentinel.valkeyShutdownWaitFailover` | Whether the Valkey container waits for Sentinel failover before shutting down       | `true`                                                                                       |
 | `sentinel.preStop.enabled`           | Enable the preStop hook on the Sentinel container                                    | `true`                                                                                       |
+| `sentinel.masterProxy.enabled`             | Enable a stable master endpoint for non-Sentinel-aware clients via an HAProxy sidecar | `false`     |
+| `sentinel.masterProxy.image.registry`      | HAProxy image registry                                                                | `docker.io` |
+| `sentinel.masterProxy.image.repository`    | HAProxy image repository                                                              | `haproxy`   |
+| `sentinel.masterProxy.image.tag`           | HAProxy image tag                                                                     | `3.0-alpine`|
+| `sentinel.masterProxy.image.pullPolicy`    | HAProxy image pull policy                                                             | `IfNotPresent` |
+| `sentinel.masterProxy.containerPort`       | Port the HAProxy sidecar listens on                                                   | `6380`      |
+| `sentinel.masterProxy.checkInterval`       | Health check interval (HAProxy `inter`)                                               | `"1s"`      |
+| `sentinel.masterProxy.checkRise`           | Consecutive successful checks before a backend is marked master-eligible             | `2`         |
+| `sentinel.masterProxy.checkFall`           | Consecutive failed checks before a backend is marked down                            | `2`         |
+| `sentinel.masterProxy.resources`           | Resource limits and requests for the HAProxy sidecar                                  | `{}`        |
+| `sentinel.masterProxy.service.type`        | Kubernetes service type for the master proxy service                                  | `""`        |
+| `sentinel.masterProxy.service.annotations` | Additional custom annotations for the master proxy service                            | `{}`        |
 
 ### Init Container Configuration
 

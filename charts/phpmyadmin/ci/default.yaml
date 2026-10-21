@@ -1,0 +1,19 @@
+# CI scenario: default phpMyAdmin deployment without database connection
+# Exercises: basic deployment, ingress, and service configuration
+image:
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+apache:
+  serverName: phpmyadmin.local
+
+config:
+  auth:
+    arbitrary: true
+    cookieAuth: true

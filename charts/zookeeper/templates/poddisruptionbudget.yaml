@@ -11,7 +11,7 @@ metadata:
 {{- . | indent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.podDisruptionBudget.minAvailable }}
+  {{- if and .Values.podDisruptionBudget.minAvailable (not .Values.podDisruptionBudget.maxUnavailable) }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   {{- end }}
   {{- if .Values.podDisruptionBudget.maxUnavailable }}

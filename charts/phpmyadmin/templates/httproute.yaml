@@ -1,0 +1,26 @@
+{{- if .Values.gatewayAPI.httpRoute.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  {{- with .Values.gatewayAPI.httpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.gatewayAPI.httpRoute.parentRefs | nindent 4 }}
+  hostnames:
+    {{- toYaml .Values.gatewayAPI.httpRoute.hostnames | nindent 4 }}
+  rules:
+    {{- range .Values.gatewayAPI.httpRoute.rules }}
+    - matches:
+        {{- toYaml .matches | nindent 8 }}
+      backendRefs:
+        - name: {{ include "phpmyadmin.fullname" $ }}
+          port: {{ $.Values.service.port }}
+    {{- end }}
+{{- end }}

@@ -21,7 +21,7 @@ spec:
       {{- include "redis.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: metrics
   endpoints:
-    - port: metrics
+    - port: {{ .Values.metrics.service.name }}
       {{- with .Values.metrics.serviceMonitor.interval }}
       interval: {{ . }}
       {{- end }}
@@ -44,7 +44,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if and .Values.sentinel.enabled (eq .Values.architecture "replication") }}
-    - port: metrics
+    - port: {{ .Values.metrics.service.name }}
       {{- with .Values.metrics.serviceMonitor.interval }}
       interval: {{ . }}
       {{- end }}

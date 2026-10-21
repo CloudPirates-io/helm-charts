@@ -1,0 +1,83 @@
+# Functional verification for ci/replicaset.yaml.
+# Proves the replica set actually elected exactly one primary and two
+# secondaries, and that a document written on the primary (with majority write
+# concern) is really replicated and readable directly from a secondary - not
+# just that probes/rs.status() "look" healthy.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mongo:7
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOSTS="test-mongodb-replicaset-0.test-mongodb-replicaset-headless test-mongodb-replicaset-1.test-mongodb-replicaset-headless test-mongodb-replicaset-2.test-mongodb-replicaset-headless"
+              ROOT_USER="admin"
+              ROOT_PASSWORD="RootPass123!"
+
+              echo "-> Checking each member's replica set role"
+              PRIMARY_COUNT=0
+              SECONDARY_COUNT=0
+              PRIMARY_HOST=""
+              SECONDARY_HOST=""
+              for HOST in $HOSTS; do
+                URI="mongodb://${ROOT_USER}:${ROOT_PASSWORD}@${HOST}:27017/admin?authSource=admin&directConnection=true"
+                STATE=$(mongosh "$URI" --quiet --eval 'db.hello().isWritablePrimary')
+                echo "   $HOST isWritablePrimary=$STATE"
+                if [ "$STATE" = "true" ]; then
+                  PRIMARY_COUNT=$((PRIMARY_COUNT+1))
+                  PRIMARY_HOST=$HOST
+                else
+                  SECONDARY_COUNT=$((SECONDARY_COUNT+1))
+                  SECONDARY_HOST=$HOST
+                fi
+              done
+
+              if [ "$PRIMARY_COUNT" -ne 1 ]; then
+                echo "ERROR: expected exactly 1 primary, got $PRIMARY_COUNT"
+                exit 1
+              fi
+              if [ "$SECONDARY_COUNT" -ne 2 ]; then
+                echo "ERROR: expected exactly 2 secondaries, got $SECONDARY_COUNT"
+                exit 1
+              fi
+              echo "OK: replica set has 1 primary ($PRIMARY_HOST) and 2 secondaries"
+
+              echo "-> Writing a document on the primary with majority write concern"
+              PRIMARY_URI="mongodb://${ROOT_USER}:${ROOT_PASSWORD}@${PRIMARY_HOST}:27017/admin?authSource=admin&directConnection=true"
+              mongosh "$PRIMARY_URI" --quiet --eval '
+                db = db.getSiblingDB("verify_db");
+                db.verify_col.insertOne({ _id: 1, value: "hello-replicaset" }, { writeConcern: { w: "majority" } });
+              '
+
+              echo "-> Reading the document directly from a secondary to prove replication"
+              SECONDARY_URI="mongodb://${ROOT_USER}:${ROOT_PASSWORD}@${SECONDARY_HOST}:27017/admin?authSource=admin&directConnection=true&readPreference=secondary"
+              RESULT=""
+              for i in 1 2 3 4 5 6 7 8 9 10; do
+                RESULT=$(mongosh "$SECONDARY_URI" --quiet --eval 'print(db.getSiblingDB("verify_db").verify_col.findOne({ _id: 1 }) ? db.getSiblingDB("verify_db").verify_col.findOne({ _id: 1 }).value : "")')
+                [ "$RESULT" = "hello-replicaset" ] && break
+                sleep 1
+              done
+              if [ "$RESULT" != "hello-replicaset" ]; then
+                echo "ERROR: expected 'hello-replicaset' on secondary $SECONDARY_HOST but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Cleaning up"
+              mongosh "$PRIMARY_URI" --quiet --eval 'db.getSiblingDB("verify_db").verify_col.drop();'
+
+              echo "OK: MongoDB replica set verification passed"

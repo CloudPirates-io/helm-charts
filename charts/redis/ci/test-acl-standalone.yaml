@@ -1,0 +1,24 @@
+# CI scenario: standalone Redis with ACL auth using a non-default ACL username.
+# Exercises: redis-cli probes (liveness/readiness/startup) authenticating with
+# `--user <custom>` instead of the implicit ACL user "default".
+architecture: standalone
+
+image:
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+auth:
+  enabled: true
+  acl:
+    enabled: true
+    existingSecret: redis-acl-standalone
+    defaultUsername: redisadmin

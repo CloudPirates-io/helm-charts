@@ -266,3 +266,10 @@ Render containerSecurityContext using the common helper with proper parameter ma
 {{- $ctx := merge (dict "Values" (dict "containerSecurityContext" (omit .securityContext "enabled"))) .context }}
 {{- include "cloudpirates.renderContainerSecurityContext" $ctx }}
 {{- end -}}
+
+{{/*
+Common annotations
+*/}}
+{{- define "rmqco.annotations" -}}
+{{- include "cloudpirates.annotations" . -}}
+{{- end }}

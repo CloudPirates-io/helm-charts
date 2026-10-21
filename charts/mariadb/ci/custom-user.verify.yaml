@@ -1,0 +1,61 @@
+# Functional verification for ci/custom-user.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves that the non-root
+# application user created via auth.database/auth.username/auth.password can
+# authenticate directly and perform a real write/read round-trip against its
+# own database, and that its grants are restricted to that database only
+# (unlike root, which has full access).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mariadb:11
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-mariadb-custom-user"
+              PORT=3306
+              ROOT_PASSWORD="RootPass123!"
+              APP_USER="appuser"
+              APP_PASSWORD="AppPass123!"
+              APP_DB="appdb"
+
+              echo "-> Connecting as the application user and writing a row to its own database"
+              mariadb -h "$HOST" -P "$PORT" -u"$APP_USER" -p"$APP_PASSWORD" "$APP_DB" -e "
+                CREATE TABLE verify_tbl (id INT PRIMARY KEY, value VARCHAR(64));
+                INSERT INTO verify_tbl (id, value) VALUES (1, 'hello-appuser');
+              "
+
+              echo "-> Reading back the row as the application user and asserting the value"
+              RESULT=$(mariadb -h "$HOST" -P "$PORT" -u"$APP_USER" -p"$APP_PASSWORD" "$APP_DB" -N -B -e "SELECT value FROM verify_tbl WHERE id=1;")
+              if [ "$RESULT" != "hello-appuser" ]; then
+                echo "ERROR: expected 'hello-appuser' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Asserting the application user's grants are restricted to its own database"
+              if mariadb -h "$HOST" -P "$PORT" -u"$APP_USER" -p"$APP_PASSWORD" -e "CREATE DATABASE other_db;" 2>/tmp/err; then
+                echo "ERROR: application user was able to create a database outside its own grants"
+                cat /tmp/err
+                exit 1
+              fi
+              grep -qi "access denied" /tmp/err
+
+              echo "-> Confirming root retains full access, including to the application's database"
+              mariadb -h "$HOST" -P "$PORT" -uroot -p"$ROOT_PASSWORD" -e "DROP TABLE $APP_DB.verify_tbl;"
+
+              echo "OK: MariaDB custom-user verification passed"

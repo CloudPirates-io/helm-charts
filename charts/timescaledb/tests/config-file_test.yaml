@@ -1,0 +1,78 @@
+suite: test timescaledb config_file wiring
+templates:
+  - statefulset.yaml
+  - configmap.yaml
+tests:
+  - it: should point postgres at the rendered config ConfigMap
+    template: statefulset.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - postgres
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+
+  - it: should not set the removed PostgreSQL tuning environment variables
+    template: statefulset.yaml
+    set:
+      config:
+        postgresqlMaxConnections: 100
+        postgresqlSharedBuffers: 128MB
+        postgresqlEffectiveCacheSize: 4GB
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: POSTGRES_MAX_CONNECTIONS
+            value: "100"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: POSTGRES_SHARED_BUFFERS
+            value: 128MB
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: POSTGRES_EFFECTIVE_CACHE_SIZE
+            value: 4GB
+
+  - it: should set listen_addresses to allow connections from other pods
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "listen_addresses = '\\*'"
+
+  - it: should single-quote shared_preload_libraries, not double-quote
+    template: configmap.yaml
+    set:
+      config:
+        postgresqlSharedPreloadLibraries: timescaledb
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "shared_preload_libraries = 'timescaledb'"
+      - notMatchRegex:
+          path: data["postgresql.conf"]
+          pattern: 'shared_preload_libraries = "timescaledb"'
+
+  - it: should single-quote log_statement, not double-quote
+    template: configmap.yaml
+    set:
+      config:
+        postgresqlLogStatement: all
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "log_statement = 'all'"
+      - notMatchRegex:
+          path: data["postgresql.conf"]
+          pattern: 'log_statement = "all"'
+
+  - it: should include postgresql.auto.conf from PGDATA so ALTER SYSTEM keeps working
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["postgresql.conf"]
+          pattern: "include_if_exists '/var/lib/postgresql/data/pgdata/postgresql\\.auto\\.conf'"

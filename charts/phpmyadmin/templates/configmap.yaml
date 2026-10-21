@@ -1,0 +1,12 @@
+{{- if and .Values.configMap.create .Values.configMap.data }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}-config
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+data:
+  config.user.inc.php: |
+    {{- .Values.configMap.data | nindent 4 }}
+{{- end }}

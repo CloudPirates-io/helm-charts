@@ -13,6 +13,7 @@ spec:
   serviceName: {{ include "keycloak.fullname" . }}-headless
   podManagementPolicy: OrderedReady
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
@@ -36,6 +37,9 @@ spec:
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       {{- with .Values.shareProcessNamespace }}
       shareProcessNamespace: {{ . }}
+      {{- end }}
+      {{- if ne (toString .Values.terminationGracePeriodSeconds) "" }}
+      terminationGracePeriodSeconds: {{ int .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
         - name: copy-quarkus-lib
@@ -73,6 +77,10 @@ spec:
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "keycloak.image" . }}
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          {{- with .Values.lifecycle }}
+          lifecycle:
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
           command:
             - {{ .Values.image.command }}
           args:
@@ -115,6 +123,9 @@ spec:
             {{- if .Values.keycloak.httpsPort }}
             - --https-port={{ .Values.keycloak.httpsPort }}
             {{- end }}
+            {{- if .Values.keycloak.managementPort }}
+            - --http-management-port={{ .Values.keycloak.managementPort }}
+            {{- end }}
             {{- if and .Values.database.type (not (has .Values.database.type (list "h2-file" "h2-mem" "dev-mem"))) }}
             - --db={{ .Values.database.type }}
             - --db-url={{ include "keycloak.databaseUrl" . }}
@@ -143,9 +154,6 @@ spec:
             {{- end }}
             {{- if .Values.tls.truststoreEnabled }}
             - --https-trust-store-file={{ .Values.tls.truststoreFile }}
-            {{- if .Values.tls.truststorePassword }}
-            - --https-trust-store-password={{ .Values.tls.truststorePassword }}
-            {{- end }}
             {{- end }}
           env:
             - name: KC_HTTP_RELATIVE_PATH
@@ -161,7 +169,7 @@ spec:
             - name: KC_HTTPS_TRUST_STORE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "keycloak.truststoreSecretName" . }}
+                  name: {{ include "keycloak.truststorePasswordSecretName" . }}
                   key: {{ .Values.tls.truststoreExistingSecretPasswordKey }}
             {{- end }}
             {{- if .Values.database.type }}

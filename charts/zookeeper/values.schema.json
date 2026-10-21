@@ -5,6 +5,9 @@
         "affinity": {
             "type": "object"
         },
+        "topologySpreadConstraints": {
+            "type": "array"
+        },
         "command": {
             "type": "array"
         },
@@ -74,6 +77,9 @@
                         "externalTrafficPolicy": {
                             "type": "string"
                         },
+                        "hostnameDomain": {
+                            "type": "string"
+                        },
                         "labels": {
                             "type": "object"
                         },
@@ -87,9 +93,6 @@
                             "type": "integer"
                         },
                         "type": {
-                            "type": "string"
-                        },
-                        "hostnameDomain": {
                             "type": "string"
                         }
                     }
@@ -370,11 +373,17 @@
                             "type": "integer"
                         },
                         "secureClient": {
-                            "type": ["integer", "null"]
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
                         }
                     }
                 },
                 "type": {
+                    "type": "string"
+                },
+                "trafficDistribution": {
                     "type": "string"
                 }
             }

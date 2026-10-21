@@ -1,0 +1,37 @@
+# Functional verification for ci/test-acl-standalone.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves ACL auth actually
+# works end-to-end, rather than trusting the liveness/readiness probes alone
+# (which run the exact same auth path they're meant to verify).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Authenticating as the configured ACL user (redisadmin) should succeed"
+              redis-cli -t 3 -h test-redis-test-acl-standalone --user redisadmin -a 'RedisAdminPass123!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Authenticating as the literal ACL user 'default' should be rejected (disabled in the ACL file)"
+              if redis-cli -t 3 -h test-redis-test-acl-standalone --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
+                echo "ERROR: PING succeeded as 'default', but that user is disabled in the ACL file"
+                exit 1
+              fi
+
+              echo "OK: standalone ACL auth verified"

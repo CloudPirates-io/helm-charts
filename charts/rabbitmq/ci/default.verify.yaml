@@ -1,0 +1,55 @@
+# Functional verification for ci/default.yaml.
+# Proves AMQP + management API actually work end-to-end: declares a queue,
+# publishes a message via the management HTTP API, and consumes it back.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/rabbitmq:4-management
+          env:
+            - name: RABBITMQ_HOST
+              value: test-rabbitmq-default
+            - name: RABBITMQ_USER
+              value: admin
+            - name: RABBITMQ_PASS
+              value: "RabbitMQTestPass123!"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ADMIN="rabbitmqadmin -H ${RABBITMQ_HOST} -P 15672 -u ${RABBITMQ_USER} -p ${RABBITMQ_PASS}"
+
+              echo "-> Waiting for the management API to accept authenticated requests"
+              i=0
+              until ${ADMIN} list vhosts > /dev/null 2>&1; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: management API never became ready"
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              echo "-> Declaring queue ci-verify-queue"
+              ${ADMIN} declare queue --name ci-verify-queue --durable true
+
+              echo "-> Publishing a message to ci-verify-queue"
+              ${ADMIN} publish message --exchange amq.default --routing-key ci-verify-queue --payload "hello-from-ci"
+
+              echo "-> Consuming the message back from ci-verify-queue"
+              ${ADMIN} get messages --queue ci-verify-queue --ack-mode ack_requeue_false | grep -q "hello-from-ci"
+
+              echo "OK: RabbitMQ AMQP/management verification passed"

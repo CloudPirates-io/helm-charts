@@ -1,0 +1,22 @@
+{{- if and .Values.persistence.sessions.enabled (not .Values.persistence.sessions.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "phpmyadmin.fullname" . }}-sessions
+  namespace: {{ include "phpmyadmin.namespace" . }}
+  labels:
+    {{- include "phpmyadmin.labels" . | nindent 4 }}
+  {{- with .Values.persistence.sessions.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.sessions.accessModes | nindent 4 }}
+  {{- if .Values.persistence.sessions.storageClass }}
+  storageClassName: {{ .Values.persistence.sessions.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.sessions.size | quote }}
+{{- end }}

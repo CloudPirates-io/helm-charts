@@ -1,0 +1,17 @@
+# CI scenario: default MariaDB deployment with a deterministic root password
+# Exercises: basic deployment, service exposure, and root authentication
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootPassword: "RootPass123!"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
