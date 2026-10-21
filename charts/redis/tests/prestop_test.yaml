@@ -22,3 +22,27 @@ tests:
       - notMatchRegex:
           path: data["prestop.sh"]
           pattern: 'WAIT_FOR_FAILOVER=true'
+
+  - it: should detect the master by headless FQDN or pod IP in both preStop hooks
+    release:
+      name: test-release
+      namespace: test-ns
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'HEADLESS_SERVICE="test-release-redis-headless\.test-ns\.svc\.cluster\.local"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'HEADLESS_SERVICE="test-release-redis-headless\.test-ns\.svc\.cluster\.local"'
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: '"\$address" == "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: '"\$address" == "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'if is_current_pod_address "\$master_host"; then'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'if is_current_pod_address "\$master_host"; then'
