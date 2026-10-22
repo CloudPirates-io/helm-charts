@@ -65,10 +65,24 @@ data:
         [[ "$REDIS_ROLE" == "master" ]]
     }
 
-    # Function to get current pod's IP address
-    get_current_pod_ip() {
-        # Get Pod IP from hostname -i
-        hostname -i 2>/dev/null | awk '{print $1}'
+    # Function to check if an address reported by Sentinel refers to this pod
+    # Sentinel reports the pod's headless-service FQDN when hostnames are announced
+    # (and for the bootstrap master, which is monitored by FQDN), otherwise its IP
+    is_current_pod_address() {
+        local address="$1"
+        local ip
+
+        if [[ "$address" == "$HOSTNAME" || "$address" == "${HOSTNAME}.${HEADLESS_SERVICE}" ]]; then
+            return 0
+        fi
+
+        for ip in $(hostname -i 2>/dev/null); do
+            if [[ "$address" == "$ip" ]]; then
+                return 0
+            fi
+        done
+
+        return 1
     }
 
     # Function to run Sentinel commands
@@ -87,14 +101,6 @@ data:
     # Returns 0 (true) if failover is complete (current pod is no longer master)
     # Returns 1 (false) if this pod is still the master or cannot verify
     sentinel_failover_finished() {
-        local current_pod_ip
-        current_pod_ip=$(get_current_pod_ip)
-
-        if [ -z "$current_pod_ip" ]; then
-            echo "Warning: Could not determine current pod IP"
-            return 1  # Cannot verify, assume not finished
-        fi
-
         local sentinel_output
         sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
         local sentinel_exit_code=$?
@@ -104,7 +110,7 @@ data:
             return 1  # Cannot verify, assume not finished
         fi
 
-        # Parse the sentinel response (returns: IP PORT)
+        # Parse the sentinel response (returns: HOST PORT, HOST is a hostname or an IP)
         REDIS_SENTINEL_INFO=($sentinel_output)
 
         if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
@@ -112,13 +118,13 @@ data:
             return 1  # Invalid response, assume not finished
         fi
 
-        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+        local master_host="${REDIS_SENTINEL_INFO[0]}"
 
-        if [[ "$master_ip" == "$current_pod_ip" ]]; then
-            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+        if is_current_pod_address "$master_host"; then
+            echo "Failover not yet complete: current pod ($HOSTNAME) is still master ($master_host)"
             return 1
         else
-            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
+            echo "Failover complete: new master is $master_host (this pod: $HOSTNAME)"
             return 0
         fi
     }
@@ -267,24 +273,30 @@ data:
         [[ "$REDIS_ROLE" == "master" ]]
     }
 
-    # Function to get current pod's IP address
-    get_current_pod_ip() {
-        # Get Pod IP from hostname -i
-        hostname -i 2>/dev/null | awk '{print $1}'
+    # Function to check if an address reported by Sentinel refers to this pod
+    # Sentinel reports the pod's headless-service FQDN when hostnames are announced
+    # (and for the bootstrap master, which is monitored by FQDN), otherwise its IP
+    is_current_pod_address() {
+        local address="$1"
+        local ip
+
+        if [[ "$address" == "$HOSTNAME" || "$address" == "${HOSTNAME}.${HEADLESS_SERVICE}" ]]; then
+            return 0
+        fi
+
+        for ip in $(hostname -i 2>/dev/null); do
+            if [[ "$address" == "$ip" ]]; then
+                return 0
+            fi
+        done
+
+        return 1
     }
 
     # Function to check if sentinel failover has finished
     # Returns 0 (true) if failover is complete (current pod is no longer master)
     # Returns 1 (false) if this pod is still the master or cannot verify
     sentinel_failover_finished() {
-        local current_pod_ip
-        current_pod_ip=$(get_current_pod_ip)
-
-        if [ -z "$current_pod_ip" ]; then
-            echo "Warning: Could not determine current pod IP"
-            return 1  # Cannot verify, assume not finished
-        fi
-
         local sentinel_output
         sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
         local sentinel_exit_code=$?
@@ -294,7 +306,7 @@ data:
             return 1  # Cannot verify, assume not finished
         fi
 
-        # Parse the sentinel response (returns: IP PORT)
+        # Parse the sentinel response (returns: HOST PORT, HOST is a hostname or an IP)
         REDIS_SENTINEL_INFO=($sentinel_output)
 
         if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
@@ -302,13 +314,13 @@ data:
             return 1  # Invalid response, assume not finished
         fi
 
-        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+        local master_host="${REDIS_SENTINEL_INFO[0]}"
 
-        if [[ "$master_ip" == "$current_pod_ip" ]]; then
-            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+        if is_current_pod_address "$master_host"; then
+            echo "Failover not yet complete: current pod ($HOSTNAME) is still master ($master_host)"
             return 1
         else
-            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
+            echo "Failover complete: new master is $master_host (this pod: $HOSTNAME)"
             return 0
         fi
     }
