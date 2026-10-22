@@ -213,6 +213,9 @@ spec:
                 {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | nindent 16 }}
                 {{- end }}
             spec:
+              # Keep the Service type on every apply. Without it, server-side apply drops
+              # type=LoadBalancer on each master change, which removes the external IP.
+              type: {{ .Values.sentinel.masterService.type | default .Values.service.type }}
               ports:
                 - port: {{ .Values.service.port }}
                   targetPort: redis
