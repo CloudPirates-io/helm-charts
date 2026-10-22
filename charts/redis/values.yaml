@@ -501,7 +501,7 @@ sentinel:
     ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
     ## @param sentinel.image.tag Redis Sentinel image tag
-    tag: "8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6"
+    tag: "8.10.2@sha256:5c02d7c0f8d75af45958c0294a8004f2e14b42df98a1103e3a669aa7ec787be6"
     ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
@@ -678,7 +678,7 @@ metrics:
     ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Redis exporter image tag
-    tag: "v1.94.0-alpine@sha256:2f5c00216f2142f23e6d13de341325101c31f93b8f6c3e72fe33087136bf43ec"
+    tag: "v1.95.0-alpine@sha256:19bb5c732f5812d5b60b2e0af3c6d82c5b3e418cd020068d65f588a56df4a118"
     ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
