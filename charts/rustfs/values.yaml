@@ -26,7 +26,7 @@ image:
   ## @param image.repository RustFS image repository
   repository: rustfs/rustfs
   ## @param image.tag RustFS image tag (immutable tags are recommended)
-  tag: "1.0.0-beta.1@sha256:3c2d55977829620284ece8593901bf776bcfc0fc9972784352de4dcffdb92416"
+  tag: "1.0.3@sha256:9ca9559533b537d10482fe923288b676ad08f92a7069d9a17327fbae3cab688b"
   ## @param image.imagePullPolicy RustFS image pull policy
   imagePullPolicy: Always
 
@@ -62,8 +62,8 @@ config:
   consoleCorsAllowedOrigins: "*"
   ## @param config.logLevel RustFS log level (trace, debug, info, warn, error)
   logLevel: "debug"
-  ## @param config.tlsPath Path to TLS certificates
-  tlsPath: "/opt/tls"
+  ## @param config.tlsPath Path to TLS certificates. Empty disables TLS unless tlsPersistence is enabled, then tlsPersistence.mountPath is used (RustFS refuses to start if the directory does not exist)
+  tlsPath: ""
 
   ## @param config.extraEnvVars Extra environment variables to be set on RustFS containers
   extraEnvVars: []
@@ -104,6 +104,8 @@ setup:
   #        - readwrite
   # -- Bucket definitions
   buckets: []
+  ## @param setup.resources Resource requests and limits for the setup job containers
+  resources: {}
 #    - name: test
 #      versioning: true
 
