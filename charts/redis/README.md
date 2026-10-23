@@ -428,6 +428,7 @@ user default >sentinelpassword ~* +@all
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - The ACL file must contain at least the user named by `sentinel.acl.defaultUsername`
 - Setting the `aclfile` directive alone is what enables ACL auth on the Sentinel process; no other configuration is needed for clients to authenticate with the users it defines
+- Sentinels authenticate to each other with the Sentinel ACL user's credentials: `sentinel sentinel-user` / `sentinel sentinel-pass` are set to the `sentinel.acl.defaultUsername` user and its password from the ACL file
 
 ### ServiceAccount
 
