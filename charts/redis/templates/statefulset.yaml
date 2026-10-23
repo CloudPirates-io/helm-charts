@@ -1130,6 +1130,9 @@ spec:
               {{- end }}
               {{- if .Values.sentinel.acl.enabled }}
               aclfile {{ include "redis.sentinel.acl.path" . }}
+              # Authenticate to peer Sentinels as the Sentinel ACL user
+              sentinel sentinel-user {{ include "redis.sentinel.acl.defaultUsername" . }}
+              sentinel sentinel-pass "${SENTINEL_ACL_PASSWORD}"
               {{- else if .Values.auth.sentinel }}
               requirepass "${REDIS_PASSWORD}"
               {{- end }}
@@ -1316,6 +1319,9 @@ spec:
               {{- end }}
               {{- if .Values.sentinel.acl.enabled }}
               aclfile {{ include "redis.sentinel.acl.path" . }}
+              # Authenticate to peer Sentinels as the Sentinel ACL user
+              sentinel sentinel-user {{ include "redis.sentinel.acl.defaultUsername" . }}
+              sentinel sentinel-pass "${SENTINEL_ACL_PASSWORD}"
               {{- else if .Values.auth.sentinel }}
               requirepass "${REDIS_PASSWORD}"
               {{- end }}
