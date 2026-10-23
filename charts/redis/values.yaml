@@ -108,7 +108,7 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
+  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). With auth.acl enabled, this is the password of the auth.acl.defaultUsername user, not the auth.acl.sentinelUsername user. Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
   sentinel: true
   ## @param auth.metrics Enable Metrics authentication
   metrics: true
@@ -129,7 +129,7 @@ auth:
     ##
     ## user default >masterpassword ~* +@all
     ## user readonly >readonlypassword ~* +@read
-    ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
+    ## user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
     existingSecretACLKey: ""
     ## @param auth.acl.existingFilePath Path to existing ACL file injected by Vault Agent Injector or similar tools
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
@@ -137,7 +137,7 @@ auth:
     existingFilePath: ""
     ## @param auth.acl.defaultUsername ACL username used as the 'default' Redis user. Must match a user defined in the ACL file.
     defaultUsername: "default"
-    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file.
+    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file and needs the monitoring permissions shown in the example above. It does not set the password clients use to connect to the Sentinel port (see auth.sentinel and sentinel.acl).
     sentinelUsername: "sentinel"
 
 ## @section TLS/SSL configuration

@@ -80,10 +80,16 @@ tests:
           path: spec.template.spec.containers[1].command[2]
           pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
       
-      # Sentinel probe checks
+      # Sentinel probe checks: Sentinel's requirepass is the default user's password
       - matchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
-          pattern: 'export REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: 'export REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: '\$2=="sentinel"'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'requirepass "\$\{REDIS_PASSWORD\}"'
 
   - it: should configure acl in master discovery deployment
     template: sentinel-master-deployment.yaml
@@ -109,7 +115,10 @@ tests:
               secretName: my-acl-secret
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: 'ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: 'ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '\$2=="sentinel"'
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: 'REDIS_PASSWORD="\$ACL_PASSWORD"'
@@ -155,9 +164,9 @@ tests:
       - matchRegex:
           path: data["prestop.sh"]
           pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
-      - matchRegex:
+      - notMatchRegex:
           path: data["prestop.sh"]
-          pattern: 'SENTINEL_ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: '\$2=="sentinel"'
 
   - it: should configure acl in metrics container
     template: statefulset.yaml

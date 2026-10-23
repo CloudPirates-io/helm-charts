@@ -400,7 +400,6 @@ spec:
               # Try to determine current master from Sentinel (if any sentinel is available)
               CURRENT_MASTER=""
               SENTINEL_FOUND=false
-              SENTINEL_PASSWORD="${REDIS_PASSWORD}"
 
               # Check if any sentinel is already running and knows the master
               for i in $(seq 0 {{ sub .Values.replicaCount 1 }}); do
@@ -408,11 +407,13 @@ spec:
                 {{- if .Values.sentinel.acl.enabled }}
                 MASTER_INFO=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 {{- else if .Values.auth.sentinel }}
-                MASTER_INFO=$(REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                MASTER_INFO=$(REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 {{- else }}
                 MASTER_INFO=$(redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                 {{- end }}
-                if [ -n "$MASTER_INFO" ] && [ "$MASTER_INFO" != "Could not connect" ]; then
+                # Only accept a bare host or IP: on failure redis-cli prints errors such as
+                # "NOAUTH Authentication required." on stdout, which must never become a master address
+                if [ -n "$MASTER_INFO" ] && echo "$MASTER_INFO" | grep -qE '^[A-Za-z0-9.:-]+$'; then
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
                   echo "Found current master from sentinel: $CURRENT_MASTER"
@@ -1233,11 +1234,13 @@ spec:
                   {{- if .Values.sentinel.acl.enabled }}
                   EXISTING_MASTER=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   {{- else if .Values.auth.sentinel }}
-                  EXISTING_MASTER=$(REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  EXISTING_MASTER=$(REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   {{- else }}
                   EXISTING_MASTER=$(redis-cli -t {{ .Values.sentinel.discoveryTimeout }} -h "${SENTINEL_HOST}" -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
                   {{- end }}
-                  if [ -n "$EXISTING_MASTER" ] && [ "$EXISTING_MASTER" != "Could not connect" ]; then
+                  # Only accept a bare host or IP: on failure redis-cli prints errors such as
+                  # "NOAUTH Authentication required." on stdout, which must never become a master address
+                  if [ -n "$EXISTING_MASTER" ] && echo "$EXISTING_MASTER" | grep -qE '^[A-Za-z0-9.:-]+$'; then
                     MASTER_HOST="$EXISTING_MASTER"
                     SENTINEL_FOUND_MASTER=true
                     echo "Found current master via sentinel: $MASTER_HOST"
