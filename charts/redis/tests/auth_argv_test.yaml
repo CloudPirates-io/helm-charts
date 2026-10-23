@@ -123,10 +123,16 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
-          pattern: 'REDISCLI_AUTH="\$\{REDIS_SENTINEL_PASSWORD:-\$REDIS_PASSWORD\}" redis-cli'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli'
       - notMatchRegex:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'echo "\$MASTER_INFO" \| grep -qE ''\^\[A-Za-z0-9\.:-\]\+\$'''
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '"Could not connect"'
 
   - it: should inherit sentinel master discovery authentication
     template: sentinel-master-deployment.yaml
@@ -251,12 +257,12 @@ tests:
           pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk'
       - matchRegex:
           path: spec.template.spec.containers[1].command[2]
-          pattern: 'REDISCLI_AUTH="\$\{REDIS_SENTINEL_PASSWORD:-\$REDIS_PASSWORD\}" redis-cli'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli'
       - notMatchRegex:
           path: spec.template.spec.containers[1].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
 
-  - it: should select acl sentinel probe authentication with fallback
+  - it: should authenticate acl sentinel probes with the default user password
     template: statefulset.yaml
     set:
       architecture: replication
@@ -268,10 +274,10 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
-          pattern: 'export REDIS_PASSWORD=\$\(awk .*\$2=="sentinel"'
-      - matchRegex:
+          pattern: 'export REDIS_PASSWORD=\$\(awk .*\$2=="default"'
+      - notMatchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
-          pattern: '\[ -z "\$REDIS_PASSWORD" \] && export REDIS_PASSWORD=\$\(awk .*\$2=="default"'
+          pattern: '\$2=="sentinel"'
       - matchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
           pattern: 'export REDISCLI_AUTH="\$REDIS_PASSWORD"'
@@ -314,7 +320,7 @@ tests:
           path: spec.template.spec.containers[0].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
 
-  - it: should export distinct acl prestop authentication
+  - it: should authenticate acl prestop sentinel commands with the default user password
     template: prestop-configmap.yaml
     set:
       architecture: replication
@@ -329,13 +335,19 @@ tests:
           pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: 'export REDIS_SENTINEL_PASSWORD="\$SENTINEL_ACL_PASSWORD"'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT"'
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: 'REDIS_SENTINEL_PASSWORD'
       - matchRegex:
           path: data["prestop-sentinel.sh"]
           pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
       - matchRegex:
           path: data["prestop-sentinel.sh"]
-          pattern: 'export REDIS_SENTINEL_PASSWORD="\$SENTINEL_ACL_PASSWORD"'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT"'
+      - notMatchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'REDIS_SENTINEL_PASSWORD'
       - notMatchRegex:
           path: data["prestop.sh"]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'

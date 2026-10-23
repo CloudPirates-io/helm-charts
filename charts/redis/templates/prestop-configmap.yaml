@@ -91,7 +91,7 @@ data:
         {{- if .Values.sentinel.acl.enabled }}
         REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
         {{- else if .Values.auth.sentinel }}
-        REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
         {{- else }}
         redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
         {{- end }}

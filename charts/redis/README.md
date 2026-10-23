@@ -137,7 +137,7 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/redis:<version>
 | Parameter                        | Description                                                  | Default |
 | -------------------------------- | ------------------------------------------------------------ | ------- |
 | `auth.enabled`                   | Enable Redis authentication                                  | `true`  |
-| `auth.sentinel`                  | Enable authentication for Redis sentinels                    | `true`  |
+| `auth.sentinel`                  | Enable authentication for Redis sentinels using the shared Redis password (with `auth.acl`, the `auth.acl.defaultUsername` user's password) | `true`  |
 | `auth.metrics`                   | Enable authentication for Redis metrics sidecar              | `true`  |
 | `auth.password`                  | Redis password (if empty, random password will be generated) | `""`    |
 | `auth.existingSecret`            | Name of existing secret containing Redis password            | `""`    |
@@ -189,7 +189,7 @@ auth:
 ```
 user default >masterpassword ~* +@all
 user readonly >readonlypassword ~* +@read
-user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
+user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
 ```
 
 **Notes:**
@@ -197,7 +197,8 @@ user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psub
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - When using `existingFilePath`, no volume mounting is performed - the file must be available at the specified path
 - The ACL file must contain at least the user named by `auth.acl.defaultUsername` (`default` unless overridden)
-- For Sentinel deployments, include a user named by `auth.acl.sentinelUsername` (`sentinel` unless overridden), or the `defaultUsername` user's password will be used instead
+- For Sentinel deployments, include a user named by `auth.acl.sentinelUsername` (`sentinel` unless overridden), or the `defaultUsername` user will be used instead. Sentinel logs in to Redis as this user, so it needs the monitoring permissions shown in the example above (from the [Redis Sentinel docs](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/#redis-access-control-list-authentication)); without them Sentinel cannot detect failures or fail over
+- `auth.acl.sentinelUsername` only covers Sentinel's connections *to* Redis. With `auth.sentinel`, clients connect to the Sentinel port with the `defaultUsername` user's password; use [Sentinel ACL Configuration](#sentinel-acl-configuration) for separate Sentinel credentials
 - This is separate from Sentinel's own ACL, which secures connections *to* the Sentinel process itself - see [Sentinel ACL Configuration](#sentinel-acl-configuration)
 
 ### TLS/SSL Configuration
@@ -666,6 +667,39 @@ To upgrade your Redis installation:
 ```bash
 helm upgrade my-redis cloudpirates/redis
 ```
+
+### Upgrading from 0.34.x to 0.35.0 or later with `auth.acl` and Sentinel
+
+0.35.0 changed how a `sentinel` user in the `auth.acl` file (or the user named by `auth.acl.sentinelUsername`) is used:
+
+| | 0.34.x (StatefulSet mode) | 0.35.0 and later |
+| --- | --- | --- |
+| Password clients send to the Sentinel port (`requirepass`) | the `sentinel` user's password | the `auth.acl.defaultUsername` user's password |
+| User Sentinel logs in to Redis as | `default` | the `auth.acl.sentinelUsername` user (`sentinel auth-user`) |
+
+If your clients authenticate to Sentinel with the `sentinel` user's password, or that user has no command permissions, do the following before upgrading:
+
+1. Grant the `auth.acl.sentinelUsername` user the monitoring permissions shown in [ACL File Format Example](#acl-configuration), otherwise Sentinel cannot detect failures or fail over:
+
+   ```
+   user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
+   ```
+
+2. To keep a separate credential for clients connecting to Sentinel, enable a [Sentinel ACL](#sentinel-acl-configuration). Clients that only send a password authenticate as the Sentinel ACL's `default` user, so putting the previous `sentinel` password there lets them keep working unchanged:
+
+   ```
+   # key sentinel-users.acl in Secret my-sentinel-acl
+   user default on >previous-sentinel-password ~* +@all
+   ```
+
+   ```yaml
+   sentinel:
+     acl:
+       enabled: true
+       existingSecret: "my-sentinel-acl"
+   ```
+
+   Without a Sentinel ACL, clients need the `auth.acl.defaultUsername` user's password.
 
 ## Uninstalling
 
