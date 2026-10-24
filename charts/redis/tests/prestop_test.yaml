@@ -46,3 +46,69 @@ tests:
       - matchRegex:
           path: data["prestop-sentinel.sh"]
           pattern: 'if is_current_pod_address "\$master_host"; then'
+
+  - it: should pass the tls arguments and the tls port to redis-cli in both preStop hooks when tls is enabled
+    set:
+      tls.enabled: true
+      tls.existingSecret: redis-tls
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'REDIS_PORT="6380"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'REDIS_PORT="6380"'
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'args\+=\(--tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'args\+=\(--tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'redis-cli -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'redis-cli -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
+
+  - it: should use the tls client certificate in both preStop hooks when tls.client.existingSecret is set
+    set:
+      tls.enabled: true
+      tls.existingSecret: redis-tls
+      tls.client.existingSecret: redis-tls-client
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'args\+=\(--tls --cert /etc/redis/tls-client/tls\.crt --key /etc/redis/tls-client/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: '-p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls-client/tls\.crt --key /etc/redis/tls-client/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
+
+  - it: should pass the tls arguments to the Sentinel ACL redis-cli call when tls and sentinel.acl are enabled
+    set:
+      tls.enabled: true
+      tls.existingSecret: redis-tls
+      sentinel.acl.enabled: true
+      sentinel.acl.existingSecret: redis-sentinel-acl
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'redis-cli --user default -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'redis-cli --user default -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
+
+  - it: should not pass tls arguments in either preStop hook when tls is disabled
+    asserts:
+      - matchRegex:
+          path: data["prestop.sh"]
+          pattern: 'REDIS_PORT="6379"'
+      - matchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: 'REDIS_PORT="6379"'
+      - notMatchRegex:
+          path: data["prestop.sh"]
+          pattern: '--tls'
+      - notMatchRegex:
+          path: data["prestop-sentinel.sh"]
+          pattern: '--tls'
