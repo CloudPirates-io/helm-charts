@@ -127,8 +127,8 @@ auth:
     ## @param auth.acl.existingSecretACLKey Key in existing secret containing ACL rules
     ## Key should represent an ACL file content:
     ##
-    ## user default >masterpassword ~* +@all
-    ## user readonly >readonlypassword ~* +@read
+    ## user default on >masterpassword ~* &* +@all
+    ## user readonly on >readonlypassword ~* +@read
     ## user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
     existingSecretACLKey: ""
     ## @param auth.acl.existingFilePath Path to existing ACL file injected by Vault Agent Injector or similar tools
@@ -553,8 +553,8 @@ sentinel:
     ## @param sentinel.acl.existingSecretACLKey Key in existing secret containing the Sentinel ACL rules
     ## Key should represent an ACL file content, e.g.:
     ##
-    ## user default >sentinelpassword ~* +@all
-    ## user monitoring >monitoringpassword ~* +client +info +ping +subscribe +psubscribe
+    ## user default on >sentinelpassword ~* &* +@all
+    ## user monitoring on >monitoringpassword ~* &* +client +info +ping +subscribe +psubscribe
     existingSecretACLKey: ""
     ## @param sentinel.acl.existingFilePath Path to existing Sentinel ACL file injected by Vault Agent Injector or similar tools
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.

@@ -187,8 +187,8 @@ auth:
 **ACL File Format Example:**
 
 ```
-user default >masterpassword ~* +@all
-user readonly >readonlypassword ~* +@read
+user default on >masterpassword ~* &* +@all
+user readonly on >readonlypassword ~* +@read
 user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
 ```
 
@@ -420,13 +420,14 @@ sentinel:
 **ACL File Format Example:**
 
 ```
-user default >sentinelpassword ~* +@all
+user default on >sentinelpassword ~* &* +@all
 ```
 
 **Notes:**
 
 - `existingSecret` and `existingFilePath` are mutually exclusive
 - The ACL file must contain at least the user named by `sentinel.acl.defaultUsername`
+- A user is disabled unless its line includes `on`, and has no Pub/Sub channel permissions unless it is granted `&*` (or `allchannels`). Sentinel-aware clients subscribe to Sentinel events such as `+switch-master`, so the user they authenticate as needs channel permissions, or they get `NOPERM`
 - Setting the `aclfile` directive alone is what enables ACL auth on the Sentinel process; no other configuration is needed for clients to authenticate with the users it defines
 - Sentinels authenticate to each other with the Sentinel ACL user's credentials: `sentinel sentinel-user` / `sentinel sentinel-pass` are set to the `sentinel.acl.defaultUsername` user and its password from the ACL file
 
@@ -690,7 +691,7 @@ If your clients authenticate to Sentinel with the `sentinel` user's password, or
 
    ```
    # key sentinel-users.acl in Secret my-sentinel-acl
-   user default on >previous-sentinel-password ~* +@all
+   user default on >previous-sentinel-password ~* &* +@all
    ```
 
    ```yaml
