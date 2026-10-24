@@ -20,7 +20,7 @@ data:
     set -e
 
     # Configuration
-    REDIS_PORT="{{ .Values.service.port }}"
+    REDIS_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -56,6 +56,9 @@ data:
         {{- if .Values.auth.acl.enabled }}
         args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
         {{- end }}
+        {{- if .Values.tls.enabled }}
+        args+=({{ include "redis.tls.probeArgs" . }})
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
@@ -89,11 +92,11 @@ data:
     # NOTE: Sentinel runs in the same Pod, so we connect via localhost (REDIS_LOOPBACK)
     run_sentinel_command() {
         {{- if .Values.sentinel.acl.enabled }}
-        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else if .Values.auth.sentinel }}
-        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else }}
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- end }}
     }
 
@@ -217,7 +220,7 @@ data:
     set -e
 
     # Configuration
-    REDIS_PORT="{{ .Values.service.port }}"
+    REDIS_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -253,17 +256,20 @@ data:
         {{- if .Values.auth.acl.enabled }}
         args+=("--user" "{{ include "redis.auth.acl.defaultUsername" . }}")
         {{- end }}
+        {{- if .Values.tls.enabled }}
+        args+=({{ include "redis.tls.probeArgs" . }})
+        {{- end }}
         redis-cli "${args[@]}" "$@"
     }
 
     # Function to run local Sentinel commands
     run_sentinel_command() {
         {{- if .Values.sentinel.acl.enabled }}
-        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else if .Values.auth.sentinel }}
-        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else }}
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- end }}
     }
 
