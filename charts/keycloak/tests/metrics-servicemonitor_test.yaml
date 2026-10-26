@@ -1,0 +1,84 @@
+suite: test metrics ServiceMonitor
+templates:
+  - metrics-servicemonitor.yaml
+set:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+tests:
+  - it: should scrape over http without TLS
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: http
+      - notExists:
+          path: spec.endpoints[0].tlsConfig
+
+  - it: should scrape over https when TLS is enabled
+    set:
+      tls:
+        enabled: true
+        existingSecret: my-tls-secret
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: https
+
+  - it: should use an explicitly set scheme
+    set:
+      tls:
+        enabled: true
+        existingSecret: my-tls-secret
+      metrics:
+        serviceMonitor:
+          scheme: http
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: http
+
+  - it: should render a static tlsConfig
+    set:
+      metrics:
+        serviceMonitor:
+          tlsConfig:
+            insecureSkipVerify: true
+    asserts:
+      - equal:
+          path: spec.endpoints[0].tlsConfig
+          value:
+            insecureSkipVerify: true
+
+  - it: should render templates in tlsConfig
+    release:
+      namespace: identity
+    set:
+      tls:
+        enabled: true
+        certManager:
+          enabled: true
+          issuerRef:
+            name: my-issuer
+      metrics:
+        serviceMonitor:
+          tlsConfig:
+            serverName: '{{ include "keycloak.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.cluster.local'
+            ca:
+              secret:
+                name: '{{ include "keycloak.tlsSecretName" . }}'
+                key: ca.crt
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: https
+      - equal:
+          path: spec.endpoints[0].tlsConfig
+          value:
+            serverName: RELEASE-NAME-keycloak.identity.svc.cluster.local
+            ca:
+              secret:
+                name: RELEASE-NAME-keycloak-tls
+                key: ca.crt

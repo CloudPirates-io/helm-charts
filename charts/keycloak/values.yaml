@@ -407,6 +407,17 @@ metrics:
     honorLabels: false
     ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in prometheus
     jobLabel: ""
+    ## @param metrics.serviceMonitor.scheme HTTP scheme to use for scraping (defaults to https when tls.enabled is true, otherwise http)
+    scheme: ""
+    ## @param metrics.serviceMonitor.tlsConfig TLS configuration for scraping the metrics endpoint (evaluated as a template)
+    ## Prometheus scrapes the pod IPs, so serverName has to match a DNS name in the certificate. Example:
+    ## tlsConfig:
+    ##   serverName: '{{ include "keycloak.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.cluster.local'
+    ##   ca:
+    ##     secret:
+    ##       name: '{{ include "keycloak.tlsSecretName" . }}'
+    ##       key: ca.crt
+    tlsConfig: {}
 
 ## @section Liveness and readiness probes
 livenessProbe:

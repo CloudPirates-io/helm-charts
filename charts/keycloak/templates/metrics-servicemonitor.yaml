@@ -38,6 +38,11 @@ spec:
       {{- else }}
       path: {{ printf "%s/metrics" .Values.keycloak.httpRelativePath }}
       {{- end }}
+      scheme: {{ .Values.metrics.serviceMonitor.scheme | default (ternary "https" "http" .Values.tls.enabled) }}
+      {{- with .Values.metrics.serviceMonitor.tlsConfig }}
+      tlsConfig:
+        {{- include "cloudpirates.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
       {{- with .Values.metrics.serviceMonitor.relabelings }}
       relabelings:
         {{- toYaml . | nindent 8 }}

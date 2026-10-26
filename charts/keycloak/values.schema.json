@@ -523,8 +523,15 @@
                         "relabelings": {
                             "type": "array"
                         },
+                        "scheme": {
+                            "type": "string",
+                            "enum": ["", "http", "https"]
+                        },
                         "scrapeTimeout": {
                             "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
                         }
                     }
                 }
