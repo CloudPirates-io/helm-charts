@@ -1169,6 +1169,8 @@ spec:
               # Start sentinel in background for one-time stale peer cleanup
               redis-sentinel /tmp/sentinel.conf &
               SENTINEL_PID=$!
+              # sh is PID 1 and ignores SIGTERM: forward it to Sentinel and exit once Sentinel has stopped
+              trap 'kill -TERM "$SENTINEL_PID" 2>/dev/null; wait "$SENTINEL_PID"; exit $?' TERM INT
 
               # Wait for sentinel to be ready
               _sentinel_wait=0
@@ -1374,7 +1376,8 @@ spec:
               echo "Starting Sentinel..."
               {{- end }}
 
-              redis-sentinel /tmp/sentinel.conf
+              # exec, so Sentinel is PID 1 and receives the kubelet's SIGTERM
+              exec redis-sentinel /tmp/sentinel.conf
               {{- end }}
           ports:
             - name: sentinel
