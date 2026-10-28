@@ -52,6 +52,10 @@ service:
   peerPort: 2380
   ## @param service.metricsPort etcd metrics service port
   metricsPort: 2381
+  ## @param service.loadBalancerSourceRanges Allowed source CIDRs when service type is LoadBalancer
+  loadBalancerSourceRanges: []
+  ## @param service.loadBalancerIP Load balancer IP when service type is LoadBalancer
+  loadBalancerIP: ""
 
 auth:
   ## @param auth.enabled Enable client-to-server authentication
