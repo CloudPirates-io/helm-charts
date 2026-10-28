@@ -291,10 +291,7 @@
                     "type": "integer"
                 },
                 "minAvailable": {
-                    "type": [
-                        "integer",
-                        "string"
-                    ]
+                    "type": "string"
                 }
             }
         },
@@ -354,10 +351,7 @@
                     "type": "string"
                 },
                 "loadBalancerSourceRanges": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "array"
                 },
                 "metricsPort": {
                     "type": "integer"
