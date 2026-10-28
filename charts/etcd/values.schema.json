@@ -350,6 +350,15 @@
                 "clientPort": {
                     "type": "integer"
                 },
+                "loadBalancerIP": {
+                    "type": "string"
+                },
+                "loadBalancerSourceRanges": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "metricsPort": {
                     "type": "integer"
                 },
