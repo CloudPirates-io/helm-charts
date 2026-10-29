@@ -123,7 +123,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
-          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" timeout 3 redis-cli'
       - notMatchRegex:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
@@ -257,7 +257,7 @@ tests:
           pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk'
       - matchRegex:
           path: spec.template.spec.containers[1].command[2]
-          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" redis-cli'
+          pattern: 'REDISCLI_AUTH="\$\{REDIS_PASSWORD\}" timeout 3 redis-cli'
       - notMatchRegex:
           path: spec.template.spec.containers[1].command[2]
           pattern: '(^|[[:space:]])-a([[:space:]]|$)|--password'
