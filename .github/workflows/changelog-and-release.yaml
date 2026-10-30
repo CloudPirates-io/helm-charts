@@ -240,7 +240,6 @@ jobs:
         with:
           skip_existing: true
           charts_dir: charts
-          charts_repo_url: https://charts.cloudpirates.io
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -281,8 +280,8 @@ jobs:
             return 1
           }
 
-          retry helm registry login --username "$REGISTRY_USER" --password ${{ secrets.REGISTRY_PASSWORD }} https://${{ vars.REGISTRY }}
-          retry helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
+          retry helm registry login --username "$REGISTRY_USER" --password ${{ secrets.REGISTRY_PASSWORD }} ${{ vars.REGISTRY }}
+          retry helm registry login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
 
           RELEASED_CHARTS=""
           for CHART_NAME in ${CHANGED_CHARTS//,/ }; do
