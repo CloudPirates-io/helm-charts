@@ -20,9 +20,9 @@ image:
   ## @param image.registry ClusterPirate image registry
   registry: harbor.cloudpirates.io
   ## @param image.repository ClusterPirate image repository
-  repository: koperator-internal/services/clusterpirate
+  repository: public/clusterpirate
   ## @param image.tag ClusterPirate image tag (immutable tags are recommended)
-  tag: 464e93ac@sha256:bd9e0a4e5b8465edd5a88e8ef9dcde8dd97fb6c5a9113304cb9871a2d4b89545
+  tag: 1.0.0-rc1
   ## @param image.imagePullPolicy ClusterPirate image pull policy
   imagePullPolicy: Always
 
