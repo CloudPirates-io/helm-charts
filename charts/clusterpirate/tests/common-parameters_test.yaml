@@ -18,7 +18,7 @@ tests:
           value: RELEASE-NAME
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.cloudpirates.io/koperator-internal/services/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
+          value: harbor.cloudpirates.io/public/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
@@ -30,7 +30,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: my-registry.com/koperator-internal/services/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
+          value: my-registry.com/public/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
 
   - it: should respect global.imagePullSecrets
     set:
@@ -98,7 +98,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: custom-registry.io/koperator-internal/services/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
+          value: custom-registry.io/public/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
 
   - it: should respect image.repository override
     set:
@@ -116,7 +116,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.cloudpirates.io/koperator-internal/services/clusterpirate:v2.0.0@sha256:newdigest123
+          value: harbor.cloudpirates.io/public/clusterpirate:v2.0.0@sha256:newdigest123
 
   - it: should respect image.imagePullPolicy override
     set:
@@ -136,7 +136,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: global-registry.com/koperator-internal/services/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
+          value: global-registry.com/public/clusterpirate:a741419b@sha256:6ae8df57a26681329a1770e8df60e47c2996ea82e9a9173cec761707937ba524
 
   - it: should combine all overrides correctly
     set:
