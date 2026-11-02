@@ -409,14 +409,8 @@ extraContainers: []
 #       mountPath: /pgdata
 #       readOnly: true
 
-## @param initContainers Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades
+## @param initContainers Init containers to add to the PostgreSQL pods. See [initContainers](#initContainers)
 initContainers: []
-# Example with pgautoupgrade for major version upgrades:
-# - name: pgautoupgrade
-#   image: tianon/pgautoupgrade:17-to-18
-#   volumeMounts:
-#     - name: data  # must match persistence.volumeName
-#       mountPath: /var/lib/postgresql/data
 
 ## @section Container command/args override
 ## @param command Override default container command (useful for hardened images)
