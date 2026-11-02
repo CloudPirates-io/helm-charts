@@ -348,6 +348,7 @@ user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subs
 | Parameter                            | Description                                     | Default |
 | ------------------------------------ | ----------------------------------------------- | ------- |
 | `readinessProbe.enabled`             | Enable readiness probe                          | `true`  |
+| `readinessProbe.waitForReplicationSync` | In replication mode, report ready only for a master or a replica with `master_link_status:up` (makes RollingUpdate safe) | `false` |
 | `readinessProbe.initialDelaySeconds` | Initial delay before starting probes            | `5`     |
 | `readinessProbe.periodSeconds`       | How often to perform the probe                  | `10`    |
 | `readinessProbe.timeoutSeconds`      | Timeout for each probe attempt                  | `5`     |

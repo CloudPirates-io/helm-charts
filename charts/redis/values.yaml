@@ -402,6 +402,8 @@ livenessProbe:
 readinessProbe:
   ## @param readinessProbe.enabled Enable readiness probe
   enabled: true
+  ## @param readinessProbe.waitForReplicationSync In replication mode, report ready only for a master or a replica with master_link_status:up (makes RollingUpdate safe)
+  waitForReplicationSync: false
   ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
   initialDelaySeconds: 5
   ## @param readinessProbe.periodSeconds How often to perform the probe
