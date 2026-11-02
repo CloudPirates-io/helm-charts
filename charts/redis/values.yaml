@@ -532,6 +532,15 @@ sentinel:
   ## names across clusters, so they must set this to a value that is unique per cluster (for example
   ## the externally-resolvable hostname of that release).
   idSeed: ""
+  ## @param sentinel.discoveryHosts Extra Sentinel addresses ("host" or "host:port") asked for the current master when a Redis pod starts
+  ## On startup a Redis pod asks the Sentinels of its own release for the current master and, if none
+  ## answers, falls back to bootstrap, where pod-0 starts as master. A multi-cluster group usually runs
+  ## one release per cluster with a single pod each, so a restarting pod has no other Sentinel to ask
+  ## and comes back as an empty master even when the group has already failed over to another release.
+  ## List the externally-resolvable Sentinel addresses of the other releases here. They are asked after
+  ## the local Sentinels and before bootstrap. A reported master that does not answer is ignored, so a
+  ## pod that restarts while it is still the master keeps that role.
+  discoveryHosts: []
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down

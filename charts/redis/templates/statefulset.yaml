@@ -421,6 +421,44 @@ spec:
                 fi
               done
 
+              {{- if .Values.sentinel.discoveryHosts }}
+              # The Sentinels above belong to this release only. When the group spans several releases
+              # (one per cluster or region), the master may have failed over to another release, and only
+              # their Sentinels know it. Ask them before falling back to bootstrap, where pod-0 would start
+              # as an empty master next to the real one.
+              if [ "$SENTINEL_FOUND" = false ]; then
+                for SENTINEL_ADDR in {{ range .Values.sentinel.discoveryHosts }}{{ . | quote }} {{ end }}; do
+                  case "$SENTINEL_ADDR" in
+                    *:*:*) SENTINEL_HOST="$SENTINEL_ADDR"; SENTINEL_PORT={{ .Values.sentinel.port }} ;;
+                    *:*) SENTINEL_HOST="${SENTINEL_ADDR%:*}"; SENTINEL_PORT="${SENTINEL_ADDR##*:}" ;;
+                    *) SENTINEL_HOST="$SENTINEL_ADDR"; SENTINEL_PORT={{ .Values.sentinel.port }} ;;
+                  esac
+                  {{- if .Values.sentinel.acl.enabled }}
+                  MASTER_INFO=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else if .Values.auth.sentinel }}
+                  MASTER_INFO=$(REDISCLI_AUTH="${REDIS_PASSWORD}" timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else }}
+                  MASTER_INFO=$(timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- end }}
+                  if [ -z "$MASTER_INFO" ] || ! echo "$MASTER_INFO" | grep -qE '^[A-Za-z0-9.:-]+$'; then
+                    continue
+                  fi
+                  # A Sentinel keeps reporting this pod as master until it fails over, and this pod's Redis
+                  # is not running yet. Any reply, even an auth error, means a Redis answered; silence means
+                  # the reported master is down or is this pod, and bootstrap below handles both.
+                  PING_REPLY=$(timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli --no-auth-warning -h "$MASTER_INFO" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} PING 2>/dev/null || echo "")
+                  if [ -z "$PING_REPLY" ]; then
+                    echo "Sentinel at ${SENTINEL_HOST} reports master $MASTER_INFO, which does not answer (ignoring)"
+                    continue
+                  fi
+                  CURRENT_MASTER="$MASTER_INFO"
+                  SENTINEL_FOUND=true
+                  echo "Found current master from sentinel at ${SENTINEL_HOST}: $CURRENT_MASTER"
+                  break
+                done
+              fi
+              {{- end }}
+
               # Configuration logic
               if [ "$SENTINEL_FOUND" = true ] && [ -n "$CURRENT_MASTER" ]; then
                 # Sentinel knows the master - configure accordingly

@@ -1,0 +1,62 @@
+suite: test redis sentinel.discoveryHosts master discovery on startup
+templates:
+  - statefulset.yaml
+set:
+  architecture: replication
+  replicaCount: 1
+  sentinel.enabled: true
+  sentinel.monitorTarget: redis-a.example.net
+tests:
+  - it: should not render the extra discovery loop when sentinel.discoveryHosts is empty
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'SENTINEL_ADDR'
+
+  - it: should ask every listed Sentinel, keeping an explicit port and defaulting to sentinel.port
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net:26380
+        - sentinel-c.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'for SENTINEL_ADDR in "sentinel-b\.example\.net:26380" "sentinel-c\.example\.net" ; do'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '\*\) SENTINEL_HOST="\$SENTINEL_ADDR"; SENTINEL_PORT=26379 ;;'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'timeout 3 redis-cli -h "\$\{SENTINEL_HOST\}" -p "\$\{SENTINEL_PORT\}" sentinel get-master-addr-by-name mymaster'
+
+  - it: should only ask the extra Sentinels when the local ones did not answer, and before bootstrap
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(?s)if \[ "\$SENTINEL_FOUND" = false \]; then\s+for SENTINEL_ADDR.*# Configuration logic.*Bootstrap mode: pod-0 starting as initial master'
+
+  - it: should ignore a reported master that does not answer
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'PING_REPLY=\$\(timeout 3 redis-cli --no-auth-warning -h "\$MASTER_INFO" -p 6379 PING'
+
+  - it: should use the Sentinel ACL user for the extra Sentinels when sentinel.acl is enabled
+    set:
+      sentinel.acl.enabled: true
+      sentinel.acl.existingSecret: my-sentinel-acl
+      sentinel.acl.defaultUsername: sentinel-admin
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'REDISCLI_AUTH="\$\{SENTINEL_ACL_PASSWORD\}" timeout 3 redis-cli --user sentinel-admin -h "\$\{SENTINEL_HOST\}" -p "\$\{SENTINEL_PORT\}"'
