@@ -734,6 +734,12 @@ initContainers:
 
 Hardened PostgreSQL images have strict security requirements and will not automatically fix directory permissions. When Kubernetes creates persistent volumes with `fsGroup`, it sets permissions to 2770 (including the setgid bit), which PostgreSQL's hardened images reject. The initContainer runs once before PostgreSQL starts to correct these permissions.
 
+## initContainers
+
+### Upgrade PostgreSQL via. pgautoupgrade
+
+You can use [pgautoupgrade](https://github.com/mreiche/pgautoupgrade) to automatically upgrade your PostgreSQL instance as `initContainer`.
+
 ## Access PostgreSQL
 
 ### Via kubectl port-forward
