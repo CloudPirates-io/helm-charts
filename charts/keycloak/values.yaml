@@ -110,9 +110,9 @@ containerSecurityContext:
 
 ## @section Keycloak Configuration
 keycloak:
-  ## @param keycloak.adminUser Keycloak admin username
+  ## @param keycloak.adminUser Keycloak admin username. Note that an update to keycloak.adminUser has no effect unless the Secret is previously deleted from the cluster, see https://github.com/CloudPirates-io/helm-charts/pull/1746
   adminUser: admin
-  ## @param keycloak.adminPassword Keycloak admin password
+  ## @param keycloak.adminPassword Keycloak admin password. Note that an update to keycloak.adminPassword has no effect unless the Secret is previously deleted from the cluster, see https://github.com/CloudPirates-io/helm-charts/pull/1746
   adminPassword: ""
   ## @param keycloak.existingSecret Name of existing secret to use for Keycloak admin credentials
   existingSecret: ""
