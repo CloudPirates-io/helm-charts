@@ -57,3 +57,14 @@ tests:
             name: metrics
             image: prometheuscommunity/postgres-exporter:v0.20.1
           any: true
+  - it: should pass arguments to exporter
+    set:
+      metrics:
+        args:
+          - --collector.stat_statements
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            args: [ --collector.stat_statements ]
+          any: true
