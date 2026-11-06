@@ -36,10 +36,10 @@ tests:
           pattern: 'HEADLESS_SERVICE="test-release-redis-headless\.test-ns\.svc\.cluster\.local"'
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: '"\$address" == "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
+          pattern: '"\$address" = "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
       - matchRegex:
           path: data["prestop-sentinel.sh"]
-          pattern: '"\$address" == "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
+          pattern: '"\$address" = "\$\{HOSTNAME\}\.\$\{HEADLESS_SERVICE\}"'
       - matchRegex:
           path: data["prestop.sh"]
           pattern: 'if is_current_pod_address "\$master_host"; then'
@@ -60,10 +60,10 @@ tests:
           pattern: 'REDIS_PORT="6380"'
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: 'args\+=\(--tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+          pattern: 'args="\$args --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt"'
       - matchRegex:
           path: data["prestop-sentinel.sh"]
-          pattern: 'args\+=\(--tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+          pattern: 'args="\$args --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt"'
       - matchRegex:
           path: data["prestop.sh"]
           pattern: 'redis-cli -h "\$REDIS_LOOPBACK" -p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls/tls\.crt --key /etc/redis/tls/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'
@@ -79,7 +79,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["prestop.sh"]
-          pattern: 'args\+=\(--tls --cert /etc/redis/tls-client/tls\.crt --key /etc/redis/tls-client/tls\.key --cacert /etc/redis/tls/ca\.crt\)'
+          pattern: 'args="\$args --tls --cert /etc/redis/tls-client/tls\.crt --key /etc/redis/tls-client/tls\.key --cacert /etc/redis/tls/ca\.crt"'
       - matchRegex:
           path: data["prestop-sentinel.sh"]
           pattern: '-p "\$SENTINEL_PORT" --tls --cert /etc/redis/tls-client/tls\.crt --key /etc/redis/tls-client/tls\.key --cacert /etc/redis/tls/ca\.crt sentinel "\$@"'

@@ -890,7 +890,7 @@ spec:
             preStop:
               exec:
                 command:
-                  - /bin/bash
+                  - /bin/sh
                   - /scripts/prestop.sh
             {{- end }}
           {{- end }}
@@ -1487,7 +1487,7 @@ spec:
             preStop:
               exec:
                 command:
-                  - /bin/bash
+                  - /bin/sh
                   - /scripts/prestop-sentinel.sh
           {{- end }}
           resources: {{- toYaml .Values.sentinel.resources | nindent 12 }}
