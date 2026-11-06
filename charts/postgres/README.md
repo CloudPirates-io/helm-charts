@@ -598,7 +598,7 @@ curl http://localhost:9187/metrics
 
 #### Extended metrics configuration
 
-If you want gather more metrics, like statement executions, configure PostgreSQL and the metrics exporter like:
+If you want gather more metrics, like statement executions, configure PostgreSQL and the [metrics exporter](https://github.com/prometheus-community/postgres_exporter) like:
 
 ```yaml
 initdb:
