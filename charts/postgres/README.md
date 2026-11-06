@@ -384,6 +384,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.image.repository`                 | PostgreSQL exporter image repository                                            | `prometheuscommunity/postgres-exporter` |
 | `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.19.1`                               |
 | `metrics.image.pullPolicy`                 | PostgreSQL exporter image pull policy                                           | `Always`                                |
+| `metrics.args`                             | Arguments to pass to the PostgreSQL exporter                                    | `[]`                                    |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                                    |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                                    |
 | `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                                    |
@@ -593,6 +594,23 @@ You can access metrics directly via port-forward:
 ```bash
 kubectl port-forward service/my-postgres-metrics 9187:9187
 curl http://localhost:9187/metrics
+```
+
+#### Extended metrics configuration
+
+If you want gather more metrics, like statement executions, configure PostgreSQL and the [metrics exporter](https://github.com/prometheus-community/postgres_exporter) like:
+
+```yaml
+initdb:
+  scripts:
+    create_extension.sql: "CREATE EXTENSION pg_stat_statements;"
+config:
+  postgresql:
+    shared_preload_libraries: "pg_stat_statements"
+metrics:
+  enabled: true
+  args:
+    - --collector.stat_statements
 ```
 
 ### Replication setup

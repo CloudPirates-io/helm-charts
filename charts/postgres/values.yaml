@@ -435,6 +435,8 @@ metrics:
     tag: "v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e"
     ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
     pullPolicy: Always
+  ## @param metrics.args Arguments to pass to the PostgreSQL exporter
+  args: []
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
   ## Metrics service configuration
