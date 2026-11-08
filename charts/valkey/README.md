@@ -311,6 +311,9 @@ When `sentinel.masterProxy.enabled` is set, the `<release>-master` Service alway
 | `sentinel.masterProxy.checkInterval`       | Health check interval (HAProxy `inter`)                                               | `"1s"`      |
 | `sentinel.masterProxy.checkRise`           | Consecutive successful checks before a backend is marked master-eligible             | `2`         |
 | `sentinel.masterProxy.checkFall`           | Consecutive failed checks before a backend is marked down                            | `2`         |
+| `sentinel.masterProxy.timeouts.connect`    | HAProxy `timeout connect`: maximum time to establish a connection to a backend        | `"2s"`      |
+| `sentinel.masterProxy.timeouts.client`     | HAProxy `timeout client`: maximum inactivity time on the client side                  | `"30s"`     |
+| `sentinel.masterProxy.timeouts.server`     | HAProxy `timeout server`: maximum inactivity time on the server side                  | `"30s"`     |
 | `sentinel.masterProxy.resources`           | Resource limits and requests for the HAProxy sidecar                                  | `{}`        |
 | `sentinel.masterProxy.service.type`        | Kubernetes service type for the master proxy service                                  | `""`        |
 | `sentinel.masterProxy.service.annotations` | Additional custom annotations for the master proxy service                            | `{}`        |
