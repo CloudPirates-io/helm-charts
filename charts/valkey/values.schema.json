@@ -589,13 +589,16 @@
                             "type": "object",
                             "properties": {
                                 "client": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
                                 },
                                 "connect": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
                                 },
                                 "server": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
                                 }
                             }
                         }

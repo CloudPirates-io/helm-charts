@@ -508,11 +508,11 @@ sentinel:
     ## (e.g. "30s", "5m", "1h").
     timeouts:
       ## @param sentinel.masterProxy.timeouts.connect HAProxy `timeout connect`: maximum time to establish a connection to a backend
-      connect: "2s"
+      connect: "2s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
       ## @param sentinel.masterProxy.timeouts.client HAProxy `timeout client`: maximum inactivity time on the client side
-      client: "30s"
+      client: "30s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
       ## @param sentinel.masterProxy.timeouts.server HAProxy `timeout server`: maximum inactivity time on the server side
-      server: "30s"
+      server: "30s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
     ## Plain `role:master` is not sufficient on its own: a pod that restarts with empty/ephemeral
     ## storage can come back up self-declared as master (see the sentinel container's bootstrap
     ## logic) before Sentinel has finished failing over, producing two backends that both report
