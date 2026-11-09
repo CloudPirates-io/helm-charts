@@ -558,9 +558,9 @@ spec:
 
               defaults
                   mode tcp
-                  timeout connect 2s
-                  timeout client 30s
-                  timeout server 30s
+                  timeout connect {{ .Values.sentinel.masterProxy.timeouts.connect }}
+                  timeout client {{ .Values.sentinel.masterProxy.timeouts.client }}
+                  timeout server {{ .Values.sentinel.masterProxy.timeouts.server }}
 
               resolvers cluster_dns
                   parse-resolv-conf
