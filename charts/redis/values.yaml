@@ -758,7 +758,7 @@ serviceAccount:
   create: false
   ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
   name: ""
-  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods and the cluster-init Job
   automountServiceAccountToken: false
   ## @param serviceAccount.annotations Additional custom annotations for the ServiceAccount
   annotations: {}
