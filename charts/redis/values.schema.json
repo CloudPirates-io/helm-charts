@@ -597,6 +597,9 @@
                 },
                 "timeoutSeconds": {
                     "type": "integer"
+                },
+                "waitForReplicationSync": {
+                    "type": "boolean"
                 }
             }
         },
@@ -647,10 +650,7 @@
                     }
                 },
                 "discoveryHosts": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "array"
                 },
                 "discoveryTimeout": {
                     "type": "integer"

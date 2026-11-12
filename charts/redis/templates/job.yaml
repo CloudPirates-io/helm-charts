@@ -26,6 +26,8 @@ spec:
 {{ . | nindent 6 }}
 {{- end }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      serviceAccountName: {{ include "redis.serviceAccountName" . }}
       restartPolicy: OnFailure
       containers:
         - name: redis-cluster-init

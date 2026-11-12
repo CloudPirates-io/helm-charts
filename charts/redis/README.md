@@ -438,7 +438,7 @@ user default on >sentinelpassword ~* &* +@all
 | Parameter                                     | Description                                                                                                                             | Default |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `serviceAccount.annotations`                  | Additional custom annotations for the ServiceAccount                                                                                    | `{}`    |
-| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods                                                                                   | `false` |
+| `serviceAccount.automountServiceAccountToken` | Automount service account token inside the Redis pods and the cluster-init Job                                                          | `false` |
 | `serviceAccount.create`                       | Enable the creation of a ServiceAccount                                                                                                 | `false` |
 | `serviceAccount.name`                         | Name of the ServiceAccount to use. If not set and `serviceAccount.create` is `true`, a name is generated using the `fullname` template. | `""`    |
 
