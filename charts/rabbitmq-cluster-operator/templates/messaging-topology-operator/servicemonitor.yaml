@@ -38,6 +38,8 @@ spec:
         credentials:
           name: {{ .Values.msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret.name }}
           key: {{ .Values.msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret.key }}
+      {{- else if .Values.msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile }}
+      bearerTokenFile: {{ .Values.msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile }}
       {{- end }}
       {{- else }}
       scheme: http

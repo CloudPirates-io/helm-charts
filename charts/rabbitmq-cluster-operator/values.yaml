@@ -973,6 +973,10 @@ msgTopologyOperator:
       ##   name: prometheus-metrics-token
       ##   key: token
       bearerTokenSecret: {}
+      ## @param msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile Path of a file inside the Prometheus pod holding the bearer token to present to the secure metrics endpoint, typically /var/run/secrets/kubernetes.io/serviceaccount/token (the scraping Prometheus' own projected ServiceAccount token, so no Secret is needed). That ServiceAccount still needs read access, see msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true and bearerTokenSecret is not set (bearerTokenSecret takes precedence). The scraping Prometheus must allow file access from ServiceMonitors (spec.arbitraryFSAccessThroughSMs.deny: false, the default), else Prometheus Operator rejects the whole ServiceMonitor. Not available on the PodMonitor: the PodMetricsEndpoint API has no such field.
+      ## e.g:
+      ## bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      bearerTokenFile: ""
     podMonitor:
       ## @param msgTopologyOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
