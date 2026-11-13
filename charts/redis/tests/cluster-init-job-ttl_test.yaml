@@ -1,0 +1,48 @@
+suite: test redis cluster-init job ttlSecondsAfterFinished
+templates:
+  - job.yaml
+set:
+  architecture: cluster
+  replicaCount: 6
+  clusterReplicaCount: 1
+tests:
+  - it: should not set ttlSecondsAfterFinished by default
+    asserts:
+      - notExists:
+          path: spec.ttlSecondsAfterFinished
+
+  - it: should set ttlSecondsAfterFinished from an integer
+    set:
+      clusterInitJob:
+        ttlSecondsAfterFinished: 300
+    asserts:
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 300
+
+  - it: should set ttlSecondsAfterFinished from a numeric string
+    set:
+      clusterInitJob:
+        ttlSecondsAfterFinished: "600"
+    asserts:
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 600
+
+  - it: should allow 0 to delete the Job right after it finishes
+    set:
+      clusterInitJob:
+        ttlSecondsAfterFinished: 0
+    asserts:
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 0
+
+  - it: should not render the Job outside cluster architecture
+    set:
+      architecture: standalone
+      clusterInitJob:
+        ttlSecondsAfterFinished: 300
+    asserts:
+      - hasDocuments:
+          count: 0

@@ -12,6 +12,9 @@ metadata:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
+  {{- if ne (toString .Values.clusterInitJob.ttlSecondsAfterFinished) "" }}
+  ttlSecondsAfterFinished: {{ int .Values.clusterInitJob.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     metadata:
       labels:

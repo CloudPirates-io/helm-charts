@@ -472,6 +472,7 @@ user default on >sentinelpassword ~* &* +@all
 | `clusterInitJob.nodeSelector` | Node selector for the clusterInit Job (defaults to `.Values.nodeSelector` if unset)| `{}`    |
 | `clusterInitJob.tolerations`  | Tolerations for the clusterInit Job (defaults to `.Values.tolerations` if unset)   | `[]`    |
 | `clusterInitJob.affinity`     | Affinity rules for the clusterInit Job (defaults to `.Values.affinity` if unset)   | `{}`    |
+| `clusterInitJob.ttlSecondsAfterFinished` | Seconds after which Kubernetes deletes the finished clusterInit Job (empty keeps it). Use it when Helm hooks are ignored (`helm template` + `kubectl apply`) | `""` |
 
 #### Extra Objects
 
