@@ -838,3 +838,9 @@ clusterInitJob:
   ## and would destroy the topology). If the cluster is still not healthy after this timeout, the Job fails instead of
   ## recreating the cluster, preserving data for manual intervention.
   recoveryTimeout: 120
+  ## @param clusterInitJob.ttlSecondsAfterFinished Seconds after which Kubernetes deletes the finished clusterInit Job (empty = keep it)
+  ## Helm deletes the Job through its hook-delete-policy. Tools that render the chart and apply it with
+  ## `kubectl apply` (helm template, kustomize) ignore hooks, so the finished Job stays and every later change to its
+  ## pod template (e.g. a new image tag) fails with "field is immutable". Setting a TTL removes it so the next apply recreates it.
+  # @schema type:[integer, string]
+  ttlSecondsAfterFinished: ""
