@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: rabbitmq-cluster-operator loadBalancerSourceRanges
+templates:
+  - templates/cluster-operator/metrics-service.yaml
+  - templates/messaging-topology-operator/metrics-service.yaml
+  - templates/messaging-topology-operator/webhook-service.yaml
+
+tests:
+  - it: should render every source range of the cluster operator metrics service
+    set:
+      clusterOperator.metrics.service.enabled: true
+      clusterOperator.metrics.service.type: LoadBalancer
+      clusterOperator.metrics.service.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+    template: templates/cluster-operator/metrics-service.yaml
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value:
+            - 10.0.0.0/8
+            - 192.168.0.0/16
+
+  - it: should render every source range of the messaging topology operator metrics service
+    set:
+      msgTopologyOperator.enabled: true
+      msgTopologyOperator.metrics.service.enabled: true
+      msgTopologyOperator.metrics.service.type: LoadBalancer
+      msgTopologyOperator.metrics.service.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+    template: templates/messaging-topology-operator/metrics-service.yaml
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value:
+            - 10.0.0.0/8
+            - 192.168.0.0/16
+
+  - it: should render every source range of the messaging topology operator webhook service
+    set:
+      msgTopologyOperator.enabled: true
+      msgTopologyOperator.service.type: LoadBalancer
+      msgTopologyOperator.service.loadBalancerSourceRanges:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+    template: templates/messaging-topology-operator/webhook-service.yaml
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value:
+            - 10.0.0.0/8
+            - 192.168.0.0/16
+
+  - it: should omit loadBalancerSourceRanges when the list is empty
+    set:
+      clusterOperator.metrics.service.enabled: true
+      clusterOperator.metrics.service.type: LoadBalancer
+    template: templates/cluster-operator/metrics-service.yaml
+    asserts:
+      - notExists:
+          path: spec.loadBalancerSourceRanges
