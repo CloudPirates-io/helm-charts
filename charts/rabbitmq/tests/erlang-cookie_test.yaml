@@ -1,0 +1,30 @@
+suite: test the init-erlang-cookie init container
+templates:
+  - templates/statefulset.yaml
+tests:
+  - it: should not rewrite an existing read-only cookie file
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="init-erlang-cookie")].command[2]
+          pattern: 'if \[ -f /var/lib/rabbitmq/\.erlang\.cookie \] && \[ ! -w /var/lib/rabbitmq/\.erlang\.cookie \]; then'
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="init-erlang-cookie")].command[2]
+          pattern: 'else\n\s+echo "\$RABBITMQ_ERLANG_COOKIE" > /var/lib/rabbitmq/\.erlang\.cookie\n\s*fi\n'
+
+  - it: should guard the default cookie when auth is disabled
+    set:
+      auth:
+        enabled: false
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="init-erlang-cookie")].command[2]
+          pattern: 'else\n\s+# Generate a default Erlang cookie when auth is disabled\n\s+echo "defaultcookie" > /var/lib/rabbitmq/\.erlang\.cookie\n\s*fi\n'
+
+  - it: should use the configured persistence mount path in the guard
+    set:
+      persistence:
+        mountPath: /data
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="init-erlang-cookie")].command[2]
+          pattern: 'if \[ -f /data/\.erlang\.cookie \] && \[ ! -w /data/\.erlang\.cookie \]; then'
