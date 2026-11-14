@@ -47,12 +47,16 @@ spec:
             - sh
             - -c
             - |
+              if [ -f {{ .Values.persistence.mountPath }}/.erlang.cookie ] && [ ! -w {{ .Values.persistence.mountPath }}/.erlang.cookie ]; then
+                echo "Keeping the existing read-only {{ .Values.persistence.mountPath }}/.erlang.cookie"
+              else
               {{- if .Values.auth.enabled }}
-              echo "$RABBITMQ_ERLANG_COOKIE" > {{ .Values.persistence.mountPath }}/.erlang.cookie
+                echo "$RABBITMQ_ERLANG_COOKIE" > {{ .Values.persistence.mountPath }}/.erlang.cookie
               {{- else }}
-              # Generate a default Erlang cookie when auth is disabled
-              echo "defaultcookie" > {{ .Values.persistence.mountPath }}/.erlang.cookie
+                # Generate a default Erlang cookie when auth is disabled
+                echo "defaultcookie" > {{ .Values.persistence.mountPath }}/.erlang.cookie
               {{- end }}
+              fi
               chmod {{ .Values.auth.erlangCookiePermissions }} {{ .Values.persistence.mountPath }}/.erlang.cookie
               chown $(id -u):$(id -g) {{ .Values.persistence.mountPath }}/.erlang.cookie
           {{- if .Values.auth.enabled }}
