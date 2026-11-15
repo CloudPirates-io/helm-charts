@@ -1,0 +1,43 @@
+suite: test redis nodePort values
+templates:
+  - service.yaml
+  - metrics-service.yaml
+tests:
+  - it: should accept an integer service.nodePort
+    template: service.yaml
+    set:
+      service.type: NodePort
+      service.nodePort: 30379
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30379
+
+  - it: should still accept a string service.nodePort
+    template: service.yaml
+    set:
+      service.type: NodePort
+      service.nodePort: "30379"
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30379
+
+  - it: should omit nodePort when service.nodePort is empty
+    template: service.yaml
+    set:
+      service.type: NodePort
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
+
+  - it: should accept an integer metrics.service.nodePort
+    template: metrics-service.yaml
+    set:
+      metrics.enabled: true
+      metrics.service.type: NodePort
+      metrics.service.nodePort: 30121
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30121

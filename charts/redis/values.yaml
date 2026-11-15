@@ -90,7 +90,7 @@ service:
   ## @param service.port Redis service port
   port: 6379
   ## @param service.nodePort Specify the nodePort value for NodePort and LoadBalancer service types
-  nodePort: ""
+  nodePort: ""  # @schema type:[integer, string]
   ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
   clusterPort: 16379
   ## @param service.ipFamilies List of IP families (e.g. [IPv4], [IPv6], [IPv4,IPv6])
@@ -724,7 +724,7 @@ metrics:
     ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
     clusterIP: ""
     ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
-    nodePort: ""
+    nodePort: ""  # @schema type:[integer, string]
     ## @param metrics.service.ipFamilies List of IP families for the metrics service
     ipFamilies: []
     ## @param metrics.service.ipFamilyPolicy IP family policy for the metrics service
