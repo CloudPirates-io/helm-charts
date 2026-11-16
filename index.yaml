@@ -47362,6 +47362,62 @@ entries:
       artifacthub.io/category: streaming-messaging
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[ghcr.io/rabbitmq/default-user-credential-updater] Update credentialUpdaterImage.repository
+            to v1.0.19 (#1817)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1817
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: RabbitMQ
+          url: https://www.rabbitmq.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+        - name: RabbitMQ Cluster Operator
+          url: https://github.com/rabbitmq/cluster-operator
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 2.23.3
+    created: "2026-11-16T07:35:01.017655766Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: Kubernetes operator to deploy and manage RabbitMQ clusters.
+    digest: 561fd2b8c73bb8a16ef9ce386b43c642889590a538a88a5d8ce1705f89de8c09
+    home: https://www.rabbitmq.com
+    icon: https://a.storyblok.com/f/143071/512x512/aa1bd68288/rabbitmq-logo.svg
+    keywords:
+    - rabbitmq-cluster-operator
+    - rabbitmq
+    - operator
+    - message broker
+    - amqp
+    - messaging
+    - queue
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - name: Gasper Oblak
+      url: https://about.bl4ko.com
+    name: rabbitmq-cluster-operator
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/rabbitmq-cluster-operator
+    - https://github.com/rabbitmq/cluster-operator
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/rabbitmq-cluster-operator-0.6.28/rabbitmq-cluster-operator-0.6.28.tgz
+    version: 0.6.28
+  - annotations:
+      artifacthub.io/category: streaming-messaging
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[library/rabbitmq] Update rabbitmqImage.repository to 4841f63 (#1888)'
           links:
           - name: Pull Request
@@ -74297,4 +74353,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-16T07:33:22.894798219Z"
+generated: "2026-11-16T07:35:01.01962891Z"
