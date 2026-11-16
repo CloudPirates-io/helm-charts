@@ -27,7 +27,11 @@ spec:
         {{- include "rustfs.labels" . | nindent 8 }}
         app.kubernetes.io/component: setup
     spec:
-      securityContext: {} # CLI is not running with any SecurityContext
+{{- with (include "rustfs.imagePullSecrets" .) }}
+{{ . | nindent 6 }}
+{{- end }}
+      serviceAccountName: {{ template "rustfs.serviceAccountName" . }}
+      securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       restartPolicy: Never
       volumes:
         - name: setup
@@ -43,8 +47,12 @@ spec:
           emptyDir: {}
       initContainers:
         - name: waiting-for-service
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rustfs-setup.image" . }}
           imagePullPolicy: {{ .Values.setup.image.imagePullPolicy }}
+          {{- with .Values.setup.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: TIMEOUT
               value: "90"
@@ -79,9 +87,12 @@ spec:
               done
       containers:
         - name: setup
-          securityContext: {} # CLI is not running with any SecurityContext
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "rustfs-setup.image" . }}
           imagePullPolicy: {{ .Values.setup.image.imagePullPolicy }}
+          {{- with .Values.setup.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
           command: ["/bin/sh", "-c"]
           args:
             - |
