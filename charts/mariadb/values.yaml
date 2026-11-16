@@ -395,6 +395,10 @@ metrics:
     # requests:
     #   memory: 64Mi
     #   cpu: 10m
+  ## @param metrics.extraArgs Additional command-line flags passed to mysqld-exporter
+  extraArgs: []
+    # - --collect.info_schema.tables
+    # - --collect.info_schema.processlist
   ## @param metrics.extraEnvVars Additional environment variables for metrics exporter
   extraEnvVars: []
     # - name: CUSTOM_VAR

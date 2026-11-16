@@ -1,0 +1,29 @@
+suite: test mariadb exporter args
+templates:
+  - statefulset.yaml
+set:
+  metrics:
+    enabled: true
+tests:
+  - it: should only pass the default args to the exporter
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[?(@.name == "metrics")].args
+          value:
+            - --mysqld.username=exporter
+            - --mysqld.address=localhost:3306
+
+  - it: should append metrics.extraArgs to the exporter args
+    set:
+      metrics:
+        extraArgs:
+          - --collect.info_schema.tables
+          - --collect.info_schema.processlist
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[?(@.name == "metrics")].args
+          value:
+            - --mysqld.username=exporter
+            - --mysqld.address=localhost:3306
+            - --collect.info_schema.tables
+            - --collect.info_schema.processlist
