@@ -1,0 +1,70 @@
+suite: test etcd service
+templates:
+  - service.yaml
+set:
+  image:
+    tag: v3.6.0-alpha.0
+tests:
+  - it: should not render loadBalancer fields by default
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+      - notExists:
+          path: spec.loadBalancerIP
+
+  - it: should render loadBalancerSourceRanges and loadBalancerIP for LoadBalancer type
+    documentIndex: 0
+    set:
+      service:
+        type: LoadBalancer
+        loadBalancerSourceRanges:
+          - 10.0.0.0/8
+          - 192.168.0.0/16
+        loadBalancerIP: 10.1.2.3
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value:
+            - 10.0.0.0/8
+            - 192.168.0.0/16
+      - equal:
+          path: spec.loadBalancerIP
+          value: 10.1.2.3
+
+  - it: should not render loadBalancer fields for ClusterIP type
+    documentIndex: 0
+    set:
+      service:
+        type: ClusterIP
+        loadBalancerSourceRanges:
+          - 10.0.0.0/8
+        loadBalancerIP: 10.1.2.3
+    asserts:
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+      - notExists:
+          path: spec.loadBalancerIP
+
+  - it: should not render loadBalancer fields on the headless service
+    documentIndex: 1
+    set:
+      service:
+        type: LoadBalancer
+        loadBalancerSourceRanges:
+          - 10.0.0.0/8
+        loadBalancerIP: 10.1.2.3
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+      - notExists:
+          path: spec.loadBalancerIP
