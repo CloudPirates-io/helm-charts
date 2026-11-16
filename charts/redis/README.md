@@ -275,7 +275,7 @@ user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subs
 | -------------------- | -------------------------------------------------------------- | ------- |
 | `pdb.enabled`        | Enable Pod Disruption Budget                                   | `false` |
 | `pdb.minAvailable`   | Minimum number/percentage of pods that should remain scheduled | `1`     |
-| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable | `""`    |
+| `pdb.maxUnavailable` | Maximum number/percentage of pods that may be made unavailable. Takes precedence over `pdb.minAvailable` | `""`    |
 
 ### Persistence
 

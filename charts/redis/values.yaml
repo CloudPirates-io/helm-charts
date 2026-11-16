@@ -272,6 +272,7 @@ pdb:
   # @schema type:[integer, string]
   minAvailable: 1
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ## Takes precedence over pdb.minAvailable: when set, the budget is rendered as maxUnavailable only
   # @schema type:[integer, string]
   maxUnavailable: ""
 
