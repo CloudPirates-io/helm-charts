@@ -26,7 +26,7 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.31.6-alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2"
+  tag: "1.31.8-alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
@@ -162,7 +162,7 @@ cloneStaticSiteFromGit:
     ## @param cloneStaticSiteFromGit.image.repository Git image repository
     repository: alpine/git
     ## @param cloneStaticSiteFromGit.image.tag Git image tag
-    tag: "v2.54.0"
+    tag: "v2.54.1"
     ## @param cloneStaticSiteFromGit.image.pullPolicy Git image pull policy
     pullPolicy: IfNotPresent
     ## @param cloneStaticSiteFromGit.image.pullSecrets Git image pull secrets
