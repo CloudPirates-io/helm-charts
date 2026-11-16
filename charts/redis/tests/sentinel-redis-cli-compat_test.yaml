@@ -1,0 +1,58 @@
+suite: test redis sentinel scripts work with redis-cli older than 7.4
+templates:
+  - statefulset.yaml
+set:
+  architecture: replication
+  replicaCount: 3
+  sentinel.enabled: true
+tests:
+  - it: should bound discovery calls with timeout instead of redis-cli -t (StatefulSet)
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'redis-cli[^\n]* -t [0-9]'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'timeout 3 redis-cli -h "\$\{SENTINEL_HOST\}" -p 26379 sentinel get-master-addr-by-name mymaster'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'redis-cli[^\n]* -t [0-9]'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'ROLE_INFO=\$\(timeout 3 redis-cli -h "\$\{REDIS_HOST\}" -p 6379'
+
+  - it: should honour sentinel.discoveryTimeout in the timeout bound
+    set:
+      sentinel.discoveryTimeout: 7
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'timeout 7 redis-cli -h "\$\{SENTINEL_HOST\}"'
+
+  - it: should leave the Sentinel listen addresses to the default, as an explicit bind breaks Sentinel outbound connections on Redis 6.2 (StatefulSet)
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^bind '
+
+  - it: should bound discovery calls with timeout and leave the Sentinel listen addresses to the default (Deployment)
+    set:
+      useDeployment: true
+      persistence.enabled: false
+    asserts:
+      - isKind:
+          of: Deployment
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'redis-cli[^\n]* -t [0-9]'
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'timeout 2 redis-cli --no-auth-warning -h "\$CURRENT_MASTER" -p 6379 PING'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'redis-cli[^\n]* -t [0-9]'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^bind '

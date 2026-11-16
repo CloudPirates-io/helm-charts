@@ -51,7 +51,7 @@ spec:
             - -c
             - |
               mkdir -p {{ .Values.persistence.mountPath }}
-              exec minio server {{ .Values.persistence.mountPath }} {{ include "minio.serverUrl" . }}
+              exec {{ .Values.image.executable }} server {{ .Values.persistence.mountPath }} {{ include "minio.serverUrl" . }}
           env:
             - name: MINIO_ROOT_USER
               valueFrom:

@@ -68,3 +68,46 @@ tests:
         equal:
           path: metadata.annotations["helm.sh/hook-delete-policy"]
           value: before-hook-creation
+
+  - it: Setup job should use the image pull secrets and the service account
+    set:
+      global:
+        imagePullSecrets:
+          - registry-secret
+      setup:
+        buckets:
+          - name: test
+    template: setup-job.yaml
+    asserts:
+      - documentIndex: 0
+        contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: registry-secret
+      - documentIndex: 0
+        equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-rustfs
+
+  - it: Setup job containers should run with the chart security context and resources
+    set:
+      setup:
+        buckets:
+          - name: test
+        resources:
+          limits:
+            memory: 64Mi
+    template: setup-job.yaml
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - documentIndex: 0
+        equal:
+          path: spec.template.spec.initContainers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - documentIndex: 0
+        equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 64Mi

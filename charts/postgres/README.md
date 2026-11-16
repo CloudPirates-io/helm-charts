@@ -334,7 +334,8 @@ These parameters are useful when using hardened PostgreSQL images (such as from 
 | -------------------- | ---------------------------------------------------------------------- | ------- |
 | `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
 | `extraVolumes`       | Additional volumes to add to the pod                                   | `[]`    |
-| `extraVolumeMounts`  | Additional volume mounts to add to the MongoDB container               | `[]`    |
+| `extraVolumeMounts`  | Additional volume mounts to add to the Postgres container              | `[]`    |
+| `extraContainers`    | Additional containers to add to the pod                                | `[]`    |
 | `extraObjects`       | Array of extra objects to deploy with the release                      | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing Secret containing additional environment variables | ``      |
 
@@ -383,6 +384,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.image.repository`                 | PostgreSQL exporter image repository                                            | `prometheuscommunity/postgres-exporter` |
 | `metrics.image.tag`                        | PostgreSQL exporter image tag                                                   | `v0.19.1`                               |
 | `metrics.image.pullPolicy`                 | PostgreSQL exporter image pull policy                                           | `Always`                                |
+| `metrics.args`                             | Arguments to pass to the PostgreSQL exporter                                    | `[]`                                    |
 | `metrics.resources`                        | Resource limits and requests for metrics container                              | `{}`                                    |
 | `metrics.service.annotations`              | Additional custom annotations for Metrics service                               | `{}`                                    |
 | `metrics.service.labels`                   | Additional custom labels for Metrics service                                    | `{}`                                    |
@@ -594,6 +596,23 @@ kubectl port-forward service/my-postgres-metrics 9187:9187
 curl http://localhost:9187/metrics
 ```
 
+#### Extended metrics configuration
+
+If you want gather more metrics, like statement executions, configure PostgreSQL and the [metrics exporter](https://github.com/prometheus-community/postgres_exporter) like:
+
+```yaml
+initdb:
+  scripts:
+    create_extension.sql: "CREATE EXTENSION pg_stat_statements;"
+config:
+  postgresql:
+    shared_preload_libraries: "pg_stat_statements"
+metrics:
+  enabled: true
+  args:
+    - --collector.stat_statements
+```
+
 ### Replication setup
 
 Replication setup only works for instances without an initialized database and `$PGDATA` directory.
@@ -732,6 +751,12 @@ initContainers:
 **Why is the initContainer needed?**
 
 Hardened PostgreSQL images have strict security requirements and will not automatically fix directory permissions. When Kubernetes creates persistent volumes with `fsGroup`, it sets permissions to 2770 (including the setgid bit), which PostgreSQL's hardened images reject. The initContainer runs once before PostgreSQL starts to correct these permissions.
+
+## initContainers
+
+### Upgrade PostgreSQL via. pgautoupgrade
+
+You can use [pgautoupgrade](https://github.com/mreiche/pgautoupgrade) to automatically upgrade your PostgreSQL instance as `initContainer`.
 
 ## Access PostgreSQL
 

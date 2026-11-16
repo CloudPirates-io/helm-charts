@@ -10,6 +10,7 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if and (not .Values.autoscaling.enabled) (not .Values.daemonset.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}

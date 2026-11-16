@@ -22,6 +22,17 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: Always
+      - equal:
+          path: spec.revisionHistoryLimit
+          value: 10
+
+  - it: should respect revisionHistoryLimit override
+    set:
+      revisionHistoryLimit: 0
+    asserts:
+      - equal:
+          path: spec.revisionHistoryLimit
+          value: 0
 
   - it: should respect global.imageRegistry override
     set:
