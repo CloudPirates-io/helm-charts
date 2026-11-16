@@ -1,0 +1,59 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the S3 API actually
+# works end-to-end (bucket creation, upload, download, checksum match), rather
+# than trusting the liveness/readiness probes alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          # docker.io/minio/mc ships as a from-scratch image (no /bin/sh), so it can't run
+          # a multi-step shell script. aws-cli's image is amazonlinux-based (has a shell)
+          # and talks to any S3-compatible endpoint via --endpoint-url, which MinIO is.
+          image: docker.io/amazon/aws-cli:2.17.62
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: "admin"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "verify-minio-password"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ENDPOINT="http://test-minio-default:9000"
+              BUCKET="verify-bucket"
+
+              echo "-> Creating a bucket"
+              aws --endpoint-url "${ENDPOINT}" s3 mb "s3://${BUCKET}"
+
+              echo "-> Uploading an object"
+              echo "hello from test-charts verification" > /tmp/upload.txt
+              aws --endpoint-url "${ENDPOINT}" s3 cp /tmp/upload.txt "s3://${BUCKET}/upload.txt"
+
+              echo "-> Downloading the object back"
+              aws --endpoint-url "${ENDPOINT}" s3 cp "s3://${BUCKET}/upload.txt" /tmp/download.txt
+
+              echo "-> Comparing checksums of the uploaded and downloaded object"
+              upload_sum=$(md5sum /tmp/upload.txt | awk '{print $1}')
+              download_sum=$(md5sum /tmp/download.txt | awk '{print $1}')
+              if [ "${upload_sum}" != "${download_sum}" ]; then
+                echo "ERROR: checksum mismatch (uploaded=${upload_sum}, downloaded=${download_sum})"
+                exit 1
+              fi
+
+              echo "OK: MinIO verification passed"

@@ -584,6 +584,23 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "timeouts": {
+                            "type": "object",
+                            "properties": {
+                                "client": {
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
+                                },
+                                "connect": {
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
+                                },
+                                "server": {
+                                    "type": "string",
+                                    "pattern": "^[0-9]+(us|ms|s|m|h|d)?$"
+                                }
+                            }
                         }
                     }
                 },

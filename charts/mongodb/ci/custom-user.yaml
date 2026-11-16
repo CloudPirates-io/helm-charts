@@ -1,0 +1,32 @@
+# CI scenario: MongoDB deployment with a non-root application user
+# Exercises: customUsers (user creation with roles restricted to its own database,
+# rather than root access to the admin database)
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootUsername: admin
+  rootPassword: "RootPass123!"
+
+customUsers:
+  - name: appuser
+    database: appdb
+    password: "AppPass123!"
+    roles:
+      - readWrite
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# Workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 (TCMalloc/glibc
+# incompatibility, MongoDB SERVER-121912). Needed on CI runners/kind nodes with newer kernels.
+experimental:
+  tcmallocRseqWorkaround:
+    enabled: true

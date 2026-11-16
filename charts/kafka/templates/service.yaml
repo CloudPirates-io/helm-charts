@@ -46,3 +46,35 @@ spec:
       name: controller
   selector:
     {{- include "kafka.selectorLabels" . | nindent 4 }}
+{{- if .Values.externalAccess.enabled }}
+{{- $root := . }}
+{{- range $i := until (int .Values.replicaCount) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.fullname" $root }}-{{ $i }}-external
+  namespace: {{ include "cloudpirates.namespace" $root }}
+  labels:
+    {{- include "kafka.labels" $root | nindent 4 }}
+  {{- with $root.Values.externalAccess.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $root.Values.externalAccess.service.type }}
+  {{- $host := include "kafka.externalAdvertisedHost" (dict "context" $root "ordinal" $i) }}
+  {{- if and (eq $root.Values.externalAccess.service.type "LoadBalancer") (gt (len $root.Values.externalAccess.service.loadBalancerIPs) $i) }}
+  loadBalancerIP: {{ $host }}
+  {{- end }}
+  publishNotReadyAddresses: false
+  ports:
+    - port: {{ $root.Values.externalAccess.service.ports.external }}
+      targetPort: external
+      protocol: TCP
+      name: external
+  selector:
+    {{- include "kafka.selectorLabels" $root | nindent 4 }}
+    statefulset.kubernetes.io/pod-name: {{ include "kafka.fullname" $root }}-{{ $i }}
+{{- end }}
+{{- end }}

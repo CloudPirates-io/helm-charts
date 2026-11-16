@@ -1,0 +1,92 @@
+suite: test mongodb replica set arbiter and hidden secondaries
+templates:
+  - statefulset-arbiter.yaml
+  - statefulset-hidden.yaml
+  - init-scripts.yaml
+set:
+  replicaSet:
+    enabled: true
+    key: "c29tZS1yZXBsaWNhc2V0LWtleQ=="
+    arbiter:
+      enabled: true
+    hiddenSecondaries:
+      instances: 1
+tests:
+  - it: should mount the custom config into the arbiter init container
+    template: statefulset-arbiter.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: custom-config
+            mountPath: /customconfig
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: custom-config
+            configMap:
+              name: RELEASE-NAME-mongodb-config
+
+  - it: should mount the custom config into the hidden secondary init container
+    template: statefulset-hidden.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: custom-config
+            mountPath: /customconfig
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: custom-config
+            configMap:
+              name: RELEASE-NAME-mongodb-config
+
+  - it: should use config.existingConfigmap for the arbiter and hidden secondaries
+    set:
+      config:
+        content: ""
+        existingConfigmap: my-mongod-config
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: custom-config
+            configMap:
+              name: my-mongod-config
+        template: statefulset-arbiter.yaml
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: custom-config
+            configMap:
+              name: my-mongod-config
+        template: statefulset-hidden.yaml
+
+  - it: should not mount a custom config when none is configured
+    set:
+      config:
+        content: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: custom-config
+            mountPath: /customconfig
+        template: statefulset-arbiter.yaml
+      - notContains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: custom-config
+            mountPath: /customconfig
+        template: statefulset-hidden.yaml
+
+  - it: should detect mongod regardless of where --config appears in its arguments
+    template: init-scripts.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["extra-init.sh"]
+          pattern: grep "mongod --config
+      - matchRegex:
+          path: data["extra-init.sh"]
+          pattern: grep -F -e "--config /etc/mongo/mongod\.conf"

@@ -1,0 +1,11 @@
+# CI scenario: default etcd cluster (no auth, no persistence for fast CI startup)
+# Exercises: basic StatefulSet/Service deployment and client connectivity
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi

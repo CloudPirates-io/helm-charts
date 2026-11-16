@@ -1,0 +1,23 @@
+# CI scenario: etcd client-to-server mTLS (auth.enabled)
+# Exercises: client-cert-auth on the client listener (HTTPS), i.e. etcd only
+# accepts client connections that present a certificate signed by the trusted
+# CA, in addition to the basic StatefulSet/Service deployment.
+#
+# Server certs are provided via an existing Secret (test-etcd-tls-server-certs,
+# see ci/tls.secrets.yaml) containing ca.crt/tls.crt/tls.key, since this chart
+# does not self-generate certificates. The server cert's SANs cover the
+# release name "test-etcd-tls" used by this scenario (client Service, headless
+# Service, and each pod's headless-Service FQDN).
+auth:
+  enabled: true
+  existingSecret: test-etcd-tls-server-certs
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi

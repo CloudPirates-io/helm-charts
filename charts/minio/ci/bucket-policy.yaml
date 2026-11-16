@@ -1,0 +1,20 @@
+# CI scenario: bucket provisioning via defaultBuckets, including an
+# anonymous-download bucket policy applied by the bucket-init Job.
+# Exercises: the bucket-init Job/ConfigMap ("mc mb" + "mc anonymous set"),
+# and that a "public"-policy bucket is actually readable without credentials
+# while a policy-less bucket still requires authentication.
+auth:
+  rootUser: "admin"
+  rootPassword: "verify-minio-password"
+
+defaultBuckets: "verify-private-bucket, verify-public-bucket:public"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

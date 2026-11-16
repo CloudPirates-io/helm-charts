@@ -1,0 +1,72 @@
+# Functional verification for ci/with-ingress.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion.
+# Proves two things: (1) Ghost still boots and serves a real page with ingress
+# enabled -- i.e. the config.production.json "url" pointing at the ingress host
+# (via the ghost.url helper's ingress branch) doesn't break Ghost's own startup
+# self-fetch the way routing through the readiness-gated Service used to; and
+# (2) that ingress host actually made it into Ghost's rendered site config, by
+# checking the canonical link tag the theme emits from site.url.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SERVICE_HOST="test-ghost-with-ingress:80"
+              INGRESS_HOST="ghost-with-ingress.local"
+              BODY_FILE=/tmp/body
+
+              echo "-> Fetching the Ghost blog home page"
+              # No real ingress controller here, so connect directly to the Service and send the
+              # Host header an ingress would forward. Do NOT follow redirects (-L): Ghost's "url"
+              # is configured as https://ghost-with-ingress.local, which doesn't resolve/terminate
+              # TLS in this test setup, so following that redirect would hang/fail. Capture status
+              # and body separately (no -f) so a non-200 response prints its body instead of just
+              # failing silently.
+              STATUS=$(curl -sS -o "$BODY_FILE" -w '%{http_code}' --connect-timeout 10 --max-time 30 \
+                -H "Host: ${INGRESS_HOST}" \
+                "http://${SERVICE_HOST}/")
+
+              if [ "$STATUS" != "200" ]; then
+                echo "ERROR: expected HTTP 200 from the Ghost home page, got $STATUS"
+                echo "--- response body ---"
+                cat "$BODY_FILE"
+                exit 1
+              fi
+
+              echo "-> Checking the response is a real Ghost-rendered page"
+              # Loose match (not a specific meta tag, which varies by theme/version) - just confirm
+              # this is actual rendered HTML mentioning Ghost, not an error/maintenance page.
+              if ! grep -qi '<html' "$BODY_FILE" || ! grep -qi 'ghost' "$BODY_FILE"; then
+                echo "ERROR: home page did not look like a real Ghost-rendered page"
+                echo "--- response body ---"
+                cat "$BODY_FILE"
+                exit 1
+              fi
+
+              echo "-> Checking the page references the configured ingress host as its site URL"
+              grep -qi 'ghost-with-ingress\.local' "$BODY_FILE" || {
+                echo "ERROR: home page did not reference the ingress host anywhere (expected it in canonical/og:url tags)"
+                echo "--- response body ---"
+                cat "$BODY_FILE"
+                exit 1
+              }
+
+              echo "OK: Ghost ingress verification passed"

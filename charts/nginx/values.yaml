@@ -26,12 +26,15 @@ image:
   ## @param image.repository Nginx image repository
   repository: nginx
   ## @param image.tag Nginx image tag
-  tag: "1.31.4-alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913"
+  tag: "1.31.8-alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72"
   ## @param image.pullPolicy Nginx image pull policy
   pullPolicy: Always
 
 ## @param replicaCount Number of Nginx replicas to deploy
 replicaCount: 1
+
+## @param revisionHistoryLimit Number of revisions to keep in history for rollback
+revisionHistoryLimit: 10
 
 ## @section Container port configuration
 ## @param containerPorts Array of container ports
@@ -159,7 +162,7 @@ cloneStaticSiteFromGit:
     ## @param cloneStaticSiteFromGit.image.repository Git image repository
     repository: alpine/git
     ## @param cloneStaticSiteFromGit.image.tag Git image tag
-    tag: "v2.54.0"
+    tag: "v2.54.1"
     ## @param cloneStaticSiteFromGit.image.pullPolicy Git image pull policy
     pullPolicy: IfNotPresent
     ## @param cloneStaticSiteFromGit.image.pullSecrets Git image pull secrets
@@ -172,6 +175,10 @@ cloneStaticSiteFromGit:
   ## @param cloneStaticSiteFromGit.branch Git branch to checkout
   ##
   branch: "main"
+
+  ## @param cloneStaticSiteFromGit.subPath Subdirectory within the cloned repository to serve as the web root (e.g. "public" for Hugo/Zola sites). Leave empty to serve the repository root.
+  ##
+  subPath: ""
 
   ## @param cloneStaticSiteFromGit.interval Interval (seconds) for sidecar to pull from Git repository
   ##
@@ -255,6 +262,11 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
 
 ## @param podSecurityContext Security context for the pod
+## Note: fsGroup applies to ALL volumes in the pod, including extraVolumes. If you mount a Secret
+## (e.g. an SSH private key for cloneStaticSiteFromGit) with a restrictive defaultMode like 0600,
+## the group ownership set by fsGroup (101) may still make Git/SSH reject the key as "too open".
+## In that case, either set defaultMode: 0640 on the secret volume, or set podSecurityContext.fsGroup
+## to a value matching your key's requirements (or null, if your workload doesn't need it).
 podSecurityContext:
   ## @param podSecurityContext.fsGroup Set Nginx pod's Security Context fsGroup
   fsGroup: 101

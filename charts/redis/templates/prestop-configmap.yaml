@@ -12,7 +12,7 @@ metadata:
   {{- end }}
 data:
   prestop.sh: |
-    #!/bin/bash
+    #!/bin/sh
 
     # Redis master failover script for graceful shutdown
     # Based on Bitnami Redis charts failover handling
@@ -20,7 +20,7 @@ data:
     set -e
 
     # Configuration
-    REDIS_PORT="{{ .Values.service.port }}"
+    REDIS_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -34,6 +34,15 @@ data:
     # Check for ACL authentication
     {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
 
+    # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
+    {{- if .Values.sentinel.acl.enabled }}
+    export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
+    {{- end }}
+
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
     REDIS_LOOPBACK="::1"
@@ -43,29 +52,52 @@ data:
 
     # Function to run Redis commands
     run_redis_command() {
-        local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
-        redis-cli "${args[@]}" "$@"
+        local args="-h $REDIS_LOOPBACK -p $REDIS_PORT"
+        {{- if .Values.auth.acl.enabled }}
+        args="$args --user {{ include "redis.auth.acl.defaultUsername" . }}"
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        args="$args {{ include "redis.tls.probeArgs" . }}"
+        {{- end }}
+        # shellcheck disable=SC2086
+        redis-cli $args "$@"
     }
 
     # Function to check if current instance is master
     is_master() {
         REDIS_ROLE=$(run_redis_command role | head -1)
-        [[ "$REDIS_ROLE" == "master" ]]
+        [ "$REDIS_ROLE" = "master" ]
     }
 
-    # Function to get current pod's IP address
-    get_current_pod_ip() {
-        # Get Pod IP from hostname -i
-        hostname -i 2>/dev/null | awk '{print $1}'
+    # Function to check if an address reported by Sentinel refers to this pod
+    # Sentinel reports the pod's headless-service FQDN when hostnames are announced
+    # (and for the bootstrap master, which is monitored by FQDN), otherwise its IP
+    is_current_pod_address() {
+        local address="$1"
+        local ip
+
+        if [ "$address" = "$HOSTNAME" ] || [ "$address" = "${HOSTNAME}.${HEADLESS_SERVICE}" ]; then
+            return 0
+        fi
+
+        for ip in $(hostname -i 2>/dev/null); do
+            if [ "$address" = "$ip" ]; then
+                return 0
+            fi
+        done
+
+        return 1
     }
 
     # Function to run Sentinel commands
     # NOTE: Sentinel runs in the same Pod, so we connect via localhost (REDIS_LOOPBACK)
     run_sentinel_command() {
-        {{- if .Values.auth.sentinel }}
-        REDISCLI_AUTH="${REDIS_SENTINEL_PASSWORD:-$REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- if .Values.sentinel.acl.enabled }}
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
+        {{- else if .Values.auth.sentinel }}
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else }}
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- end }}
     }
 
@@ -73,14 +105,6 @@ data:
     # Returns 0 (true) if failover is complete (current pod is no longer master)
     # Returns 1 (false) if this pod is still the master or cannot verify
     sentinel_failover_finished() {
-        local current_pod_ip
-        current_pod_ip=$(get_current_pod_ip)
-
-        if [ -z "$current_pod_ip" ]; then
-            echo "Warning: Could not determine current pod IP"
-            return 1  # Cannot verify, assume not finished
-        fi
-
         local sentinel_output
         sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
         local sentinel_exit_code=$?
@@ -90,21 +114,22 @@ data:
             return 1  # Cannot verify, assume not finished
         fi
 
-        # Parse the sentinel response (returns: IP PORT)
-        REDIS_SENTINEL_INFO=($sentinel_output)
+        # Parse the sentinel response (returns: HOST PORT, HOST is a hostname or an IP)
+        # shellcheck disable=SC2086
+        set -- $sentinel_output
 
-        if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
+        if [ $# -lt 2 ]; then
             echo "Warning: Invalid Sentinel response: $sentinel_output"
             return 1  # Invalid response, assume not finished
         fi
 
-        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+        local master_host="$1"
 
-        if [[ "$master_ip" == "$current_pod_ip" ]]; then
-            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+        if is_current_pod_address "$master_host"; then
+            echo "Failover not yet complete: current pod ($HOSTNAME) is still master ($master_host)"
             return 1
         else
-            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
+            echo "Failover complete: new master is $master_host (this pod: $HOSTNAME)"
             return 0
         fi
     }
@@ -142,7 +167,7 @@ data:
                 return 0
             fi
             sleep "$sleep_time"
-            ((attempt++))
+            attempt=$((attempt + 1))
         done
         return 1
     }
@@ -189,7 +214,7 @@ data:
     echo "Redis preStop hook completed"
     exit 0
   prestop-sentinel.sh: |
-    #!/bin/bash
+    #!/bin/sh
 
     # Sentinel preStop hook for graceful shutdown during rolling updates
     # Ensures Redis failover completes before Sentinel terminates
@@ -197,7 +222,7 @@ data:
     set -e
 
     # Configuration
-    REDIS_PORT="{{ .Values.service.port }}"
+    REDIS_PORT="{{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}"
     SENTINEL_PORT="{{ .Values.sentinel.port }}"
     MASTER_NAME="{{ .Values.sentinel.masterName }}"
     HEADLESS_SERVICE="{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
@@ -208,6 +233,15 @@ data:
     {{- end }}
 
     {{- include "redis.auth.acl.setupScript" (dict "type" "prestop" "context" .) | nindent 4 }}
+
+    # Check for Sentinel's own ACL authentication (independent of the Redis ACL above)
+    {{- if .Values.sentinel.acl.enabled }}
+    export SENTINEL_ACL_PASSWORD=$({{ include "redis.sentinel.acl.awkCommand" (dict "user" (include "redis.sentinel.acl.defaultUsername" .) "context" .) }})
+    if [ -z "$SENTINEL_ACL_PASSWORD" ]; then
+      echo "ERROR: Sentinel ACL is enabled but no password found for 'user {{ include "redis.sentinel.acl.defaultUsername" . }}' in '{{ include "redis.sentinel.acl.path" . }}'"
+      exit 1
+    fi
+    {{- end }}
 
     # Set loopback address based on ipFamily configuration
     {{- if eq .Values.ipFamily "ipv6" }}
@@ -220,43 +254,58 @@ data:
 
     # Function to run local Redis commands
     run_redis_command() {
-        local args=("-h" "$REDIS_LOOPBACK" "-p" "$REDIS_PORT")
-        redis-cli "${args[@]}" "$@"
+        local args="-h $REDIS_LOOPBACK -p $REDIS_PORT"
+        {{- if .Values.auth.acl.enabled }}
+        args="$args --user {{ include "redis.auth.acl.defaultUsername" . }}"
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        args="$args {{ include "redis.tls.probeArgs" . }}"
+        {{- end }}
+        # shellcheck disable=SC2086
+        redis-cli $args "$@"
     }
 
     # Function to run local Sentinel commands
     run_sentinel_command() {
-        {{- if .Values.auth.sentinel }}
-        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        {{- if .Values.sentinel.acl.enabled }}
+        REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
+        {{- else if .Values.auth.sentinel }}
+        REDISCLI_AUTH="${REDIS_PASSWORD}" redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- else }}
-        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT" sentinel "$@"
+        redis-cli -h "$REDIS_LOOPBACK" -p "$SENTINEL_PORT"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel "$@"
         {{- end }}
     }
 
     # Function to check if current Redis instance is master
     is_redis_master() {
         REDIS_ROLE=$(run_redis_command role 2>/dev/null | head -1 || echo "")
-        [[ "$REDIS_ROLE" == "master" ]]
+        [ "$REDIS_ROLE" = "master" ]
     }
 
-    # Function to get current pod's IP address
-    get_current_pod_ip() {
-        # Get Pod IP from hostname -i
-        hostname -i 2>/dev/null | awk '{print $1}'
+    # Function to check if an address reported by Sentinel refers to this pod
+    # Sentinel reports the pod's headless-service FQDN when hostnames are announced
+    # (and for the bootstrap master, which is monitored by FQDN), otherwise its IP
+    is_current_pod_address() {
+        local address="$1"
+        local ip
+
+        if [ "$address" = "$HOSTNAME" ] || [ "$address" = "${HOSTNAME}.${HEADLESS_SERVICE}" ]; then
+            return 0
+        fi
+
+        for ip in $(hostname -i 2>/dev/null); do
+            if [ "$address" = "$ip" ]; then
+                return 0
+            fi
+        done
+
+        return 1
     }
 
     # Function to check if sentinel failover has finished
     # Returns 0 (true) if failover is complete (current pod is no longer master)
     # Returns 1 (false) if this pod is still the master or cannot verify
     sentinel_failover_finished() {
-        local current_pod_ip
-        current_pod_ip=$(get_current_pod_ip)
-
-        if [ -z "$current_pod_ip" ]; then
-            echo "Warning: Could not determine current pod IP"
-            return 1  # Cannot verify, assume not finished
-        fi
-
         local sentinel_output
         sentinel_output=$(run_sentinel_command get-master-addr-by-name "$MASTER_NAME" 2>&1)
         local sentinel_exit_code=$?
@@ -266,21 +315,22 @@ data:
             return 1  # Cannot verify, assume not finished
         fi
 
-        # Parse the sentinel response (returns: IP PORT)
-        REDIS_SENTINEL_INFO=($sentinel_output)
+        # Parse the sentinel response (returns: HOST PORT, HOST is a hostname or an IP)
+        # shellcheck disable=SC2086
+        set -- $sentinel_output
 
-        if [ ${#REDIS_SENTINEL_INFO[@]} -lt 2 ]; then
+        if [ $# -lt 2 ]; then
             echo "Warning: Invalid Sentinel response: $sentinel_output"
             return 1  # Invalid response, assume not finished
         fi
 
-        local master_ip="${REDIS_SENTINEL_INFO[0]}"
+        local master_host="$1"
 
-        if [[ "$master_ip" == "$current_pod_ip" ]]; then
-            echo "Failover not yet complete: current pod ($current_pod_ip) is still master"
+        if is_current_pod_address "$master_host"; then
+            echo "Failover not yet complete: current pod ($HOSTNAME) is still master ($master_host)"
             return 1
         else
-            echo "Failover complete: new master is $master_ip (this pod: $current_pod_ip)"
+            echo "Failover complete: new master is $master_host (this pod: $HOSTNAME)"
             return 0
         fi
     }
@@ -297,7 +347,7 @@ data:
                 return 0
             fi
             sleep "$sleep_time"
-            ((attempt++))
+            attempt=$((attempt + 1))
         done
         return 1
     }

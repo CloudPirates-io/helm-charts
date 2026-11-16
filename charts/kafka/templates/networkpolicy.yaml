@@ -31,4 +31,9 @@ spec:
         - podSelector:
             matchLabels:
               {{- include "kafka.selectorLabels" . | nindent 14 }}
+    {{- if .Values.externalAccess.enabled }}
+    # Allow external client connections to the EXTERNAL listener
+    - ports:
+        - port: {{ .Values.externalAccess.service.ports.external }}
+    {{- end }}
 {{- end }}

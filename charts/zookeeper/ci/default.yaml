@@ -1,0 +1,11 @@
+# CI scenario: default Zookeeper ensemble (no persistence, for fast CI startup)
+# Exercises: basic StatefulSet/Service deployment and znode read/write via zkCli.sh
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

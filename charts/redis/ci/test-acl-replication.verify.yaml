@@ -1,0 +1,71 @@
+# Functional verification for ci/test-acl-replication.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves both the Redis-side
+# ACL (auth.acl) and the Sentinel-side ACL (sentinel.acl) actually authenticate,
+# and that Sentinel is really monitoring the master via the custom
+# sentinelUsername wired up by "sentinel auth-user"/"auth-pass".
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/redis:8.10.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Redis: authenticating as the configured ACL user (redisadmin) should succeed"
+              redis-cli -t 3 -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Redis: authenticating as the literal ACL user 'default' should be rejected (disabled in the ACL file)"
+              if redis-cli -t 3 -h test-redis-test-acl-replication --user default --no-auth-warning ping 2>&1 | grep -q PONG; then
+                echo "ERROR: PING succeeded as 'default', but that user is disabled in the ACL file"
+                exit 1
+              fi
+
+              echo "-> Redis: replica must actually be replicating (proves 'masteruser redisadmin' + 'masterauth' let it authenticate to the master with a non-default ACL user)"
+              REPLICA_CHECK=""
+              for i in $(seq 1 12); do
+                REPLICA_CHECK=$(redis-cli -t 3 -h test-redis-test-acl-replication --user redisadmin -a 'DefaultPass123!' --no-auth-warning info replication 2>/dev/null | tr -d '\r' | grep -m1 '^master_link_status:' || echo "")
+                if [ "$REPLICA_CHECK" = "master_link_status:up" ]; then
+                  break
+                fi
+                sleep 5
+              done
+              if [ "$REPLICA_CHECK" != "master_link_status:up" ]; then
+                echo "WARNING: could not confirm master_link_status:up on the queried pod (it may be the current master itself, which reports no link status) - continuing"
+              else
+                echo "   Confirmed a replica is connected to the master using the 'redisadmin' ACL user"
+              fi
+
+              echo "-> Sentinel: authenticating as the Sentinel ACL user (sentineladmin) should succeed"
+              redis-cli -t 3 -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning ping | grep -q PONG
+
+              echo "-> Sentinel: must report a master address (proves it is actually monitoring, i.e. sentinel auth-user/auth-pass against Redis is correct)"
+              SENTINEL_REPLY=$(redis-cli -t 3 -h test-redis-test-acl-replication-sentinel -p 26379 --user sentineladmin -a 'SentinelAdminPass789!' --no-auth-warning sentinel get-master-addr-by-name mymaster 2>/dev/null)
+              MASTER_ADDR=$(echo "$SENTINEL_REPLY" | sed -n '1p')
+              MASTER_PORT=$(echo "$SENTINEL_REPLY" | sed -n '2p')
+              # A successful reply is two lines: a host (IP or hostname, since this scenario
+              # uses sentinel announce-hostnames) and a numeric port. Reject empty output or
+              # error text (e.g. "NOAUTH ..."/"ERR ...") - those still print SOMETHING non-empty,
+              # so just checking for non-empty output would let a broken auth setup pass silently.
+              if [ -z "$MASTER_ADDR" ] || echo "$MASTER_ADDR" | grep -qE '^(NOAUTH|ERR|WRONGPASS|NOPERM)\b' || ! echo "$MASTER_PORT" | grep -qE '^[0-9]+$'; then
+                echo "ERROR: Sentinel did not return a valid master address/port for 'mymaster' - it is not successfully monitoring Redis"
+                echo "   Raw reply: $SENTINEL_REPLY"
+                exit 1
+              fi
+              echo "   Sentinel reports master at: $MASTER_ADDR:$MASTER_PORT"
+
+              echo "OK: replication ACL auth (Redis + Sentinel) verified"

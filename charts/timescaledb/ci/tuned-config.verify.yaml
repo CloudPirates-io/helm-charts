@@ -1,0 +1,86 @@
+# Functional verification for ci/tuned-config.yaml.
+# Proves the rendered postgresql.conf (config.postgresql* + config.extraConfig)
+# actually took effect on a real running server, not just that it parsed, then
+# confirms TimescaleDB itself still works end-to-end on top of it.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/timescale/timescaledb:latest-pg16
+          env:
+            - name: PGHOST
+              value: test-timescaledb-tuned-config
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: postgres
+            - name: PGPASSWORD
+              value: "TimescaleTunedPass123!"
+            - name: PGDATABASE
+              value: postgres
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Waiting for PostgreSQL to accept connections"
+              i=0
+              until pg_isready -q; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: PostgreSQL never became ready"
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              echo "-> Checking tuned settings were actually applied"
+              check_setting() {
+                name="$1"
+                expected="$2"
+                actual=$(psql -v ON_ERROR_STOP=1 -t -A -c "SHOW ${name};")
+                if [ "$actual" != "$expected" ]; then
+                  echo "ERROR: expected ${name}=${expected}, got '${actual}'"
+                  exit 1
+                fi
+                echo "   ${name} = ${actual}"
+              }
+              check_setting max_connections 200
+              check_setting shared_buffers 256MB
+              check_setting work_mem 8MB
+              check_setting maintenance_work_mem 128MB
+              check_setting checkpoint_completion_target 0.9
+              check_setting random_page_cost "1.5"
+              check_setting log_statement ddl
+              check_setting log_min_duration_statement "500ms"
+              check_setting statement_timeout "30s"
+              check_setting timescaledb.max_background_workers 4
+
+              echo "-> Ensuring the timescaledb extension is available"
+              psql -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+
+              echo "-> Creating a hypertable and inserting a row"
+              psql -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS ci_verify_tuned_metrics (time TIMESTAMPTZ NOT NULL, value DOUBLE PRECISION);"
+              psql -v ON_ERROR_STOP=1 -c "SELECT create_hypertable('ci_verify_tuned_metrics', 'time', if_not_exists => TRUE);"
+              psql -v ON_ERROR_STOP=1 -c "INSERT INTO ci_verify_tuned_metrics (time, value) VALUES (now(), 99.0);"
+
+              echo "-> Querying the row back"
+              RESULT=$(psql -v ON_ERROR_STOP=1 -t -A -c "SELECT value FROM ci_verify_tuned_metrics WHERE value = 99.0;")
+              if [ "$RESULT" != "99" ]; then
+                echo "ERROR: expected to read back value 99, got '${RESULT}'"
+                exit 1
+              fi
+
+              echo "OK: TimescaleDB tuned-config verification passed"
