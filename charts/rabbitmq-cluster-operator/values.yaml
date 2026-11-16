@@ -48,7 +48,7 @@ rabbitmqImage:
   ## @param rabbitmqImage.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ Image repository
   repository: library/rabbitmq
   ## @param rabbitmqImage.tag RabbitMQ Image tag (immutable tags are recommended)
-  tag: "4.4.0-management-alpine@sha256:d5c8b200a061242868833c8bbdd0703534a4a06ffe654a853e33acd46c7ce258"
+  tag: "4.4.0-management-alpine@sha256:8f7cd1fddbfb94b28d6adc956de2f4e6b99f67fe151f04ee97e097e814fb75ab"
   ## @param rabbitmqImage.pullSecrets RabbitMQ Image pull secrets
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -86,7 +86,7 @@ clusterOperator:
     ## @param clusterOperator.image.repository [default: REPOSITORY_NAME/rabbitmq-cluster-operator] RabbitMQ Cluster Operator image repository
     repository: rabbitmq/cluster-operator
     ## @param clusterOperator.image.tag RabbitMQ Cluster Operator image tag (immutable tags are recommended)
-    tag: "2.23.0@sha256:9236fb4f559bb6c4a04605fdf9aa1c03d00573df2d4da43c71e11b296e0a1886"
+    tag: "2.23.1@sha256:a6794c3912978fdba7b8e1bb9f0327ec40dacf77469854bc42c48ca39dceb642"
     ## @param clusterOperator.image.pullPolicy RabbitMQ Cluster Operator image pull policy
     ## Specify a imagePullPolicy
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -973,6 +973,10 @@ msgTopologyOperator:
       ##   name: prometheus-metrics-token
       ##   key: token
       bearerTokenSecret: {}
+      ## @param msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile Path of a file inside the Prometheus pod holding the bearer token to present to the secure metrics endpoint, typically /var/run/secrets/kubernetes.io/serviceaccount/token (the scraping Prometheus' own projected ServiceAccount token, so no Secret is needed). That ServiceAccount still needs read access, see msgTopologyOperator.metrics.rbac.metricsReader. Only used when msgTopologyOperator.metrics.secure is true and bearerTokenSecret is not set (bearerTokenSecret takes precedence). The scraping Prometheus must allow file access from ServiceMonitors (spec.arbitraryFSAccessThroughSMs.deny: false, the default), else Prometheus Operator rejects the whole ServiceMonitor. Not available on the PodMonitor: the PodMetricsEndpoint API has no such field.
+      ## e.g:
+      ## bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      bearerTokenFile: ""
     podMonitor:
       ## @param msgTopologyOperator.metrics.podMonitor.enabled Create PodMonitor Resource for scraping metrics using PrometheusOperator
       enabled: false
