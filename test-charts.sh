@@ -374,7 +374,8 @@ run_scenario() {
         kubectl get pods -n "$namespace" -o wide
 
         # Check if all pods are ready
-        if kubectl wait --for=condition=Ready pods --all -n "$namespace" --timeout=1s 2>/dev/null; then
+        # Completed Job pods (e.g. mongodb add-shards) never become Ready, so exclude them
+        if kubectl wait --for=condition=Ready pods --field-selector=status.phase!=Succeeded -n "$namespace" --timeout=1s 2>/dev/null; then
             echo -e "${GREEN}✅ All pods are ready${NC}"
             break
         fi
