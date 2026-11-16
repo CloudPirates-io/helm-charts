@@ -377,7 +377,7 @@ metrics:
     ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
     clusterIP: ""
     ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
-    nodePort: ""
+    nodePort: ""  # @schema type:[integer, string]
   ## Prometheus ServiceMonitor configuration
   serviceMonitor:
     ## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource(s) for scraping metrics using PrometheusOperator

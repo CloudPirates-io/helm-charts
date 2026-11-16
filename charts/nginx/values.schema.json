@@ -405,7 +405,10 @@
                             "type": "array"
                         },
                         "nodePort": {
-                            "type": "string"
+                            "type": [
+                                "integer",
+                                "string"
+                            ]
                         },
                         "port": {
                             "type": "integer"
