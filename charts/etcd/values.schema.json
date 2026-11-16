@@ -291,10 +291,7 @@
                     "type": "integer"
                 },
                 "minAvailable": {
-                    "type": [
-                        "integer",
-                        "string"
-                    ]
+                    "type": "string"
                 }
             }
         },
@@ -349,6 +346,12 @@
                 },
                 "clientPort": {
                     "type": "integer"
+                },
+                "loadBalancerIP": {
+                    "type": "string"
+                },
+                "loadBalancerSourceRanges": {
+                    "type": "array"
                 },
                 "metricsPort": {
                     "type": "integer"

@@ -94,6 +94,11 @@ spec:
             SENTINEL_MASTER_NAME="{{ .Values.sentinel.masterName }}"
             CHECK_INTERVAL="{{ .Values.sentinel.masterService.checkInterval }}"
 
+            # Upper bound for each Sentinel query exec: kubectl exec has no
+            # timeout of its own and blocks for minutes when the target pod's
+            # node is unreachable, which would park the whole discovery loop.
+            EXEC_TIMEOUT=15
+
             {{- include "redis.auth.acl.setupScript" (dict "type" "master-discovery" "context" .) | nindent 12 }}
 
             echo "Starting Redis master discovery service..."
@@ -107,10 +112,14 @@ spec:
               oldmaster=$(kubectl get service "$MASTER_SERVICE" -n "$NAMESPACE" \
                 -o jsonpath='{.spec.selector.statefulset\.kubernetes\.io/pod-name}' 2>/dev/null || echo "<none>")
 
-              # Get a random Redis Sentinel pod to query Sentinel from
+              # Get a random Redis Sentinel pod that is Running and not terminating to query Sentinel from.
+              # status.phase=Running also matches pods that are being deleted (deletionTimestamp set)
+              # and pods on failed nodes, whose exec can block for a long time, so exclude terminating pods.
               pod=$(kubectl get pods -n "$NAMESPACE" \
                 --selector="app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=sentinel" \
-                -o name 2>/dev/null | shuf | head -n1)
+                --field-selector=status.phase=Running \
+                -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.deletionTimestamp}{"\n"}{end}' 2>/dev/null \
+                | awk 'NF == 1 {print "pod/"$1}' | shuf | head -n1)
 
               if [ -z "$pod" ]; then
                 echo "Warning: No Redis pods found, retrying in 10s..."
@@ -122,29 +131,49 @@ spec:
 
               # Query Sentinel for the current master hostname via the selected pod
               {{- if .Values.sentinel.acl.enabled }}
-              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
+              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | timeout "$EXEC_TIMEOUT" kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
                 /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} "$@"' sh \
                 --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
                 sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
                 | head -n1 || echo "")
               {{- else if and .Values.auth.sentinel .Values.auth.acl.enabled }}
-              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
+              master_hostname=$(printf '%s\n' "$REDIS_PASSWORD" | timeout "$EXEC_TIMEOUT" kubectl exec -i -n "$NAMESPACE" "$pod" -c sentinel -- \
                 /bin/sh -c 'IFS= read -r REDISCLI_AUTH; export REDISCLI_AUTH; exec redis-cli "$@"' sh \
                 --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
                 sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
                 | head -n1 || echo "")
               {{- else }}
-              master_hostname=$(kubectl exec -n "$NAMESPACE" "$pod" -c sentinel -- \
+              master_hostname=$(timeout "$EXEC_TIMEOUT" kubectl exec -n "$NAMESPACE" "$pod" -c sentinel -- \
                 redis-cli --raw -p {{ .Values.sentinel.port }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} \
                 sentinel GET-MASTER-ADDR-BY-NAME "$SENTINEL_MASTER_NAME" 2>/dev/null \
                 | head -n1 || echo "")
               {{- end }}
 
-              # Extract just the pod name from the hostname (e.g., test-redis-0 from test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
-              master=$(echo "$master_hostname" | cut -d'.' -f1)
+              # Sentinel may report either a pod FQDN (e.g. test-redis-0.test-redis-headless.redis-test.svc.cluster.local)
+              # or a bare IP (when replica-announce-ip is set, e.g. sentinel.config.announceHostnames=false); resolve both to a pod name.
+              master_addr=$(printf '%s' "$master_hostname" | head -n1)
 
-              if [ -z "$master" ]; then
-                echo "Warning: Could not determine master from Sentinel, retrying in 10s..."
+              if printf '%s' "$master_addr" | grep -qE '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+                master=$(kubectl get pods -n "$NAMESPACE" \
+                  -l "app.kubernetes.io/instance={{ .Release.Name }}" \
+                  -o jsonpath="{range .items[?(@.status.podIP=='$master_addr')]}{.metadata.name}{end}" 2>/dev/null || echo "")
+              else
+                master="${master_addr%%.*}"
+              fi
+
+              # NOTE: --field-selector cannot be combined with a resource name
+              # (kubectl fails with "name cannot be provided when a selector is
+              # specified"), so the phase has to be read from the pod object.
+              if [ -z "$master" ] || [ "$(kubectl get pod "$master" -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null)" != "Running" ]; then
+                echo "Warning: Master address '$master_addr' did not resolve to a Running pod, retrying in 10s..."
+                sleep 10
+                continue
+              fi
+
+              # A pod that is being deleted keeps phase=Running until its containers stop;
+              # refuse to point the Service at a pod that is already on its way out.
+              if [ -n "$(kubectl get pod "$master" -n "$NAMESPACE" -o jsonpath='{.metadata.deletionTimestamp}' 2>/dev/null)" ]; then
+                echo "Warning: Master pod '$master' is terminating, retrying in 10s..."
                 sleep 10
                 continue
               fi
@@ -172,6 +201,17 @@ spec:
             metadata:
               name: $MASTER_SERVICE
               namespace: $NAMESPACE
+              labels:
+                {{- include "redis.labels" . | nindent 16 }}
+                app.kubernetes.io/component: master
+              annotations:
+                meta.helm.sh/release-name: {{ .Release.Name }}
+                meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+                {{- if .Values.sentinel.masterService.annotations }}
+                {{- include "cloudpirates.tplvalues.render" (dict "value" .Values.sentinel.masterService.annotations "context" .) | nindent 16 }}
+                {{- else if (include "redis.annotations" .) }}
+                {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | nindent 16 }}
+                {{- end }}
             spec:
               ports:
                 - port: {{ .Values.service.port }}
@@ -185,7 +225,7 @@ spec:
                 {{- end }}
               selector:
                 {{- include "redis.selectorLabels" . | nindent 16 }}
-                statefulset.kubernetes.io/pod-name: $master
+                statefulset.kubernetes.io/pod-name: "$master"
             EOF
               then
                 echo "Successfully updated service to point to master: $master"

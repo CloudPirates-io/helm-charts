@@ -370,7 +370,7 @@ metrics:
     ## @param metrics.image.repository Valkey exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Valkey exporter image tag
-    tag: "v1.91.1-alpine@sha256:30e56152988ca4bb3784e10debaac8905b78f6a7ff2bbd362a40b8c2a78eb1d6"
+    tag: "v1.95.0-alpine@sha256:19bb5c732f5812d5b60b2e0af3c6d82c5b3e418cd020068d65f588a56df4a118"
     ## @param metrics.image.pullPolicy Valkey exporter image pull policy
     pullPolicy: Always
   ## @param metrics.resources Resource limits and requests for metrics container
@@ -488,7 +488,7 @@ sentinel:
       ## @param sentinel.masterProxy.image.repository HAProxy image repository
       repository: haproxy
       ## @param sentinel.masterProxy.image.tag HAProxy image tag
-      tag: "3.4-alpine@sha256:c0afc4864dca9c68694cd1290433f0ee79b5c55be80f6745a165ffe373b9a564"
+      tag: "3.4-alpine@sha256:09ba5c0b582cda2fa00e1f7f23f6e29cc27000089d6ffeb3c8683f930126ed10"
       ## @param sentinel.masterProxy.image.pullPolicy HAProxy image pull policy
       pullPolicy: IfNotPresent
     ## @param sentinel.masterProxy.containerPort Port the HAProxy sidecar listens on
@@ -501,6 +501,18 @@ sentinel:
     checkRise: 2
     ## @param sentinel.masterProxy.checkFall Consecutive failed checks before a backend is marked down
     checkFall: 2
+    ## HAProxy `defaults` timeouts for client connections proxied to the master. `client` and `server`
+    ## are inactivity timeouts: HAProxy closes a connection that has been idle that long. Raise them
+    ## for clients that keep idle pooled connections open (e.g. connection pools or HTTP-to-Redis
+    ## proxies), which would otherwise be disconnected after 30s. Values use HAProxy time syntax
+    ## (e.g. "30s", "5m", "1h").
+    timeouts:
+      ## @param sentinel.masterProxy.timeouts.connect HAProxy `timeout connect`: maximum time to establish a connection to a backend
+      connect: "2s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
+      ## @param sentinel.masterProxy.timeouts.client HAProxy `timeout client`: maximum inactivity time on the client side
+      client: "30s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
+      ## @param sentinel.masterProxy.timeouts.server HAProxy `timeout server`: maximum inactivity time on the server side
+      server: "30s"  # @schema pattern:^[0-9]+(us|ms|s|m|h|d)?$
     ## Plain `role:master` is not sufficient on its own: a pod that restarts with empty/ephemeral
     ## storage can come back up self-declared as master (see the sentinel container's bootstrap
     ## logic) before Sentinel has finished failing over, producing two backends that both report
