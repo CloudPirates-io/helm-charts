@@ -167,3 +167,67 @@ tests:
       - matchRegex:
           path: spec.template.spec.containers[2].command[2]
           pattern: "sed -i \"s/__VALKEY_PASSWORD__/\\$\\{ESCAPED_PASSWORD\\}/\" /tmp/haproxy\\.cfg"
+
+  - it: should keep the previous HAProxy timeouts by default
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout connect 2s\\n"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout client 30s\\n"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout server 30s\\n"
+
+  - it: should render custom HAProxy timeouts
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          timeouts:
+            connect: 5s
+            client: 10m
+            server: 15m
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout connect 5s\\n"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout client 10m\\n"
+      - matchRegex:
+          path: spec.template.spec.containers[2].command[2]
+          pattern: "timeout server 15m\\n"
+
+  - it: should reject a timeout that is not an HAProxy time value
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          timeouts:
+            client: abc
+    asserts:
+      - failedTemplate: {}
+
+  - it: should reject a timeout that would inject a config line
+    template: statefulset.yaml
+    set:
+      sentinel:
+        enabled: true
+        masterProxy:
+          enabled: true
+          timeouts:
+            server: "30s\n  bind :1"
+    asserts:
+      - failedTemplate: {}
