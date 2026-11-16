@@ -239,6 +239,7 @@ spec:
           image: {{ include "postgres.metrics.image" . | quote }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          args: {{- toYaml .Values.metrics.args | nindent 12 }}
           env:
             - name: POSTGRES_PASSWORD
               valueFrom:

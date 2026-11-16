@@ -409,14 +409,8 @@ extraContainers: []
 #       mountPath: /pgdata
 #       readOnly: true
 
-## @param initContainers Init containers to add to the PostgreSQL pods. Useful for tasks like pgautoupgrade for major version upgrades
+## @param initContainers Init containers to add to the PostgreSQL pods. See [initContainers](#initContainers)
 initContainers: []
-# Example with pgautoupgrade for major version upgrades:
-# - name: pgautoupgrade
-#   image: tianon/pgautoupgrade:17-to-18
-#   volumeMounts:
-#     - name: data  # must match persistence.volumeName
-#       mountPath: /var/lib/postgresql/data
 
 ## @section Container command/args override
 ## @param command Override default container command (useful for hardened images)
@@ -441,6 +435,8 @@ metrics:
     tag: "v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e"
     ## @param metrics.image.pullPolicy PostgreSQL exporter image pull policy
     pullPolicy: Always
+  ## @param metrics.args Arguments to pass to the PostgreSQL exporter
+  args: []
   ## @param metrics.resources Resource limits and requests for metrics container
   resources: {}
   ## Metrics service configuration
