@@ -53,3 +53,38 @@ tests:
       - equal:
           path: spec.maxUnavailable
           value: 2
+
+  - it: should prefer maxUnavailable over the default minAvailable
+    set:
+      pdb:
+        enabled: true
+        maxUnavailable: 1
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - notExists:
+          path: spec.minAvailable
+
+  - it: should prefer maxUnavailable when both are set
+    set:
+      pdb:
+        enabled: true
+        minAvailable: "80%"
+        maxUnavailable: "20%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "20%"
+      - notExists:
+          path: spec.minAvailable
+
+  - it: should fail when neither minAvailable nor maxUnavailable is set
+    set:
+      pdb:
+        enabled: true
+        minAvailable: ""
+        maxUnavailable: ""
+    asserts:
+      - failedTemplate:
+          errorMessage: "redis: set either pdb.minAvailable or pdb.maxUnavailable when pdb.enabled is true"
