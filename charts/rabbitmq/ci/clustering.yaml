@@ -1,0 +1,29 @@
+# CI scenario: 3-node RabbitMQ cluster using the built-in K8s peer discovery plugin.
+# Exercises: replicaCount > 1, peerDiscoveryK8sPlugin, and the RBAC/ServiceAccount
+# token needed for peer discovery to actually talk to the K8s API and form a cluster
+# (the plugin can't authenticate against the API server without
+# serviceAccount.automountServiceAccountToken enabled).
+auth:
+  username: admin
+  password: "RabbitMQClusterPass123!"
+
+replicaCount: 3
+
+peerDiscoveryK8sPlugin:
+  enabled: true
+
+serviceAccount:
+  automountServiceAccountToken: true
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+managementPlugin:
+  enabled: true

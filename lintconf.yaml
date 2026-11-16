@@ -1,0 +1,40 @@
+---
+rules:
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  colons:
+    max-spaces-after: -1
+    max-spaces-before: 0
+  commas:
+    max-spaces-after: -1
+    max-spaces-before: 0
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  document-end: disable
+  document-start: disable
+  empty-lines:
+    max: 2
+    max-end: 0
+    max-start: 0
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  key-duplicates: enable
+  line-length: disable
+  new-line-at-end-of-file: enable
+  new-lines:
+    type: unix
+  octal-values:
+    forbid-implicit-octal: true
+  trailing-spaces: enable
+  truthy:
+    level: warning

@@ -32,9 +32,7 @@ Common labels
 Common annotations
 */}}
 {{- define "rustfs.annotations" -}}
-{{- with .Values.commonAnnotations }}
-{{- toYaml . }}
-{{- end }}
+{{- include "cloudpirates.annotations" . -}}
 {{- end }}
 
 {{/*
@@ -62,7 +60,7 @@ Return the proper RustFS CLI image name
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "rustfs.imagePullSecrets" -}}
-{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image) "context" .) }}
+{{ include "cloudpirates.images.renderPullSecrets" (dict "images" (list .Values.image .Values.setup.image) "context" .) }}
 {{- end -}}
 
 {{/*

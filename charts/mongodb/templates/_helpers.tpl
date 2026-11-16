@@ -203,6 +203,16 @@ Validate sharded cluster configuration
 {{- end }}
 {{- end -}}
 
+{{- define "mongodb.externalAccess.validate" -}}
+{{- if .Values.replicaSet.externalAccess.enabled }}
+{{- $expected := add1 (int .Values.replicaSet.secondaries) }}
+{{- $actual := len .Values.replicaSet.externalAccess.service.publicNames }}
+{{- if ne $actual $expected }}
+{{- fail (printf "replicaSet.externalAccess.service.publicNames must have exactly %d entries (1 primary + replicaSet.secondaries), got %d" $expected $actual) }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
 {{/*
 Return config server connection string for mongos
 */}}

@@ -386,6 +386,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -578,6 +581,15 @@
                     "type": "object",
                     "properties": {
                         "image": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
                             "type": "string"
                         }
                     }

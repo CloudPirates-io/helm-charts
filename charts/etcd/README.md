@@ -115,13 +115,15 @@ cosign verify --key cosign.pub registry-1.docker.io/cloudpirates/etcd:<version>
 
 ### Service Configuration
 
-| Parameter             | Description             | Default     |
-| --------------------- | ----------------------- | ----------- |
-| `service.type`        | Kubernetes service type | `ClusterIP` |
-| `service.annotations` | Service annotations     | `{}`        |
-| `service.clientPort`  | etcd client port        | `2379`      |
-| `service.peerPort`    | etcd peer port          | `2380`      |
-| `service.metricsPort` | etcd metrics port       | `2381`      |
+| Parameter                          | Description                                              | Default     |
+| ---------------------------------- | -------------------------------------------------------- | ----------- |
+| `service.type`                     | Kubernetes service type                                  | `ClusterIP` |
+| `service.annotations`              | Service annotations                                      | `{}`        |
+| `service.clientPort`               | etcd client port                                         | `2379`      |
+| `service.peerPort`                 | etcd peer port                                           | `2380`      |
+| `service.metricsPort`              | etcd metrics port                                        | `2381`      |
+| `service.loadBalancerSourceRanges` | Allowed source CIDRs when service type is `LoadBalancer` | `[]`        |
+| `service.loadBalancerIP`           | Load balancer IP when service type is `LoadBalancer`     | `""`        |
 
 ### Authentication and Security
 

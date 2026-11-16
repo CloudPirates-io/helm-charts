@@ -1,0 +1,49 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the MariaDB server
+# actually accepts authenticated connections and performs a real write/read
+# round-trip, rather than trusting the liveness/readiness probes alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mariadb:11
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-mariadb-default"
+              PORT=3306
+              ROOT_PASSWORD="RootPass123!"
+
+              echo "-> Creating a test database, table and row"
+              mariadb -h "$HOST" -P "$PORT" -uroot -p"$ROOT_PASSWORD" -e "
+                CREATE DATABASE verify_db;
+                CREATE TABLE verify_db.verify_tbl (id INT PRIMARY KEY, value VARCHAR(64));
+                INSERT INTO verify_db.verify_tbl (id, value) VALUES (1, 'hello-mariadb');
+              "
+
+              echo "-> Reading back the row and asserting the value"
+              RESULT=$(mariadb -h "$HOST" -P "$PORT" -uroot -p"$ROOT_PASSWORD" -N -B -e "SELECT value FROM verify_db.verify_tbl WHERE id=1;")
+              if [ "$RESULT" != "hello-mariadb" ]; then
+                echo "ERROR: expected 'hello-mariadb' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Dropping the test database"
+              mariadb -h "$HOST" -P "$PORT" -uroot -p"$ROOT_PASSWORD" -e "DROP DATABASE verify_db;"
+
+              echo "OK: MariaDB verification passed"

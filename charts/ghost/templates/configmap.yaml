@@ -12,7 +12,7 @@ metadata:
 data:
   config.production.json: |-
     {
-      "url": {{ printf "https://%s" (first .Values.ingress.hosts).host | quote }},
+      "url": {{ include "ghost.url" . | quote }},
       "database": {
         {{- if .Values.mariadb.enabled }}
         "client": "mysql",

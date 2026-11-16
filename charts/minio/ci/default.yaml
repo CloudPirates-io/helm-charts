@@ -1,0 +1,15 @@
+# CI scenario: default MinIO deployment with deterministic root credentials
+# Exercises: basic Deployment/StatefulSet, Service, and authenticated S3 API access
+auth:
+  rootUser: "admin"
+  rootPassword: "verify-minio-password"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

@@ -123,6 +123,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
 | `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
 | `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
 
 ### StatefulSet & Pod metadata
 
@@ -223,8 +224,8 @@ kubectl edit configmap my-rabbitmq-definitions -n <namespace>
 | `config.memoryHighWatermark.enabled` | Enable configuring Memory high watermark on RabbitMQ                                                                                                               | `false`      |
 | `config.memoryHighWatermark.type`    | Memory high watermark type. Either `absolute` or `relative`                                                                                                        | `"relative"` |
 | `config.memoryHighWatermark.value`   | Memory high watermark value. For relative: use number (e.g., `0.4` for 40%). For absolute: use string to avoid scientific notation (e.g., `"8GB"`, `"8590000000"`) | `0.4`        |
-| `config.extraConfiguration`          | Additional RabbitMQ configuration                                                                                                                                  | `""`         |
-| `config.advancedConfiguration`       | Advanced RabbitMQ configuration                                                                                                                                    | `""`         |
+| `config.extraConfiguration`          | Additional RabbitMQ configuration. Supports Helm template expressions.                                                                                            | `""`         |
+| `config.advancedConfiguration`       | Advanced RabbitMQ configuration. Supports Helm template expressions.                                                                                              | `""`         |
 
 ### PeerDiscoveryK8sPlugin configuration
 

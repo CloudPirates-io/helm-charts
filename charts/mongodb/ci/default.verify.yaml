@@ -1,0 +1,50 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the MongoDB server
+# actually accepts authenticated connections and performs a real write/read
+# round-trip, rather than trusting the liveness/readiness probes alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/mongo:7
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-mongodb-default"
+              PORT=27017
+              ROOT_USER="admin"
+              ROOT_PASSWORD="RootPass123!"
+              URI="mongodb://${ROOT_USER}:${ROOT_PASSWORD}@${HOST}:${PORT}/admin?authSource=admin"
+
+              echo "-> Inserting a test document"
+              mongosh "$URI" --quiet --eval '
+                db = db.getSiblingDB("verify_db");
+                db.verify_col.insertOne({ _id: 1, value: "hello-mongodb" });
+              '
+
+              echo "-> Reading back the document and asserting the value"
+              RESULT=$(mongosh "$URI" --quiet --eval 'print(db.getSiblingDB("verify_db").verify_col.findOne({ _id: 1 }).value)')
+              if [ "$RESULT" != "hello-mongodb" ]; then
+                echo "ERROR: expected 'hello-mongodb' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Dropping the test collection"
+              mongosh "$URI" --quiet --eval 'db.getSiblingDB("verify_db").verify_col.drop();'
+
+              echo "OK: MongoDB verification passed"

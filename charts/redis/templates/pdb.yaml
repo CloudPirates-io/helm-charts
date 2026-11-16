@@ -11,11 +11,12 @@ metadata:
 {{- include "cloudpirates.tplvalues.render" (dict "value" (include "redis.annotations" .) "context" .) | indent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.pdb.minAvailable }}
-  minAvailable: {{ .Values.pdb.minAvailable }}
-  {{- end }}
   {{- if .Values.pdb.maxUnavailable }}
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- else if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- else }}
+  {{- fail "redis: set either pdb.minAvailable or pdb.maxUnavailable when pdb.enabled is true" }}
   {{- end }}
   selector:
     matchLabels:

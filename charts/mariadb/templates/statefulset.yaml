@@ -283,7 +283,7 @@ spec:
             {{- end }}
         {{- if .Values.metrics.enabled }}
         - name: metrics
-          image: {{ .Values.metrics.image.registry }}/{{ .Values.metrics.image.repository }}:{{ .Values.metrics.image.tag }}
+          image: {{ include "mariadb.metrics.image" . | quote }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
           args: 
             - "--mysqld.username=exporter"

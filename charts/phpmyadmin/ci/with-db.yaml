@@ -1,0 +1,29 @@
+# CI scenario: phpMyAdmin with MariaDB connection configured
+# Exercises: database host configuration and environment variables
+image:
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+apache:
+  serverName: phpmyadmin.local
+
+config:
+  database:
+    host: mariadb
+    port: 3306
+    user: root
+  auth:
+    arbitrary: false
+    cookieAuth: true
+
+php:
+  maxExecutionTime: 600
+  memoryLimit: 512M
+  postMaxSize: 32M
+  uploadMaxFilesize: 32M

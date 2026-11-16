@@ -1,0 +1,61 @@
+suite: test ghost mariadb init container image
+templates:
+  - deployment.yaml
+set:
+  mariadb:
+    enabled: true
+  initContainers:
+    waitForMariadb:
+      image: ""
+      registry: ""
+      repository: mariadb
+      tag: 12.0.2
+tests:
+  - it: should build the image from repository and tag by default
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-mariadb
+            image: mariadb:12.0.2
+          any: true
+
+  - it: should use global.imageRegistry for the init container image
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-mariadb
+            image: myregistry.example.com/mariadb:12.0.2
+          any: true
+
+  - it: should use the init container registry when no global registry is set
+    set:
+      initContainers:
+        waitForMariadb:
+          registry: quay.io
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-mariadb
+            image: quay.io/mariadb:12.0.2
+          any: true
+
+  - it: should use a fully qualified image verbatim when set
+    set:
+      global:
+        imageRegistry: myregistry.example.com
+      initContainers:
+        waitForMariadb:
+          image: ghcr.io/example/mariadb:11.4.0
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-mariadb
+            image: ghcr.io/example/mariadb:11.4.0
+          any: true

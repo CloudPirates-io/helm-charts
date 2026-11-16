@@ -1,0 +1,61 @@
+suite: test rabbitmq-cluster-operator podmonitor namespaces
+templates:
+  - cluster-operator/podmonitor.yaml
+  - messaging-topology-operator/podmonitor.yaml
+tests:
+  - it: should default both PodMonitors to the release namespace
+    set:
+      clusterOperator:
+        metrics:
+          podMonitor:
+            enabled: true
+      msgTopologyOperator:
+        metrics:
+          podMonitor:
+            enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: NAMESPACE
+
+  - it: should put the cluster operator PodMonitor in its own namespace value
+    template: cluster-operator/podmonitor.yaml
+    set:
+      clusterOperator:
+        metrics:
+          podMonitor:
+            enabled: true
+            namespace: cluster-operator-monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: cluster-operator-monitoring
+
+  - it: should not move the cluster operator PodMonitor with the topology operator value
+    template: cluster-operator/podmonitor.yaml
+    set:
+      clusterOperator:
+        metrics:
+          podMonitor:
+            enabled: true
+      msgTopologyOperator:
+        metrics:
+          podMonitor:
+            namespace: topology-monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: NAMESPACE
+
+  - it: should put the topology operator PodMonitor in its own namespace value
+    template: messaging-topology-operator/podmonitor.yaml
+    set:
+      msgTopologyOperator:
+        metrics:
+          podMonitor:
+            enabled: true
+            namespace: topology-monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: topology-monitoring

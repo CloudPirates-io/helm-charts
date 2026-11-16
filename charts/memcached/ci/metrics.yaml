@@ -1,0 +1,12 @@
+# CI scenario: Prometheus metrics exporter sidecar
+# Exercises: the metrics sidecar container, its dedicated "-metrics" Service,
+# and that the exporter actually reflects live memcached activity.
+metrics:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi
