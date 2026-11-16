@@ -14,6 +14,9 @@
                 "acl": {
                     "type": "object",
                     "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
                         "enabled": {
                             "type": "boolean"
                         },
@@ -24,6 +27,9 @@
                             "type": "string"
                         },
                         "existingSecretACLKey": {
+                            "type": "string"
+                        },
+                        "sentinelUsername": {
                             "type": "string"
                         }
                     }
@@ -137,8 +143,17 @@
                 "resources": {
                     "type": "object"
                 },
+                "runtimeClassName": {
+                    "type": "string"
+                },
                 "tolerations": {
                     "type": "array"
+                },
+                "ttlSecondsAfterFinished": {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
@@ -237,6 +252,9 @@
                 }
             }
         },
+        "dnsConfig": {
+            "type": "object"
+        },
         "externalMaster": {
             "type": "object",
             "properties": {
@@ -254,10 +272,16 @@
         "extraConfig": {
             "type": "string"
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
         "extraFlags": {
+            "type": "array"
+        },
+        "extraInitContainers": {
             "type": "array"
         },
         "extraObjects": {
@@ -397,7 +421,10 @@
                             "type": "string"
                         },
                         "nodePort": {
-                            "type": "string"
+                            "type": [
+                                "integer",
+                                "string"
+                            ]
                         },
                         "port": {
                             "type": "integer"
@@ -579,6 +606,9 @@
                 },
                 "timeoutSeconds": {
                     "type": "integer"
+                },
+                "waitForReplicationSync": {
+                    "type": "boolean"
                 }
             }
         },
@@ -591,9 +621,32 @@
         "revisionHistoryLimit": {
             "type": "integer"
         },
+        "runtimeClassName": {
+            "type": "string"
+        },
         "sentinel": {
             "type": "object",
             "properties": {
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "defaultUsername": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingFilePath": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretACLKey": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "config": {
                     "type": "object",
                     "properties": {
@@ -604,6 +657,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "discoveryHosts": {
+                    "type": "array"
                 },
                 "discoveryTimeout": {
                     "type": "integer"
@@ -619,6 +675,9 @@
                 },
                 "failoverTimeout": {
                     "type": "integer"
+                },
+                "idSeed": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "object",
@@ -807,7 +866,10 @@
                     "type": "string"
                 },
                 "nodePort": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "port": {
                     "type": "integer"

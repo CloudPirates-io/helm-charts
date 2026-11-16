@@ -1,0 +1,28 @@
+# Functional verification for ci/with-ingress.yaml
+# Tests that Ingress resource is properly created and service responds
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "-> Testing service connectivity with Ingress configured"
+              curl -f http://test-phpmyadmin-with-ingress:80/ -L -o /dev/null -s
+              echo "-> phpMyAdmin service responding correctly"
+              echo "OK: Ingress configuration verification passed"

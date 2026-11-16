@@ -1,0 +1,30 @@
+# CI scenario: phpMyAdmin with standard Kubernetes Ingress
+# Exercises: ingress configuration and routing
+image:
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+apache:
+  serverName: phpmyadmin.local
+
+config:
+  auth:
+    arbitrary: true
+    cookieAuth: true
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts:
+    - host: phpmyadmin.local
+      paths:
+        - path: /
+          pathType: Prefix

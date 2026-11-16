@@ -43,7 +43,7 @@ image:
   ## @param image.repository Zookeeper image repository
   repository: zookeeper
   ## @param image.tag Zookeeper image tag
-  tag: "3.9.5@sha256:e0e03e73997fd82687c693cddd1ef9b8a0ed87cda5ae4c9ff7fd2ed7458f2e17"
+  tag: "3.9.6@sha256:5bad433c71701a1d788b4df86c921d91bfb65c23a1443bcb18a80f40373ae9d9"
   ## @param image.pullPolicy Zookeeper image pull policy
   imagePullPolicy: Always
 
@@ -183,10 +183,13 @@ podSecurityContext:
 service:
   ## @param service.type Kubernetes service type
   type: ClusterIP
+  ## @param service.trafficDistribution Kubernetes service traffic distribution
+  trafficDistribution: ""
   ports:
     ## @param service.ports.client Zookeeper client service port
     client: 2181
     ## @param service.ports.secureClient TLS client port (e.g. 2281). Set to null to disable.
+    # @schema type:[null, integer]
     secureClient: null
     ## @param service.ports.quorum Zookeeper quorum service port
     quorum: 2888
@@ -220,6 +223,9 @@ tolerations: []
 
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+topologySpreadConstraints: []
 
 ## @section Persistence
 persistence:

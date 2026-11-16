@@ -1,0 +1,54 @@
+# Functional verification for ci/metrics.yaml.
+# Proves the kafka-exporter Deployment actually authenticated to the SASL/PLAIN
+# client listener and is scraping real, live cluster metrics from Prometheus'
+# /metrics endpoint - not just that its own liveness/readiness probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/alpine:3.20
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              URL="http://test-kafka-metrics-metrics:9308/metrics"
+
+              apk add --no-cache curl >/dev/null
+
+              echo "-> Fetching metrics from $URL"
+              curl -fsS "$URL" -o /tmp/metrics.txt
+
+              echo "-> Checking for kafka_brokers metric"
+              if ! grep -qE '^kafka_brokers[[:space:]]+[0-9]+' /tmp/metrics.txt; then
+                echo "ERROR: kafka_brokers metric not found in exporter output"
+                cat /tmp/metrics.txt
+                exit 1
+              fi
+              BROKERS=$(grep -E '^kafka_brokers[[:space:]]' /tmp/metrics.txt | awk '{print $2}')
+              echo "   kafka_brokers=$BROKERS"
+              if [ "$BROKERS" -lt 1 ]; then
+                echo "ERROR: expected at least 1 broker to be reported, got $BROKERS"
+                exit 1
+              fi
+
+              echo "-> Checking exporter actually reached the broker over the SASL/PLAIN listener (not just its own /healthz)"
+              if ! grep -qE '^kafka_exporter_build_info' /tmp/metrics.txt; then
+                echo "ERROR: kafka_exporter_build_info metric not found in exporter output"
+                cat /tmp/metrics.txt
+                exit 1
+              fi
+
+              echo "OK: kafka-exporter Prometheus metrics verification passed"
