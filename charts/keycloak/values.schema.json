@@ -523,8 +523,14 @@
                         "relabelings": {
                             "type": "array"
                         },
+                        "scheme": {
+                            "type": "string"
+                        },
                         "scrapeTimeout": {
                             "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
                         }
                     }
                 }

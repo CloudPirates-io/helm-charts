@@ -1,0 +1,32 @@
+suite: test redis sentinel container stops on SIGTERM
+templates:
+  - statefulset.yaml
+set:
+  architecture: replication
+  replicaCount: 3
+  sentinel.enabled: true
+tests:
+  - it: should exec redis-sentinel so it is PID 1 and receives SIGTERM (StatefulSet)
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^exec redis-sentinel /tmp/sentinel\.conf$'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^redis-sentinel /tmp/sentinel\.conf'
+
+  - it: should forward SIGTERM to the background redis-sentinel and wait for it (Deployment)
+    set:
+      useDeployment: true
+      persistence.enabled: false
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^redis-sentinel /tmp/sentinel\.conf &\nSENTINEL_PID=\$!\n'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^trap ''kill -TERM "\$SENTINEL_PID" 2>/dev/null; wait "\$SENTINEL_PID"; exit \$\?'' TERM INT$'
