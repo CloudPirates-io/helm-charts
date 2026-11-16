@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: rabbitmq-messaging-topology-operator-servicemonitor-bearer-token-file-tests
+templates:
+  - templates/messaging-topology-operator/servicemonitor.yaml
+set:
+  msgTopologyOperator.metrics.service.enabled: true
+  msgTopologyOperator.metrics.serviceMonitor.enabled: true
+
+tests:
+  - it: should render bearerTokenFile on the secure endpoint without an authorization block
+    set:
+      msgTopologyOperator.metrics.secure: true
+      msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: https
+      - equal:
+          path: spec.endpoints[0].bearerTokenFile
+          value: /var/run/secrets/kubernetes.io/serviceaccount/token
+      - notExists:
+          path: spec.endpoints[0].authorization
+
+  - it: should not render bearerTokenFile when it is not set
+    set:
+      msgTopologyOperator.metrics.secure: true
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: https
+      - notExists:
+          path: spec.endpoints[0].bearerTokenFile
+      - notExists:
+          path: spec.endpoints[0].authorization
+
+  - it: should not render bearerTokenFile when secure metrics are disabled
+    set:
+      msgTopologyOperator.metrics.secure: false
+      msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: http
+      - notExists:
+          path: spec.endpoints[0].bearerTokenFile
+      - notExists:
+          path: spec.endpoints[0].authorization
+
+  - it: should let bearerTokenSecret win over bearerTokenFile when both are set
+    set:
+      msgTopologyOperator.metrics.secure: true
+      msgTopologyOperator.metrics.serviceMonitor.bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret:
+        name: prometheus-metrics-token
+        key: token
+    asserts:
+      - equal:
+          path: spec.endpoints[0].authorization.credentials.name
+          value: prometheus-metrics-token
+      - equal:
+          path: spec.endpoints[0].authorization.credentials.key
+          value: token
+      - notExists:
+          path: spec.endpoints[0].bearerTokenFile
+
+  - it: should keep rendering the authorization block when only bearerTokenSecret is set
+    set:
+      msgTopologyOperator.metrics.secure: true
+      msgTopologyOperator.metrics.serviceMonitor.bearerTokenSecret:
+        name: prometheus-metrics-token
+        key: token
+    asserts:
+      - equal:
+          path: spec.endpoints[0].authorization.credentials.name
+          value: prometheus-metrics-token
+      - equal:
+          path: spec.endpoints[0].authorization.credentials.key
+          value: token
+      - notExists:
+          path: spec.endpoints[0].bearerTokenFile

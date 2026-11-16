@@ -148,6 +148,12 @@
                 },
                 "tolerations": {
                     "type": "array"
+                },
+                "ttlSecondsAfterFinished": {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },
@@ -415,7 +421,10 @@
                             "type": "string"
                         },
                         "nodePort": {
-                            "type": "string"
+                            "type": [
+                                "integer",
+                                "string"
+                            ]
                         },
                         "port": {
                             "type": "integer"
@@ -597,6 +606,9 @@
                 },
                 "timeoutSeconds": {
                     "type": "integer"
+                },
+                "waitForReplicationSync": {
+                    "type": "boolean"
                 }
             }
         },
@@ -645,6 +657,9 @@
                             "type": "string"
                         }
                     }
+                },
+                "discoveryHosts": {
+                    "type": "array"
                 },
                 "discoveryTimeout": {
                     "type": "integer"
@@ -851,7 +866,10 @@
                     "type": "string"
                 },
                 "nodePort": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "port": {
                     "type": "integer"
