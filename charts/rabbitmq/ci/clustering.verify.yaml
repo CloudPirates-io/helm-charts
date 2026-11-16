@@ -1,0 +1,80 @@
+# Functional verification for ci/clustering.yaml.
+# Proves the K8s peer discovery plugin actually formed a real 3-node cluster (not
+# just 3 independent pods), then proves AMQP still works end-to-end on top of it:
+# declares a queue, publishes a message via the management HTTP API, and consumes
+# it back.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/rabbitmq:4-management
+          env:
+            - name: RABBITMQ_HOST
+              value: test-rabbitmq-clustering
+            - name: RABBITMQ_USER
+              value: admin
+            - name: RABBITMQ_PASS
+              value: "RabbitMQClusterPass123!"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ADMIN="rabbitmqadmin -H ${RABBITMQ_HOST} -P 15672 -u ${RABBITMQ_USER} -p ${RABBITMQ_PASS}"
+
+              echo "-> Waiting for the management API to accept authenticated requests"
+              i=0
+              until ${ADMIN} list vhosts > /dev/null 2>&1; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: management API never became ready"
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              # rabbitmqadmin's bundled v2 CLI (Rust-based, shipped with RabbitMQ 4.x) has no
+              # --format/column-selection flags and its "list nodes" table has no "running" column,
+              # so count node rows by their unique "rabbit@<pod>" name instead.
+              echo "-> Waiting for all 3 nodes to join the cluster"
+              i=0
+              until [ "$(${ADMIN} --non-interactive list nodes 2>/dev/null | grep -c 'rabbit@')" -ge 3 ]; do
+                i=$((i+1))
+                if [ "$i" -ge 30 ]; then
+                  echo "ERROR: cluster never reached 3 running nodes"
+                  ${ADMIN} list nodes || true
+                  exit 1
+                fi
+                sleep 2
+              done
+
+              echo "-> Confirming cluster membership via management API"
+              NODE_COUNT=$(${ADMIN} --non-interactive list nodes 2>/dev/null | grep -c 'rabbit@')
+              if [ "$NODE_COUNT" -ne 3 ]; then
+                echo "ERROR: expected 3 cluster nodes, found $NODE_COUNT"
+                ${ADMIN} list nodes
+                exit 1
+              fi
+
+              echo "-> Declaring queue ci-verify-cluster-queue"
+              ${ADMIN} declare queue --name ci-verify-cluster-queue --durable true
+
+              echo "-> Publishing a message to ci-verify-cluster-queue"
+              ${ADMIN} publish message --exchange amq.default --routing-key ci-verify-cluster-queue --payload "hello-from-cluster-ci"
+
+              echo "-> Consuming the message back from ci-verify-cluster-queue"
+              ${ADMIN} get messages --queue ci-verify-cluster-queue --ack-mode ack_requeue_false | grep -q "hello-from-cluster-ci"
+
+              echo "OK: RabbitMQ clustering verification passed"

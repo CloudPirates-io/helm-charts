@@ -1,0 +1,60 @@
+# Functional verification for ci/default.yaml.
+# Proves the deployed Kafka cluster actually accepts SASL/PLAIN-authenticated
+# clients and can produce/consume a real message end-to-end, not just that
+# probes pass.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/apache/kafka:4.3.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              BOOTSTRAP="test-kafka-default:9092"
+              TOPIC="verify-topic"
+              MESSAGE="verify-message-$(date +%s)"
+              CLIENT_CONF=/tmp/client.properties
+
+              cat > "$CLIENT_CONF" <<EOF
+              security.protocol=SASL_PLAINTEXT
+              sasl.mechanism=PLAIN
+              sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="user" password="VerifyClientPass123!";
+              EOF
+
+              echo "-> Producing test message to topic '$TOPIC'"
+              echo "$MESSAGE" | /opt/kafka/bin/kafka-console-producer.sh \
+                --bootstrap-server "$BOOTSTRAP" \
+                --command-config "$CLIENT_CONF" \
+                --topic "$TOPIC"
+
+              echo "-> Consuming test message from topic '$TOPIC'"
+              # --command-config (not the deprecated --consumer.config, which prints a
+              # warning to stdout that would otherwise pollute this captured output)
+              OUTPUT=$(/opt/kafka/bin/kafka-console-consumer.sh \
+                --bootstrap-server "$BOOTSTRAP" \
+                --command-config "$CLIENT_CONF" \
+                --topic "$TOPIC" \
+                --from-beginning \
+                --max-messages 1 \
+                --timeout-ms 30000)
+
+              if [ "$OUTPUT" != "$MESSAGE" ]; then
+                echo "ERROR: expected '$MESSAGE' but got '$OUTPUT'"
+                exit 1
+              fi
+
+              echo "OK: kafka SASL/PLAIN produce/consume round-trip verification passed"

@@ -228,6 +228,9 @@
                 }
             }
         },
+        "extraContainers": {
+            "type": "array"
+        },
         "extraEnvVars": {
             "type": "array"
         },
@@ -388,6 +391,14 @@
                 }
             }
         },
+        "initContainer": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "type": "object"
+                }
+            }
+        },
         "initContainers": {
             "type": "array"
         },
@@ -434,6 +445,9 @@
         "metrics": {
             "type": "object",
             "properties": {
+                "args": {
+                    "type": "array"
+                },
                 "enabled": {
                     "type": "boolean"
                 },

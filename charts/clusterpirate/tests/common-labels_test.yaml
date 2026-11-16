@@ -1,0 +1,49 @@
+suite: test clusterpirate common labels
+templates:
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
+  - configmap.yaml
+  - secret.yaml
+  - serviceaccount.yaml
+set:
+  auth:
+    accessToken: test-token
+tests:
+  - it: should label every object by default
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: clusterpirate
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: should add commonLabels to every object
+    set:
+      commonLabels:
+        team: platform
+    asserts:
+      - equal:
+          path: metadata.labels.team
+          value: platform
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: clusterpirate
+
+  - it: should keep commonAnnotations separate from labels
+    set:
+      commonLabels:
+        team: platform
+      commonAnnotations:
+        owner: platform-team
+    asserts:
+      - equal:
+          path: metadata.annotations.owner
+          value: platform-team
+      - isNull:
+          path: metadata.labels.owner
+      - isNull:
+          path: metadata.annotations.team

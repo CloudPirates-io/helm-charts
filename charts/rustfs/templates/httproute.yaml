@@ -121,7 +121,7 @@ spec:
         {{- end }}
       {{- end }}
       backendRefs:
-        - name: {{ include "rustfs.fullname" $ }}-pod0
+        - name: {{ include "rustfs.fullname" $ }}-console
           port: {{ $.Values.consoleService.port }}
     {{- end }}
     {{- else }}
@@ -132,7 +132,7 @@ spec:
             type: {{ if eq .pathType "Exact" }}Exact{{ else }}PathPrefix{{ end }}
             value: {{ .path }}
       backendRefs:
-        - name: {{ include "rustfs.fullname" $ }}-pod0
+        - name: {{ include "rustfs.fullname" $ }}-console
           port: {{ $.Values.consoleService.port }}
     {{- end }}
     {{- end }}

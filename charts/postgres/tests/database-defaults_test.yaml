@@ -1,0 +1,105 @@
+suite: test postgres database default in secret
+templates:
+  - secret.yaml
+
+tests:
+  - it: should default the database to auth.username when auth.database is empty
+    set:
+      auth:
+        username: myuser
+        password: pw
+    asserts:
+      - equal:
+          path: data.username
+          value: "bXl1c2Vy"
+      - equal:
+          path: data.database
+          value: "bXl1c2Vy"
+      - equal:
+          path: data.uri
+          value: "cG9zdGdyZXNxbDovL215dXNlcjpwd0BSRUxFQVNFLU5BTUUtcG9zdGdyZXMuTkFNRVNQQUNFLnN2Yzo1NDMyL215dXNlcg=="
+
+  - it: should prefer auth.database over auth.username
+    set:
+      auth:
+        username: myuser
+        database: mydb
+        password: pw
+    asserts:
+      - equal:
+          path: data.database
+          value: "bXlkYg=="
+      - equal:
+          path: data.uri
+          value: "cG9zdGdyZXNxbDovL215dXNlcjpwd0BSRUxFQVNFLU5BTUUtcG9zdGdyZXMuTkFNRVNQQUNFLnN2Yzo1NDMyL215ZGI="
+
+  - it: should keep postgres as the database when neither username nor database is set
+    set:
+      auth:
+        password: pw
+    asserts:
+      - equal:
+          path: data.username
+          value: "cG9zdGdyZXM="
+      - equal:
+          path: data.database
+          value: "cG9zdGdyZXM="
+      - equal:
+          path: data.uri
+          value: "cG9zdGdyZXNxbDovL3Bvc3RncmVzOnB3QFJFTEVBU0UtTkFNRS1wb3N0Z3Jlcy5OQU1FU1BBQ0Uuc3ZjOjU0MzIvcG9zdGdyZXM="
+---
+suite: test postgres database default in statefulset
+templates:
+  - statefulset.yaml
+
+tests:
+  - it: should use auth.username in the metrics DSN when auth.database is empty
+    set:
+      auth:
+        username: myuser
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].env[1].name
+          value: DATA_SOURCE_NAME
+      - equal:
+          path: spec.template.spec.containers[1].env[1].value
+          value: "postgresql://myuser:$(POSTGRES_PASSWORD)@localhost:5432/myuser?sslmode=disable"
+
+  - it: should prefer auth.database in the metrics DSN
+    set:
+      auth:
+        username: myuser
+        database: mydb
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].env[1].value
+          value: "postgresql://myuser:$(POSTGRES_PASSWORD)@localhost:5432/mydb?sslmode=disable"
+
+  - it: should keep the postgres database in the metrics DSN by default
+    set:
+      metrics:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].env[1].value
+          value: "postgresql://postgres:$(POSTGRES_PASSWORD)@localhost:5432/postgres?sslmode=disable"
+
+  - it: should not set POSTGRES_DB when only auth.username is given
+    set:
+      auth:
+        username: myuser
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: POSTGRES_USER
+            value: myuser
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          any: true
+          content:
+            name: POSTGRES_DB

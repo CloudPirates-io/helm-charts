@@ -1,0 +1,91 @@
+suite: test ghost mariadb host
+templates:
+  - templates/configmap.yaml
+  - templates/deployment.yaml
+tests:
+  - it: should point at the embedded mariadb service by default
+    asserts:
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"host": "RELEASE-NAME-mariadb"'
+        template: templates/configmap.yaml
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'mariadb-admin ping -h RELEASE-NAME-mariadb -P 3306'
+        template: templates/deployment.yaml
+
+  - it: should follow the mariadb subchart fullnameOverride
+    set:
+      mariadb:
+        fullnameOverride: my-maria
+    asserts:
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"host": "my-maria"'
+        template: templates/configmap.yaml
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'mariadb-admin ping -h my-maria -P 3306'
+        template: templates/deployment.yaml
+
+  - it: should follow the mariadb subchart nameOverride
+    set:
+      mariadb:
+        nameOverride: mdbx
+    asserts:
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"host": "RELEASE-NAME-mdbx"'
+        template: templates/configmap.yaml
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'mariadb-admin ping -h RELEASE-NAME-mdbx -P 3306'
+        template: templates/deployment.yaml
+
+  - it: should not derive the host from the ghost fullname
+    asserts:
+      - notMatchRegex:
+          path: data["config.production.json"]
+          pattern: 'RELEASE-NAME-ghost-mariadb'
+        template: templates/configmap.yaml
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'RELEASE-NAME-ghost-mariadb'
+        template: templates/deployment.yaml
+
+  - it: should keep the ghost fullnameOverride out of the database host
+    set:
+      fullnameOverride: my-blog
+    asserts:
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"host": "RELEASE-NAME-mariadb"'
+        template: templates/configmap.yaml
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'mariadb-admin ping -h RELEASE-NAME-mariadb -P 3306'
+        template: templates/deployment.yaml
+
+  - it: should use the external database host when the subchart is disabled
+    set:
+      mariadb:
+        enabled: false
+      config:
+        database:
+          client: mysql2
+          externalConnection:
+            host: db.example.com
+            port: 3307
+            database: ghostdb
+    asserts:
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"host": "db.example.com"'
+        template: templates/configmap.yaml
+      - matchRegex:
+          path: data["config.production.json"]
+          pattern: '"client": "mysql2"'
+        template: templates/configmap.yaml
+      - isNull:
+          path: spec.template.spec.initContainers
+        template: templates/deployment.yaml

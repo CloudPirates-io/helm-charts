@@ -8,12 +8,12 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
     service-type: mongos
-  {{- with .Values.shardedCluster.mongos.service.annotations }}
+  {{- if or (include "mongodb.annotations" .) .Values.shardedCluster.mongos.service.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+{{- (include "mongodb.annotations" .) | indent 4 }}
+  {{- if .Values.shardedCluster.mongos.service.annotations }}
+{{ toYaml .Values.shardedCluster.mongos.service.annotations | indent 4 }}
   {{- end }}
-  {{- with (include "mongodb.annotations" .) }}
-{{- . | indent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.shardedCluster.mongos.service.type }}

@@ -1,0 +1,69 @@
+# CI test values for rustfs chart - advanced scenario
+# Exercises distributed multi-node mode (deploymentType: statefulset), which
+# requires replicaCount >= 4 and derives a distributed RUSTFS_VOLUMES value
+# spanning all StatefulSet pods via the headless Service, beyond the single
+# in-memory-equivalent node covered by ci/test-values.yaml.
+
+image:
+  # Use IfNotPresent to avoid repeated pulls in CI
+  imagePullPolicy: IfNotPresent
+
+# Disable ingress for CI tests
+ingress:
+  enabled: false
+
+consoleIngress:
+  enabled: false
+
+deploymentType: "statefulset"
+replicaCount: 4
+
+# Lenient probes for slow CI environments
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 10
+
+startupProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 30
+
+# Minimal resources for kind cluster
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Use smaller persistent volumes for CI
+dataPersistence:
+  enabled: true
+  size: 1Gi
+
+logsPersistence:
+  enabled: true
+  size: 500Mi
+
+# Disable TLS persistence for CI
+tlsPersistence:
+  enabled: false
+
+# Test authentication with simple values
+auth:
+  accessKey: "testkey"
+  secretKey: "testsecret"
+
+# Simple configuration for testing
+config:
+  logLevel: "debug"
+  consoleEnabled: true

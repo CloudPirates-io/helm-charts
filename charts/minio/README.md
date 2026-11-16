@@ -86,6 +86,8 @@ The following table lists the configurable parameters of the MinIO chart and the
 | `image.useCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `false`                                                                                                      |
 | `image.tagCpuV1`        | image.useCpuV1 Use the Minio image tags suitable for old cpus (see https://github.com/minio/minio/issues/18365) | `RELEASE.2025-10-15T17-29-55Z-cpuv1@sha256:830d7d8c5cf42c02a6e4d575ec0b6a21c285794203d749fcd82251ac815fab36` |
 | `image.imagePullPolicy` | MinIO image pull policy                                                                                         | `IfNotPresent`                                                                                               |
+| `image.executable`      | MinIO executable to run. Useful when swicthing to [Silo](https://github.com/pgsty/silo)                         | `IfNotPresent`                                                                                               |
+
 
 ### MinIO Authentication
 

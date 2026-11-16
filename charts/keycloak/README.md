@@ -302,6 +302,8 @@ The following table lists the configurable parameters of the Keycloak chart and 
 | `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                        | `[]`           |
 | `metrics.serviceMonitor.honorLabels`       | Specify honorLabels parameter to add the scrape endpoint                         | `false`        |
 | `metrics.serviceMonitor.jobLabel`          | The name of the label on the target service to use as the job name in Prometheus | `""`           |
+| `metrics.serviceMonitor.scheme`            | HTTP scheme for scraping (defaults to `https` when `tls.enabled`, else `http`)   | `""`           |
+| `metrics.serviceMonitor.tlsConfig`         | TLS configuration for scraping the metrics endpoint (evaluated as a template)    | `{}`           |
 
 ### Liveness and readiness probes
 

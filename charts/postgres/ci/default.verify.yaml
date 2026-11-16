@@ -1,0 +1,48 @@
+# Functional verification for ci/default.yaml.
+# Applied by test-charts.sh into the scenario's namespace after the release is
+# Ready and stable, then waited on for completion. Proves the PostgreSQL server
+# actually accepts authenticated connections and performs a real write/read
+# round-trip, rather than trusting the liveness/readiness probes alone.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify
+  labels:
+    test-charts.io/verify: "true"
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        test-charts.io/verify: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: docker.io/postgres:16
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              HOST="test-postgres-default"
+              PORT=5432
+              export PGPASSWORD="RootPass123!"
+
+              echo "-> Creating a test table and inserting a row"
+              psql -h "$HOST" -p "$PORT" -U postgres -d postgres -c "
+                CREATE TABLE verify_tbl (id INT PRIMARY KEY, value TEXT);
+                INSERT INTO verify_tbl (id, value) VALUES (1, 'hello-postgres');
+              "
+
+              echo "-> Reading back the row and asserting the value"
+              RESULT=$(psql -h "$HOST" -p "$PORT" -U postgres -d postgres -tAc "SELECT value FROM verify_tbl WHERE id=1;")
+              if [ "$RESULT" != "hello-postgres" ]; then
+                echo "ERROR: expected 'hello-postgres' but got '$RESULT'"
+                exit 1
+              fi
+
+              echo "-> Dropping the test table"
+              psql -h "$HOST" -p "$PORT" -U postgres -d postgres -c "DROP TABLE verify_tbl;"
+
+              echo "OK: PostgreSQL verification passed"
