@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.10.2@sha256:97ec88159e6d7cfb5ddef9015386087d58a912de80112f06ebdfa78fa5989901"
+  tag: "8.10.3@sha256:1f88291b4c57bdf249f02eb085a8669889b2d2954e91d4de5118a5da6b78dd53"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -90,7 +90,7 @@ service:
   ## @param service.port Redis service port
   port: 6379
   ## @param service.nodePort Specify the nodePort value for NodePort and LoadBalancer service types
-  nodePort: ""  # @schema type:[integer, string]
+  nodePort: "" # @schema type:[integer, string]
   ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
   clusterPort: 16379
   ## @param service.ipFamilies List of IP families (e.g. [IPv4], [IPv6], [IPv4,IPv6])
@@ -307,7 +307,7 @@ volumePermissions:
     ## @param volumePermissions.image.repository Image repository
     repository: busybox
     ## @param volumePermissions.image.tag Image tag
-    tag: "1.38.0@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e"
+    tag: "1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4"
     ## @param volumePermissions.image.pullPolicy Image pull policy
     pullPolicy: IfNotPresent
   ## @param volumePermissions.resources Resource limits and requests
@@ -504,7 +504,7 @@ sentinel:
     ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
     ## @param sentinel.image.tag Redis Sentinel image tag
-    tag: "8.10.2@sha256:5c02d7c0f8d75af45958c0294a8004f2e14b42df98a1103e3a669aa7ec787be6"
+    tag: "8.10.3@sha256:1f88291b4c57bdf249f02eb085a8669889b2d2954e91d4de5118a5da6b78dd53"
     ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
@@ -615,7 +615,7 @@ sentinel:
       ## @param sentinel.masterService.image.repository Image for master discovery deployment
       repository: alpine/kubectl
       ## @param sentinel.masterService.image.tag Image tag for master discovery deployment
-      tag: "1.37.1@sha256:b57b3bd3cd9f4f02dd444281857126aa78efa4b7b7e6ec57579dd927bf146fc3"
+      tag: "1.37.2@sha256:02791a008d526a0b2ca9edc9692d86933b4a164e64d1c012eb46e30fca18d818"
       ## @param sentinel.masterService.image.pullPolicy Image pull policy for master discovery deployment
       pullPolicy: IfNotPresent
     ## @param sentinel.masterService.resources Resource limits and requests for master discovery deployment
@@ -690,7 +690,7 @@ metrics:
     ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Redis exporter image tag
-    tag: "v1.95.0-alpine@sha256:19bb5c732f5812d5b60b2e0af3c6d82c5b3e418cd020068d65f588a56df4a118"
+    tag: "v1.97.0-alpine@sha256:ae30be386ab25600a8b222538a868d1b156b7e411073f7d2d5208fe79cc98d81"
     ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
@@ -725,7 +725,7 @@ metrics:
     ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
     clusterIP: ""
     ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
-    nodePort: ""  # @schema type:[integer, string]
+    nodePort: "" # @schema type:[integer, string]
     ## @param metrics.service.ipFamilies List of IP families for the metrics service
     ipFamilies: []
     ## @param metrics.service.ipFamilyPolicy IP family policy for the metrics service
