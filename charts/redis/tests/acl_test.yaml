@@ -80,10 +80,16 @@ tests:
           path: spec.template.spec.containers[1].command[2]
           pattern: 'REDIS_SENTINEL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
       
-      # Sentinel probe checks
+      # Sentinel probe checks: Sentinel's requirepass is the default user's password
       - matchRegex:
           path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
-          pattern: 'export REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: 'export REDIS_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].readinessProbe.exec.command[2]
+          pattern: '\$2=="sentinel"'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'requirepass "\$\{REDIS_PASSWORD\}"'
 
   - it: should configure acl in master discovery deployment
     template: sentinel-master-deployment.yaml
@@ -109,7 +115,10 @@ tests:
               secretName: my-acl-secret
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: 'ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: 'ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="default".*''/etc/redis/users.acl''\)'
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '\$2=="sentinel"'
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: 'REDIS_PASSWORD="\$ACL_PASSWORD"'
@@ -155,9 +164,9 @@ tests:
       - matchRegex:
           path: data["prestop.sh"]
           pattern: 'export REDISCLI_AUTH="\$ACL_PASSWORD"'
-      - matchRegex:
+      - notMatchRegex:
           path: data["prestop.sh"]
-          pattern: 'SENTINEL_ACL_PASSWORD=\$\(awk .\$1=="user" && \$2=="sentinel".*''/etc/redis/users.acl''\)'
+          pattern: '\$2=="sentinel"'
 
   - it: should configure acl in metrics container
     template: statefulset.yaml
@@ -387,3 +396,84 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: should authenticate Sentinel peers with the Sentinel ACL user (StatefulSet)
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+      sentinel.acl.enabled: true
+      sentinel.acl.existingSecret: my-sentinel-acl
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'aclfile /etc/redis/sentinel/sentinel-users.acl'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^sentinel sentinel-user default$'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^sentinel sentinel-pass "\$\{SENTINEL_ACL_PASSWORD\}"$'
+
+  - it: should authenticate Sentinel peers with the Sentinel ACL user (Deployment)
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      useDeployment: true
+      persistence.enabled: false
+      sentinel.enabled: true
+      sentinel.acl.enabled: true
+      sentinel.acl.existingSecret: my-sentinel-acl
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'aclfile /etc/redis/sentinel/sentinel-users.acl'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^sentinel sentinel-user default$'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^sentinel sentinel-pass "\$\{SENTINEL_ACL_PASSWORD\}"$'
+
+  - it: should use sentinel.acl.defaultUsername as the Sentinel peer user
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+      sentinel.acl.enabled: true
+      sentinel.acl.existingSecret: my-sentinel-acl
+      sentinel.acl.defaultUsername: sentinel-admin
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: '(?m)^sentinel sentinel-user sentinel-admin$'
+
+  - it: should not set Sentinel peer credentials without sentinel.acl (StatefulSet)
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      sentinel.enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'sentinel sentinel-(user|pass)'
+
+  - it: should not set Sentinel peer credentials without sentinel.acl (Deployment)
+    template: statefulset.yaml
+    set:
+      architecture: replication
+      useDeployment: true
+      persistence.enabled: false
+      sentinel.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - notMatchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'sentinel sentinel-(user|pass)'

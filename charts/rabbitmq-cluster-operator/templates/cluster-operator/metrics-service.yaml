@@ -19,8 +19,9 @@ spec:
   {{- if .Values.clusterOperator.metrics.service.clusterIP }}
   clusterIP: {{ .Values.clusterOperator.metrics.service.clusterIP }}
   {{- end }}
-  {{- if eq .Values.clusterOperator.metrics.service.type "LoadBalancer" }}
-  loadBalancerSourceRanges: {{ .Values.clusterOperator.metrics.service.loadBalancerSourceRanges }}
+  {{- if and (eq .Values.clusterOperator.metrics.service.type "LoadBalancer") .Values.clusterOperator.metrics.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.clusterOperator.metrics.service.loadBalancerSourceRanges | nindent 4 }}
   {{- end }}
   {{- if (and (eq .Values.clusterOperator.metrics.service.type "LoadBalancer") (not (empty .Values.clusterOperator.metrics.service.loadBalancerIP))) }}
   loadBalancerIP: {{ .Values.clusterOperator.metrics.service.loadBalancerIP }}
