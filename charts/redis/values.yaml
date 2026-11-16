@@ -26,7 +26,7 @@ image:
   ## @param image.repository Redis image repository
   repository: redis
   ## @param image.tag Redis image tag
-  tag: "8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6"
+  tag: "8.10.2@sha256:97ec88159e6d7cfb5ddef9015386087d58a912de80112f06ebdfa78fa5989901"
   ## @param image.pullPolicy Redis image pull policy
   pullPolicy: Always
 
@@ -90,7 +90,7 @@ service:
   ## @param service.port Redis service port
   port: 6379
   ## @param service.nodePort Specify the nodePort value for NodePort and LoadBalancer service types
-  nodePort: ""
+  nodePort: ""  # @schema type:[integer, string]
   ## @param service.clusterPort Redis cluster port. Applicable only if architecture=cluster
   clusterPort: 16379
   ## @param service.ipFamilies List of IP families (e.g. [IPv4], [IPv6], [IPv4,IPv6])
@@ -108,7 +108,7 @@ service:
 auth:
   ## @param auth.enabled Enable Redis authentication
   enabled: true
-  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
+  ## @param auth.sentinel Enable Sentinel authentication using the shared Redis password (requirepass). With auth.acl enabled, this is the password of the auth.acl.defaultUsername user, not the auth.acl.sentinelUsername user. Ignored when sentinel.acl.enabled is true, which loads a fully independent Sentinel ACL instead.
   sentinel: true
   ## @param auth.metrics Enable Metrics authentication
   metrics: true
@@ -127,9 +127,9 @@ auth:
     ## @param auth.acl.existingSecretACLKey Key in existing secret containing ACL rules
     ## Key should represent an ACL file content:
     ##
-    ## user default >masterpassword ~* +@all
-    ## user readonly >readonlypassword ~* +@read
-    ## user sentinel >sentinelpassword ~* +client +info +ping +publish +subscribe +psubscribe +multi +exec +slaveof +config|rewrite +config|get +config|set
+    ## user default on >masterpassword ~* &* +@all
+    ## user readonly on >readonlypassword ~* +@read
+    ## user sentinel on >sentinelpassword allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill
     existingSecretACLKey: ""
     ## @param auth.acl.existingFilePath Path to existing ACL file injected by Vault Agent Injector or similar tools
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
@@ -137,7 +137,7 @@ auth:
     existingFilePath: ""
     ## @param auth.acl.defaultUsername ACL username used as the 'default' Redis user. Must match a user defined in the ACL file.
     defaultUsername: "default"
-    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file.
+    ## @param auth.acl.sentinelUsername ACL username Sentinel uses to authenticate to the monitored Redis instances (via `sentinel auth-user`). Must match a user defined in the ACL file and needs the monitoring permissions shown in the example above. It does not set the password clients use to connect to the Sentinel port (see auth.sentinel and sentinel.acl).
     sentinelUsername: "sentinel"
 
 ## @section TLS/SSL configuration
@@ -272,6 +272,7 @@ pdb:
   # @schema type:[integer, string]
   minAvailable: 1
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ## Takes precedence over pdb.minAvailable: when set, the budget is rendered as maxUnavailable only
   # @schema type:[integer, string]
   maxUnavailable: ""
 
@@ -402,6 +403,8 @@ livenessProbe:
 readinessProbe:
   ## @param readinessProbe.enabled Enable readiness probe
   enabled: true
+  ## @param readinessProbe.waitForReplicationSync In replication mode, report ready only for a master or a replica with master_link_status:up (makes RollingUpdate safe)
+  waitForReplicationSync: false
   ## @param readinessProbe.initialDelaySeconds Initial delay before starting probes
   initialDelaySeconds: 5
   ## @param readinessProbe.periodSeconds How often to perform the probe
@@ -501,7 +504,7 @@ sentinel:
     ## @param sentinel.image.repository Redis Sentinel image repository
     repository: redis
     ## @param sentinel.image.tag Redis Sentinel image tag
-    tag: "8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6"
+    tag: "8.10.2@sha256:5c02d7c0f8d75af45958c0294a8004f2e14b42df98a1103e3a669aa7ec787be6"
     ## @param sentinel.image.pullPolicy Redis Sentinel image pull policy
     pullPolicy: Always
   ## @param sentinel.config.announceHostnames Use the hostnames instead of the IP in "announce-ip" commands
@@ -530,6 +533,15 @@ sentinel:
   ## names across clusters, so they must set this to a value that is unique per cluster (for example
   ## the externally-resolvable hostname of that release).
   idSeed: ""
+  ## @param sentinel.discoveryHosts Extra Sentinel addresses ("host" or "host:port") asked for the current master when a Redis pod starts
+  ## On startup a Redis pod asks the Sentinels of its own release for the current master and, if none
+  ## answers, falls back to bootstrap, where pod-0 starts as master. A multi-cluster group usually runs
+  ## one release per cluster with a single pod each, so a restarting pod has no other Sentinel to ask
+  ## and comes back as an empty master even when the group has already failed over to another release.
+  ## List the externally-resolvable Sentinel addresses of the other releases here. They are asked after
+  ## the local Sentinels and before bootstrap. A reported master that does not answer is ignored, so a
+  ## pod that restarts while it is still the master keeps that role.
+  discoveryHosts: []
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down
@@ -540,7 +552,7 @@ sentinel:
   parallelSyncs: 1
   ## @param sentinel.port Sentinel port
   port: 26379
-  ## @param sentinel.discoveryTimeout Timeout in seconds for redis-cli during master discovery (prevents long TCP timeouts during initial bootstrap)
+  ## @param sentinel.discoveryTimeout Timeout in seconds for each redis-cli call during master discovery, enforced with timeout(1) so images with redis-cli older than 7.4 work (prevents long TCP timeouts during initial bootstrap)
   discoveryTimeout: 3
   ## @param sentinel.extraVolumeMounts Additional volume mounts to add to the Sentinel container
   extraVolumeMounts: []
@@ -553,8 +565,8 @@ sentinel:
     ## @param sentinel.acl.existingSecretACLKey Key in existing secret containing the Sentinel ACL rules
     ## Key should represent an ACL file content, e.g.:
     ##
-    ## user default >sentinelpassword ~* +@all
-    ## user monitoring >monitoringpassword ~* +client +info +ping +subscribe +psubscribe
+    ## user default on >sentinelpassword ~* &* +@all
+    ## user monitoring on >monitoringpassword ~* &* +client +info +ping +subscribe +psubscribe
     existingSecretACLKey: ""
     ## @param sentinel.acl.existingFilePath Path to existing Sentinel ACL file injected by Vault Agent Injector or similar tools
     ## Mutually exclusive with existingSecret. When set, no volume mounting is performed.
@@ -678,7 +690,7 @@ metrics:
     ## @param metrics.image.repository Redis exporter image repository
     repository: oliver006/redis_exporter
     ## @param metrics.image.tag Redis exporter image tag
-    tag: "v1.94.0-alpine@sha256:2f5c00216f2142f23e6d13de341325101c31f93b8f6c3e72fe33087136bf43ec"
+    tag: "v1.95.0-alpine@sha256:19bb5c732f5812d5b60b2e0af3c6d82c5b3e418cd020068d65f588a56df4a118"
     ## @param metrics.image.pullPolicy Redis exporter image pull policy
     pullPolicy: Always
   ## @param metrics.port Metrics exporter port
@@ -713,7 +725,7 @@ metrics:
     ## @param metrics.service.clusterIP Static clusterIP or None for headless services when metrics service type is ClusterIP
     clusterIP: ""
     ## @param metrics.service.nodePort Specify the nodePort value for the LoadBalancer and NodePort service types
-    nodePort: ""
+    nodePort: ""  # @schema type:[integer, string]
     ## @param metrics.service.ipFamilies List of IP families for the metrics service
     ipFamilies: []
     ## @param metrics.service.ipFamilyPolicy IP family policy for the metrics service
@@ -747,7 +759,7 @@ serviceAccount:
   create: false
   ## @param serviceAccount.name Name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name is generated using the `fullname` template.
   name: ""
-  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods
+  ## @param serviceAccount.automountServiceAccountToken Automount service account token inside the Redis pods and the cluster-init Job
   automountServiceAccountToken: false
   ## @param serviceAccount.annotations Additional custom annotations for the ServiceAccount
   annotations: {}
@@ -827,3 +839,9 @@ clusterInitJob:
   ## and would destroy the topology). If the cluster is still not healthy after this timeout, the Job fails instead of
   ## recreating the cluster, preserving data for manual intervention.
   recoveryTimeout: 120
+  ## @param clusterInitJob.ttlSecondsAfterFinished Seconds after which Kubernetes deletes the finished clusterInit Job (empty = keep it)
+  ## Helm deletes the Job through its hook-delete-policy. Tools that render the chart and apply it with
+  ## `kubectl apply` (helm template, kustomize) ignore hooks, so the finished Job stays and every later change to its
+  ## pod template (e.g. a new image tag) fails with "field is immutable". Setting a TTL removes it so the next apply recreates it.
+  # @schema type:[integer, string]
+  ttlSecondsAfterFinished: ""
