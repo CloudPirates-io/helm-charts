@@ -379,7 +379,7 @@ customUsers:
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- |
 | `replicaSet.enabled`       | Enables replica set deployment mode                                                                                    | `false`         |
 | `replicaSet.name`          | Replica set name                                                                                                       | `"repl"`        |
-| `replicaSet.key`           | Key for internal replica set authentication (base64 encoded string 6-1024 chars.)                                      |                 |
+| `replicaSet.key`           | Key for internal replica set authentication (plain text string 6-1024 chars). If empty and auth is enabled, a random key is generated and reused on upgrades | `""`          |
 | `replicaSet.keySecretName` | Alternative to 'key' - Name of an existing secret with a file named "keyfile" containing the base64 encoded key string |                 |
 | `replicaSet.clusterDomain` | Default Kubernetes cluster domain                                                                                      | `cluster.local` |
 | `replicaSet.secondaries`   | Number of secondary instances (should be at least 2 - or - one secondary and an arbiter)                               | `2`             |
@@ -488,7 +488,7 @@ For MongoDB sharded cluster deployments, enable `shardedCluster.enabled` instead
 | Parameter                      | Description                                                                              | Default  |
 | ------------------------------ | ---------------------------------------------------------------------------------------- | -------- |
 | `shardedCluster.enabled`       | Enable sharded cluster deployment (mutually exclusive with `replicaSet.enabled`)         | `false`  |
-| `shardedCluster.keyFile`       | Plain-text keyfile string (6-1024 chars) for internal cluster authentication             | `""`     |
+| `shardedCluster.keyFile`       | Plain-text keyfile string (6-1024 chars) for internal cluster authentication. If empty and auth is enabled, a random key is generated and reused on upgrades | `""`     |
 | `shardedCluster.keySecretName` | Name of an existing secret with a file named `keyfile` containing the keyfile string     | `""`     |
 | `shardedCluster.shards`        | Number of shards (minimum 2)                                                             | `2`      |
 
