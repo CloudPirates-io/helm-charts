@@ -24,7 +24,7 @@ image:
   ## @param image.repository Keycloak image repository
   repository: keycloak/keycloak
   ## @param image.tag Keycloak image tag (immutable tags are recommended)
-  tag: "26.7.3@sha256:ff4257d0d64efbe99ed1ddfaf07765cc3c36dc7518bf8324d41961327f441c54"
+  tag: "26.8.1@sha256:79c623a22abacf3fe6c00a5fb30f5b7843d717b234033b80995891c06116d244"
   ## @param image.imagePullPolicy Keycloak image pull policy
   imagePullPolicy: Always
   ## @param image.command Keycloak container command
@@ -110,9 +110,9 @@ containerSecurityContext:
 
 ## @section Keycloak Configuration
 keycloak:
-  ## @param keycloak.adminUser Keycloak admin username
+  ## @param keycloak.adminUser Keycloak admin username. Note that an update to keycloak.adminUser has no effect unless the Secret is previously deleted from the cluster, see https://github.com/CloudPirates-io/helm-charts/pull/1746
   adminUser: admin
-  ## @param keycloak.adminPassword Keycloak admin password
+  ## @param keycloak.adminPassword Keycloak admin password. Note that an update to keycloak.adminPassword has no effect unless the Secret is previously deleted from the cluster, see https://github.com/CloudPirates-io/helm-charts/pull/1746
   adminPassword: ""
   ## @param keycloak.existingSecret Name of existing secret to use for Keycloak admin credentials
   existingSecret: ""
@@ -407,6 +407,17 @@ metrics:
     honorLabels: false
     ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in prometheus
     jobLabel: ""
+    ## @param metrics.serviceMonitor.scheme HTTP scheme to use for scraping (defaults to https when tls.enabled is true, otherwise http)
+    scheme: ""
+    ## @param metrics.serviceMonitor.tlsConfig TLS configuration for scraping the metrics endpoint (evaluated as a template)
+    ## Prometheus scrapes the pod IPs, so serverName has to match a DNS name in the certificate. Example:
+    ## tlsConfig:
+    ##   serverName: '{{ include "keycloak.fullname" . }}.{{ include "cloudpirates.namespace" . }}.svc.cluster.local'
+    ##   ca:
+    ##     secret:
+    ##       name: '{{ include "keycloak.tlsSecretName" . }}'
+    ##       key: ca.crt
+    tlsConfig: {}
 
 ## @section Liveness and readiness probes
 livenessProbe:
@@ -507,7 +518,7 @@ initContainers:
     ## @param initContainers.waitForPostgres.repository PostgreSQL image repository
     repository: postgres
     ## @param initContainers.waitForPostgres.tag PostgreSQL image tag
-    tag: "18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280"
+    tag: "18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc"
     ## @param initContainers.waitForPostgres.pullPolicy PostgreSQL image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForPostgres.resources Resource requests and limits for PostgreSQL init container
@@ -526,7 +537,7 @@ initContainers:
     ## @param initContainers.waitForMariadb.repository MariaDB image repository
     repository: mariadb
     ## @param initContainers.waitForMariadb.tag MariaDB image tag
-    tag: "13.0.2@sha256:d4fdec0510ad498e4f3127da30a99df3745bd6d5e611ae6ac5f76403d9284a8d"
+    tag: "13.0.2@sha256:0e4bb0f339feba125d1154fbacd36c16ec8518f52e44e1f82ecec7d6771caf39"
     ## @param initContainers.waitForMariadb.pullPolicy MariaDB image pull policy
     pullPolicy: IfNotPresent
     ## @param initContainers.waitForMariadb.resources Resource requests and limits for MariaDB init container

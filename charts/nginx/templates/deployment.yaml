@@ -10,6 +10,7 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if and (not .Values.autoscaling.enabled) (not .Values.daemonset.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -162,6 +163,9 @@ spec:
           {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}
             - name: static-site
               mountPath: /usr/share/nginx/html
+              {{- if and .Values.cloneStaticSiteFromGit.enabled .Values.cloneStaticSiteFromGit.subPath }}
+              subPath: {{ .Values.cloneStaticSiteFromGit.subPath }}
+              {{- end }}
           {{- end }}
           {{- if or .Values.config .Values.existingConfigConfigmap }}
             - name: nginx-config

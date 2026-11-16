@@ -1,0 +1,46 @@
+# CI scenario: minimal MongoDB sharded cluster (1 config server, 1 mongos router, 2 single-node shards)
+# Exercises: shardedCluster deployment mode - config server replica set, shard
+# replica sets, the mongos router, and the add-shards Job that initializes and
+# wires all of them together into a working cluster.
+image:
+  pullPolicy: IfNotPresent
+
+auth:
+  rootUsername: admin
+  rootPassword: "RootPass123!"
+
+shardedCluster:
+  enabled: true
+  keyFile: "CIShardedClusterInternalAuthKey123"
+  shards: 2
+  configsvr:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+  mongos:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+  shardsvr:
+    dataNode:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+
+# Workaround for MongoDB 8.x crashing on boot under Linux kernel >=6.19 (TCMalloc/glibc
+# incompatibility, MongoDB SERVER-121912). Needed on CI runners/kind nodes with newer kernels.
+experimental:
+  tcmallocRseqWorkaround:
+    enabled: true

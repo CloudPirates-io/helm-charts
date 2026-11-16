@@ -123,6 +123,7 @@ The following table lists the configurable parameters of the RabbitMQ chart and 
 | `replicaCount`         | Number of RabbitMQ replicas to deploy (clustering needs to be enabled to set more than 1 replicas) | `1`            |
 | `revisionHistoryLimit` | Number of revisions to keep in history for rollback (set to 0 for unlimited)                       | `10`           |
 | `podManagementPolicy`  | StatefulSet pod management policy                                                                  | `OrderedReady` |
+| `terminationGracePeriodSeconds` | Time for Kubernetes to wait for the pod to gracefully terminate                                    | `30`    |
 
 ### StatefulSet & Pod metadata
 

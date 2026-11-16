@@ -217,7 +217,7 @@ spec:
                 - |
                   mongosh \
                   {{- if .Values.auth.enabled }}
-                  -username "${MONGO_INITDB_ROOT_USERNAME}" \
+                  --username "${MONGO_INITDB_ROOT_USERNAME}" \
                   --password "${MONGO_INITDB_ROOT_PASSWORD}" \
                   --authenticationDatabase admin \
                   {{- end }}
