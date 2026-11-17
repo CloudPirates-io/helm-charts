@@ -172,6 +172,14 @@
                 }
             }
         },
+        "probes": {
+            "type": "object",
+            "properties": {
+                "authenticate": {
+                    "type": "boolean"
+                }
+            }
+        },
         "livenessProbe": {
             "type": "object",
             "properties": {

@@ -201,6 +201,10 @@ priorityClassName: ""
 ## @param terminationGracePeriodSeconds Seconds Kubernetes waits for the pod to terminate gracefully before SIGKILL
 terminationGracePeriodSeconds: 30
 
+## @param probes.authenticate Pass the root credentials to mongosh in the startup/liveness/readiness probes (requires auth.enabled). Disable to keep the password out of the process arguments; ping and hello do not require authentication
+probes:
+  authenticate: true
+
 livenessProbe:
   ## @param livenessProbe.enabled Enable liveness probe
   enabled: true

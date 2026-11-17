@@ -257,6 +257,7 @@ customUsers:
 
 | Parameter                            | Description                                     | Default |
 | ------------------------------------ | ----------------------------------------------- | ------- |
+| `probes.authenticate` | Pass the root credentials to mongosh in the startup/liveness/readiness probes (requires auth.enabled). Disable to keep the password out of the process arguments; ping and hello do not require authentication | `true` |
 | `livenessProbe.enabled`              | Enable liveness probe                           | `true`  |
 | `livenessProbe.initialDelaySeconds`  | Initial delay before starting probes            | `30`    |
 | `livenessProbe.periodSeconds`        | How often to perform the probe                  | `10`    |
