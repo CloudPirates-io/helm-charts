@@ -220,6 +220,10 @@ spec:
                   key: {{ include "keycloak.databasePasswordKey" . }}
               {{- end }}
             {{- end }}
+            {{- if .Values.javaOptsAppend }}
+            - name: JAVA_OPTS_APPEND
+              value: {{ .Values.javaOptsAppend | quote }}
+            {{- end }}
             {{- with .Values.extraEnvVars }}
 {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}

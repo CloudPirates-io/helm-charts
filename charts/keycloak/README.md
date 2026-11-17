@@ -351,6 +351,7 @@ The following table lists the configurable parameters of the Keycloak chart and 
 
 | Parameter            | Description                                                            | Default |
 | -------------------- | ---------------------------------------------------------------------- | ------- |
+| `javaOptsAppend` | Extra JVM options appended to the Keycloak JVM (JAVA_OPTS_APPEND). Defaults to disabling the Base64 intrinsic as a mitigation for CVE-2026-114938 (Java4Shell); set to "" to disable once the image ships a patched JDK. An entry named JAVA_OPTS_APPEND in extraEnvVars takes precedence | `-XX:-UseBASE64Intrinsics` |
 | `extraEnvVars`       | Additional environment variables to set                                | `[]`    |
 | `extraEnvVarsSecret` | Name of an existing secret containing additional environment variables | ``      |
 
