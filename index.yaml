@@ -31751,6 +31751,58 @@ entries:
       artifacthub.io/category: networking
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[nginx] Accept an integer metrics.service.nodePort (#1933)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1933
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: Nginx
+          url: https://www.nginx.com
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+        - name: Application
+          url: https://github.com/nginx/nginx
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 1.31.8
+    created: "2026-11-17T07:56:07.952901511Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: Nginx is a high-performance HTTP server and reverse proxy.
+    digest: 90a0d97e54e917c3c6740e6d4fcba9c052f4ed3b2cb4b14a71cc054fdb68f1ba
+    home: https://www.nginx.com
+    icon: https://a.storyblok.com/f/143071/512x512/9fcd98c061/nginx-logo.svg
+    keywords:
+    - nginx
+    - web server
+    - http
+    - reverse proxy
+    - load balancer
+    - proxy
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    name: nginx
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/nginx
+    - https://github.com/nginx/nginx
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/nginx-0.16.17/nginx-0.16.17.tgz
+    version: 0.16.17
+  - annotations:
+      artifacthub.io/category: networking
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[nginx] Update image.repository to fed7e14 (#1892)'
           links:
           - name: Pull Request
@@ -74533,4 +74585,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-17T07:44:30.767500012Z"
+generated: "2026-11-17T07:56:07.954238083Z"
