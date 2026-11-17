@@ -597,7 +597,10 @@
                     "type": "string"
                 },
                 "nodePort": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "port": {
                     "type": "integer"
