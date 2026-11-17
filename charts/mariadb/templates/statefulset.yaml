@@ -288,6 +288,9 @@ spec:
           args: 
             - "--mysqld.username=exporter"
             - "--mysqld.address=localhost:3306"
+            {{- with .Values.metrics.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- if .Values.metrics.containerSecurityContext }}
           securityContext:
             {{- toYaml .Values.metrics.containerSecurityContext | nindent 12 }}

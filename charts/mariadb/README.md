@@ -339,6 +339,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
 | `metrics.port`                     | Metrics exporter port                                       | `9104`                                          |
 | `metrics.containerSecurityContext` | Security context for metrics container                      | `{runAsUser: 65534, runAsNonRoot: true, ...}`   |
 | `metrics.resources`                | Resource limits and requests for metrics container          | `{}`                                            |
+| `metrics.extraArgs`                | Additional command-line flags passed to mysqld-exporter     | `[]`                                            |
 | `metrics.extraEnvVars`             | Additional environment variables for metrics exporter       | `[]`                                            |
 | `metrics.livenessProbe`            | LivenessProbe for metrics container                         | `{enabled: true, initialDelaySeconds: 30, ...}` |
 | `metrics.readinessProbe`           | ReadinessProbe for metrics container                        | `{enabled: true, initialDelaySeconds: 30, ...}` |
