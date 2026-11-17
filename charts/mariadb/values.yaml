@@ -125,7 +125,7 @@ service:
   ## @param service.port MariaDB service port
   port: 3306
   ## @param service.nodePort Node port for MariaDB service
-  nodePort: ""
+  nodePort: ""  # @schema type:[integer, string]
   ## @param service.clusterIP Static cluster IP or "None" for headless service
   clusterIP: ""
   ## @param service.annotations Additional custom annotations for MariaDB service

@@ -1,0 +1,28 @@
+suite: test mariadb service nodePort
+templates:
+  - service.yaml
+tests:
+  - it: should accept an integer service.nodePort
+    set:
+      service.type: NodePort
+      service.nodePort: 30306
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30306
+
+  - it: should still accept a string service.nodePort
+    set:
+      service.type: NodePort
+      service.nodePort: "30306"
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30306
+
+  - it: should omit nodePort when service.nodePort is empty
+    set:
+      service.type: NodePort
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
