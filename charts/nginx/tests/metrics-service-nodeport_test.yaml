@@ -1,0 +1,31 @@
+suite: test nginx metrics service nodePort
+templates:
+  - metrics-service.yaml
+tests:
+  - it: should accept an integer metrics.service.nodePort
+    set:
+      metrics.enabled: true
+      metrics.service.type: NodePort
+      metrics.service.nodePort: 30913
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30913
+
+  - it: should still accept a string metrics.service.nodePort
+    set:
+      metrics.enabled: true
+      metrics.service.type: NodePort
+      metrics.service.nodePort: "30913"
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30913
+
+  - it: should omit nodePort when metrics.service.nodePort is empty
+    set:
+      metrics.enabled: true
+      metrics.service.type: NodePort
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
