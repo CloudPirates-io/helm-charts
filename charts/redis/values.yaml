@@ -542,6 +542,13 @@ sentinel:
   ## the local Sentinels and before bootstrap. A reported master that does not answer is ignored, so a
   ## pod that restarts while it is still the master keeps that role.
   discoveryHosts: []
+  ## @param sentinel.discoverySelfHost Address the Sentinels report when this release is the master (its replica-announce-ip)
+  ## Only used with sentinel.discoveryHosts, for releases running a single Redis pod. Without it a pod
+  ## cannot tell "the reported master is me" from "the reported master is down", so it skips a master
+  ## that does not answer and, when every release restarts at once, several pods come back as masters.
+  ## When set, a pod reported as master keeps the role, and a pod whose reported master is another
+  ## release replicates from it even if it does not answer yet, as a fixed replicaof would.
+  discoverySelfHost: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down

@@ -60,3 +60,41 @@ tests:
       - matchRegex:
           path: spec.template.spec.initContainers[0].command[2]
           pattern: 'REDISCLI_AUTH="\$\{SENTINEL_ACL_PASSWORD\}" timeout 3 redis-cli --user sentinel-admin -h "\$\{SENTINEL_HOST\}" -p "\$\{SENTINEL_PORT\}"'
+
+  - it: should keep skipping a master that does not answer when sentinel.discoverySelfHost is empty
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'which does not answer \(ignoring\)"\s+continue'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'reports this release as master'
+
+  - it: should keep the master role when the Sentinels report sentinel.discoverySelfHost
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+      sentinel.discoverySelfHost: redis-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(?s)if \[ "\$MASTER_INFO" = "redis-b\.example\.net" \]; then\s+CURRENT_MASTER="\$MASTER_INFO"\s+SENTINEL_FOUND=true.*?break\s+fi\s+.*?PING_REPLY='
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '\|\| \[ "redis-b\.example\.net" = "\$CURRENT_MASTER" \]; then\s+echo "I am the current master according to Sentinel"'
+
+  - it: should replicate from another release's master that does not answer yet when sentinel.discoverySelfHost is set
+    set:
+      sentinel.discoveryHosts:
+        - sentinel-b.example.net
+      sentinel.discoverySelfHost: redis-b.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: '(?s)which does not answer yet \(replicating from it anyway\)"\s+fi\s+CURRENT_MASTER="\$MASTER_INFO"\s+SENTINEL_FOUND=true'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'which does not answer \(ignoring\)'
