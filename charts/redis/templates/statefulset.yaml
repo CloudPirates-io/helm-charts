@@ -443,13 +443,30 @@ spec:
                   if [ -z "$MASTER_INFO" ] || ! echo "$MASTER_INFO" | grep -qE '^[A-Za-z0-9.:-]+$'; then
                     continue
                   fi
+                  {{- if .Values.sentinel.discoverySelfHost }}
+                  # The Sentinels still report this release as master and its Redis is not running yet, so
+                  # there is nothing to ping. Keep the role.
+                  if [ "$MASTER_INFO" = {{ .Values.sentinel.discoverySelfHost | quote }} ]; then
+                    CURRENT_MASTER="$MASTER_INFO"
+                    SENTINEL_FOUND=true
+                    echo "Sentinel at ${SENTINEL_HOST} reports this release as master"
+                    break
+                  fi
+                  {{- end }}
                   # A Sentinel keeps reporting this pod as master until it fails over, and this pod's Redis
                   # is not running yet. Any reply, even an auth error, means a Redis answered; silence means
-                  # the reported master is down or is this pod, and bootstrap below handles both.
+                  # the reported master is down or is this pod.
                   PING_REPLY=$(timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli --no-auth-warning -h "$MASTER_INFO" -p {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} PING 2>/dev/null || echo "")
                   if [ -z "$PING_REPLY" ]; then
+                    {{- if .Values.sentinel.discoverySelfHost }}
+                    # Not this release, so the master is down or restarting with the rest of the group.
+                    # Replicate from it anyway and let Redis retry, rather than start a second master next
+                    # to it. If it is gone for good, the Sentinels fail over and repoint this replica.
+                    echo "Sentinel at ${SENTINEL_HOST} reports master $MASTER_INFO, which does not answer yet (replicating from it anyway)"
+                    {{- else }}
                     echo "Sentinel at ${SENTINEL_HOST} reports master $MASTER_INFO, which does not answer (ignoring)"
                     continue
+                    {{- end }}
                   fi
                   CURRENT_MASTER="$MASTER_INFO"
                   SENTINEL_FOUND=true
@@ -467,7 +484,7 @@ spec:
                 MY_IP=$(hostname -i)
 
                 # Check if I am the master by hostname or IP
-                if [ "$MY_IP" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME_FQDN" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME" = "$CURRENT_MASTER" ]; then
+                if [ "$MY_IP" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME_FQDN" = "$CURRENT_MASTER" ] || [ "$MY_HOSTNAME" = "$CURRENT_MASTER" ]{{ if .Values.sentinel.discoverySelfHost }} || [ {{ .Values.sentinel.discoverySelfHost | quote }} = "$CURRENT_MASTER" ]{{ end }}; then
                   echo "I am the current master according to Sentinel"
                 else
                   echo "Configuring as replica of current master: $CURRENT_MASTER"
