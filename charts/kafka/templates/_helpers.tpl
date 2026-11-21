@@ -192,3 +192,14 @@ Covers the per-pod headless FQDNs (wildcard), the client Service FQDN, and short
 {{- $names = append $names "localhost" -}}
 {{- $names | toYaml -}}
 {{- end -}}
+
+{{/*
+Name of the service account used by the Kafka and kafka-exporter pods
+*/}}
+{{- define "kafka.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "kafka.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+{{- default "default" .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}

@@ -32,7 +32,8 @@ spec:
 {{- with (include "kafka.imagePullSecrets" .) }}
 {{ . | nindent 6 }}
 {{- end }}
-      automountServiceAccountToken: false
+      serviceAccountName: {{ include "kafka.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}

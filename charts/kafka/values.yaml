@@ -337,6 +337,17 @@ tolerations: []
 ## @param affinity Affinity rules for pod assignment
 affinity: {}
 
+## @section Service Account
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+  ## @param serviceAccount.annotations Annotations to add to the service account
+  annotations: {}
+  ## @param serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the `fullname` template.
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Whether to automount the service account token inside the pods
+  automountServiceAccountToken: false
+
 ## @section Persistence
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
