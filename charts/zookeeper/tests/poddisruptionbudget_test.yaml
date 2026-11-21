@@ -48,3 +48,27 @@ tests:
           value: "75%"
       - isNull:
           path: spec.maxUnavailable
+
+  - it: should accept an integer minAvailable
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        minAvailable: 2
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should accept an integer maxUnavailable
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        maxUnavailable: 1
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - isNull:
+          path: spec.minAvailable
