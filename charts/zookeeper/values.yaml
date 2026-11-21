@@ -56,8 +56,10 @@ podDisruptionBudget:
   ## @param podDisruptionBudget.enabled Create a Pod Disruption Budget to ensure high availability during voluntary disruptions
   enabled: true
   ## @param podDisruptionBudget.minAvailable minAvailable for Pod Disruption Budget. Value is not mandatory.
+  # @schema type:[integer, string]
   minAvailable: "51%"
   ## @param podDisruptionBudget.maxUnavailable maxUnavailable for Pod Disruption Budget. Value is not mandatory.
+  # @schema type:[integer, string]
   maxUnavailable: ""
 
 networkPolicy:
