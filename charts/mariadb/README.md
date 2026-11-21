@@ -325,7 +325,7 @@ All objects in `extraObjects` will be rendered and deployed with the release. Yo
   | `nodeSelector`              | Node labels for pod assignment                  | `{}`    |
   | `tolerations`               | Tolerations for pod assignment                  | `[]`    |
   | `affinity`                  | Affinity for pod assignment                     | `{}`    |
-  | `topologySpreadConstraints` | TopologySpreadConstraints for pod assignment    | `{}`    |
+  | `topologySpreadConstraints` | TopologySpreadConstraints for pod assignment    | `[]`    |
 
 ### Metrics
 
