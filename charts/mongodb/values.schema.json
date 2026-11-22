@@ -172,14 +172,6 @@
                 }
             }
         },
-        "probes": {
-            "type": "object",
-            "properties": {
-                "authenticate": {
-                    "type": "boolean"
-                }
-            }
-        },
         "livenessProbe": {
             "type": "object",
             "properties": {
@@ -478,6 +470,14 @@
         "priorityClassName": {
             "type": "string"
         },
+        "probes": {
+            "type": "object",
+            "properties": {
+                "authenticate": {
+                    "type": "boolean"
+                }
+            }
+        },
         "readinessProbe": {
             "type": "object",
             "properties": {
@@ -567,7 +567,7 @@
                             "type": "array"
                         },
                         "topologySpreadConstraints": {
-                            "type": "object"
+                            "type": "array"
                         }
                     }
                 },
@@ -611,7 +611,10 @@
                                     "type": "array"
                                 },
                                 "port": {
-                                    "type": "string"
+                                    "type": [
+                                        "integer",
+                                        "string"
+                                    ]
                                 },
                                 "publicNames": {
                                     "type": "array"
@@ -712,7 +715,7 @@
                             "type": "array"
                         },
                         "topologySpreadConstraints": {
-                            "type": "object"
+                            "type": "array"
                         }
                     }
                 },
