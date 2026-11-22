@@ -457,8 +457,8 @@ replicaSet:
     tolerations: []
     ## @param replicaSet.hiddenSecondaries.affinity Pod affinity
     affinity: {}
-    ## @param replicaSet.hiddenSecondaries.topologySpreadContraints Topology spread constraints for pods
-    topologySpreadConstraints: {}
+    ## @param replicaSet.hiddenSecondaries.topologySpreadConstraints Topology spread constraints for pods
+    topologySpreadConstraints: []
     ## @param replicaSet.hiddenSecondaries.storage Storage of the hidden secondary
     storage:
       ## @param replicaSet.hiddenSecondaries.storage.persistentVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
@@ -503,7 +503,7 @@ replicaSet:
     ## @param replicaSet.arbiter.affinity Pod affinity
     affinity: {}
     ## @param replicaSet.arbiter.topologySpreadConstraints Topology spread constraints for pods
-    topologySpreadConstraints: {}
+    topologySpreadConstraints: []
     ## @param replicaSet.arbiter.storage Storage of the arbiter
     storage:
       ## @param replicaSet.arbiter.storage.persistenVolumeClaimName Set persistentVolumenClaimName to reference an existing PVC
@@ -557,7 +557,7 @@ replicaSet:
       type: LoadBalancer
       ## @param replicaSet.externalAccess.service.port Port exposed by each external Service and advertised to the ReplicaSet (defaults to service.port)
       ## @type string|number
-      port: ""
+      port: ""  # @schema type:[integer, string]
       ## @param replicaSet.externalAccess.service.publicNames Externally reachable hostname for each pod, indexed by ordinal (must have exactly 1 primary + replicaSet.secondaries entries). Also used as the advertised replica set member identity instead of the internal FQDN.
       publicNames: []
       ## @param replicaSet.externalAccess.service.loadBalancerIPs Static LoadBalancer IP per pod, indexed by ordinal (optional, must match publicNames length if set)

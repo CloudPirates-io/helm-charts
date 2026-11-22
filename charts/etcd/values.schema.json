@@ -288,10 +288,16 @@
                     "type": "boolean"
                 },
                 "maxUnavailable": {
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 },
                 "minAvailable": {
-                    "type": "string"
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
                 }
             }
         },

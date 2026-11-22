@@ -232,6 +232,19 @@ tests:
       - isNull:
           path: spec.maxUnavailable
 
+  - it: should set a percentage maxUnavailable in PDB
+    template: poddisruptionbudget.yaml
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: "50%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 50%
+      - isNull:
+          path: spec.minAvailable
+
   - it: should set integer minAvailable in PDB
     template: poddisruptionbudget.yaml
     set:
