@@ -19368,6 +19368,70 @@ entries:
       artifacthub.io/category: database
       artifacthub.io/changes: |-
         - kind: changed
+          description: '[mariadb] Accept a list for topologySpreadConstraints (#1944)'
+          links:
+          - name: Pull Request
+            url: https://github.com/CloudPirates-io/helm-charts/pull/1944
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/links: |
+        - name: MariaDB
+          url: https://mariadb.org
+        - name: Helm Chart
+          url: https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+        - name: Application
+          url: https://github.com/MariaDB/server
+        - name: Docker Image
+          url: https://github.com/MariaDB/mariadb-docker
+        - name: Galera Cluster
+          url: https://galeracluster.com
+        - name: Maintainer CloudPirates
+          url: https://www.cloudpirates.io
+      artifacthub.io/signKey: |
+        fingerprint: 6917f1a88c122cbb1de5aa55457752135bdcf95a
+        url: https://raw.githubusercontent.com/CloudPirates-io/helm-charts/refs/heads/main/cosign.pub
+      license: Apache-2.0
+    apiVersion: v2
+    appVersion: 13.0.2
+    created: "2026-11-22T17:35:15.096495299Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 2.2.1
+    description: MariaDB is a high-performance, open-source relational database server
+      that is a drop-in replacement for MySQL. Supports both single-node and Galera
+      Cluster deployments.
+    digest: 92e57411f62ce716b14c88ecbf8d4f3a7e107af0e10e35b3ad6ec0d8a7775305
+    home: https://mariadb.org
+    icon: https://a.storyblok.com/f/143071/512x512/6512dd22ee/mariadb-logo.svg
+    keywords:
+    - mariadb
+    - mysql
+    - database
+    - sql
+    - relational
+    - galera
+    - cluster
+    - replication
+    maintainers:
+    - email: hello@cloudpirates.io
+      name: CloudPirates GmbH & Co. KG
+      url: https://www.cloudpirates.io
+    - email: gianni.carafa@srf.ch
+      name: Gianni Carafa
+      url: https://www.srf.ch
+    name: mariadb
+    sources:
+    - https://github.com/CloudPirates-io/helm-charts/tree/main/charts/mariadb
+    - https://github.com/MariaDB/server
+    - https://github.com/MariaDB/mariadb-docker
+    type: application
+    urls:
+    - https://github.com/CloudPirates-io/helm-charts/releases/download/mariadb-0.17.1/mariadb-0.17.1.tgz
+    version: 0.17.1
+  - annotations:
+      artifacthub.io/category: database
+      artifacthub.io/changes: |-
+        - kind: changed
           description: '[mariadb] Add metrics.extraArgs for the mysqld-exporter container
             (#1932)'
           links:
@@ -74850,4 +74914,4 @@ entries:
     urls:
     - https://github.com/CloudPirates-io/helm-charts/releases/download/zookeeper-0.1.0/zookeeper-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-21T15:42:22.986158919Z"
+generated: "2026-11-22T17:35:15.098033249Z"
