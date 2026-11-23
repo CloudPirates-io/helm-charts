@@ -549,6 +549,14 @@ sentinel:
   ## When set, a pod reported as master keeps the role, and a pod whose reported master is another
   ## release replicates from it even if it does not answer yet, as a fixed replicaof would.
   discoverySelfHost: ""
+  ## @param sentinel.discoveryBootstrapHost Address of the one release allowed to start as master when no Sentinel of the group answers
+  ## Requires sentinel.discoveryHosts and sentinel.discoverySelfHost. When every release restarts at once,
+  ## no Sentinel answers and each release falls back to bootstrap, where its pod-0 starts as master, so the
+  ## group comes back with one master per release until the Sentinels settle on one, and the writes taken
+  ## by the others are lost. When set, only the release whose sentinel.discoverySelfHost matches it starts
+  ## as master; the others start as its replicas and their Sentinels monitor it. Set the same value in
+  ## every release. If that release cannot start, the others wait as replicas until it does.
+  discoveryBootstrapHost: ""
   ## @param sentinel.quorum Number of Sentinels that need to agree about the fact the master is not reachable
   quorum: 2
   ## @param sentinel.downAfterMilliseconds Time in milliseconds after the master is declared down

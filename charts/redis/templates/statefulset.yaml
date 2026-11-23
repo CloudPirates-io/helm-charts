@@ -2,6 +2,7 @@
 {{- include "redis.auth.acl.validate" . -}}
 {{- include "redis.sentinel.acl.validate" . -}}
 {{- include "redis.externalMaster.validate" . -}}
+{{- include "redis.sentinel.discoveryBootstrapHost.validate" . -}}
 {{- $useDeployment := and .Values.useDeployment (not .Values.persistence.enabled) -}}
 apiVersion: apps/v1
 {{- if $useDeployment }}
@@ -501,6 +502,17 @@ spec:
                 {{- if .Values.externalMaster.enabled }}
                 echo "Bootstrap mode: configuring as replica of external master {{ .Values.externalMaster.host }}"
                 echo "replicaof {{ .Values.externalMaster.host }} {{ .Values.externalMaster.port | default .Values.service.port }}" >> /tmp/redis.conf
+                {{- if .Values.auth.enabled }}
+                echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
+                {{- if .Values.auth.acl.enabled }}
+                echo "masteruser {{ include "redis.auth.acl.defaultUsername" . }}" >> /tmp/redis.conf
+                {{- end }}
+                {{- end }}
+                {{- else if and .Values.sentinel.discoveryBootstrapHost (ne .Values.sentinel.discoveryBootstrapHost .Values.sentinel.discoverySelfHost) }}
+                # No Sentinel of the group answered, so the whole group is starting at once. Only the release at
+                # sentinel.discoveryBootstrapHost starts as master; replicate from it, Redis retries until it is up.
+                echo "Bootstrap mode: configuring as replica of the bootstrap release {{ .Values.sentinel.discoveryBootstrapHost }}"
+                echo "replicaof {{ .Values.sentinel.discoveryBootstrapHost }} {{ if .Values.tls.enabled }}{{ .Values.tls.port }}{{ else }}{{ .Values.service.port }}{{ end }}" >> /tmp/redis.conf
                 {{- if .Values.auth.enabled }}
                 echo "masterauth ${REDIS_PASSWORD}" >> /tmp/redis.conf
                 {{- if .Values.auth.acl.enabled }}
@@ -1333,8 +1345,14 @@ spec:
 
               # Final fallback: Use pod-0 hostname for initial bootstrap only
               if [ -z "$MASTER_HOST" ]; then
+                {{- if .Values.sentinel.discoveryBootstrapHost }}
+                # Monitor the one release of the group allowed to start as master, as the init container does
+                MASTER_HOST={{ .Values.sentinel.discoveryBootstrapHost | quote }}
+                echo "No existing master found, using the bootstrap release for initial bootstrap: $MASTER_HOST"
+                {{- else }}
                 MASTER_HOST="{{ include "redis.fullname" . }}-0.{{ include "redis.fullname" . }}-headless.{{ include "cloudpirates.namespace" . }}.svc.{{ .Values.clusterDomain }}"
                 echo "No existing master found, using pod-0 for initial bootstrap: $MASTER_HOST"
+                {{- end }}
               fi
 
               {{- if not .Values.sentinel.config.announceHostnames }}

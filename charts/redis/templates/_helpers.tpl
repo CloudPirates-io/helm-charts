@@ -185,6 +185,21 @@ Validate externalMaster configuration - only supported for architecture=replicat
 {{- end -}}
 
 {{/*
+Validate sentinel.discoveryBootstrapHost - a release can only tell whether it is the bootstrap one through
+sentinel.discoverySelfHost, and the setting only matters for a group spread over releases (sentinel.discoveryHosts)
+*/}}
+{{- define "redis.sentinel.discoveryBootstrapHost.validate" -}}
+{{- if .Values.sentinel.discoveryBootstrapHost -}}
+{{- if or (not .Values.sentinel.discoveryHosts) (not .Values.sentinel.discoverySelfHost) -}}
+{{- fail "sentinel.discoveryBootstrapHost requires sentinel.discoveryHosts and sentinel.discoverySelfHost." -}}
+{{- end -}}
+{{- if .Values.externalMaster.enabled -}}
+{{- fail "sentinel.discoveryBootstrapHost and externalMaster.enabled are mutually exclusive. Please use only one of them." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the ACL file name
 Usage: {{ include "redis.acl.file" (dict "values" .Values.auth.acl "defaultFile" "users.acl") }}
 */}}

@@ -372,6 +372,7 @@ Redis Sentinel provides high availability for Redis through automatic failover. 
 | `sentinel.idSeed`                             | Seed for a stable Sentinel id across restarts; defaults to the release fullname                 | `""`        |
 | `sentinel.discoveryHosts`                     | Extra Sentinel addresses (`host` or `host:port`) asked for the master on startup (multi-cluster) | `[]`        |
 | `sentinel.discoverySelfHost`                  | Address the Sentinels report when this release is the master; a pod then waits for a restarting remote master instead of starting as a second one | `""`        |
+| `sentinel.discoveryBootstrapHost`             | Address of the one release allowed to start as master when no Sentinel of the group answers; the other releases start as its replicas | `""`        |
 | `sentinel.quorum`                             | Number of Sentinels needed to agree on master failure                                         | `2`         |
 | `sentinel.downAfterMilliseconds`              | Time in ms after master is declared down                                                      | `30000`     |
 | `sentinel.failoverTimeout`                    | Timeout for failover in ms                                                                    | `180000`    |

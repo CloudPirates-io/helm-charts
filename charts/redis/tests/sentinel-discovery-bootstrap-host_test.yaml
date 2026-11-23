@@ -1,0 +1,71 @@
+suite: test redis sentinel.discoveryBootstrapHost keeps a single master when the whole group starts at once
+templates:
+  - statefulset.yaml
+set:
+  architecture: replication
+  replicaCount: 1
+  sentinel.enabled: true
+  sentinel.discoveryHosts:
+    - sentinel-a.example.net
+    - sentinel-c.example.net
+tests:
+  - it: should keep the pod-0 bootstrap when sentinel.discoveryBootstrapHost is empty
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'Bootstrap mode: pod-0 starting as initial master'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'replica of the bootstrap release'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'using pod-0 for initial bootstrap'
+
+  - it: should start as a replica of the bootstrap release when this release is another one
+    set:
+      sentinel.discoverySelfHost: redis-b.example.net
+      sentinel.discoveryBootstrapHost: redis-a.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'echo "replicaof redis-a\.example\.net 6379" >> /tmp/redis\.conf'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'Bootstrap mode: pod-0 starting as initial master'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'MASTER_HOST="redis-a\.example\.net"\s+echo "No existing master found, using the bootstrap release for initial bootstrap'
+
+  - it: should start pod-0 as master when this release is the bootstrap release
+    set:
+      sentinel.discoverySelfHost: redis-a.example.net
+      sentinel.discoveryBootstrapHost: redis-a.example.net
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'Bootstrap mode: pod-0 starting as initial master'
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'replica of the bootstrap release'
+      - matchRegex:
+          path: spec.template.spec.containers[1].command[2]
+          pattern: 'MASTER_HOST="redis-a\.example\.net"'
+
+  - it: should fail when sentinel.discoverySelfHost is not set
+    set:
+      sentinel.discoveryBootstrapHost: redis-a.example.net
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.discoveryBootstrapHost requires sentinel.discoveryHosts and sentinel.discoverySelfHost."
+
+  - it: should fail together with externalMaster
+    set:
+      sentinel.discoverySelfHost: redis-b.example.net
+      sentinel.discoveryBootstrapHost: redis-a.example.net
+      externalMaster.enabled: true
+      externalMaster.host: redis-ext.example.net
+    asserts:
+      - failedTemplate:
+          errorMessage: "sentinel.discoveryBootstrapHost and externalMaster.enabled are mutually exclusive. Please use only one of them."
