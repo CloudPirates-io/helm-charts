@@ -208,6 +208,11 @@ cluster:
   ## a new one before the restarting pod rejoins, preventing the old master from re-entering as master
   ## with an empty dataset. Set to 0 to disable (default).
   startupSleepTime: 0
+  ## @param cluster.refreshNodesConfIPs Re-resolve peer IPs in the persisted nodes.conf on container start
+  ## After all pods were stopped and started again, nodes.conf still lists the old pod IPs. When enabled, each pod
+  ## replaces them with the current IPs of the peers that are already resolvable via the headless service, so the
+  ## cluster can re-form. Only applies when cluster.announceHostnames is true and external access is disabled.
+  refreshNodesConfIPs: true
   ## @param cluster.config Additional cluster-specific configuration settings
   ## These settings are automatically applied when architecture=cluster
   config:

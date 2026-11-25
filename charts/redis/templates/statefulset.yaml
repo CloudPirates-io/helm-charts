@@ -815,6 +815,35 @@ spec:
               echo "Sleeping for {{ .Values.cluster.startupSleepTime }}s (cluster.startupSleepTime configured)..."
               sleep {{ .Values.cluster.startupSleepTime }}
               {{- end }}
+              {{- if and (eq .Values.architecture "cluster") .Values.cluster.announceHostnames (not .Values.cluster.externalAccess.enabled) .Values.cluster.refreshNodesConfIPs }}
+
+              # After a full stop the persisted nodes.conf still lists the old pod IPs of every peer, and redis
+              # only resolves hostnames when it learns about a new node. Re-resolve the peers that are already
+              # resolvable so the cluster can re-form instead of staying in cluster_state:fail.
+              NODES_FILE="{{ .Values.persistence.mountPath }}/nodes.conf"
+              if [ -f "$NODES_FILE" ]; then
+                : > "$NODES_FILE.tmp"
+                while IFS= read -r line; do
+                  addr=$(echo "$line" | awk '{print $2}')
+                  case "$line" in
+                    *myself*) echo "$line" >> "$NODES_FILE.tmp"; continue ;;
+                  esac
+                  peer_host=$(echo "$addr" | cut -s -d, -f2)
+                  peer_ip=""
+                  if [ -n "$peer_host" ]; then
+                    peer_ip=$(getent hosts "$peer_host" 2>/dev/null | awk '{print $1; exit}')
+                  fi
+                  if [ -n "$peer_ip" ]; then
+                    endpoint="${addr%%,*}"
+                    new_addr="${peer_ip}:${endpoint##*:}${addr#"$endpoint"}"
+                    echo "Refreshing nodes.conf: ${peer_host} -> ${peer_ip}"
+                    line=$(echo "$line" | awk -v new="$new_addr" '{$2=new; print}')
+                  fi
+                  echo "$line" >> "$NODES_FILE.tmp"
+                done < "$NODES_FILE"
+                mv "$NODES_FILE.tmp" "$NODES_FILE"
+              fi
+              {{- end }}
 
               exec redis-server "$CONFIG_FILE" {{- range .Values.extraFlags }} {{ . }}{{- end }}
           ports:

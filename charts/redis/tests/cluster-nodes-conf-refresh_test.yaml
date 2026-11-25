@@ -1,0 +1,40 @@
+suite: test redis cluster nodes.conf IP refresh
+templates:
+  - statefulset.yaml
+tests:
+  - it: should refresh peer IPs in nodes.conf by default in cluster mode
+    set:
+      architecture: cluster
+      replicaCount: 6
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[?(@.name == "redis")].command[2]
+          pattern: 'Refreshing nodes.conf'
+
+  - it: should not refresh when disabled
+    set:
+      architecture: cluster
+      replicaCount: 6
+      cluster:
+        refreshNodesConfIPs: false
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[?(@.name == "redis")].command[2]
+          pattern: 'Refreshing nodes.conf'
+
+  - it: should not refresh when hostnames are not announced
+    set:
+      architecture: cluster
+      replicaCount: 6
+      cluster:
+        announceHostnames: false
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[?(@.name == "redis")].command[2]
+          pattern: 'Refreshing nodes.conf'
+
+  - it: should not refresh in standalone mode
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[?(@.name == "redis")].command[2]
+          pattern: 'Refreshing nodes.conf'
