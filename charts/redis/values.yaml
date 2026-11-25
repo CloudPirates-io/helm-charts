@@ -541,6 +541,8 @@ sentinel:
   ## List the externally-resolvable Sentinel addresses of the other releases here. They are asked after
   ## the local Sentinels and before bootstrap. A reported master that does not answer is ignored, so a
   ## pod that restarts while it is still the master keeps that role.
+  ## The Sentinel container asks them too, before it falls back to its own Redis or to pod-0, so a
+  ## restarted Sentinel monitors the group's master from the start.
   discoveryHosts: []
   ## @param sentinel.discoverySelfHost Address the Sentinels report when this release is the master (its replica-announce-ip)
   ## Only used with sentinel.discoveryHosts, for releases running a single Redis pod. Without it a pod

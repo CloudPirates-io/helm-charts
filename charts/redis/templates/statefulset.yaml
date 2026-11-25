@@ -1329,6 +1329,36 @@ spec:
                 fi
               done
 
+              {{- if .Values.sentinel.discoveryHosts }}
+              # The Sentinels above belong to this release only. When the group spans several releases, ask
+              # the ones in sentinel.discoveryHosts too, as the init container does, before the role check and
+              # the pod-0 fallback: with a single pod per release both of those point this Sentinel at its own
+              # Redis, a replica, and clients asking it get the wrong master until the other Sentinels correct it.
+              # The reported master is not pinged: if it is down, the group fails over and this Sentinel follows.
+              if [ "$SENTINEL_FOUND_MASTER" = false ]; then
+                for SENTINEL_ADDR in {{ range .Values.sentinel.discoveryHosts }}{{ . | quote }} {{ end }}; do
+                  case "$SENTINEL_ADDR" in
+                    *:*:*) SENTINEL_HOST="$SENTINEL_ADDR"; SENTINEL_PORT={{ .Values.sentinel.port }} ;;
+                    *:*) SENTINEL_HOST="${SENTINEL_ADDR%:*}"; SENTINEL_PORT="${SENTINEL_ADDR##*:}" ;;
+                    *) SENTINEL_HOST="$SENTINEL_ADDR"; SENTINEL_PORT={{ .Values.sentinel.port }} ;;
+                  esac
+                  {{- if .Values.sentinel.acl.enabled }}
+                  EXISTING_MASTER=$(REDISCLI_AUTH="${SENTINEL_ACL_PASSWORD}" timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli --user {{ include "redis.sentinel.acl.defaultUsername" . }} -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else if .Values.auth.sentinel }}
+                  EXISTING_MASTER=$(REDISCLI_AUTH="${REDIS_PASSWORD}" timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- else }}
+                  EXISTING_MASTER=$(timeout {{ .Values.sentinel.discoveryTimeout }} redis-cli -h "${SENTINEL_HOST}" -p "${SENTINEL_PORT}"{{- if .Values.tls.enabled }} {{ include "redis.tls.probeArgs" . }}{{- end }} sentinel get-master-addr-by-name {{ .Values.sentinel.masterName }} 2>/dev/null | head -1 || echo "")
+                  {{- end }}
+                  if [ -n "$EXISTING_MASTER" ] && echo "$EXISTING_MASTER" | grep -qE '^[A-Za-z0-9.:-]+$'; then
+                    MASTER_HOST="$EXISTING_MASTER"
+                    SENTINEL_FOUND_MASTER=true
+                    echo "Found current master via sentinel at ${SENTINEL_HOST}: $MASTER_HOST"
+                    break
+                  fi
+                done
+              fi
+              {{- end }}
+
               # Second priority: If no Sentinels found master, check if any Redis instance claims to be master
               if [ "$SENTINEL_FOUND_MASTER" = false ]; then
                 echo "No Sentinels available, checking Redis instances directly..."
