@@ -43,10 +43,29 @@ spec:
 {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if  or .Values.extraInitContainers .Values.cloneStaticSiteFromGit.enabled }}
+      {{- if or .Values.extraInitContainers .Values.cloneStaticSiteFromGit.enabled .Values.workerProcessesAutotune.enabled }}
       initContainers:
       {{- with .Values.extraInitContainers }}
       {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.workerProcessesAutotune.enabled }}
+        - name: copy-nginx-conf
+          securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
+          image: {{ include "nginx.image" . | quote }}
+          imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
+          command:
+            - /bin/sh
+            - -c
+            - cp /etc/nginx/nginx.conf /writable-nginx-conf/nginx.conf
+          resources: {{- toYaml .Values.workerProcessesAutotune.resources | nindent 12 }}
+          volumeMounts:
+            - name: writable-nginx-conf
+              mountPath: /writable-nginx-conf
+          {{- if or .Values.config .Values.existingConfigConfigmap }}
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          {{- end }}
       {{- end }}
       {{- end }}
       {{- if .Values.cloneStaticSiteFromGit.enabled }}
@@ -98,9 +117,15 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- with .Values.extraEnvVars }}
+          {{- if or .Values.extraEnvVars .Values.workerProcessesAutotune.enabled }}
           env:
+            {{- if .Values.workerProcessesAutotune.enabled }}
+            - name: NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE
+              value: "1"
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
+            {{- end }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -167,7 +192,11 @@ spec:
               subPath: {{ .Values.cloneStaticSiteFromGit.subPath }}
               {{- end }}
           {{- end }}
-          {{- if or .Values.config .Values.existingConfigConfigmap }}
+          {{- if .Values.workerProcessesAutotune.enabled }}
+            - name: writable-nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          {{- else if or .Values.config .Values.existingConfigConfigmap }}
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
@@ -274,6 +303,10 @@ spec:
       volumes:
         - name: emptydir
           emptyDir: {}
+        {{- if .Values.workerProcessesAutotune.enabled }}
+        - name: writable-nginx-conf
+          emptyDir: {}
+        {{- end }}
         {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}
         - name: static-site
           {{- include "nginx.staticSiteVolume" . | nindent 10 }}

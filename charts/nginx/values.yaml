@@ -464,6 +464,18 @@ streamServerConfig: ""
 ## @param existingStreamServerConfigmap Name of an existing ConfigMap containing stream-server-config.conf
 existingStreamServerConfigConfigmap: ""
 
+## @section Worker process autotune
+## Lets the official image entrypoint (30-tune-worker-processes.sh) set worker_processes to the CPU count.
+## The entrypoint must rewrite /etc/nginx/nginx.conf, which is root-owned in the image (and a read-only
+## ConfigMap mount when `config`/`existingConfigConfigmap` is used). When enabled, an init container copies the
+## effective nginx.conf into an emptyDir that is mounted writable at /etc/nginx/nginx.conf, and
+## NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE=1 is set. Do not set that variable via extraEnvVars without this.
+workerProcessesAutotune:
+  ## @param workerProcessesAutotune.enabled Enable worker_processes autotune (writable nginx.conf copy via init container)
+  enabled: false
+  ## @param workerProcessesAutotune.resources Resources for the copy-nginx-conf init container
+  resources: {}
+
 ## @param extraInitContainers Additional init containers to add to the pod
 extraInitContainers: []
 

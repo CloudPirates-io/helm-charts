@@ -436,6 +436,15 @@ location /stub_status {
 | `extraVolumeMounts`   | Additional volume mounts to add to the Nginx container | `[]`    |
 | `extraObjects`        | Array of extra objects to deploy with the release      | `[]`    |
 | `extrainitContainers` | Array of extra objects to deploy with the release      | `[]`    |
+
+### Worker process autotune
+
+| Parameter | Description | Default |
+| --- | --- | --- |
+| `workerProcessesAutotune.enabled` | Make `/etc/nginx/nginx.conf` writable (init container copies it to an `emptyDir`) and set `NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE=1` | `false` |
+| `workerProcessesAutotune.resources` | Resources for the `copy-nginx-conf` init container | `{}` |
+
+Do not set `NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` through `extraEnvVars` on its own: the image's `nginx.conf` is root-owned (and a read-only mount when `config` is used), so the entrypoint fails with `can not modify /etc/nginx/nginx.conf`. Use `workerProcessesAutotune.enabled` instead.
 | `sidecars`            | Additional sidecar containers to add to the pod        | `[]`    |
 
 #### Extra Objects

@@ -590,6 +590,17 @@
         },
         "topologySpreadConstraints": {
             "type": "array"
+        },
+        "workerProcessesAutotune": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "resources": {
+                    "type": "object"
+                }
+            }
         }
     }
 }

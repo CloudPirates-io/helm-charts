@@ -1,0 +1,78 @@
+suite: test worker processes autotune
+templates:
+  - deployment.yaml
+  - configmap.yaml
+set:
+  image:
+    tag: 1.6.31@sha256:testdigest123
+tests:
+  - it: should not render autotune resources by default
+    template: deployment.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: writable-nginx-conf
+          any: true
+      - notExists:
+          path: spec.template.spec.initContainers
+
+  - it: should render init container, writable mount and env when enabled
+    template: deployment.yaml
+    set:
+      workerProcessesAutotune:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: copy-nginx-conf
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE
+            value: "1"
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: writable-nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: writable-nginx-conf
+            emptyDir: {}
+
+  - it: should copy a custom config from the ConfigMap instead of mounting it directly
+    template: deployment.yaml
+    set:
+      workerProcessesAutotune:
+        enabled: true
+      config: |
+        events {}
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: nginx-config
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-config
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+
+  - it: should keep user extraEnvVars alongside autotune env
+    template: deployment.yaml
+    set:
+      workerProcessesAutotune:
+        enabled: true
+      extraEnvVars:
+        - name: FOO
+          value: bar
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 2
