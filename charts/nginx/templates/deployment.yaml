@@ -43,28 +43,46 @@ spec:
 {{- end }}
       serviceAccountName: {{ include "nginx.serviceAccountName" . }}
       securityContext: {{ include "cloudpirates.renderPodSecurityContext" . | nindent 8 }}
-      {{- if or .Values.extraInitContainers .Values.cloneStaticSiteFromGit.enabled .Values.workerProcessesAutotune.enabled }}
+      {{- if or .Values.extraInitContainers .Values.cloneStaticSiteFromGit.enabled .Values.writableConfig.enabled }}
       initContainers:
       {{- with .Values.extraInitContainers }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.workerProcessesAutotune.enabled }}
-        - name: copy-nginx-conf
+      {{- if .Values.writableConfig.enabled }}
+        - name: copy-nginx-config
           securityContext: {{ include "cloudpirates.renderContainerSecurityContext" . | nindent 12 }}
           image: {{ include "nginx.image" . | quote }}
           imagePullPolicy: {{ include "cloudpirates.imagePullPolicy" (dict "image" .Values.image) }}
           command:
             - /bin/sh
-            - -c
-            - cp /etc/nginx/nginx.conf /writable-nginx-conf/nginx.conf
-          resources: {{- toYaml .Values.workerProcessesAutotune.resources | nindent 12 }}
+            - -ec
+            - |
+              cp -R /etc/nginx/. /writable-nginx/
+              {{- if or .Values.config .Values.existingConfigConfigmap }}
+              cp /nginx-config-source/main/nginx.conf /writable-nginx/nginx.conf
+              {{- end }}
+              {{- if or .Values.serverConfig .Values.existingServerConfigConfigmap }}
+              rm -rf /writable-nginx/conf.d/*
+              cp /nginx-config-source/server/* /writable-nginx/conf.d/
+              {{- end }}
+              {{- if or .Values.streamServerConfig .Values.existingStreamServerConfigConfigmap }}
+              cp /nginx-config-source/stream/stream-server-config.conf /writable-nginx/conf.d/
+              {{- end }}
+          resources: {{- toYaml .Values.writableConfig.resources | nindent 12 }}
           volumeMounts:
-            - name: writable-nginx-conf
-              mountPath: /writable-nginx-conf
+            - name: writable-nginx-config
+              mountPath: /writable-nginx
           {{- if or .Values.config .Values.existingConfigConfigmap }}
             - name: nginx-config
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
+              mountPath: /nginx-config-source/main
+          {{- end }}
+          {{- if or .Values.serverConfig .Values.existingServerConfigConfigmap }}
+            - name: nginx-server-config
+              mountPath: /nginx-config-source/server
+          {{- end }}
+          {{- if or .Values.streamServerConfig .Values.existingStreamServerConfigConfigmap }}
+            - name: stream-server-config
+              mountPath: /nginx-config-source/stream
           {{- end }}
       {{- end }}
       {{- end }}
@@ -117,15 +135,9 @@ spec:
               containerPort: {{ .containerPort }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
-          {{- if or .Values.extraEnvVars .Values.workerProcessesAutotune.enabled }}
+          {{- with .Values.extraEnvVars }}
           env:
-            {{- if .Values.workerProcessesAutotune.enabled }}
-            - name: NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE
-              value: "1"
-            {{- end }}
-            {{- with .Values.extraEnvVars }}
 {{ toYaml . | indent 12 }}
-            {{- end }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
@@ -192,11 +204,11 @@ spec:
               subPath: {{ .Values.cloneStaticSiteFromGit.subPath }}
               {{- end }}
           {{- end }}
-          {{- if .Values.workerProcessesAutotune.enabled }}
-            - name: writable-nginx-conf
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
-          {{- else if or .Values.config .Values.existingConfigConfigmap }}
+          {{- if .Values.writableConfig.enabled }}
+            - name: writable-nginx-config
+              mountPath: /etc/nginx
+          {{- else }}
+          {{- if or .Values.config .Values.existingConfigConfigmap }}
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
@@ -209,6 +221,7 @@ spec:
             - name: stream-server-config
               mountPath: /etc/nginx/conf.d/stream-server-config.conf
               subPath: stream-server-config.conf
+          {{- end }}
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
@@ -303,8 +316,8 @@ spec:
       volumes:
         - name: emptydir
           emptyDir: {}
-        {{- if .Values.workerProcessesAutotune.enabled }}
-        - name: writable-nginx-conf
+        {{- if .Values.writableConfig.enabled }}
+        - name: writable-nginx-config
           emptyDir: {}
         {{- end }}
         {{- if or .Values.cloneStaticSiteFromGit.enabled .Values.staticSiteConfigmap }}

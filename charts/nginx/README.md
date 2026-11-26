@@ -436,16 +436,42 @@ location /stub_status {
 | `extraVolumeMounts`   | Additional volume mounts to add to the Nginx container | `[]`    |
 | `extraObjects`        | Array of extra objects to deploy with the release      | `[]`    |
 | `extrainitContainers` | Array of extra objects to deploy with the release      | `[]`    |
+| `sidecars`            | Additional sidecar containers to add to the pod        | `[]`    |
 
-### Worker process autotune
+### Writable configuration
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `workerProcessesAutotune.enabled` | Make `/etc/nginx/nginx.conf` writable (init container copies it to an `emptyDir`) and set `NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE=1` | `false` |
-| `workerProcessesAutotune.resources` | Resources for the `copy-nginx-conf` init container | `{}` |
+| `writableConfig.enabled` | Mount a writable copy of `/etc/nginx` | `false` |
+| `writableConfig.resources` | Resources for the `copy-nginx-config` init container | `{}` |
 
-Do not set `NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE` through `extraEnvVars` on its own: the image's `nginx.conf` is root-owned (and a read-only mount when `config` is used), so the entrypoint fails with `can not modify /etc/nginx/nginx.conf`. Use `workerProcessesAutotune.enabled` instead.
-| `sidecars`            | Additional sidecar containers to add to the pod        | `[]`    |
+The image's `/etc/nginx` is root-owned and ConfigMap mounts are read-only, so the official entrypoint scripts cannot change the configuration. With a writable configuration, an init container copies `/etc/nginx`, including `config`, `serverConfig` and `streamServerConfig` (or their existing ConfigMaps), into an `emptyDir` mounted at `/etc/nginx`. ConfigMap changes then only apply after a pod restart.
+
+To use the entrypoint's `envsubst` templating, enable it and mount your templates:
+
+```yaml
+writableConfig:
+  enabled: true
+extraVolumes:
+  - name: templates
+    configMap:
+      name: my-nginx-templates
+extraVolumeMounts:
+  - name: templates
+    mountPath: /etc/nginx/templates
+```
+
+To let the entrypoint set `worker_processes` to the number of available CPUs:
+
+```yaml
+writableConfig:
+  enabled: true
+extraEnvVars:
+  - name: NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE
+    value: "1"
+```
+
+Without `writableConfig.enabled`, the entrypoint cannot modify `nginx.conf` and autotune has no effect.
 
 #### Extra Objects
 

@@ -464,16 +464,16 @@ streamServerConfig: ""
 ## @param existingStreamServerConfigmap Name of an existing ConfigMap containing stream-server-config.conf
 existingStreamServerConfigConfigmap: ""
 
-## @section Worker process autotune
-## Lets the official image entrypoint (30-tune-worker-processes.sh) set worker_processes to the CPU count.
-## The entrypoint must rewrite /etc/nginx/nginx.conf, which is root-owned in the image (and a read-only
-## ConfigMap mount when `config`/`existingConfigConfigmap` is used). When enabled, an init container copies the
-## effective nginx.conf into an emptyDir that is mounted writable at /etc/nginx/nginx.conf, and
-## NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE=1 is set. Do not set that variable via extraEnvVars without this.
-workerProcessesAutotune:
-  ## @param workerProcessesAutotune.enabled Enable worker_processes autotune (writable nginx.conf copy via init container)
+## @section Writable configuration directory
+## The image's /etc/nginx is root-owned and ConfigMap mounts are read-only, so the official entrypoint scripts
+## cannot change the configuration. When enabled, an init container copies /etc/nginx, including `config`,
+## `serverConfig` and `streamServerConfig` (or their existing ConfigMaps), into an emptyDir mounted at /etc/nginx.
+## Needed for envsubst on /etc/nginx/templates and for worker_processes autotune
+## (extraEnvVars NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE=1). ConfigMap changes then only apply after a pod restart.
+writableConfig:
+  ## @param writableConfig.enabled Mount a writable copy of /etc/nginx
   enabled: false
-  ## @param workerProcessesAutotune.resources Resources for the copy-nginx-conf init container
+  ## @param writableConfig.resources Resources for the copy-nginx-config init container
   resources: {}
 
 ## @param extraInitContainers Additional init containers to add to the pod

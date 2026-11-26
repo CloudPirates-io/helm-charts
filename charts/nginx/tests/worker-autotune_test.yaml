@@ -1,4 +1,4 @@
-suite: test worker processes autotune
+suite: test writable config
 templates:
   - deployment.yaml
   - configmap.yaml
@@ -6,73 +6,70 @@ set:
   image:
     tag: 1.6.31@sha256:testdigest123
 tests:
-  - it: should not render autotune resources by default
+  - it: should not render writable config resources by default
     template: deployment.yaml
     asserts:
       - notContains:
           path: spec.template.spec.volumes
           content:
-            name: writable-nginx-conf
+            name: writable-nginx-config
           any: true
       - notExists:
           path: spec.template.spec.initContainers
 
-  - it: should render init container, writable mount and env when enabled
+  - it: should render init container and writable mount when enabled
     template: deployment.yaml
     set:
-      workerProcessesAutotune:
+      writableConfig:
         enabled: true
     asserts:
       - equal:
           path: spec.template.spec.initContainers[0].name
-          value: copy-nginx-conf
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE
-            value: "1"
+          value: copy-nginx-config
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
           content:
-            name: writable-nginx-conf
-            mountPath: /etc/nginx/nginx.conf
-            subPath: nginx.conf
+            name: writable-nginx-config
+            mountPath: /etc/nginx
       - contains:
           path: spec.template.spec.volumes
           content:
-            name: writable-nginx-conf
+            name: writable-nginx-config
             emptyDir: {}
 
-  - it: should copy a custom config from the ConfigMap instead of mounting it directly
+  - it: should copy ConfigMaps into the writable directory instead of mounting them
     template: deployment.yaml
     set:
-      workerProcessesAutotune:
+      writableConfig:
         enabled: true
       config: |
         events {}
+      serverConfig: |
+        server {}
+      streamServerConfig: |
+        server {}
     asserts:
-      - contains:
-          path: spec.template.spec.initContainers[0].volumeMounts
-          content:
-            name: nginx-config
-            mountPath: /etc/nginx/nginx.conf
-            subPath: nginx.conf
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: cp /nginx-config-source/main/nginx.conf
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: cp /nginx-config-source/server/
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: cp /nginx-config-source/stream/
       - notContains:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: nginx-config
-            mountPath: /etc/nginx/nginx.conf
-            subPath: nginx.conf
-
-  - it: should keep user extraEnvVars alongside autotune env
-    template: deployment.yaml
-    set:
-      workerProcessesAutotune:
-        enabled: true
-      extraEnvVars:
-        - name: FOO
-          value: bar
-    asserts:
-      - lengthEqual:
-          path: spec.template.spec.containers[0].env
-          count: 2
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: nginx-server-config
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: stream-server-config
+          any: true
